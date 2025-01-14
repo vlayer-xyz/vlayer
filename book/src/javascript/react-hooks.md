@@ -18,7 +18,6 @@ These hooks provide functions that help manage state and side effects in React c
 ## Prerequisites
 The following libraries are required to use `@vlayer/react`:
 - [React](https://reactjs.org/docs/getting-started.html): A library for building user interfaces.
-- [viem](https://viem.sh/docs/getting-started): A library for interacting with Ethereum.
 - [Wagmi](https://wagmi.sh/docs/getting-started): A library of React hooks for Ethereum.
 - [TanStack Query](https://tanstack.com/query/latest): A library for efficient data fetching and caching.
 
@@ -26,22 +25,22 @@ Add them to your project if they are not already present:
 {{#tabs }}
 {{#tab name="yarn" }}
 ```sh
-yarn add react react-dom viem wagmi @tanstack/react-query
+yarn add react react-dom wagmi @tanstack/react-query
 ```
 {{#endtab }}
 {{#tab name="npm" }}
 ```sh
-npm install react react-dom viem wagmi @tanstack/react-query
+npm install react react-dom wagmi @tanstack/react-query
 ```
 {{#endtab }}
 {{#tab name="pnpm" }}
 ```sh
-pnpm install react react-dom viem wagmi @tanstack/react-query
+pnpm install react react-dom wagmi @tanstack/react-query
 ```
 {{#endtab }}
 {{#tab name="bun" }}
 ```sh
-bun add react react-dom viem wagmi @tanstack/react-query
+bun add react react-dom wagmi @tanstack/react-query
 ```
 {{#endtab }}
 {{#endtabs }}
@@ -112,8 +111,35 @@ export default App;
 
 Context providers facilitate the sharing of application state (e.g., connected wallet, selected chain) across components. Once the setup is complete, components wrapped within the `WagmiProvider`, `QueryClientProvider`, and `ProofProvider` can use the vlayer hooks.
 
-## Configuring`ProofProvider`
-vlayer `ProofProvider` allows to configure custom urls for [vlayer network services](/advanced/dev-and-production.html) such as `proverUrl`, `notaryUrl` and `wsProxyUrl` via `config` prop:
+Your section on configuring `ProofProvider` is well-structured and clear. Here are some suggestions to improve grammar, style, and clarity while maintaining the current structure:
+
+
+## Configuring `ProofProvider`
+
+The `ProofProvider` component in vlayer is pre-configured for the [testnet environment](/advanced/dev-and-production.html#public-testnet-services) by default, requiring no additional props for basic usage:
+
+```javascript
+<ProofProvider>
+    {/* Application components go here */}
+</ProofProvider>
+```
+
+### Using the `config` Prop
+
+The `ProofProvider` also accepts an optional `config` prop, enabling you to select the desired `env`. Based on the chosen environment, the provider is automatically configured with the [default and pre-configured URLs](/advanced/dev-and-production.html#public-testnet-services) necessary to access vlayer network services:
+
+```javascript
+<ProofProvider
+  config={{
+    env: "dev|testnet|prod", // Specify the environment
+  }}
+>
+    {/* Application components go here */}
+</ProofProvider>
+```
+
+### Customizing Service URLs
+In addition to selecting an environment, the `config` prop allows you to specify custom URLs for [vlayer network services](/advanced/dev-and-production.html). These include services like `proverUrl`, `notaryUrl`, and `wsProxyUrl`:
 
 ```javascript
 <ProofProvider
@@ -125,18 +151,6 @@ vlayer `ProofProvider` allows to configure custom urls for [vlayer network servi
 >
     {/* Application components go here */}
 </ProofProvider>
-```
-
-It is also possible to pass `env` prop. It will set [default values](/advanced/dev-and-production.html#public-testnet-services) for `proverUrl`, `notaryUrl` and `wsProxyUrl` for the selected environment:
-
-```javascript
-<ProofProvider
-  config={{
-    env: "dev|testnet|prod",
-  }}
->
-    {/* Application components go here */}
-<ProofProvider>
 ```
 
 ## `useCallProver`
@@ -223,3 +237,13 @@ The hook provides additional properties for tracking progress and managing UI up
 - `isPending`: Indicates the proof generation is ongoing.
 - `isReady`: Indicates the proof is available.
 - `isError`: Indicates an error occurred during proof retrieval.
+
+> 💡 **Try it Now**
+> 
+> To see vlayer React hooks in action, run the following command in your terminal:
+> 
+> ```bash
+> vlayer init --template simple-email-proof
+> ```
+> 
+> This command will download create a new project. Check out the `vlayer/src/components/EmlForm.tsx` file to see how vlayer React hooks are used.
