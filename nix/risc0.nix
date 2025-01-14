@@ -48,7 +48,7 @@ let
 in
 rec {
   risc0 = {
-    default = risc0."1.2.0";
+    default = risc0."1.2.1-rc.1";
     inherit (package "1.2.0") "1.2.0";
   };
 }
