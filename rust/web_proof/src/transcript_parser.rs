@@ -119,76 +119,85 @@ mod tests {
         mod success {
             use super::*;
 
-            #[test]
-            fn request_no_header_redaction() {
-                let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json\r\n\r\n";
-                let url = parse_request_and_validate_redaction(request).unwrap();
-                assert_eq!(url, "https://example.com/test.json");
-            }
+            mod request {
+                use super::*;
 
-            #[test]
-            fn request_header_name_with_replacement_character_1() {
-                let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{HEADER_NAME_REPLACEMENT_CHAR_1}: application/json\r\n\r\n");
-                let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
-                assert_eq!(url, "https://example.com/test.json");
-            }
+                #[test]
+                fn no_header_redaction() {
+                    let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json\r\n\r\n";
+                    let url = parse_request_and_validate_redaction(request).unwrap();
+                    assert_eq!(url, "https://example.com/test.json");
+                }
 
-            #[test]
-            fn request_header_name_with_replacement_character_2() {
-                let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{HEADER_NAME_REPLACEMENT_CHAR_2}: application/json\r\n\r\n");
-                let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
-                assert_eq!(url, "https://example.com/test.json");
-            }
+                #[test]
+                fn header_name_with_replacement_character_1() {
+                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{HEADER_NAME_REPLACEMENT_CHAR_1}: application/json\r\n\r\n");
+                    let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
+                    assert_eq!(url, "https://example.com/test.json");
+                }
 
-            #[test]
-            fn request_header_value_with_replacement_character_1() {
-                let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{HEADER_NAME_REPLACEMENT_CHAR_1}\r\n\r\n");
-                let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
-                assert_eq!(url, "https://example.com/test.json");
-            }
+                #[test]
+                fn header_name_with_replacement_character_2() {
+                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{HEADER_NAME_REPLACEMENT_CHAR_2}: application/json\r\n\r\n");
+                    let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
+                    assert_eq!(url, "https://example.com/test.json");
+                }
 
-            #[test]
-            fn request_header_value_with_replacement_character_2() {
-                let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{HEADER_NAME_REPLACEMENT_CHAR_2}\r\n\r\n");
-                let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
-                assert_eq!(url, "https://example.com/test.json");
-            }
+                #[test]
+                fn header_value_with_replacement_character_1() {
+                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{HEADER_NAME_REPLACEMENT_CHAR_1}\r\n\r\n");
+                    let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
+                    assert_eq!(url, "https://example.com/test.json");
+                }
 
-            #[test]
-            fn request_header_value_with_multi_byte_utf8_character() {
-                let request =
+                #[test]
+                fn header_value_with_replacement_character_2() {
+                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{HEADER_NAME_REPLACEMENT_CHAR_2}\r\n\r\n");
+                    let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
+                    assert_eq!(url, "https://example.com/test.json");
+                }
+
+                #[test]
+                fn header_value_with_multi_byte_utf8_character() {
+                    let request =
                     "GET https://example.com/test.json HTTP/1.1\r\nHeader-Name: Hello 😊\r\n\r\n";
-                let url = parse_request_and_validate_redaction(request).unwrap();
-                assert_eq!(url, "https://example.com/test.json");
+                    let url = parse_request_and_validate_redaction(request).unwrap();
+                    assert_eq!(url, "https://example.com/test.json");
+                }
+
+                #[test]
+                fn fully_redacted_header_value() {
+                    let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: \0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
+                    let url = parse_request_and_validate_redaction(request).unwrap();
+                    assert_eq!(url, "https://example.com/test.json");
+                }
+
+                #[test]
+                fn fully_redacted_header_value_no_space_before_value() {
+                    let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type:\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
+                    let url = parse_request_and_validate_redaction(request).unwrap();
+                    assert_eq!(url, "https://example.com/test.json");
+                }
             }
 
-            #[test]
-            fn request_fully_redacted_header_value() {
-                let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: \0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
-                let url = parse_request_and_validate_redaction(request).unwrap();
-                assert_eq!(url, "https://example.com/test.json");
-            }
+            mod response {
+                use super::*;
 
-            #[test]
-            fn request_fully_redacted_header_value_no_space_before_value() {
-                let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type:\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
-                let url = parse_request_and_validate_redaction(request).unwrap();
-                assert_eq!(url, "https://example.com/test.json");
-            }
+                #[test]
+                fn no_header_redaction() {
+                    let response =
+                        "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!";
+                    let body = parse_response_and_validate_redaction(response).unwrap().0;
+                    assert_eq!(body, "Hello, world!");
+                }
 
-            #[test]
-            fn response_no_header_redaction() {
-                let response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!";
-                let body = parse_response_and_validate_redaction(response).unwrap().0;
-                assert_eq!(body, "Hello, world!");
-            }
-
-            #[test]
-            fn response_fully_redacted_header_value() {
-                let response =
-                    "HTTP/1.1 200 OK\r\nContent-Type: \0\0\0\0\0\0\0\0\0\0\r\n\r\nHello, world!";
-                let body = parse_response_and_validate_redaction(response).unwrap().0;
-                assert_eq!(body, "Hello, world!");
+                #[test]
+                fn fully_redacted_header_value() {
+                    let response =
+                        "HTTP/1.1 200 OK\r\nContent-Type: \0\0\0\0\0\0\0\0\0\0\r\n\r\nHello, world!";
+                    let body = parse_response_and_validate_redaction(response).unwrap().0;
+                    assert_eq!(body, "Hello, world!");
+                }
             }
         }
 
