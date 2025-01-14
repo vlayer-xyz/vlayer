@@ -49,7 +49,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     vlayer test
 
     cd vlayer
-    bun install --verbose
+    bun install
     echo '::endgroup::'
 
     echo "::group::vlayer run prove.ts: ${example_name}"
