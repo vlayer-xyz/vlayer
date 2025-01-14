@@ -203,6 +203,8 @@ The `useWaitForProvingResult` hook waits for a proving process to complete and r
 ### Example usage
 Pass the proof hash to the hook to monitor the proving process and retrieve the proof (`data`) when it is ready. If no hash (`null`) is provided, no request is sent to the prover.
 
+Proof computation is an asynchronous operation, and depending on the complexity of the proof, it may take a few seconds to complete. Proof is `null` until the computation is complete.
+
 ```javascript
 import { useWaitForProvingResult, useCallProver } from "@vlayer/react";
 
