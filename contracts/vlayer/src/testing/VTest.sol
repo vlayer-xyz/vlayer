@@ -25,6 +25,10 @@ contract VTest is Test {
         );
     }
 
+    function setUp() internal {
+        // setUp is not allowed in VTest tests
+    }
+
     function callProver() internal {
         ICheatCodes(CHEATCODES).callProver();
     }

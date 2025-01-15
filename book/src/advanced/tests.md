@@ -47,6 +47,14 @@ In general, `callProver()` **should only be used if you want to generate a proof
 
 </div>
 
+### Differences against Forge
+
+There are a few forge functionalities that are explicitly disabled in the vlayer tests:
+
+- Having `setUp()` function in the test contract. Currently, every unit test needs to set up the environment on its own. It's still possible to create a separate function and call it at the beginning of each test.
+- Watch mode
+- Forking the blockchain
+
 ### Example Usage
 
 ```solidity
