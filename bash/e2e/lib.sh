@@ -16,8 +16,16 @@ function build_sdk() {
 }
 
 function run_prover_script() {
+  # Sadly, bun's manifest caching is so unstable, it causes random `bun install` freezes.
+  # To circumvent that for the time being, we disable all caching.
+  # https://github.com/oven-sh/bun/issues/5831
+  if [[ -n ${BUN_NO_FROZEN_LOCKFILE:-} ]]; then
+    local args="--no-cache"
+  else
+    local args="--frozen-lockfile --no-cache"
+  fi
   pushd vlayer
-      silent_unless_fails bun install --frozen-lockfile
+      silent_unless_fails bun install "${args}"
       bun run prove:"${VLAYER_ENV}"
   popd
 }
