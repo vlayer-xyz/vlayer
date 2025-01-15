@@ -3,6 +3,7 @@
 set -uexo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
 output_dir="${VLAYER_HOME}/out"
 ARCHIVE="${output_dir}/examples.tar"
@@ -18,13 +19,14 @@ touch "${ARCHIVE}"
 (
     cd "${VLAYER_HOME}/examples"
 
-    for example in $(find . -type d -maxdepth 1 -mindepth 1) ; do
+    for example in $(get_examples); do
         echo "::group::Packing example: ${example}"
 
-        scripts="${example}/vlayer"
-        contracts="${example}/src/vlayer"
-        contracts_tests="${example}/test/vlayer"
-        testdata="${example}/testdata"
+        example_path="$VLAYER_HOME/examples/$example"
+        scripts="${example_path}/vlayer"
+        contracts="${example_path}/src/vlayer"
+        contracts_tests="${example_path}/test/vlayer"
+        testdata="${example_path}/testdata"
 
         cp "${VLAYER_HOME}/docker/docker-compose.devnet.yaml" "${scripts}/"
 
