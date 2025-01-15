@@ -7,5 +7,8 @@ edition = "2021"
 
 [dependencies]
 chain_guest = { path = "../../services/chain/guest" }
-risc0-zkvm = { version = "1.2.1-rc.1", default-features = false, features = ["std"] }
+risc0-zkvm = { version = "1.2.1-rc.1", default-features = false, features = ["std", "unstable"] }
 tokio = { version = "1.41.0", features = ["rt", "macros"] }
+
+[patch.crates-io]
+tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", rev = "7ff2b8465891d1cbb55a69e553e05d369ce41d72" }
