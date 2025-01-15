@@ -37,12 +37,6 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
     example_name=$(basename "${example}"  | tr '_' '-')
 
-    if [ "$VLAYER_ENV" = "dev" ]; then
-      # We're restarting anvils because some examples rely on a clean chain state.
-      echo "Restarting anvils"
-      docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart anvil-l1 anvil-l2-op
-    fi
-
     echo "::group::Initializing vlayer template: ${example_name}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
