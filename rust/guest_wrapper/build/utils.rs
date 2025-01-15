@@ -131,7 +131,7 @@ pub fn check_or_update_chain_guest_id(chain_guest: &GuestListEntry) -> anyhow::R
     if *UPDATE_GUEST_ELF_ID {
         anyhow::ensure!(*RISC0_USE_DOCKER, "`UPDATE_GUEST_ELF_ID` requires `RISC0_USE_DOCKER`");
         let chain_guest_elf_id: Digest = chain_guest.image_id.into();
-        File::create("../chain_guest_elf_id")?.write_all(chain_guest_elf_id.as_bytes())?;
+        File::create("chain_guest_elf_id")?.write_all(chain_guest_elf_id.as_bytes())?;
     } else if *RISC0_USE_DOCKER {
         println!("cargo::rerun-if-changed=chain_guest_elf_id");
         let chain_guest_elf_id: Digest = (*include_bytes!("../chain_guest_elf_id")).into();
