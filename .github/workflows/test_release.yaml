@@ -8,7 +8,8 @@ on:
     paths:
       - ".github/workflows/test_release.yaml"
       - "docker/docker-compose.devnet.yaml"
-      - "bash/test-release.sh"
+      - "bash/test-release-local-prover.sh"
+      - "bash/test-release-remote-prover.sh"
       - "bash/test-js-sdk-release.sh"
 concurrency:
   group: ${{ github.workflow }}
