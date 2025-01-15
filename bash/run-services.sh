@@ -48,7 +48,7 @@ ensure_binaries_built
 
 echo "Starting services..."
 
-docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-L1 anvil-L2-OP
+docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op
 
 if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
     startup_chain_services "${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"

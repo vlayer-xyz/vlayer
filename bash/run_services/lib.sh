@@ -114,7 +114,7 @@ function cleanup() {
         fi
     done < "${CHAIN_WORKER_PIDS}"
 
-    docker compose -f $DOCKER_COMPOSE_FILE down anvil-L1 anvil-L2-OP
+    docker compose -f $DOCKER_COMPOSE_FILE down anvil-l1 anvil-l2-op
 
     echo "Cleanup done. Artifacts saved to: ${VLAYER_TMP_DIR}"
 }
