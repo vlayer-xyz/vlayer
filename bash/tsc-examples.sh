@@ -3,6 +3,7 @@
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
 echo "::group::Installing npm dependencies"
 cd "${VLAYER_HOME}"
@@ -14,13 +15,11 @@ cd "${VLAYER_HOME}/packages/sdk"
 bun run build
 echo '::endgroup::'
 
-for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
-  example_name=$(basename "${example}")
-
-  example="${VLAYER_HOME}/examples/${example_name}"
-
+for example in $(get_examples); do
   echo ""::group::Running tsc for: ${example}""
-  cd "${example}"
+  example_path="${VLAYER_HOME}/examples/${example}"
+  
+  cd $example_path
 
   forge soldeer install
   forge build
@@ -28,7 +27,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   echo Generating typescript bidings ...
   ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
 
-  cd ${example}/vlayer
+  cd "${example_path}/vlayer"
 
   bun install --frozen-lockfile
   bun tsc --noEmit
