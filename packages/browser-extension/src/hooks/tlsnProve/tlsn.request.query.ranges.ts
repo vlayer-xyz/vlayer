@@ -1,12 +1,12 @@
-const calculateRequestQueriesRanges = (
-  urlQueries: string[],
+const calculateRequestQueryParamsRanges = (
+  urlQueryParams: string[],
   url: string,
   offset: number,
 ) => {
-  return urlQueries.map((query) => {
+  return urlQueryParams.map((param) => {
     const stepOverFirstAmpersand = 1;
     const start =
-      offset + url.indexOf("&" + query + "=") + stepOverFirstAmpersand;
+      offset + url.indexOf("&" + param + "=") + stepOverFirstAmpersand;
 
     const secondAmpersandPosition = url.indexOf("&", start);
     const end =
@@ -20,4 +20,4 @@ const calculateRequestQueriesRanges = (
   });
 };
 
-export { calculateRequestQueriesRanges };
+export { calculateRequestQueryParamsRanges };

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { calculateRequestRanges } from "./tlsn.request.ranges";
 import {
-  fixtureAllUrlQueries,
+  fixtureAllUrlQueryParams,
   fixtureTranscript,
 } from "./tlsn.ranges.test.fixtures";
 
@@ -27,7 +27,7 @@ describe("request url query", () => {
     ]);
   });
 
-  test("url_query with multiple queries", () => {
+  test("url_query with multiple parameters", () => {
     const redactionItem = {
       request: {
         url_query: ["ext", "include_mention_filter"],
@@ -52,7 +52,7 @@ describe("request url query", () => {
     ]);
   });
 
-  test("url_query with the last query", () => {
+  test("url_query with the last parameter", () => {
     const redactionItem = {
       request: {
         url_query: ["include_ext_dm_nsfw_media_filter"],
@@ -76,12 +76,12 @@ describe("request url query", () => {
   test("url_query_except", () => {
     const redactionItem = {
       request: {
-        url_query_except: fixtureAllUrlQueries.filter(
-          (query) =>
+        url_query_except: fixtureAllUrlQueryParams.filter(
+          (param) =>
             ![
               "include_mention_filter",
               "include_ext_dm_nsfw_media_filter",
-            ].includes(query),
+            ].includes(param),
         ),
       },
     };
@@ -104,10 +104,10 @@ describe("request url query", () => {
     ]);
   });
 
-  test("url_query_except with all queries", () => {
+  test("url_query_except with all query parameters", () => {
     const redactionItem = {
       request: {
-        url_query_except: fixtureAllUrlQueries,
+        url_query_except: fixtureAllUrlQueryParams,
       },
     };
 

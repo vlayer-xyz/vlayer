@@ -8,7 +8,7 @@ import { ParsedTranscriptData } from "tlsn-js";
 import { CommitData } from "tlsn-js/src/types";
 import { match, P } from "ts-pattern";
 import { calculateRequestHeadersRanges } from "./tlsn.request.headers.ranges";
-import { calculateRequestQueriesRanges } from "./tlsn.request.queries.ranges";
+import { calculateRequestQueryParamsRanges } from "./tlsn.request.query.ranges";
 
 function calculateRequestRanges(
   redactionItem:
@@ -38,14 +38,18 @@ function calculateRequestRanges(
       );
     })
     .with({ url_query: P.array(P.string) }, ({ url_query }) => {
-      return calculateRequestQueriesRanges(url_query, url, url_offset);
+      return calculateRequestQueryParamsRanges(url_query, url, url_offset);
     })
     .with({ url_query_except: P.array(P.string) }, ({ url_query_except }) => {
-      const queriesToRedact = findAllUrlQueries(url).filter(
-        (query) => !url_query_except.includes(query),
+      const queryParamsToRedact = findAllQueryParams(url).filter(
+        (param) => !url_query_except.includes(param),
       );
 
-      return calculateRequestQueriesRanges(queriesToRedact, url, url_offset);
+      return calculateRequestQueryParamsRanges(
+        queryParamsToRedact,
+        url,
+        url_offset,
+      );
     })
     .exhaustive();
 }
@@ -56,7 +60,7 @@ function findUrlInRequest(raw: string, request_range: CommitData): string {
   return url;
 }
 
-function findAllUrlQueries(path: string): string[] {
+function findAllQueryParams(path: string): string[] {
   const url = new URL(path);
 
   const params: string[] = [];

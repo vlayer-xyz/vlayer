@@ -43,7 +43,7 @@ export const fixtureAllRequestHeaders = [
   "user-agent",
 ];
 
-export const fixtureAllUrlQueries = [
+export const fixtureAllUrlQueryParams = [
   "include_ext_sharing_audiospaces_listening_data_with_followers",
   "include_mention_filter",
   "include_nsfw_user_flag",
