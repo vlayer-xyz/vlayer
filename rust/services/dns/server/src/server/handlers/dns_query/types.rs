@@ -3,9 +3,7 @@ use axum::{
     response::IntoResponse,
 };
 use serde::{Deserialize, Serialize};
-use verifiable_dns::{Query, Response};
-
-use super::MIME_DNS_JSON_CONTENT_TYPE;
+use verifiable_dns::{Query, Response, MIME_DNS_JSON_CONTENT_TYPE};
 
 #[derive(Deserialize, Debug)]
 pub(super) struct Params {

@@ -11916,13 +11916,17 @@ version = "0.1.0"
 dependencies = [
  "bytes",
  "chrono",
+ "futures",
  "olpc-cjson",
  "rand",
+ "reqwest 0.12.12",
  "rsa",
  "serde",
  "serde_json",
  "serde_repr",
+ "serde_urlencoded",
  "serde_with",
+ "tokio",
 ]
 
 [[package]]
