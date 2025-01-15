@@ -36,8 +36,8 @@ pub(crate) fn parse_request_and_validate_redaction(request: &str) -> Result<Stri
     )?;
 
     validate_name_value_redaction(
-        &convert_path(&path_with_replacement_1),
-        &convert_path(&path_with_replacement_2),
+        &convert_path(&path_with_replacement_1)?,
+        &convert_path(&path_with_replacement_2)?,
     )?;
 
     Ok(path_with_replacement_1)
@@ -123,15 +123,15 @@ fn convert_headers(headers: &[Header]) -> Vec<NameValue> {
         .collect()
 }
 
-fn convert_path(path: &str) -> Vec<NameValue> {
-    let parsed_url = Url::parse(path).expect("Failed to parse URL");
+fn convert_path(path: &str) -> Result<Vec<NameValue>, ParsingError> {
+    let parsed_url = Url::parse(path)?;
     let query_pairs = parsed_url.query_pairs();
-    query_pairs
+    Ok(query_pairs
         .map(|param| NameValue {
             name: param.0.to_string(),
             value: param.1.to_string().into_bytes(),
         })
-        .collect()
+        .collect())
 }
 
 #[cfg(test)]
@@ -140,7 +140,8 @@ mod tests {
 
     #[test]
     fn success_convert_path() {
-        let name_values = convert_path("https://example.com/test.json?param1=value1&param2=value2");
+        let name_values =
+            convert_path("https://example.com/test.json?param1=value1&param2=value2").unwrap();
         assert_eq!(
             name_values,
             vec![
@@ -348,7 +349,7 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?\0\0\0\0\0\0\0\0\0\0\0\0&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
+                        assert!(matches!(err, ParsingError::RedactedName));
                     }
                 }
             }

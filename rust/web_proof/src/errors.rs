@@ -27,4 +27,7 @@ pub enum ParsingError {
 
     #[error("Header value is partially redacted")]
     PartiallyRedactedValue,
+
+    #[error("Url parse error: {0}")]
+    UrlParse(#[from] url::ParseError),
 }
