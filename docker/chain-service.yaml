@@ -1,11 +1,11 @@
 include:
   - anvil.yaml
 services:
-  vlayer-chain-worker-L1:
+  vlayer-chain-worker-l1:
     depends_on:
       - anvil-l1
     image: ghcr.io/vlayer-xyz/chain_worker:latest
-    container_name: vlayer-chain-worker-L1
+    container_name: vlayer-chain-worker-l1
     pull_policy: always
     volumes:
       - ./chain_db:/chain_db
@@ -20,11 +20,11 @@ services:
       MAX_BACK_PROPAGATION_BLOCKS: 10
       MAX_HEAD_BLOCKS: 10
       CONFIRMATIONS: 1
-  vlayer-chain-worker-L2-OP:
+  vlayer-chain-worker-l2-op:
     depends_on:
       - anvil-l2-op
     image: ghcr.io/vlayer-xyz/chain_worker:latest
-    container_name: vlayer-chain-worker-L2-OP
+    container_name: vlayer-chain-worker-l2-op
     pull_policy: always
     volumes:
       - ./chain_db:/chain_db
