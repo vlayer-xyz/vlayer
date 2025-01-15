@@ -280,6 +280,42 @@ mod tests {
                         assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
                     }
                 }
+
+                mod url {
+                    use super::*;
+
+                    #[test]
+                    fn partially_redacted_url_param_value() {
+                        let request =
+                            "GET https://example.com/test.json?param1=value\0&param2=value2 HTTP/1.1\r\n\r\n";
+                        let err = parse_request_and_validate_redaction(request).unwrap_err();
+                        assert!(matches!(err, ParsingError::PartiallyRedactedValue));
+                    }
+
+                    #[test]
+                    fn partially_redacted_url_param_name() {
+                        let request =
+                            "GET https://example.com/test.json?param\0=value1&param2=value2 HTTP/1.1\r\n\r\n";
+                        let err = parse_request_and_validate_redaction(request).unwrap_err();
+                        assert!(matches!(err, ParsingError::RedactedName));
+                    }
+
+                    #[test]
+                    fn fully_redacted_url_param_name() {
+                        let request =
+                            "GET https://example.com/test.json?\0\0\0\0\0\0=value1&param2=value2 HTTP/1.1\r\n\r\n";
+                        let err = parse_request_and_validate_redaction(request).unwrap_err();
+                        assert!(matches!(err, ParsingError::RedactedName));
+                    }
+
+                    #[test]
+                    fn fully_redacted_url_param_name_and_value() {
+                        let request =
+                            "GET https://example.com/test.json?\0\0\0\0\0\0\0\0\0\0\0\0&param2=value2 HTTP/1.1\r\n\r\n";
+                        let err = parse_request_and_validate_redaction(request).unwrap_err();
+                        assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
+                    }
+                }
             }
 
             mod response {
