@@ -1,6 +1,7 @@
 use std::iter::zip;
 
 use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
+use url::Url;
 
 use crate::errors::ParsingError;
 
@@ -14,7 +15,7 @@ const REDACTED_CHAR: char = '\0';
 const REDACTION_REPLACEMENT_CHAR: char = '*';
 const REDACTION_REPLACEMENT_DIFFERENT_CHAR: char = '+';
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct NameValue {
     pub(crate) name: String,
     pub(crate) value: Vec<u8>,
@@ -23,18 +24,23 @@ pub(crate) struct NameValue {
 pub(crate) fn parse_request_and_validate_redaction(request: &str) -> Result<String, ParsingError> {
     let request_string =
         request.replace(REDACTED_CHAR, REDACTION_REPLACEMENT_CHAR.to_string().as_str());
-    let (path, headers_with_replacement_1) = parse_request(&request_string)?;
+    let (path_with_replacement_1, headers_with_replacement_1) = parse_request(&request_string)?;
 
     let request_string =
         request.replace(REDACTED_CHAR, REDACTION_REPLACEMENT_DIFFERENT_CHAR.to_string().as_str());
-    let (_, headers_with_replacement_2) = parse_request(&request_string)?;
+    let (path_with_replacement_2, headers_with_replacement_2) = parse_request(&request_string)?;
 
     validate_name_value_redaction(
         &convert_headers(&headers_with_replacement_1),
         &convert_headers(&headers_with_replacement_2),
     )?;
 
-    Ok(path)
+    validate_name_value_redaction(
+        &convert_path(&path_with_replacement_1),
+        &convert_path(&path_with_replacement_2),
+    )?;
+
+    Ok(path_with_replacement_1)
 }
 
 fn parse_request(request: &str) -> Result<(String, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
@@ -117,9 +123,38 @@ fn convert_headers(headers: &[Header]) -> Vec<NameValue> {
         .collect()
 }
 
+fn convert_path(path: &str) -> Vec<NameValue> {
+    let parsed_url = Url::parse(path).expect("Failed to parse URL");
+    let query_pairs = parsed_url.query_pairs();
+    query_pairs
+        .map(|param| NameValue {
+            name: param.0.to_string(),
+            value: param.1.to_string().into_bytes(),
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn success_convert_path() {
+        let name_values = convert_path("https://example.com/test.json?param1=value1&param2=value2");
+        assert_eq!(
+            name_values,
+            vec![
+                NameValue {
+                    name: "param1".to_string(),
+                    value: "value1".to_string().into_bytes()
+                },
+                NameValue {
+                    name: "param2".to_string(),
+                    value: "value2".to_string().into_bytes()
+                }
+            ]
+        );
+    }
 
     mod redaction {
         use super::*;
