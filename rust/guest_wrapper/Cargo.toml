@@ -2,12 +2,14 @@
 name = "guest_wrapper"
 version = "0.1.0"
 edition = "2021"
+build = "build/main.rs"
 
 [dependencies]
 common = { workspace = true }
 
 [build-dependencies]
 anyhow = { workspace = true }
+lazy_static = { workspace = true }
 risc0-build = { workspace = true }
 risc0-build-ethereum = { workspace = true }
 risc0-zkp = { workspace = true }
