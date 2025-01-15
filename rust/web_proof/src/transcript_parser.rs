@@ -1,7 +1,7 @@
 use std::{
-    fmt,
-    fmt::{Display, Formatter},
+    fmt::{self, Display, Formatter},
     iter::zip,
+    str::from_utf8,
 };
 
 use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
@@ -27,7 +27,12 @@ pub(crate) struct NameValue {
 
 impl Display for NameValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}: {:?}", self.name, self.value)
+        write!(
+            f,
+            "{}: {}",
+            self.name,
+            from_utf8(&self.value).unwrap_or(format!("{:?}", self.value).as_str())
+        )
     }
 }
 
