@@ -48,6 +48,7 @@ const envVars = [
   { var: "CHAIN_NAME" },
   { var: "PROVER_URL" },
   { var: "JSON_RPC_URL" },
+  { var: "L2_JSON_RPC_URL", optional: true },
   { var: "EXAMPLES_TEST_PRIVATE_KEY", to: "privateKey" },
   { var: "VLAYER_API_TOKEN", to: "token", optional: true },
 ];
