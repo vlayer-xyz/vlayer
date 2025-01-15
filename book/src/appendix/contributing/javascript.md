@@ -30,3 +30,31 @@ $ bun run test:unit
 ```
 
 and nothing happening for a longer while, make sure you have [Node.js](https://nodejs.org) installed.
+
+### `bun install` hung on resolving dependencies
+
+If you see `bun install` hung on resolving dependencies in any of our examples, for instance
+
+```sh
+$ vlayer init --template simple
+$ cd vlayer
+$ bun install
+Resolving dependencies
+```
+
+disable Bun's global cache by either using `bunfig.toml` as described [here](https://bun.sh/docs/install/cache)
+
+```toml
+[install.cache]
+disable = true
+disableManifest = true
+```
+
+or by directly passing a CLI flag
+
+```sh
+$ bun install --no-cache 
+```
+
+There is a long-standing bug in Bun that despite many attempts at fixing is still present in **all** versions:
+[issue #5831: Bun install hangs sporadically](https://github.com/oven-sh/bun/issues/5831)
