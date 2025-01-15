@@ -11,8 +11,8 @@ const REDACTED_CHAR: char = '\0';
 // Both '-' and '+' are valid header characters. Replacing redacted '\0' bytes with
 // two different characters ensures the request is parsable and allows analysis
 // of redacted content via diffs.
-const HEADER_NAME_REPLACEMENT_CHAR_1: char = '-';
-const HEADER_NAME_REPLACEMENT_CHAR_2: char = '+';
+const REDACTION_REPLACEMENT_CHAR: char = '-';
+const REDACTION_REPLACEMENT_DIFFERENT_CHAR: char = '+';
 
 #[derive(Clone, Debug)]
 pub(crate) struct NameValue {
@@ -31,11 +31,11 @@ impl From<&Header<'_>> for NameValue {
 
 pub(crate) fn parse_request_and_validate_redaction(request: &str) -> Result<String, ParsingError> {
     let request_string =
-        request.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_1.to_string().as_str());
+        request.replace(REDACTED_CHAR, REDACTION_REPLACEMENT_CHAR.to_string().as_str());
     let (path, headers_with_replacement_1) = parse_request(&request_string)?;
 
     let request_string =
-        request.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_2.to_string().as_str());
+        request.replace(REDACTED_CHAR, REDACTION_REPLACEMENT_DIFFERENT_CHAR.to_string().as_str());
     let (_, headers_with_replacement_2) = parse_request(&request_string)?;
 
     validate_name_value_redaction(
@@ -60,11 +60,11 @@ pub(crate) fn parse_response_and_validate_redaction(
     response: &str,
 ) -> Result<(String, Vec<NameValue>), ParsingError> {
     let response_string =
-        response.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_1.to_string().as_str());
+        response.replace(REDACTED_CHAR, REDACTION_REPLACEMENT_CHAR.to_string().as_str());
     let (body_index, headers_with_replacement_1) = parse_response(&response_string)?;
 
     let response_string =
-        response.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_2.to_string().as_str());
+        response.replace(REDACTED_CHAR, REDACTION_REPLACEMENT_DIFFERENT_CHAR.to_string().as_str());
     let (_, headers_with_replacement_2) = parse_response(&response_string)?;
 
     validate_name_value_redaction(
@@ -106,9 +106,9 @@ fn validate_name_value_redaction(
         return Err(ParsingError::RedactedName);
     }
 
-    let some_value_is_partially_redacted = zipped_pairs.clone().any(|(l, r)| {
-        !fully_redacted(&l.value, HEADER_NAME_REPLACEMENT_CHAR_1) && l.value != r.value
-    });
+    let some_value_is_partially_redacted = zipped_pairs
+        .clone()
+        .any(|(l, r)| !fully_redacted(&l.value, REDACTION_REPLACEMENT_CHAR) && l.value != r.value);
 
     if some_value_is_partially_redacted {
         return Err(ParsingError::PartiallyRedactedValue);
@@ -147,28 +147,28 @@ mod tests {
 
                 #[test]
                 fn header_name_with_replacement_character_1() {
-                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{HEADER_NAME_REPLACEMENT_CHAR_1}: application/json\r\n\r\n");
+                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{REDACTION_REPLACEMENT_CHAR}: application/json\r\n\r\n");
                     let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
                     assert_eq!(url, "https://example.com/test.json");
                 }
 
                 #[test]
                 fn header_name_with_replacement_character_2() {
-                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{HEADER_NAME_REPLACEMENT_CHAR_2}: application/json\r\n\r\n");
+                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{REDACTION_REPLACEMENT_DIFFERENT_CHAR}: application/json\r\n\r\n");
                     let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
                     assert_eq!(url, "https://example.com/test.json");
                 }
 
                 #[test]
                 fn header_value_with_replacement_character_1() {
-                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{HEADER_NAME_REPLACEMENT_CHAR_1}\r\n\r\n");
+                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{REDACTION_REPLACEMENT_CHAR}\r\n\r\n");
                     let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
                     assert_eq!(url, "https://example.com/test.json");
                 }
 
                 #[test]
                 fn header_value_with_replacement_character_2() {
-                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{HEADER_NAME_REPLACEMENT_CHAR_2}\r\n\r\n");
+                    let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{REDACTION_REPLACEMENT_DIFFERENT_CHAR}\r\n\r\n");
                     let url = parse_request_and_validate_redaction(request.as_str()).unwrap();
                     assert_eq!(url, "https://example.com/test.json");
                 }
