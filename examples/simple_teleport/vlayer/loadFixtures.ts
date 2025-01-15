@@ -1,46 +1,66 @@
 import { getConfig } from "@vlayer/sdk/config";
-import { createTestClient, http, publicActions, walletActions } from "viem";
+import {
+  Chain,
+  createTestClient,
+  http,
+  publicActions,
+  walletActions,
+} from "viem";
 import { foundry } from "viem/chains";
 import MockERC20 from "../out/MockERC20.sol/MockERC20";
 import { privateKeyToAccount } from "viem/accounts";
 
+const l1 = {
+  ...foundry,
+  id: 31_337,
+};
+
+const opL2 = {
+  ...foundry,
+  id: 31_338,
+};
+
 const config = getConfig();
 
-export const testClient = createTestClient({
-  chain: foundry,
-  mode: "anvil",
-  transport: http(config.jsonRpcUrl),
-})
-  .extend(publicActions)
-  .extend(walletActions);
+function createAnvilClient(chain: Chain, url: string) {
+  return createTestClient({
+    chain,
+    mode: "anvil",
+    transport: http(url),
+  })
+    .extend(publicActions)
+    .extend(walletActions);
+}
 
-const [john] = await testClient.getAddresses();
+export const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
+export const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
+
+const [john] = await l1TestClient.getAddresses();
 
 const account = privateKeyToAccount(config.privateKey as `0x${string}`);
 
-const hash = await testClient.deployContract({
+const hash = await l1TestClient.deployContract({
   abi: MockERC20.abi,
   bytecode: MockERC20.bytecode.object,
   account,
-  args: ["TestTeleport", "TestTeleport"],
+  args: ["L2 ERC20 Token", "L2ERC20"],
 });
 
-const receipt = await testClient.waitForTransactionReceipt({ hash });
+const receipt = await l1TestClient.waitForTransactionReceipt({ hash });
 const erc20addr = receipt.contractAddress as `0x${string}`;
 
-await testClient.writeContract({
+await l1TestClient.writeContract({
   address: erc20addr,
   abi: MockERC20.abi,
   functionName: "mint",
   args: [account.address, 1000n],
   account,
 });
-await testClient.mine({ blocks: 10 });
-
-await testClient.writeContract({
+await l1TestClient.writeContract({
   address: erc20addr,
   abi: MockERC20.abi,
   functionName: "transfer",
   args: [john, 100n],
   account,
 });
+await l1TestClient.mine({ blocks: 1 });
