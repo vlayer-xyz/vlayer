@@ -37,12 +37,12 @@ for example in $(get_examples); do
     echo "Restarting anvils"
     docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart anvil-l1 anvil-l2-op
 
-    local template_name="${example//_/-}"
-    echo "::group::Initializing vlayer template: ${template_name}"
+    TEMPLATE="${example//_/-}"
+    echo "::group::Initializing vlayer template: ${TEMPLATE}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
 
-    vlayer init --template "${template_name}"
+    vlayer init --template "${TEMPLATE}"
     forge build
     vlayer test
     echo '::endgroup::'
