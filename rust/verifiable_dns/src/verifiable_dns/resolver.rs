@@ -11,6 +11,18 @@ use crate::dns_over_https::{
     Provider as DoHProvider, Query, Response,
 };
 
+#[derive(thiserror::Error, Debug)]
+pub enum ResolverError<PError> {
+    #[error("Some responses are missing")]
+    MissingResponses,
+    #[error("Invalid response, {1}: {0:?}")]
+    InvalidResponse(Response, String),
+    #[error("Responses mismatch: {0:?} {1:?}")]
+    ResponsesMismatch(Response, Response),
+    #[error("Provider error: {0}")]
+    ProviderError(PError),
+}
+
 #[derive(Clone)]
 pub struct Resolver<C: Now, P: DoHProvider, const Q: usize> {
     providers: [P; Q],
@@ -40,37 +52,42 @@ impl<C: Now, P: DoHProvider, const Q: usize> Resolver<C, P, Q> {
     }
 }
 
-fn validate_responses(responses: &[Option<Response>]) -> Option<()> {
-    if responses.iter().any(Option::is_none) {
-        return None;
-    }
+fn validate_responses<PError>(responses: &[Response]) -> Result<(), ResolverError<PError>> {
+    responses
+        .iter()
+        .map(validate_response::<PError>)
+        .collect::<Result<Vec<_>, _>>()?;
 
-    let responses: Vec<_> = responses.iter().map(|r| r.as_ref().unwrap()).collect();
+    let first_response: &Response = responses.first().ok_or(ResolverError::MissingResponses)?;
 
-    if responses.iter().any(|r| !validate_response(r)) {
-        return None;
-    }
-
-    let first_response: &Response = responses.first()?;
-
-    if responses
+    if let Some(mismatched) = responses
         .iter()
         .skip(1)
-        .any(|r| !responses_match(first_response, r))
+        .find(|r| !responses_match(first_response, r))
     {
-        return None;
+        return Err(ResolverError::ResponsesMismatch(first_response.clone(), mismatched.clone()));
     }
 
-    Some(())
+    Ok(())
 }
 
 impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resolver<C, P, Q> {
-    async fn resolve(&self, query: &Query) -> Option<Response> {
-        let jobs: Vec<_> = self.providers.iter().map(|p| p.resolve(query)).collect();
-        let responses = join_all(jobs).await;
-        validate_responses(&responses)?;
+    type Error = ResolverError<P::Error>;
 
-        let provider_response = responses.first()?.as_ref()?.clone();
+    async fn resolve(&self, query: &Query) -> Result<Response, Self::Error> {
+        let jobs: Vec<_> = self.providers.iter().map(|p| p.resolve(query)).collect();
+        let responses = &join_all(jobs)
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>, P::Error>>()
+            .map_err(ResolverError::<P::Error>::ProviderError)?;
+
+        validate_responses(responses)?;
+
+        let provider_response = responses
+            .first()
+            .ok_or(ResolverError::MissingResponses)?
+            .clone();
 
         let mut response = Response {
             status: 0,
@@ -87,10 +104,10 @@ impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resol
                 .last()
                 .map(|record| self.sign_record(record))
         } else {
-            None
+            return Err(ResolverError::MissingResponses);
         };
 
-        Some(response)
+        Ok(response)
     }
 }
 
@@ -122,26 +139,22 @@ mod tests {
 
         fn responses_to_validate_responses_args<const SIZE: usize>(
             responses: &[Response; SIZE],
-        ) -> [Option<Response>; SIZE] {
-            let mut result: [Option<Response>; SIZE] = [const { None }; SIZE];
-            for (i, response) in responses.iter().enumerate() {
-                result[i] = Some(response.clone());
-            }
-            result
+        ) -> [Response; SIZE] {
+            responses.clone()
         }
 
         #[test]
         fn all_responses_must_not_be_none() {
             let responses =
                 responses_to_validate_responses_args(&[response(), response(), response()]);
-            assert!(validate_responses(&responses).is_some());
+            assert!(validate_responses::<()>(&responses).is_ok());
         }
 
         #[test]
         fn passes_for_equal_results() {
             let responses =
                 responses_to_validate_responses_args(&[response(), response(), response()]);
-            assert!(validate_responses(&responses).is_some());
+            assert!(validate_responses::<()>(&responses).is_ok());
         }
 
         #[test]
@@ -149,7 +162,8 @@ mod tests {
             let mut responses = [response(), response(), response()];
             responses[1].answer = Some(vec![]);
 
-            assert!(validate_responses(&responses_to_validate_responses_args(&responses)).is_none());
+            assert!(validate_responses::<()>(&responses_to_validate_responses_args(&responses))
+                .is_err());
         }
 
         #[test]
@@ -163,8 +177,8 @@ mod tests {
                 response(),
             ]);
 
-            assert!(validate_responses(&passing_responses).is_some());
-            assert!(validate_responses(&failing_responses).is_none());
+            assert!(validate_responses::<()>(&passing_responses).is_ok());
+            assert!(validate_responses::<()>(&failing_responses).is_err());
         }
     }
 
@@ -188,7 +202,7 @@ mod tests {
                 let result = resolver
                     .resolve(&"google._domainkey.vlayer.xyz".into())
                     .await;
-                assert!(result.is_some());
+                assert!(result.is_ok());
             }
 
             #[tokio::test]
