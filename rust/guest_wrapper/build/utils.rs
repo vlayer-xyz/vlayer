@@ -50,12 +50,12 @@ fn remove_file_if_exists(path: &PathBuf) -> io::Result<()> {
 }
 
 /// Get path to target directory. If `CARGO_TARGET_DIR` is set use that,
-/// otherwise default to ../../../target
+/// otherwise default to ../../target
 fn get_target_dir() -> PathBuf {
     if let Ok(target_dir) = env::var("CARGO_TARGET_DIR") {
         target_dir.into()
     } else {
-        PathBuf::from("../../../target")
+        PathBuf::from("../../target")
     }
 }
 
