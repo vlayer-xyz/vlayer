@@ -4,15 +4,17 @@ mod signer;
 mod time;
 
 use resolver::Resolver;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use signer::{PublicKey, Signature};
 use time::RTClock;
 
-pub type VerifiableDNSResolver = Resolver<RTClock>;
+use crate::dns_over_https::provider::ExternalProvider;
+
+pub type VerifiableDNSResolver = Resolver<RTClock, ExternalProvider, 2>;
 
 type Timestamp = u64;
 
-#[derive(Serialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub(crate) struct VerificationData {
     pub(crate) valid_until: Timestamp,
     pub(crate) signature: Signature,

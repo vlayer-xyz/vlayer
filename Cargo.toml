@@ -135,6 +135,7 @@ semver = "1.0.24"
 serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.135" 
 serde_repr = "0.1.19"
+serde_urlencoded = "0.7.1"
 serde_with = { version = "3.11.0", default-features = false }
 static_assertions = "1.1.0"
 strum = "0.26.3"

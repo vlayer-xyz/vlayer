@@ -4,7 +4,7 @@ use axum::Router;
 use server_utils::{cors, init_trace_layer, RequestIdLayer};
 use tokio::net::TcpListener;
 use tracing::info;
-use verifiable_dns::VerifiableDNSResolver;
+use verifiable_dns::{ExternalProvider, VerifiableDNSResolver};
 
 use crate::config::Config;
 
@@ -15,8 +15,9 @@ struct AppState {
 
 impl AppState {
     fn new() -> Self {
+        let providers = [ExternalProvider::google_provider(), ExternalProvider::dns_sb_provider()];
         Self {
-            vdns_resolver: VerifiableDNSResolver::default(),
+            vdns_resolver: VerifiableDNSResolver::new(providers),
         }
     }
 }

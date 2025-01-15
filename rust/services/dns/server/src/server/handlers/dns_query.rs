@@ -8,11 +8,10 @@ use axum::{
 use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::debug;
 use types::{Params, ServerResponse};
-use verifiable_dns::Provider;
+use verifiable_dns::{Provider, MIME_DNS_JSON_CONTENT_TYPE};
 
 use crate::server::AppState;
 
-const MIME_DNS_JSON_CONTENT_TYPE: &str = "application/dns-json";
 pub fn handler() -> MethodRouter<AppState> {
     get(dns_query_handler)
         .route_layer(ValidateRequestHeaderLayer::accept(MIME_DNS_JSON_CONTENT_TYPE))
@@ -23,7 +22,7 @@ async fn dns_query_handler(
     Query(params): Query<Params>,
 ) -> impl IntoResponse {
     debug!("Querying for {:?}", &params);
-    let result = ServerResponse(state.vdns_resolver.resolve(&params.into()).unwrap());
+    let result = ServerResponse(state.vdns_resolver.resolve(&params.into()).await.unwrap());
     debug!("Responding with: {:?}", &result);
     result
 }
