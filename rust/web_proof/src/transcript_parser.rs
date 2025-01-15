@@ -186,6 +186,31 @@ mod tests {
                     let url = parse_request_and_validate_redaction(request).unwrap();
                     assert_eq!(url, "https://example.com/test.json");
                 }
+                #[test]
+                fn url_param_no_redaction() {
+                    let request = "GET https://example.com/test.json?param=value HTTP/1.1\r\n\r\n";
+                    let url = parse_request_and_validate_redaction(request).unwrap();
+                    assert_eq!(url, "https://example.com/test.json?param=value");
+                }
+
+                #[test]
+                fn fully_redacted_url_param_value() {
+                    let request =
+                        "GET https://example.com/test.json?param=\0\0\0\0\0 HTTP/1.1\r\n\r\n";
+                    let url = parse_request_and_validate_redaction(request).unwrap();
+                    assert_eq!(url, "https://example.com/test.json?param=*****");
+                }
+
+                #[test]
+                fn fully_redacted_multiple_url_param_values() {
+                    let request =
+                        "GET https://example.com/test.json?param1=\0\0\0\0\0&param2=value2&param3=\0\0\0 HTTP/1.1\r\n\r\n";
+                    let url = parse_request_and_validate_redaction(request).unwrap();
+                    assert_eq!(
+                        url,
+                        "https://example.com/test.json?param1=*****&param2=value2&param3=***"
+                    );
+                }
             }
 
             mod response {
