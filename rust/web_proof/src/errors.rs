@@ -22,11 +22,11 @@ pub enum ParsingError {
     #[error("IO error: {0}")]
     StdIoError(#[from] std::io::Error),
 
-    #[error("Header name is redacted")]
-    RedactedName,
+    #[error("Name is redacted: {0}")]
+    RedactedName(String),
 
-    #[error("Header value is partially redacted")]
-    PartiallyRedactedValue,
+    #[error("Value is partially redacted: {0}")]
+    PartiallyRedactedValue(String),
 
     #[error("Url parse error: {0}")]
     UrlParse(#[from] url::ParseError),
