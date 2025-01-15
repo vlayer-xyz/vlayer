@@ -1,7 +1,5 @@
 import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
 
-import { foundry } from "viem/chains";
-
 import {
   createVlayerClient,
   type PresentationJSON,
@@ -57,7 +55,7 @@ export const setupProveWebButton = (element: HTMLButtonElement) => {
     const hash = await vlayer.proveWeb({
       address: import.meta.env.VITE_PROVER_ADDRESS,
       proverAbi: webProofProver.abi,
-      chainId: foundry.id,
+      chainId: chain.id,
       functionName: "main",
       token: import.meta.env.VITE_VLAYER_API_TOKEN,
       args: [webProofRequest, twitterUserAddress],
