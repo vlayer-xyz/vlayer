@@ -28,6 +28,7 @@ echo '::endgroup::'
 git config --global user.email "test@example.com"
 git config --global user.name "Github Runner"
 
+BUN_NO_FROZEN_LOCKFILE=1
 VLAYER_ENV="dev"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"

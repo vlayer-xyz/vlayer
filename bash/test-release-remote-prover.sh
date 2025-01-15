@@ -34,12 +34,12 @@ echo '::endgroup::'
 git config --global user.email "test@example.com"
 git config --global user.name "Github Runner"
 
+BUN_NO_FROZEN_LOCKFILE=1
 VLAYER_ENV="testnet"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
 for example in $(get_examples); do
-
     echo "::group::Initializing vlayer template: ${example}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
