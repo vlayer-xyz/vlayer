@@ -73,6 +73,29 @@ describe("request url query", () => {
     ]);
   });
 
+  test("url_query with the first parameter", () => {
+    const redactionItem = {
+      request: {
+        url_query: [
+          "include_ext_sharing_audiospaces_listening_data_with_followers",
+        ],
+      },
+    };
+
+    const result = calculateRequestRanges(
+      redactionItem,
+      fixtureTranscript.sent,
+      fixtureTranscript.ranges.sent,
+    );
+
+    expect(result).toEqual([
+      {
+        start: 48,
+        end: 114,
+      },
+    ]);
+  });
+
   test("url_query_except", () => {
     const redactionItem = {
       request: {

@@ -5,8 +5,13 @@ const calculateRequestQueryParamsRanges = (
 ) => {
   return urlQueryParams.map((param) => {
     const stepOverFirstAmpersand = 1;
-    const start =
-      offset + url.indexOf("&" + param + "=") + stepOverFirstAmpersand;
+
+    const startInUrl =
+      url.indexOf("&" + param + "=") !== -1
+        ? url.indexOf("&" + param + "=")
+        : url.indexOf("?" + param + "=");
+
+    const start = offset + startInUrl + stepOverFirstAmpersand;
 
     const secondAmpersandPosition = url.indexOf("&", start);
     const end =
