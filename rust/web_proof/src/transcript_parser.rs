@@ -8,10 +8,10 @@ const MAX_HEADERS_NUMBER: usize = 40;
 
 const REDACTED_CHAR: char = '\0';
 
-// Both '-' and '+' are valid header characters. Replacing redacted '\0' bytes with
+// Both '*' and '+' are valid header characters. Replacing redacted '\0' bytes with
 // two different characters ensures the request is parsable and allows analysis
 // of redacted content via diffs.
-const REDACTION_REPLACEMENT_CHAR: char = '-';
+const REDACTION_REPLACEMENT_CHAR: char = '*';
 const REDACTION_REPLACEMENT_DIFFERENT_CHAR: char = '+';
 
 #[derive(Clone, Debug)]
