@@ -3,10 +3,10 @@ const calculateRequestQueryParamsRanges = (
   url: string,
   offset: number,
 ) => {
-  return urlQueryParams.map((param) => {
-    const stepOverFirstAmpersand = 1;
-    const stepOverEqualSign = 1;
+  const stepOverFirstAmpersand = 1;
+  const stepOverEqualSign = 1;
 
+  return urlQueryParams.map((param) => {
     const startInUrl =
       url.indexOf("&" + param + "=") !== -1
         ? url.indexOf("&" + param + "=")
