@@ -34,7 +34,7 @@ function get_templates() {
             echo "Error: Invalid TEMPLATE_NAME '$TEMPLATE'. Valid options are: ${TEMPLATE_LIST[*]}" >&2
             exit 1
         fi
-        echo $TEMPLATE_LIST
+        echo $TEMPLATE
     else
         echo "${TEMPLATE_LIST[@]}"
     fi
