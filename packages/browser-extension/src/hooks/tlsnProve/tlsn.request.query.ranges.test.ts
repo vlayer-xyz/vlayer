@@ -21,7 +21,7 @@ describe("request url query", () => {
 
     expect(result).toEqual([
       {
-        start: 259,
+        start: 263,
         end: 277,
       },
     ]);
@@ -42,11 +42,11 @@ describe("request url query", () => {
 
     expect(result).toEqual([
       {
-        start: 259,
+        start: 263,
         end: 277,
       },
       {
-        start: 115,
+        start: 138,
         end: 142,
       },
     ]);
@@ -67,7 +67,7 @@ describe("request url query", () => {
 
     expect(result).toEqual([
       {
-        start: 304,
+        start: 337,
         end: 341,
       },
     ]);
@@ -90,7 +90,7 @@ describe("request url query", () => {
 
     expect(result).toEqual([
       {
-        start: 48,
+        start: 110,
         end: 114,
       },
     ]);
@@ -117,11 +117,11 @@ describe("request url query", () => {
 
     expect(result).toEqual([
       {
-        start: 115,
+        start: 138,
         end: 142,
       },
       {
-        start: 304,
+        start: 337,
         end: 341,
       },
     ]);
