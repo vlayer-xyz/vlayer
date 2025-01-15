@@ -296,7 +296,7 @@ mod tests {
                         data: "google verification".into(),
                     };
 
-                    assert!(compare_answers(&Some(vec![l.clone()]), &Some(vec![r.clone()])));
+                    assert!(compare_answers(&Some(vec![l]), &Some(vec![r])));
                 }
 
                 #[test]
