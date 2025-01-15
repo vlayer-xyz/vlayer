@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib.sh"
+
 set -ueo pipefail
 
 echo '::group::foundry installation'
@@ -32,6 +34,7 @@ echo '::endgroup::'
 git config --global user.email "test@example.com"
 git config --global user.name "Github Runner"
 
+VLAYER_ENV="testnet"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
@@ -44,15 +47,7 @@ for example in $(get_examples); do
     vlayer init --template "${example}"
     forge build
     vlayer test
-
-    cd vlayer
-    # Sadly, bun's manifest caching is so unstable, it causes random `bun install` freezes.
-    # To circumvent that for the time being, we disable all caching.
-    # https://github.com/oven-sh/bun/issues/5831
-    bun install --no-cache
     echo '::endgroup::'
 
-    echo "::group::vlayer run prove.ts: ${example}"
-    bun run prove:testnet
-    echo '::endgroup::'
+    run_prover_script
 done
