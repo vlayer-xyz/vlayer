@@ -138,23 +138,33 @@ fn convert_path(path: &str) -> Result<Vec<NameValue>, ParsingError> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn success_convert_path() {
-        let name_values =
-            convert_path("https://example.com/test.json?param1=value1&param2=value2").unwrap();
-        assert_eq!(
-            name_values,
-            vec![
-                NameValue {
-                    name: "param1".to_string(),
-                    value: "value1".to_string().into_bytes()
-                },
-                NameValue {
-                    name: "param2".to_string(),
-                    value: "value2".to_string().into_bytes()
-                }
-            ]
-        );
+    mod convert_path {
+        use super::*;
+
+        #[test]
+        fn success() {
+            let name_values =
+                convert_path("https://example.com/test.json?param1=value1&param2=value2").unwrap();
+            assert_eq!(
+                name_values,
+                vec![
+                    NameValue {
+                        name: "param1".to_string(),
+                        value: "value1".to_string().into_bytes()
+                    },
+                    NameValue {
+                        name: "param2".to_string(),
+                        value: "value2".to_string().into_bytes()
+                    }
+                ]
+            );
+        }
+
+        #[test]
+        fn fail() {
+            let err = convert_path("https://").unwrap_err();
+            assert!(matches!(err, ParsingError::UrlParse(url::ParseError::EmptyHost)));
+        }
     }
 
     mod redaction {
