@@ -124,9 +124,8 @@ fn convert_headers(headers: &[Header]) -> Vec<NameValue> {
 }
 
 fn convert_path(path: &str) -> Result<Vec<NameValue>, ParsingError> {
-    let parsed_url = Url::parse(path)?;
-    let query_pairs = parsed_url.query_pairs();
-    Ok(query_pairs
+    Ok(Url::parse(path)?
+        .query_pairs()
         .map(|param| NameValue {
             name: param.0.to_string(),
             value: param.1.to_string().into_bytes(),
