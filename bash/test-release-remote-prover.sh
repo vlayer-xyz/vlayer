@@ -15,16 +15,8 @@ vlayerup
 echo '::endgroup::'
 
 echo '::group::bun installation'
-curl -fsSL https://bun.sh/install | bash
+curl -fsSL https://bun.sh/install | bash -s "bun-v1.1.34"
 export PATH="$PATH:~/.bun/bin"
-# Sadly, bun's manifest caching is so unstable, it causes random `bun install` freezes.
-# To circumvent that for the time being, we disable all caching.
-# https://github.com/oven-sh/bun/issues/5831
-cat > $HOME/.bunfig.toml <<EOF
-[install.cache]
-disable = true
-disableManifest = true
-EOF
 echo '::endgroup::'
 
 echo '::group::risczero installation'
@@ -54,7 +46,10 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     vlayer test
 
     cd vlayer
-    bun install
+    # Sadly, bun's manifest caching is so unstable, it causes random `bun install` freezes.
+    # To circumvent that for the time being, we disable all caching.
+    # https://github.com/oven-sh/bun/issues/5831
+    bun install --no-cache
     echo '::endgroup::'
 
     echo "::group::vlayer run prove.ts: ${example_name}"
