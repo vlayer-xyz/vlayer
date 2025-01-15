@@ -97,7 +97,7 @@ where
     #[instrument(skip(self))]
     pub async fn poll_commit(&mut self) -> Result<(), HostError> {
         if let Some(chain_update) = self.poll().await? {
-            info!("Chain update: {chain_update:?}");
+            info!("Chain info: {:?}", chain_update.chain_info);
             self.db.update_chain(self.chain_id, chain_update)?;
         } else {
             sleep(SLEEP_IF_FULLY_SYNCED).await;
@@ -147,7 +147,7 @@ where
             info!("No new blocks to append or prepend");
             return Ok(None);
         }
-        info!("Appending and prepending blocks");
+        info!("Append: {append} Prepend: {prepend}. New range: {new_range}");
 
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
         let append_blocks = self.fetcher.get_blocks_range(append).await?;
