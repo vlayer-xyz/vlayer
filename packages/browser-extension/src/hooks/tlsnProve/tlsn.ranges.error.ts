@@ -1,3 +1,5 @@
+import { CommitData } from "tlsn-js/src/types";
+
 export class RedactionError extends Error {
   constructor(message: string) {
     super(message);
@@ -37,5 +39,19 @@ export class InvalidJsonError extends RedactionError {
   constructor() {
     super("Invalid JSON");
     this.name = "InvalidJsonError";
+  }
+}
+
+export class OutOfBoundsError extends RedactionError {
+  constructor(range: CommitData) {
+    super(`Range ${range.start} - ${range.end} is out of bounds`);
+    this.name = "OutOfBoundsError";
+  }
+}
+
+export class InvalidRangeError extends RedactionError {
+  constructor(range: CommitData) {
+    super(`Range ${range.start} - ${range.end} is invalid`);
+    this.name = "InvalidRangeError";
   }
 }

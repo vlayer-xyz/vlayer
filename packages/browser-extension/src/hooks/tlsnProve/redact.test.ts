@@ -1,7 +1,115 @@
 import { RedactionConfig } from "src/web-proof-commons/types/message";
-import { redact } from "./redact";
+import { calcRedactionRanges, calcRevealRanges } from "./redact";
 import { describe, expect, test } from "vitest";
 import { fixtureTranscript } from "./tlsn.ranges.test.fixtures";
+import { InvalidRangeError } from "./tlsn.ranges.error";
+import { OutOfBoundsError } from "./tlsn.ranges.error";
+describe("calcRevealRanges", () => {
+  test("invalid range", () => {
+    const wholeTranscriptRange = {
+      start: 0,
+      end: 100,
+    };
+    const toRedact = [
+      {
+        start: 50,
+        end: 40,
+      },
+    ];
+    expect(() => calcRevealRanges(wholeTranscriptRange, toRedact)).toThrow(
+      InvalidRangeError,
+    );
+  });
+  test("disjoint intervals", () => {
+    const wholeTranscriptRange = {
+      start: 0,
+      end: 100,
+    };
+    const toRedact = [
+      {
+        start: 110,
+        end: 120,
+      },
+    ];
+
+    expect(() => calcRevealRanges(wholeTranscriptRange, toRedact)).toThrow(
+      OutOfBoundsError,
+    );
+  });
+
+  test("overlapping intervals", () => {
+    const wholeTranscriptRange = {
+      start: 0,
+      end: 100,
+    };
+    const toRedact = [
+      {
+        start: 10,
+        end: 20,
+      },
+      {
+        start: 30,
+        end: 40,
+      },
+    ];
+
+    const result = calcRevealRanges(wholeTranscriptRange, toRedact);
+
+    expect(result).toEqual([
+      {
+        start: 0,
+        end: 10,
+      },
+      {
+        start: 20,
+        end: 30,
+      },
+      {
+        start: 40,
+        end: 100,
+      },
+    ]);
+  });
+
+  test("empty redact ranges", () => {
+    const wholeTranscriptRange = {
+      start: 0,
+      end: 100,
+    };
+    const result = calcRevealRanges(wholeTranscriptRange, []);
+
+    expect(result).toEqual([{ start: 0, end: 100 }]);
+  });
+
+  test("single redact range", () => {
+    const wholeTranscriptRange = {
+      start: 0,
+      end: 100,
+    };
+    const result = calcRevealRanges(wholeTranscriptRange, [
+      { start: 10, end: 20 },
+    ]);
+
+    expect(result).toEqual([
+      { start: 0, end: 10 },
+      { start: 20, end: 100 },
+    ]);
+  });
+
+  test("multiple redact ranges starting at the beginning of transcript", () => {
+    const wholeTranscriptRange = {
+      start: 0,
+      end: 100,
+    };
+    const result = calcRevealRanges(wholeTranscriptRange, [
+      { start: 0, end: 20 },
+      { start: 30, end: 100 },
+    ]);
+
+    expect(result).toEqual([{ start: 20, end: 30 }]);
+  });
+});
+
 describe("redact", () => {
   const mockTranscript = fixtureTranscript;
 
@@ -14,7 +122,7 @@ describe("redact", () => {
       },
     ];
 
-    const result = redact(mockTranscript, redactionConfig);
+    const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
     expect(result.sent).toEqual([
       {
@@ -37,7 +145,7 @@ describe("redact", () => {
       },
     ];
 
-    const result = redact(mockTranscript, redactionConfig);
+    const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
     expect(result.sent).toEqual([
       {
@@ -152,7 +260,7 @@ describe("redact", () => {
       },
     ];
 
-    const result = redact(mockTranscript, redactionConfig);
+    const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
     expect(result.sent).toEqual([]);
     expect(result.recv).toEqual([
@@ -192,7 +300,7 @@ describe("redact", () => {
       },
     ];
 
-    const result = redact(mockTranscript, redactionConfig);
+    const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
     expect(result.sent).toEqual([
       {
@@ -223,7 +331,7 @@ describe("redact", () => {
   });
 
   test("returns empty commit for empty redaction config", () => {
-    const result = redact(mockTranscript, []);
+    const result = calcRedactionRanges(mockTranscript, []);
 
     expect(result).toEqual({ sent: [], recv: [] });
   });

@@ -71,11 +71,10 @@ const calculateJsonBodyRanges = (
       // this is the last segment of the path
       if (i === pathSegments.length - 1) {
         // Make sure the value is a string
-        if (typeof currentObj !== "object") {
-          if (typeof currentObj !== "string") {
-            throw new NonStringValueError(typeof currentObj);
-          }
+        if (typeof currentObj !== "string") {
+          throw new NonStringValueError(typeof currentObj);
         }
+
         // Only set final value position for the last segment
         const valueStr = JSON.stringify(currentObj).replace(/"/g, "");
 
