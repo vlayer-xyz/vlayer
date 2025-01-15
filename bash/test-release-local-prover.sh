@@ -33,17 +33,16 @@ VLAYER_ENV="dev"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-for example in $(get_examples); do
+for template in $(get_templates); do
     # We're restarting anvils because some examples rely on a clean chain state.
     echo "Restarting anvils"
     docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart anvil-l1 anvil-l2-op
 
-    TEMPLATE="${example//_/-}"
-    echo "::group::Initializing vlayer template: ${TEMPLATE}"
+    echo "::group::Initializing vlayer template: ${template}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
 
-    vlayer init --template "${TEMPLATE}"
+    vlayer init --template "${template}"
     forge build
     vlayer test
     echo '::endgroup::'

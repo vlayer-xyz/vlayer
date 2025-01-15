@@ -39,13 +39,12 @@ VLAYER_ENV="testnet"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-for example in $(get_examples); do
-    TEMPLATE="${example//_/-}"
-    echo "::group::Initializing vlayer template: ${TEMPLATE}"
+for template in $(get_templates); do
+    echo "::group::Initializing vlayer template: ${template}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
 
-    vlayer init --template "${TEMPLATE}"
+    vlayer init --template "${template}"
     forge build
     vlayer test
     echo '::endgroup::'

@@ -18,3 +18,24 @@ function get_examples() {
         echo "${EXAMPLE_LIST[@]}"
     fi
 }
+
+# You can set the $TEMPLATE variable to run a single example
+function get_templates() {
+    local TEMPLATE_LIST=(
+        "simple"
+        "simple-email-proof"
+        "simple-web-proof"
+        "simple-time-travel"
+        "simple-teleport"
+    )
+
+    if [[ -n ${TEMPLATE:-} ]]; then
+        if ! [[ " ${TEMPLATE_LIST[*]} " == *" $TEMPLATE"* ]]; then
+            echo "Error: Invalid TEMPLATE_NAME '$TEMPLATE'. Valid options are: ${TEMPLATE_LIST[*]}" >&2
+            exit 1
+        fi
+        echo $TEMPLATE_LIST
+    else
+        echo "${TEMPLATE_LIST[@]}"
+    fi
+}
