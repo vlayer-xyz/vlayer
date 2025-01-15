@@ -3,10 +3,11 @@
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
+for example in $(get_examples); do
   echo "::group::Running vlayer test in: ${example}"
-  cd "${example}"
+  cd "${VLAYER_HOME}/examples/${example}"
   forge soldeer install
   forge clean
   forge build

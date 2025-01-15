@@ -5,6 +5,7 @@ set -ueo pipefail
 # Imports
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib.sh"
 
 # Defaults
@@ -15,13 +16,12 @@ generate_ts_bindings
 build_sdk
 
 echo "::group::Running examples"
-for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
-  export EXAMPLE_NAME=$(basename "${example}")
-    
+for example in $(get_examples); do
+  export EXAMPLE_NAME=$example
   echo Running services...
   source ${VLAYER_HOME}/bash/run-services.sh
 
-  pushd "${example}"
+  pushd "$VLAYER_HOME/examples/$example"
   echo "::group::Running tests of: ${example}"
   silent_unless_fails build_contracts
   run_prover_script

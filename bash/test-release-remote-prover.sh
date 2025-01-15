@@ -33,15 +33,15 @@ git config --global user.email "test@example.com"
 git config --global user.name "Github Runner"
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
-    example_name=$(basename "${example}"  | tr '_' '-')
+for example in $(get_examples); do
 
-    echo "::group::Initializing vlayer template: ${example_name}"
+    echo "::group::Initializing vlayer template: ${example}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
 
-    vlayer init --template "${example_name}"
+    vlayer init --template "${example}"
     forge build
     vlayer test
 
@@ -52,7 +52,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     bun install --no-cache
     echo '::endgroup::'
 
-    echo "::group::vlayer run prove.ts: ${example_name}"
+    echo "::group::vlayer run prove.ts: ${example}"
     bun run prove:testnet
     echo '::endgroup::'
 done
