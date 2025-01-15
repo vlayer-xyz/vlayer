@@ -44,9 +44,9 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     vlayer test
 
     cd vlayer
-# Sadly, bun's manifest caching is so unstable, it causes random `bun install` freezes.
-# To circumvent that for the time being, we disable all caching.
-# https://github.com/oven-sh/bun/issues/5831
+    # Sadly, bun's manifest caching is so unstable, it causes random `bun install` freezes.
+    # To circumvent that for the time being, we disable all caching.
+    # https://github.com/oven-sh/bun/issues/5831
     bun install --no-cache
     echo '::endgroup::'
 
