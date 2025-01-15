@@ -1,3 +1,5 @@
+use std::{collections::HashSet, hash::Hash};
+
 use crate::dns_over_https::{types::Record, Response};
 
 pub(super) fn validate_response(response: &Response) -> bool {
@@ -20,23 +22,21 @@ fn compare_answers(l: &Option<Vec<Record>>, r: &Option<Vec<Record>>) -> bool {
         return l.is_none() && r.is_none();
     }
 
-    let mut l: Vec<_> = l.as_ref().unwrap().iter().collect();
-    let mut r: Vec<_> = r.as_ref().unwrap().iter().collect();
+    let l = l.as_ref().unwrap().iter();
+    let r = r.as_ref().unwrap().iter();
 
-    if l.len() != r.len() {
-        return false;
-    }
-
-    l.sort_by(|lr, rr| canonize_data(&lr.data).cmp(&canonize_data(&rr.data)));
-    r.sort_by(|lr, rr| canonize_data(&lr.data).cmp(&canonize_data(&rr.data)));
-
-    l.iter()
-        .zip(r)
-        .all(|(record_l, record_r)| compare_records(record_l, record_r))
+    compare_unordered(l.map(canonized), r.map(canonized))
 }
 
-fn compare_records(l: &Record, r: &Record) -> bool {
-    canonize_data(&l.data) == canonize_data(&r.data)
+fn compare_unordered<T: Eq + Hash>(
+    l: impl IntoIterator<Item = T>,
+    r: impl IntoIterator<Item = T>,
+) -> bool {
+    HashSet::<T>::from_iter(l) == HashSet::<T>::from_iter(r)
+}
+
+fn canonized(r: &Record) -> String {
+    canonize_data(&r.data)
 }
 
 fn canonize_data(data: &str) -> String {
@@ -224,14 +224,14 @@ mod tests {
             }
 
             #[test]
-            fn fails_for_different_number_of_records() {
+            fn passes_for_repeated_arguments() {
                 let l = mock_response();
                 let mut r = mock_response();
                 let mut records = r.answer.take().unwrap();
                 records.push(records.first().unwrap().clone());
                 r.answer = Some(records);
 
-                assert!(!responses_match(&l, &r));
+                assert!(responses_match(&l, &r));
             }
 
             #[test]
@@ -277,7 +277,7 @@ mod tests {
                 assert!(responses_match(&l, &r));
             }
 
-            mod records {
+            mod canonization {
                 use tests::canonize_data;
 
                 use super::*;
@@ -296,7 +296,7 @@ mod tests {
                         data: "google verification".into(),
                     };
 
-                    assert!(compare_records(&l, &r));
+                    assert!(compare_answers(&Some(vec![l.clone()]), &Some(vec![r.clone()])));
                 }
 
                 #[test]
