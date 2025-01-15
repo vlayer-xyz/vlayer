@@ -9,7 +9,7 @@ RUN curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL 'https:
 ENV PATH="/home/vlayer/.cargo/bin:${PATH}"
 
 RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-RUN cargo binstall -y cargo-risczero@1.2.0
+RUN cargo binstall -y cargo-risczero@1.2.1-rc.1
 RUN cargo risczero install
 
 RUN curl -L https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-linux-amd64.tar.gz -o nightly-linux-amd64.tar.gz

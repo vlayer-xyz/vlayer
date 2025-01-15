@@ -2,11 +2,6 @@
 
 set -ueo pipefail
 
-if [ -z "${VLAYER_ENV:-}" ]; then
-    echo "Error: VLAYER_ENV is not set."
-    exit 1
-fi
-
 echo '::group::foundry installation'
 curl -L https://foundry.paradigm.xyz | bash
 export PATH="$PATH:$HOME/.config/.foundry/bin"
@@ -20,13 +15,13 @@ vlayerup
 echo '::endgroup::'
 
 echo '::group::bun installation'
-curl -fsSL https://bun.sh/install | bash
+curl -fsSL https://bun.sh/install | bash -s "bun-v1.1.34"
 export PATH="$PATH:~/.bun/bin"
 echo '::endgroup::'
 
 echo '::group::risczero installation'
 curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-cargo binstall -y cargo-risczero@1.2.0
+cargo binstall -y cargo-risczero@1.2.1-rc.1
 cargo risczero install
 echo '::endgroup::'
 
@@ -42,12 +37,6 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
     example_name=$(basename "${example}"  | tr '_' '-')
 
-    if [ "$VLAYER_ENV" = "dev" ]; then
-      # We're restarting anvil because some examples rely on a clean chain state.
-      echo "Restarting anvil"
-      docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart anvil-a
-    fi
-
     echo "::group::Initializing vlayer template: ${example_name}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
@@ -57,10 +46,13 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     vlayer test
 
     cd vlayer
-    bun install
+    # Sadly, bun's manifest caching is so unstable, it causes random `bun install` freezes.
+    # To circumvent that for the time being, we disable all caching.
+    # https://github.com/oven-sh/bun/issues/5831
+    bun install --no-cache
     echo '::endgroup::'
 
     echo "::group::vlayer run prove.ts: ${example_name}"
-    bun run prove:"${VLAYER_ENV}"
+    bun run prove:testnet
     echo '::endgroup::'
 done

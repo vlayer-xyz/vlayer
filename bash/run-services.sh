@@ -19,6 +19,7 @@ BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
 SERVER_PROOF_ARG="fake"
 EXTERNAL_RPC_URLS=()
+DOCKER_COMPOSE_FILE="${VLAYER_HOME}/docker/docker-compose.devnet.yaml"
 
 setup_tmp_dir
 
@@ -47,7 +48,8 @@ ensure_binaries_built
 
 echo "Starting services..."
 
-start_anvil
+docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op
+
 if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
     startup_chain_services "${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"
 fi

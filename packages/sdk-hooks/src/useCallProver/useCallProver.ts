@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useChainId } from "wagmi";
 import {
   type Abi,
   type AbiStateMutability,
@@ -8,6 +7,7 @@ import {
 } from "viem";
 import { type BrandedHash, type ProveArgs } from "@vlayer/sdk";
 import { useProofContext } from "../context";
+import { useChainId } from "wagmi";
 
 export enum ProverStatus {
   Idle = "Idle",
@@ -17,10 +17,7 @@ export enum ProverStatus {
 }
 
 export const useCallProver = (
-  proveArgs: Omit<
-    ProveArgs<Abi, ContractFunctionName<Abi>>,
-    "chainId" | "args"
-  >,
+  proveArgs: Omit<ProveArgs<Abi, ContractFunctionName<Abi>>, "args">,
 ) => {
   // read vlayer client from context
   const { vlayerClient } = useProofContext();
