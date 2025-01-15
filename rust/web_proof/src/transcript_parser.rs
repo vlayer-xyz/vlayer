@@ -1,4 +1,4 @@
-use std::{convert::Into, iter::zip};
+use std::iter::zip;
 
 use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
 
@@ -18,15 +18,6 @@ const REDACTION_REPLACEMENT_DIFFERENT_CHAR: char = '+';
 pub(crate) struct NameValue {
     pub(crate) name: String,
     pub(crate) value: Vec<u8>,
-}
-
-impl From<&Header<'_>> for NameValue {
-    fn from(header: &Header) -> Self {
-        NameValue {
-            name: header.name.to_string(),
-            value: header.value.to_vec(),
-        }
-    }
 }
 
 pub(crate) fn parse_request_and_validate_redaction(request: &str) -> Result<String, ParsingError> {
@@ -74,12 +65,7 @@ pub(crate) fn parse_response_and_validate_redaction(
 
     let body = &response_string[body_index..];
 
-    Ok((
-        body.to_string(),
-        headers_with_replacement_1
-            .map(|header| NameValue::from(&header))
-            .to_vec(),
-    ))
+    Ok((body.to_string(), convert_headers(&headers_with_replacement_1)))
 }
 
 fn parse_response(response: &str) -> Result<(usize, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
@@ -122,7 +108,13 @@ fn fully_redacted(input: &[u8], redacted_char: char) -> bool {
 }
 
 fn convert_headers(headers: &[Header]) -> Vec<NameValue> {
-    headers.iter().map(Into::into).collect()
+    headers
+        .iter()
+        .map(|header| NameValue {
+            name: header.name.to_string(),
+            value: header.value.to_vec(),
+        })
+        .collect()
 }
 
 #[cfg(test)]
