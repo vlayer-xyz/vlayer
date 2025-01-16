@@ -4,12 +4,16 @@ use clap::{Parser, ValueEnum};
 
 #[derive(Clone, Debug, Parser)]
 pub(crate) struct InitArgs {
+    /// Template to use for the project
     #[arg(long, value_enum)]
     pub(crate) template: Option<TemplateOption>,
+    /// Force init in existing project location
     #[arg(long)]
     pub(crate) existing: bool,
+    /// Name of the project
     #[arg()]
     pub(crate) project_name: Option<String>,
+    /// Directory where the templates will be unpacked into (useful for debugging)
     #[arg(long, env = "VLAYER_WORK_DIR")]
     pub(crate) work_dir: Option<PathBuf>,
 }
