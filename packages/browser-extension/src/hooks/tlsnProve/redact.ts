@@ -63,9 +63,20 @@ export const calcRevealRanges = (
   const result: CommitData[] = [];
   let begin = wholeTranscriptRange.start;
 
-  const validatedRedactRanges = redactRanges.map((range) =>
-    validateRange(range, wholeTranscriptRange),
+  const validatedRedactRanges = redactRanges
+    .map((range) => validateRange(range, wholeTranscriptRange))
+    .sort((a, b) => a.start - b.start);
+
+  const hasOverlap = validatedRedactRanges.find(
+    (range, index) =>
+      index > 0 && range.start <= validatedRedactRanges[index - 1].end,
   );
+
+  if (hasOverlap) {
+    throw new InvalidRangeError(hasOverlap);
+  }
+
+  console.log(validatedRedactRanges);
 
   for (const redactRange of validatedRedactRanges) {
     result.push({ start: begin, end: redactRange.start });

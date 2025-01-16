@@ -37,7 +37,27 @@ describe("calcRevealRanges", () => {
     );
   });
 
-  test("overlapping intervals", () => {
+  test("overlapping ranges", () => {
+    const wholeTranscriptRange = {
+      start: 0,
+      end: 100,
+    };
+    const toRedact = [
+      {
+        start: 10,
+        end: 20,
+      },
+      {
+        start: 10,
+        end: 40,
+      },
+    ];
+
+    expect(() => calcRevealRanges(wholeTranscriptRange, toRedact)).toThrow(
+      InvalidRangeError,
+    );
+  });
+  test("disjoint ranges", () => {
     const wholeTranscriptRange = {
       start: 0,
       end: 100,
@@ -147,107 +167,15 @@ describe("redact", () => {
 
     const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
-    expect(result.sent).toEqual([
-      {
-        start:
-          mockTranscript.ranges.sent.headers["x-client-transaction-id"].start +
-          "x-client-transaction-id".length +
-          1,
-        end: 471,
-      }, // x-client-transaction-id
-      {
-        start:
-          mockTranscript.ranges.sent.headers["accept-encoding"].start +
-          "accept-encoding".length +
-          1,
-        end: 498,
-      }, // accept-encoding
-      {
-        start:
-          mockTranscript.ranges.sent.headers["sec-ch-ua"].start +
-          "sec-ch-ua".length +
-          1,
-        end: 576,
-      }, // sec-ch-ua
-      {
-        start:
-          mockTranscript.ranges.sent.headers["content-type"].start +
-          "content-type".length +
-          1,
-        end: 608,
-      }, // content-type
-      {
-        start:
-          mockTranscript.ranges.sent.headers["authorization"].start +
-          "authorization".length +
-          1,
-        end: 736,
-      }, // authorization
-      {
-        start:
-          mockTranscript.ranges.sent.headers["sec-ch-ua-mobile"].start +
-          "sec-ch-ua-mobile".length +
-          1,
-        end: 775,
-      }, // sec-ch-ua-mobile
-      {
-        start:
-          mockTranscript.ranges.sent.headers["accept"].start +
-          "accept".length +
-          1,
-        end: 788,
-      }, // accept
-      {
-        start:
-          mockTranscript.ranges.sent.headers["x-twitter-auth-type"].start +
-          "x-twitter-auth-type".length +
-          1,
-        end: 824,
-      }, // x-twitter-auth-type
-      {
-        start:
-          mockTranscript.ranges.sent.headers["x-twitter-client-language"]
-            .start +
-          "x-twitter-client-language".length +
-          1,
-        end: 855,
-      }, // x-twitter-client-language
-      {
-        start:
-          mockTranscript.ranges.sent.headers["cookie"].start +
-          "cookie".length +
-          1,
-        end: 1481,
-      }, // cookie
-      {
-        start:
-          mockTranscript.ranges.sent.headers["sec-ch-ua-platform"].start +
-          "sec-ch-ua-platform".length +
-          1,
-        end: 1510,
-      }, // sec-ch-ua-platform
-      {
-        start:
-          mockTranscript.ranges.sent.headers["x-csrf-token"].start +
-          "x-csrf-token".length +
-          1,
-        end: 1686,
-      }, // x-csrf-token
-      {
-        start:
-          mockTranscript.ranges.sent.headers["connection"].start +
-          "connection".length +
-          1,
-        end: 1705,
-      }, // connection
-      {
-        start:
-          mockTranscript.ranges.sent.headers["x-twitter-active-user"].start +
-          "x-twitter-active-user".length +
-          1,
-        end: 1733,
-      }, // x-twitter-active-user
-    ]);
+    expect(result.sent).toEqual(
+      Object.entries(mockTranscript.ranges.sent.headers)
+        .filter(([header]) => !["host", "user-agent"].includes(header))
+        .map(([header, range]) => ({
+          start: range.start + header.length + 1,
+          end: range.end,
+        })),
+    );
+
     expect(result.recv).toEqual([]);
   });
 
