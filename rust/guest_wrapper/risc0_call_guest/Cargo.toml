@@ -8,13 +8,12 @@ edition = "2021"
 [dependencies]
 alloy-sol-types = { version = "=0.8.16", default-features = false }
 call_guest = { path = "../../services/call/guest" }
-risc0-zkvm = { version = "1.2.1-rc.1", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm = { version = "1.2.0", default-features = false, features = ["std", "unstable"] }
 risc0-zkvm-platform = { version = "1.2.1-rc.1", features = [ "rust-runtime", "export-getrandom", "sys-getenv" ] }
 tokio = { version = "1.41.0", features = ["rt", "macros"] }
 
 [patch.crates-io]
 ring = { git = "https://github.com/briansmith/ring.git", rev = "7c0024abaf4fd59250c9b79cc41a029aa0ef3497" }
-tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", rev = "7ff2b8465891d1cbb55a69e553e05d369ce41d72" }
 
 [package.metadata.cargo-machete]
 ignored = ["risc0-zkvm-platform"]
