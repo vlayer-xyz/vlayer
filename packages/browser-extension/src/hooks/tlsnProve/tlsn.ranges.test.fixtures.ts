@@ -594,7 +594,10 @@ export const fixtureTranscript = {
   },
 };
 
-export const paths = {
+export const paths: {
+  valid: string[];
+  invalid: string[];
+} = {
   valid: [
     "[2]",
     "key1",
