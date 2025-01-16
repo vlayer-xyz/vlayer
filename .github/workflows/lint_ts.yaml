@@ -4,6 +4,9 @@ on:
     paths:
       - "examples/**"
       - "packages/**"
+      - ".github/workflows/lint_ts.yaml"
+      - "bash/lint-ts.sh"
+      - "bash/build-ts-types.sh"
   merge_group:
   push:
     branches:
