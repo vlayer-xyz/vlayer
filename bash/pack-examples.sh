@@ -22,11 +22,10 @@ touch "${ARCHIVE}"
     for example in $(get_examples); do
         echo "::group::Packing example: ${example}"
 
-        example_path="$VLAYER_HOME/examples/$example"
-        scripts="${example_path}/vlayer"
-        contracts="${example_path}/src/vlayer"
-        contracts_tests="${example_path}/test/vlayer"
-        testdata="${example_path}/testdata"
+        scripts="${example}/vlayer"
+        contracts="${example}/src/vlayer"
+        contracts_tests="${example}/test/vlayer"
+        testdata="${example}/testdata"
 
         cp "${VLAYER_HOME}/docker/docker-compose.devnet.yaml" "${scripts}/"
 
