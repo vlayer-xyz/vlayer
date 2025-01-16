@@ -39,17 +39,15 @@ function computeOutputRoot(
   latestBlock: GetBlockReturnType<Chain, false, "latest">,
 ): `0x${string}` {
   const versionByte = "00".repeat(32);
-  const stateRoot = latestBlock.stateRoot as string;
-  const withdrawalStorageRoot =
-    latestBlock.withdrawalsRoot ?? "0x" + "00".repeat(32);
-  const latestBlockHash = latestBlock.hash as string;
+  const stateRoot = latestBlock.stateRoot.slice(2);
+  const withdrawalStorageRoot = (
+    latestBlock.withdrawalsRoot ?? `0x${"00".repeat(32)}`
+  ).slice(2);
+  const latestBlockHash = latestBlock.hash.slice(2);
 
-  const payload =
-    stateRoot.slice(2) +
-    withdrawalStorageRoot.slice(2) +
-    latestBlockHash.slice(2);
+  const payload = stateRoot + withdrawalStorageRoot + latestBlockHash;
   const concatenated = versionByte + payload;
-  const formattedHex = `0x${concatenated.slice(2)}`;
+  const formattedHex = `0x${concatenated}`;
   const outputRoot = keccak256(formattedHex as `0x${string}`);
   return outputRoot;
 }
