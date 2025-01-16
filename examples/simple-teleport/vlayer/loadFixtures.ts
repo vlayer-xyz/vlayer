@@ -41,7 +41,7 @@ function computeOutputRoot(
   const payload = [
     "00".repeat(32),
     latestBlock.stateRoot.slice(2),
-    (latestBlock.withdrawalsRoot ?? `0x${"00".repeat(32)}`).slice(2),
+    (latestBlock.withdrawalsRoot ?? `0x`).slice(2),
     latestBlock.hash.slice(2),
   ].join("");
 
