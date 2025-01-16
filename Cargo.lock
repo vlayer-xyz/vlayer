@@ -11901,6 +11901,7 @@ dependencies = [
  "bytes",
  "chrono",
  "futures",
+ "lazy_static",
  "olpc-cjson",
  "rand",
  "reqwest 0.12.12",
@@ -11910,6 +11911,7 @@ dependencies = [
  "serde_repr",
  "serde_urlencoded",
  "serde_with",
+ "thiserror 2.0.11",
  "tokio",
 ]
 

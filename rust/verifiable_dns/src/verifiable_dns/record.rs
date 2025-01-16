@@ -4,7 +4,7 @@ use super::Timestamp;
 use crate::dns_over_https::types::{Record as DNSRecord, RecordType};
 
 #[derive(Serialize)]
-pub(super) struct Record<'a> {
+pub(crate) struct Record<'a> {
     name: &'a String,
     #[serde(rename = "type")]
     #[allow(clippy::struct_field_names)]

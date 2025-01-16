@@ -1,11 +1,11 @@
-mod record;
-mod resolver;
-mod signer;
-mod time;
+pub(crate) mod record;
+pub(crate) mod resolver;
+pub(crate) mod signer;
+pub(crate) mod time;
 
 use resolver::Resolver;
 use serde::{Deserialize, Serialize};
-use signer::{PublicKey, Signature};
+pub(crate) use signer::{PublicKey, Signature};
 use time::RTClock;
 
 use crate::dns_over_https::provider::ExternalProvider;
