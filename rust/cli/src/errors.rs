@@ -12,7 +12,7 @@ pub enum CLIError {
     GitError(String),
     #[error("No foundry.toml file found")]
     NoFoundryError,
-    #[error("{0}")]
+    #[error(transparent)]
     AnyhowError(#[from] anyhow::Error),
     #[error("Error parsing TOML:\n {0}")]
     TomlError(String),
