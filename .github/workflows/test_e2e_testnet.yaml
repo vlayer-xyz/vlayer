@@ -63,7 +63,6 @@ jobs:
           JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
           PROVER_URL: http://127.0.0.1:3000
           VLAYER_TMP_DIR: ./artifacts
-          RUN_CHAIN_SERVICES: 1
           BUILD_BINARIES: 0
           CONFIRMATIONS: 2
         run: bash/e2e-test.sh
