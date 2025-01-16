@@ -24,7 +24,7 @@ pub enum RecordVerifierError {
 }
 
 impl RecordVerifier {
-    pub fn verify_record(
+    pub fn verify_signature(
         record: &DNSRecord,
         valid_until: u64,
         pub_key: &PublicKey,
@@ -63,7 +63,7 @@ mod test {
             pub_key,
             valid_until,
         } = resolver().sign_record(&RECORD);
-        RecordVerifier::verify_record(&RECORD, valid_until, &pub_key, &signature).unwrap();
+        RecordVerifier::verify_signature(&RECORD, valid_until, &pub_key, &signature).unwrap();
     }
 
     #[test]
@@ -78,7 +78,7 @@ mod test {
             ..RECORD.clone()
         };
         assert_eq!(
-            RecordVerifier::verify_record(&modified_record, valid_until, &pub_key, &signature)
+            RecordVerifier::verify_signature(&modified_record, valid_until, &pub_key, &signature)
                 .unwrap_err()
                 .to_string(),
             "Signature verification error"
@@ -88,7 +88,7 @@ mod test {
     #[test]
     fn fails_on_invalid_public_key() {
         assert_eq!(
-            RecordVerifier::verify_record(
+            RecordVerifier::verify_signature(
                 &RECORD,
                 100,
                 &PublicKey(Bytes::from(vec![0_u8])),
