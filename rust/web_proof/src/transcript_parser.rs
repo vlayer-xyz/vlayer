@@ -342,7 +342,7 @@ mod tests {
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
                         assert!(matches!(
                             err,
-                            ParsingError::RedactedName(RedactionElementType::RequestHeader, _)
+                            ParsingError::RedactedName(RedactionElementType::RequestHeader, err_string) if err_string == "content-typ*: application/json"
                         ));
                     }
 
@@ -352,7 +352,7 @@ mod tests {
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
                         assert!(matches!(
                             err,
-                            ParsingError::RedactedName(RedactionElementType::RequestHeader, _)
+                            ParsingError::RedactedName(RedactionElementType::RequestHeader, err_string) if err_string == "************: application/json"
                         ));
                     }
 
@@ -372,7 +372,13 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?param1=value\0&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::PartiallyRedactedValue(_, _)));
+                        assert!(matches!(
+                            err,
+                            ParsingError::PartiallyRedactedValue(
+                                RedactionElementType::RequestUrlParam,
+                                err_string
+                            ) if err_string == "param1: value*"
+                        ));
                     }
 
                     #[test]
@@ -380,7 +386,10 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?param\0=value1&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::RedactedName(_, _)));
+                        assert!(matches!(
+                            err,
+                            ParsingError::RedactedName(RedactionElementType::RequestUrlParam, err_string) if err_string == "param*: value1"
+                        ));
                     }
 
                     #[test]
@@ -388,7 +397,10 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?\0\0\0\0\0\0=value1&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::RedactedName(_, _)));
+                        assert!(matches!(
+                            err,
+                            ParsingError::RedactedName(RedactionElementType::RequestUrlParam, err_string) if err_string == "******: value1"
+                        ));
                     }
 
                     #[test]
@@ -396,7 +408,10 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?\0\0\0\0\0\0\0\0\0\0\0\0&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::RedactedName(_, _)));
+                        assert!(matches!(
+                            err,
+                            ParsingError::RedactedName(RedactionElementType::RequestUrlParam, err_string) if err_string == "************: "
+                        ));
                     }
                 }
             }
@@ -408,7 +423,13 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\nContent-Type: text/plai\0\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::PartiallyRedactedValue(_, _)));
+                    assert!(matches!(
+                        err,
+                        ParsingError::PartiallyRedactedValue(
+                            RedactionElementType::ResponseHeader,
+                            err_string
+                        ) if err_string == "Content-Type: text/plai*"
+                    ));
                 }
 
                 #[test]
@@ -416,7 +437,10 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\nContent-Typ\0: text/plain\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::RedactedName(_, _)));
+                    assert!(matches!(
+                        err,
+                        ParsingError::RedactedName(RedactionElementType::ResponseHeader, err_string) if err_string == "Content-Typ*: text/plain"
+                    ));
                 }
 
                 #[test]
@@ -424,7 +448,10 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\n\0\0\0\0\0\0\0\0\0\0\0\0: text/plain\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::RedactedName(_, _)));
+                    assert!(matches!(
+                        err,
+                        ParsingError::RedactedName(RedactionElementType::ResponseHeader, err_string) if err_string == "************: text/plain"
+                    ));
                 }
 
                 #[test]
