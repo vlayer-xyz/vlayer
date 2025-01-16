@@ -39,7 +39,7 @@ const [john] = await l1TestClient.getAddresses();
 
 const account = privateKeyToAccount(config.privateKey as `0x${string}`);
 
-const hash = await l1TestClient.deployContract({
+const hash = await l2TestClient.deployContract({
   abi: MockERC20.abi,
   bytecode: MockERC20.bytecode.object,
   account,
@@ -49,18 +49,17 @@ const hash = await l1TestClient.deployContract({
 const receipt = await l1TestClient.waitForTransactionReceipt({ hash });
 const erc20addr = receipt.contractAddress as `0x${string}`;
 
-await l1TestClient.writeContract({
+await l2TestClient.writeContract({
   address: erc20addr,
   abi: MockERC20.abi,
   functionName: "mint",
   args: [account.address, 1000n],
   account,
 });
-await l1TestClient.writeContract({
+await l2TestClient.writeContract({
   address: erc20addr,
   abi: MockERC20.abi,
   functionName: "transfer",
   args: [john, 100n],
   account,
 });
-await l1TestClient.mine({ blocks: 1 });
