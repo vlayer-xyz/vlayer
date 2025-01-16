@@ -1,4 +1,7 @@
 pub fn version() -> String {
+    if let Ok(version) = std::env::var("VLAYER_VERSION") {
+        return version;
+    }
     let build_date = env!("VERGEN_BUILD_DATE").replace("-", "");
     [
         env!("CARGO_PKG_VERSION"),
