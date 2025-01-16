@@ -7,8 +7,8 @@ use rsa::{
 };
 
 use crate::{
-    dns_over_https::types::Record as DNSRecord,
-    verifiable_dns::{record::Record, signer::ToSignablePayload, PublicKey, Signature},
+    common, common::to_payload::ToPayload, dns_over_https::types::Record as DNSRecord, PublicKey,
+    Signature,
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -31,7 +31,8 @@ pub fn verify_signature(
     let rsa_signature = pkcs1v15::Signature::try_from(signature.0.iter().as_slice())
         .map_err(RecordVerifierError::SignatureDecoding)?;
 
-    verifying_key.verify(&Record::new(record, valid_until).to_payload(), &rsa_signature)?;
+    verifying_key
+        .verify(&common::record::Record::new(record, valid_until).to_payload(), &rsa_signature)?;
     Ok(())
 }
 
@@ -41,7 +42,7 @@ mod test {
     use lazy_static::lazy_static;
 
     use super::*;
-    use crate::verifiable_dns::{resolver::tests_utils::resolver, VerificationData};
+    use crate::{verifiable_dns::resolver::tests_utils::resolver, VerificationData};
 
     lazy_static! {
         static ref RECORD: DNSRecord = DNSRecord {

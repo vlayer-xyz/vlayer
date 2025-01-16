@@ -133,13 +133,7 @@ mod tests {
     mod responses_match {
 
         use super::*;
-        use crate::{
-            dns_over_https::Query,
-            verifiable_dns::{
-                signer::{PublicKey, Signature},
-                VerificationData,
-            },
-        };
+        use crate::{dns_over_https::Query, PublicKey, Signature, VerificationData};
 
         #[test]
         fn passes_for_equal_responses() {

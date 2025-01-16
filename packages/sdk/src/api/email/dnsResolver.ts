@@ -9,12 +9,57 @@ interface DnsResponse {
     name: string;
     type: number;
   }[];
-  Answer: {
-    name: string;
-    type: number;
-    TTL: number;
-    data: string;
-  }[];
+  Answer:
+    | {
+        name: string;
+        type: number;
+        TTL: number;
+        data: string;
+      }[]
+    | undefined;
+  VerificationData:
+    | {
+        valid_until: number;
+        signature: string;
+        pub_key: string;
+      }
+    | undefined;
+}
+
+function parseBase64(data: string): `0x${string}` {
+  return `0x${Buffer.from(data, "base64").toString("hex")}`;
+}
+
+function parseVerificationData(response: DnsResponse) {
+  if (!response.VerificationData) {
+    console.warn(`No verification data in DNS response`);
+    return {
+      validUntil: 0n,
+      signature: "0x" as const,
+      pubKey: "0x" as const,
+    };
+  }
+  return {
+    validUntil: BigInt(response.VerificationData.valid_until),
+    signature: parseBase64(response.VerificationData.signature),
+    pubKey: parseBase64(response.VerificationData.pub_key),
+  };
+}
+
+function takeLastAnswer(response: DnsResponse) {
+  const answer = response.Answer;
+  if (!answer || answer?.length == 0) {
+    throw new Error(
+      `No DNS answer found\n${JSON.stringify(response, null, 2)}`,
+    );
+  }
+  const record = answer.flat().at(-1)!;
+  return {
+    name: record.name,
+    recordType: record.type,
+    data: normalizeDnsData(record.data),
+    ttl: BigInt(record.TTL),
+  };
 }
 
 export class DnsResolver {
@@ -32,26 +77,17 @@ export class DnsResolver {
       )
     ).json()) as DnsResponse;
 
-    return response.Answer.map((answer) => answer.data);
+    return {
+      dnsRecord: takeLastAnswer(response),
+      verificationData: parseVerificationData(response),
+    };
   }
 }
 
-export async function resolveDkimDns(
-  resolver: DnsResolver,
-  domain: string,
-  selector: string,
-) {
-  const address = await resolver.resolveDkimDns(selector, domain);
-
-  let record = address.flat().at(-1);
-
-  if (!record) {
-    throw new Error("No DKIM DNS record found");
+export function normalizeDnsData(data: string) {
+  if (data.startsWith("p=")) {
+    return ["v=DKIM1", "k=rsa", data].join("; ");
   }
 
-  if (record?.startsWith("p=")) {
-    record = ["v=DKIM1", "k=rsa", record].join("; ");
-  }
-
-  return record;
+  return data;
 }

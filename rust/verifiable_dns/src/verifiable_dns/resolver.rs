@@ -5,10 +5,14 @@ use std::marker::PhantomData;
 use futures::future::join_all;
 use responses_validation::{responses_match, validate_response};
 
-use super::{record::Record, signer::Signer, time::Now, VerificationData};
-use crate::dns_over_https::{
-    types::{Record as DNSRecord, RecordType},
-    Provider as DoHProvider, Query, Response,
+use super::{signer::Signer, time::Now};
+use crate::{
+    common,
+    dns_over_https::{
+        types::{Record as DNSRecord, RecordType},
+        Provider as DoHProvider, Query, Response,
+    },
+    VerificationData,
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -39,10 +43,12 @@ impl<C: Now, P: DoHProvider, const Q: usize> Resolver<C, P, Q> {
         }
     }
 
-    pub(crate) fn sign_record(&self, record: &DNSRecord) -> VerificationData {
+    pub fn sign_record(&self, record: &DNSRecord) -> VerificationData {
         let now = C::now();
         let valid_until = now + record.ttl;
-        let signature = self.signer.sign(&Record::new(record, valid_until));
+        let signature = self
+            .signer
+            .sign(&common::record::Record::new(record, valid_until));
 
         VerificationData {
             signature,

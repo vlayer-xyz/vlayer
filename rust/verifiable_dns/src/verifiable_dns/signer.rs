@@ -1,4 +1,3 @@
-use bytes::Bytes;
 use rsa::{
     pkcs1v15::{self, SigningKey},
     pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePublicKey},
@@ -6,18 +5,10 @@ use rsa::{
     signature::{Keypair, RandomizedSigner, SignatureEncoding},
     RsaPrivateKey,
 };
-use serde::{Deserialize, Serialize};
-use serde_with::{base64::Base64, serde_as};
+
+use crate::{common::to_payload::ToPayload, PublicKey, Signature};
 
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
-
-#[serde_as]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct Signature(#[serde_as(as = "Base64")] pub(crate) Bytes);
-
-#[serde_as]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct PublicKey(#[serde_as(as = "Base64")] pub(crate) Bytes);
 
 #[derive(Clone)]
 pub(super) struct Signer {
@@ -32,7 +23,7 @@ impl Signer {
         Self { key }
     }
 
-    pub fn sign<P: ToSignablePayload>(&self, payload: &P) -> Signature {
+    pub fn sign<P: ToPayload>(&self, payload: &P) -> Signature {
         let mut rng = rand::thread_rng();
         let signature = self.key.sign_with_rng(&mut rng, &payload.to_payload());
         Signature(signature.to_bytes().into())
@@ -45,22 +36,6 @@ impl Signer {
             .to_public_key_der()
             .expect("Failed to encode public key");
         PublicKey(pub_key.into_vec().into())
-    }
-}
-
-pub(crate) trait ToSignablePayload {
-    fn to_payload(&self) -> Vec<u8>;
-}
-
-impl<T: Serialize> ToSignablePayload for T {
-    fn to_payload(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        let formattter = olpc_cjson::CanonicalFormatter::new();
-        let mut serializer = serde_json::Serializer::with_formatter(&mut buf, formattter);
-        self.serialize(&mut serializer)
-            .expect("Failed to serialize signable struct");
-
-        buf
     }
 }
 
