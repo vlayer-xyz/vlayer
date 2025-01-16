@@ -5,6 +5,7 @@ use std::{
     process::Output,
 };
 
+use anyhow::Context;
 use lazy_static::lazy_static;
 use version::version;
 
@@ -92,7 +93,13 @@ impl SoldeerDep {
             .arg("install")
             .arg(format!("{name}~{version}"))
             .current_dir(foundry_root)
-            .output()?;
+            .output()
+            .with_context(|| {
+                format!(
+                    "Invoking 'forge soldeer install {name}~{version}' from directory {} failed",
+                    foundry_root.display()
+                )
+            })?;
 
         Ok(output)
     }
@@ -109,7 +116,10 @@ impl SoldeerDep {
             .arg(format!("{name}~{version}"))
             .arg(url)
             .current_dir(foundry_root)
-            .output()?;
+            .output()
+            .with_context(|| {
+                format!("Invoking 'forge soldeer install {name}~{version} {url}' from directory {} failed", foundry_root.display())
+            })?;
 
         Ok(output)
     }

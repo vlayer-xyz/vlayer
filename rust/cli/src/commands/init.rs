@@ -4,6 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use anyhow::Context;
 use flate2::read::GzDecoder;
 use lazy_static::lazy_static;
 use reqwest::get;
@@ -79,11 +80,14 @@ pub(crate) async fn run_init(args: InitArgs) -> Result<(), CLIError> {
     if !args.existing {
         let mut command = std::process::Command::new("forge");
         command.arg("init");
-        if let Some(project_name) = args.project_name {
-            cwd.push(&project_name);
+        if let Some(project_name) = &args.project_name {
+            cwd.push(project_name);
             command.arg(project_name);
         }
-        let output = command.output()?;
+        let output = command.output().with_context(|| match args.project_name {
+            Some(project_name) => format!("Invoking 'forge init {project_name}' failed"),
+            None => "Invoking 'forge init' failed".to_string(),
+        })?;
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
@@ -250,9 +254,10 @@ pub(crate) fn vlayer_dir_exists_in(src_path: &Path) -> bool {
     src_path.join(VLAYER_DIR_NAME).exists()
 }
 
-pub(crate) fn create_vlayer_dir(src_path: &Path) -> Result<PathBuf, CLIError> {
+pub(crate) fn create_vlayer_dir(src_path: &Path) -> anyhow::Result<PathBuf> {
     let vlayer_dir = src_path.join(VLAYER_DIR_NAME);
-    std::fs::create_dir_all(&vlayer_dir)?;
+    std::fs::create_dir_all(&vlayer_dir)
+        .with_context(|| format!("Failed to create path {}", vlayer_dir.display()))?;
     info!("Created vlayer directory in \"{}\"", src_path.display());
     Ok(vlayer_dir)
 }
