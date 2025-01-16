@@ -60,7 +60,7 @@ fn prove_bonsai(env: ExecutorEnv<'_>, elf: &[u8], opts: &ProverOpts) -> Result<P
 }
 
 fn prove_fake(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
-    // Fake proof mode cannot be forced in any other way, since all  risc0-zkvm modules, that could be reused here, are only crate-public.
+    // Fake proof mode cannot be forced in any other way, since all risc0-zkvm modules, that could be reused here, are only crate-public.
     // Following is a temporary solution, that sets RISC0_DEV_MODE always to the same value, so race conditions are not a risk here.
     // Setting this env variable will be moved directly to ExternalProver, once it supports injection of config.
     unsafe {
