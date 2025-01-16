@@ -38,18 +38,14 @@ function createAnvilClient(chain: Chain, url: string) {
 function computeOutputRoot(
   latestBlock: GetBlockReturnType<Chain, false, "latest">,
 ): `0x${string}` {
-  const versionByte = "00".repeat(32);
-  const stateRoot = latestBlock.stateRoot.slice(2);
-  const withdrawalStorageRoot = (
-    latestBlock.withdrawalsRoot ?? `0x${"00".repeat(32)}`
-  ).slice(2);
-  const latestBlockHash = latestBlock.hash.slice(2);
+  const payload = [
+    "00".repeat(32),
+    latestBlock.stateRoot.slice(2),
+    (latestBlock.withdrawalsRoot ?? `0x${"00".repeat(32)}`).slice(2),
+    latestBlock.hash.slice(2),
+  ].join("");
 
-  const payload = stateRoot + withdrawalStorageRoot + latestBlockHash;
-  const concatenated = versionByte + payload;
-  const formattedHex = `0x${concatenated}`;
-  const outputRoot = keccak256(formattedHex as `0x${string}`);
-  return outputRoot;
+  return keccak256(`0x${payload}` as `0x${string}`);
 }
 
 export const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
