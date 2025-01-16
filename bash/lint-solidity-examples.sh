@@ -3,15 +3,13 @@
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
+bun install --frozen-lockfile
 
-  (
+for example in $(get_examples); do (
     echo "Running solhint of: ${example}"
-    cd "${example}/vlayer"
-
-    bun install --frozen-lockfile
+    cd "$VLAYER_HOME/examples/$example/vlayer"
     bun run lint:solidity
-  )
-done
+) done
  

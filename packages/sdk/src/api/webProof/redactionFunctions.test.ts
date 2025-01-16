@@ -1,8 +1,8 @@
 import type {
   RedactRequestHeaders,
   RedactRequestHeadersExcept,
-  RedactRequestUrlQuery,
-  RedactRequestUrlQueryExcept,
+  RedactRequestUrlQueryParam,
+  RedactRequestUrlQueryParamExcept,
   RedactResponseHeaders,
   RedactResponseHeadersExcept,
   RedactResponseJsonBody,
@@ -34,7 +34,7 @@ describe("redactionFunctions", () => {
 
   it("should redact request url query params", () => {
     const redacted = request.url.redactQueryParams(["token"]);
-    expectTypeOf(redacted).toEqualTypeOf<RedactRequestUrlQuery>();
+    expectTypeOf(redacted).toEqualTypeOf<RedactRequestUrlQueryParam>();
     expect(redacted).toEqual({
       request: {
         url_query: ["token"],
@@ -44,7 +44,7 @@ describe("redactionFunctions", () => {
 
   it("should redact all request url query params except", () => {
     const redacted = request.url.redactAllQueryParamsExcept(["token"]);
-    expectTypeOf(redacted).toEqualTypeOf<RedactRequestUrlQueryExcept>();
+    expectTypeOf(redacted).toEqualTypeOf<RedactRequestUrlQueryParamExcept>();
     expect(redacted).toEqual({
       request: {
         url_query_except: ["token"],

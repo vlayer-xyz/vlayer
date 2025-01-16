@@ -6,6 +6,8 @@ use std::{
     str::from_utf8,
 };
 
+use anyhow::Context;
+
 use crate::errors::CLIError;
 
 pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf, CLIError> {
@@ -14,22 +16,41 @@ pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf, CLIError> {
     do_find_foundry_root_from(&start, &git_root)
 }
 
-pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> std::io::Result<()> {
+pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> {
     if !dst_dir.is_dir() {
-        fs::create_dir_all(dst_dir)?;
+        fs::create_dir_all(dst_dir)
+            .with_context(|| format!("Failed to create path '{}'", dst_dir.display()))?;
     }
 
-    for entry_result in src_dir.read_dir()? {
+    for entry_result in src_dir
+        .read_dir()
+        .with_context(|| format!("Failed to open directory '{}' for reading", src_dir.display()))?
+    {
         let entry = entry_result?;
         let file_type = entry.file_type()?;
         let file_name = entry.file_name();
+        let dst = dst_dir.join(file_name);
         if file_type.is_dir() {
-            copy_dir_to(&entry.path(), &dst_dir.join(file_name))?;
+            copy_dir_to(&entry.path(), &dst).with_context(|| {
+                format!(
+                    "Failed to copy directory from '{}' to '{}'",
+                    entry.path().display(),
+                    dst.display()
+                )
+            })?;
         } else if file_type.is_symlink() {
             let link = fs::read_link(entry.path())?;
-            unix_fs::symlink(link, dst_dir.join(file_name))?;
+            unix_fs::symlink(&link, &dst).with_context(|| {
+                format!("Failed to symlink '{}' as '{}'", link.display(), dst.display())
+            })?;
         } else {
-            fs::copy(entry.path(), dst_dir.join(file_name))?;
+            fs::copy(entry.path(), &dst).with_context(|| {
+                format!(
+                    "Failed to copy file from '{}' to '{}'",
+                    entry.path().display(),
+                    dst.display()
+                )
+            })?;
         }
     }
 
@@ -61,7 +82,13 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError>
     let output = Command::new("git")
         .args(["rev-parse", "--show-toplevel"])
         .current_dir(path)
-        .output()?;
+        .output()
+        .with_context(|| {
+            format!(
+                "Invorking 'git rev-parse --show-toplevel' from directory {} failed",
+                path.display()
+            )
+        })?;
 
     if !output.status.success() {
         return Err(CLIError::GitError(String::from_utf8_lossy(&output.stderr).to_string()));

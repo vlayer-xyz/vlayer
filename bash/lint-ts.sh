@@ -3,18 +3,15 @@
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
+bun install --frozen-lockfile
 
-  (
+for example in $(get_examples); do (
     echo "Running eslint for: ${example}"
-    cd "${example}/vlayer"
-
-    bun install --frozen-lockfile
-    bun run eslint .
-
-  )
-done
+    cd "$VLAYER_HOME/examples/$example/vlayer"
+    bunx eslint .   
+) done
 
 
 echo "::group::Running eslint for: $VLAYER_HOME/packages"

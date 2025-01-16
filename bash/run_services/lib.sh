@@ -71,7 +71,7 @@ function startup_vlayer() {
         "--rpc-url" "31337:http://localhost:8545" # L1
         "--rpc-url" "31338:http://localhost:8546" # L2 OP
     )
-    if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
+    if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
         args+=("--chain-proof-url" "http://localhost:3001")
     fi
 
@@ -98,23 +98,4 @@ function ensure_binaries_built() {
         silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker
         popd
     fi
-}
-
-function cleanup() {
-    echo "Cleaning up..."
-
-    for service in CHAIN_SERVER VLAYER_SERVER ; do 
-        kill_service "${service}"
-    done
-
-    while read worker_pid; do
-        if ps -p "${worker_pid}" >/dev/null; then
-            echo "Killing worker ${worker_pid}"
-            kill "${worker_pid}"
-        fi
-    done < "${CHAIN_WORKER_PIDS}"
-
-    docker compose -f $DOCKER_COMPOSE_FILE down anvil-l1 anvil-l2-op
-
-    echo "Cleanup done. Artifacts saved to: ${VLAYER_TMP_DIR}"
 }

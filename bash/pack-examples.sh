@@ -3,6 +3,7 @@
 set -uexo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
 output_dir="${VLAYER_HOME}/out"
 ARCHIVE="${output_dir}/examples.tar"
@@ -18,7 +19,7 @@ touch "${ARCHIVE}"
 (
     cd "${VLAYER_HOME}/examples"
 
-    for example in $(find . -type d -maxdepth 1 -mindepth 1) ; do
+    for example in $(get_examples); do
         echo "::group::Packing example: ${example}"
 
         scripts="${example}/vlayer"

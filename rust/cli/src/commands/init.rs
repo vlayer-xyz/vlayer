@@ -1,16 +1,17 @@
 use std::{
+    convert::TryFrom,
     fs::{self, OpenOptions},
     io::{Cursor, Read, Write},
     path::{Path, PathBuf},
 };
 
+use anyhow::Context;
 use flate2::read::GzDecoder;
 use lazy_static::lazy_static;
 use reqwest::get;
 use serde_json::{Map, Value};
 use tar::Archive;
 use tracing::{error, info};
-use version::version;
 
 use crate::{
     commands::{
@@ -18,6 +19,7 @@ use crate::{
         common::soldeer::{add_remappings, DEPENDENCIES},
     },
     errors::CLIError,
+    target_version,
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
         path::{copy_dir_to, find_foundry_root},
@@ -26,10 +28,43 @@ use crate::{
 
 const VLAYER_DIR_NAME: &str = "vlayer";
 
+pub(crate) enum WorkDir {
+    Temp(tempfile::TempDir),
+    Explicit(PathBuf),
+}
+
+impl WorkDir {
+    pub(crate) fn path(&self) -> &Path {
+        match self {
+            Self::Temp(dir) => dir.path(),
+            Self::Explicit(path) => path,
+        }
+    }
+}
+
+impl TryFrom<Option<PathBuf>> for WorkDir {
+    type Error = anyhow::Error;
+
+    fn try_from(value: Option<PathBuf>) -> Result<Self, Self::Error> {
+        match value {
+            Some(path) => {
+                fs::create_dir_all(&path)
+                    .with_context(|| format!("Failed to create work dir '{}'", path.display()))?;
+                Ok(Self::Explicit(path))
+            }
+            None => {
+                let tempdir =
+                    tempfile::tempdir().context("Failed to create work dir in temp files")?;
+                Ok(Self::Temp(tempdir))
+            }
+        }
+    }
+}
+
 lazy_static! {
     static ref EXAMPLES_URL: String = format!(
         "https://vlayer-releases.s3.eu-north-1.amazonaws.com/{}/examples.tar.gz",
-        version()
+        target_version()
     );
 }
 
@@ -52,7 +87,7 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
     file.read_to_string(&mut contents)?;
 
     let mut json: Value = serde_json::from_str(&contents)?;
-    let version = version();
+    let version = target_version();
 
     if let Some(dependencies) = json.get_mut("dependencies") {
         if let Some(dependencies_map) = dependencies.as_object_mut() {
@@ -79,11 +114,14 @@ pub(crate) async fn run_init(args: InitArgs) -> Result<(), CLIError> {
     if !args.existing {
         let mut command = std::process::Command::new("forge");
         command.arg("init");
-        if let Some(project_name) = args.project_name {
-            cwd.push(&project_name);
+        if let Some(project_name) = &args.project_name {
+            cwd.push(project_name);
             command.arg(project_name);
         }
-        let output = command.output()?;
+        let output = command.output().with_context(|| match args.project_name {
+            Some(project_name) => format!("Invoking 'forge init {project_name}' failed"),
+            None => "Invoking 'forge init' failed".to_string(),
+        })?;
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
@@ -91,16 +129,22 @@ pub(crate) async fn run_init(args: InitArgs) -> Result<(), CLIError> {
         }
     }
 
-    init_existing(cwd, args.template.unwrap_or_default()).await
+    let work_dir = args.work_dir.try_into()?;
+
+    init_existing(cwd, args.template.unwrap_or_default(), work_dir).await
 }
 
-pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
+pub(crate) async fn init_existing(
+    cwd: PathBuf,
+    template: TemplateOption,
+    work_dir: WorkDir,
+) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
 
     let root_path = find_foundry_root(&cwd)?;
     let src_path = find_src_path(&root_path)?;
 
-    info!("Found foundry project root in \"{}\"", &src_path.display());
+    info!("Found foundry project root in \"{}\"", &root_path.display());
 
     if vlayer_dir_exists_in(&src_path) || vlayer_dir_exists_in(&root_path) {
         error!(
@@ -119,6 +163,7 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
             &tests_dst,
             &testdata_dst,
             template.to_string(),
+            work_dir,
         )
         .await?;
         info!("Successfully downloaded vlayer template \"{}\"", template);
@@ -214,6 +259,7 @@ async fn fetch_examples(
     tests_dst: &Path,
     testdata_dst: &Path,
     template: String,
+    work_dir: WorkDir,
 ) -> Result<(), CLIError> {
     let response = get(EXAMPLES_URL.as_str())
         .await
@@ -224,13 +270,13 @@ async fn fetch_examples(
 
     let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
 
-    let temp_dir = tempfile::tempdir()?;
-    archive.unpack(temp_dir.path())?;
+    let work_dir_path = work_dir.path();
+    archive.unpack(work_dir_path)?;
 
-    let downloaded_scripts = temp_dir.path().join(&template).join("vlayer");
-    let downloaded_examples = temp_dir.path().join(&template).join("src/vlayer");
-    let downloaded_tests = temp_dir.path().join(&template).join("test/vlayer");
-    let downloaded_testdata = temp_dir.path().join(&template).join("testdata");
+    let downloaded_scripts = work_dir_path.join(&template).join("vlayer");
+    let downloaded_examples = work_dir_path.join(&template).join("src/vlayer");
+    let downloaded_tests = work_dir_path.join(&template).join("test/vlayer");
+    let downloaded_testdata = work_dir_path.join(&template).join("testdata");
 
     copy_dir_to(&downloaded_scripts, scripts_dst)?;
     copy_dir_to(&downloaded_examples, examples_dst)?;
@@ -250,9 +296,10 @@ pub(crate) fn vlayer_dir_exists_in(src_path: &Path) -> bool {
     src_path.join(VLAYER_DIR_NAME).exists()
 }
 
-pub(crate) fn create_vlayer_dir(src_path: &Path) -> Result<PathBuf, CLIError> {
+pub(crate) fn create_vlayer_dir(src_path: &Path) -> anyhow::Result<PathBuf> {
     let vlayer_dir = src_path.join(VLAYER_DIR_NAME);
-    std::fs::create_dir_all(&vlayer_dir)?;
+    std::fs::create_dir_all(&vlayer_dir)
+        .with_context(|| format!("Failed to create path {}", vlayer_dir.display()))?;
     info!("Created vlayer directory in \"{}\"", src_path.display());
     Ok(vlayer_dir)
 }
@@ -262,7 +309,7 @@ mod tests {
     use tempfile::TempDir;
 
     use super::*;
-    use crate::test_utils::create_temp_git_repo;
+    use crate::{build_version, test_utils::create_temp_git_repo};
 
     fn prepare_empty_foundry_dir(src_name: &str) -> TempDir {
         // creates a temporary directory with a foundry.toml file
@@ -353,7 +400,7 @@ mod tests {
             forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
-            version()
+            build_version()
         );
 
         assert_eq!(contents, expected_remappings);
@@ -377,7 +424,7 @@ mod tests {
             forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
-            version()
+            build_version()
         );
 
         assert_eq!(contents, expected_remappings);
@@ -397,7 +444,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
         assert!(!new_contents.contains(&expected_sdk_dependency));
     }
     #[test]
@@ -415,7 +462,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
     #[test]
@@ -433,7 +480,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
 
@@ -452,7 +499,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
 
         assert!(!new_contents.contains("file:../../../packages/sdk"));
         assert!(new_contents.contains(&expected_sdk_dependency));

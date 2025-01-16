@@ -52,11 +52,7 @@ jobs:
         run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker
       - name: Run e2e test
         env:
-          PROVING_MODE: "dev"
-          CHAIN_ID: 31337
-          VLAYER_ENV: dev
           VLAYER_TMP_DIR: ./artifacts
-          RUN_CHAIN_SERVICES: 1
           BUILD_BINARIES: 0
         run: bash/e2e-test.sh
 
