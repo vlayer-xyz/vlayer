@@ -1,16 +1,16 @@
 .circle {
   color: var(--vlayer-violet);
   border-style: solid;
-  width: 32px;
-  height: 32px;
+  width: 27px;
+  height: 27px;
   border-radius: 50%;
-  line-height: 32px;
+  line-height: 27px;
   border-width: 2px;
   justify-content: center;
   align-items: center;
   display: flex;
   flex-grow: 1;
-  max-height: 32px;
+  max-height: 27px;
 }
 
 .solidCircle {
