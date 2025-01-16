@@ -8,7 +8,7 @@ use risc0_zkvm::{guest::env, sha::Digest};
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
     let input = env::read();
-    let chain_guest_elf_id: Digest = (*include_bytes!("../../chain_guest_elf_id")).into();
+    let chain_guest_elf_id: Digest = (*include_bytes!("../../artifacts/chain_guest/elf_id")).into();
 
     let output = call_guest::main(input, chain_guest_elf_id).await;
 
