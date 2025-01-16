@@ -14,8 +14,8 @@ function calculateRequestRanges(
   redactionItem:
     | RedactRequestHeadersExcept
     | RedactRequestHeaders
-    | RedactRequestUrlQueryParamExcept
-    | RedactRequestUrlQueryParam,
+    | RedactRequestUrlQueryParam
+    | RedactRequestUrlQueryParamExcept,
   raw: string,
   transcriptRanges: ParsedTranscriptData,
 ): CommitData[] {
