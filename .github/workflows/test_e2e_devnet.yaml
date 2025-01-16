@@ -53,7 +53,6 @@ jobs:
       - name: Run e2e test
         env:
           VLAYER_TMP_DIR: ./artifacts
-          RUN_CHAIN_SERVICES: 1
           BUILD_BINARIES: 0
         run: bash/e2e-test.sh
 
