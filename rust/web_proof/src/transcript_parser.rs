@@ -19,13 +19,14 @@ const REDACTED_CHAR: char = '\0';
 const REDACTION_REPLACEMENT_CHAR: char = '*';
 const REDACTION_REPLACEMENT_DIFFERENT_CHAR: char = '+';
 
+// This struct is used to store the name and value of a header or URL parameter.
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct NameValue {
+pub(crate) struct RedactedTranscriptNameValue {
     pub(crate) name: String,
     pub(crate) value: Vec<u8>,
 }
 
-impl Display for NameValue {
+impl Display for RedactedTranscriptNameValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -70,7 +71,7 @@ fn parse_request(request: &str) -> Result<(String, [Header; MAX_HEADERS_NUMBER])
 
 pub(crate) fn parse_response_and_validate_redaction(
     response: &str,
-) -> Result<(String, Vec<NameValue>), ParsingError> {
+) -> Result<(String, Vec<RedactedTranscriptNameValue>), ParsingError> {
     let response_string =
         response.replace(REDACTED_CHAR, REDACTION_REPLACEMENT_CHAR.to_string().as_str());
     let (body_index, headers_with_replacement_1) = parse_response(&response_string)?;
@@ -101,8 +102,8 @@ fn parse_response(response: &str) -> Result<(usize, [Header; MAX_HEADERS_NUMBER]
 }
 
 fn validate_name_value_redaction(
-    name_values_with_replacement_1: &[NameValue],
-    name_values_with_replacement_2: &[NameValue],
+    name_values_with_replacement_1: &[RedactedTranscriptNameValue],
+    name_values_with_replacement_2: &[RedactedTranscriptNameValue],
 ) -> Result<(), ParsingError> {
     let zipped_pairs =
         zip(name_values_with_replacement_1.iter(), name_values_with_replacement_2.iter());
@@ -128,20 +129,20 @@ fn fully_redacted(input: &[u8], redacted_char: char) -> bool {
     input.iter().all(|&c| c == redacted_char as u8)
 }
 
-fn convert_headers(headers: &[Header]) -> Vec<NameValue> {
+fn convert_headers(headers: &[Header]) -> Vec<RedactedTranscriptNameValue> {
     headers
         .iter()
-        .map(|header| NameValue {
+        .map(|header| RedactedTranscriptNameValue {
             name: header.name.to_string(),
             value: header.value.to_vec(),
         })
         .collect()
 }
 
-fn convert_path(path: &str) -> Result<Vec<NameValue>, ParsingError> {
+fn convert_path(path: &str) -> Result<Vec<RedactedTranscriptNameValue>, ParsingError> {
     Ok(Url::parse(path)?
         .query_pairs()
-        .map(|param| NameValue {
+        .map(|param| RedactedTranscriptNameValue {
             name: param.0.to_string(),
             value: param.1.to_string().into_bytes(),
         })
@@ -162,11 +163,11 @@ mod tests {
             assert_eq!(
                 name_values,
                 vec![
-                    NameValue {
+                    RedactedTranscriptNameValue {
                         name: "param1".to_string(),
                         value: "value1".to_string().into_bytes()
                     },
-                    NameValue {
+                    RedactedTranscriptNameValue {
                         name: "param2".to_string(),
                         value: "value2".to_string().into_bytes()
                     }

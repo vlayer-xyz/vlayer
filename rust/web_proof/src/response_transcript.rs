@@ -5,7 +5,7 @@ use derive_new::new;
 
 use crate::{
     errors::ParsingError,
-    transcript_parser::{parse_response_and_validate_redaction, NameValue},
+    transcript_parser::{parse_response_and_validate_redaction, RedactedTranscriptNameValue},
 };
 
 #[derive(Debug, new)]
@@ -24,7 +24,7 @@ impl ResponseTranscript {
 }
 
 fn handle_chunked_transfer_encoding(
-    headers: &[NameValue],
+    headers: &[RedactedTranscriptNameValue],
     body: &str,
 ) -> Result<String, ParsingError> {
     let transfer_encoding_header = headers
