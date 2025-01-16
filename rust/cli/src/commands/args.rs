@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, path::PathBuf};
 
 use clap::{Parser, ValueEnum};
 
@@ -10,6 +10,8 @@ pub(crate) struct InitArgs {
     pub(crate) existing: bool,
     #[arg()]
     pub(crate) project_name: Option<String>,
+    #[arg(long, env = "VLAYER_WORK_DIR")]
+    pub(crate) work_dir: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]

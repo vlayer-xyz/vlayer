@@ -1,4 +1,5 @@
 use std::{
+    convert::TryFrom,
     fs::{self, OpenOptions},
     io::{Cursor, Read, Write},
     path::{Path, PathBuf},
@@ -26,6 +27,39 @@ use crate::{
 };
 
 const VLAYER_DIR_NAME: &str = "vlayer";
+
+pub(crate) enum WorkDir {
+    Temp(tempfile::TempDir),
+    Explicit(PathBuf),
+}
+
+impl WorkDir {
+    pub(crate) fn path(&self) -> &Path {
+        match self {
+            Self::Temp(dir) => dir.path(),
+            Self::Explicit(path) => path,
+        }
+    }
+}
+
+impl TryFrom<Option<PathBuf>> for WorkDir {
+    type Error = anyhow::Error;
+
+    fn try_from(value: Option<PathBuf>) -> Result<Self, Self::Error> {
+        match value {
+            Some(path) => {
+                fs::create_dir_all(&path)
+                    .with_context(|| format!("Failed to create work dir '{}'", path.display()))?;
+                Ok(Self::Explicit(path))
+            }
+            None => {
+                let tempdir =
+                    tempfile::tempdir().context("Failed to create work dir in temp files")?;
+                Ok(Self::Temp(tempdir))
+            }
+        }
+    }
+}
 
 lazy_static! {
     static ref EXAMPLES_URL: String = format!(
@@ -95,10 +129,16 @@ pub(crate) async fn run_init(args: InitArgs) -> Result<(), CLIError> {
         }
     }
 
-    init_existing(cwd, args.template.unwrap_or_default()).await
+    let work_dir = args.work_dir.try_into()?;
+
+    init_existing(cwd, args.template.unwrap_or_default(), work_dir).await
 }
 
-pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
+pub(crate) async fn init_existing(
+    cwd: PathBuf,
+    template: TemplateOption,
+    work_dir: WorkDir,
+) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
 
     let root_path = find_foundry_root(&cwd)?;
@@ -123,6 +163,7 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
             &tests_dst,
             &testdata_dst,
             template.to_string(),
+            work_dir,
         )
         .await?;
         info!("Successfully downloaded vlayer template \"{}\"", template);
@@ -218,6 +259,7 @@ async fn fetch_examples(
     tests_dst: &Path,
     testdata_dst: &Path,
     template: String,
+    work_dir: WorkDir,
 ) -> Result<(), CLIError> {
     let response = get(EXAMPLES_URL.as_str())
         .await
@@ -228,13 +270,13 @@ async fn fetch_examples(
 
     let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
 
-    let temp_dir = tempfile::tempdir()?;
-    archive.unpack(temp_dir.path())?;
+    let work_dir_path = work_dir.path();
+    archive.unpack(work_dir_path)?;
 
-    let downloaded_scripts = temp_dir.path().join(&template).join("vlayer");
-    let downloaded_examples = temp_dir.path().join(&template).join("src/vlayer");
-    let downloaded_tests = temp_dir.path().join(&template).join("test/vlayer");
-    let downloaded_testdata = temp_dir.path().join(&template).join("testdata");
+    let downloaded_scripts = work_dir_path.join(&template).join("vlayer");
+    let downloaded_examples = work_dir_path.join(&template).join("src/vlayer");
+    let downloaded_tests = work_dir_path.join(&template).join("test/vlayer");
+    let downloaded_testdata = work_dir_path.join(&template).join("testdata");
 
     copy_dir_to(&downloaded_scripts, scripts_dst)?;
     copy_dir_to(&downloaded_examples, examples_dst)?;
