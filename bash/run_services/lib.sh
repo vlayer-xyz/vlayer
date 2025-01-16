@@ -71,7 +71,7 @@ function startup_vlayer() {
         "--rpc-url" "31337:http://localhost:8545" # L1
         "--rpc-url" "31338:http://localhost:8546" # L2 OP
     )
-    if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
+    if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
         args+=("--chain-proof-url" "http://localhost:3001")
     fi
 
