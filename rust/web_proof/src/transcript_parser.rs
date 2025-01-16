@@ -1,10 +1,7 @@
-use std::{
-    fmt::{self, Display, Formatter},
-    iter::zip,
-    str::from_utf8,
-};
+use std::{fmt, iter::zip, str::from_utf8};
 
 use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
+use strum::Display;
 use url::Url;
 
 use crate::errors::ParsingError;
@@ -26,8 +23,8 @@ pub(crate) struct RedactedTranscriptNameValue {
     pub(crate) value: Vec<u8>,
 }
 
-impl Display for RedactedTranscriptNameValue {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl fmt::Display for RedactedTranscriptNameValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}: {}",
@@ -35,6 +32,16 @@ impl Display for RedactedTranscriptNameValue {
             from_utf8(&self.value).unwrap_or(format!("{:?}", self.value).as_str())
         )
     }
+}
+
+#[derive(Debug, Display)]
+pub enum RedactionElementType {
+    #[strum(to_string = "request header")]
+    RequestHeader,
+    #[strum(to_string = "request url parameter")]
+    RequestUrlParam,
+    #[strum(to_string = "response header")]
+    ResponseHeader,
 }
 
 pub(crate) fn parse_request_and_validate_redaction(request: &str) -> Result<String, ParsingError> {
@@ -49,11 +56,13 @@ pub(crate) fn parse_request_and_validate_redaction(request: &str) -> Result<Stri
     validate_name_value_redaction(
         &convert_headers(&headers_with_replacement_1),
         &convert_headers(&headers_with_replacement_2),
+        RedactionElementType::RequestHeader,
     )?;
 
     validate_name_value_redaction(
         &convert_path(&path_with_replacement_1)?,
         &convert_path(&path_with_replacement_2)?,
+        RedactionElementType::RequestUrlParam,
     )?;
 
     Ok(path_with_replacement_1)
@@ -83,6 +92,7 @@ pub(crate) fn parse_response_and_validate_redaction(
     validate_name_value_redaction(
         &convert_headers(&headers_with_replacement_1),
         &convert_headers(&headers_with_replacement_2),
+        RedactionElementType::ResponseHeader,
     )?;
 
     let body = &response_string[body_index..];
@@ -104,6 +114,7 @@ fn parse_response(response: &str) -> Result<(usize, [Header; MAX_HEADERS_NUMBER]
 fn validate_name_value_redaction(
     name_values_with_replacement_1: &[RedactedTranscriptNameValue],
     name_values_with_replacement_2: &[RedactedTranscriptNameValue],
+    redaction_element_type: RedactionElementType,
 ) -> Result<(), ParsingError> {
     let zipped_pairs =
         zip(name_values_with_replacement_1.iter(), name_values_with_replacement_2.iter());
@@ -111,7 +122,7 @@ fn validate_name_value_redaction(
     let redacted_name = zipped_pairs.clone().find(|(l, r)| l.name != r.name);
 
     if let Some(pair) = redacted_name {
-        return Err(ParsingError::RedactedName(pair.0.to_string()));
+        return Err(ParsingError::RedactedName(redaction_element_type, pair.0.to_string()));
     }
 
     let partially_redacted_value = zipped_pairs
@@ -119,7 +130,10 @@ fn validate_name_value_redaction(
         .find(|(l, r)| !fully_redacted(&l.value, REDACTION_REPLACEMENT_CHAR) && l.value != r.value);
 
     if let Some(pair) = partially_redacted_value {
-        return Err(ParsingError::PartiallyRedactedValue(pair.0.to_string()));
+        return Err(ParsingError::PartiallyRedactedValue(
+            redaction_element_type,
+            pair.0.to_string(),
+        ));
     }
 
     Ok(())
@@ -317,21 +331,29 @@ mod tests {
                     fn partially_redacted_header_value() {
                         let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/jso\0\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::PartiallyRedactedValue(_)));
+                        assert!(
+                            matches!(err, ParsingError::PartiallyRedactedValue(RedactionElementType::RequestHeader, err_string) if err_string == "content-type: application/jso*")
+                        );
                     }
 
                     #[test]
                     fn partially_redacted_header_name() {
                         let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-typ\0: application/json\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::RedactedName(_)));
+                        assert!(matches!(
+                            err,
+                            ParsingError::RedactedName(RedactionElementType::RequestHeader, _)
+                        ));
                     }
 
                     #[test]
                     fn fully_redacted_header_name() {
                         let request = "GET https://example.com/test.json HTTP/1.1\r\n\0\0\0\0\0\0\0\0\0\0\0\0: application/json\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::RedactedName(_)));
+                        assert!(matches!(
+                            err,
+                            ParsingError::RedactedName(RedactionElementType::RequestHeader, _)
+                        ));
                     }
 
                     #[test]
@@ -350,7 +372,7 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?param1=value\0&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::PartiallyRedactedValue(_)));
+                        assert!(matches!(err, ParsingError::PartiallyRedactedValue(_, _)));
                     }
 
                     #[test]
@@ -358,7 +380,7 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?param\0=value1&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::RedactedName(_)));
+                        assert!(matches!(err, ParsingError::RedactedName(_, _)));
                     }
 
                     #[test]
@@ -366,7 +388,7 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?\0\0\0\0\0\0=value1&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::RedactedName(_)));
+                        assert!(matches!(err, ParsingError::RedactedName(_, _)));
                     }
 
                     #[test]
@@ -374,7 +396,7 @@ mod tests {
                         let request =
                             "GET https://example.com/test.json?\0\0\0\0\0\0\0\0\0\0\0\0&param2=value2 HTTP/1.1\r\n\r\n";
                         let err = parse_request_and_validate_redaction(request).unwrap_err();
-                        assert!(matches!(err, ParsingError::RedactedName(_)));
+                        assert!(matches!(err, ParsingError::RedactedName(_, _)));
                     }
                 }
             }
@@ -386,7 +408,7 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\nContent-Type: text/plai\0\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::PartiallyRedactedValue(_)));
+                    assert!(matches!(err, ParsingError::PartiallyRedactedValue(_, _)));
                 }
 
                 #[test]
@@ -394,7 +416,7 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\nContent-Typ\0: text/plain\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::RedactedName(_)));
+                    assert!(matches!(err, ParsingError::RedactedName(_, _)));
                 }
 
                 #[test]
@@ -402,7 +424,7 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\n\0\0\0\0\0\0\0\0\0\0\0\0: text/plain\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::RedactedName(_)));
+                    assert!(matches!(err, ParsingError::RedactedName(_, _)));
                 }
 
                 #[test]
