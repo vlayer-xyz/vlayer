@@ -2,7 +2,9 @@ import { getConfig } from "@vlayer/sdk/config";
 import {
   Chain,
   createTestClient,
+  GetBlockReturnType,
   http,
+  keccak256,
   publicActions,
   walletActions,
 } from "viem";
@@ -32,6 +34,25 @@ function createAnvilClient(chain: Chain, url: string) {
     .extend(walletActions);
 }
 
+function computeOutputRoot(
+  latestBlock: GetBlockReturnType<Chain, false, "latest">,
+): string {
+  const versionByte = "00".repeat(32);
+  const stateRoot = latestBlock.stateRoot as string;
+  const withdrawalStorageRoot =
+    latestBlock.withdrawalsRoot ?? "0x" + "00".repeat(32);
+  const latestBlockHash = latestBlock.hash as string;
+
+  const payload =
+    stateRoot.slice(2) +
+    withdrawalStorageRoot.slice(2) +
+    latestBlockHash.slice(2);
+  const concatenated = versionByte + payload;
+  const formattedHex = `0x${concatenated.slice(2)}`;
+  const outputRoot = keccak256(formattedHex as `0x${string}`);
+  return outputRoot;
+}
+
 export const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
 export const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
 
@@ -46,7 +67,9 @@ const hash = await l2TestClient.deployContract({
   args: ["L2 ERC20 Token", "L2ERC20"],
 });
 
-const receipt = await l1TestClient.waitForTransactionReceipt({ hash });
+const receipt = await l2TestClient.waitForTransactionReceipt({ hash });
+
+console.log("Contract deployed at:", receipt.contractAddress);
 const erc20addr = receipt.contractAddress as `0x${string}`;
 
 await l2TestClient.writeContract({
@@ -63,3 +86,8 @@ await l2TestClient.writeContract({
   args: [john, 100n],
   account,
 });
+
+const latestBlock = await l2TestClient.getBlock({ blockTag: "latest" });
+
+const outputRoot = computeOutputRoot(latestBlock);
+console.log("Output Root:", outputRoot);
