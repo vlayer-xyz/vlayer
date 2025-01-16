@@ -11,6 +11,7 @@ import {
 import { foundry } from "viem/chains";
 import MockERC20 from "../out/MockERC20.sol/MockERC20";
 import { privateKeyToAccount } from "viem/accounts";
+import L2State from "../out/L2State.sol/L2State";
 
 const l1 = {
   ...foundry,
@@ -36,7 +37,7 @@ function createAnvilClient(chain: Chain, url: string) {
 
 function computeOutputRoot(
   latestBlock: GetBlockReturnType<Chain, false, "latest">,
-): string {
+): `0x${string}` {
   const versionByte = "00".repeat(32);
   const stateRoot = latestBlock.stateRoot as string;
   const withdrawalStorageRoot =
@@ -56,7 +57,7 @@ function computeOutputRoot(
 export const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
 export const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
 
-const [john] = await l1TestClient.getAddresses();
+const [john] = await l2TestClient.getAddresses();
 
 const account = privateKeyToAccount(config.privateKey as `0x${string}`);
 
@@ -88,6 +89,11 @@ await l2TestClient.writeContract({
 });
 
 const latestBlock = await l2TestClient.getBlock({ blockTag: "latest" });
-
 const outputRoot = computeOutputRoot(latestBlock);
-console.log("Output Root:", outputRoot);
+
+await l1TestClient.deployContract({
+  abi: L2State.abi,
+  bytecode: L2State.bytecode.object,
+  account,
+  args: [outputRoot, latestBlock.number],
+});
