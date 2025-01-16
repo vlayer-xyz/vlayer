@@ -12,7 +12,6 @@ use reqwest::get;
 use serde_json::{Map, Value};
 use tar::Archive;
 use tracing::{error, info};
-use version::version;
 
 use crate::{
     commands::{
@@ -20,6 +19,7 @@ use crate::{
         common::soldeer::{add_remappings, DEPENDENCIES},
     },
     errors::CLIError,
+    target_version,
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
         path::{copy_dir_to, find_foundry_root},
@@ -64,7 +64,7 @@ impl TryFrom<Option<PathBuf>> for WorkDir {
 lazy_static! {
     static ref EXAMPLES_URL: String = format!(
         "https://vlayer-releases.s3.eu-north-1.amazonaws.com/{}/examples.tar.gz",
-        version()
+        target_version()
     );
 }
 
@@ -87,7 +87,7 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
     file.read_to_string(&mut contents)?;
 
     let mut json: Value = serde_json::from_str(&contents)?;
-    let version = version();
+    let version = target_version();
 
     if let Some(dependencies) = json.get_mut("dependencies") {
         if let Some(dependencies_map) = dependencies.as_object_mut() {
@@ -309,7 +309,7 @@ mod tests {
     use tempfile::TempDir;
 
     use super::*;
-    use crate::test_utils::create_temp_git_repo;
+    use crate::{build_version, test_utils::create_temp_git_repo};
 
     fn prepare_empty_foundry_dir(src_name: &str) -> TempDir {
         // creates a temporary directory with a foundry.toml file
@@ -400,7 +400,7 @@ mod tests {
             forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
-            version()
+            build_version()
         );
 
         assert_eq!(contents, expected_remappings);
@@ -424,7 +424,7 @@ mod tests {
             forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
-            version()
+            build_version()
         );
 
         assert_eq!(contents, expected_remappings);
@@ -444,7 +444,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
         assert!(!new_contents.contains(&expected_sdk_dependency));
     }
     #[test]
@@ -462,7 +462,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
     #[test]
@@ -480,7 +480,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
 
@@ -499,7 +499,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
 
         assert!(!new_contents.contains("file:../../../packages/sdk"));
         assert!(new_contents.contains(&expected_sdk_dependency));

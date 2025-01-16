@@ -7,9 +7,8 @@ use std::{
 
 use anyhow::Context;
 use lazy_static::lazy_static;
-use version::version;
 
-use crate::errors::CLIError;
+use crate::{errors::CLIError, target_version};
 
 lazy_static! {
     pub(crate) static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
@@ -33,7 +32,7 @@ lazy_static! {
         },
         SoldeerDep {
             name: "vlayer".into(),
-            version: version(),
+            version: target_version(),
             url: None,
             remapping: Some(("vlayer-0.1.0", "src").into() ),
         }
