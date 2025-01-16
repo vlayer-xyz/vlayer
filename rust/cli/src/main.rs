@@ -38,12 +38,9 @@ async fn main() {
     let filter = EnvFilter::try_from_env("RUST_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
-    match Box::pin(run()).await {
-        Ok(_) => (),
-        Err(e) => {
-            error!("Error: {}", e);
-            std::process::exit(e.error_code());
-        }
+    if let Err(e) = Box::pin(run()).await {
+        error!("Error: {}", e);
+        std::process::exit(e.error_code());
     }
 }
 

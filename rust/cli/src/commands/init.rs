@@ -100,7 +100,7 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     let root_path = find_foundry_root(&cwd)?;
     let src_path = find_src_path(&root_path)?;
 
-    info!("Found foundry project root in \"{}\"", &src_path.display());
+    info!("Found foundry project root in \"{}\"", &root_path.display());
 
     if vlayer_dir_exists_in(&src_path) || vlayer_dir_exists_in(&root_path) {
         error!(
