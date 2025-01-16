@@ -64,7 +64,6 @@ const hash = await l2TestClient.deployContract({
 
 const receipt = await l2TestClient.waitForTransactionReceipt({ hash });
 
-console.log("Contract deployed at:", receipt.contractAddress);
 const erc20addr = receipt.contractAddress as `0x${string}`;
 
 await l2TestClient.writeContract({
