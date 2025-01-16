@@ -3,13 +3,13 @@
 ///   * generated struct name,
 ///   * list of 'root directories' with initializer expressions,
 ///   * list of nested paths with assigned names.
-/// 
+///
 /// Root directories are `PathBuf` fields of the generated struct.
 /// There is a fallible `new()` implementation generated returning `Option<Self>`,
 /// so the root directories' initializer expressions can use `?` operator.
 /// Initializer expressions can reference other roots, but beware of the ordering.
 /// Nested paths can be based on any root dir or another nested path.
-/// 
+///
 /// Example:
 /// ```
 /// data_layout!(MyLayout {
@@ -24,7 +24,7 @@
 /// struct MyLayout {
 ///     root: PathBuf,
 /// }
-/// 
+///
 /// impl MyLayout {
 ///     pub fn new() -> Option<Self> {
 ///         let root: std::path::PathBuf = "/".into();
@@ -32,15 +32,15 @@
 ///             root: root,
 ///         })
 ///     }
-/// 
+///
 ///     pub fn root(&self) -> &std::path::Path {
 ///         &self.root
 ///     }
-/// 
+///
 ///     pub fn home(&self) -> std::path::PathBuf {
 ///         self.root().join("home")
 ///     }
-/// 
+///
 ///     pub fn user(&self) -> std::path::PathBuf {
 ///         self.home().join("user")
 ///     }

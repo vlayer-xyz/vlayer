@@ -1,6 +1,7 @@
 use std::{env, fs, io, path::PathBuf};
 
 use risc0_build::GuestListEntry;
+use risc0_zkp::core::digest::Digest;
 
 pub fn use_var(key: &str) -> Option<String> {
     println!("cargo:rerun-if-env-changed={key}");
@@ -50,4 +51,10 @@ pub fn remove_guest(
         .position(|g| g.name == name)
         .ok_or_else(|| anyhow::anyhow!("Guest {name} not found"))?;
     Ok(guests.remove(idx))
+}
+
+pub fn decode_hex_id(hex_id: impl AsRef<[u8]>) -> anyhow::Result<Digest> {
+    let mut bytes = [0_u8; 32];
+    hex::decode_to_slice(hex_id, &mut bytes)?;
+    Ok(Digest::from_bytes(bytes))
 }

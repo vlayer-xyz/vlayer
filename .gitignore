@@ -23,5 +23,5 @@ target/
 
 **/dependencies
 
-
 rust/chain_db
+rust/guest_wrapper/artifacts/guest_id.rs

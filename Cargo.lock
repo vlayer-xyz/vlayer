@@ -5695,6 +5695,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "common",
+ "derive-new",
+ "hex",
  "lazy_static",
  "risc0-build 1.2.0",
  "risc0-build-ethereum",
