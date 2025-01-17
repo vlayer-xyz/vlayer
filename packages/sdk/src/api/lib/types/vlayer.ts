@@ -98,6 +98,7 @@ export type VlayerClient = {
     hash: BrandedHash<T, F>;
     numberOfRetries?: number;
     sleepDuration?: number;
+    callback?: (_: ProofReceipt) => void;
   }) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
 
   proveWeb: <T extends Abi, F extends ContractFunctionName<T>>(args: {
@@ -119,6 +120,7 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
     status: z.literal(0),
     error: z.string(),
     data: z.undefined(),
+    metrics: z.custom<Metrics>(),
     state: z.enum([
       ProofState.ChainProof,
       ProofState.Preflight,
@@ -138,6 +140,7 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
       ])
       .optional(),
     data: z.custom<ProofData>(),
+    metrics: z.custom<Metrics>(),
   }),
 ]);
 

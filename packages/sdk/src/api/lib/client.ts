@@ -5,6 +5,7 @@ import {
   type ProofData,
   ProofState,
   type VGetProofReceiptResponse,
+  type ProofReceipt,
 } from "types/vlayer";
 import { type WebProofProvider } from "types/webProofProvider";
 import { match } from "ts-pattern";
@@ -95,10 +96,12 @@ export const createVlayerClient = (
       hash,
       numberOfRetries = 240,
       sleepDuration = 1000,
+      callback,
     }: {
       hash: BrandedHash<T, F>;
       numberOfRetries?: number;
       sleepDuration?: number;
+      callback?: (_: ProofReceipt) => void;
     }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
       try {
         const proof_data = await getProof(
@@ -107,6 +110,7 @@ export const createVlayerClient = (
           numberOfRetries,
           sleepDuration,
           webProofProvider,
+          callback,
         );
         const savedProvingData = resultHashMap.get(hash.hash);
         if (!savedProvingData) {
@@ -212,12 +216,16 @@ async function getProof<T extends Abi, F extends ContractFunctionName<T>>(
   numberOfRetries: number,
   sleepDuration: number,
   webProofProvider: WebProofProvider,
+  callback?: (_: ProofReceipt) => void,
 ): Promise<ProofData> {
   for (let retry = 0; retry < numberOfRetries; retry++) {
     const resp = await getProofReceipt(hash, url);
     handleErrors(resp);
     const { state, data } = resp.result;
     if (state === ProofState.Done) {
+      if (callback !== undefined) {
+        callback(resp.result);
+      }
       return data;
     }
     webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
