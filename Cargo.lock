@@ -5695,6 +5695,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "hex",
+ "lazy_static",
  "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
  "risc0-build-ethereum",
  "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",

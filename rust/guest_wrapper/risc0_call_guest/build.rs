@@ -1,5 +1,5 @@
-use guest_build_utils::ChainGuestId;
+use guest_build_utils::chain_guest_id;
 
 pub fn main() {
-    ChainGuestId::default().generate_rust().unwrap();
+    chain_guest_id::generate_rust().unwrap();
 }

@@ -1,4 +1,4 @@
-mod chain_guest_id;
+pub mod chain_guest_id;
 mod data_layout;
 
 #[cfg(feature = "risc0")]
@@ -6,7 +6,6 @@ mod risc0_builder;
 
 use std::{env, fs, io, path::PathBuf};
 
-pub use chain_guest_id::ChainGuestId;
 #[cfg(feature = "risc0")]
 pub use risc0_builder::Builder as Risc0Builder;
 use risc0_zkp::core::digest::Digest;

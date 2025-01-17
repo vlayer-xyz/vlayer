@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs, io};
 use risc0_build::{embed_methods_with_options, DockerOptions, GuestListEntry, GuestOptions};
 
 use crate::{
-    data_layout, path_from_env, remove_file_if_exists, use_bool_var, ChainGuestId, PROJECT_ROOT,
+    chain_guest_id, data_layout, path_from_env, remove_file_if_exists, use_bool_var, PROJECT_ROOT,
 };
 
 data_layout!(DataLayout {
@@ -119,13 +119,12 @@ impl Builder {
     /// Generate rust file with current and historical chain guest IDs.
     fn check_or_update_chain_guest_id(&self, chain_guest: &GuestListEntry) -> anyhow::Result<()> {
         let generated_id = chain_guest.image_id.into();
-        let chain_guest_id = ChainGuestId::new();
 
         if self.update_guest_elf {
             anyhow::ensure!(self.use_docker, "`UPDATE_GUEST_ELF_ID` requires `RISC0_USE_DOCKER`");
-            chain_guest_id.update(generated_id)?;
+            chain_guest_id::update(generated_id)?;
         } else if self.use_docker {
-            chain_guest_id.assert(generated_id)?;
+            chain_guest_id::assert(generated_id)?;
         }
 
         Ok(())

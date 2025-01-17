@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 hex = { workspace = true }
+lazy_static = { workspace = true }
 risc0-zkp = { workspace = true }
 
 risc0-build = { workspace = true, optional = true }
