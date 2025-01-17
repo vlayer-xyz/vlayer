@@ -20,6 +20,11 @@ function run_services {
     source ${VLAYER_HOME}/bash/run-services.sh 
 }
 
+function build_example_contracts {
+    cd ${VLAYER_HOME}/examples/simple_web_proof
+    forge build
+}
+
 function run_web_app {
     cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer
     bun run web:dev &
@@ -32,5 +37,6 @@ function run_browser_extension {
 
 install_deps
 run_services
+build_example_contracts
 run_web_app
 run_browser_extension
