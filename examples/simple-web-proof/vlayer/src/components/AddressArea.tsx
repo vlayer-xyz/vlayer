@@ -48,7 +48,7 @@ function isVlayerSupportedChain(chain: Chain) {
   console.log(
     "isVlayerSupportedChain",
     import.meta.env.VITE_CHAIN_NAME,
-    chain.name
+    chain.name,
   );
   return import.meta.env.VITE_CHAIN_NAME === chain.name.toLowerCase();
 }
