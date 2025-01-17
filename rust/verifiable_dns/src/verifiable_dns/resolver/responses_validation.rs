@@ -121,7 +121,7 @@ mod tests {
         use crate::{
             dns_over_https::Query,
             verifiable_dns::{
-                signer::{PublicKey, Signature},
+                types::{PublicKey, Signature},
                 VerificationData,
             },
         };

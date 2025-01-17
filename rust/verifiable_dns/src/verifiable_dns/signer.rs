@@ -1,4 +1,3 @@
-use bytes::Bytes;
 use rsa::{
     pkcs1v15::{self, SigningKey},
     pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePublicKey},
@@ -6,18 +5,11 @@ use rsa::{
     signature::{Keypair, RandomizedSigner, SignatureEncoding},
     RsaPrivateKey,
 };
-use serde::{Deserialize, Serialize};
-use serde_with::{base64::Base64, serde_as};
+use serde::Serialize;
+
+use super::{PublicKey, Signature};
 
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
-
-#[serde_as]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct Signature(#[serde_as(as = "Base64")] pub Bytes);
-
-#[serde_as]
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct PublicKey(#[serde_as(as = "Base64")] pub Bytes);
 
 #[derive(Clone)]
 pub(super) struct Signer {

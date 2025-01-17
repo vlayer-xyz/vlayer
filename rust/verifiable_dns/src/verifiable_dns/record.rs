@@ -1,7 +1,9 @@
 use serde::Serialize;
 
 use super::Timestamp;
-use crate::dns_over_https::types::{Record as DNSRecord, RecordType};
+#[cfg(feature = "signer")]
+use crate::dns_over_https::types::Record as DNSRecord;
+use crate::dns_over_https::types::RecordType;
 
 #[derive(Serialize, PartialEq, Debug)]
 pub struct Record {
@@ -14,6 +16,7 @@ pub struct Record {
 }
 
 impl Record {
+    #[cfg(feature = "signer")]
     pub(crate) fn new(record: &DNSRecord, valid_until: Timestamp) -> Self {
         Self {
             name: record.name.clone(),

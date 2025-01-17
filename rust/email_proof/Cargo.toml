@@ -11,7 +11,7 @@ mailparse = "0.14.1"
 rsa = { workspace = true }
 slog = "2.7.0"
 thiserror = { workspace = true }
-verifiable_dns = { workspace = true }
+verifiable_dns = { workspace = true, default-features = false }
 
 [dev-dependencies]
 anyhow = { workspace = true }

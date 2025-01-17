@@ -79,8 +79,8 @@ export async function preverifyEmail(mimeEmail: string) {
     },
     verificationData: {
       validUntil: Number.MAX_SAFE_INTEGER,
-      signature: "",
-      pubKey: "",
+      signature: "0x",
+      pubKey: "0x",
     },
   };
 }

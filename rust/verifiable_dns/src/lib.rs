@@ -2,11 +2,15 @@ mod dns_over_https;
 
 mod verifiable_dns;
 
+#[cfg(feature = "http")]
+pub use dns_over_https::ExternalProvider;
 pub use dns_over_https::{
-    types::RecordType, ExternalProvider, Provider, Query, Response, MIME_DNS_JSON_CONTENT_TYPE,
+    types::RecordType, Provider, Query, Response, MIME_DNS_JSON_CONTENT_TYPE,
 };
+#[cfg(feature = "http")]
+pub use verifiable_dns::VerifiableDNSResolver;
 pub use verifiable_dns::{
     record::Record as DNSRecord,
-    signer::{PublicKey, Signature},
-    VerifiableDNSResolver, VerificationData,
+    types::{PublicKey, Signature},
+    VerificationData,
 };
