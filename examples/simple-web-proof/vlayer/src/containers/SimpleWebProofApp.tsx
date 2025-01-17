@@ -8,7 +8,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const queryClient = new QueryClient();
 
 export const config = createConfig({
-  chains: [optimismSepolia, anvil],
+  chains:
+    import.meta.env.VITE_CHAIN_NAME === "anvil" ? [anvil] : [optimismSepolia],
   connectors: [metaMask()],
   transports: {
     [optimismSepolia.id]: http(),

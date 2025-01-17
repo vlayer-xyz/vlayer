@@ -44,7 +44,7 @@ export default function SimpleWebProof() {
         onClick={() => callProver([webProof, address])}
         isLoading={isCallProverPending || isWaitingForProvingResult}
       />
-      <VerifyButton zkProof={result as string} />
+      <VerifyButton zkProof={result as unknown[]} />
       <AddressArea />
     </Container>
   );
