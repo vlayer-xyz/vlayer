@@ -3,7 +3,7 @@ import {
   getDkimSigners,
   parseEmail,
 } from "./parseEmail";
-import { DnsResolver, resolveDkimDns } from "./dnsResolver";
+import { DnsResolver, normalizeDnsData } from "./dnsResolver";
 import { prefixAllButNthSubstring } from "../utils/prefixAllButNthSubstring";
 
 export function findIndicesOfMatchingDomains(
@@ -57,10 +57,24 @@ export async function preverifyEmail(mimeEmail: string) {
 
   const [{ domain, selector }] = signers;
   const resolver = new DnsResolver();
-  const dnsRecord = await resolveDkimDns(resolver, domain, selector);
+  const record = await resolver.resolveDkimDns(domain, selector);
+  if (!record || record.length === 0) {
+    throw new Error("No DKIM DNS record found");
+  }
+  const { data, name, type } = record[0];
+
   return {
     email: mimeEmail,
-    dnsRecords: [dnsRecord],
-    verificationData: [],
+    dnsRecord: {
+      name,
+      type,
+      data: normalizeDnsData(data),
+      validUntil: Number.MAX_SAFE_INTEGER,
+    },
+    verificationData: {
+      validUntil: Number.MAX_SAFE_INTEGER,
+      signature: "",
+      pubKey: "",
+    },
   };
 }

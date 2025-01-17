@@ -32,8 +32,16 @@ export class DnsResolver {
       )
     ).json()) as DnsResponse;
 
-    return response.Answer.map((answer) => answer.data);
+    return response.Answer;
   }
+}
+
+export function normalizeDnsData(data: string) {
+  if (data.startsWith("p=")) {
+    return ["v=DKIM1", "k=rsa", data].join("; ");
+  }
+
+  return data;
 }
 
 export async function resolveDkimDns(
@@ -49,9 +57,5 @@ export async function resolveDkimDns(
     throw new Error("No DKIM DNS record found");
   }
 
-  if (record?.startsWith("p=")) {
-    record = ["v=DKIM1", "k=rsa", record].join("; ");
-  }
-
-  return record;
+  return normalizeDnsData(record.data);
 }
