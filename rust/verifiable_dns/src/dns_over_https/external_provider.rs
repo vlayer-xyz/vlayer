@@ -70,7 +70,6 @@ mod tests {
 
         assert_eq!(result.question.len(), 1);
         assert_eq!(result.question[0], query);
-        dbg!(&result);
         assert!(!result.answer.unwrap().is_empty());
     }
 

@@ -10,8 +10,8 @@ describe("Preverify email: integration", () => {
     expect(preverifiedEmail.email).toBe(rawEmail);
     expect(preverifiedEmail.dnsRecord).toMatchObject({
       name: "20230601._domainkey.google.com.",
-      type: "TXT",
-      validUntil: Number.MAX_SAFE_INTEGER,
+      recordType: "TXT",
+      validUntil: BigInt(Number.MAX_SAFE_INTEGER),
     });
     expect(preverifiedEmail.dnsRecord.data).toContain("v=DKIM1; k=rsa; p=");
   });
