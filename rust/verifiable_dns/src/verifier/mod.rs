@@ -11,8 +11,6 @@ use crate::{
     verifiable_dns::{record::Record, signer::ToSignablePayload, PublicKey, Signature},
 };
 
-pub struct RecordVerifier;
-
 #[derive(thiserror::Error, Debug)]
 pub enum RecordVerifierError {
     #[error("Public key decoding error: {0}")]
@@ -23,20 +21,18 @@ pub enum RecordVerifierError {
     SignatureVerification(#[from] signature::Error),
 }
 
-impl RecordVerifier {
-    pub fn verify_signature(
-        record: &DNSRecord,
-        valid_until: u64,
-        pub_key: &PublicKey,
-        signature: &Signature,
-    ) -> Result<(), RecordVerifierError> {
-        let verifying_key = VerifyingKey::<Sha256>::from_public_key_der(&pub_key.0)?;
-        let rsa_signature = pkcs1v15::Signature::try_from(signature.0.iter().as_slice())
-            .map_err(RecordVerifierError::SignatureDecoding)?;
+pub fn verify_signature(
+    record: &DNSRecord,
+    valid_until: u64,
+    pub_key: &PublicKey,
+    signature: &Signature,
+) -> Result<(), RecordVerifierError> {
+    let verifying_key = VerifyingKey::<Sha256>::from_public_key_der(&pub_key.0)?;
+    let rsa_signature = pkcs1v15::Signature::try_from(signature.0.iter().as_slice())
+        .map_err(RecordVerifierError::SignatureDecoding)?;
 
-        verifying_key.verify(&Record::new(record, valid_until).to_payload(), &rsa_signature)?;
-        Ok(())
-    }
+    verifying_key.verify(&Record::new(record, valid_until).to_payload(), &rsa_signature)?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -63,7 +59,7 @@ mod test {
             pub_key,
             valid_until,
         } = resolver().sign_record(&RECORD);
-        RecordVerifier::verify_signature(&RECORD, valid_until, &pub_key, &signature).unwrap();
+        verify_signature(&RECORD, valid_until, &pub_key, &signature).unwrap();
     }
 
     #[test]
@@ -78,7 +74,7 @@ mod test {
             ..RECORD.clone()
         };
         assert_eq!(
-            RecordVerifier::verify_signature(&modified_record, valid_until, &pub_key, &signature)
+            verify_signature(&modified_record, valid_until, &pub_key, &signature)
                 .unwrap_err()
                 .to_string(),
             "Signature verification error"
@@ -88,7 +84,7 @@ mod test {
     #[test]
     fn fails_on_invalid_public_key() {
         assert_eq!(
-            RecordVerifier::verify_signature(
+            verify_signature(
                 &RECORD,
                 100,
                 &PublicKey(Bytes::from(vec![0_u8])),
