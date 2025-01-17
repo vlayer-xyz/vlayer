@@ -4435,8 +4435,7 @@ checksum = "ef927ca75afb808a4d64dd374f00a2adf8d0fcff8e7b184af886c3c87ec4a3f3"
 [[package]]
 name = "tiny-keccak"
 version = "2.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
+source = "git+https://github.com/risc0/tiny-keccak?rev=7ff2b8465891d1cbb55a69e553e05d369ce41d72#7ff2b8465891d1cbb55a69e553e05d369ce41d72"
 dependencies = [
  "crunchy",
 ]

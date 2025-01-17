@@ -20,9 +20,9 @@ fn eight_kb() {
 
 pub fn benchmarks() -> Vec<Benchmark> {
     vec![
-        Benchmark::new("empty", empty, 26_005),
-        Benchmark::new("one_block", one_block, 26_211),
-        Benchmark::new("one_kb", one_kb, 211_176),
-        Benchmark::new("eight_kb", eight_kb, 1_608_339),
+        Benchmark::new("empty", empty, 1_915),
+        Benchmark::new("one_block", one_block, 2_121),
+        Benchmark::new("one_kb", one_kb, 18_449),
+        Benchmark::new("eight_kb", eight_kb, 138_789),
     ]
 }
