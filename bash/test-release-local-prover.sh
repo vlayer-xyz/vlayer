@@ -48,4 +48,8 @@ for example in $(get_examples); do
     echo '::endgroup::'
 
     run_prover_script
+
+    echo "::group::vlayer run Playwright test: ${example_name}"
+    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:dev" bun run test:dev
+    echo '::endgroup::'
 done
