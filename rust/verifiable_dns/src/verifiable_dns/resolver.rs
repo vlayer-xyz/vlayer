@@ -5,10 +5,13 @@ use std::marker::PhantomData;
 use futures::future::join_all;
 use responses_validation::{responses_match, validate_response};
 
-use super::{record::Record, signer::Signer, time::Now, VerificationData};
-use crate::dns_over_https::{
-    types::{Record as DNSRecord, RecordType},
-    Provider as DoHProvider, Query, Response,
+use super::{record::Record, signer::Signer, time::Now};
+use crate::{
+    dns_over_https::{
+        types::{Record as DNSRecord, RecordType},
+        Provider as DoHProvider, Query, Response,
+    },
+    VerificationData,
 };
 
 #[derive(Clone)]

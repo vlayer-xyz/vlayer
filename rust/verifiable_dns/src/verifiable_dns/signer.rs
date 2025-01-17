@@ -7,7 +7,7 @@ use rsa::{
 };
 use serde::Serialize;
 
-use super::{PublicKey, Signature};
+use crate::{PublicKey, Signature};
 
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
