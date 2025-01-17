@@ -2,17 +2,11 @@
 name = "guest_wrapper"
 version = "0.1.0"
 edition = "2021"
-build = "build/main.rs"
-
 [dependencies]
 common = { workspace = true }
 
 [build-dependencies]
-anyhow = { workspace = true }
-hex = { workspace = true }
-risc0-build = { workspace = true }
-risc0-build-ethereum = { workspace = true }
-risc0-zkp = { workspace = true }
+guest_build_utils = { workspace = true, features = ["risc0"] }
 
 [package.metadata.risc0]
 methods = ["risc0_call_guest", "risc0_chain_guest"]

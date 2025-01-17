@@ -1,0 +1,15 @@
+[package]
+name = "guest_build_utils"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+hex = { workspace = true }
+risc0-zkp = { workspace = true }
+
+risc0-build = { workspace = true, optional = true }
+risc0-build-ethereum = { workspace = true, optional = true }
+
+[features]
+risc0 = ["risc0-build", "risc0-build-ethereum"]

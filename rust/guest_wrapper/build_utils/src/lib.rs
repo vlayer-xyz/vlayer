@@ -1,7 +1,17 @@
+mod chain_guest_id;
+mod data_layout;
+
+#[cfg(feature = "risc0")]
+mod risc0_builder;
+
 use std::{env, fs, io, path::PathBuf};
 
-use risc0_build::GuestListEntry;
+pub use chain_guest_id::ChainGuestId;
+#[cfg(feature = "risc0")]
+pub use risc0_builder::Builder as Risc0Builder;
 use risc0_zkp::core::digest::Digest;
+
+const PROJECT_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../..");
 
 pub fn use_var(key: &str) -> Option<String> {
     println!("cargo:rerun-if-env-changed={key}");
@@ -25,9 +35,8 @@ pub fn use_bool_var(key: &str) -> bool {
         .unwrap_or(false)
 }
 
-#[allow(clippy::needless_pass_by_value)]
-fn parse_bool_str(s: String) -> anyhow::Result<bool> {
-    match s.to_ascii_lowercase().as_str() {
+pub fn parse_bool_str(s: impl AsRef<str>) -> anyhow::Result<bool> {
+    match s.as_ref().to_ascii_lowercase().as_str() {
         "1" | "true" | "yes" => Ok(true),
         "0" | "false" | "no" => Ok(false),
         s => anyhow::bail!("Invalid value: '{s}' accepted: 1/0/true/false/yes/no"),
@@ -39,18 +48,6 @@ pub fn remove_file_if_exists(path: &PathBuf) -> io::Result<()> {
         Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(()),
         res => res,
     }
-}
-
-/// Remove `GuestListEntry` with given name from vector.
-pub fn remove_guest(
-    guests: &mut Vec<GuestListEntry>,
-    name: &str,
-) -> anyhow::Result<GuestListEntry> {
-    let idx = guests
-        .iter()
-        .position(|g| g.name == name)
-        .ok_or_else(|| anyhow::anyhow!("Guest {name} not found"))?;
-    Ok(guests.remove(idx))
 }
 
 pub fn decode_hex_id(hex_id: impl AsRef<[u8]>) -> anyhow::Result<Digest> {

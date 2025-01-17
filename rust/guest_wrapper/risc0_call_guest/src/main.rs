@@ -5,7 +5,7 @@ risc0_zkvm::guest::entry!(main);
 use alloy_sol_types::SolValue;
 use risc0_zkvm::{guest::env, sha::Digest};
 
-include!("../../artifacts/guest_id.rs");
+include!(concat!(env!("OUT_DIR"), "/guest_id.rs"));
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {

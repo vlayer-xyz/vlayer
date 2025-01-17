@@ -12,6 +12,7 @@
 ///
 /// Example:
 /// ```
+/// use guest_build_utils::data_layout;
 /// data_layout!(MyLayout {
 ///     root: "/".into(),
 /// } {
@@ -22,7 +23,7 @@
 /// Will generate the following code:
 /// ```
 /// struct MyLayout {
-///     root: PathBuf,
+///     root: std::path::PathBuf,
 /// }
 ///
 /// impl MyLayout {
