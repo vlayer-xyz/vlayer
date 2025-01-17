@@ -14,17 +14,19 @@ pub struct ExternalProvider {
 
 impl Provider for ExternalProvider {
     async fn resolve(&self, query: &Query) -> Option<Response> {
-        let response = Client::new()
-            .get(self.base_url)
-            .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
-            .query(&query)
-            .timeout(Duration::from_secs(2))
-            .send()
-            .await
-            .ok()?
-            .text()
-            .await
-            .ok()?;
+        let response = dbg!(
+            Client::new()
+                .get(self.base_url)
+                .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
+                .query(&query)
+                .timeout(Duration::from_secs(2))
+                .send()
+                .await
+                .ok()?
+                .text()
+                .await
+        )
+        .ok()?;
 
         serde_json::from_str(&response).ok()?
     }
@@ -64,13 +66,13 @@ mod tests {
     #[tokio::test]
     async fn fetches_record_from_dnssb_doh() {
         let provider = ExternalProvider::dns_sb_provider();
-        let query = "http://vlayer.xyz".into();
+        let query = "vlayer.xyz".into();
 
         let result = provider.resolve(&query).await.unwrap();
 
         assert_eq!(result.question.len(), 1);
         assert_eq!(result.question[0], query);
-
+        dbg!(&result);
         assert!(!result.answer.unwrap().is_empty());
     }
 
