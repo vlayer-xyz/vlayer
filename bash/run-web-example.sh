@@ -11,7 +11,7 @@ function install_deps {
     cd ${VLAYER_HOME}/packages/sdk
     bun run build
     
-    cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer
+    cd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
     rm -rf node_modules
     bun install --frozen-lockfile
 }
@@ -21,12 +21,12 @@ function run_services {
 }
 
 function build_example_contracts {
-    cd ${VLAYER_HOME}/examples/simple_web_proof
+    cd ${VLAYER_HOME}/examples/simple-web-proof
     forge build
 }
 
 function run_web_app {
-    cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer
+    cd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
     bun run web:dev &
 }
 
