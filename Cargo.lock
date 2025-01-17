@@ -12190,6 +12190,7 @@ dependencies = [
  "pkcs8",
  "serde",
  "serde_json",
+ "strum",
  "thiserror 2.0.11",
  "tlsn-core",
  "url",
