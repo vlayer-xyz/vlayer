@@ -9,7 +9,7 @@ chrono = { workspace = true, features = ["now"] }
 futures = { workspace = true }
 olpc-cjson = { workspace = true }
 rand = { workspace = true }
-reqwest = { workspace = true }
+reqwest = { workspace = true, features = ["rustls-tls"] }
 rsa = { workspace = true, features = ["sha2"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
