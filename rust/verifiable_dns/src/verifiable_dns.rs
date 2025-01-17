@@ -22,10 +22,11 @@ pub(crate) struct VerificationData {
 }
 
 impl VerificationData {
+    #[allow(dead_code)]
     pub fn verify_signature(
         &self,
         record: &dns_over_https::types::Record,
     ) -> Result<(), verifier::RecordVerifierError> {
-        verifier::verify_signature(&record, self.valid_until, &self.pub_key, &self.signature)
+        verifier::verify_signature(record, self.valid_until, &self.pub_key, &self.signature)
     }
 }
