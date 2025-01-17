@@ -63,7 +63,7 @@ impl Default for Response {
 }
 
 #[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]
-pub(crate) struct Record {
+pub struct Record {
     pub name: String,
     #[serde(rename = "type")]
     #[allow(clippy::struct_field_names)]

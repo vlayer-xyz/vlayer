@@ -9,7 +9,7 @@ struct DnsRecord {
     string name;
     string recordType;
     string data;
-    uint64 validUntil;
+    uint64 ttl;
 }
 
 struct VerificationData {

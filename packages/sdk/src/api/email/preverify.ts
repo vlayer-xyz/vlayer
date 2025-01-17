@@ -75,7 +75,7 @@ export async function preverifyEmail(mimeEmail: string) {
       name,
       recordType: "TXT",
       data: normalizeDnsData(data),
-      validUntil: BigInt(Number.MAX_SAFE_INTEGER),
+      ttl: BigInt(Number.MAX_SAFE_INTEGER),
     },
     verificationData: {
       validUntil: BigInt(Number.MAX_SAFE_INTEGER),

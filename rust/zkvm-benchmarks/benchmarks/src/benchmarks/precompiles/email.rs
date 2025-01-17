@@ -15,7 +15,7 @@ fn fixture() -> Bytes {
             name: "_domainkey.vlayer.xyz".into(),
             recordType: "TXT".into(),
             data: DNS_RECORD.into(),
-            validUntil: 0,
+            ttl: 0,
         },
         verificationData: SolVerificationData {
             validUntil: 0,

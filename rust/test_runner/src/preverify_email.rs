@@ -100,7 +100,7 @@ fn resolve_dkim_dns(selector: &str, domain: &str) -> Result<DnsRecord, EnhanceEm
         name,
         recordType: "TXT".into(),
         data: record,
-        validUntil: u64::MAX,
+        ttl: u64::MAX,
     })
 }
 

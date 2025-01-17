@@ -35,7 +35,7 @@ impl UnverifiedEmail {
             name: unverified_email.dnsRecord.name,
             record_type: parse_record_type(&unverified_email.dnsRecord.recordType)?,
             data: unverified_email.dnsRecord.data,
-            valid_until: unverified_email.dnsRecord.validUntil,
+            ttl: unverified_email.dnsRecord.ttl,
         };
         let verification_data = VerificationData {
             valid_until: unverified_email.verificationData.validUntil,
@@ -71,7 +71,7 @@ mod test {
                     name: "name".into(),
                     recordType: "TXT".into(),
                     data: "data".into(),
-                    validUntil: 123,
+                    ttl: 123,
                 },
                 verificationData: SolVerificationData {
                     validUntil: 456,
@@ -89,7 +89,7 @@ mod test {
                     name: "name".into(),
                     record_type: RecordType::TXT,
                     data: "data".into(),
-                    valid_until: 123,
+                    ttl: 123,
                 }
             );
         }
