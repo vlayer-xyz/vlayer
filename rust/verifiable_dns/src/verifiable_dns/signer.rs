@@ -13,11 +13,11 @@ const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
 #[serde_as]
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct Signature(#[serde_as(as = "Base64")] pub(crate) Bytes);
+pub struct Signature(#[serde_as(as = "Base64")] pub Bytes);
 
 #[serde_as]
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub struct PublicKey(#[serde_as(as = "Base64")] pub(crate) Bytes);
+pub struct PublicKey(#[serde_as(as = "Base64")] pub Bytes);
 
 #[derive(Clone)]
 pub(super) struct Signer {

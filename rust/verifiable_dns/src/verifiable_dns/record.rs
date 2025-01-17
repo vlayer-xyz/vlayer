@@ -3,22 +3,22 @@ use serde::Serialize;
 use super::Timestamp;
 use crate::dns_over_https::types::{Record as DNSRecord, RecordType};
 
-#[derive(Serialize)]
-pub(super) struct Record<'a> {
-    name: &'a String,
+#[derive(Serialize, PartialEq, Debug)]
+pub struct Record {
+    pub name: String,
     #[serde(rename = "type")]
     #[allow(clippy::struct_field_names)]
-    record_type: &'a RecordType,
-    data: &'a String,
-    valid_until: Timestamp,
+    pub record_type: RecordType,
+    pub data: String,
+    pub valid_until: Timestamp,
 }
 
-impl<'a> Record<'a> {
-    pub const fn new(record: &'a DNSRecord, valid_until: Timestamp) -> Self {
+impl Record {
+    pub(crate) fn new(record: &DNSRecord, valid_until: Timestamp) -> Self {
         Self {
-            name: &record.name,
-            data: &record.data,
-            record_type: &record.record_type,
+            name: record.name.clone(),
+            data: record.data.clone(),
+            record_type: record.record_type.clone(),
             valid_until,
         }
     }

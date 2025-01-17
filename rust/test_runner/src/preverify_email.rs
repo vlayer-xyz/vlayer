@@ -32,6 +32,7 @@ pub fn preverify_email(input: &Bytes) -> Result<UnverifiedEmail, EnhanceEmailErr
     Ok(UnverifiedEmail {
         email,
         dnsRecords: vec![dns_record],
+        verificationData: vec![],
     })
 }
 

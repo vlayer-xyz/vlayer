@@ -1,6 +1,6 @@
-mod record;
+pub(crate) mod record;
 mod resolver;
-mod signer;
+pub(crate) mod signer;
 mod time;
 
 use resolver::Resolver;
@@ -15,8 +15,8 @@ pub type VerifiableDNSResolver = Resolver<RTClock, ExternalProvider, 2>;
 type Timestamp = u64;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-pub(crate) struct VerificationData {
-    pub(crate) valid_until: Timestamp,
-    pub(crate) signature: Signature,
-    pub(crate) pub_key: PublicKey,
+pub struct VerificationData {
+    pub valid_until: Timestamp,
+    pub signature: Signature,
+    pub pub_key: PublicKey,
 }

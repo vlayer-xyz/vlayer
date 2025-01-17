@@ -20,13 +20,29 @@ sol!(
     struct Proof {
         uint256 length;
         Seal seal;
-        CallAssumptions call_assumptions;
+        CallAssumptions callAssumptions;
     }
 
-    #[derive(Default, Debug)]
+    #[derive(Default)]
+    struct DnsRecord {
+        string name;
+        string recordType;
+        string data;
+        uint256 timestamp;
+    }
+
+    #[derive(Default)]
+    struct VerificationData {
+        uint256 validUntil;
+        bytes signature;
+        bytes pubKey;
+    }
+
+    #[derive(Default)]
     struct UnverifiedEmail {
         string email;
-        string[] dnsRecords;
+        DnsRecord dnsRecord;
+        VerificationData verificationData;
     }
 
     function callProver() external returns (bool);

@@ -61,5 +61,6 @@ export async function preverifyEmail(mimeEmail: string) {
   return {
     email: mimeEmail,
     dnsRecords: [dnsRecord],
+    verificationData: [],
   };
 }

@@ -3781,6 +3781,7 @@ dependencies = [
  "rsa",
  "slog",
  "thiserror 2.0.11",
+ "verifiable_dns",
 ]
 
 [[package]]
