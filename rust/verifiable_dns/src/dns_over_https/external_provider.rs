@@ -14,19 +14,17 @@ pub struct ExternalProvider {
 
 impl Provider for ExternalProvider {
     async fn resolve(&self, query: &Query) -> Option<Response> {
-        let response = dbg!(
-            Client::new()
-                .get(self.base_url)
-                .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
-                .query(&query)
-                .timeout(Duration::from_secs(2))
-                .send()
-                .await
-                .ok()?
-                .text()
-                .await
-        )
-        .ok()?;
+        let response = Client::new()
+            .get(self.base_url)
+            .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
+            .query(&query)
+            .timeout(Duration::from_secs(2))
+            .send()
+            .await
+            .ok()?
+            .text()
+            .await
+            .ok()?;
 
         serde_json::from_str(&response).ok()?
     }
