@@ -5,11 +5,11 @@ on:
     types: [completed]
   pull_request:
     paths:
-      - examples/simple_web_proof/**
+      - examples/simple-web-proof/**
       - .github/workflows/deploy_simple_web_proof.yaml
   push:
     paths:
-      - examples/simple_web_proof/**
+      - examples/simple-web-proof/**
       - .github/workflows/deploy_simple_web_proof.yaml
     branches:
       - main
@@ -27,7 +27,7 @@ jobs:
       - name: Install, build and deploy example
         uses: ./.github/actions/example-deploy
         with:
-          EXAMPLE_NAME: simple_web_proof
+          EXAMPLE_NAME: simple-web-proof
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
