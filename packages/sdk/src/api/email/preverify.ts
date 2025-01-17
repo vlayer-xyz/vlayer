@@ -73,14 +73,14 @@ export async function preverifyEmail(mimeEmail: string) {
     email: mimeEmail,
     dnsRecord: {
       name,
-      type: "TXT",
+      recordType: "TXT",
       data: normalizeDnsData(data),
-      validUntil: Number.MAX_SAFE_INTEGER,
+      validUntil: BigInt(Number.MAX_SAFE_INTEGER),
     },
     verificationData: {
-      validUntil: Number.MAX_SAFE_INTEGER,
-      signature: "0x",
-      pubKey: "0x",
+      validUntil: BigInt(Number.MAX_SAFE_INTEGER),
+      signature: "0x" as const,
+      pubKey: "0x" as const,
     },
   };
 }
