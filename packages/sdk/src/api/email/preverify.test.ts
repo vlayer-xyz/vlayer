@@ -7,10 +7,13 @@ const rawEmail = readFile("./src/api/email/testdata/test_email.txt");
 describe("Preverify email: integration", () => {
   test("adds dns record to email mime", async () => {
     const preverifiedEmail = await preverifyEmail(rawEmail);
-    expect(preverifiedEmail).toMatchObject({
-      email: rawEmail,
-      dnsRecords: [expect.stringContaining("v=DKIM1; k=rsa; p=")],
+    expect(preverifiedEmail.email).toBe(rawEmail);
+    expect(preverifiedEmail.dnsRecord).toMatchObject({
+      name: "20230601._domainkey.google.com.",
+      type: "TXT",
+      validUntil: Number.MAX_SAFE_INTEGER,
     });
+    expect(preverifiedEmail.dnsRecord.data).toContain("v=DKIM1; k=rsa; p=");
   });
 
   test("throws error if DKIM not found", async () => {
@@ -53,9 +56,9 @@ X-DKIM-Signature: v=1; a=rsa-sha256; d=example.com;
 DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
  c=simple/simple; d=google.com;`),
       ).toBeTruthy();
-      expect(email.dnsRecords).toStrictEqual([
+      expect(email.dnsRecord.data).toEqual(
         "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4zd3nfUoLHWFbfoPZzAb8bvjsFIIFsNypweLuPe4M+vAP1YxObFxRnpvLYz7Z+bORKLber5aGmgFF9iaufsH1z0+aw8Qex7uDaafzWoJOM/6lAS5iI0JggZiUkqNpRQLL7H6E7HcvOMC61nJcO4r0PwLDZKwEaCs8gUHiqRn/SS3wqEZX29v/VOUVcI4BjaOzOCLaz7V8Bkwmj4Rqq4kaLQQrbfpjas1naScHTAmzULj0Rdp+L1vVyGitm+dd460PcTIG3Pn+FYrgQQo2fvnTcGiFFuMa8cpxgfH3rJztf1YFehLWwJWgeXTriuIyuxUabGdRQu7vh7GrObTsHmIHwIDAQAB",
-      ]);
+      );
     });
 
     test("throws error if no DNS record domain matches the sender", async () => {

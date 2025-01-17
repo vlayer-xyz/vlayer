@@ -33,7 +33,7 @@ impl UnverifiedEmail {
         let raw_email = unverified_email.email.into_bytes();
         let dns_record = DNSRecord {
             name: unverified_email.dnsRecord.name,
-            record_type: parse_record_type(&unverified_email.dnsRecord.recordType)?.clone(),
+            record_type: parse_record_type(&unverified_email.dnsRecord.recordType)?,
             data: unverified_email.dnsRecord.data,
             valid_until: unverified_email.dnsRecord.validUntil,
         };

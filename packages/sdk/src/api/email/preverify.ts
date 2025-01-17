@@ -58,17 +58,22 @@ export async function preverifyEmail(mimeEmail: string) {
   const [{ domain, selector }] = signers;
   const resolver = new DnsResolver();
 
-  const record = await resolver.resolveDkimDns(domain, selector);
+  const record = await resolver.resolveDkimDns(selector, domain);
+
   if (!record || record.length === 0) {
     throw new Error("No DKIM DNS record found");
   }
   const { data, name, type } = record[0];
 
+  if (type !== 16) {
+    throw new Error(`Invalid DNS record type: ${type}`);
+  }
+
   return {
     email: mimeEmail,
     dnsRecord: {
       name,
-      type,
+      type: "TXT",
       data: normalizeDnsData(data),
       validUntil: Number.MAX_SAFE_INTEGER,
     },

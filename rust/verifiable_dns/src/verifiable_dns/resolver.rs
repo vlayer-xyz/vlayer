@@ -30,7 +30,7 @@ impl<C: Now, P: DoHProvider, const Q: usize> Resolver<C, P, Q> {
     fn sign_record(&self, record: &DNSRecord) -> VerificationData {
         let now = C::now();
         let valid_until = now + record.ttl;
-        let signature = self.signer.sign(&Record::new(&record, valid_until));
+        let signature = self.signer.sign(&Record::new(record, valid_until));
 
         VerificationData {
             signature,

@@ -51,7 +51,7 @@ export async function resolveDkimDns(
 ) {
   const address = await resolver.resolveDkimDns(selector, domain);
 
-  let record = address.flat().at(-1);
+  const record = address.flat().at(-1);
 
   if (!record) {
     throw new Error("No DKIM DNS record found");
