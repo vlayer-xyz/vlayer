@@ -28,12 +28,12 @@ sol!(
         string name;
         string recordType;
         string data;
-        uint256 timestamp;
+        uint64 validUntil;
     }
 
     #[derive(Default)]
     struct VerificationData {
-        uint256 validUntil;
+        uint64 validUntil;
         bytes signature;
         bytes pubKey;
     }

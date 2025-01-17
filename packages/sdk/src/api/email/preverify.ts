@@ -57,6 +57,7 @@ export async function preverifyEmail(mimeEmail: string) {
 
   const [{ domain, selector }] = signers;
   const resolver = new DnsResolver();
+
   const record = await resolver.resolveDkimDns(domain, selector);
   if (!record || record.length === 0) {
     throw new Error("No DKIM DNS record found");

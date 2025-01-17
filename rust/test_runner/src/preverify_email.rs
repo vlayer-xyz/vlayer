@@ -7,7 +7,7 @@ use hickory_resolver::{
 use mailparse::MailHeaderMap;
 use thiserror::Error;
 
-use crate::cheatcodes::{preverifyEmailCall, UnverifiedEmail};
+use crate::cheatcodes::{preverifyEmailCall, DnsRecord, UnverifiedEmail, VerificationData};
 
 #[derive(Error, Debug)]
 pub enum EnhanceEmailError {
@@ -31,8 +31,12 @@ pub fn preverify_email(input: &Bytes) -> Result<UnverifiedEmail, EnhanceEmailErr
 
     Ok(UnverifiedEmail {
         email,
-        dnsRecords: vec![dns_record],
-        verificationData: vec![],
+        dnsRecord: dns_record,
+        verificationData: VerificationData {
+            validUntil: u64::MAX,
+            signature: Bytes::default(),
+            pubKey: Bytes::default(),
+        },
     })
 }
 
@@ -72,11 +76,12 @@ fn extract_from_header(tag: char, header: &str) -> Option<&str> {
         .map(|c| c.as_str().trim())
 }
 
-fn resolve_dkim_dns(selector: &str, domain: &str) -> Result<String, EnhanceEmailError> {
+fn resolve_dkim_dns(selector: &str, domain: &str) -> Result<DnsRecord, EnhanceEmailError> {
     let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
+    let name = format!("{selector}._domainkey.{domain}");
 
     let response = resolver
-        .txt_lookup(format!("{selector}._domainkey.{domain}"))
+        .txt_lookup(&name)
         .map_err(|e| EnhanceEmailError::ResolveDns(format!("{e:?}")))?;
 
     let record = response
@@ -85,11 +90,18 @@ fn resolve_dkim_dns(selector: &str, domain: &str) -> Result<String, EnhanceEmail
         .ok_or(EnhanceEmailError::NoDnsRecord)?
         .to_string();
 
-    if record.starts_with("p=") {
-        Ok(format!("v=DKIM1; k=rsa; {record}"))
+    let record = if record.starts_with("p=") {
+        format!("v=DKIM1; k=rsa; {record}")
     } else {
-        Ok(record)
-    }
+        record
+    };
+
+    Ok(DnsRecord {
+        name,
+        recordType: "TXT".into(),
+        data: record,
+        validUntil: u64::MAX,
+    })
 }
 
 #[cfg(test)]
