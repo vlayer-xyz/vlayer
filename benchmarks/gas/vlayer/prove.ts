@@ -1,4 +1,5 @@
-import { createVlayerClient, ProofReceipt } from "@vlayer/sdk";
+import { mean, median, sampleStandardDeviation } from "simple-statistics";
+import { createVlayerClient, ProofReceipt, Metrics } from "@vlayer/sdk";
 import nftSpec from "../out/ExampleNFT.sol/ExampleNFT";
 import tokenSpec from "../out/ExampleToken.sol/ExampleToken";
 import { isAddress } from "viem";
@@ -11,6 +12,50 @@ import {
 
 import proverSpec from "../out/SimpleProver.sol/SimpleProver";
 import verifierSpec from "../out/SimpleVerifier.sol/SimpleVerifier";
+
+class MetricsUnpacked {
+  gas: Array<number> = [];
+  cycles: Array<number> = [];
+  times: {
+    preflight: Array<number>;
+    proving: Array<number>;
+  } = {
+    preflight: [],
+    proving: [],
+  };
+
+  toStats(): MetricsStats {
+    return {
+      gas: meanStddev(this.gas),
+      cycles: meanStddev(this.cycles),
+      times: {
+        preflight: meanStddev(this.times.preflight),
+        proving: meanStddev(this.times.proving),
+      },
+    };
+  }
+}
+
+function meanStddev(values: Array<number>): MeanStddev {
+  return {
+    mean: mean(values),
+    stddev: sampleStandardDeviation(values),
+  };
+}
+
+type MeanStddev = {
+  mean: number;
+  stddev: number;
+};
+
+type MetricsStats = {
+  gas: MeanStddev;
+  cycles: MeanStddev;
+  times: {
+    preflight: MeanStddev;
+    proving: MeanStddev;
+  };
+};
 
 const config = getConfig();
 const {
@@ -56,9 +101,13 @@ const vlayer = createVlayerClient({
   url: proverUrl,
 });
 
-let metrics = [];
-const callback = (proof_receipt: ProofReceipt) => {
-  metrics.push(proof_receipt.metrics);
+let out_metrics = new MetricsUnpacked();
+
+const callback = ({ metrics }: ProofReceipt) => {
+  out_metrics.gas.push(metrics.gas);
+  out_metrics.cycles.push(metrics.cycles);
+  out_metrics.times.preflight.push(metrics.times.preflight);
+  out_metrics.times.proving.push(metrics.times.proving);
 };
 
 for (let i = 0; i < 10; i++) {
@@ -103,4 +152,6 @@ for (let i = 0; i < 10; i++) {
   console.log("  ...success");
 }
 
-console.log("Metrics for running simple example: " + JSON.stringify(metrics));
+const stats = out_metrics.toStats();
+
+console.log("Metrics for running simple example: " + JSON.stringify(stats));
