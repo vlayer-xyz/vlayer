@@ -1,15 +1,8 @@
 import { mean, sampleStandardDeviation } from "simple-statistics";
 import { createVlayerClient, ProofReceipt } from "@vlayer/sdk";
-import tokenSpec from "../out/ExampleToken.sol/ExampleToken";
-import { isAddress } from "viem";
-import {
-  getConfig,
-  createContext,
-  deployProver,
-  waitForContractDeploy,
-} from "@vlayer/sdk/config";
+import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
 
-import proverSpec from "../out/SimpleProver.sol/SimpleProver";
+import proverSpec from "../out/NoopProver.sol/NoopProver";
 
 class MetricsUnpacked {
   gas: Array<number> = [];
@@ -56,22 +49,9 @@ type MetricsStats = {
 };
 
 const config = getConfig();
-const { chain, ethClient, account: john, proverUrl } = createContext(config);
+const { chain, proverUrl } = createContext(config);
 
-const INITIAL_TOKEN_SUPPLY = BigInt(10_000_000);
-
-const tokenDeployTransactionHash = await ethClient.deployContract({
-  abi: tokenSpec.abi,
-  bytecode: tokenSpec.bytecode.object,
-  account: john,
-  args: [john.address, INITIAL_TOKEN_SUPPLY],
-});
-
-const tokenAddress = await waitForContractDeploy({
-  hash: tokenDeployTransactionHash,
-});
-
-const prover = await deployProver({ proverSpec, proverArgs: [tokenAddress] });
+const prover = await deployProver({ proverSpec, proverArgs: [] });
 
 const vlayer = createVlayerClient({
   url: proverUrl,
@@ -92,20 +72,16 @@ for (let i = 0; i < 10; i++) {
   const hash = await vlayer.prove({
     address: prover,
     proverAbi: proverSpec.abi,
-    functionName: "balance",
-    args: [john.address],
+    functionName: "noop",
+    args: [],
     chainId: chain.id,
     token: config.token,
   });
 
-  const result = await vlayer.waitForProvingResult({
+  await vlayer.waitForProvingResult({
     hash,
     callback,
   });
-
-  if (!isAddress(result[1])) {
-    throw new Error(`${result.owner} is not a valid address`);
-  }
 
   console.log("  ...success");
 }
