@@ -108,7 +108,9 @@ where
         .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
         .build();
 
-    preload_l1_block_info(&mut evm);
+    if evm.handler_cfg().is_optimism() {
+        preload_l1_block_info(&mut evm);
+    }
 
     evm
 }
