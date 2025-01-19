@@ -1,11 +1,11 @@
-import { ParsedTranscriptData } from "tlsn-js";
 import {
-  BodyRangeNotFoundError,
   InvalidJsonError,
   InvalidPathError,
   NonStringValueError,
   PathNotFoundError,
 } from "./tlsn.ranges.error";
+
+import { MessageTranscript, Utf8String } from "./utils";
 
 export const validPathRegex = /^(\[\d+\]|[a-zA-Z_]\w*)(\.\w+|\[\d+\])*$/;
 
@@ -14,24 +14,26 @@ const filterExceptPaths = (except: string[], paths: string[]) => {
 };
 
 const calculateJsonBodyRanges = (
-  raw: string,
-  transcriptRanges: ParsedTranscriptData,
+  rawMessage: MessageTranscript,
   paths: string[],
 ) => {
   return paths.map((path) => {
-    if (!transcriptRanges.body) {
-      throw new BodyRangeNotFoundError();
+    const bodyRange = rawMessage.body.range;
+    let bodyJson;
+    try {
+      //parse body json
+      bodyJson = JSON.parse(rawMessage.body.content.toUtf16String()) as object;
+    } catch {
+      throw new InvalidJsonError("Invalid JSON body");
     }
-    //parse body json
-    const bodyJson = getBodyJson(raw, transcriptRanges);
     // Validate path and get path segments
     const pathSegments = getPathSegments(path);
 
     // Initialize helper variables
     let currentObj = bodyJson;
     let currentPath = "";
-    let valueStart = transcriptRanges.body.start;
-    let valueEnd = transcriptRanges.body.end;
+    let valueStart = bodyRange.start;
+    let valueEnd = bodyRange.end;
     let searchStartPos = valueStart;
 
     pathSegments.forEach((segment, i) => {
@@ -43,22 +45,33 @@ const calculateJsonBodyRanges = (
         path,
       );
 
-      // initialize keyPos
       let keyPos = 0;
 
-      searchStartPos = raw.indexOf(JSON.stringify(currentObj));
+      searchStartPos = rawMessage.body.content.indexOf(
+        new Utf8String(JSON.stringify(currentObj)),
+      );
       const isArrayIndex = segment.type === PathSegmentType.ArrayIndex;
       if (isArrayIndex) {
         let foundIndex = -1;
+        const alreadyChecked: number[] = [];
         while (foundIndex < parseInt(segment.value)) {
-          keyPos = raw.indexOf(
-            JSON.stringify((currentObj as object[])[foundIndex + 1]),
+          const newKeyPos = rawMessage.message.content.indexOf(
+            new Utf8String(
+              JSON.stringify((currentObj as object[])[foundIndex + 1]),
+            ),
             searchStartPos + 1,
           );
+          if (!alreadyChecked.includes(newKeyPos)) {
+            keyPos = newKeyPos;
+            alreadyChecked.push(newKeyPos);
+          }
           foundIndex++;
         }
       } else {
-        keyPos = raw.indexOf(`"${segment.value}"`, searchStartPos);
+        keyPos = rawMessage.message.content.indexOf(
+          new Utf8String(`"${segment.value}"`),
+          searchStartPos,
+        );
         if (keyPos === -1) {
           throw new PathNotFoundError(path);
         }
@@ -74,17 +87,13 @@ const calculateJsonBodyRanges = (
         if (typeof currentObj !== "string") {
           throw new NonStringValueError(typeof currentObj);
         }
-
         // Only set final value position for the last segment
-        const valueStr = JSON.stringify(currentObj).replace(/"/g, "");
-
-        // set valueStart and valueEnd for the last segment
-        if (isArrayIndex) {
-          valueStart = keyPos + 1;
-        } else {
-          valueStart = raw.indexOf(valueStr, keyPos + segment.value.length + 1);
-        }
-        valueEnd = valueStart + valueStr.length;
+        const valueStr = JSON.stringify(currentObj).replace(/"/g, "").trim();
+        valueStart = rawMessage.message.content.indexOf(
+          new Utf8String(valueStr),
+          keyPos + new Utf8String(segment.value).length,
+        );
+        valueEnd = valueStart + new Utf8String(valueStr).length;
       }
     });
 
@@ -101,21 +110,6 @@ enum PathSegmentType {
   ArrayIndex = "arrayIndex",
   Key = "key",
 }
-
-const getBodyJson = (raw: string, transcriptRanges: ParsedTranscriptData) => {
-  if (!transcriptRanges.body) {
-    throw new BodyRangeNotFoundError();
-  }
-  let bodyJson;
-  try {
-    bodyJson = JSON.parse(
-      raw.slice(transcriptRanges.body.start, transcriptRanges.body.end + 1),
-    ) as object;
-  } catch {
-    throw new InvalidJsonError();
-  }
-  return bodyJson;
-};
 
 const getPathSegments = (path: string) => {
   if (!validPathRegex.test(path)) {

@@ -1,6 +1,8 @@
+import { Utf8String } from "./utils";
+
 const calculateRequestQueryParamsRanges = (
   urlQueryParams: string[],
-  url: string,
+  url: Utf8String,
   offset: number,
 ) => {
   const stepOverFirstAmpersand = 1;
@@ -8,9 +10,9 @@ const calculateRequestQueryParamsRanges = (
 
   return urlQueryParams.map((param) => {
     const startInUrl =
-      url.indexOf("&" + param + "=") !== -1
-        ? url.indexOf("&" + param + "=")
-        : url.indexOf("?" + param + "=");
+      url.indexOf(`&${param}=`) !== -1
+        ? url.indexOf(`&${param}=`)
+        : url.indexOf(`?${param}=`);
 
     const start =
       offset +

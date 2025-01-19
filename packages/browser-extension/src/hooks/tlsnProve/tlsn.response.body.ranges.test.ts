@@ -1,31 +1,67 @@
 import { describe, test, expect } from "vitest";
-import { calculateResponseRanges } from "./tlsn.response.ranges";
+
 import {
   RedactResponseJsonBody,
   RedactResponseJsonBodyExcept,
 } from "src/web-proof-commons/types/message";
 
-import { ParsedTranscriptData } from "tlsn-js";
-import {
-  BodyRangeNotFoundError,
-  InvalidJsonError,
-  PathNotFoundError,
-} from "./tlsn.ranges.error";
+import { InvalidJsonError, PathNotFoundError } from "./tlsn.ranges.error";
 import { InvalidPathError, NonStringValueError } from "./tlsn.ranges.error";
-import { validPathRegex } from "./tlsn.response.body.ranges";
-import { paths } from "./tlsn.ranges.test.fixtures";
+import {
+  calculateJsonBodyRanges,
+  filterExceptPaths,
+  validPathRegex,
+} from "./tlsn.response.body.ranges";
+import { MessageTranscript, parseHttpMessage, Utf8String } from "./utils";
+import { getStringPaths } from "./getStringPaths";
+
+const paths = {
+  valid: [
+    "[2]",
+    "key1",
+    "key1.key2",
+    "key1[3]",
+    "[2].key1[5]",
+    "key1[1].key2[2].key3",
+    "key1.key2[0].key3",
+    "key_with_underscore[42].nested_key",
+    "_key123[4].key",
+  ],
+  invalid: [
+    "key1..key2",
+    "key1[abc]",
+    "key1[key2]",
+    ".key1",
+    "1key",
+    "[key]",
+    "key1.[2]",
+    "key1.key2[]",
+    "[123abc]",
+    "key1..[3]",
+  ],
+};
+const createTestData = (body: string) => {
+  const headers = `HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: ${Buffer.byteLength(body)}\r\n\r\n`;
+  const raw = headers + body;
+  return parseHttpMessage(raw);
+};
+
+const valueRange = (
+  transcript: MessageTranscript,
+  value: string,
+  index: number = 1,
+) => ({
+  start: transcript.message.content.nthIndexOf(value, index),
+  end:
+    transcript.message.content.nthIndexOf(value, index) +
+    new Utf8String(value).length,
+});
 
 describe("calculateResponseRanges", () => {
   describe("json_body redaction", () => {
     test("simple json paths", () => {
-      const name = "John";
-      const headers =
-        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
-      const raw = headers + `{"name": "${name}", "age": 30}`;
-      const transcriptRanges = {
-        body: { start: headers.length, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const name = "José 🌟";
+      const transcript = createTestData(`{"name": "${name}", "age": 30}`);
 
       const redactionItem = {
         response: {
@@ -33,31 +69,19 @@ describe("calculateResponseRanges", () => {
         },
       } as RedactResponseJsonBody;
 
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
+      const result = calculateJsonBodyRanges(
+        transcript,
+        redactionItem.response.json_body,
       );
-      expect(result).toEqual([
-        {
-          start: headers.length + raw.slice(headers.length).indexOf("John"),
-          end:
-            headers.length +
-            raw.slice(headers.length).indexOf("John") +
-            name.length,
-        },
-      ]);
+      expect(result).toEqual([valueRange(transcript, name)]);
     });
 
     test("multiple json paths", () => {
-      const headers =
-        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
-      const raw =
-        headers + `{"name": "John", "email": "john@example.com", "age": 30}`;
-      const transcriptRanges = {
-        body: { start: headers.length, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const name = "María 👩";
+      const email = "maría@例子.com";
+      const transcript = createTestData(
+        `{"name": "${name}", "email": "${email}", "age": 30}`,
+      );
 
       const redactionItem = {
         response: {
@@ -65,37 +89,20 @@ describe("calculateResponseRanges", () => {
         },
       } as RedactResponseJsonBody;
 
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
+      const result = calculateJsonBodyRanges(
+        transcript,
+        redactionItem.response.json_body,
       );
       expect(result).toEqual([
-        {
-          start: headers.length + raw.slice(headers.length).indexOf("John"),
-          end:
-            headers.length +
-            raw.slice(headers.length).indexOf("John") +
-            "John".length,
-        },
-        {
-          start:
-            headers.length +
-            raw.slice(headers.length).indexOf("john@example.com"),
-          end:
-            headers.length +
-            raw.slice(headers.length).indexOf("john@example.com") +
-            "john@example.com".length,
-        },
+        valueRange(transcript, name),
+        valueRange(transcript, email),
       ]);
     });
 
     test("throws for non-string values", () => {
-      const raw = '{"user": {"name": "John", "details": {"age": 30}}}';
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const transcript = createTestData(
+        '{"user": {"name": "José 🌟", "details": {"age": 30}}}',
+      );
 
       const redactionItem = {
         response: {
@@ -104,16 +111,15 @@ describe("calculateResponseRanges", () => {
       } as RedactResponseJsonBody;
 
       expect(() =>
-        calculateResponseRanges(redactionItem, raw, transcriptRanges),
+        calculateJsonBodyRanges(transcript, redactionItem.response.json_body),
       ).toThrow(NonStringValueError);
     });
 
     test("array indices in paths", () => {
-      const raw = '{"users": [{"name": "John"}, {"name": "Jane"}]}';
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const name = "María 👩";
+      const transcript = createTestData(
+        `{"users": [{"name": "José 🌟"}, {"name": "${name}"}]}`,
+      );
 
       const redactionItem = {
         response: {
@@ -121,51 +127,16 @@ describe("calculateResponseRanges", () => {
         },
       } as RedactResponseJsonBody;
 
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
+      const result = calculateJsonBodyRanges(
+        transcript,
+        redactionItem.response.json_body,
       );
-      expect(result).toEqual([
-        {
-          start: raw.indexOf("Jane"),
-          end: raw.indexOf("Jane") + "Jane".length,
-        },
-      ]);
+      expect(result).toEqual([valueRange(transcript, name)]);
     });
 
-    test("simple array of strings and numbers", () => {
-      const raw = '["apple", "banana", "orange",1,"pear"]';
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
-
-      const redactionItem = {
-        response: {
-          json_body: ["[0]"],
-        },
-      } as RedactResponseJsonBody;
-
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
-      );
-      expect(result).toEqual([
-        {
-          start: raw.indexOf("apple"),
-          end: raw.indexOf("apple") + "apple".length,
-        },
-      ]);
-    });
-
-    test("simple array of strings and numbers with number at path", () => {
-      const raw = '["apple", "banana", "orange",1,"pear"]';
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+    test("simple array of fruits and numbers", () => {
+      const orange = "🍊";
+      const transcript = createTestData('["🍊","🍎", "🍌", "🍊",1,"🍐"]');
 
       const redactionItem = {
         response: {
@@ -173,18 +144,33 @@ describe("calculateResponseRanges", () => {
         },
       } as RedactResponseJsonBody;
 
-      expect(() =>
-        calculateResponseRanges(redactionItem, raw, transcriptRanges),
-      ).toThrow(NonStringValueError);
+      const result = calculateJsonBodyRanges(
+        transcript,
+        redactionItem.response.json_body,
+      );
+      console.log(result);
+      expect(result).toEqual([valueRange(transcript, orange, 2)]);
     });
 
-    test("fails on deeply nested boolean value in path", () => {
-      const idValue = "IdValue";
-      const raw = `{"data": [{"users": [{"settings": [{"config": {"features": [{"enabled": true, "id": "${idValue}"}]}}]}]}]}`;
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+    test("simple array of strings and numbers with number at path", () => {
+      const transcript = createTestData('["🍎", "🍌", "🍊",1,"🍐"]');
+
+      const redactionItem = {
+        response: {
+          json_body: ["[3]"],
+        },
+      } as RedactResponseJsonBody;
+
+      expect(() => {
+        calculateJsonBodyRanges(transcript, redactionItem.response.json_body);
+      }).toThrow(NonStringValueError);
+    });
+
+    test("deeply nested value in path", () => {
+      const idValue = "测试值🔑";
+      const transcript = createTestData(
+        `{"data": [{"users": [{"settings": [{"config": {"features": [{"enabled": true, "id": "${idValue}"}]}}]}]}]}`,
+      );
 
       const redactionItem = {
         response: {
@@ -192,26 +178,17 @@ describe("calculateResponseRanges", () => {
         },
       } as RedactResponseJsonBody;
 
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
+      const result = calculateJsonBodyRanges(
+        transcript,
+        redactionItem.response.json_body,
       );
-      expect(result).toEqual([
-        {
-          start: raw.indexOf(idValue),
-          end: raw.indexOf(idValue) + idValue.length,
-        },
-      ]);
+      expect(result).toEqual([valueRange(transcript, idValue)]);
     });
 
     test("fails on deeply nested boolean value in path", () => {
-      const raw =
-        '{"data": [{"users": [{"settings": [{"config": {"features": [{"enabled": true, "id": "s"}]}}]}]}]}';
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const transcript = createTestData(
+        '{"data": [{"users": [{"settings": [{"config": {"features": [{"enabled": true, "id": "测试🔑"}]}}]}]}]}',
+      );
 
       const redactionItem = {
         response: {
@@ -222,16 +199,12 @@ describe("calculateResponseRanges", () => {
       } as RedactResponseJsonBody;
 
       expect(() =>
-        calculateResponseRanges(redactionItem, raw, transcriptRanges),
+        calculateJsonBodyRanges(transcript, redactionItem.response.json_body),
       ).toThrow(NonStringValueError);
     });
 
     test("throws for invalid paths", () => {
-      const raw = '{"name": "John"}';
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const transcript = createTestData('{"name": "José 🌟"}');
 
       const redactionItem = {
         response: {
@@ -240,131 +213,86 @@ describe("calculateResponseRanges", () => {
       } as RedactResponseJsonBody;
 
       expect(() =>
-        calculateResponseRanges(redactionItem, raw, transcriptRanges),
+        calculateJsonBodyRanges(transcript, redactionItem.response.json_body),
       ).toThrow(new PathNotFoundError("invalid.path"));
     });
 
-    test("throws when body range is missing", () => {
-      const raw = '{"name": "John"}';
-      const transcriptRanges = {
-        headers: {},
-      } as ParsedTranscriptData;
-
-      const redactionItem = {
-        response: {
-          json_body: ["name"],
-        },
-      } as RedactResponseJsonBody;
-
-      expect(() =>
-        calculateResponseRanges(redactionItem, raw, transcriptRanges),
-      ).toThrow(BodyRangeNotFoundError);
-    });
-
     test("throws for invalid JSON", () => {
-      const raw = "{a: 12, b: 13}";
-      const somePath = "some.path[1]";
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const transcript = createTestData("{a: 12, b: 13}");
 
       const redactionItem = {
         response: {
-          json_body: [somePath],
+          json_body: ["some.path[1]"],
         },
       } as RedactResponseJsonBody;
 
       expect(() =>
-        calculateResponseRanges(redactionItem, raw, transcriptRanges),
-      ).toThrow(new InvalidJsonError());
+        calculateJsonBodyRanges(transcript, redactionItem.response.json_body),
+      ).toThrow(InvalidJsonError);
     });
 
     test("throws for invalid path", () => {
-      const raw = '{"name": "John"}';
-      const somePath = "some.path[1";
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const transcript = createTestData('{"name": "José 🌟"}');
 
       const redactionItem = {
         response: {
-          json_body: [somePath],
+          json_body: ["some.path[1"],
         },
       } as RedactResponseJsonBody;
 
       expect(() =>
-        calculateResponseRanges(redactionItem, raw, transcriptRanges),
-      ).toThrow(new InvalidPathError(somePath));
+        calculateJsonBodyRanges(transcript, redactionItem.response.json_body),
+      ).toThrow(new InvalidPathError("some.path[1"));
     });
   });
 
   describe("json_body_except redaction", () => {
     test("string values except specified paths", () => {
-      const raw = '{"name": "John", "email": "john@example.com", "age": 30}';
-      const email = "john@example.com";
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const email = "josé@例子.com";
+      const transcript = createTestData(
+        `{"name": "José 🌟", "email": "${email}", "age": 30}`,
+      );
 
       const redactionItem = {
         response: {
           json_body_except: ["name"],
         },
       } as RedactResponseJsonBodyExcept;
-
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
+      const paths = getStringPaths(transcript.body.content);
+      const filteredPaths = filterExceptPaths(
+        redactionItem.response.json_body_except,
+        paths,
       );
-      expect(result).toEqual([
-        {
-          start: raw.indexOf(email),
-          end: raw.indexOf(email) + email.length,
-        },
-      ]);
+      const result = calculateJsonBodyRanges(transcript, filteredPaths);
+      expect(result).toEqual([valueRange(transcript, email)]);
     });
 
     test("nested objects with except paths", () => {
-      const raw =
-        '{"user": {"name": "John", "contact": {"email": "john@example.com", "phone": "123456"}}}';
-      const email = "john@example.com";
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const email = "josé@例子.com";
+      const transcript = createTestData(
+        `{"user": {"name": "José 🌟", "contact": {"email": "${email}", "phone": "123456"}}}`,
+      );
 
       const redactionItem = {
         response: {
           json_body_except: ["user.name", "user.contact.phone"],
         },
       } as RedactResponseJsonBodyExcept;
-
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
+      const paths = getStringPaths(transcript.body.content);
+      const filteredPaths = filterExceptPaths(
+        redactionItem.response.json_body_except,
+        paths,
       );
-      expect(result).toEqual([
-        {
-          start: raw.indexOf(email),
-          end: raw.indexOf(email) + email.length,
-        },
-      ]);
+      const result = calculateJsonBodyRanges(transcript, filteredPaths);
+      expect(result).toEqual([valueRange(transcript, email)]);
     });
 
     test("arrays with except paths", () => {
-      const raw =
-        '{"users": [{"name": "John", "email": "john@example.com"}, {"name": "Jane", "email": "jane@example.com"}]}';
-      const email1 = "john@example.com";
-      const name2 = "Jane";
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const email1 = "josé@例子.com";
+      const name2 = "María 👩";
+      const transcript = createTestData(
+        `{"users": [{"name": "José 🌟", "email": "${email1}"}, {"name": "${name2}", "email": "maría@例子.com"}]}`,
+      );
 
       const redactionItem = {
         response: {
@@ -372,30 +300,24 @@ describe("calculateResponseRanges", () => {
         },
       } as RedactResponseJsonBodyExcept;
 
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
+      const paths = getStringPaths(transcript.body.content);
+      const filteredPaths = filterExceptPaths(
+        redactionItem.response.json_body_except,
+        paths,
       );
+      const result = calculateJsonBodyRanges(transcript, filteredPaths);
       expect(result).toEqual([
-        {
-          start: raw.indexOf(email1),
-          end: raw.indexOf(email1) + email1.length,
-        },
-        { start: raw.indexOf(name2), end: raw.indexOf(name2) + name2.length },
+        valueRange(transcript, email1),
+        valueRange(transcript, name2),
       ]);
     });
 
     test("arrays with except paths", () => {
-      const raw =
-        '{"users": [{"name": "John", "email": "john@example.com"}, {"name": "Jane", "email": "jane@example.com"}]}';
-
-      const name1 = "John";
-      const name2 = "Jane";
-      const transcriptRanges = {
-        body: { start: 0, end: raw.length },
-        headers: {},
-      } as ParsedTranscriptData;
+      const name1 = "José 🌟";
+      const name2 = "María 👩";
+      const transcript = createTestData(
+        `{"users": [{"name": "${name1}", "email": "josé@例子.com"}, {"name": "${name2}", "email": "maría@例子.com"}]}`,
+      );
 
       const redactionItem = {
         response: {
@@ -403,20 +325,15 @@ describe("calculateResponseRanges", () => {
         },
       } as RedactResponseJsonBodyExcept;
 
-      const result = calculateResponseRanges(
-        redactionItem,
-        raw,
-        transcriptRanges,
+      const paths = getStringPaths(transcript.body.content);
+      const filteredPaths = filterExceptPaths(
+        redactionItem.response.json_body_except,
+        paths,
       );
+      const result = calculateJsonBodyRanges(transcript, filteredPaths);
       expect(result).toEqual([
-        {
-          start: raw.indexOf(name1),
-          end: raw.indexOf(name1) + name1.length,
-        },
-        {
-          start: raw.indexOf(name2),
-          end: raw.indexOf(name2) + name2.length,
-        },
+        valueRange(transcript, name1),
+        valueRange(transcript, name2),
       ]);
     });
   });
@@ -424,12 +341,14 @@ describe("calculateResponseRanges", () => {
 
 describe("validPathRegex", () => {
   test("valid paths", () => {
-    expect(paths.valid.every((path) => validPathRegex.test(path))).toBe(true);
+    expect(paths.valid.every((path: string) => validPathRegex.test(path))).toBe(
+      true,
+    );
   });
 
   test("invalid paths", () => {
-    expect(paths.invalid.every((path) => !validPathRegex.test(path))).toBe(
-      true,
-    );
+    expect(
+      paths.invalid.every((path: string) => !validPathRegex.test(path)),
+    ).toBe(true);
   });
 });

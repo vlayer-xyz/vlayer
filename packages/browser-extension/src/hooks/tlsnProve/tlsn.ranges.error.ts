@@ -36,8 +36,8 @@ export class InvalidPathError extends RedactionError {
 }
 
 export class InvalidJsonError extends RedactionError {
-  constructor() {
-    super("Invalid JSON");
+  constructor(message: string) {
+    super(`Invalid JSON: ${message}`);
     this.name = "InvalidJsonError";
   }
 }
@@ -53,5 +53,26 @@ export class InvalidRangeError extends RedactionError {
   constructor(range: CommitData) {
     super(`Range ${range.start} - ${range.end} is invalid`);
     this.name = "InvalidRangeError";
+  }
+}
+
+export class InvalidHttpStringError extends RedactionError {
+  constructor() {
+    super("Invalid HTTP request string: No header-body delimiter found.");
+    this.name = "InvalidHttpStringError";
+  }
+}
+
+export class InvalidHttpMessageError extends RedactionError {
+  constructor(message: string) {
+    super(`Invalid HTTP message: ${message}`);
+    this.name = "InvalidHttpMessageError";
+  }
+}
+
+export class HeaderNotFoundError extends RedactionError {
+  constructor(header: string) {
+    super(`Header ${header} not found in transcript`);
+    this.name = "HeaderNotFoundError";
   }
 }

@@ -1,4 +1,4 @@
-import { NotaryServer } from "tlsn-js";
+import { NotaryServer, Transcript } from "tlsn-js";
 import { wrap } from "comlink";
 import { Prover as TProver, Presentation as TPresentation } from "tlsn-js";
 import type { PresentationJSON } from "tlsn-js/src/types";
@@ -73,7 +73,6 @@ export async function tlsnProve(
 
   const commit = redact(transcript, redactionConfig);
 
-  console.log("Commit", commit);
   const notarizationOutputs = await prover.notarize(commit);
 
   const presentation = await new Presentation({
@@ -84,5 +83,15 @@ export async function tlsnProve(
     reveal: commit,
   });
 
-  return await presentation.json();
+  const tlsnJson = await presentation.json();
+  const verifierOutput = await presentation.verify();
+
+  const beauty = new Transcript({
+    sent: verifierOutput?.transcript.sent,
+    recv: verifierOutput?.transcript.recv,
+  });
+
+  console.log("Beauty", beauty.recv());
+
+  return tlsnJson;
 }

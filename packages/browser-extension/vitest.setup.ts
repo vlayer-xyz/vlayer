@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi, expect } from "vitest";
 import { MessageToExtension } from "./src/web-proof-commons";
 import "@testing-library/jest-dom/vitest";
 

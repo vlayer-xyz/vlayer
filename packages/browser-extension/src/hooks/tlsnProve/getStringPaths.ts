@@ -1,21 +1,31 @@
-export function getStringPaths(jsonString: string): string[] {
+import { Utf8String } from "./utils";
+import { InvalidJsonError } from "./tlsn.ranges.error";
+
+export function getStringPaths(jsonString: Utf8String): string[] {
   const paths: string[] = [];
 
-  function traverse(obj: Record<string, unknown>, currentPath = "") {
-    if (typeof obj === "object" && obj !== null) {
-      for (const key in obj) {
-        const newPath = currentPath ? `${currentPath}.${key}` : key;
-        if (typeof obj[key] === "string") {
-          paths.push(newPath);
-        }
-        traverse(obj[key] as Record<string, unknown>, newPath);
+  function traverse(obj: unknown, currentPath = ""): void {
+    if (typeof obj !== "object" || obj === null) {
+      return;
+    }
+
+    for (const [key, value] of Object.entries(obj)) {
+      const newPath = currentPath ? `${currentPath}.${key}` : key;
+
+      if (typeof value === "string") {
+        paths.push(newPath);
       }
+      traverse(value, newPath);
     }
   }
 
-  const parsed = JSON.parse(jsonString) as Record<string, unknown>;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonString.toUtf16String());
+  } catch (e) {
+    throw new InvalidJsonError((e as Error).message);
+  }
 
   traverse(parsed);
-
   return paths;
 }

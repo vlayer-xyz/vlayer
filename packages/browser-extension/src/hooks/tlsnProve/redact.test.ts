@@ -1,7 +1,10 @@
 import { RedactionConfig } from "src/web-proof-commons/types/message";
 import { calcRedactionRanges, calcRevealRanges } from "./redact";
 import { describe, expect, test } from "vitest";
-import { fixtureTranscript } from "./tlsn.ranges.test.fixtures";
+import {
+  extractHeaders,
+  XAPICallTranscript,
+} from "./tlsn.ranges.test.fixtures";
 import { InvalidRangeError } from "./tlsn.ranges.error";
 import { OutOfBoundsError } from "./tlsn.ranges.error";
 describe("calcRevealRanges", () => {
@@ -131,7 +134,7 @@ describe("calcRevealRanges", () => {
 });
 
 describe("redact", () => {
-  const mockTranscript = fixtureTranscript;
+  const mockTranscript = XAPICallTranscript;
 
   test("redacts request headers", () => {
     const redactionConfig: RedactionConfig = [
@@ -144,37 +147,53 @@ describe("redact", () => {
 
     const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
+    const start =
+      mockTranscript.sent.message.content.indexOf("authorization") +
+      "authorization".length +
+      2;
+    const end = mockTranscript.sent.message.content.indexOf("\r\n", start);
     expect(result.sent).toEqual([
       {
-        start:
-          mockTranscript.ranges.sent.headers["authorization"].start +
-          "authorization".length +
-          1,
-        end: mockTranscript.ranges.sent.headers["authorization"].end,
+        start,
+        end,
       },
     ]);
-    expect(result.recv).toEqual([]);
   });
 
   test("redacts request headers except specified ones", () => {
     const redactionConfig: RedactionConfig = [
       {
         request: {
-          headers_except: ["host", "user-agent"],
+          headers_except: extractHeaders(
+            mockTranscript.sent.message.content.toUtf16String(),
+          ).filter((header) => header !== "host" && header !== "authorization"),
         },
       },
     ];
 
+    const values = {
+      host: "api.x.com",
+      authorization:
+        "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA",
+    };
     const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
-    expect(result.sent).toEqual(
-      Object.entries(mockTranscript.ranges.sent.headers)
-        .filter(([header]) => !["host", "user-agent"].includes(header))
-        .map(([header, range]) => ({
-          start: range.start + header.length + 1,
-          end: range.end,
-        })),
-    );
+    expect(result.sent).toEqual([
+      {
+        start: mockTranscript.sent.message.content.indexOf(
+          values.authorization,
+        ),
+        end:
+          mockTranscript.sent.message.content.indexOf(values.authorization) +
+          values.authorization.length,
+      },
+      {
+        start: mockTranscript.sent.message.content.nthIndexOf(values.host, 2),
+        end:
+          mockTranscript.sent.message.content.nthIndexOf(values.host, 2) +
+          values.host.length,
+      },
+    ]);
 
     expect(result.recv).toEqual([]);
   });
@@ -193,18 +212,19 @@ describe("redact", () => {
     expect(result.sent).toEqual([]);
     expect(result.recv).toEqual([
       {
-        start:
-          mockTranscript.ranges.recv.headers["x-transaction"].start +
-          "x-transaction".length +
-          1,
-        end: mockTranscript.ranges.recv.headers["x-transaction"].end,
+        start: mockTranscript.recv.message.content.indexOf("f7370b3d41b0ce46"),
+        end:
+          mockTranscript.recv.message.content.indexOf("f7370b3d41b0ce46") +
+          "f7370b3d41b0ce46".length,
       },
       {
-        start:
-          mockTranscript.ranges.recv.headers["content-type"].start +
-          "content-type".length +
-          1,
-        end: mockTranscript.ranges.recv.headers["content-type"].end,
+        start: mockTranscript.recv.message.content.indexOf(
+          "application/json;charset=utf-8",
+        ),
+        end:
+          mockTranscript.recv.message.content.indexOf(
+            "application/json;charset=utf-8",
+          ) + "application/json;charset=utf-8".length,
       },
     ]);
   });
@@ -212,13 +232,8 @@ describe("redact", () => {
   test("handles multiple redaction items", () => {
     const redactionConfig: RedactionConfig = [
       {
-        request: {
-          headers: ["authorization"],
-        },
-      },
-      {
         response: {
-          headers: ["content-type"],
+          headers: ["pragma", "content-type"],
         },
       },
       {
@@ -226,34 +241,50 @@ describe("redact", () => {
           json_body: ["screen_name", "mention_filter"],
         },
       },
+      {
+        request: {
+          headers: ["accept-encoding"],
+        },
+      },
     ];
 
     const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
-    expect(result.sent).toEqual([
-      {
-        start:
-          fixtureTranscript.ranges.sent.headers.authorization.start +
-          "authorization".length +
-          1,
-        end: fixtureTranscript.ranges.sent.headers.authorization.end,
-      },
-    ]);
     expect(result.recv).toEqual([
       {
-        start:
-          fixtureTranscript.ranges.recv.headers["content-type"].start +
-          "content-type".length +
-          1,
-        end: fixtureTranscript.ranges.recv.headers["content-type"].end,
+        start: mockTranscript.recv.message.content.indexOf("no-cache"),
+        end:
+          mockTranscript.recv.message.content.indexOf("no-cache") +
+          "no-cache".length,
       },
       {
-        start: fixtureTranscript.recv.indexOf("g_p_vlayer"),
-        end: fixtureTranscript.recv.indexOf("g_p_vlayer") + "g_p_vlayer".length,
+        start: mockTranscript.recv.message.content.indexOf(
+          "application/json;charset=utf-8",
+        ),
+        end:
+          mockTranscript.recv.message.content.indexOf(
+            "application/json;charset=utf-8",
+          ) + "application/json;charset=utf-8".length,
       },
       {
-        start: fixtureTranscript.recv.indexOf("unfiltered"),
-        end: fixtureTranscript.recv.indexOf("unfiltered") + "unfiltered".length,
+        start: mockTranscript.recv.message.content.indexOf("g_p_vlayer"),
+        end:
+          mockTranscript.recv.message.content.indexOf("g_p_vlayer") +
+          "g_p_vlayer".length,
+      },
+      {
+        start: mockTranscript.recv.message.content.indexOf("unfiltered"),
+        end:
+          mockTranscript.recv.message.content.indexOf("unfiltered") +
+          "unfiltered".length,
+      },
+    ]);
+    expect(result.sent).toEqual([
+      {
+        start: mockTranscript.sent.message.content.indexOf("identity"),
+        end:
+          mockTranscript.sent.message.content.indexOf("identity") +
+          "identity".length,
       },
     ]);
   });
