@@ -41,3 +41,9 @@ export type MetricsStats = {
     proving: MeanStddev;
   };
 };
+
+export interface Benchmark {
+  spec: any;
+  args: any[];
+  functionName: string;
+}

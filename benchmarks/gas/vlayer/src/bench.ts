@@ -1,47 +1,74 @@
 import { createVlayerClient, ProofReceipt } from "@vlayer/sdk";
 import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
-import { MetricsUnpacked } from "./types";
+import { MetricsUnpacked, MetricsStats, Benchmark } from "./types";
+import { noop } from "./benches/noop";
 
-import proverSpec from "../../out/NoopProver.sol/NoopProver";
+export const runBenchmark = async ({
+  bench,
+  numberOfRepetitions = 10,
+}: {
+  bench: Benchmark;
+  numberOfRepetitions?: number;
+}): Promise<MetricsStats> => {
+  const config = getConfig();
+  const { chain, proverUrl } = createContext(config);
 
-const config = getConfig();
-const { chain, proverUrl } = createContext(config);
+  const prover = await deployProver({
+    proverSpec: bench.spec,
+    proverArgs: bench.args,
+  });
 
-const prover = await deployProver({ proverSpec, proverArgs: [] });
+  const vlayer = createVlayerClient({
+    url: proverUrl,
+  });
 
-const vlayer = createVlayerClient({
-  url: proverUrl,
-});
+  let out_metrics = new MetricsUnpacked();
 
-let out_metrics = new MetricsUnpacked();
+  const callback = ({ metrics }: ProofReceipt) => {
+    out_metrics.gas.push(metrics.gas);
+    out_metrics.cycles.push(metrics.cycles);
+    out_metrics.times.preflight.push(metrics.times.preflight);
+    out_metrics.times.proving.push(metrics.times.proving);
+  };
 
-const callback = ({ metrics }: ProofReceipt) => {
-  out_metrics.gas.push(metrics.gas);
-  out_metrics.cycles.push(metrics.cycles);
-  out_metrics.times.preflight.push(metrics.times.preflight);
-  out_metrics.times.proving.push(metrics.times.proving);
+  for (let i = 0; i < numberOfRepetitions; i++) {
+    const hash = await vlayer.prove({
+      address: prover,
+      proverAbi: bench.spec.abi,
+      functionName: bench.functionName,
+      args: bench.args,
+      chainId: chain.id,
+    });
+
+    await vlayer.waitForProvingResult({
+      hash,
+      callback,
+    });
+  }
+
+  return out_metrics.toStats();
 };
 
-for (let i = 0; i < 10; i++) {
-  console.log(`Executing ${i} time...`);
+let benchmarks = [{ name: "No-op", bench: noop }];
+let allStats: MetricsStats[] = [];
 
-  const hash = await vlayer.prove({
-    address: prover,
-    proverAbi: proverSpec.abi,
-    functionName: "noop",
-    args: [],
-    chainId: chain.id,
-    token: config.token,
-  });
-
-  await vlayer.waitForProvingResult({
-    hash,
-    callback,
-  });
-
-  console.log("  ...success");
+for (const { bench } of benchmarks) {
+  allStats.push(await runBenchmark({ bench }));
 }
 
-const stats = out_metrics.toStats();
+console.log("Benchmark results:");
 
-console.log("Metrics for running simple example: " + JSON.stringify(stats));
+for (let i in benchmarks) {
+  const name = benchmarks[i].name;
+  const stats = allStats[i];
+  console.log(`
+
+
+      ==============  ${name}  ========================
+      Gas:  ${stats.gas.mean} +/- ${stats.gas.stddev}
+      Cycles:  ${stats.cycles.mean} +/- ${stats.cycles.stddev}
+      ===============================================
+
+
+  `);
+}
