@@ -31,7 +31,5 @@ function run_prover_script() {
 }
 
 function build_contracts() {
-  forge soldeer install
-  forge clean
   forge build
 }

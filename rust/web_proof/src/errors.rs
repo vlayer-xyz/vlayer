@@ -2,6 +2,8 @@ use std::string::FromUtf8Error;
 
 use thiserror::Error;
 
+use crate::transcript_parser::RedactionElementType;
+
 #[derive(Error, Debug)]
 pub enum ParsingError {
     #[error("No path in request")]
@@ -22,11 +24,11 @@ pub enum ParsingError {
     #[error("IO error: {0}")]
     StdIoError(#[from] std::io::Error),
 
-    #[error("Name is redacted: {0}")]
-    RedactedName(String),
+    #[error("{0} name is redacted: {1}")]
+    RedactedName(RedactionElementType, String),
 
-    #[error("Value is partially redacted: {0}")]
-    PartiallyRedactedValue(String),
+    #[error("{0} value is partially redacted: {1}")]
+    PartiallyRedactedValue(RedactionElementType, String),
 
     #[error("Url parse error: {0}")]
     UrlParse(#[from] url::ParseError),
