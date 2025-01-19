@@ -4,9 +4,11 @@ use alloy_rlp::RlpEncodable;
 use call_engine::{evm::env::location::ExecutionLocation, Call as EngineCall};
 use call_host::{Call as HostCall, Error as HostError};
 use common::Hashable;
-use derive_more::From;
+use derive_more::{Deref, From};
 use derive_new::new;
 use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
+use rand::{RngCore, SeedableRng};
+use rand_chacha::ChaCha20Rng;
 use serde::{Deserialize, Serialize};
 use server_utils::{parse_address_field, parse_hex_field, FieldValidationError};
 
@@ -100,9 +102,21 @@ impl std::fmt::Display for CallHash {
 
 impl From<(&ExecutionLocation, &EngineCall)> for CallHash {
     fn from((execution_location, call): (&ExecutionLocation, &EngineCall)) -> Self {
-        CallHashData::new(execution_location, call)
+        CallHashData::new(execution_location, call, Nonce::new())
             .hash_slow()
             .into()
+    }
+}
+
+#[derive(Deref, RlpEncodable)]
+struct Nonce(B256);
+
+impl Nonce {
+    fn new() -> Self {
+        let mut rng = ChaCha20Rng::from_entropy();
+        let mut buffer = [0_u8; 32];
+        rng.fill_bytes(&mut buffer);
+        Self(B256::new(buffer))
     }
 }
 
@@ -110,6 +124,7 @@ impl From<(&ExecutionLocation, &EngineCall)> for CallHash {
 pub struct CallHashData<'a> {
     execution_location: &'a ExecutionLocation,
     call: &'a EngineCall,
+    nonce: Nonce,
 }
 
 impl Hashable for CallHashData<'_> {
