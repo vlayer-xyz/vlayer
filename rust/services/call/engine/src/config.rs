@@ -27,6 +27,8 @@ lazy_static! {
             (U256::from(3), U256::from(0)),
             // sequenceNumber
             (U256::from(5), U256::from(0)),
+            // blobBaseFeeScalar
+            (U256::from(6), U256::from(0)),
             // baseFeeScalar
             (U256::from(7), U256::from(0)),
         ])
