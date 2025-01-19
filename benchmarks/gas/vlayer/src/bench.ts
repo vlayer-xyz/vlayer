@@ -1,52 +1,8 @@
-import { mean, sampleStandardDeviation } from "simple-statistics";
 import { createVlayerClient, ProofReceipt } from "@vlayer/sdk";
 import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
+import { MetricsUnpacked } from "./types";
 
-import proverSpec from "../out/NoopProver.sol/NoopProver";
-
-class MetricsUnpacked {
-  gas: Array<number> = [];
-  cycles: Array<number> = [];
-  times: {
-    preflight: Array<number>;
-    proving: Array<number>;
-  } = {
-    preflight: [],
-    proving: [],
-  };
-
-  toStats(): MetricsStats {
-    return {
-      gas: meanStddev(this.gas),
-      cycles: meanStddev(this.cycles),
-      times: {
-        preflight: meanStddev(this.times.preflight),
-        proving: meanStddev(this.times.proving),
-      },
-    };
-  }
-}
-
-function meanStddev(values: Array<number>): MeanStddev {
-  return {
-    mean: mean(values),
-    stddev: sampleStandardDeviation(values),
-  };
-}
-
-type MeanStddev = {
-  mean: number;
-  stddev: number;
-};
-
-type MetricsStats = {
-  gas: MeanStddev;
-  cycles: MeanStddev;
-  times: {
-    preflight: MeanStddev;
-    proving: MeanStddev;
-  };
-};
+import proverSpec from "../../out/NoopProver.sol/NoopProver";
 
 const config = getConfig();
 const { chain, proverUrl } = createContext(config);
