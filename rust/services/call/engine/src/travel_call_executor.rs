@@ -98,7 +98,7 @@ where
         });
     };
 
-    Evm::builder()
+    let mut evm = Evm::builder()
         .with_ref_db(&env.db)
         .with_external_context(inspector)
         .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
@@ -106,7 +106,24 @@ where
         .append_handler_register(precompiles_handle_register)
         .append_handler_register(inspector_handle_register)
         .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
-        .build()
+        .build();
+
+    preload_l1_block_info(&mut evm);
+
+    evm
+}
+
+// EVM does it on itself in transaction validation, but we use transact_preverified so we need to do it manually.
+fn preload_l1_block_info<D>(evm: &mut Evm<'_, TravelInspector<'_>, WrapDatabaseRef<&D>>)
+where
+    D: DatabaseRef,
+    D::Error: std::fmt::Debug,
+{
+    let spec_id = evm.spec_id();
+    let l1_block_info = revm::optimism::L1BlockInfo::try_fetch(evm.db_mut(), spec_id).expect(
+        "Failed to fetch L1 block info. This should not happen as we preload all necesary data in seed_cache_db_with_trusted_data",
+    );
+    evm.context.evm.l1_block_info = Some(l1_block_info);
 }
 
 impl<D: std::fmt::Debug> From<EVMError<D>> for Error {
