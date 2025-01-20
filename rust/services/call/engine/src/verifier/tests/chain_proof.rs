@@ -38,7 +38,7 @@ const fn proof_invalid(_: &Receipt, _: Digest) -> zk_proof::Result {
 
 #[test]
 fn ok() -> anyhow::Result<()> {
-    let verifier = ZkVerifier::new(CHAIN_GUEST_ID, proof_ok);
+    let verifier = ZkVerifier::new([CHAIN_GUEST_ID], proof_ok);
     let block_trie = mock_block_trie(0..=1);
     let journal = mock_journal(block_trie.hash_slow(), CHAIN_GUEST_ID);
     let proof = mock_chain_proof(block_trie, journal);
@@ -49,7 +49,7 @@ fn ok() -> anyhow::Result<()> {
 
 #[test]
 fn invalid_receipt() {
-    let verifier = ZkVerifier::new(CHAIN_GUEST_ID, proof_ok);
+    let verifier = ZkVerifier::new([CHAIN_GUEST_ID], proof_ok);
     let proof = ChainProof {
         proof: Bytes::new(),
         block_trie: Default::default(),
@@ -60,17 +60,18 @@ fn invalid_receipt() {
 
 #[test]
 fn zk_verification_fail() {
-    let verifier = ZkVerifier::new(CHAIN_GUEST_ID, proof_invalid);
+    let verifier = ZkVerifier::new([CHAIN_GUEST_ID], proof_invalid);
     #[allow(clippy::reversed_empty_ranges)]
     let block_trie = mock_block_trie(1..=0);
-    let proof = mock_chain_proof(block_trie, vec![]);
+    let journal = mock_journal(block_trie.hash_slow(), CHAIN_GUEST_ID);
+    let proof = mock_chain_proof(block_trie, journal);
     let res = verifier.verify(&proof);
     assert!(matches!(res.unwrap_err(), Error::Zk(zk_proof::Error::InvalidProof)));
 }
 
 #[test]
 fn invalid_root_hash() {
-    let verifier = ZkVerifier::new(CHAIN_GUEST_ID, proof_ok);
+    let verifier = ZkVerifier::new([CHAIN_GUEST_ID], proof_ok);
     let block_trie = mock_block_trie(0..=1);
     let _root_hash = block_trie.hash_slow();
     let journal = mock_journal(INVALID_ROOT_HASH, CHAIN_GUEST_ID);
@@ -87,15 +88,16 @@ fn invalid_root_hash() {
 
 #[test]
 fn invalid_elf_id() {
-    let verifier = ZkVerifier::new(CHAIN_GUEST_ID, proof_ok);
+    let verifier = ZkVerifier::new([CHAIN_GUEST_ID], proof_ok);
     let block_trie = mock_block_trie(0..=1);
     let journal = mock_journal(block_trie.hash_slow(), INVALID_ELF_ID);
     let proof = mock_chain_proof(block_trie, journal);
     let res = verifier.verify(&proof);
+    let _expected_ids = vec![CHAIN_GUEST_ID].into_boxed_slice();
     assert!(matches!(
         res.unwrap_err(),
         Error::ElfId {
-            expected: CHAIN_GUEST_ID,
+            expected: _expected_ids,
             got: INVALID_ELF_ID
         }
     ));

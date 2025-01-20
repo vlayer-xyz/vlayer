@@ -18,7 +18,7 @@ pub struct Config {
     chain_proof_config: Option<ChainProofConfig>,
     max_calldata_size: usize,
     call_guest_elf: GuestElf,
-    chain_guest_elf: GuestElf,
+    chain_guest_ids: Box<[Digest]>,
     api_version: String,
     gas_meter_config: Option<GasMeterConfig>,
 }
@@ -49,11 +49,14 @@ impl Config {
     }
 
     pub const fn chain_guest_id(&self) -> Digest {
-        self.chain_guest_elf.id
+        *self
+            .chain_guest_ids
+            .last()
+            .expect("no chain guest ID provided")
     }
 
     pub fn chain_guest_id_hex(&self) -> String {
-        self.chain_guest_elf.id.encode_hex_with_prefix()
+        self.chain_guest_id().encode_hex_with_prefix()
     }
 
     pub fn api_version(&self) -> String {
@@ -74,12 +77,16 @@ pub struct ConfigBuilder {
 }
 
 impl ConfigBuilder {
-    pub fn new(call_guest_elf: GuestElf, chain_guest_elf: GuestElf, api_version: String) -> Self {
+    pub fn new(
+        call_guest_elf: GuestElf,
+        chain_guest_ids: Box<[Digest]>,
+        api_version: String,
+    ) -> Self {
         Self {
             config: Config {
                 chain_proof_config: None,
                 call_guest_elf,
-                chain_guest_elf,
+                chain_guest_ids,
                 socket_addr: "127.0.0.1:3000".parse().unwrap(),
                 rpc_urls: HashMap::from([(TEST_CHAIN_ID, "http://localhost:8545".to_string())]),
                 proof_mode: ProofMode::Groth16,
@@ -148,7 +155,7 @@ impl From<&Config> for HostConfig {
         HostConfig {
             proof_mode: config.proof_mode.into(),
             call_guest_elf: config.call_guest_elf.clone(),
-            chain_guest_elf: config.chain_guest_elf.clone(),
+            chain_guest_ids: config.chain_guest_ids.clone(),
         }
     }
 }
@@ -178,8 +185,8 @@ mod tests {
     #[test]
     fn correctly_formats_guest_id() {
         let call_elf = GuestElf::new([0; 8], &[]);
-        let chain_elf = GuestElf::new([1; 8], &[]);
-        let config = ConfigBuilder::new(call_elf, chain_elf, "1.2.3".into()).build();
+        let chain_guest_ids = vec![Digest::new([1; 8])].into_boxed_slice();
+        let config = ConfigBuilder::new(call_elf, chain_guest_ids, "1.2.3".into()).build();
 
         assert_eq!(
             config.call_guest_id_hex(),
