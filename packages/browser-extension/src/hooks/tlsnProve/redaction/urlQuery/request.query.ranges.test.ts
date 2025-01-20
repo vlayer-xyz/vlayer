@@ -1,10 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { calculateRequestRedactionRanges } from "./tlsn.request.ranges";
-import {
-  extractUrlQueryParams,
-  XAPICallTranscript,
-} from "./tlsn.ranges.test.fixtures";
-import { MessageTranscript, Utf8String } from "./utils";
+import { calculateRequestRedactionRanges } from "../request.ranges";
+import { extractUrlQueryParams, XAPICallTranscript } from "../test.fixtures";
+import { type MessageTranscript, Utf8String } from "../utils";
 
 describe("request url query", () => {
   test("url_query", () => {

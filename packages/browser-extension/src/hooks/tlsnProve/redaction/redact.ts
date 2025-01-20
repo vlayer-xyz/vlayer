@@ -1,11 +1,15 @@
 import { Commit } from "tlsn-wasm";
 import { match, P } from "ts-pattern";
-import { calculateRequestRedactionRanges as calculateRequestRanges } from "./tlsn.request.ranges";
-import { calculateResponseRedactionRanges as calculateResponseRanges } from "./tlsn.response.ranges";
+import { calculateRequestRedactionRanges as calculateRequestRanges } from "./request.ranges";
+import { calculateResponseRedactionRanges as calculateResponseRanges } from "./response.ranges";
 import { RedactionConfig } from "src/web-proof-commons/types/message";
 import { CommitData } from "tlsn-js/src/types";
-import { InvalidRangeError, OutOfBoundsError } from "./tlsn.ranges.error";
-import { toUtf8Transcript, Transcript, Utf8Transcript } from "./utils";
+import { InvalidRangeError, OutOfBoundsError } from "./utils/error";
+import {
+  toUtf8Transcript,
+  type Transcript,
+  type Utf8Transcript,
+} from "./utils";
 
 const emptyCommit: Commit = {
   sent: [],

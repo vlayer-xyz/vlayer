@@ -1,5 +1,5 @@
-import { Utf8String } from "./utils";
-import { InvalidJsonError } from "./tlsn.ranges.error";
+import { Utf8String } from "./utf8String";
+import { InvalidJsonError } from "./error";
 
 export function getStringPaths(jsonString: Utf8String): string[] {
   const paths: string[] = [];

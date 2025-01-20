@@ -1,6 +1,6 @@
 import { getStringPaths } from "./getStringPaths";
 import { describe, test, expect } from "vitest";
-import { Utf8String } from "./utils";
+import { Utf8String } from "./utf8String";
 describe("getStringPaths", () => {
   test("empty object", () => {
     expect(getStringPaths(new Utf8String("{}"))).toEqual([]);

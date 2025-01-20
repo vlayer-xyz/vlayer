@@ -3,9 +3,9 @@ import {
   InvalidPathError,
   NonStringValueError,
   PathNotFoundError,
-} from "./tlsn.ranges.error";
+} from "../utils/error";
 
-import { MessageTranscript, Utf8String } from "./utils";
+import { MessageTranscript, Utf8String } from "../utils";
 
 export const validPathRegex = /^(\[\d+\]|[a-zA-Z_]\w*)(\.\w+|\[\d+\])*$/;
 

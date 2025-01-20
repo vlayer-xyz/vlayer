@@ -1,4 +1,4 @@
-import { Utf8String } from "./utils";
+import { Utf8String } from "../utils";
 
 const calculateRequestQueryParamsRanges = (
   urlQueryParams: string[],

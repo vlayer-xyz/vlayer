@@ -1,5 +1,5 @@
-import { HeaderNotFoundError } from "./tlsn.ranges.error";
-import { MessagePartTranscript } from "./utils";
+import { HeaderNotFoundError } from "../utils/error";
+import { type MessagePartTranscript } from "../utils";
 const stepAfterColon = 2;
 
 const filterExceptHeaders = (except: string[], headers: string[]) => {

@@ -10,13 +10,9 @@ import {
   calculateHeadersRanges,
   filterExceptHeaders,
   getAllHeaders,
-} from "./tlsn.headers.ranges";
-import { calculateRequestQueryParamsRanges } from "./tlsn.request.query.ranges";
-import {
-  findAllQueryParams,
-  findUrlInRequest,
-  MessageTranscript,
-} from "./utils";
+} from "./headers/headers.ranges";
+import { calculateRequestQueryParamsRanges } from "./urlQuery/request.query.ranges";
+import { getQueryParams, getRequestUrl, MessageTranscript } from "./utils";
 
 export const calculateRequestRedactionRanges = (
   redactionItem:
@@ -26,7 +22,7 @@ export const calculateRequestRedactionRanges = (
     | RedactRequestUrlQueryParamExcept,
   transcript: MessageTranscript,
 ): CommitData[] => {
-  const { url, url_offset } = findUrlInRequest(transcript);
+  const { url, url_offset } = getRequestUrl(transcript);
 
   return match(redactionItem.request)
     .with({ headers: P.array(P.string) }, ({ headers: headersToRedact }) => {
@@ -46,9 +42,9 @@ export const calculateRequestRedactionRanges = (
       return calculateRequestQueryParamsRanges(url_query, url, url_offset);
     })
     .with({ url_query_except: P.array(P.string) }, ({ url_query_except }) => {
-      const queryParamsToRedact = findAllQueryParams(
-        url.toUtf16String(),
-      ).filter((param) => !url_query_except.includes(param));
+      const queryParamsToRedact = getQueryParams(url.toUtf16String()).filter(
+        (param) => !url_query_except.includes(param),
+      );
       return calculateRequestQueryParamsRanges(
         queryParamsToRedact,
         url,

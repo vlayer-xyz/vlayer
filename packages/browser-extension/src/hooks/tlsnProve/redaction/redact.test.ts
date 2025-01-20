@@ -1,12 +1,9 @@
 import { RedactionConfig } from "src/web-proof-commons/types/message";
 import { calcRedactionRanges, calcRevealRanges } from "./redact";
 import { describe, expect, test } from "vitest";
-import {
-  extractHeaders,
-  XAPICallTranscript,
-} from "./tlsn.ranges.test.fixtures";
-import { InvalidRangeError } from "./tlsn.ranges.error";
-import { OutOfBoundsError } from "./tlsn.ranges.error";
+import { extractHeaders, XAPICallTranscript } from "./test.fixtures";
+import { InvalidRangeError } from "./utils/error";
+import { OutOfBoundsError } from "./utils/error";
 describe("calcRevealRanges", () => {
   test("invalid range", () => {
     const wholeTranscriptRange = {

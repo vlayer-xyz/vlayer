@@ -4,7 +4,7 @@ import { Prover as TProver, Presentation as TPresentation } from "tlsn-js";
 import type { PresentationJSON } from "tlsn-js/src/types";
 import { Reveal } from "tlsn-wasm";
 import { type RedactionConfig } from "../../web-proof-commons";
-import { redact } from "./redact";
+import { redact } from "./redaction";
 
 type ProverConfig = {
   serverDns: string;

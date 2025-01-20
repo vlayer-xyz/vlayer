@@ -5,15 +5,15 @@ import {
   RedactResponseJsonBodyExcept,
 } from "src/web-proof-commons/types/message";
 
-import { InvalidJsonError, PathNotFoundError } from "./tlsn.ranges.error";
-import { InvalidPathError, NonStringValueError } from "./tlsn.ranges.error";
+import { InvalidJsonError, PathNotFoundError } from "../utils/error";
+import { InvalidPathError, NonStringValueError } from "../utils/error";
 import {
   calculateJsonBodyRanges,
   filterExceptPaths,
   validPathRegex,
 } from "./tlsn.response.body.ranges";
-import { MessageTranscript, parseHttpMessage, Utf8String } from "./utils";
-import { getStringPaths } from "./getStringPaths";
+import { MessageTranscript, parseHttpMessage, Utf8String } from "../utils";
+import { getStringPaths } from "../utils/getStringPaths";
 
 const paths = {
   valid: [

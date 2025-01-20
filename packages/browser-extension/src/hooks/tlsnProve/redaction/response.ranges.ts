@@ -3,19 +3,19 @@ import {
   RedactResponseHeadersExcept,
   RedactResponseJsonBody,
   RedactResponseJsonBodyExcept,
-} from "../../web-proof-commons/types/message";
+} from "../../../web-proof-commons/types/message";
 import { CommitData } from "tlsn-js/src/types";
 import { match, P } from "ts-pattern";
-import { getStringPaths } from "./getStringPaths";
+import { getStringPaths } from "./utils/getStringPaths";
 import {
   filterExceptHeaders,
   calculateHeadersRanges,
   getAllHeaders,
-} from "./tlsn.headers.ranges";
+} from "./headers/headers.ranges";
 import {
   calculateJsonBodyRanges,
   filterExceptPaths,
-} from "./tlsn.response.body.ranges";
+} from "./body/tlsn.response.body.ranges";
 import { MessageTranscript } from "./utils";
 
 export const calculateResponseRedactionRanges = (

@@ -3,9 +3,9 @@ import { describe, expect, test } from "vitest";
 import {
   getHeaderRange,
   XAPICallTranscript,
-} from "./tlsn.ranges.test.fixtures";
-import { calculateHeadersRanges } from "./tlsn.headers.ranges";
-import { HeaderNotFoundError } from "./tlsn.ranges.error";
+} from "../test.fixtures";
+import { calculateHeadersRanges } from "./headers.ranges";
+import { HeaderNotFoundError } from "../utils/error";
 
 describe("response headers", () => {
   test("single header", () => {
