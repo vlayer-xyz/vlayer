@@ -6,4 +6,7 @@
 .button {
   padding-left : 28px;
   padding-right: 28px;
+  background-color: #E1D9FF;
+  border-color: #7235E5;
+  border-width: 2px;
 }

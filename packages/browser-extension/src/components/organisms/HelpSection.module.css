@@ -14,5 +14,7 @@
   bottom: 0
 }
 .separator {
-  margin-bottom: 20px;
+  position: absolute;
+  top: -15px;
+  left: -8px;
 }
