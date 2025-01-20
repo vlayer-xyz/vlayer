@@ -1,32 +1,69 @@
 import SimpleWebProof from "../components/SimpleWebProof";
+import { WelcomeScreen } from "../components/WelcomeScreen";
+import { ConnectWallet } from "../components/ConnectWallet";
+import { StartProving } from "../components/StartProving";
+import { Minting } from "../components/Minting";
+import { Success } from "../components/Success";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
-import { http, createConfig } from "wagmi";
-import { optimismSepolia, anvil } from "wagmi/chains";
-import { metaMask } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Route, Routes } from "react-router";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { createAppKit } from "@reown/appkit/react";
+import { optimismSepolia, anvil } from "@reown/appkit/networks";
+
 const queryClient = new QueryClient();
 
-export const config = createConfig({
+const wagmiAdapter = new WagmiAdapter({
+  projectId: `0716afdbbb2cc3df69721a879b92ad5b`,
+  networks: [optimismSepolia, anvil],
   chains:
     import.meta.env.VITE_CHAIN_NAME === "anvil" ? [anvil] : [optimismSepolia],
-  connectors: [metaMask()],
-  transports: {
-    [optimismSepolia.id]: http(),
-    [anvil.id]: http(),
+});
+
+createAppKit({
+  adapters: [wagmiAdapter],
+  projectId: `0716afdbbb2cc3df69721a879b92ad5b`,
+  networks: [optimismSepolia, anvil],
+  defaultNetwork:
+    import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil : optimismSepolia,
+  metadata: {
+    name: "appkit-example",
+    description: "AppKit Example",
+    url: "https://appkitexampleapp.com", // origin must match your domain & subdomain
+    icons: ["https://avatars.githubusercontent.com/u/179229932"]
   },
 });
 
+// export const config = createConfig({
+//   chains:
+//     import.meta.env.VITE_CHAIN_NAME === "anvil" ? [anvil] : [optimismSepolia],
+//   connectors: [metaMask()],
+//   transports: {
+//     [optimismSepolia.id]: http(),
+//     [anvil.id]: http(),
+//   },
+// });
+
 const SimpleWebProofApp = () => {
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <ProofProvider
           config={{
             proverUrl: import.meta.env.VITE_PROVER_URL,
           }}
         >
-          <SimpleWebProof />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<WelcomeScreen />} />
+              <Route path="/connect-wallet" element={<ConnectWallet />} />
+              <Route path="/start-proving" element={<StartProving />} />
+              <Route path="/minting" element={<Minting />} />
+              <Route path="/success" element={<Success />} />
+              <Route path="/simple" element={<SimpleWebProof />} />
+            </Routes>
+          </BrowserRouter>
         </ProofProvider>
       </QueryClientProvider>
     </WagmiProvider>
