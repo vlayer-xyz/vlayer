@@ -4,7 +4,6 @@ import {
 } from "hooks/tlsnProve/error";
 import { EncodedString } from "./EncodedString";
 import { Encoding } from "./Encoding";
-import { describe, test, expect } from "vitest";
 
 const bodyHeaderDelimiter = "\r\n\r\n";
 const newLine = "\r\n";
@@ -34,9 +33,7 @@ export function parseHttpMessage(message: string) {
     throw new InvalidHttpMessageError("No content-type header found");
   }
 
-  const encoding = contentType.includes("charset=")
-    ? contentType.split("charset=")[1]
-    : "utf-8";
+  const encoding = contentType.split("charset=")[1].trim();
 
   if (!validateEncoding(encoding)) {
     throw new InvalidEncodingError(encoding);
@@ -83,5 +80,5 @@ export function parseHttpMessage(message: string) {
 }
 
 const validateEncoding = (encoding: string): encoding is Encoding => {
-  return !Object.values(Encoding).includes(encoding as Encoding);
+  return Object.values(Encoding).includes(encoding as Encoding);
 };

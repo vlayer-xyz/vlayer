@@ -1,8 +1,8 @@
 import { match } from "ts-pattern";
 
 export enum Encoding {
-  UTF8 = "utf8",
-  UTF16 = "utf16",
+  UTF8 = "utf-8",
+  UTF16 = "utf-16",
 }
 
 export const encoder = (encoding: Encoding) => {
