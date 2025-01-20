@@ -30,6 +30,7 @@ describe("response headers", () => {
       },
     ]);
   });
+
   test("multiple headers", () => {
     const redactionItem: RedactResponseHeaders = {
       response: {
@@ -81,4 +82,45 @@ describe("response headers", () => {
       },
     ]);
   });
+
+  test("headers case insensitive", () => {
+    const redactionItem: RedactResponseHeaders = {
+      response: {
+        headers: ["Pragma", "sTaTuS"],
+      },
+    };
+
+    const result = calculateResponseRanges(
+      redactionItem,
+      fixtureTranscript.recv,
+      fixtureTranscript.ranges.recv,
+    );
+
+    expect(result).toEqual([
+      {
+        start: 79,
+        end: 88,
+      },
+      {
+        start: 112,
+        end: 119,
+      },
+    ]);
+  });
+
+  test("not existing header", () => {
+    const redactionItem: RedactResponseHeaders = {
+      response: {
+        headers: ["not-existing-header"],
+      },
+    };
+
+    expect(() =>
+      calculateResponseRanges(
+        redactionItem,
+        fixtureTranscript.recv,
+        fixtureTranscript.ranges.recv,
+      ),
+    ).toThrowError("Header not-existing-header not found");
+});
 });
