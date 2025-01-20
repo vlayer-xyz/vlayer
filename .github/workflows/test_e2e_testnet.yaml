@@ -24,9 +24,6 @@ on:
       - "LICENSE"
       - "book/**"
   workflow_dispatch:
-concurrency:
-  group: ${{ github.workflow }}-main
-  cancel-in-progress: false
 
 jobs:
   test-e2e-testnet:
