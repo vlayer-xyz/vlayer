@@ -4,6 +4,15 @@ name: E2E test against testnet
 # because it uses external API resources.
 
 on:
+  pull_request:
+  paths:
+    - "rust-toolchain.toml"
+    - "rust/**"
+    - "examples/**"
+    - "packages/**"
+    - "bash/**"
+    - ".github/workflows/test_e2e_devnet.yaml"
+    - "contracts/**"
   push:
     branches:
       - main
@@ -51,7 +60,7 @@ jobs:
         run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker
       - name: Run e2e test in prod mode
         env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "prod"
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
@@ -65,6 +74,7 @@ jobs:
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
           CONFIRMATIONS: 2
+          EXAMPLE: simple-web-proof
         run: bash/e2e-test.sh
 
       # Teardown
