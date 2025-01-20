@@ -2178,8 +2178,6 @@ dependencies = [
  "mime",
  "mock_chain_server",
  "provider",
- "rand",
- "rand_chacha",
  "reqwest 0.12.12",
  "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "seal",
