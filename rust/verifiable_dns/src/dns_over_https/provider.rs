@@ -1,11 +1,16 @@
 use std::time::Duration;
 
-use reqwest::{header::ACCEPT, Client};
+use reqwest::{header::ACCEPT, Client, RequestBuilder};
 
 use super::{Query, Response, MIME_DNS_JSON_CONTENT_TYPE};
 
 pub trait Provider {
-    fn resolve(&self, query: &Query) -> impl std::future::Future<Output = Option<Response>> + Send;
+    type Error: Send;
+
+    fn resolve(
+        &self,
+        query: &Query,
+    ) -> impl std::future::Future<Output = Result<Response, Self::Error>> + Send;
 }
 
 const GOOGLE_BASE_URL: &str = "https://8.8.8.8/resolve";
@@ -16,21 +21,21 @@ pub struct ExternalProvider {
     base_url: &'static str,
 }
 
-impl Provider for ExternalProvider {
-    async fn resolve(&self, query: &Query) -> Option<Response> {
-        let response = Client::new()
-            .get(self.base_url)
-            .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
-            .query(&query)
-            .timeout(Duration::from_secs(2))
-            .send()
-            .await
-            .ok()?
-            .text()
-            .await
-            .ok()?;
+#[derive(thiserror::Error, Debug)]
+pub enum ExternalProviderError {
+    #[error("Failed to resolve query: {0}")]
+    ResolveError(#[from] reqwest::Error),
+    #[error("Failed to parse response: {0}")]
+    ParseError(#[from] serde_json::Error),
+}
 
-        serde_json::from_str(&response).ok()?
+impl Provider for ExternalProvider {
+    type Error = ExternalProviderError;
+
+    async fn resolve(&self, query: &Query) -> Result<Response, Self::Error> {
+        let response = self.client().query(&query).send().await?.text().await?;
+
+        Ok(serde_json::from_str(&response)?)
     }
 }
 
@@ -45,6 +50,13 @@ impl ExternalProvider {
         Self {
             base_url: DNS_SB_BASE_URL,
         }
+    }
+
+    fn client(&self) -> RequestBuilder {
+        Client::new()
+            .get(self.base_url)
+            .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
+            .timeout(Duration::from_secs(2))
     }
 }
 
@@ -62,11 +74,16 @@ pub(crate) mod test_utils {
     }
 
     impl Provider for MockProvider {
-        async fn resolve(&self, query: &Query) -> Option<Response> {
-            self.0.clone().map(|mut r| {
-                r.question.push(query.clone());
-                r
-            })
+        type Error = ();
+
+        async fn resolve(&self, query: &Query) -> Result<Response, Self::Error> {
+            self.0
+                .clone()
+                .map(|mut r| {
+                    r.question.push(query.clone());
+                    r
+                })
+                .ok_or(())
         }
     }
 }
