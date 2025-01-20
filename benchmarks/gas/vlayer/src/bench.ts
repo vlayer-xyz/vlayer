@@ -1,7 +1,8 @@
 import { createVlayerClient, ProofReceipt, Metrics } from "@vlayer/sdk";
 import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
 import { Benchmark } from "./types";
-import { noop } from "./benches/noop";
+import { benchmark as noopBenchmark } from "./benches/noop";
+import { benchmarks as noopWithCalldataBenchmarks } from "./benches/noop_with_calldata";
 
 export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
   const config = getConfig();
@@ -9,7 +10,6 @@ export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
 
   const prover = await deployProver({
     proverSpec: bench.spec,
-    proverArgs: bench.args,
   });
 
   const vlayer = createVlayerClient({
@@ -42,7 +42,7 @@ export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
   return out_metrics;
 };
 
-let benchmarks = [noop];
+let benchmarks = [noopBenchmark, ...noopWithCalldataBenchmarks];
 let allMetrics: Metrics[] = [];
 
 for (const bench of benchmarks) {
