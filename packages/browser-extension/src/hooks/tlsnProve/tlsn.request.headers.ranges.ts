@@ -14,8 +14,8 @@ const calculateRequestHeadersRanges = (
     );
     if (!headerRange) {
       throw new HeaderNotFound(header);
-    };
-    
+    }
+
     const newStart = raw.indexOf(":", headerRange[1].start) + stepAfterColon;
     return {
       start: newStart,

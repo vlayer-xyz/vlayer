@@ -95,7 +95,7 @@ describe("request headers", () => {
 
     expect(result).toEqual([]);
   });
-  
+
   test("headers case insensitivity", () => {
     const redactionItem = {
       request: {
@@ -121,7 +121,7 @@ describe("request headers", () => {
     ]);
   });
 
-  test ("not existing header", () => {
+  test("not existing header", () => {
     const redactionItem = {
       request: {
         headers: ["not-existing-header"],

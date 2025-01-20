@@ -122,5 +122,5 @@ describe("response headers", () => {
         fixtureTranscript.ranges.recv,
       ),
     ).toThrowError("Header not-existing-header not found");
-});
+  });
 });
