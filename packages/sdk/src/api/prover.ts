@@ -11,8 +11,7 @@ import {
   type CallContext,
   type CallParams,
   type BrandedHash,
-  type Metrics,
-  type ProofData,
+  type ProofDataWithMetrics,
   type ProofReceipt,
   ProofState,
   type VGetProofReceiptParams,
@@ -104,11 +103,11 @@ export async function waitForProof<
   url: string,
   numberOfRetries: number = 240,
   sleepDuration: number = 1000,
-): Promise<[ProofData, Metrics]> {
+): Promise<ProofDataWithMetrics> {
   for (let retry = 0; retry < numberOfRetries; retry++) {
     const { state, data, metrics } = await getProofReceipt(hash, url);
     if (state === ProofState.Done) {
-      return [data, metrics];
+      return { data, metrics };
     }
     await sleep(sleepDuration);
   }

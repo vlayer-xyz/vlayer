@@ -82,7 +82,7 @@ export const createVlayerClient = (
       sleepDuration?: number;
     }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
       try {
-        const [proof_data] = await waitForProof(
+        const { data } = await waitForProof(
           hash,
           url,
           numberOfRetries,
@@ -97,14 +97,14 @@ export const createVlayerClient = (
         const result = dropEmptyProofFromArgs(
           decodeFunctionResult({
             abi: proverAbi,
-            data: proof_data.evm_call_result,
+            data: data.evm_call_result,
             functionName,
           }),
         );
 
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
 
-        return [proof_data.proof, ...result] as ContractFunctionReturnType<
+        return [data.proof, ...result] as ContractFunctionReturnType<
           T,
           AbiStateMutability,
           F

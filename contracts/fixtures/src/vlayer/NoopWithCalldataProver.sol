@@ -6,7 +6,7 @@ import {Prover} from "vlayer/Prover.sol";
 
 contract NoopWithCalldataProver is Prover {
     function noopWithCalldata(
-        bytes calldata payload
+        bytes calldata _
     ) public pure returns (Proof memory) {
         return (proof());
     }

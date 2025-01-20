@@ -1,6 +1,8 @@
+import { ContractArg, ContractSpec } from "@vlayer/sdk";
+
 export interface Benchmark {
   name: string;
-  spec: any;
-  args: any[];
+  spec: ContractSpec;
+  args: ContractArg[];
   functionName: string;
 }

@@ -7,7 +7,7 @@ import { benchmarks as noopWithCalldataBenchmarks } from "./benches/noop_with_ca
 
 const benchmarks = [noopBenchmark, ...noopWithCalldataBenchmarks];
 
-export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
+async function run(bench: Benchmark): Promise<Metrics> {
   const config = getConfig();
   const { chain, proverUrl } = createContext(config);
 
@@ -23,20 +23,21 @@ export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
     chain.id,
     proverUrl,
   );
-  const [_, metrics] = await waitForProof(hash, proverUrl);
+  const { metrics } = await waitForProof(hash, proverUrl);
 
   return metrics;
-};
+}
 
-let allMetrics: Metrics[] = [];
+const allMetrics: Metrics[] = [];
 
 for (const bench of benchmarks) {
-  allMetrics.push(await runBenchmark(bench));
+  const metrics: Metrics = await run(bench);
+  allMetrics.push(metrics);
 }
 
 console.log("Benchmark results:");
 
-for (let i in benchmarks) {
+for (let i = 0; i < benchmarks.length; i++) {
   const name = benchmarks[i].name;
   const stats = allMetrics[i];
   console.log(`

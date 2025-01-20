@@ -1,14 +1,15 @@
 import { Benchmark } from "../types";
+import { bytesToHex } from "viem";
 import proverSpec from "../../../../contracts/fixtures/out/NoopWithCalldataProver.sol/NoopWithCalldataProver";
 
 function encodeArgs(length: number): string {
-  let arr = new Uint8Array(length);
+  const arr = new Uint8Array(length);
   arr.fill(0xaa);
-  return "0x" + Buffer.from(arr).toString("hex");
+  return bytesToHex(arr);
 }
 
 function genBenches(): Array<Benchmark> {
-  let arr = [];
+  const arr = [];
   const calldata_lengths = [1, 2, 3, 4, 10, 20, 100, 1000];
   for (const length of calldata_lengths) {
     arr.push({

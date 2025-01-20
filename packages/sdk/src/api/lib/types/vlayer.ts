@@ -76,6 +76,11 @@ export type Metrics = {
   };
 };
 
+export type ProofDataWithMetrics = {
+  data: ProofData;
+  metrics: Metrics;
+};
+
 export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
   address: Hex;
   proverAbi: T;
@@ -98,7 +103,6 @@ export type VlayerClient = {
     hash: BrandedHash<T, F>;
     numberOfRetries?: number;
     sleepDuration?: number;
-    callback?: (_: ProofReceipt) => void;
   }) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
 
   proveWeb: <T extends Abi, F extends ContractFunctionName<T>>(args: {
