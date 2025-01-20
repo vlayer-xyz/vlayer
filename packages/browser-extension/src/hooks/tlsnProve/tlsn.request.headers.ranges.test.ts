@@ -95,4 +95,20 @@ describe("request headers", () => {
 
     expect(result).toEqual([]);
   });
+
+  test ("not existing header", () => {
+    const redactionItem = {
+      request: {
+        headers: ["not-existing-header"],
+      },
+    };
+
+    expect(() =>
+      calculateRequestRanges(
+        redactionItem,
+        fixtureTranscript.sent,
+        fixtureTranscript.ranges.sent,
+      ),
+    ).toThrowError("Header not-existing-header not found");
+  });
 });
