@@ -12,9 +12,10 @@ data_layout!(Layout {
     project_root: PROJECT_ROOT.into(),
     out_dir: path_from_env("OUT_DIR").unwrap(),
 } {
-    (project_root / "rust/guest_wrapper/artifacts") => artifacts_dir,
-    (artifacts_dir / "chain_guest/elf_id") => chain_guest_id,
-    (artifacts_dir / "chain_guest/elf_id_history") => chain_guest_history,
+    (project_root / "rust/guest_wrapper/artifacts/chain_guest") => chain_artifacts_dir,
+    (chain_artifacts_dir / "elf_id") => chain_guest_id,
+    (chain_artifacts_dir / "elf_id_history") => chain_guest_history,
+    (chain_artifacts_dir / "CHANGELOG.md") => chain_guest_changelog,
     (out_dir / "guest_id.rs") => rust_guest_id,
 });
 
@@ -69,6 +70,13 @@ pub fn update(new_id: Digest) -> anyhow::Result<()> {
         .append(true)
         .open(LAYOUT.chain_guest_history())?;
     writeln!(&history_file, "{old_hex_id}")?;
+
+    // Add changelog entry
+    let changelog_file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(LAYOUT.chain_guest_changelog())?;
+    writeln!(&changelog_file, "  * `{new_hex_id}` – TODO")?;
 
     Ok(())
 }
