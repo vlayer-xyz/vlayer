@@ -11,8 +11,13 @@ import {
   type CallContext,
   type CallParams,
   type BrandedHash,
+  type Metrics,
+  type ProofData,
+  ProofState,
   type VGetProofReceiptParams,
+  type VGetProofReceiptResponse,
 } from "types/vlayer";
+import { match } from "ts-pattern";
 import { v_call } from "./v_call";
 import { v_getProofReceipt } from "./v_getProofReceipt";
 import { foundry } from "viem/chains";
@@ -64,5 +69,49 @@ export async function getProofReceipt<
   const params: VGetProofReceiptParams = {
     hash: hash.hash as Hex,
   };
-  return v_getProofReceipt(params, url);
+  const resp = await v_getProofReceipt(params, url);
+  handleErrors(resp);
+  return resp.result;
+}
+
+const handleErrors = (resp: VGetProofReceiptResponse) => {
+  const { status, state, error } = resp.result;
+  if (status === 0) {
+    match(state)
+      .with(ProofState.ChainProof, () => {
+        throw new Error("Waiting for chain proof failed with error: " + error);
+      })
+      .with(ProofState.Preflight, () => {
+        throw new Error("Preflight failed with error: " + error);
+      })
+      .with(ProofState.Proving, () => {
+        throw new Error("Proving failed with error: " + error);
+      })
+      .exhaustive();
+  }
+};
+
+export async function waitForProof<
+  T extends Abi,
+  F extends ContractFunctionName<T>,
+>(
+  hash: BrandedHash<T, F>,
+  url: string,
+  numberOfRetries: number = 240,
+  sleepDuration: number = 1000,
+): Promise<[ProofData, Metrics]> {
+  for (let retry = 0; retry < numberOfRetries; retry++) {
+    const { state, data, metrics } = await getProofReceipt(hash, url);
+    if (state === ProofState.Done) {
+      return [data, metrics];
+    }
+    await sleep(sleepDuration);
+  }
+  throw new Error(
+    `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries.`,
+  );
+}
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

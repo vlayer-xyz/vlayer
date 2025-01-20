@@ -2,14 +2,9 @@ import {
   type VCallResponse,
   type VlayerClient,
   type BrandedHash,
-  type ProofData,
-  ProofState,
-  type VGetProofReceiptResponse,
-  type ProofReceipt,
 } from "types/vlayer";
 import { type WebProofProvider } from "types/webProofProvider";
-import { match } from "ts-pattern";
-import { prove, getProofReceipt } from "../prover";
+import { prove, waitForProof } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import {
   type Abi,
@@ -38,10 +33,6 @@ function dropEmptyProofFromArgs(args: unknown) {
 async function getHash(vcall_response: Promise<VCallResponse>): Promise<Hex> {
   const result = await vcall_response;
   return result.result;
-}
-
-async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export const createVlayerClient = (
@@ -96,21 +87,17 @@ export const createVlayerClient = (
       hash,
       numberOfRetries = 240,
       sleepDuration = 1000,
-      callback,
     }: {
       hash: BrandedHash<T, F>;
       numberOfRetries?: number;
       sleepDuration?: number;
-      callback?: (_: ProofReceipt) => void;
     }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
       try {
-        const proof_data = await getProof(
+        const [proof_data] = await waitForProof(
           hash,
           url,
           numberOfRetries,
           sleepDuration,
-          webProofProvider,
-          callback,
         );
         const savedProvingData = resultHashMap.get(hash.hash);
         if (!savedProvingData) {
@@ -208,48 +195,4 @@ export const createVlayerClient = (
       return hash;
     },
   };
-};
-
-async function getProof<T extends Abi, F extends ContractFunctionName<T>>(
-  hash: BrandedHash<T, F>,
-  url: string,
-  numberOfRetries: number,
-  sleepDuration: number,
-  webProofProvider: WebProofProvider,
-  callback?: (_: ProofReceipt) => void,
-): Promise<ProofData> {
-  for (let retry = 0; retry < numberOfRetries; retry++) {
-    const resp = await getProofReceipt(hash, url);
-    handleErrors(resp);
-    const { state, data } = resp.result;
-    if (state === ProofState.Done) {
-      if (callback !== undefined) {
-        callback(resp.result);
-      }
-      return data;
-    }
-    webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
-
-    await sleep(sleepDuration);
-  }
-  throw new Error(
-    `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
-  );
-}
-
-const handleErrors = (resp: VGetProofReceiptResponse) => {
-  const { status, state, error } = resp.result;
-  if (status === 0) {
-    match(state)
-      .with(ProofState.ChainProof, () => {
-        throw new Error("Waiting for chain proof failed with error: " + error);
-      })
-      .with(ProofState.Preflight, () => {
-        throw new Error("Preflight failed with error: " + error);
-      })
-      .with(ProofState.Proving, () => {
-        throw new Error("Proving failed with error: " + error);
-      })
-      .exhaustive();
-  }
 };

@@ -1,4 +1,4 @@
-import { createVlayerClient, ProofReceipt, Metrics } from "@vlayer/sdk";
+import { prove, waitForProof, Metrics } from "@vlayer/sdk";
 import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
 import { Benchmark } from "./types";
 import { benchmark as noopBenchmark } from "./benches/noop";
@@ -14,34 +14,17 @@ export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
     proverSpec: bench.spec,
   });
 
-  const vlayer = createVlayerClient({
-    url: proverUrl,
-  });
+  const hash = await prove.prove(
+    prover,
+    bench.spec.abi,
+    bench.functionName,
+    bench.args,
+    chain.id,
+    proverUrl,
+  );
+  const { metrics } = await waitForProof(hash, proverUrl);
 
-  let out_metrics: Metrics | undefined = undefined;
-
-  const callback = ({ metrics }: ProofReceipt) => {
-    out_metrics = metrics;
-  };
-
-  const hash = await vlayer.prove({
-    address: prover,
-    proverAbi: bench.spec.abi,
-    functionName: bench.functionName,
-    args: bench.args,
-    chainId: chain.id,
-  });
-
-  await vlayer.waitForProvingResult({
-    hash,
-    callback,
-  });
-
-  if (out_metrics === undefined) {
-    throw Error(`no metrics available from benchamrk ${bench.name}`);
-  }
-
-  return out_metrics;
+  return metrics;
 };
 
 let allMetrics: Metrics[] = [];
