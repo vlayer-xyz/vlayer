@@ -5,7 +5,7 @@ function get_examples() {
         "simple-email-proof"
         "simple-web-proof"
         "simple-time-travel"
-        "simple-teleport"
+        # "simple-teleport"
     )
 
     if [[ -n ${EXAMPLE:-} ]]; then
