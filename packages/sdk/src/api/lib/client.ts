@@ -1,8 +1,4 @@
-import {
-  type VCallResponse,
-  type VlayerClient,
-  type BrandedHash,
-} from "types/vlayer";
+import { type VlayerClient, type BrandedHash } from "types/vlayer";
 import { type WebProofProvider } from "types/webProofProvider";
 import { prove, waitForProof } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
@@ -13,7 +9,6 @@ import {
   type ContractFunctionName,
   type ContractFunctionReturnType,
   decodeFunctionResult,
-  type Hex,
 } from "viem";
 import {
   ExtensionMessageType,
@@ -28,11 +23,6 @@ function dropEmptyProofFromArgs(args: unknown) {
     return args.slice(1) as unknown[];
   }
   return [];
-}
-
-async function getHash(vcall_response: Promise<VCallResponse>): Promise<Hex> {
-  const result = await vcall_response;
-  return result.result;
 }
 
 export const createVlayerClient = (
@@ -61,23 +51,22 @@ export const createVlayerClient = (
     }: ProveArgs<T, F>) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
 
-      const response = prove(
+      const hash = await prove(
         address,
         proverAbi,
         functionName,
         args,
         chainId,
-        gasLimit,
         url,
+        gasLimit,
         token,
       ).catch((e) => {
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
         throw e;
       });
 
-      const hash = await getHash(response);
-      resultHashMap.set(hash, [proverAbi, functionName]);
-      return { hash } as BrandedHash<typeof proverAbi, typeof functionName>;
+      resultHashMap.set(hash.hash, [proverAbi, functionName]);
+      return hash;
     },
 
     waitForProvingResult: async <

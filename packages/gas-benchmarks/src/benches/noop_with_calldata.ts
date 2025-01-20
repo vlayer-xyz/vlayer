@@ -1,5 +1,5 @@
 import { Benchmark } from "../types";
-import proverSpec from "../../../out/NoopWithCalldataProver.sol/NoopWithCalldataProver";
+import proverSpec from "../../../../contracts/fixtures/out/NoopWithCalldataProver.sol/NoopWithCalldataProver";
 
 function encodeArgs(length: number): string {
   let arr = new Uint8Array(length);

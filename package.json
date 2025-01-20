@@ -1,7 +1,6 @@
 {
   "workspaces": [
     "packages/*",
-    "examples/*/vlayer",
-    "benchmarks/*/vlayer"
+    "examples/*/vlayer"
   ]
 }

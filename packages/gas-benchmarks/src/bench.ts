@@ -1,10 +1,12 @@
-import { prove, waitForProof, Metrics } from "@vlayer/sdk";
+import { Metrics } from "@vlayer/sdk";
+import { prove, waitForProof } from "../../sdk/src/api/prover.ts";
 import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
 import { Benchmark } from "./types";
 import { benchmark as noopBenchmark } from "./benches/noop";
 import { benchmarks as noopWithCalldataBenchmarks } from "./benches/noop_with_calldata";
 
-const benchmarks = [noopBenchmark, ...noopWithCalldataBenchmarks];
+// const benchmarks = [noopBenchmark, ...noopWithCalldataBenchmarks];
+const benchmarks = [noopBenchmark];
 
 export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
   const config = getConfig();
@@ -14,7 +16,7 @@ export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
     proverSpec: bench.spec,
   });
 
-  const hash = await prove.prove(
+  const hash = await prove(
     prover,
     bench.spec.abi,
     bench.functionName,
@@ -22,7 +24,8 @@ export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
     chain.id,
     proverUrl,
   );
-  const { metrics } = await waitForProof(hash, proverUrl);
+  const [metrics] = await waitForProof(hash, proverUrl);
+  console.log(metrics);
 
   return metrics;
 };

@@ -1,17 +1,18 @@
 {
-  "name": "gas_benchmarks",
-  "module": "prove.ts",
+  "name": "gas-benchmarks",
+  "private": true,
+  "version": "1.0.0",
   "type": "module",
-  "dependencies": {
-    "@noble/hashes": "^1.4.0",
-    "@vlayer/sdk": "workspace:*",
-    "prettier-plugin-solidity": "^1.4.2",
-    "solhint": "^5.0.3",
-    "viem": "^2.17.5"
-  },
   "scripts": {
     "lint:solidity": "solhint '../src/**/*.sol'",
     "bench:dev": "VLAYER_ENV=dev bun run src/bench.ts",
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.4.0",
+    "@vlayer/sdk": "file:../sdk",
+    "prettier-plugin-solidity": "^1.4.2",
+    "solhint": "^5.0.3",
+    "viem": "^2.17.5"
   },
   "peerDependencies": {
     "typescript": "^5.5.4"

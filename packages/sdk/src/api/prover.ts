@@ -13,6 +13,7 @@ import {
   type BrandedHash,
   type Metrics,
   type ProofData,
+  type ProofReceipt,
   ProofState,
   type VGetProofReceiptParams,
   type VGetProofReceiptResponse,
@@ -43,11 +44,11 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   functionName: F,
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId: number = foundry.id,
-  gasLimit: number = 10_000_000,
   url: string = "http://127.0.0.1:3000",
+  gasLimit: number = 10_000_000,
   token?: string,
   options: ProveOptions = { preverifyVersions: false },
-) {
+): Promise<BrandedHash<T, F>> {
   await preverifyVersions(url, !!options.preverifyVersions);
   const calldata = encodeFunctionData({
     abi: abi as Abi,
@@ -59,13 +60,17 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     chain_id: chainId,
   };
   const fullUrl = url.concat(token !== undefined ? "/?token=" + token : "");
-  return v_call(call, context, fullUrl);
+  const resp = await v_call(call, context, fullUrl);
+  return { hash: resp.result } as BrandedHash<T, F>;
 }
 
 export async function getProofReceipt<
   T extends Abi,
   F extends ContractFunctionName<T>,
->(hash: BrandedHash<T, F>, url: string = "http://127.0.0.1:3000") {
+>(
+  hash: BrandedHash<T, F>,
+  url: string = "http://127.0.0.1:3000",
+): Promise<ProofReceipt> {
   const params: VGetProofReceiptParams = {
     hash: hash.hash as Hex,
   };
