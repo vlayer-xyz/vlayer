@@ -14,6 +14,7 @@ VLAYER_ENV=${VLAYER_ENV:-dev}
 
 generate_ts_bindings
 build_sdk
+build_vlayer_contracts
 
 echo "::group::Running examples"
 for example in $(get_examples); do
