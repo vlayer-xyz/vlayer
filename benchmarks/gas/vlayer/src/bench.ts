@@ -1,15 +1,9 @@
-import { createVlayerClient, ProofReceipt } from "@vlayer/sdk";
+import { createVlayerClient, ProofReceipt, Metrics } from "@vlayer/sdk";
 import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
-import { MetricsUnpacked, MetricsStats, Benchmark } from "./types";
+import { Benchmark } from "./types";
 import { noop } from "./benches/noop";
 
-export const runBenchmark = async ({
-  bench,
-  numberOfRepetitions = 10,
-}: {
-  bench: Benchmark;
-  numberOfRepetitions?: number;
-}): Promise<MetricsStats> => {
+export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
   const config = getConfig();
   const { chain, proverUrl } = createContext(config);
 
@@ -22,51 +16,50 @@ export const runBenchmark = async ({
     url: proverUrl,
   });
 
-  let out_metrics = new MetricsUnpacked();
+  let out_metrics: Metrics | undefined = undefined;
 
   const callback = ({ metrics }: ProofReceipt) => {
-    out_metrics.gas.push(metrics.gas);
-    out_metrics.cycles.push(metrics.cycles);
-    out_metrics.times.preflight.push(metrics.times.preflight);
-    out_metrics.times.proving.push(metrics.times.proving);
+    out_metrics = metrics;
   };
 
-  for (let i = 0; i < numberOfRepetitions; i++) {
-    const hash = await vlayer.prove({
-      address: prover,
-      proverAbi: bench.spec.abi,
-      functionName: bench.functionName,
-      args: bench.args,
-      chainId: chain.id,
-    });
+  const hash = await vlayer.prove({
+    address: prover,
+    proverAbi: bench.spec.abi,
+    functionName: bench.functionName,
+    args: bench.args,
+    chainId: chain.id,
+  });
 
-    await vlayer.waitForProvingResult({
-      hash,
-      callback,
-    });
+  await vlayer.waitForProvingResult({
+    hash,
+    callback,
+  });
+
+  if (out_metrics === undefined) {
+    throw Error(`no metrics available from benchamrk ${bench.name}`);
   }
 
-  return out_metrics.toStats();
+  return out_metrics;
 };
 
-let benchmarks = [{ name: "No-op", bench: noop }];
-let allStats: MetricsStats[] = [];
+let benchmarks = [noop];
+let allMetrics: Metrics[] = [];
 
-for (const { bench } of benchmarks) {
-  allStats.push(await runBenchmark({ bench }));
+for (const bench of benchmarks) {
+  allMetrics.push(await runBenchmark(bench));
 }
 
 console.log("Benchmark results:");
 
 for (let i in benchmarks) {
   const name = benchmarks[i].name;
-  const stats = allStats[i];
+  const stats = allMetrics[i];
   console.log(`
 
 
       ==============  ${name}  ========================
-      Gas:  ${stats.gas.mean} +/- ${stats.gas.stddev}
-      Cycles:  ${stats.cycles.mean} +/- ${stats.cycles.stddev}
+      Gas:  ${stats.gas}
+      Cycles:  ${stats.cycles}
       ===============================================
 
 
