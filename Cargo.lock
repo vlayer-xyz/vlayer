@@ -5690,15 +5690,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "guest_wrapper"
+name = "guest_build_utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "common",
+ "hex",
  "lazy_static",
  "risc0-build 1.2.0",
  "risc0-build-ethereum",
  "risc0-zkp 1.2.1",
+]
+
+[[package]]
+name = "guest_wrapper"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "guest_build_utils",
 ]
 
 [[package]]

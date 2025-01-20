@@ -30,8 +30,12 @@ function run_prover_script() {
   popd
 }
 
+function build_vlayer_contracts() {
+  pushd "${VLAYER_HOME}/contracts/vlayer"
+  build_contracts
+  popd
+}
+
 function build_contracts() {
-  forge soldeer install
-  forge clean
   forge build
 }

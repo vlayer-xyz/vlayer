@@ -14,7 +14,9 @@ function cleanup() {
         fi
     done < "${CHAIN_WORKER_PIDS}"
 
-    docker compose -f $DOCKER_COMPOSE_FILE down anvil-l1 anvil-l2-op
+    if [[ $VLAYER_ENV == "dev" ]]; then
+        docker compose -f $DOCKER_COMPOSE_FILE down anvil-l1 anvil-l2-op
+    fi
 
     echo "Cleanup done. Artifacts saved to: ${VLAYER_TMP_DIR}"
 }

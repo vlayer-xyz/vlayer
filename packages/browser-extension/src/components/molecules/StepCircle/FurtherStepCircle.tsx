@@ -5,7 +5,9 @@ import { Text } from "@radix-ui/themes";
 export const FurtherStepCircle = ({ index }: { index: number }) => {
   return (
     <Circle isSolid={false} isDisabled={true}>
-      <Text size={"2"}>{index}</Text>
+      <Text size={"2"} weight={"bold"}>
+        {index}
+      </Text>
     </Circle>
   );
 };

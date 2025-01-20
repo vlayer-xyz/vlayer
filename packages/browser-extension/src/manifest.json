@@ -3,11 +3,11 @@
   "{{chrome}}.manifest_version": 3,
   "{{firefox}}.manifest_version": 2,
   "icons": {
-    "16": "icon/vlayer_logo_crop.png",
-    "32": "icon/vlayer_logo_crop.png",
-    "48": "icon/vlayer_logo_crop.png",
-    "96": "icon/vlayer_logo_crop.png",
-    "128": "icon/vlayer_logo_crop.png"
+    "16": "icon/16px.png",
+    "32": "icon/32px.png",
+    "48": "icon/48px.png",
+    "96": "icon/96px.png",
+    "128": "icon/128px.png"
   },
   "background": {
     "{{chrome}}.service_worker": "src/background.ts",
