@@ -23,7 +23,7 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
-      "types/*": ["../../../packages/sdk/src/api/lib/types/*"],
+      "types/*": ["../sdk/src/api/lib/types/*"],
     }
   }, 
 }
