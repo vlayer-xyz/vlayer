@@ -13,6 +13,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/run_services/cleanup.sh"
 trap cleanup EXIT ERR INT
 
 # Default values
+VLAYER_ENV=${VLAYER_ENV:-dev}
 BUILD_BINARIES=${BUILD_BINARIES:-1}
 PROVING_MODE=${PROVING_MODE:-dev}
 RISC0_DEV_MODE=""
@@ -49,7 +50,9 @@ ensure_binaries_built
 
 echo "Starting services..."
 
-docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op
+if [[ $VLAYER_ENV == "dev" ]]; then
+    docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op
+fi
 
 if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
     startup_chain_services "${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"

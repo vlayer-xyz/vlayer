@@ -218,3 +218,24 @@ mod time_travel {
         Ok(())
     }
 }
+
+mod simple {
+    use super::*;
+    use crate::test_harness::contracts::simple::{
+        SimpleProver::{balanceCall, balanceReturn},
+        BLOCK_NO, SIMPLE,
+    };
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn balance_call() -> anyhow::Result<()> {
+        let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BLOCK_NO).into();
+        let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
+        let call = call(SIMPLE, &balanceCall { _owner: binance_8 });
+        let balanceReturn { _2: balance, .. } =
+            preflight::<balanceCall>("simple", call, &location).await?;
+
+        assert_eq!(balance, uint!(0_U256));
+
+        Ok(())
+    }
+}
