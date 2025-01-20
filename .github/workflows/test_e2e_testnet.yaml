@@ -11,7 +11,7 @@ on:
       - "examples/**"
       - "packages/**"
       - "bash/**"
-      - ".github/workflows/test_e2e_devnet.yaml"
+      - ".github/workflows/test_e2e_testnet.yaml"
       - "contracts/**"
   push:
     branches:
