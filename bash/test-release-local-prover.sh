@@ -45,11 +45,14 @@ for example in $(get_examples); do
 
     run_prover_script
 
+    
+
+    cd vlayer
+
     echo '::group::Playwright browser installation'
     bunx playwright install --with-deps chromium
     echo '::endgroup::'
 
-    cd vlayer
     echo "::group::vlayer run Playwright test: ${example}"
     WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:dev" bun run test:dev
     echo '::endgroup::'
