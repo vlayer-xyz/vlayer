@@ -166,6 +166,14 @@ forks = [
 ]
 
 [[chains]]
+name = "local-testnet-optimism"
+id = 31338
+is_optimism = true
+forks = [
+    { spec = "GRANITE", activation = { Block = 0 } }
+]
+
+[[chains]]
 name = "vlayer-test-runner"
 id = 301337
 forks = [
