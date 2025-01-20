@@ -14,6 +14,7 @@ const EmlUploadForm = () => {
     verificationError,
     provingError,
     startProving,
+    callProverError,
   } = useEmailProofVerification();
 
   const handleError = (err: unknown) => {
@@ -66,6 +67,13 @@ const EmlUploadForm = () => {
       handleError("Cannot finalize proving, check logs");
     }
   }, [provingError]);
+
+  useEffect(() => {
+    console.log("callProverError", callProverError);
+    if (callProverError) {
+      handleError("Cannot call prover, check logs");
+    }
+  }, [callProverError]);
 
   return (
     <EmlForm
