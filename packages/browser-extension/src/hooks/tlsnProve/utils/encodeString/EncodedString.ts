@@ -44,7 +44,11 @@ export class EncodedString {
         : encoder(this.encoding).encode(needle);
     return indexInArray(this.bytesRepresentation, needleValue, from);
   }
-  nthIndexOf(needle: string, n: number, from: number = 0): number {
+  nthIndexOf(
+    needle: string | EncodedString,
+    n: number,
+    from: number = 0,
+  ): number {
     let count = 0;
     while (count < n) {
       count++;
@@ -86,7 +90,11 @@ export class EncodedString {
     return this.stringRepresentation;
   }
 
-  slice(start: number, end: number) {
-    return this.bytesRepresentation.slice(start, end);
+  slice(start: number, end: number): EncodedString {
+    const slicedBytes = this.bytesRepresentation.slice(start, end);
+    return new EncodedString(
+      new TextDecoder(this.encoding).decode(slicedBytes),
+      this.encoding,
+    );
   }
 }

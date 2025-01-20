@@ -7,15 +7,15 @@
     "lib": ["ESNext", "DOM"],
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "isolatedModules": true,
     "esModuleInterop": true,
-    "baseUrl": "./",
     "allowImportingTsExtensions": true,
     "paths": {
       "components/*" : ["./src/components/*"],
       "constants/*" : ["./src/constants/*"],
       "hooks/*" : ["./src/hooks/*"],
       "lib/*" : ["./src/lib/*"],
-    }
+      "src/*" : ["./src/*"],
+    },
   },
+  "include": ["vitest.d.ts", "**/*.ts", "**/*.tsx"],
 }
