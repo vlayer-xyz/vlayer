@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 2
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
@@ -70,3 +71,6 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo machete
+
+      - name: Check chain guest ELF ID
+        run: ./bash/check-elf-id.sh
