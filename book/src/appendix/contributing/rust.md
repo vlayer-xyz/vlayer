@@ -7,7 +7,7 @@ To start working with [this repository](https://github.com/vlayer-xyz/vlayer), y
 - [Rust](https://www.rust-lang.org/tools/install) compiler
 - Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart) version v1.2.0
   ```
-  rzup install cargo-risczero v1.2.0
+  rzup install cargo-risczero v1.2.1-rc.1
   cargo risczero install
   ```
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
