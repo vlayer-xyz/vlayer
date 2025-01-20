@@ -25,11 +25,18 @@ function run_prover_script() {
     local args="--frozen-lockfile --no-cache"
   fi
   pushd vlayer
-      silent_unless_fails bun install "${args}"
-      bun run prove:"${VLAYER_ENV}"
+    silent_unless_fails bun install "${args}"
+    bun run prove:"${VLAYER_ENV}"
   popd
 }
 
 function build_contracts() {
   forge build
+}
+
+function run_playwright_tests() {
+  pushd vlayer
+    silent_unless_fails bunx playwright install --with-deps chromium
+    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:dev" bun run test:dev
+  popd
 }

@@ -43,17 +43,11 @@ for example in $(get_examples); do
     vlayer test
     echo '::endgroup::'
 
+    echo "::group::vlayer run prove.ts: ${example}"
     run_prover_script
-
-    
-
-    cd vlayer
-
-    echo '::group::Playwright browser installation'
-    bunx playwright install --with-deps chromium
     echo '::endgroup::'
 
     echo "::group::vlayer run Playwright test: ${example}"
-    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:dev" bun run test:dev
+    run_playwright_tests
     echo '::endgroup::'
 done
