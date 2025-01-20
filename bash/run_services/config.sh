@@ -19,7 +19,7 @@ function set_proof_mode() {
 }
 
 function set_external_rpc_urls() {
-    if [[ -n "${QUICKNODE_API_KEY:-}" && -n "${QUICKNODE_ENDPOINT:-}" ]] ; then
+    if [[ -n "${QUICKNODE_API_KEY:-}" && -n "${QUICKNODE_ENDPOINT:-}" ]]; then
         EXTERNAL_RPC_URLS=(
             "--rpc-url" "1:https://${QUICKNODE_ENDPOINT}.quiknode.pro/${QUICKNODE_API_KEY}"
             "--rpc-url" "11155111:https://${QUICKNODE_ENDPOINT}.ethereum-sepolia.quiknode.pro/${QUICKNODE_API_KEY}"
@@ -47,30 +47,22 @@ function set_testnet_chain_worker_args() {
 
     if [[ "${EXAMPLE_NAME:-}" == "simple_time_travel" ]]; then
         # Time travel example needs to travel 10 block back
-        start_op_sepolia_block=$(( $latest_op_sepolia_block - 10 ))
+        start_op_sepolia_block=$(($latest_op_sepolia_block - 10))
     else
         start_op_sepolia_block=$latest_op_sepolia_block
     fi
 
     CHAIN_WORKER_ARGS=()
 
-    if [[ "${EXAMPLE_NAME:-}" == "simple_teleport" || "${EXAMPLE_NAME:-}" == "simple_time_travel" ]]; then
+    if [ "${EXAMPLE_NAME:-}" == "simple_time_travel" ]; then
         CHAIN_WORKER_ARGS+=(
             "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420 ${start_op_sepolia_block} ${latest_op_sepolia_block}"
-        )
-    fi
-
-    if [[ "${EXAMPLE_NAME:-}" == "simple_teleport" ]]; then
-        CHAIN_WORKER_ARGS+=(
-            "https://${QUICKNODE_ENDPOINT}.quiknode.pro/${QUICKNODE_API_KEY} 1 20683110 20683110"
-            "https://${QUICKNODE_ENDPOINT}.base-mainnet.quiknode.pro/${QUICKNODE_API_KEY} 8453 19367633 19367633"
-            "https://${QUICKNODE_ENDPOINT}.optimism.quiknode.pro/${QUICKNODE_API_KEY} 10 124962954 124962954"
         )
     fi
 }
 
 function set_chain_worker_args() {
-    if [[ -z "${QUICKNODE_API_KEY:-}" || -z "${QUICKNODE_ENDPOINT:-}" ]] ; then
+    if [[ -z "${QUICKNODE_API_KEY:-}" || -z "${QUICKNODE_ENDPOINT:-}" ]]; then
         echo QUICKNODE_API_KEY is not configured. Starting devnet chain workers. >&2
         set_devnet_chain_worker_args
     else
