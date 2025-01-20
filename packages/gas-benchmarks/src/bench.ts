@@ -5,8 +5,7 @@ import { Benchmark } from "./types";
 import { benchmark as noopBenchmark } from "./benches/noop";
 import { benchmarks as noopWithCalldataBenchmarks } from "./benches/noop_with_calldata";
 
-// const benchmarks = [noopBenchmark, ...noopWithCalldataBenchmarks];
-const benchmarks = [noopBenchmark];
+const benchmarks = [noopBenchmark, ...noopWithCalldataBenchmarks];
 
 export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
   const config = getConfig();
@@ -24,8 +23,7 @@ export const runBenchmark = async (bench: Benchmark): Promise<Metrics> => {
     chain.id,
     proverUrl,
   );
-  const [metrics] = await waitForProof(hash, proverUrl);
-  console.log(metrics);
+  const [_, metrics] = await waitForProof(hash, proverUrl);
 
   return metrics;
 };

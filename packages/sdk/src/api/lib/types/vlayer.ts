@@ -130,15 +130,13 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal(1),
     error: z.undefined(),
-    state: z
-      .enum([
-        ProofState.Done,
-        ProofState.ChainProof,
-        ProofState.Preflight,
-        ProofState.Proving,
-        ProofState.Queued,
-      ])
-      .optional(),
+    state: z.enum([
+      ProofState.Done,
+      ProofState.ChainProof,
+      ProofState.Preflight,
+      ProofState.Proving,
+      ProofState.Queued,
+    ]),
     data: z.custom<ProofData>(),
     metrics: z.custom<Metrics>(),
   }),
