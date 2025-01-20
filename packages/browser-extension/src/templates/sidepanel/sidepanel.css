@@ -6,6 +6,7 @@
 
 body{
     overflow: hidden;
+    margin: 12px
 }
 .radix-themes {
     --vlayer-violet: #7235E5;
