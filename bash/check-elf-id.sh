@@ -15,13 +15,12 @@ if [[ "${CURRENT_ELF_ID}" == "${PREV_ELF_ID}" ]]; then
     exit 0
 fi
 
-grep "${PREV_ELF_ID}" "${ELF_ID_HISTORY_PATH}" > /dev/null
-if [ $? -ne 0 ]; then
+if ! grep -q "${PREV_ELF_ID}" "${ELF_ID_HISTORY_PATH}"; then
   echo "Previous ELF ID ${PREV_ELF_ID} not found in history"
   exit 1
 fi
 
 if ! grep "${CURRENT_ELF_ID}" "${CHANGELOG_PATH}" | grep -vq "TODO"; then
-  echo "No changelog entry for ${CURRENT_ELF_ID}"
+  echo "Fill changelog entry for ${CURRENT_ELF_ID}"
   exit 1
 fi

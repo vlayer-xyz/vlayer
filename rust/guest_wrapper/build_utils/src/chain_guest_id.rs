@@ -12,10 +12,10 @@ data_layout!(Layout {
     project_root: PROJECT_ROOT.into(),
     out_dir: path_from_env("OUT_DIR").unwrap(),
 } {
-    (project_root / "rust/guest_wrapper/artifacts") => artifacts_dir,
-    (artifacts_dir / "chain_guest/elf_id") => chain_guest_id,
-    (artifacts_dir / "chain_guest/elf_id_history") => chain_guest_history,
-    (artifacts_dir / "chain_guest/CHANGELOG.md") => chain_guest_changelog,
+    (project_root / "rust/guest_wrapper/artifacts/chain_guest") => chain_artifacts_dir,
+    (chain_artifacts_dir / "elf_id") => chain_guest_id,
+    (chain_artifacts_dir / "elf_id_history") => chain_guest_history,
+    (chain_artifacts_dir / "CHANGELOG.md") => chain_guest_changelog,
     (out_dir / "guest_id.rs") => rust_guest_id,
 });
 
