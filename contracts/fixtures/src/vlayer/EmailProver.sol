@@ -23,7 +23,7 @@ contract EmailProver is Prover {
     IVDnsKeyVerifier public vDnsKeyVerifier;
 
     function main(UnverifiedEmail calldata unverifiedEmail) public view returns (Proof memory) {
-        VerifiedEmail memory email = unverifiedEmail.verify(vDnsKeyVerifier);
+        VerifiedEmail memory email = unverifiedEmail.verify();
 
         require(email.subject.equal("Verify me for Email NFT"), "incorrect subject");
         require(email.from.matches("^.*@vlayer.xyz$"), "from must be a vlayer address");
