@@ -1,6 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "moduleResolution": "bundler",
-  },
+    "moduleResolution": "bundler"
+  }
 }

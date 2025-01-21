@@ -18,9 +18,9 @@
     "baseUrl": "./",
     "types": [
       "bun"
-    ],
+    ]
   }, 
   "include": [
-    "src",
-  ],
+    "src"
+  ]
 }

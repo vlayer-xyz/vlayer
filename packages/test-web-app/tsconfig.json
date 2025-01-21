@@ -9,7 +9,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "baseUrl": "./",
-    "moduleResolution": "bundler",
+    "moduleResolution": "bundler"
   },
   "include": [
     "src/**/*",
