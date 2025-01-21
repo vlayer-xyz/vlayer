@@ -67,10 +67,10 @@ impl<C: chain_client::Client, V: chain_proof::Verifier> seal::Sealed for ZkVerif
 #[async_trait]
 impl<C: chain_client::Client, V: chain_proof::Verifier> Verifier for ZkVerifier<C, V> {
     async fn verify(&self, input: &MultiEvmInput) -> Result {
-        if input.is_single_location() {
-            return Ok(()); // No need to verify chain proofs for a single location
-        }
         for (chain_id, blocks) in input.blocks_by_chain() {
+            if blocks.len() == 1 {
+                return Ok(()); // No need to verify chain proofs for a single location
+            }
             let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
             let chain_proof = self
                 .chain_client
