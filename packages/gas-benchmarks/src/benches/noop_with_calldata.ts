@@ -9,17 +9,13 @@ function encodeArgs(length: number): string {
 }
 
 function genBenches(): Array<Benchmark> {
-  const arr = [];
   const calldata_lengths = [1, 2, 3, 4, 10, 20, 100, 1000];
-  for (const length of calldata_lengths) {
-    arr.push({
-      name: `No-op-with-${length}byte-calldata`,
-      spec: proverSpec,
-      args: [encodeArgs(length)],
-      functionName: "noopWithCalldata",
-    });
-  }
-  return arr;
+  return calldata_lengths.map((length) => ({
+    name: `No-op-with-${length}byte-calldata`,
+    spec: proverSpec,
+    args: [encodeArgs(length)],
+    functionName: "noopWithCalldata",
+  }));
 }
 
 export const benchmarks = genBenches();
