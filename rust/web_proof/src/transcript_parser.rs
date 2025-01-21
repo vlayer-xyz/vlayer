@@ -628,7 +628,7 @@ mod tests {
                         parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
                     assert!(matches!(
                         err,
-                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "string*: Hello"
+                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.string*: Hello"
                     ));
                 }
 
@@ -644,7 +644,7 @@ mod tests {
                         parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
                     assert!(matches!(
                         err,
-                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "object.nested_string*: Hello"
+                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.object.nested_string*: Hello"
                     ));
                 }
 
@@ -658,9 +658,10 @@ mod tests {
                         + "{\"\0\0\0\0\0\0\": \"Hello\"}";
                     let err =
                         parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                    println!("{:?}", err);
                     assert!(matches!(
                         err,
-                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "******: Hello"
+                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: Hello"
                     ));
                 }
             }

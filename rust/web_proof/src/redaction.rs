@@ -29,6 +29,15 @@ impl fmt::Display for RedactedTranscriptNameValue {
     }
 }
 
+impl From<(&str, &str)> for RedactedTranscriptNameValue {
+    fn from(pair: (&str, &str)) -> Self {
+        Self {
+            name: pair.0.to_string(),
+            value: pair.1.as_bytes().to_vec(),
+        }
+    }
+}
+
 #[derive(Debug, Display)]
 pub enum RedactionElementType {
     #[strum(to_string = "request header")]
@@ -74,15 +83,6 @@ pub(crate) fn validate_name_value_redaction(
 #[cfg(test)]
 mod test_validate_name_value_redaction {
     use super::*;
-
-    impl From<(&str, &str)> for RedactedTranscriptNameValue {
-        fn from(pair: (&str, &str)) -> Self {
-            Self {
-                name: pair.0.to_string(),
-                value: pair.1.as_bytes().to_vec(),
-            }
-        }
-    }
 
     #[test]
     fn success_no_redaction() {
