@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
+import { useSimpleWebProof } from "../hooks/useSimpleWebProof";
+
+const extensionId = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 const isMobile =
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -12,22 +15,27 @@ const isSupportedBrowser = () => {
   return isChromium || isBrave;
 };
 
+const checkExtensionInstalled = async () => {
+  try {
+    await chrome.runtime.sendMessage(extensionId, {
+      message: "ping",
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const StartProving = () => {
-  const navigate = useNavigate();
   const [disabled, setDisabled] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const checkExtensionInstalled = async () => {
-    try {
-      await chrome.runtime.sendMessage("jbchhcgphfokabmfacnkafoeeeppjmpl", {
-        message: "ping",
-      });
-      return true;
-    } catch (err) {
-      return false;
-    }
-  };
+  const { requestWebProof, isWebProofPending, webProof } = useSimpleWebProof();
+
+  useEffect(() => {
+    console.log({ isWebProofPending, webProof });
+  }, [isWebProofPending, webProof]);
 
   const isExtensionReady = async () => {
     if (isMobile) {
@@ -90,7 +98,7 @@ export const StartProving = () => {
               className="btn w-[188px] px-4 bg-[#915bf8] rounded-lg border-none text-white hover:bg-[#915bf8]/80 hover:text-white"
               onClick={() => {
                 console.log("open extension");
-                navigate("/minting");
+                requestWebProof();
               }}
             >
               Open Extension

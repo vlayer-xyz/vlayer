@@ -1,4 +1,3 @@
-import SimpleWebProof from "../components/SimpleWebProof";
 import { WelcomeScreen } from "../components/WelcomeScreen";
 import { ConnectWallet } from "../components/ConnectWallet";
 import { StartProving } from "../components/StartProving";
@@ -7,7 +6,7 @@ import { Success } from "../components/Success";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Routes, Route } from "react-router";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { createAppKit } from "@reown/appkit/react";
 import { optimismSepolia, anvil } from "@reown/appkit/networks";
@@ -31,19 +30,9 @@ createAppKit({
     name: "appkit-example",
     description: "AppKit Example",
     url: "https://appkitexampleapp.com", // origin must match your domain & subdomain
-    icons: ["https://avatars.githubusercontent.com/u/179229932"]
+    icons: ["https://avatars.githubusercontent.com/u/179229932"],
   },
 });
-
-// export const config = createConfig({
-//   chains:
-//     import.meta.env.VITE_CHAIN_NAME === "anvil" ? [anvil] : [optimismSepolia],
-//   connectors: [metaMask()],
-//   transports: {
-//     [optimismSepolia.id]: http(),
-//     [anvil.id]: http(),
-//   },
-// });
 
 const SimpleWebProofApp = () => {
   return (
@@ -61,7 +50,6 @@ const SimpleWebProofApp = () => {
               <Route path="/start-proving" element={<StartProving />} />
               <Route path="/minting" element={<Minting />} />
               <Route path="/success" element={<Success />} />
-              <Route path="/simple" element={<SimpleWebProof />} />
             </Routes>
           </BrowserRouter>
         </ProofProvider>
