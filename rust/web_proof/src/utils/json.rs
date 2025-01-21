@@ -6,13 +6,16 @@ pub(crate) fn json_to_redacted_transcript(
     json_str: &str,
 ) -> Result<Vec<RedactedTranscriptNameValue>, ParsingError> {
     let parsed_json: Value = serde_json::from_str(json_str)?;
-    Ok(flatten_json(&parsed_json, "$".to_string()))
+    Ok(flatten_json(&parsed_json, "$".to_string())
+        .into_iter()
+        .map(Into::into)
+        .collect())
 }
 
-fn flatten_json(json: &Value, prefix: String) -> Vec<RedactedTranscriptNameValue> {
+fn flatten_json(json: &Value, prefix: String) -> Vec<(String, String)> {
     match json {
         Value::Object(obj) => obj
-            .into_iter()
+            .iter()
             .flat_map(|(key, value)| flatten_json(value, format!("{prefix}.{key}")))
             .collect(),
 
@@ -22,15 +25,9 @@ fn flatten_json(json: &Value, prefix: String) -> Vec<RedactedTranscriptNameValue
             .flat_map(|(index, value)| flatten_json(value, format!("{prefix}[{index}]")))
             .collect(),
 
-        Value::String(s) => vec![RedactedTranscriptNameValue {
-            name: prefix,
-            value: s.as_bytes().to_vec(),
-        }],
+        Value::String(s) => vec![(prefix, s.to_string())],
 
-        _ => vec![RedactedTranscriptNameValue {
-            name: prefix,
-            value: json.to_string().into_bytes(),
-        }],
+        _ => vec![(prefix, json.to_string())],
     }
 }
 

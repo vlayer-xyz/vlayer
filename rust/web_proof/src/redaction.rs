@@ -29,10 +29,10 @@ impl fmt::Display for RedactedTranscriptNameValue {
     }
 }
 
-impl From<(&str, &str)> for RedactedTranscriptNameValue {
-    fn from(pair: (&str, &str)) -> Self {
+impl From<(String, String)> for RedactedTranscriptNameValue {
+    fn from(pair: (String, String)) -> Self {
         Self {
-            name: pair.0.to_string(),
+            name: pair.0,
             value: pair.1.as_bytes().to_vec(),
         }
     }
@@ -83,6 +83,12 @@ pub(crate) fn validate_name_value_redaction(
 #[cfg(test)]
 mod test_validate_name_value_redaction {
     use super::*;
+
+    impl From<(&str, &str)> for RedactedTranscriptNameValue {
+        fn from(pair: (&str, &str)) -> Self {
+            (pair.0.to_string(), pair.1.to_string()).into()
+        }
+    }
 
     #[test]
     fn success_no_redaction() {
