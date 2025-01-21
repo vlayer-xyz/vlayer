@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { useSimpleWebProof } from "../hooks/useSimpleWebProof";
 import { useAppKitAccount } from "@reown/appkit/react";
 
@@ -27,12 +28,13 @@ const checkExtensionInstalled = async () => {
 };
 
 export const StartProving = () => {
+  const navigate = useNavigate();
   const { address } = useAppKitAccount();
   const [disabled, setDisabled] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { requestWebProof, webProof, callProver, isPending } =
+  const { requestWebProof, webProof, callProver, isPending, result } =
     useSimpleWebProof();
 
   useEffect(() => {
@@ -40,6 +42,12 @@ export const StartProving = () => {
       callProver([webProof, address]);
     }
   }, [webProof]);
+
+  useEffect(() => {
+    if (result) {
+      navigate("/minting");
+    }
+  }, [result]);
 
   const isExtensionReady = async () => {
     if (isMobile) {
