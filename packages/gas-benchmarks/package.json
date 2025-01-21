@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "lint": "eslint .",
-    "bench:dev": "VLAYER_ENV=dev bun run src/bench.ts",
+    "bench:dev": "VLAYER_ENV=dev bun run src/bench.ts"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
