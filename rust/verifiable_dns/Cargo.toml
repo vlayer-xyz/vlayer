@@ -19,6 +19,7 @@ thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 
 [dev-dependencies]
+lazy_static = { workspace = true }
 serde_urlencoded = { workspace = true }
 
 [lints]

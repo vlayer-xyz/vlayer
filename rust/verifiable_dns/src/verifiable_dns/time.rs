@@ -21,7 +21,7 @@ impl Now for RTClock {
 }
 
 #[cfg(test)]
-pub(super) mod tests_utils {
+pub(crate) mod tests_utils {
     use super::*;
 
     pub(crate) struct MockClock<const T: Timestamp>;
