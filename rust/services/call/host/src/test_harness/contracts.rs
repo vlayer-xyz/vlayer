@@ -131,28 +131,28 @@ pub mod teleport_v2 {
     // Generated using `simple_teleport` example
     pub const SIMPLE_TELEPORT: Address = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
     pub const BLOCK_NO: u64 = 3;
+    pub const JOHN: Address = address!("70997970C51812dc3A010C7d01b50e0d17dc79C8");
     sol! {
-        #[sol(all_derives = true)]
+        #[derive(Debug)]
         struct Seal {
             bytes18 lhv;
             bytes19 rhv;
         }
-        #[sol(all_derives = true)]
+        #[derive(Debug)]
         struct CallAssumptions {
             address proverContractAddress;
             bytes4 functionSelector;
             uint256 settleBlockNumber; // Block number for which the assumptions was made.
             bytes32 settleBlockHash; // Hash of the block at the specified block number.
         }
-        #[sol(all_derives = true)]
+        #[derive(Debug)]
         struct Proof {
             uint256 length;
             Seal seal;
             CallAssumptions call_assumptions;
         }
-        #[sol(all_derives = true)]
+        #[derive(Debug)]
         contract SimpleTeleportProver {
-            #[sol(all_derives = true)]
             function crossChainBalanceOf(address owner) public returns (Proof memory, address, uint256);
         }
     }
