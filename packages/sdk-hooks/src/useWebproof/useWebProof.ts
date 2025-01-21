@@ -2,17 +2,15 @@ import { useEffect, useState } from "react";
 import { type Abi, type ContractFunctionName } from "viem";
 import { useProofContext } from "../context";
 import { WebProofRequestStatus } from "../types";
-import {
-  ExtensionMessageType,
-  type GetWebProofArgs,
-  type PresentationJSON,
-} from "@vlayer/sdk";
+import { ExtensionMessageType, type GetWebProofArgs } from "@vlayer/sdk";
 
 export const useWebProof = (
   webProofRequest: GetWebProofArgs<Abi, ContractFunctionName>,
 ) => {
   const { webProofProvider } = useProofContext();
-  const [webProof, setWebProof] = useState<PresentationJSON | null>(null);
+  const [webProof, setWebProof] = useState<{
+    webProofJson: string;
+  } | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<WebProofRequestStatus>(
     WebProofRequestStatus.idle,
@@ -23,7 +21,9 @@ export const useWebProof = (
       ExtensionMessageType.ProofDone,
       ({ payload: { proof } }) => {
         console.log("useWebproof: ProofDone message", proof);
-        setWebProof(proof);
+        setWebProof({
+          webProofJson: JSON.stringify(proof),
+        });
         setStatus(WebProofRequestStatus.success);
       },
     );

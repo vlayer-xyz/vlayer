@@ -103,8 +103,10 @@ describe("useWebproof", () => {
     vi.advanceTimersByTime(1000);
     rerender();
 
-    expect(result.current).toEqual({
-      webProof: { mock: "proof" },
+    expect(result.current).toMatchObject({
+      webProof: {
+        webProofJson: JSON.stringify({ mock: "proof" }),
+      },
       status: WebProofRequestStatus.success,
       isIdle: false,
       isPending: false,
