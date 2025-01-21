@@ -27,10 +27,14 @@ createAppKit({
   defaultNetwork:
     import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil : optimismSepolia,
   metadata: {
-    name: "appkit-example",
-    description: "AppKit Example",
-    url: "https://appkitexampleapp.com", // origin must match your domain & subdomain
+    name: "vlayer-web-proof-example",
+    description: "vlayer Web Proof Example",
+    url: "https://vlayer.xyz",
     icons: ["https://avatars.githubusercontent.com/u/179229932"],
+  },
+  themeVariables: {
+    "--w3m-color-mix": "#551fbc",
+    "--w3m-color-mix-strength": 40,
   },
 });
 
