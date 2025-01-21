@@ -10,16 +10,16 @@
     "esModuleInterop": true,
     "moduleResolution": "bundler",
     "paths": {
-      "types/*": ["../sdk/src/api/lib/types/*"],
+      "types/*": ["../sdk/src/api/lib/types/*"]
     }
   }, 
   "include": [
     "./src/**/*",
     "../sdk/src/**/*",
     "../web-proof-commons/**/*",
-    "../../contracts/fixtures/out/**/*.ts",
+    "../../contracts/fixtures/out/**/*.ts"
   ],
   "exclude": [
-    "../sdk/**/*.test.ts",
+    "../sdk/**/*.test.ts"
   ]
 }
