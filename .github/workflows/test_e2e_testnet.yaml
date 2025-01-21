@@ -61,7 +61,7 @@ jobs:
       - name: Run e2e test in prod mode
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          PROVING_MODE: "prod"
+          PROVING_MODE: "dev"
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
           QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
