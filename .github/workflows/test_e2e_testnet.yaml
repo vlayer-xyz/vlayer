@@ -56,7 +56,7 @@ jobs:
 
       - name: Build binaries
         env:
-          RISC0_USE_DOCKER: 1
+          # RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker
       - name: Run e2e test in prod mode
