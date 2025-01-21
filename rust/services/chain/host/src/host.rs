@@ -161,6 +161,7 @@ where
             prepend_blocks,
             append_blocks,
             old_leftmost_block,
+            prev_zk_proof: Box::new((*old_zk_proof).clone()),
             block_trie: old_trie.clone(),
         };
         let receipt = self.prover.prove(&input, Some(old_zk_proof))?;

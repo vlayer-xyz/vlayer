@@ -33,12 +33,18 @@ pub struct Builder {
 
 impl Builder {
     pub fn from_env() -> Self {
+        let use_docker = use_bool_var("RISC0_USE_DOCKER");
+        let update_guest_elf = use_bool_var("UPDATE_GUEST_ELF_ID");
+        assert!(
+            !update_guest_elf || use_docker,
+            "`UPDATE_GUEST_ELF_ID` requires `RISC0_USE_DOCKER`"
+        );
         Self {
             data_layout: DataLayout::new().unwrap(),
             existing_guest: ExistingGuestLayout::new(),
             skip_build: use_bool_var("RISC0_SKIP_BUILD"),
-            use_docker: use_bool_var("RISC0_USE_DOCKER"),
-            update_guest_elf: use_bool_var("UPDATE_GUEST_ELF_ID"),
+            use_docker,
+            update_guest_elf,
         }
     }
 
@@ -54,8 +60,15 @@ impl Builder {
             return Ok(());
         }
 
+        if self.update_guest_elf {
+            self.update_chain_guest()?;
+        }
         let (call_guest, chain_guest) = self.build_guests()?;
-        self.check_or_update_chain_guest_id(&chain_guest)?;
+
+        if self.use_docker {
+            // Assert that image ID was correctly updated, or guest was unchanged
+            chain_guest_id::assert(chain_guest.image_id.into())?;
+        }
         self.generate_guest_sol_files(call_guest)?;
 
         Ok(())
@@ -115,16 +128,11 @@ impl Builder {
         Ok((call_guest, chain_guest))
     }
 
-    /// Verify that chain guest ID is unchanged, or generate new one if `UPDATE_GUEST_ELF_ID` is set.
-    fn check_or_update_chain_guest_id(&self, chain_guest: &GuestListEntry) -> anyhow::Result<()> {
-        let generated_id = chain_guest.image_id.into();
-
-        if self.update_guest_elf {
-            anyhow::ensure!(self.use_docker, "`UPDATE_GUEST_ELF_ID` requires `RISC0_USE_DOCKER`");
-            chain_guest_id::update(generated_id)?;
-        } else if self.use_docker {
-            chain_guest_id::assert(generated_id)?;
-        }
+    /// Add current chain guest ID to history and generate a new one
+    fn update_chain_guest(&self) -> anyhow::Result<()> {
+        chain_guest_id::add_current_to_history()?;
+        let (_, chain_guest) = self.build_guests()?;
+        chain_guest_id::update(chain_guest.image_id.into())?;
 
         Ok(())
     }
