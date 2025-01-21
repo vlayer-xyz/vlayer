@@ -52,7 +52,9 @@ mod test {
     struct MockProvider;
 
     impl Provider for MockProvider {
-        async fn resolve(&self, _query: &Query) -> Option<Response> {
+        type Error = ();
+
+        async fn resolve(&self, _query: &Query) -> Result<Response, Self::Error> {
             unreachable!()
         }
     }

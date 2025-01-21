@@ -7,7 +7,7 @@ pub use resolver::Resolver;
 use time::RTClock;
 
 #[cfg(feature = "http")]
-use crate::{dns_over_https, dns_over_https::ExternalProvider, verifier};
+use crate::dns_over_https::ExternalProvider;
 
 #[cfg(feature = "http")]
 pub type VerifiableDNSResolver = Resolver<RTClock, ExternalProvider, 2>;
