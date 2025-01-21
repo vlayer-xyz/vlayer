@@ -9,7 +9,6 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "moduleResolution": "bundler",
-    "baseUrl": "./",
     "paths": {
       "types/*": ["../sdk/src/api/lib/types/*"],
     }
