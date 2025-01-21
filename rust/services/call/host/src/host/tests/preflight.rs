@@ -200,13 +200,13 @@ mod teleport_v2 {
 
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "Fails due to ABI decoding issue"]
-    async fn teleport_dev() -> anyhow::Result<()> {
+    async fn success() -> anyhow::Result<()> {
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
         let call = call(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner: JOHN });
         let crossChainBalanceOfReturn {
             _2: cross_chain_balance,
             ..
-        } = preflight::<crossChainBalanceOfCall>("simple_teleport_v2", call, &location).await?;
+        } = preflight::<crossChainBalanceOfCall>("teleport_v2", call, &location).await?;
         assert_eq!(cross_chain_balance, uint!(100_U256));
 
         Ok(())
