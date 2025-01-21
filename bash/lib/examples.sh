@@ -3,7 +3,7 @@ function get_examples() {
     local EXAMPLE_LIST=(
         "simple"
         "simple-email-proof"
-        "simple-web-proof"
+        # "simple-web-proof"
         "simple-time-travel"
         # "simple-teleport"
     )
