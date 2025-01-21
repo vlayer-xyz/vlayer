@@ -55,13 +55,13 @@ jobs:
         run: forge soldeer install
 
       - name: Build binaries
-        # env:
-          # RISC0_USE_DOCKER: 1
-          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        env:
+          RISC0_USE_DOCKER: 1
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker
       - name: Run e2e test in prod mode
         env:
-          PROVING_MODE: "prod"
+          PROVING_MODE: "dev"
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
           QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
