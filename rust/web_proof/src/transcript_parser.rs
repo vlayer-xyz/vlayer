@@ -11,7 +11,7 @@ use crate::{
         REDACTED_BYTE_CODE, REDACTION_REPLACEMENT_CHAR_PRIMARY,
         REDACTION_REPLACEMENT_CHAR_SECONDARY,
     },
-    utils::bytes::replace_bytes,
+    utils::{bytes::replace_bytes, json::json_to_redacted_transcript},
 };
 
 const MAX_HEADERS_NUMBER: usize = 40;
@@ -59,7 +59,7 @@ pub(crate) fn parse_response_and_validate_redaction(
 
     let response_secondary_replacement =
         replace_redacted_bytes(response, REDACTION_REPLACEMENT_CHAR_SECONDARY);
-    let (_body_secondary, headers_secondary) = parse_response(&response_secondary_replacement)?;
+    let (body_secondary, headers_secondary) = parse_response(&response_secondary_replacement)?;
 
     validate_name_value_redaction(
         &convert_headers(&headers_primary),
@@ -68,11 +68,24 @@ pub(crate) fn parse_response_and_validate_redaction(
     )?;
 
     let body_primary = &response_primary_replacement[body_primary..];
+    let body_secondary = &response_secondary_replacement[body_secondary..];
 
     let body_primary = handle_chunked_transfer_encoding(
         &convert_headers(&headers_primary),
         &String::from_utf8(body_primary.to_vec())?,
     )?;
+    let body_secondary = handle_chunked_transfer_encoding(
+        &convert_headers(&headers_secondary),
+        &String::from_utf8(body_secondary.to_vec())?,
+    )?;
+
+    if !body_primary.trim().is_empty() || !body_secondary.trim().is_empty() {
+        validate_name_value_redaction(
+            &json_to_redacted_transcript(&body_primary)?,
+            &json_to_redacted_transcript(&body_secondary)?,
+            RedactionElementType::ResponseBody,
+        )?;
+    }
 
     Ok(body_primary)
 }
@@ -279,6 +292,136 @@ mod tests {
                     assert_eq!(body, "{}");
                 }
             }
+
+            mod body {
+                use super::*;
+
+                #[test]
+                fn no_redaction() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\r\n"
+                        + "\"string\": \"Hello, World!\",\r\n"
+                        + "\"number\": 42,\r\n"
+                        + "\"boolean\": true,\r\n"
+                        + "\"array\": [1, 2, 3, \"four\"],\r\n"
+                        + "\"object\": {\r\n"
+                        + "\"nested_string\": \"Nested\",\r\n"
+                        + "\"nested_number\": 99.99\r\n"
+                        + "}\r\n"
+                        + "}";
+                    let body = parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                    assert_eq!(
+                        body,
+                        trim_start(
+                            r#"{
+                            "string": "Hello, World!",
+                            "number": 42,
+                            "boolean": true,
+                            "array": [1, 2, 3, "four"],
+                                "object": {
+                                    "nested_string": "Nested",
+                                    "nested_number": 99.99
+                                }
+                            }"#,
+                        )
+                    );
+                }
+
+                #[test]
+                fn blank_body() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "\r\n";
+                    let body = parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                    assert_eq!(body, "");
+                }
+
+                #[test]
+                fn fully_redacted_string_value() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\r\n"
+                        + "\"string\": \"\0\0\0\0\0\0\0\0\0\0\0\0\0\",\r\n"
+                        + "\"number\": 42,\r\n"
+                        + "\"boolean\": true,\r\n"
+                        + "\"array\": [1, 2, 3, \"four\"],\r\n"
+                        + "\"object\": {\r\n"
+                        + "\"nested_string\": \"Nested\",\r\n"
+                        + "\"nested_number\": 99.99\r\n"
+                        + "}\r\n"
+                        + "}";
+                    let body = parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                    assert_eq!(
+                        body,
+                        trim_start(
+                            r#"{
+                            "string": "*************",
+                            "number": 42,
+                            "boolean": true,
+                            "array": [1, 2, 3, "four"],
+                            "object": {
+                                "nested_string": "Nested",
+                                "nested_number": 99.99
+                            }
+                            }"#,
+                        )
+                    );
+                }
+
+                #[test]
+                fn fully_redacted_nested_string_value() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\r\n"
+                        + "\"string\": \"Hello, World!\",\r\n"
+                        + "\"number\": 42,\r\n"
+                        + "\"boolean\": true,\r\n"
+                        + "\"array\": [1, 2, 3, \"four\"],\r\n"
+                        + "\"object\": {\r\n"
+                        + "\"nested_string\": \"\0\0\0\0\0\0\",\r\n"
+                        + "\"nested_number\": 99.99\r\n"
+                        + "}\r\n"
+                        + "}";
+                    let body = parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                    assert_eq!(
+                        body,
+                        trim_start(
+                            r#"{
+                            "string": "Hello, World!",
+                            "number": 42,
+                            "boolean": true,
+                            "array": [1, 2, 3, "four"],
+                                "object": {
+                                    "nested_string": "******",
+                                    "nested_number": 99.99
+                                }
+                            }"#,
+                        )
+                    );
+                }
+
+                #[test]
+                fn redact_string_value_inside_array() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "\r\n"
+                        + "[{\"string\": \"\0\0\0\0\0\"}]";
+                    let body = parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                    assert_eq!(body, trim_start(r#"[{"string": "*****"}]"#));
+                }
+            }
         }
 
         mod fail {
@@ -425,6 +568,110 @@ mod tests {
                     assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
                 }
             }
+
+            mod body {
+                use super::*;
+
+                #[test]
+                fn number_redaction() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\r\n"
+                        + "\"string\": \"Hello, World!\",\r\n"
+                        + "\"number\": \0\0,\r\n"
+                        + "\"boolean\": true,\r\n"
+                        + "\"array\": [1, 2, 3, \"four\"],\r\n"
+                        + "\"object\": {\r\n"
+                        + "\"nested_string\": \"Nested\",\r\n"
+                        + "\"nested_number\": 99.99\r\n"
+                        + "}\r\n"
+                        + "}";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                    assert!(matches!(err, ParsingError::Json(_)));
+                }
+
+                #[test]
+                fn boolean_redaction() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\r\n"
+                        + "\"string\": \"Hello, World!\",\r\n"
+                        + "\"number\": 42,\r\n"
+                        + "\"boolean\": \0\0\0\0,\r\n"
+                        + "\"array\": [1, 2, 3, \"four\"],\r\n"
+                        + "\"object\": {\r\n"
+                        + "\"nested_string\": \"Nested\",\r\n"
+                        + "\"nested_number\": 99.99\r\n"
+                        + "}\r\n"
+                        + "}";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                    assert!(matches!(err, ParsingError::Json(_)));
+                }
+
+                #[test]
+                fn key_partial_redaction() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\"string\0\": \"Hello\"}";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                    assert!(matches!(
+                        err,
+                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "string*: Hello"
+                    ));
+                }
+
+                #[test]
+                fn nested_key_partial_redaction() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\"object\": {\"nested_string\0\":\"Hello\"}}";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                    assert!(matches!(
+                        err,
+                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "object.nested_string*: Hello"
+                    ));
+                }
+
+                #[test]
+                fn key_full_redaction() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\"\0\0\0\0\0\0\": \"Hello\"}";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                    assert!(matches!(
+                        err,
+                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "******: Hello"
+                    ));
+                }
+            }
         }
+    }
+
+    fn trim_start(input: &str) -> String {
+        input
+            .lines()
+            .map(str::trim_start)
+            .collect::<Vec<_>>()
+            .join("\r\n")
     }
 }
