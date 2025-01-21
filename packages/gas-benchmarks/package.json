@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "lint": "eslint .",
+    "build": "bun tsc --build --noEmit",
     "bench:dev": "VLAYER_ENV=dev bun run src/bench.ts"
   },
   "dependencies": {
