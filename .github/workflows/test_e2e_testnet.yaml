@@ -74,7 +74,6 @@ jobs:
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
           CONFIRMATIONS: 2
-          EXAMPLE: simple-web-proof
         run: bash/e2e-test.sh
 
       # Teardown
