@@ -32,4 +32,7 @@ pub enum ParsingError {
 
     #[error("Url parse error: {0}")]
     UrlParse(#[from] url::ParseError),
+
+    #[error("Json parsing error: {0}")]
+    Json(#[from] serde_json::Error),
 }
