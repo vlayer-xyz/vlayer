@@ -1,8 +1,7 @@
 {
-    // Used to compile sdk for cjs and esm targets. Should exclude all test files.
     "extends": "./tsconfig.base.json",
     "exclude": [
-      "./src/**/*.test.ts",
+      "./src/**/*.test.ts"
     ],
     "compilerOptions": {
       "noEmit": false,
