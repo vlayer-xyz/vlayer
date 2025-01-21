@@ -6,7 +6,7 @@ import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Proof} from "vlayer/Proof.sol";
 import {Prover} from "vlayer/Prover.sol";
 import {RegexLib} from "vlayer/Regex.sol";
-import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer/EmailProof.sol";
+import {VerifiedEmail, UnverifiedEmail, EmailProofLib, IVDnsKeyVerifier} from "vlayer/EmailProof.sol";
 
 import {AddressParser} from "./utils/AddressParser.sol";
 
@@ -20,8 +20,10 @@ contract EmailProver is Prover {
     using AddressParser for string;
     using EmailProofLib for UnverifiedEmail;
 
+    IVDnsKeyVerifier public vDnsKeyVerifier;
+
     function main(UnverifiedEmail calldata unverifiedEmail) public view returns (Proof memory) {
-        VerifiedEmail memory email = unverifiedEmail.verify();
+        VerifiedEmail memory email = unverifiedEmail.verify(vDnsKeyVerifier);
 
         require(email.subject.equal("Verify me for Email NFT"), "incorrect subject");
         require(email.from.matches("^.*@vlayer.xyz$"), "from must be a vlayer address");

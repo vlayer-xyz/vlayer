@@ -4,6 +4,7 @@ pragma solidity ^0.8.21;
 import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 
 import {Precompiles} from "./PrecompilesAddresses.sol";
+import {IVDnsKeyVerifier} from "./interface/IVDnsKeyVerifier.sol";
 
 struct DnsRecord {
     string name;
@@ -32,7 +33,9 @@ struct VerifiedEmail {
 }
 
 library EmailProofLib {
-    function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory) {
+    function verify(UnverifiedEmail memory unverifiedEmail, IVDnsKeyVerifier dnsKeyVerifier) internal view returns (VerifiedEmail memory) {
+        require(dnsKeyVerifier.isKeyValid(unverifiedEmail.verificationData.pubKey), "Not a valid VDNS public key");
+
         (bool success, bytes memory returnData) = Precompiles.VERIFY_EMAIL.staticcall(abi.encode(unverifiedEmail));
         Address.verifyCallResult(success, returnData);
 
