@@ -22,29 +22,29 @@ runs:
         cache: false
         target: ${{ inputs.target }}
 
-    - name: Setup Rust Caching
-      uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
-      with:
-        workspaces: |
-          .
-          rust/guest_wrapper/risc0_call_guest
-          rust/guest_wrapper/risc0_chain_guest
-        cache-on-failure: false
-        save-if: ${{ github.ref == 'refs/heads/main' }}
+    # - name: Setup Rust Caching
+    #   uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
+    #   with:
+    #     workspaces: |
+    #       .
+    #       rust/guest_wrapper/risc0_call_guest
+    #       rust/guest_wrapper/risc0_chain_guest
+    #     cache-on-failure: false
+    #     save-if: ${{ github.ref == 'refs/heads/main' }}
 
-    - name: Install sccache
-      uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
-      with:
-        tool: sccache@0.9.0
+    # - name: Install sccache
+    #   uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
+    #   with:
+    #     tool: sccache@0.9.0
 
-    # Configure env for the remaining steps of this composite action,
-    # and an output for workflows to use.
-    - name: Configure sccache wrapper
-      id: configure_sccache_wrapper
-      run: |
-        echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
-        echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_OUTPUT
-      shell: bash
+    # # Configure env for the remaining steps of this composite action,
+    # # and an output for workflows to use.
+    # - name: Configure sccache wrapper
+    #   id: configure_sccache_wrapper
+    #   run: |
+    #     echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
+    #     echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_OUTPUT
+    #   shell: bash
 
     - name: Install cargo binstall
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
