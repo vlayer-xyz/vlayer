@@ -4,6 +4,9 @@ import {
   type VCallResponse,
 } from "types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
+import Debug from "debug";
+
+const log = Debug("vlayer:v_call");
 
 function v_callBody(call: CallParams, context: CallContext) {
   return {
@@ -14,9 +17,6 @@ function v_callBody(call: CallParams, context: CallContext) {
   };
 }
 
-const log = (...args: unknown[]) => {
-  console.log("v_call: ", ...args);
-};
 export async function v_call(
   call: CallParams,
   context: CallContext,

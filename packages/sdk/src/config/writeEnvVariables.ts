@@ -1,5 +1,8 @@
 import fs from "fs";
 import dotenv from "dotenv";
+import Debug from "debug";
+
+const log = Debug("vlayer:config");
 
 export const writeEnvVariables = async (
   envPath: string,
@@ -21,5 +24,5 @@ export const writeEnvVariables = async (
 
   await Bun.write(envPath, envLines);
 
-  console.log(`Successfully updated the ${envPath} with: `, overrides);
+  log(`Successfully updated the ${envPath} with: `, overrides);
 };
