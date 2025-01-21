@@ -116,7 +116,6 @@ impl Builder {
     }
 
     /// Verify that chain guest ID is unchanged, or generate new one if `UPDATE_GUEST_ELF_ID` is set.
-    /// Generate rust file with current and historical chain guest IDs.
     fn check_or_update_chain_guest_id(&self, chain_guest: &GuestListEntry) -> anyhow::Result<()> {
         let generated_id = chain_guest.image_id.into();
 

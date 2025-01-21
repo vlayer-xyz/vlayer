@@ -84,7 +84,7 @@ impl Host {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_proof_verifier =
-            chain_proof::ZkVerifier::new(config.chain_guest_elf.id, zk_proof::HostVerifier);
+            chain_proof::ZkVerifier::new(config.chain_guest_ids, zk_proof::HostVerifier);
         let chain_client = chain_client.map(chain_client::RecordingClient::new);
 
         Host {

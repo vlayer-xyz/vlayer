@@ -15,8 +15,11 @@ pub enum Error {
     Zk(#[from] VerificationError),
     #[error("Journal decoding error: {0}")]
     Journal(#[from] risc0_zkvm::serde::Error),
-    #[error("ELF ID mismatch: expected={expected} got={got}")]
-    ElfId { expected: Digest, got: Digest },
+    #[error("ELF ID mismatch: expected={expected:?} got={got}")]
+    ElfId {
+        expected: Box<[Digest]>,
+        got: Digest,
+    },
     #[error("Root hash mismatch: proven={proven} actual={actual}")]
     RootHash { proven: B256, actual: B256 },
 }
@@ -40,15 +43,18 @@ pub trait Verifier: seal::Sealed + Send + Sync + 'static {
 assert_obj_safe!(Verifier);
 
 pub struct ZkVerifier {
-    chain_guest_id: Digest,
+    chain_guest_ids: Box<[Digest]>,
     zk_verifier: Box<dyn zk_proof::Verifier>,
 }
 
 impl ZkVerifier {
     #[must_use]
-    pub fn new(chain_guest_id: impl Into<Digest>, zk_verifier: impl zk_proof::Verifier) -> Self {
+    pub fn new(
+        chain_guest_ids: impl IntoIterator<Item = Digest>,
+        zk_verifier: impl zk_proof::Verifier,
+    ) -> Self {
         Self {
-            chain_guest_id: chain_guest_id.into(),
+            chain_guest_ids: chain_guest_ids.into_iter().collect(),
             zk_verifier: Box::new(zk_verifier),
         }
     }
@@ -58,21 +64,23 @@ impl seal::Sealed for ZkVerifier {}
 impl Verifier for ZkVerifier {
     fn verify(&self, proof: &ChainProof) -> Result {
         let receipt: ChainProofReceipt = (&proof.proof).try_into()?;
-        self.zk_verifier.verify(&receipt, self.chain_guest_id)?;
         let (proven_root, elf_id) = receipt.journal.decode()?;
-        let root_hash = proof.block_trie.hash_slow();
-        if elf_id != self.chain_guest_id {
+        if !self.chain_guest_ids.iter().any(|id| id == &elf_id) {
             return Err(Error::ElfId {
-                expected: self.chain_guest_id,
+                expected: self.chain_guest_ids.clone(),
                 got: elf_id,
             });
         }
+
+        let root_hash = proof.block_trie.hash_slow();
         if proven_root != root_hash {
             return Err(Error::RootHash {
                 proven: proven_root,
                 actual: root_hash,
             });
         }
+
+        self.zk_verifier.verify(&receipt, elf_id)?;
         Ok(())
     }
 }

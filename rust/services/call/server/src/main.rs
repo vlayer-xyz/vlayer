@@ -9,7 +9,7 @@ use call_server_lib::{
 };
 use clap::{ArgAction, Parser, ValueEnum};
 use common::{init_tracing, GlobalArgs, LogFormat};
-use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
+use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
 use tracing::{info, warn};
 
 #[derive(Parser)]
@@ -65,7 +65,8 @@ impl Cli {
             .map(|(url, (poll_interval, timeout))| {
                 ChainProofConfig::new(url, poll_interval, timeout)
             });
-        ConfigBuilder::new(CALL_GUEST_ELF.clone(), CHAIN_GUEST_ELF.clone(), api_version)
+        let chain_guest_ids = CHAIN_GUEST_IDS.into_iter().map(Into::into).collect();
+        ConfigBuilder::new(CALL_GUEST_ELF.clone(), chain_guest_ids, api_version)
             .with_chain_proof_config(chain_proof_config)
             .with_gas_meter_config(gas_meter_config)
             .with_rpc_mappings(self.rpc_url)
