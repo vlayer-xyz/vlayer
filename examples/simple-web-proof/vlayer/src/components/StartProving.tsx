@@ -11,9 +11,13 @@ const isMobile =
   );
 
 const isSupportedBrowser = () => {
-  const isChromium = !!(window as any).chrome;
-  const isBrave = navigator.brave?.isBrave?.() || false;
-  return isChromium || isBrave;
+  const userAgent = navigator.userAgent.toLowerCase();
+
+  const isChromiumBased = Boolean(
+    userAgent.includes("chrome") || userAgent.includes("chromium"),
+  );
+
+  return isChromiumBased;
 };
 
 const checkExtensionInstalled = async () => {
@@ -87,7 +91,9 @@ export const StartProving = () => {
             >
               Back
             </Link>
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-3 text-black top-3">✕</button>
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-3 text-black top-3">
+              ✕
+            </button>
           </form>
           <ul className="steps w-full">
             <li className="step step-primary text-black text-xs">
@@ -102,7 +108,8 @@ export const StartProving = () => {
             X NFT
           </h3>
           <p className="py-4 text-gray-500">
-            Open vlayer browser extension and follow instructions in order to produce the Proof of X account ownership.
+            Open vlayer browser extension and follow instructions in order to
+            produce the Proof of X account ownership.
           </p>
           <div className="mt-7 flex justify-center">
             <button

@@ -78,18 +78,27 @@ export const Minting = () => {
             >
               Back
             </Link>
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-3 text-black top-3">✕</button>
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-3 text-black top-3">
+              ✕
+            </button>
           </form>
           <ul className="steps w-full">
-            <li className="step step-primary text-black text-xs">Connect Wallet</li>
-            <li className="step step-primary text-black text-xs">Get data from X</li>
-            <li className="step step-primary text-black text-xs font-bold">Mint NFT</li>
+            <li className="step step-primary text-black text-xs">
+              Connect Wallet
+            </li>
+            <li className="step step-primary text-black text-xs">
+              Get data from X
+            </li>
+            <li className="step step-primary text-black text-xs font-bold">
+              Mint NFT
+            </li>
           </ul>
           <h3 className="mt-7 text-center text-black text-3xl font-bold ">
             X NFT
           </h3>
           <p className="py-4 text-gray-500">
-            You are all set to mint your unique @{mintedHandle} X NFT, a true reflection of your verified identity.
+            You are all set to mint your unique @{mintedHandle} X NFT, a true
+            reflection of your verified identity.
           </p>
           <div className="mt-7 flex justify-center">
             <button

@@ -26,7 +26,7 @@ export const ConnectWallet = () => {
 
   return (
     <>
-      <button 
+      <button
         className="btn"
         onClick={() => {
           modalRef.current?.showModal();
@@ -44,7 +44,9 @@ export const ConnectWallet = () => {
             >
               Back
             </Link>
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-3 text-black top-3">✕</button>
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-3 text-black top-3">
+              ✕
+            </button>
           </form>
           <ul className="steps w-full">
             <li className="step step-primary text-black text-xs font-bold">
@@ -57,7 +59,8 @@ export const ConnectWallet = () => {
             X NFT
           </h3>
           <p className="py-4 text-gray-500">
-            To proceed to the next step, please connect your wallet now by clicking the button below.
+            To proceed to the next step, please connect your wallet now by
+            clicking the button below.
           </p>
           <div className="mt-7 flex justify-center">
             {isConnected ? (
@@ -84,7 +87,7 @@ export const ConnectWallet = () => {
           {isConnected && address && (
             <p className="mt-3 text-black text-xs font-bold block w-full">
               Connected as <br />
-              {address} <br/>
+              {address} <br />
               <button className="btn btn-sm btn-error" onClick={disconnect}>
                 disconnect
               </button>
