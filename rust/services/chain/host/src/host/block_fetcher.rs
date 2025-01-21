@@ -7,7 +7,7 @@ use ethers::{
     providers::{Http, JsonRpcClient, Provider},
     types::BlockNumber as BlockTag,
 };
-use futures::future::join_all;
+use futures::{stream, StreamExt};
 use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
 use thiserror::Error;
 use tracing::{debug, instrument};
@@ -57,7 +57,11 @@ where
 
     #[instrument(skip(self))]
     pub async fn get_blocks_range(&self, range: Range) -> Result<Vec<Box<dyn EvmBlockHeader>>> {
-        let blocks = join_all(range.into_iter().map(|n| self.get_block(n.into()))).await;
+        let blocks = stream::iter(range)
+            .map(|n| self.get_block(n.into()))
+            .buffered(10) // Limit concurrency to 10
+            .collect::<Vec<_>>()
+            .await;
         blocks.into_iter().collect()
     }
 
