@@ -1,11 +1,30 @@
 import { Metrics } from "@vlayer/sdk";
 import { prove, waitForProof } from "../../sdk/src/api/prover";
 import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
-import { Benchmark } from "./types";
+import { Benchmark, GasWithCycles } from "./types";
 import { benchmark as noopBenchmark } from "./benches/noop";
 import { benchmarks as noopWithCalldataBenchmarks } from "./benches/noop_with_calldata";
+import Debug from "debug";
+
+const log = Debug("gas-benchmarks");
 
 const benchmarks = [noopBenchmark, ...noopWithCalldataBenchmarks];
+
+type Results = Record<string, GasWithCycles>;
+
+const results: Results = {};
+
+for (const bench of benchmarks) {
+  const metrics = await run(bench);
+  results[bench.name] = {
+    gas: metrics.gas,
+    cycles: metrics.cycles,
+  };
+}
+
+log(JSON.stringify(results));
+
+prettyPrint(results);
 
 async function run(bench: Benchmark): Promise<Metrics> {
   const config = getConfig();
@@ -28,26 +47,38 @@ async function run(bench: Benchmark): Promise<Metrics> {
   return metrics;
 }
 
-const allMetrics: Metrics[] = [];
+function prettyPrint(results: Results) {
+  const MIN_CELL_WIDTH = 10;
+  const NUM_COLS = 3;
 
-for (const bench of benchmarks) {
-  const metrics: Metrics = await run(bench);
-  allMetrics.push(metrics);
-}
+  const cellWidth = Object.entries(results).reduce(
+    (acc, [name, stats]) =>
+      Math.max(
+        acc,
+        name.length,
+        `${stats.gas}`.length,
+        `${stats.cycles}`.length,
+      ),
+    MIN_CELL_WIDTH,
+  );
+  const rowWidth = (cellWidth + 2) * NUM_COLS + NUM_COLS + 1;
 
-console.log("Benchmark results:");
+  const fmtCell = (str: string) => {
+    const padding = cellWidth - str.length;
+    return str + " ".repeat(padding);
+  };
 
-for (let i = 0; i < benchmarks.length; i++) {
-  const name = benchmarks[i].name;
-  const stats = allMetrics[i];
-  console.log(`
+  const fmtRow = (...values: string[]) =>
+    "|" + values.map((value) => " " + fmtCell(value) + " ").join("|") + "|\n";
 
+  const header = fmtRow(" ", "Gas", "Cycles");
+  const lineSep = "_".repeat(rowWidth) + "\n";
 
-      ==============  ${name}  ========================
-      Gas:  ${stats.gas}
-      Cycles:  ${stats.cycles}
-      ===============================================
+  let fmt = header + lineSep;
+  Object.entries(results).forEach(([name, stats]) => {
+    fmt += fmtRow(name, `${stats.gas}`, `${stats.cycles}`);
+  });
+  fmt += lineSep;
 
-
-  `);
+  console.log(fmt);
 }

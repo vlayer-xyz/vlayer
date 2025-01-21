@@ -6,3 +6,8 @@ export type Benchmark = {
   args: ContractArg[];
   functionName: string;
 };
+
+export type GasWithCycles = {
+  gas: number;
+  cycles: number;
+};
