@@ -1,5 +1,4 @@
 include:
-  - chain-service.yaml
   - anvil.yaml
   - web.yaml
 services:

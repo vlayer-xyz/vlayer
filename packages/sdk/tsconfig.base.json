@@ -14,13 +14,13 @@
     "baseUrl": "./",
     "paths": {
       "types/*": ["./src/api/lib/types/*"],
-      "testHelpers/*": ["./src/testHelpers/*"],
+      "testHelpers/*": ["./src/testHelpers/*"]
     },
     "types": [
       "bun"
-    ],
+    ]
   }, 
   "include": [
-    "src",
-  ],
+    "src"
+  ]
 }

@@ -1,4 +1,5 @@
 import { ParsedTranscriptData } from "tlsn-js";
+import { HeaderNotFound } from "./tlsn.ranges.error";
 
 const stepAfterColon = 1;
 
@@ -8,11 +9,17 @@ const calculateRequestHeadersRanges = (
   headers: string[],
 ) => {
   return headers.map((header) => {
-    const headerRange = transcriptRanges.headers[header];
-    const newStart = raw.indexOf(":", headerRange.start) + stepAfterColon;
+    const headerRange = Object.entries(transcriptRanges.headers).find(
+      ([key]) => key.toLowerCase() === header.toLowerCase(),
+    );
+    if (!headerRange) {
+      throw new HeaderNotFound(header);
+    }
+
+    const newStart = raw.indexOf(":", headerRange[1].start) + stepAfterColon;
     return {
       start: newStart,
-      end: headerRange.end,
+      end: headerRange[1].end,
     };
   });
 };

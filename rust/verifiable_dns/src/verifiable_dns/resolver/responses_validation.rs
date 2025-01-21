@@ -1,16 +1,31 @@
 use std::{collections::HashSet, hash::Hash};
 
-use crate::dns_over_https::{types::Record, Response};
+use crate::{
+    dns_over_https::{types::Record, Response},
+    verifiable_dns::resolver::ResolverError,
+};
 
-pub(super) fn validate_response(response: &Response) -> bool {
-    response.status == 0
-        && response.recursive_desired
-        && response.recursion_available
-        && !response.truncated
-        && response
-            .answer
-            .as_ref()
-            .is_some_and(|answers| !answers.is_empty())
+pub(super) fn validate_response<PError>(response: &Response) -> Result<(), ResolverError<PError>> {
+    let error_message =
+        |msg: &str| Err(ResolverError::InvalidResponse(response.clone(), msg.into()));
+
+    if response.status != 0 {
+        return error_message("Non-zero status");
+    }
+    if !response.recursive_desired {
+        return error_message("Recursion not desired");
+    }
+    if !response.recursion_available {
+        return error_message("Recursion not available");
+    }
+    if response.truncated {
+        return error_message("Response is truncated");
+    }
+    if response.answer.as_ref().map_or(true, Vec::is_empty) {
+        return error_message("No answers");
+    }
+
+    Ok(())
 }
 
 pub(super) fn responses_match(l: &Response, r: &Response) -> bool {
@@ -69,7 +84,7 @@ mod tests {
         fn passes_for_zeroed_status() {
             let response = mock_response();
 
-            assert!(validate_response(&response));
+            assert!(validate_response::<()>(&response).is_ok());
         }
 
         #[test]
@@ -78,7 +93,7 @@ mod tests {
                 status: 1,
                 ..mock_response()
             };
-            assert!(!validate_response(&response));
+            assert!(validate_response::<()>(&response).is_err());
         }
 
         #[test]
@@ -87,7 +102,7 @@ mod tests {
                 truncated: true,
                 ..mock_response()
             };
-            assert!(!validate_response(&response));
+            assert!(validate_response::<()>(&response).is_err());
         }
 
         #[test]
@@ -96,7 +111,7 @@ mod tests {
                 answer: Some(Default::default()),
                 ..mock_response()
             };
-            assert!(!validate_response(&response));
+            assert!(validate_response::<()>(&response).is_err());
         }
 
         #[test]
@@ -105,13 +120,13 @@ mod tests {
                 recursion_available: false,
                 ..mock_response()
             };
-            assert!(!validate_response(&response));
+            assert!(validate_response::<()>(&response).is_err());
 
             let response = Response {
                 recursive_desired: false,
                 ..mock_response()
             };
-            assert!(!validate_response(&response));
+            assert!(validate_response::<()>(&response).is_err());
         }
     }
 

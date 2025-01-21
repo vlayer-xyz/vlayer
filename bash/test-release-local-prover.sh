@@ -17,12 +17,8 @@ echo '::endgroup::'
 
 echo '::group::risczero installation'
 curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-cargo binstall -y cargo-risczero@1.2.0
+cargo binstall -y cargo-risczero@1.2.1
 cargo risczero install
-echo '::endgroup::'
-
-echo '::group::Playwright browser installation'
-bunx playwright install --with-deps chromium
 echo '::endgroup::'
 
 git config --global user.email "test@example.com"
@@ -47,5 +43,11 @@ for example in $(get_examples); do
     vlayer test
     echo '::endgroup::'
 
+    echo "::group::vlayer run prove.ts: ${example}"
     run_prover_script
+    echo '::endgroup::'
+
+    echo "::group::vlayer run Playwright test: ${example}"
+    run_playwright_tests
+    echo '::endgroup::'
 done

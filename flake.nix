@@ -7,13 +7,13 @@
     foundry.url = "github:shazow/foundry.nix";
   };
 
-
   outputs =
-    { flake-utils
-    , nixpkgs
-    , nixpkgs-unstable
-    , foundry
-    , ...
+    {
+      flake-utils,
+      nixpkgs,
+      nixpkgs-unstable,
+      foundry,
+      ...
     }:
     let
       systems = [ "aarch64-darwin" ];
@@ -29,7 +29,7 @@
           inherit system overlays;
         };
 
-        risc0-version = "1.2.0";
+        risc0-version = "1.2.1";
         risc0 = (import ./nix/risc0.nix { inherit system pkgs; }).risc0.${risc0-version};
 
         darwinInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin [
@@ -59,7 +59,6 @@
           pkgs.libiconv
 
         ] ++ darwinInputs;
-
 
       in
       {

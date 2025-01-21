@@ -1,0 +1,23 @@
+name: Lint JSON
+
+on:
+  pull_request:
+    paths:
+      - "examples/**"
+      - "packages/**"
+      - ".github/workflows/lint_json.yaml"
+      - "bash/lint-json.sh"
+  merge_group:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Lint JSON
+        run: bash/lint-json.sh
+        shell: bash

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
+alloy-primitives = { workspace = true, features = ["rlp", "serde", "tiny-keccak"] }
 alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 as-any = { workspace = true }

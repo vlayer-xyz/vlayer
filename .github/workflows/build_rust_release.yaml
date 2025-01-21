@@ -166,7 +166,7 @@ jobs:
       - name: Install risc0 installer
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cargo binstall -y cargo-risczero@1.2.0 --force
+        run: cargo binstall -y cargo-risczero@1.2.1 --force
       - name: Install risc0 toolchain
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

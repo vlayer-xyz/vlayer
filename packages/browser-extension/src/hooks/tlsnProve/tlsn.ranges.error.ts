@@ -55,3 +55,10 @@ export class InvalidRangeError extends RedactionError {
     this.name = "InvalidRangeError";
   }
 }
+
+export class HeaderNotFound extends RedactionError {
+  constructor(header: string) {
+    super(`Header ${header} not found`);
+    this.name = "HeaderNotFound";
+  }
+}

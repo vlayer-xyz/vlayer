@@ -48,7 +48,7 @@ impl Signer {
     }
 }
 
-pub(super) trait ToSignablePayload {
+pub(crate) trait ToSignablePayload {
     fn to_payload(&self) -> Vec<u8>;
 }
 

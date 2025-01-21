@@ -9,15 +9,17 @@ chrono = { workspace = true, features = ["now"] }
 futures = { workspace = true }
 olpc-cjson = { workspace = true }
 rand = { workspace = true }
-reqwest = { workspace = true }
+reqwest = { workspace = true, features = ["rustls-tls"] }
 rsa = { workspace = true, features = ["sha2"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_repr = { workspace = true }
 serde_with = { workspace = true, features = ["base64", "macros"] }
+thiserror = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 
 [dev-dependencies]
+lazy_static = { workspace = true }
 serde_urlencoded = { workspace = true }
 
 [lints]

@@ -95,4 +95,45 @@ describe("request headers", () => {
 
     expect(result).toEqual([]);
   });
+
+  test("headers case insensitivity", () => {
+    const redactionItem = {
+      request: {
+        headers: ["Accept-Encoding", "CoOkIe"],
+      },
+    };
+
+    const result = calculateRequestRanges(
+      redactionItem,
+      fixtureTranscript.sent,
+      fixtureTranscript.ranges.sent,
+    );
+
+    expect(result).toEqual([
+      {
+        start: 489,
+        end: 498,
+      },
+      {
+        start: 864,
+        end: 1481,
+      },
+    ]);
+  });
+
+  test("not existing header", () => {
+    const redactionItem = {
+      request: {
+        headers: ["not-existing-header"],
+      },
+    };
+
+    expect(() =>
+      calculateRequestRanges(
+        redactionItem,
+        fixtureTranscript.sent,
+        fixtureTranscript.ranges.sent,
+      ),
+    ).toThrowError("Header not-existing-header not found");
+  });
 });

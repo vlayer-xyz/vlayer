@@ -6,6 +6,7 @@ import { RedactionConfig } from "src/web-proof-commons/types/message";
 import { ParsedTranscriptData } from "tlsn-js";
 import { CommitData } from "tlsn-js/src/types";
 import { InvalidRangeError, OutOfBoundsError } from "./tlsn.ranges.error";
+
 export type Transcript = {
   sent: string;
   recv: string;
