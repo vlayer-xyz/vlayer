@@ -42,7 +42,10 @@ mod test {
     use lazy_static::lazy_static;
 
     use super::*;
-    use crate::{verifiable_dns::resolver::tests_utils::resolver, VerificationData};
+    use crate::{
+        verifiable_dns::{sign_record::sign_record, signer::Signer},
+        VerificationData,
+    };
 
     lazy_static! {
         static ref RECORD: DNSRecord = DNSRecord {
@@ -59,7 +62,7 @@ mod test {
             signature,
             pub_key,
             valid_until,
-        } = resolver().sign_record(&RECORD);
+        } = sign_record(&Signer::default(), &RECORD, 123);
         verify_signature(&RECORD, valid_until, &pub_key, &signature).unwrap();
     }
 
@@ -69,7 +72,7 @@ mod test {
             signature,
             pub_key,
             valid_until,
-        } = resolver().sign_record(&RECORD);
+        } = sign_record(&Signer::default(), &RECORD, 123);
         let modified_record = DNSRecord {
             data: "World".into(),
             ..RECORD.clone()

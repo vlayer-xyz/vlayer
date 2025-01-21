@@ -1,5 +1,6 @@
 pub(crate) mod resolver;
-pub(crate) mod signer;
+pub mod sign_record;
+pub mod signer;
 pub mod time;
 
 pub use resolver::Resolver;

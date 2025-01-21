@@ -31,48 +31,27 @@ mod test {
     use alloy_sol_types::{private::bytes, SolValue};
     use lazy_static::lazy_static;
     use verifiable_dns::{
-        verifiable_dns::{
-            time::{Now, Timestamp},
-            Resolver,
-        },
-        DNSRecord, Provider, Query, RecordType, Response, VerificationData,
+        verifiable_dns::{sign_record::sign_record, signer::Signer},
+        DNSRecord, RecordType, VerificationData,
     };
 
     use super::*;
     use crate::test_utils::{read_file, signed_email_fixture, unsigned_email_fixture};
 
-    struct MockClock<const T: Timestamp>;
-
-    impl<const T: Timestamp> Now for MockClock<T> {
-        fn now() -> Timestamp {
-            T
-        }
-    }
-
-    struct MockProvider;
-
-    impl Provider for MockProvider {
-        type Error = ();
-
-        async fn resolve(&self, _query: &Query) -> Result<Response, Self::Error> {
-            unreachable!()
-        }
-    }
-
     lazy_static! {
         static ref DNS_FIXTURE: SolDnsRecord = SolDnsRecord {
-            name: "_domainkey.vlayer.xyz".into(),
+            name: "google._domainkey.vlayer.xyz".into(),
             recordType: 16,
             data: "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".into(),
             ttl: 0,
         };
 
-        static ref VERIFICATION_DATA_SIGNED: VerificationData = Resolver::<MockClock<0>, MockProvider, 0>::new([]).sign_record(&DNSRecord {
+        static ref VERIFICATION_DATA_SIGNED: VerificationData = sign_record(&Signer::default(), &DNSRecord {
             data: DNS_FIXTURE.data.clone(),
             name: DNS_FIXTURE.name.clone(),
             record_type: RecordType::TXT,
             ttl: DNS_FIXTURE.ttl,
-        });
+        }, 0);
 
         static ref VERIFICATION_DATA: SolVerificationData = SolVerificationData {
             validUntil: VERIFICATION_DATA_SIGNED.valid_until,

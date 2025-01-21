@@ -55,10 +55,9 @@ function takeLastAnswer(response: DnsResponse) {
   }
   const record = answer.flat().at(-1)!;
   return {
-    name: record.name,
     recordType: record.type,
-    data: normalizeDnsData(record.data),
     ttl: BigInt(record.TTL),
+    ...record,
   };
 }
 
@@ -82,12 +81,4 @@ export class DnsResolver {
       verificationData: parseVerificationData(response),
     };
   }
-}
-
-export function normalizeDnsData(data: string) {
-  if (data.startsWith("p=")) {
-    return ["v=DKIM1", "k=rsa", data].join("; ");
-  }
-
-  return data;
 }

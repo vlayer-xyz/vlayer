@@ -12,7 +12,7 @@ fn fixture() -> Bytes {
     let email: UnverifiedEmail = UnverifiedEmail {
         email: SMALL_EMAIL.to_string(),
         dnsRecord: SolDnsRecord {
-            name: "_domainkey.vlayer.xyz".into(),
+            name: "google._domainkey.vlayer.xyz".into(),
             recordType: 16,
             data: DNS_RECORD.into(),
             ttl: 0,

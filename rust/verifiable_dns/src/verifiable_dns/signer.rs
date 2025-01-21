@@ -11,19 +11,21 @@ use crate::{common::to_payload::ToPayload, PublicKey, Signature};
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
 #[derive(Clone)]
-pub(super) struct Signer {
+pub struct Signer {
     key: SigningKey<Sha256>,
 }
 
-impl Signer {
-    pub fn new() -> Self {
+impl Default for Signer {
+    fn default() -> Self {
         let key = RsaPrivateKey::from_pkcs8_pem(PRIV_KEY).expect("Failed to decode private key");
         let key = SigningKey::<_>::new(key);
 
         Self { key }
     }
+}
 
-    pub fn sign<P: ToPayload>(&self, payload: &P) -> Signature {
+impl Signer {
+    pub(crate) fn sign<P: ToPayload>(&self, payload: &P) -> Signature {
         let mut rng = rand::thread_rng();
         let signature = self.key.sign_with_rng(&mut rng, &payload.to_payload());
         Signature(signature.to_bytes().into())
@@ -59,7 +61,7 @@ mod tests {
 
     #[test]
     fn can_sign() {
-        let signer = Signer::new();
+        let signer = Signer::default();
         let signature = signer.sign(&"alamakota");
 
         let pub_key = pub_key();
@@ -71,7 +73,7 @@ mod tests {
 
     #[test]
     fn pub_key_can_verify_signature() {
-        let signer = Signer::new();
+        let signer = Signer::default();
         let signature = signer.sign(&"alamakota");
         let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_ref()).unwrap();
 
