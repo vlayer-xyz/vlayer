@@ -39,7 +39,7 @@ impl<C: Now, P: DoHProvider, const Q: usize> Resolver<C, P, Q> {
         }
     }
 
-    fn sign_record(&self, record: &DNSRecord) -> VerificationData {
+    pub(crate) fn sign_record(&self, record: &DNSRecord) -> VerificationData {
         let now = C::now();
         let valid_until = now + record.ttl;
         let signature = self.signer.sign(&Record::new(record, valid_until));
@@ -112,11 +112,16 @@ impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resol
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests_utils {
     use super::*;
-    use crate::dns_over_https::types::RecordType;
+    use crate::{
+        dns_over_https::provider::test_utils::MockProvider,
+        verifiable_dns::time::tests_utils::MockClock,
+    };
 
-    fn response() -> Response {
+    pub(crate) type MockResolver = Resolver<MockClock<64>, MockProvider, 1>;
+
+    pub(crate) fn response() -> Response {
         let record = DNSRecord {
             name: "vlayer.xyz".into(),
             record_type: RecordType::TXT,
@@ -133,6 +138,15 @@ mod tests {
             ..Response::with_flags(false, true, true, false, false)
         }
     }
+
+    pub(crate) fn resolver() -> MockResolver {
+        MockResolver::new([MockProvider::new(response())])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{tests_utils::*, *};
 
     mod validate_responses {
         use super::*;
@@ -184,15 +198,7 @@ mod tests {
 
     mod resolver {
         use super::*;
-        use crate::{
-            dns_over_https::provider::test_utils::MockProvider,
-            verifiable_dns::time::tests_utils::MockClock,
-        };
 
-        type R = Resolver<MockClock<64>, MockProvider, 1>;
-        fn resolver() -> R {
-            R::new([MockProvider::new(response())])
-        }
         mod resolve {
             use super::*;
 
@@ -239,9 +245,11 @@ mod tests {
         }
 
         mod sign_record {
-
             use super::*;
-            use crate::dns_over_https::{provider::test_utils::MockProvider, types::RecordType};
+            use crate::{
+                dns_over_https::{provider::test_utils::MockProvider, types::RecordType},
+                verifiable_dns::time::tests_utils::MockClock,
+            };
 
             #[test]
             fn valid_until_is_ttl_seconds_from_now() {

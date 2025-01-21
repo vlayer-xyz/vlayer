@@ -11909,6 +11909,7 @@ dependencies = [
  "bytes",
  "chrono",
  "futures",
+ "lazy_static",
  "olpc-cjson",
  "rand",
  "reqwest 0.12.12",
