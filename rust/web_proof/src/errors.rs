@@ -2,7 +2,7 @@ use std::string::FromUtf8Error;
 
 use thiserror::Error;
 
-use crate::transcript_parser::RedactionElementType;
+use crate::redaction::RedactionElementType;
 
 #[derive(Error, Debug)]
 pub enum ParsingError {
@@ -32,4 +32,7 @@ pub enum ParsingError {
 
     #[error("Url parse error: {0}")]
     UrlParse(#[from] url::ParseError),
+
+    #[error("Json parsing error: {0}")]
+    Json(#[from] serde_json::Error),
 }

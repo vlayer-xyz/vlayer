@@ -5,7 +5,9 @@ pub mod web_proof;
 pub mod fixtures;
 
 mod errors;
+mod redaction;
 mod request_transcript;
 mod response_transcript;
 mod transcript_parser;
+mod utils;
 mod web;

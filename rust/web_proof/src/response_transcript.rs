@@ -1,12 +1,6 @@
-use std::io::Read;
-
-use chunked_transfer::Decoder;
 use derive_new::new;
 
-use crate::{
-    errors::ParsingError,
-    transcript_parser::{parse_response_and_validate_redaction, RedactedTranscriptNameValue},
-};
+use crate::{errors::ParsingError, transcript_parser::parse_response_and_validate_redaction};
 
 #[derive(Debug, new)]
 pub(crate) struct ResponseTranscript {
@@ -15,34 +9,7 @@ pub(crate) struct ResponseTranscript {
 
 impl ResponseTranscript {
     pub(crate) fn parse_body(self) -> Result<String, ParsingError> {
-        let response_string = String::from_utf8(self.transcript)?;
-
-        let (body, headers) = parse_response_and_validate_redaction(&response_string)?;
-
-        handle_chunked_transfer_encoding(&headers, &body)
-    }
-}
-
-fn handle_chunked_transfer_encoding(
-    headers: &[RedactedTranscriptNameValue],
-    body: &str,
-) -> Result<String, ParsingError> {
-    let transfer_encoding_header = headers
-        .iter()
-        .find(|header| header.name.eq_ignore_ascii_case("Transfer-Encoding"));
-
-    match transfer_encoding_header {
-        Some(header) if header.value.eq_ignore_ascii_case(b"chunked") => {
-            let mut decoder = Decoder::new(body.as_bytes());
-            let mut decoded_body = String::new();
-            decoder.read_to_string(&mut decoded_body)?;
-            Ok(decoded_body)
-        }
-        Some(header) if header.value.eq_ignore_ascii_case(b"identity") => Ok(body.to_string()),
-        Some(header) => Err(ParsingError::UnsupportedTransferEncoding(
-            String::from_utf8_lossy(header.value.as_ref()).to_string(),
-        )),
-        None => Ok(body.to_string()),
+        parse_response_and_validate_redaction(&self.transcript)
     }
 }
 
@@ -64,7 +31,7 @@ mod tests {
         assert_eq!(transcript.parse_body().unwrap(), RESPONSE_BODY.to_string());
     }
 
-    const REDACTED_RESPONSE_BODY: &str = "XXXXXXXXXXXXXXXXXXX\"screen_name\":\"wktr0\",\"always_use_https\":true,\"use_cookie_personalization\":false,\"sleep_time\":{\"enabled\":false,\"end_time\":null,\"start_time\":null},\"geo_enabled\":false,\"language\":\"en\",\"discoverable_by_email\":false,\"discoverable_by_mobile_phone\":false,\"display_sensitive_media\":false,\"personalized_trends\":true,\"allow_media_tagging\":\"all\",\"allow_contributor_request\":\"none\",\"allow_ads_personalization\":false,\"allow_logged_out_device_personalization\":false,\"allow_location_history_personalization\":false,\"allow_sharing_data_for_third_party_personalization\":false,\"allow_dms_from\":\"following\",\"always_allow_dms_from_subscribers\":null,\"allow_dm_groups_from\":\"following\",\"translator_type\":\"none\",\"country_code\":\"pl\",\"nsfw_user\":false,\"nsfw_admin\":false,\"ranked_timeline_setting\":null,\"ranked_timeline_eligible\":null,\"address_book_live_sync_enabled\":false,\"universal_quality_filtering_enabled\":\"enabled\",\"dm_receipt_setting\":\"all_enabled\",\"alt_text_compose_enabled\":null,\"mention_filter\":\"unfiltered\",\"allow_authenticated_periscope_requests\":true,\"protect_password_reset\":false,\"require_password_login\":false,\"requires_login_verification\":false,\"ext_sharing_audiospaces_listening_data_with_followers\":true,\"ext\":{\"ssoConnections\":{\"r\":{\"ok\":[{\"ssoIdHash\":\"AkGXHwarlY6pZFdEd3cbqfgdOyRufv9XiCdxLmfN884=\",\"ssoProvider\":\"Google\"}]},\"ttl\":-1}},\"dm_quality_filter\":\"enabled\",\"autoplay_disabled\":false,\"settings_metadata\":{}}";
+    const REDACTED_RESPONSE_BODY: &str = "{\"screen_name\":\"*****\",\"always_use_https\":true,\"use_cookie_personalization\":false,\"sleep_time\":{\"enabled\":false,\"end_time\":null,\"start_time\":null},\"geo_enabled\":false,\"language\":\"en\",\"discoverable_by_email\":false,\"discoverable_by_mobile_phone\":false,\"display_sensitive_media\":false,\"personalized_trends\":true,\"allow_media_tagging\":\"all\",\"allow_contributor_request\":\"none\",\"allow_ads_personalization\":false,\"allow_logged_out_device_personalization\":false,\"allow_location_history_personalization\":false,\"allow_sharing_data_for_third_party_personalization\":false,\"allow_dms_from\":\"following\",\"always_allow_dms_from_subscribers\":null,\"allow_dm_groups_from\":\"following\",\"translator_type\":\"none\",\"country_code\":\"pl\",\"nsfw_user\":false,\"nsfw_admin\":false,\"ranked_timeline_setting\":null,\"ranked_timeline_eligible\":null,\"address_book_live_sync_enabled\":false,\"universal_quality_filtering_enabled\":\"enabled\",\"dm_receipt_setting\":\"all_enabled\",\"alt_text_compose_enabled\":null,\"mention_filter\":\"unfiltered\",\"allow_authenticated_periscope_requests\":true,\"protect_password_reset\":false,\"require_password_login\":false,\"requires_login_verification\":false,\"ext_sharing_audiospaces_listening_data_with_followers\":true,\"ext\":{\"ssoConnections\":{\"r\":{\"ok\":[{\"ssoIdHash\":\"AkGXHwarlY6pZFdEd3cbqfgdOyRufv9XiCdxLmfN884=\",\"ssoProvider\":\"Google\"}]},\"ttl\":-1}},\"dm_quality_filter\":\"enabled\",\"autoplay_disabled\":false,\"settings_metadata\":{}}\r\n";
 
     #[test]
     fn redacted_body() {
@@ -116,7 +83,7 @@ mod tests {
 
         assert!(matches!(
             transcript.parse_body(),
-            Err(ParsingError::FromUtf8(err)) if err.to_string() == "invalid utf-8 sequence of 1 bytes from index 0"
+            Err(ParsingError::Httparse(httparse::Error::Version))
         ));
     }
 
