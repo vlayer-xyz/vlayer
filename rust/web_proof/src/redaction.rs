@@ -12,7 +12,6 @@ pub(crate) const REDACTED_BYTE_CODE: u8 = 0;
 pub(crate) const REDACTION_REPLACEMENT_CHAR_PRIMARY: char = '*';
 pub(crate) const REDACTION_REPLACEMENT_CHAR_SECONDARY: char = '+';
 
-// This struct is used to store the name and value of a header or URL parameter.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct RedactedTranscriptNameValue {
     pub(crate) name: String,
