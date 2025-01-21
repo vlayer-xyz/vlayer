@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
 import { useSimpleWebProof } from "../hooks/useSimpleWebProof";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 const extensionId = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
@@ -27,15 +27,19 @@ const checkExtensionInstalled = async () => {
 };
 
 export const StartProving = () => {
+  const { address } = useAppKitAccount();
   const [disabled, setDisabled] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { requestWebProof, isWebProofPending, webProof } = useSimpleWebProof();
+  const { requestWebProof, webProof, callProver, isPending } =
+    useSimpleWebProof();
 
   useEffect(() => {
-    console.log({ isWebProofPending, webProof });
-  }, [isWebProofPending, webProof]);
+    if (webProof) {
+      callProver([webProof, address]);
+    }
+  }, [webProof]);
 
   const isExtensionReady = async () => {
     if (isMobile) {
@@ -99,9 +103,10 @@ export const StartProving = () => {
               onClick={() => {
                 console.log("open extension");
                 requestWebProof();
+                setDisabled(true);
               }}
             >
-              Open Extension
+              {isPending ? "Proving in progress..." : "Open Extension"}
             </button>
           </div>
           {error && <p className="text-red-500 w-full block">{error}</p>}

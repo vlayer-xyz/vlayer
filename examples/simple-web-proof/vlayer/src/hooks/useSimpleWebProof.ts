@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   useCallProver,
   useWaitForProvingResult,
@@ -58,14 +59,26 @@ export const useSimpleWebProof = () => {
   const { isPending: isWaitingForProvingResult, data: result } =
     useWaitForProvingResult(hash);
 
+  useEffect(() => {
+    if (webProof) {
+      console.log("webProof ready", webProof);
+      window.localStorage.setItem("webProof", JSON.stringify(webProof));
+    }
+  }, [webProof]);
+
+  useEffect(() => {
+    if (result) {
+      console.log("proverResult", result);
+      window.localStorage.setItem("proverResult", JSON.stringify(result));
+    }
+  }, [result]);
+
   return {
     requestWebProof,
     webProof,
-    isWebProofPending,
+    isPending:
+      isWebProofPending || isCallProverPending || isWaitingForProvingResult,
     callProver,
-    isCallProverPending,
-    proofHash: hash,
-    isWaitingForProvingResult,
     result,
   };
 };

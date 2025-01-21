@@ -36,12 +36,7 @@ export const useCallProver = (
     try {
       const hash = await vlayerClient.prove({
         ...proveArgs,
-        args: [
-          {
-            webProofJson: JSON.stringify(args[0]),
-          },
-          args[1],
-        ],
+        args,
         chainId,
       });
       setHash(hash);

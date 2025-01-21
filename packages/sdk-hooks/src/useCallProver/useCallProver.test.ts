@@ -111,12 +111,7 @@ describe("useCallProver", () => {
       address: "0x456",
       proverAbi: [] as Abi,
       functionName: "test",
-      args: [
-        {
-          webProofJson: undefined,
-        },
-        undefined,
-      ],
+      args: [],
     };
 
     await act(async () => {
