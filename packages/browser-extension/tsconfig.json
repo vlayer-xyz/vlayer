@@ -14,8 +14,8 @@
       "constants/*" : ["./src/constants/*"],
       "hooks/*" : ["./src/hooks/*"],
       "lib/*" : ["./src/lib/*"],
-      "src/*" : ["./src/*"],
-    },
+      "src/*" : ["./src/*"]
+    }
   },
-  "include": ["vitest.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["vitest.d.ts", "**/*.ts", "**/*.tsx"]
 }
