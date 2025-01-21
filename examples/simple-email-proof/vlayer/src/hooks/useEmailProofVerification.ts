@@ -26,11 +26,7 @@ export const useEmailProofVerification = () => {
     hash: txHash,
   });
 
-  const {
-    callProver,
-    data: proofHash,
-    error: callProverError,
-  } = useCallProver({
+  const { callProver, data: proofHash } = useCallProver({
     address: import.meta.env.VITE_PROVER_ADDRESS,
     proverAbi: proverSpec.abi,
     functionName: "main",
@@ -97,7 +93,6 @@ export const useEmailProofVerification = () => {
     onChainVerificationStatus,
     verificationError,
     provingError,
-    callProverError,
     startProving,
     verifyProofOnChain,
   };

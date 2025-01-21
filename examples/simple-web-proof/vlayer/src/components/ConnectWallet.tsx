@@ -20,7 +20,6 @@ export const ConnectWallet = () => {
   useEffect(() => {
     if (isConnected) {
       modalRef.current?.showModal();
-      // navigate("/start-proving");
     }
   }, [isConnected]);
 
@@ -70,7 +69,7 @@ export const ConnectWallet = () => {
                 }}
                 className="btn w-[188px] px-4 bg-[#915bf8] rounded-lg border-none text-white hover:bg-[#915bf8]/80 hover:text-white"
               >
-                Start Minting
+                Start Proving
               </button>
             ) : (
               <button

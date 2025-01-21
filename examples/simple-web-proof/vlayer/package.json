@@ -22,6 +22,7 @@
     "@noble/hashes": "^1.4.0",
     "@reown/appkit": "^1.6.4",
     "@reown/appkit-adapter-wagmi": "^1.6.4",
+    "@tanstack/react-query": "^5.64.2",
     "@types/node": "^22.5.4",
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
