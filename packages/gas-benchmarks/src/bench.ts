@@ -4,11 +4,16 @@ import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
 import { Benchmark, GasWithCycles } from "./types";
 import { benchmark as noopBenchmark } from "./benches/noop";
 import { benchmarks as noopWithCalldataBenchmarks } from "./benches/noop_with_calldata";
+import { benchmarks as arithOpBenchmarks } from "./benches/arith_ops";
 import Debug from "debug";
 
 const log = Debug("gas-benchmarks");
 
-const benchmarks = [noopBenchmark, ...noopWithCalldataBenchmarks];
+const benchmarks = [
+  noopBenchmark,
+  ...noopWithCalldataBenchmarks,
+  ...arithOpBenchmarks,
+];
 
 type Results = Record<string, GasWithCycles>;
 
