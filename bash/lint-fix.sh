@@ -7,7 +7,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
 for example in $(get_examples); do
   (
-    cd "$VLAYER_HOME/examples/$example"
+    cd "$VLAYER_HOME/examples/$example/vlayer"
 
     bun install --frozen-lockfile --no-save --silent
     bun run --silent eslint . --fix
