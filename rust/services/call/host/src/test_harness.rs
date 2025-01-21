@@ -70,7 +70,7 @@ fn create_host(
 ) -> Result<Host, BuilderError> {
     let config = Config {
         call_guest_elf: CALL_GUEST_ELF.clone(),
-        chain_guest_elf: CHAIN_GUEST_ELF.clone(),
+        chain_guest_ids: vec![CHAIN_GUEST_ELF.id].into_boxed_slice(),
         ..Default::default()
     };
     let block_number =

@@ -49,8 +49,8 @@ pub(crate) fn call_guest_elf() -> GuestElf {
     guest_wrapper::CALL_GUEST_ELF.clone()
 }
 
-pub(crate) fn chain_guest_elf() -> GuestElf {
-    guest_wrapper::CHAIN_GUEST_ELF.clone()
+pub(crate) fn chain_guest_elf() -> &'static GuestElf {
+    &guest_wrapper::CHAIN_GUEST_ELF
 }
 
 pub(crate) const API_VERSION: &str = "1.2.3";
@@ -101,13 +101,14 @@ impl Context {
         contract
     }
 
-    pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Server {
+    pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: &GuestElf) -> Server {
         let gas_meter_config = self
             .gas_meter_server
             .as_ref()
             .map(GasMeterServer::as_gas_meter_config);
         let chain_proof_config = self.chain_proof_server.as_chain_proof_config();
-        let config = ConfigBuilder::new(call_guest_elf, chain_guest_elf, API_VERSION.into())
+        let chain_guest_ids = vec![chain_guest_elf.id].into_boxed_slice();
+        let config = ConfigBuilder::new(call_guest_elf, chain_guest_ids, API_VERSION.into())
             .with_chain_proof_config(chain_proof_config)
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
             .with_proof_mode(ProofMode::Fake)
