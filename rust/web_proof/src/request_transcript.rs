@@ -9,9 +9,7 @@ pub(crate) struct RequestTranscript {
 
 impl RequestTranscript {
     pub(crate) fn parse_url(self) -> Result<String, ParsingError> {
-        let request = String::from_utf8(self.transcript)?;
-
-        parse_request_and_validate_redaction(&request)
+        parse_request_and_validate_redaction(&self.transcript)
     }
 }
 
@@ -60,7 +58,7 @@ mod tests {
         let transcript = RequestTranscript::new(vec![128]);
         assert!(matches!(
             transcript.parse_url(),
-            Err(ParsingError::FromUtf8(err)) if err.to_string() == "invalid utf-8 sequence of 1 bytes from index 0"
+            Err(ParsingError::Httparse(httparse::Error::Token))
         ));
     }
 }

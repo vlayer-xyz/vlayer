@@ -2,7 +2,7 @@ use std::string::FromUtf8Error;
 
 use thiserror::Error;
 
-use crate::transcript_parser::RedactionElementType;
+use crate::redaction::RedactionElementType;
 
 #[derive(Error, Debug)]
 pub enum ParsingError {
