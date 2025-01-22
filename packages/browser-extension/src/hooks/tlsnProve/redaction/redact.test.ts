@@ -25,6 +25,7 @@ describe("redact tests", () => {
         InvalidRangeError,
       );
     });
+    
     test("disjoint intervals", () => {
       const wholeTranscriptRange = {
         start: 0,
