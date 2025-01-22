@@ -1,5 +1,9 @@
 import { pipe } from "fp-ts/lib/function";
-import { EncodedString, findAllQueryParams } from "../utils";
+import {
+  EncodedString,
+  findAllQueryParams,
+  NoGivenParamInUrlError,
+} from "../utils";
 
 const calculateRequestQueryParamsRanges = (
   urlQueryParams: string[],
@@ -13,7 +17,9 @@ const calculateRequestQueryParamsRanges = (
       url.indexOf(`&${param}=`) !== -1
         ? url.indexOf(`&${param}=`)
         : url.indexOf(`?${param}=`);
-
+    if (startInUrl === -1) {
+      throw new NoGivenParamInUrlError(param);
+    }
     const start =
       offset +
       startInUrl +
@@ -26,6 +32,7 @@ const calculateRequestQueryParamsRanges = (
       secondAmpersandPosition !== -1
         ? offset + secondAmpersandPosition
         : offset + url.length;
+
     return {
       start,
       end,
