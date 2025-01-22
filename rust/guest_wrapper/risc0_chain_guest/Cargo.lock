@@ -1337,6 +1337,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "guest_build_utils"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "hex",
+ "lazy_static",
+ "risc0-zkp",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2777,6 +2787,7 @@ name = "risc0_chain_guest"
 version = "0.1.0"
 dependencies = [
  "chain_guest",
+ "guest_build_utils",
  "risc0-zkvm",
  "tokio",
 ]
