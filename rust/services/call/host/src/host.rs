@@ -11,7 +11,7 @@ use call_engine::{
     travel_call_executor::TravelCallExecutor,
     verifier::{
         chain_proof, time_travel,
-        travel_call::{self, Verifier},
+        travel_call::{self, IVerifier},
         zk_proof,
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
@@ -210,7 +210,7 @@ async fn get_chain_proofs(
             return Err(PreflightError::ChainServiceNotAvailable);
         };
         let time_travel_verifier = time_travel::Verifier::new(client, verifier);
-        let travel_call_verifier = travel_call::ZkVerifier::new(time_travel_verifier);
+        let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier);
         travel_call_verifier.verify(multi_evm_input).await?;
         let (chain_proof_client, _) = travel_call_verifier
             .into_time_travel_verifier()

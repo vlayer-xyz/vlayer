@@ -16,36 +16,36 @@ pub type Result = std::result::Result<(), Error>;
 define_sealed_trait!(&super::MultiEvmInput);
 
 #[async_trait]
-pub trait Verifier: seal::Sealed + Send + Sync {
+pub trait IVerifier: seal::Sealed + Send + Sync {
     async fn verify(&self, input: &MultiEvmInput) -> Result;
 }
 
-assert_obj_safe!(Verifier);
+assert_obj_safe!(IVerifier);
 
 // Useful to mock verifier in tests
 // [auto_impl(Fn)] doesn't work with async_trait
 #[cfg(any(test, feature = "testing"))]
 #[async_trait]
-impl<F: Fn(&MultiEvmInput) -> Result + Send + Sync> Verifier for F {
+impl<F: Fn(&MultiEvmInput) -> Result + Send + Sync> IVerifier for F {
     async fn verify(&self, input: &MultiEvmInput) -> Result {
         self(input)
     }
 }
 
 #[derive(new)]
-pub struct ZkVerifier<TT: time_travel::IVerifier> {
+pub struct Verifier<TT: time_travel::IVerifier> {
     time_travel: TT,
 }
 
-impl<TT: time_travel::IVerifier> ZkVerifier<TT> {
+impl<TT: time_travel::IVerifier> Verifier<TT> {
     pub fn into_time_travel_verifier(self) -> TT {
         self.time_travel
     }
 }
 
-impl<TT: time_travel::IVerifier> seal::Sealed for ZkVerifier<TT> {}
+impl<TT: time_travel::IVerifier> seal::Sealed for Verifier<TT> {}
 #[async_trait]
-impl<TT: time_travel::IVerifier> Verifier for ZkVerifier<TT> {
+impl<TT: time_travel::IVerifier> IVerifier for Verifier<TT> {
     async fn verify(&self, input: &MultiEvmInput) -> Result {
         for (chain_id, blocks) in input.blocks_by_chain() {
             self.time_travel.verify(chain_id, blocks).await?;

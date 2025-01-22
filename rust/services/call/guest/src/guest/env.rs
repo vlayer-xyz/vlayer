@@ -21,7 +21,7 @@ use crate::db::{wrap_state::WrapStateDb, GuestDb};
 pub struct VerifiedInput(MultiEvmInput);
 
 pub async fn verify_input(
-    verifier: impl travel_call::Verifier,
+    verifier: impl travel_call::IVerifier,
     multi_evm_input: MultiEvmInput,
 ) -> VerifiedInput {
     verifier
