@@ -3,56 +3,39 @@ import { match, P } from "ts-pattern";
 import { calculateRequestRanges } from "./tlsn.request.ranges";
 import { calculateResponseRanges } from "./tlsn.response.ranges";
 import { RedactionConfig } from "src/web-proof-commons/types/message";
-import { ParsedTranscriptData } from "tlsn-js";
 import { CommitData } from "tlsn-js/src/types";
-import { InvalidRangeError, OutOfBoundsError } from "./tlsn.ranges.error";
+import {
+  InvalidRangeError,
+  OutOfBoundsError,
+  parseTlsnTranscript,
+} from "./utils";
 
-export type Transcript = {
-  sent: string;
-  recv: string;
-  ranges: {
-    recv: ParsedTranscriptData;
-    sent: ParsedTranscriptData;
-  };
-};
-
+import { Transcript, EncodedTranscript } from "./types";
 const emptyCommit: Commit = {
   sent: [],
   recv: [],
 };
 
 export function calcRedactionRanges(
-  transcript: Transcript,
+  transcript: EncodedTranscript,
   redactionConfig: RedactionConfig,
 ) {
   return redactionConfig.reduce((commit, redactionItem) => {
     return match(redactionItem)
-      .with({ response: P.any }, (responseRedactionItem) => {
-        return {
-          ...commit,
-          recv: [
-            ...commit.recv,
-            ...calculateResponseRanges(
-              responseRedactionItem,
-              transcript.recv,
-              transcript.ranges.recv,
-            ),
-          ],
-        };
-      })
-      .with({ request: P.any }, (requestRedactionItem) => {
-        return {
-          ...commit,
-          sent: [
-            ...commit.sent,
-            ...calculateRequestRanges(
-              requestRedactionItem,
-              transcript.sent,
-              transcript.ranges.sent,
-            ),
-          ],
-        };
-      })
+      .with({ response: P.any }, (responseRedactionItem) => ({
+        ...commit,
+        recv: [
+          ...commit.recv,
+          ...calculateResponseRanges(responseRedactionItem, transcript.recv),
+        ],
+      }))
+      .with({ request: P.any }, (requestRedactionItem) => ({
+        ...commit,
+        sent: [
+          ...commit.sent,
+          ...calculateRequestRanges(requestRedactionItem, transcript.sent),
+        ],
+      }))
       .exhaustive();
   }, emptyCommit);
 }
@@ -61,9 +44,6 @@ export const calcRevealRanges = (
   wholeTranscriptRange: CommitData,
   redactRanges: CommitData[],
 ): CommitData[] => {
-  const result: CommitData[] = [];
-  let begin = wholeTranscriptRange.start;
-
   const validatedRedactRanges = redactRanges
     .map((range) => validateRange(range, wholeTranscriptRange))
     .sort((a, b) => a.start - b.start);
@@ -77,26 +57,26 @@ export const calcRevealRanges = (
     throw new InvalidRangeError(hasOverlap);
   }
 
-  console.log(validatedRedactRanges);
+  const result: CommitData[] = [];
+  let begin = wholeTranscriptRange.start;
 
   for (const redactRange of validatedRedactRanges) {
     result.push({ start: begin, end: redactRange.start });
     begin = redactRange.end;
   }
 
-  const lastRange = validateRange(
-    {
-      start: begin,
-      end: wholeTranscriptRange.end,
-    },
-    wholeTranscriptRange,
+  result.push(
+    validateRange(
+      {
+        start: begin,
+        end: wholeTranscriptRange.end,
+      },
+      wholeTranscriptRange,
+    ),
   );
-  result.push(lastRange);
 
-  return result.filter(differentStartAndEnd);
+  return result.filter((range) => range.start !== range.end);
 };
-
-const differentStartAndEnd = (range: CommitData) => range.start !== range.end;
 
 const validateRange = (range: CommitData, wholeTranscriptRange: CommitData) => {
   if (range.start > range.end) {
@@ -111,13 +91,22 @@ const validateRange = (range: CommitData, wholeTranscriptRange: CommitData) => {
   return range;
 };
 
+import { pipe } from "fp-ts/function";
+
 export function redact(
   transcript: Transcript,
   redactionConfig: RedactionConfig,
 ) {
-  const redactionRanges = calcRedactionRanges(transcript, redactionConfig);
-  return {
-    sent: calcRevealRanges(transcript.ranges.sent.all, redactionRanges.sent),
-    recv: calcRevealRanges(transcript.ranges.recv.all, redactionRanges.recv),
-  };
+  return pipe(
+    transcript,
+    parseTlsnTranscript,
+    (parsed) => ({
+      parsed,
+      redactionRanges: calcRedactionRanges(parsed, redactionConfig),
+    }),
+    ({ parsed, redactionRanges }) => ({
+      sent: calcRevealRanges(parsed.sent.message.range, redactionRanges.sent),
+      recv: calcRevealRanges(parsed.recv.message.range, redactionRanges.recv),
+    }),
+  );
 }
