@@ -134,7 +134,7 @@ rlp = "0.6.1"
 rsa = "=0.9.6" # Locked because of RSA acceleration (see https://github.com/vlayer-xyz/vlayer/pull/1444)
 semver = "1.0.24"
 serde = { version = "1.0.213", features = ["derive"] }
-serde_json = "1.0.135" 
+serde_json = "1.0.135"
 serde_repr = "0.1.19"
 serde_urlencoded = "0.7.1"
 serde_with = { version = "3.11.0", default-features = false }
@@ -192,7 +192,7 @@ provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
 test_runner = { path = "rust/test_runner" }
 u64_range = { path = "rust/range" }
-verifiable_dns = { path = "rust/verifiable_dns" }
+verifiable_dns = { path = "rust/verifiable_dns", default-features = false }
 version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
 zkvm-benchmarks = { path = "rust/zkvm-benchmarks/benchmarks" }

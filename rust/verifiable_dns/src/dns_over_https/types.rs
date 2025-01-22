@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use crate::verifiable_dns::VerificationData;
+use crate::VerificationData;
 
 #[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]
 pub struct Query {
@@ -12,7 +12,7 @@ pub struct Query {
 
 #[derive(Serialize_repr, Deserialize_repr, Clone, Default, PartialEq, Debug)]
 #[repr(u8)]
-pub(crate) enum RecordType {
+pub enum RecordType {
     #[allow(clippy::upper_case_acronyms)]
     CNAME = 5,
     #[default]
@@ -63,7 +63,7 @@ impl Default for Response {
 }
 
 #[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]
-pub(crate) struct Record {
+pub struct Record {
     pub name: String,
     #[serde(rename = "type")]
     #[allow(clippy::struct_field_names)]

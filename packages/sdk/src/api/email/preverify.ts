@@ -3,7 +3,7 @@ import {
   getDkimSigners,
   parseEmail,
 } from "./parseEmail";
-import { DnsResolver, resolveDkimDns } from "./dnsResolver";
+import { DnsResolver } from "./dnsResolver";
 import { prefixAllButNthSubstring } from "../utils/prefixAllButNthSubstring";
 
 export function findIndicesOfMatchingDomains(
@@ -42,7 +42,10 @@ function requireSameOrigin(
   ] as const;
 }
 
-export async function preverifyEmail(mimeEmail: string) {
+export async function preverifyEmail(
+  mimeEmail: string,
+  dnsResolverUrl: string,
+) {
   const parsedEmail = await parseEmail(mimeEmail);
   let signers = getDkimSigners(parsedEmail);
   const fromAddress = parsedEmail.from.address;
@@ -56,10 +59,12 @@ export async function preverifyEmail(mimeEmail: string) {
   [mimeEmail, signers] = requireSameOrigin(mimeEmail, signers, fromAddress);
 
   const [{ domain, selector }] = signers;
-  const resolver = new DnsResolver();
-  const dnsRecord = await resolveDkimDns(resolver, domain, selector);
+  const resolver = new DnsResolver(dnsResolverUrl);
+
+  const dnsResponse = await resolver.resolveDkimDns(selector, domain);
+
   return {
     email: mimeEmail,
-    dnsRecords: [dnsRecord],
+    ...dnsResponse,
   };
 }

@@ -6,25 +6,34 @@ const rawEmail = readFile("./src/api/email/testdata/test_email.txt");
 
 describe("Preverify email: integration", () => {
   test("adds dns record to email mime", async () => {
-    const preverifiedEmail = await preverifyEmail(rawEmail);
-    expect(preverifiedEmail).toMatchObject({
-      email: rawEmail,
-      dnsRecords: [expect.stringContaining("v=DKIM1; k=rsa; p=")],
+    const preverifiedEmail = await preverifyEmail(
+      rawEmail,
+      "https://dns.google/resolve",
+    );
+    expect(preverifiedEmail.email).toBe(rawEmail);
+    expect(preverifiedEmail.dnsRecord).toMatchObject({
+      name: "20230601._domainkey.google.com.",
+      recordType: 16,
+      ttl: expect.any(BigInt), // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+      data: expect.stringContaining("v=DKIM1; k=rsa; p="), // eslint-disable-line @typescript-eslint/no-unsafe-assignment
     });
+    expect(preverifiedEmail.dnsRecord.data).toContain("v=DKIM1; k=rsa; p=");
   });
 
   test("throws error if DKIM not found", async () => {
     const emailWithNoDkimHeader = 'From: "Alice"\n\nBody';
-    await expect(preverifyEmail(emailWithNoDkimHeader)).rejects.toThrow(
-      "No DKIM header found",
-    );
+    await expect(
+      preverifyEmail(emailWithNoDkimHeader, "https://dns.google/resolve"),
+    ).rejects.toThrow("No DKIM header found");
   });
 
   test("throws error if DNS could not be resolved", async () => {
     const emailWithNoDkimHeader = readFile(
       "./src/api/email/testdata/test_email_unknown_domain.txt",
     );
-    await expect(preverifyEmail(emailWithNoDkimHeader)).rejects.toThrow();
+    await expect(
+      preverifyEmail(emailWithNoDkimHeader, "https://dns.google/resolve"),
+    ).rejects.toThrow();
   });
 
   describe("multiple DKIM headers", () => {
@@ -43,7 +52,10 @@ ${email}`;
         (email, domain) => addDkimWithDomain(domain, email),
         rawEmail,
       );
-      const email = await preverifyEmail(emailWithAddedHeaders);
+      const email = await preverifyEmail(
+        emailWithAddedHeaders,
+        "https://dns.google/resolve",
+      );
       expect(
         email.email
           .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=hello.kitty;
@@ -53,9 +65,9 @@ X-DKIM-Signature: v=1; a=rsa-sha256; d=example.com;
 DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
  c=simple/simple; d=google.com;`),
       ).toBeTruthy();
-      expect(email.dnsRecords).toStrictEqual([
+      expect(email.dnsRecord.data).toEqual(
         "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4zd3nfUoLHWFbfoPZzAb8bvjsFIIFsNypweLuPe4M+vAP1YxObFxRnpvLYz7Z+bORKLber5aGmgFF9iaufsH1z0+aw8Qex7uDaafzWoJOM/6lAS5iI0JggZiUkqNpRQLL7H6E7HcvOMC61nJcO4r0PwLDZKwEaCs8gUHiqRn/SS3wqEZX29v/VOUVcI4BjaOzOCLaz7V8Bkwmj4Rqq4kaLQQrbfpjas1naScHTAmzULj0Rdp+L1vVyGitm+dd460PcTIG3Pn+FYrgQQo2fvnTcGiFFuMa8cpxgfH3rJztf1YFehLWwJWgeXTriuIyuxUabGdRQu7vh7GrObTsHmIHwIDAQAB",
-      ]);
+      );
     });
 
     test("throws error if no DNS record domain matches the sender", async () => {
@@ -66,14 +78,15 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
         "otherdomain.com",
         emailWithOneDkimHeader,
       );
-      await expect(preverifyEmail(emailWithAddedHeaders)).rejects.toThrow(
-        "Found 0 DKIM headers matching the sender domain",
-      );
+      await expect(
+        preverifyEmail(emailWithAddedHeaders, "https://dns.google/resolve"),
+      ).rejects.toThrow("Found 0 DKIM headers matching the sender domain");
     });
 
     test("removes signatures from subdomain signers", async () => {
       const email = await preverifyEmail(
         addDkimWithDomain("subdomain.google.com", rawEmail),
+        "https://dns.google/resolve",
       );
       expect(
         email.email
@@ -89,9 +102,9 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
         "subdomain.google.com",
         readFile("./src/api/email/testdata/test_email_subdomain.txt"),
       );
-      await expect(preverifyEmail(emailWithAddedHeaders)).rejects.toThrow(
-        "Found 0 DKIM headers matching the sender domain",
-      );
+      await expect(
+        preverifyEmail(emailWithAddedHeaders, "https://dns.google/resolve"),
+      ).rejects.toThrow("Found 0 DKIM headers matching the sender domain");
     });
 
     test("throws error if multiple DNS record domains match the sender", async () => {
@@ -100,9 +113,9 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
         "google.com",
         emailWithAddedHeaders,
       );
-      await expect(preverifyEmail(emailWithAddedHeaders)).rejects.toThrow(
-        "Found 3 DKIM headers matching the sender domain",
-      );
+      await expect(
+        preverifyEmail(emailWithAddedHeaders, "https://dns.google/resolve"),
+      ).rejects.toThrow("Found 3 DKIM headers matching the sender domain");
     });
 
     test("ignores x-dkim-signature headers", async () => {
@@ -110,7 +123,10 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
         "example.com",
         addFakeDkimWithDomain("example.com", rawEmail),
       );
-      const email = await preverifyEmail(emailWithPrefixedDkim);
+      const email = await preverifyEmail(
+        emailWithPrefixedDkim,
+        "https://dns.google/resolve",
+      );
       expect(
         email.email
           .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=example.com;
@@ -125,7 +141,10 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
     test("ignores dkim-signature somewhere inside a header", async () => {
       const headerWithDkim = `WTF-IS-THIS-HEADER: DKIM-SIGNATURE;`;
       const emailWithDkimInHeader = `${headerWithDkim}\n${addDkimWithDomain("example.com", rawEmail)}`;
-      const email = await preverifyEmail(emailWithDkimInHeader);
+      const email = await preverifyEmail(
+        emailWithDkimInHeader,
+        "https://dns.google/resolve",
+      );
       expect(
         email.email.startsWith(`WTF-IS-THIS-HEADER: DKIM-SIGNATURE;
 X-DKIM-Signature: v=1; a=rsa-sha256; d=example.com;
@@ -138,7 +157,10 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
     test("ignores dkim-signature somewhere inside a body", async () => {
       const emailWithAddedDkim = addDkimWithDomain("example.com", rawEmail);
       const emailWithDkimsInBody = `${emailWithAddedDkim}\ndkim-signature   dkim-signature\r\ndkim-signature`;
-      const email = await preverifyEmail(emailWithDkimsInBody);
+      const email = await preverifyEmail(
+        emailWithDkimsInBody,
+        "https://dns.google/resolve",
+      );
       expect(
         email.email
           .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=example.com;

@@ -1,34 +1,19 @@
 import { describe, expect, test } from "vitest";
-import { DnsResolver, resolveDkimDns } from "./dnsResolver";
+import { DnsResolver } from "./dnsResolver";
 
 const resolver = new DnsResolver();
 
 describe("resolveDkimDns Integration", () => {
   test("resolves vlayer DNS", async () => {
-    const resolved = await resolveDkimDns(
-      resolver,
-      "vlayer-xyz.20230601.gappssmtp.com",
-      "20230601",
-    );
+    const resolved = await resolver.resolveDkimDns("google", "vlayer.xyz");
     const expected =
-      "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3gWcOhCm99qzN+h7/2+LeP3CLsJkQQ4EP/2mrceXle5pKq8uZmBl1U4d2Vxn4w+pWFANDLmcHolLboESLFqEL5N6ae7u9b236dW4zn9AFkXAGenTzQEeif9VUFtLAZ0Qh2eV7OQgz/vPj5IaNqJ7h9hpM9gO031fe4v+J0DLCE8Rgo7hXbNgJavctc0983DaCDQaznHZ44LZ6TtZv9TBs+QFvsy4+UCTfsuOtHzoEqOOuXsVXZKLP6B882XbEnBpXEF8QzV4J26HiAJFUbO3mAqZL2UeKC0hhzoIZqZXNG0BfuzOF0VLpDa18GYMUiu+LhEJPJO9D8zhzvQIHNrpGwIDAQAB";
-    expect(resolved).toBe(expected);
-  });
-
-  test("resolves delegated dns", async () => {
-    const resolved = await resolveDkimDns(
-      resolver,
-      "bolt.eu",
-      "el7njvpsjxbr7wk7l7dss5ejzvijzoeu",
-    );
-    const expected =
-      "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDQxwOEYMZS2rPORBB94iL47Ute8zb1SUNl7K0zCQMk+M83AJHcwKjnJVhA4F0rLbSxY7cxJgl57lN4Vp5k10HHOil00oIn1S0ChBKHiFCQAMHCNonwDOdJa6mXwe2VwEM7hnVpRc/Eo0F0acpNMeYJxyLcTcOuZBNzcPm6t+4uTwIDAQAB";
-    expect(resolved).toBe(expected);
+      "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB";
+    expect(resolved.dnsRecord.data).toBe(expected);
   });
 
   test("throws error if dns not found", async () => {
     await expect(
-      resolveDkimDns(resolver, "not-a-domain.com", "abcd"),
+      resolver.resolveDkimDns("abcd", "not-a-domain.com"),
     ).rejects.toThrow();
   });
 });

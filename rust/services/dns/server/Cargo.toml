@@ -16,7 +16,7 @@ tower-http = { workspace = true, features = ["validate-request"] }
 tracing = { workspace = true }
 
 server_utils = { workspace = true }
-verifiable_dns = { workspace = true }
+verifiable_dns = { workspace = true, features = ["http"] }
 
 [lints]
 workspace = true

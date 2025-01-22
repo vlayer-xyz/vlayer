@@ -1,9 +1,11 @@
 use serde::Serialize;
 
-use super::Timestamp;
-use crate::dns_over_https::types::{Record as DNSRecord, RecordType};
+use crate::{
+    common::types::Timestamp,
+    dns_over_https::types::{Record as DNSRecord, RecordType},
+};
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, PartialEq, Debug, Clone)]
 pub(crate) struct Record<'a> {
     name: &'a String,
     #[serde(rename = "type")]
@@ -14,7 +16,7 @@ pub(crate) struct Record<'a> {
 }
 
 impl<'a> Record<'a> {
-    pub const fn new(record: &'a DNSRecord, valid_until: Timestamp) -> Self {
+    pub(crate) const fn new(record: &'a DNSRecord, valid_until: Timestamp) -> Self {
         Self {
             name: &record.name,
             data: &record.data,
@@ -27,7 +29,7 @@ impl<'a> Record<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{dns_over_https::types::RecordType, verifiable_dns::signer::ToSignablePayload};
+    use crate::{common::to_payload::ToPayload, dns_over_https::types::RecordType};
 
     #[test]
     fn serializes_to_canonical_json() {
