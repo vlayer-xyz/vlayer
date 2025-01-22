@@ -3,7 +3,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
 function cleanup() {
     echo "Cleaning up..."
 
-    for service in CHAIN_SERVER VLAYER_SERVER ; do 
+    for service in CHAIN_SERVER VLAYER_SERVER DNS_SERVER ; do
         kill_service "${service}"
     done
 

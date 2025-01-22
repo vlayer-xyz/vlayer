@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { DnsResolver } from "./dnsResolver";
 
-const resolver = new DnsResolver();
+const resolver = new DnsResolver("https://dns.google/resolve");
 
 describe("resolveDkimDns Integration", () => {
   test("resolves vlayer DNS", async () => {
