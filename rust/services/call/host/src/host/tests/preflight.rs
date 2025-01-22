@@ -199,7 +199,6 @@ mod teleport_v2 {
     };
 
     #[tokio::test(flavor = "multi_thread")]
-    #[ignore = "Fails due to ABI decoding issue"]
     async fn success() -> anyhow::Result<()> {
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
         let call = call(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner: JOHN });

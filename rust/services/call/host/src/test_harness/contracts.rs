@@ -85,27 +85,33 @@ pub mod simple {
     // Block where verifier was deployed: https://sepolia-optimism.etherscan.io/tx/0x461050173aadd23142df65edcef1e847706795750398a01ed548c37bf6f58087
     pub const BLOCK_NO: u64 = 22_616_952;
     sol! {
-        #[sol(all_derives = true)]
-        struct Seal {
-            bytes18 lhv;
-            bytes19 rhv;
+        #[derive(Debug)]
+        enum ProofMode {
+            GROTH16,
+            FAKE
         }
-        #[sol(all_derives = true)]
+        #[derive(Debug)]
+        struct Seal {
+            bytes4 verifierSelector;
+            bytes32[8] seal;
+            ProofMode mode;
+        }
+        #[derive(Debug)]
         struct CallAssumptions {
             address proverContractAddress;
             bytes4 functionSelector;
-            uint256 settleBlockNumber; // Block number for which the assumptions was made.
+            uint256 settleBlockNumber; // Block number for which assumptions was made.
             bytes32 settleBlockHash; // Hash of the block at the specified block number.
         }
-        #[sol(all_derives = true)]
+        #[derive(Debug)]
         struct Proof {
-            uint256 length;
             Seal seal;
-            CallAssumptions call_assumptions;
+            bytes32 callGuestId;
+            uint256 length;
+            CallAssumptions callAssumptions;
         }
-        #[sol(all_derives = true)]
+        #[derive(Debug)]
         contract SimpleProver {
-            #[sol(all_derives = true)]
             function balance(address _owner) public returns (Proof memory, address, uint256);
         }
     }
@@ -134,22 +140,29 @@ pub mod teleport_v2 {
     pub const JOHN: Address = address!("70997970C51812dc3A010C7d01b50e0d17dc79C8");
     sol! {
         #[derive(Debug)]
+        enum ProofMode {
+            GROTH16,
+            FAKE
+        }
+        #[derive(Debug)]
         struct Seal {
-            bytes18 lhv;
-            bytes19 rhv;
+            bytes4 verifierSelector;
+            bytes32[8] seal;
+            ProofMode mode;
         }
         #[derive(Debug)]
         struct CallAssumptions {
             address proverContractAddress;
             bytes4 functionSelector;
-            uint256 settleBlockNumber; // Block number for which the assumptions was made.
+            uint256 settleBlockNumber; // Block number for which assumptions was made.
             bytes32 settleBlockHash; // Hash of the block at the specified block number.
         }
         #[derive(Debug)]
         struct Proof {
-            uint256 length;
             Seal seal;
-            CallAssumptions call_assumptions;
+            bytes32 callGuestId;
+            uint256 length;
+            CallAssumptions callAssumptions;
         }
         #[derive(Debug)]
         contract SimpleTeleportProver {
