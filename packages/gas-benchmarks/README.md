@@ -4,6 +4,41 @@ This app is used to gather benchmark data comparing gas to cycles used
 for each benchmarked scenario. It uses our client SDK to run the proofs
 and then gather the metrics.
 
+## Building benchmarks
+
+There are a few things that need to happen before we can build this package.
+Firstly, we need to build the contracts
+
+```
+$ pushd contracts/fixtures
+$ forge soldeer install
+$ forge build
+$ popd
+```
+
+Next, we need generate typescript bindings for the said contracts
+
+```
+$ ./bash/build-ts-types.sh
+```
+
+Finally, we need to build the SDK
+
+```
+$ bun install
+$ pushd packages/sdk
+$ bun run build
+$ popd
+```
+
+and this package
+
+```
+$ cd packages/gas-benchmarks
+$ bun install
+$ bun run build
+```
+
 ## Running benchmarks
 
 Since we are actually communicating with the Vlayer server, you need to have
