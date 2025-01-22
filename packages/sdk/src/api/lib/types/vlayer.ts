@@ -76,6 +76,11 @@ export type Metrics = {
   };
 };
 
+export type ProofDataWithMetrics = {
+  data: ProofData;
+  metrics: Metrics;
+};
+
 export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
   address: Hex;
   proverAbi: T;
@@ -119,6 +124,7 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
     status: z.literal(0),
     error: z.string(),
     data: z.undefined(),
+    metrics: z.custom<Metrics>(),
     state: z.enum([
       ProofState.ChainProof,
       ProofState.Preflight,
@@ -128,16 +134,15 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal(1),
     error: z.undefined(),
-    state: z
-      .enum([
-        ProofState.Done,
-        ProofState.ChainProof,
-        ProofState.Preflight,
-        ProofState.Proving,
-        ProofState.Queued,
-      ])
-      .optional(),
+    state: z.enum([
+      ProofState.Done,
+      ProofState.ChainProof,
+      ProofState.Preflight,
+      ProofState.Proving,
+      ProofState.Queued,
+    ]),
     data: z.custom<ProofData>(),
+    metrics: z.custom<Metrics>(),
   }),
 ]);
 

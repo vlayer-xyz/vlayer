@@ -3,6 +3,9 @@ import { createContext } from "./createContext";
 import { type ContractArg, type ContractSpec } from "types/ethereum";
 import { type Address } from "viem";
 import { getChainConfirmations } from "./getChainConfirmations";
+import debug from "debug";
+
+const log = debug("vlayer:prover");
 
 export const waitForContractDeploy = async ({
   hash,
@@ -57,7 +60,7 @@ export const deployProver = async ({
     abi: proverSpec.abi,
     bytecode: proverSpec.bytecode.object,
   });
-  console.log(proverHash);
+  log(`Prover hash: ${proverHash}`);
   const prover = await waitForContractDeploy({ hash: proverHash });
   return prover;
 };
@@ -73,11 +76,11 @@ export const deployVlayerContracts = async ({
   proverArgs?: ContractArg[];
   verifierArgs?: ContractArg[];
 }) => {
-  console.log("Starting contract deployment process...");
+  log("Starting contract deployment process...");
   const config = getConfig();
   const { chain, ethClient, account } = createContext(config);
 
-  console.log("Deploying prover contract...");
+  log("Deploying prover contract...");
   const proverHash = await ethClient.deployContract({
     chain,
     account,
@@ -85,11 +88,11 @@ export const deployVlayerContracts = async ({
     abi: proverSpec.abi,
     bytecode: proverSpec.bytecode.object,
   });
-  console.log(proverHash);
+  log(`Prover hash: ${proverHash}`);
   const prover = await waitForContractDeploy({ hash: proverHash });
-  console.log(`Prover contract deployed at: ${prover}`);
+  log(`Prover contract deployed at: ${prover}`);
 
-  console.log("Deploying verifier contract...");
+  log("Deploying verifier contract...");
   const verifierHash = await ethClient.deployContract({
     chain,
     account,
@@ -98,8 +101,8 @@ export const deployVlayerContracts = async ({
     bytecode: verifierSpec.bytecode.object,
   });
   const verifier = await waitForContractDeploy({ hash: verifierHash });
-  console.log(`Verifier contract deployed at: ${verifier}`);
+  log(`Verifier contract deployed at: ${verifier}`);
 
-  console.log("Contract deployment completed successfully");
+  log("Contract deployment completed successfully");
   return { prover, verifier };
 };
