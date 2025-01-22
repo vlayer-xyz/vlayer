@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use derive_new::new;
 use static_assertions::assert_obj_safe;
 
-use super::{define_sealed_trait, time_travel};
+use super::{sealed_trait, time_travel, verifier_trait};
 use crate::evm::input::MultiEvmInput;
 
 #[derive(thiserror::Error, Debug)]
@@ -13,17 +13,11 @@ pub enum Error {
 
 pub type Result = std::result::Result<(), Error>;
 
-define_sealed_trait!(&super::MultiEvmInput);
-
-#[async_trait]
-pub trait IVerifier: seal::Sealed + Send + Sync {
-    async fn verify(&self, input: &MultiEvmInput) -> Result;
-}
+sealed_trait!(&super::MultiEvmInput);
+verifier_trait!(async (input: &MultiEvmInput) -> Result);
 
 assert_obj_safe!(IVerifier);
 
-// Useful to mock verifier in tests
-// [auto_impl(Fn)] doesn't work with async_trait
 #[cfg(any(test, feature = "testing"))]
 #[async_trait]
 impl<F: Fn(&MultiEvmInput) -> Result + Send + Sync> IVerifier for F {

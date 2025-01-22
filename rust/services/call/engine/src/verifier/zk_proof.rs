@@ -2,15 +2,18 @@ pub use risc0_zkp::verify::VerificationError as Error;
 use risc0_zkvm::{guest, sha::Digest, Receipt};
 use static_assertions::assert_obj_safe;
 
-use super::define_sealed_trait;
+use super::{sealed_trait, verifier_trait};
 
 pub type Result = std::result::Result<(), Error>;
 
-define_sealed_trait!(&super::Receipt, super::Digest);
+sealed_trait!(&super::Receipt, super::Digest);
+verifier_trait!((receipt: &Receipt, elf_id: Digest) -> Result);
 
-#[cfg_attr(test, auto_impl::auto_impl(Fn))]
-pub trait IVerifier: seal::Sealed + Send + Sync + 'static {
-    fn verify(&self, receipt: &Receipt, elf_id: Digest) -> Result;
+#[cfg(any(test, feature = "testing"))]
+impl<F: Fn(&Receipt, Digest) -> Result + Send + Sync> IVerifier for F {
+    fn verify(&self, receipt: &Receipt, elf_id: Digest) -> Result {
+        self(receipt, elf_id)
+    }
 }
 
 assert_obj_safe!(IVerifier);
