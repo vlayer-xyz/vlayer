@@ -7,7 +7,7 @@
     "code-complexity": ["error", 9],
     "compiler-version": ["error", "^0.8.0"],
     "const-name-snakecase": "error",
-    "event-name-camelcase": "error",
+    "event-name-capwords": "error",
     "constructor-syntax": "error",
     "func-name-mixedcase": "off",
     "func-param-name-mixedcase": "error",
@@ -17,7 +17,7 @@
     "func-visibility": ["error", { "ignoreConstructors": true }],
     "not-rely-on-time": "off",
     "no-empty-blocks": "off",
-    "contract-name-camelcase": "off",
+    "contract-name-capwords": "off",
     "no-inline-assembly": "off",
     "reason-string": ["warn", { "maxLength": 64 }],
     "one-contract-per-file": "off"
