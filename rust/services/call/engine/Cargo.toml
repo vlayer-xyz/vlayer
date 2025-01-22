@@ -33,7 +33,6 @@ revm = { workspace = true, features = ["optimism", "serde", "std"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
-static_assertions = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 
