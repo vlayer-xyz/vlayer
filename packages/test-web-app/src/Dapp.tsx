@@ -30,6 +30,9 @@ function DappNewWay() {
   const [webProof, setWebProof] = useState<PresentationJSON>();
   const [zkProof, setZkProof] = useState<boolean>();
 
+  const [decodedResponse, setDecodedResponse] = useState<string>();
+  const [decodedRequest, setDecodedRequest] = useState<string>();
+
   const webProofProvider = useMemo(() => {
     return createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
@@ -46,8 +49,17 @@ function DappNewWay() {
   useEffect(() => {
     webProofProvider.addEventListeners(
       ExtensionMessageType.ProofDone,
-      ({ payload: { proof } }) => {
-        setWebProof(proof);
+      ({
+        payload,
+      }: {
+        payload: {
+          presentationJSON: PresentationJSON;
+          decodedTranscript: { sent: string; recv: string };
+        };
+      }) => {
+        setWebProof(payload.presentationJSON);
+        setDecodedResponse(payload.decodedTranscript.recv);
+        setDecodedRequest(payload.decodedTranscript.sent);
       },
     );
   }, []);
@@ -66,13 +78,38 @@ function DappNewWay() {
       },
       logoUrl: "",
       steps: [
-        startPage(loginUrl, "Go to login"),
+        startPage(loginUrl, "Go to login page"),
         expectUrl(dashboardUrl, "At dashboard page"),
         expectUrl(profileUrl, "At profile page"),
         notarize(
           "https://lotr-api.online:3011/regular_json?are_you_sure=yes",
           "GET",
           "Prove",
+          [
+            {
+              response: {
+                json_body_except: ["screen_name"],
+              },
+            },
+            {
+              response: {
+                headers: [
+                  "AcceSs-COntrol-ExposE-Headers",
+                  "Access-Control-Allow-Headers",
+                ],
+              },
+            },
+            {
+              request: {
+                url_query: ["are_you_sure"],
+              },
+            },
+            {
+              request: {
+                headers: ["content-type"],
+              },
+            },
+          ],
         ),
       ],
     });
@@ -133,6 +170,27 @@ function DappNewWay() {
           <h1> No zk proof </h1>
         )}
       </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          marginTop: "20px",
+        }}
+      >
+        {decodedRequest && (
+          <div>
+            <h2>Request:</h2>
+            <pre style={{ whiteSpace: "break-spaces" }}>{decodedRequest}</pre>
+          </div>
+        )}
+        {decodedResponse && (
+          <div>
+            <h2>Response:</h2>
+            <pre style={{ whiteSpace: "break-spaces" }}>{decodedResponse}</pre>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -153,7 +211,10 @@ function Dapp() {
       webProofProvider: provider,
     });
 
-    const webproof = await provider.getWebProof({
+    const webproof: {
+      presentationJSON: PresentationJSON;
+      decodedTranscript: { sent: string; recv: string };
+    } = await provider.getWebProof({
       proverCallCommitment: {
         address: PROVER_ADDRESS,
         proverAbi: lotrApiProver.abi,
@@ -174,7 +235,7 @@ function Dapp() {
       ],
     });
 
-    setWebProof(webproof);
+    setWebProof(webproof.presentationJSON);
   }, []);
 
   const requestZkProof = useCallback(async () => {
