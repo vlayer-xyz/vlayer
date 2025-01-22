@@ -183,7 +183,7 @@ mod teleport {
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
         let owner = Address::ZERO;
         let call = call(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner });
-        let result = preflight::<crossChainBalanceOfCall>("simple_teleport", call, &location).await;
+        let result = preflight::<crossChainBalanceOfCall>("teleport", call, &location).await;
         let err = result.unwrap_err().to_string();
         let expected_err = "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(Opaque(Provider factory: No rpc cache for chain: 8453";
         assert!(err.contains(expected_err));
@@ -231,7 +231,7 @@ mod time_travel {
         let averageBalanceOfReturn {
             _2: average_balance,
             ..
-        } = preflight::<averageBalanceOfCall>("simple_time_travel", call, &location).await?;
+        } = preflight::<averageBalanceOfCall>("time_travel", call, &location).await?;
 
         assert_eq!(average_balance, uint!(1_874_845_031_590_000_U256));
 
