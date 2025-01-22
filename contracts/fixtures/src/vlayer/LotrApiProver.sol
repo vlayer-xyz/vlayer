@@ -16,8 +16,7 @@ contract LotrApiProver is Prover {
     string private constant NOTARY_PUB_KEY =
         "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
 
-    constructor() {}
-
+    // solhint-disable-next-line func-name-mixedcase
     function web_proof(WebProof calldata webProof) public view returns (bool) {
         Web memory web = WebProofLib.recover(webProof);
 

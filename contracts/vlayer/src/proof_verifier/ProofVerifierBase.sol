@@ -31,7 +31,7 @@ abstract contract ProofVerifierBase is IProofVerifier {
         VERIFIER.verify(proof.seal.decode(), CALL_GUEST_ID, journalHash);
     }
 
-    function call_guest_id() external view returns (bytes32) {
+    function callGuestId() external view returns (bytes32) {
         return CALL_GUEST_ID;
     }
 

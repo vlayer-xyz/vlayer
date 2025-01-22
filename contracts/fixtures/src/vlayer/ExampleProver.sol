@@ -13,7 +13,7 @@ import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
  * In order to update the test fixture:
  * 1. Modify this contract below.
  * 2. cd contracts/fixtures && forge build
- * 3. cp out/ExampleProver.sol/ExampleProver.json ../../rust/services/call/server/testdata
+ * 3. cp out/ExampleProver.sol/ExampleProver.json ../../rust/services/call/server_lib/testdata
  */
 
 contract ExampleProver is Prover {
@@ -21,12 +21,11 @@ contract ExampleProver is Prover {
     using WebProofLib for WebProof;
     using WebLib for Web;
 
-    constructor() {}
-
     function sum(uint256 lhs, uint256 rhs) public pure returns (uint256) {
         return lhs + rhs;
     }
 
+    // solhint-disable-next-line func-name-mixedcase
     function web_proof(WebProof calldata webProof) public view returns (bool) {
         Web memory web = webProof.verify("https://api.x.com/1.1/account/settings.json");
 
