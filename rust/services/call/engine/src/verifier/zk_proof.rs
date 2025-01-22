@@ -16,8 +16,6 @@ impl<F: Fn(&Receipt, Digest) -> Result + Send + Sync> IVerifier for F {
     }
 }
 
-assert_obj_safe!(IVerifier);
-
 pub struct GuestVerifier;
 
 impl seal::Sealed for GuestVerifier {}

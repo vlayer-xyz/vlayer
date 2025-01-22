@@ -27,12 +27,14 @@ macro_rules! verifier_trait {
         pub trait IVerifier: seal::Sealed + Send + Sync {
             fn verify(&self, $($arg_name: $arg_type),*) -> $result;
         }
+        assert_obj_safe!(IVerifier);
     };
     (async ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
         #[async_trait]
         pub trait IVerifier: seal::Sealed + Send + Sync {
             async fn verify(&self, $($arg_name: $arg_type),*) -> $result;
         }
+        assert_obj_safe!(IVerifier);
     };
 }
 pub(crate) use verifier_trait;

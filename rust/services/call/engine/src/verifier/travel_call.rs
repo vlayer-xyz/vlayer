@@ -16,8 +16,6 @@ pub type Result = std::result::Result<(), Error>;
 sealed_trait!(&super::MultiEvmInput);
 verifier_trait!(async (input: &MultiEvmInput) -> Result);
 
-assert_obj_safe!(IVerifier);
-
 #[cfg(any(test, feature = "testing"))]
 #[async_trait]
 impl<F: Fn(&MultiEvmInput) -> Result + Send + Sync> IVerifier for F {

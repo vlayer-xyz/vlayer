@@ -29,8 +29,6 @@ pub type Result = std::result::Result<(), Error>;
 sealed_trait!(&super::ChainProof);
 verifier_trait!((proof: &ChainProof) -> Result);
 
-assert_obj_safe!(IVerifier);
-
 #[cfg(any(test, feature = "testing"))]
 impl<F: Fn(&ChainProof) -> Result + Send + Sync> IVerifier for F {
     fn verify(&self, proof: &ChainProof) -> Result {

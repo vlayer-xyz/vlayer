@@ -26,8 +26,6 @@ pub type Result = std::result::Result<(), Error>;
 sealed_trait!(super::ChainId, Vec<(super::BlockNumber, super::BlockHash)>);
 verifier_trait!(async (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
 
-assert_obj_safe!(IVerifier);
-
 #[cfg(any(test, feature = "testing"))]
 #[async_trait]
 impl<F: Fn(ChainId, Vec<(BlockNumber, BlockHash)>) -> Result + Send + Sync> IVerifier for F {
