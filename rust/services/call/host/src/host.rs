@@ -43,7 +43,7 @@ pub struct Host {
     prover: Prover,
     // None means that chain service is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
     chain_client: Option<chain_client::RecordingClient>,
-    chain_proof_verifier: chain_proof::Verifier,
+    chain_proof_verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
     guest_elf: GuestElf,
 }
 
@@ -201,7 +201,7 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
 async fn get_chain_proofs(
     multi_evm_input: &MultiEvmInput,
     client: Option<chain_client::RecordingClient>,
-    verifier: chain_proof::Verifier,
+    verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
 ) -> Result<ChainProofCache, PreflightError> {
     if multi_evm_input.is_single_location() {
         Ok(HashMap::new())

@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use derive_new::new;
 use static_assertions::assert_obj_safe;
 
-use super::chain_proof;
+use super::{chain_proof, define_sealed_trait};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -23,19 +23,7 @@ pub enum Error {
 
 pub type Result = std::result::Result<(), Error>;
 
-mod seal {
-    // This trait prevents adding new implementations of Verifier
-    pub trait Sealed {}
-
-    // Useful to mock verifier in tests
-    #[cfg(feature = "testing")]
-    impl<F> Sealed for F where
-        F: Fn(super::ChainId, Vec<(super::BlockNumber, super::BlockHash)>) -> super::Result
-            + Send
-            + Sync
-    {
-    }
-}
+define_sealed_trait!(super::ChainId, Vec<(super::BlockNumber, super::BlockHash)>);
 
 #[async_trait]
 pub trait IVerifier: seal::Sealed + Send + Sync {
@@ -46,7 +34,7 @@ assert_obj_safe!(IVerifier);
 
 // Useful to mock verifier in tests
 // [auto_impl(Fn)] doesn't work with async_trait
-#[cfg(feature = "testing")]
+#[cfg(test)]
 #[async_trait]
 impl<F: Fn(ChainId, Vec<(BlockNumber, BlockHash)>) -> Result + Send + Sync> IVerifier for F {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result {

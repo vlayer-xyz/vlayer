@@ -2,16 +2,11 @@ pub use risc0_zkp::verify::VerificationError as Error;
 use risc0_zkvm::{guest, sha::Digest, Receipt};
 use static_assertions::assert_obj_safe;
 
+use super::define_sealed_trait;
+
 pub type Result = std::result::Result<(), Error>;
 
-mod seal {
-    // This trait prevents adding new implementations of ZkpVerifier
-    pub trait Sealed {}
-
-    // Useful to mock verifier in tests
-    #[cfg(test)]
-    impl<F: Fn(&super::Receipt, super::Digest) -> super::Result> Sealed for F {}
-}
+define_sealed_trait!(&super::Receipt, super::Digest);
 
 #[cfg_attr(test, auto_impl::auto_impl(Fn))]
 pub trait IVerifier: seal::Sealed + Send + Sync + 'static {
