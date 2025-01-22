@@ -1,3 +1,6 @@
+import { toByteArray } from "base64-js";
+import { toHex } from "viem";
+
 interface DnsResponse {
   Status: number;
   TC: boolean;
@@ -27,7 +30,7 @@ interface DnsResponse {
 }
 
 function parseBase64(data: string): `0x${string}` {
-  return `0x${Buffer.from(data, "base64").toString("hex")}`;
+  return toHex(toByteArray(data));
 }
 
 function parseVerificationData(response: DnsResponse) {
