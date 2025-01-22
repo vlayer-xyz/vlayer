@@ -29,11 +29,11 @@ jobs:
         working-directory: contracts/vlayer
         run: |
           bun install --frozen-lockfile
-          bun run lint:solidity
+          bun run lint:solidity --max-warnings 0
       - name: Contracts fixtures lint:solidity
         working-directory: contracts/fixtures
         run: |
           bun install --frozen-lockfile
-          bun run lint:solidity
+          bun run lint:solidity --max-warnings 0
       - name: lint Solidity examples
         run: ./bash/lint-solidity-examples.sh
