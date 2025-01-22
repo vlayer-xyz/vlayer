@@ -13,7 +13,7 @@ export const WelcomeScreen = () => {
       </div>
       <h3 className="header">X NFT</h3>
       <p className="desc">
-        Mint an NFT with your X (previosuly twitter) account. Only owner of
+        Mint an NFT with your X (previosuly Twitter) account. Only owner of
         account can mint NFT for specific handle. This example demonstrates use
         of Web Proofs.
       </p>

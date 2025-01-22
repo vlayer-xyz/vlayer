@@ -5,7 +5,7 @@ export const Modal = ({
   backUrl,
   children,
 }: {
-  backUrl?: any;
+  backUrl?: string;
   children: React.ReactNode;
 }) => {
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -21,8 +21,6 @@ export const Modal = ({
   useEffect(() => {
     showModal();
   }, []);
-
-  console.log("isValidElement", isValidElement(children));
 
   const childrenWithProps = isValidElement(children)
     ? cloneElement(
