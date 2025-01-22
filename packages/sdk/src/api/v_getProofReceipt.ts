@@ -4,6 +4,9 @@ import {
 } from "types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
 import { vGetProofReceiptSchema } from "./lib/types/vlayer";
+import debug from "debug";
+
+const log = debug("vlayer:v_getProofReceipt");
 
 function v_getProofReceiptBody(params: VGetProofReceiptParams) {
   return {
@@ -13,10 +16,6 @@ function v_getProofReceiptBody(params: VGetProofReceiptParams) {
     jsonrpc: "2.0",
   };
 }
-
-const log = (...args: unknown[]) => {
-  console.log("v_getProofReceipt: ", ...args);
-};
 
 export async function v_getProofReceipt(
   params: VGetProofReceiptParams,

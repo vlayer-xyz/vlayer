@@ -1,0 +1,33 @@
+{
+  "name": "gas-benchmarks",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "build": "bun tsc --build --noEmit",
+    "bench:dev": "VLAYER_ENV=dev bun run src/bench.ts"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.4.0",
+    "@vlayer/sdk": "workspace:*",
+    "debug": "^4.4.0",
+    "prettier-plugin-solidity": "^1.4.2",
+    "solhint": "^5.0.3",
+    "viem": "^2.17.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.6",
+    "@types/eslint__js": "^8.42.3",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "^9.7.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "typescript-eslint": "^8.2.0"
+  }
+}

@@ -16,6 +16,10 @@ import {
   assertUrlPattern,
 } from "../../../web-proof-commons";
 
+import debug from "debug";
+
+const log = debug("vlayer:WebProof:provider");
+
 const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 import { type MessageToExtension } from "../../../web-proof-commons";
@@ -69,10 +73,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
         });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
-        console.log(
-          "Cant send message",
-          "look that extension is not installed ",
-        );
+        log("Cant send message", "look that extension is not installed ");
       }
     }
   }

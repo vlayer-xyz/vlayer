@@ -11,8 +11,13 @@ import {
   type CallContext,
   type CallParams,
   type BrandedHash,
+  type ProofDataWithMetrics,
+  type ProofReceipt,
+  ProofState,
   type VGetProofReceiptParams,
+  type VGetProofReceiptResponse,
 } from "types/vlayer";
+import { match } from "ts-pattern";
 import { v_call } from "./v_call";
 import { v_getProofReceipt } from "./v_getProofReceipt";
 import { foundry } from "viem/chains";
@@ -38,11 +43,11 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   functionName: F,
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId: number = foundry.id,
-  gasLimit: number = 10_000_000,
   url: string = "http://127.0.0.1:3000",
+  gasLimit: number = 10_000_000,
   token?: string,
   options: ProveOptions = { preverifyVersions: false },
-) {
+): Promise<BrandedHash<T, F>> {
   await preverifyVersions(url, !!options.preverifyVersions);
   const calldata = encodeFunctionData({
     abi: abi as Abi,
@@ -54,15 +59,63 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     chain_id: chainId,
   };
   const fullUrl = url.concat(token !== undefined ? "/?token=" + token : "");
-  return v_call(call, context, fullUrl);
+  const resp = await v_call(call, context, fullUrl);
+  return { hash: resp.result } as BrandedHash<T, F>;
 }
 
 export async function getProofReceipt<
   T extends Abi,
   F extends ContractFunctionName<T>,
->(hash: BrandedHash<T, F>, url: string = "http://127.0.0.1:3000") {
+>(
+  hash: BrandedHash<T, F>,
+  url: string = "http://127.0.0.1:3000",
+): Promise<ProofReceipt> {
   const params: VGetProofReceiptParams = {
     hash: hash.hash as Hex,
   };
-  return v_getProofReceipt(params, url);
+  const resp = await v_getProofReceipt(params, url);
+  handleErrors(resp);
+  return resp.result;
+}
+
+const handleErrors = (resp: VGetProofReceiptResponse) => {
+  const { status, state, error } = resp.result;
+  if (status === 0) {
+    match(state)
+      .with(ProofState.ChainProof, () => {
+        throw new Error("Waiting for chain proof failed with error: " + error);
+      })
+      .with(ProofState.Preflight, () => {
+        throw new Error("Preflight failed with error: " + error);
+      })
+      .with(ProofState.Proving, () => {
+        throw new Error("Proving failed with error: " + error);
+      })
+      .exhaustive();
+  }
+};
+
+export async function waitForProof<
+  T extends Abi,
+  F extends ContractFunctionName<T>,
+>(
+  hash: BrandedHash<T, F>,
+  url: string,
+  numberOfRetries: number = 240,
+  sleepDuration: number = 1000,
+): Promise<ProofDataWithMetrics> {
+  for (let retry = 0; retry < numberOfRetries; retry++) {
+    const { state, data, metrics } = await getProofReceipt(hash, url);
+    if (state === ProofState.Done) {
+      return { data, metrics };
+    }
+    await sleep(sleepDuration);
+  }
+  throw new Error(
+    `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries.`,
+  );
+}
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -1,3 +1,7 @@
+import debug from "debug";
+
+const log = debug("vlayer:v_versions");
+
 const v_versionsBody = {
   method: "v_versions",
   params: [],
@@ -25,7 +29,7 @@ export async function v_versions(
     body: JSON.stringify(v_versionsBody),
     headers: { "Content-Type": "application/json" },
   });
-  console.log("response", response);
+  log("response", response);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
