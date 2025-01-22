@@ -12,7 +12,7 @@ use call_engine::{
     verifier::{
         chain_proof,
         guest_input::{self, Verifier},
-        zk_proof,
+        time_travel, zk_proof,
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
@@ -209,9 +209,10 @@ async fn get_chain_proofs(
         let Some(client) = client else {
             return Err(PreflightError::ChainServiceNotAvailable);
         };
-        let verifier = guest_input::ZkVerifier::new(client, verifier);
-        verifier.verify(multi_evm_input).await?;
-        let (chain_proof_client, _) = verifier.into_parts();
+        let time_travel_verifier = time_travel::ZkVerifier::new(client, verifier);
+        let input_verifier = guest_input::ZkVerifier::new(time_travel_verifier);
+        input_verifier.verify(multi_evm_input).await?;
+        let (chain_proof_client, _) = input_verifier.into_time_travel_verifier().into_parts();
         Ok(chain_proof_client.into_cache())
     }
 }
