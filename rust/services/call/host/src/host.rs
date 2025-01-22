@@ -212,9 +212,7 @@ async fn get_chain_proofs(
         let time_travel_verifier = time_travel::Verifier::new(client, verifier);
         let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier);
         travel_call_verifier.verify(multi_evm_input).await?;
-        let (chain_proof_client, _) = travel_call_verifier
-            .into_time_travel_verifier()
-            .into_parts();
+        let (chain_proof_client, _) = travel_call_verifier.into_inner().into_parts();
         Ok(chain_proof_client.into_cache())
     }
 }

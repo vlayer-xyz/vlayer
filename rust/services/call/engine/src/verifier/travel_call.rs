@@ -23,7 +23,7 @@ pub struct Verifier<TT: time_travel::IVerifier> {
 }
 
 impl<TT: time_travel::IVerifier> Verifier<TT> {
-    pub fn into_time_travel_verifier(self) -> TT {
+    pub fn into_inner(self) -> TT {
         self.time_travel
     }
 }
