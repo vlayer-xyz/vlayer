@@ -21,12 +21,14 @@ export const ProvingContainer = () => {
     useSimpleWebProof();
 
   useEffect(() => {
+    console.log("webProof", webProof);
     if (webProof) {
       callProver([webProof, address]);
     }
   }, [webProof]);
 
   useEffect(() => {
+    console.log("result", result);
     if (result) {
       navigate("/minting");
     }

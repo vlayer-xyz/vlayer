@@ -4,6 +4,7 @@ import {
   useWaitForProvingResult,
   useWebProof,
 } from "@vlayer/react";
+import { useLocalStorage } from "usehooks-ts";
 import { GetWebProofArgs, ProveArgs } from "@vlayer/sdk";
 import { Abi, ContractFunctionName } from "viem";
 import { optimismSepolia, anvil } from "viem/chains";
@@ -59,17 +60,20 @@ export const useSimpleWebProof = () => {
   const { isPending: isWaitingForProvingResult, data: result } =
     useWaitForProvingResult(hash);
 
+  const [, setWebProof] = useLocalStorage("webProof", "");
+  const [, setProverResult] = useLocalStorage("proverResult", "");
+
   useEffect(() => {
     if (webProof) {
       console.log("webProof ready", webProof);
-      window.localStorage.setItem("webProof", JSON.stringify(webProof));
+      setWebProof(JSON.stringify(webProof));
     }
   }, [webProof]);
 
   useEffect(() => {
     if (result) {
       console.log("proverResult", result);
-      window.localStorage.setItem("proverResult", JSON.stringify(result));
+      setProverResult(JSON.stringify(result));
     }
   }, [result]);
 

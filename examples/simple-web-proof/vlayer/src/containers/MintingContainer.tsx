@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useLocalStorage } from "usehooks-ts";
 
 import webProofProofVerifier from "../../../out/WebProofVerifier.sol/WebProofVerifier.json";
 import { Modal } from "../components/Modal";
@@ -12,28 +13,26 @@ export const MintingContainer = () => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const [mintedHandle, setMintedHandle] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
-
+  const [proverResult] = useLocalStorage("proverResult", "");
   const { writeContract, data: txHash, error } = useWriteContract();
   const { status } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
   useEffect(() => {
-    const storedData = localStorage.getItem("proverResult");
-    if (storedData) {
-      setMintedHandle(JSON.parse(storedData)[1]);
+    if (proverResult) {
+      setMintedHandle(JSON.parse(proverResult)[1]);
     }
     modalRef.current?.showModal();
-  }, []);
+  }, [proverResult]);
 
   const handleMint = () => {
     setIsMinting(true);
-    const storedData = localStorage.getItem("proverResult");
-    if (!storedData) {
+    if (!proverResult) {
       return;
     }
 
-    const proofData = JSON.parse(storedData);
+    const proofData = JSON.parse(proverResult);
 
     const writeContractArgs: Parameters<typeof writeContract>[0] = {
       address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
