@@ -1,6 +1,6 @@
 use call_engine::{
     evm::env::factory::Error as EvmEnvFactoryError,
-    travel_call_executor::Error as TravelCallExecutorError, verifier::guest_input,
+    travel_call_executor::Error as TravelCallExecutorError, verifier::travel_call,
     GuestOutputError,
 };
 use host_utils::proving;
@@ -80,6 +80,6 @@ pub enum PreflightError {
     #[error("Creating input: {0}")]
     CreatingInput(#[from] into_input::Error),
 
-    #[error("Guest input verification error: {0}")]
-    GuestInput(#[from] guest_input::Error),
+    #[error("Travel call verification error: {0}")]
+    TravelCall(#[from] travel_call::Error),
 }

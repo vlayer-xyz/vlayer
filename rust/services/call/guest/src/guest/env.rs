@@ -11,7 +11,7 @@ use call_engine::{
     },
     seed_cache_db_with_trusted_data,
     travel_call_executor::TravelCallExecutor,
-    verifier::guest_input::Verifier,
+    verifier::travel_call::{self},
     Call, CallAssumptions, GuestOutput,
 };
 use revm::db::CacheDB;
@@ -21,7 +21,7 @@ use crate::db::{wrap_state::WrapStateDb, GuestDb};
 pub struct VerifiedInput(MultiEvmInput);
 
 pub async fn verify_input(
-    verifier: impl Verifier,
+    verifier: impl travel_call::Verifier,
     multi_evm_input: MultiEvmInput,
 ) -> VerifiedInput {
     verifier

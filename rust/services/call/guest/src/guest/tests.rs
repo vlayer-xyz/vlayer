@@ -5,7 +5,7 @@ use call_engine::{
         env::location::ExecutionLocation,
         input::{EvmInput, MultiEvmInput},
     },
-    verifier::{chain_proof, guest_input, time_travel, zk_proof},
+    verifier::{chain_proof, time_travel, travel_call, zk_proof},
 };
 use mpt::KeccakMerkleTrie as MerkleTrie;
 
@@ -15,12 +15,12 @@ const CHAIN_ID: ChainId = 1;
 const BLOCK_NUM: BlockNumber = 0;
 const EXEC_LOCATION: ExecutionLocation = ExecutionLocation::new(CHAIN_ID, BLOCK_NUM);
 
-const fn input_ok(_: &MultiEvmInput) -> guest_input::Result {
+const fn input_ok(_: &MultiEvmInput) -> travel_call::Result {
     Ok(())
 }
 
-const fn input_invalid(_: &MultiEvmInput) -> guest_input::Result {
-    Err(guest_input::Error::TimeTravel(time_travel::Error::ChainProof(
+const fn input_invalid(_: &MultiEvmInput) -> travel_call::Result {
+    Err(travel_call::Error::TimeTravel(time_travel::Error::ChainProof(
         chain_proof::Error::Zk(zk_proof::Error::InvalidProof),
     )))
 }
