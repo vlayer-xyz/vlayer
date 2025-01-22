@@ -6,7 +6,7 @@ use risc0_zkp::verify::VerificationError;
 use super::*;
 use crate::verifier::{
     chain_proof,
-    time_travel::{Error, Verifier, ZkVerifier},
+    time_travel::{Error, IVerifier, Verifier},
 };
 
 const CHAIN_ID: ChainId = 1;
@@ -46,10 +46,10 @@ const fn proof_invalid(_: &ChainProof) -> chain_proof::Result {
 
 async fn verify_time_travel_destinations(
     chain_client: impl chain_client::Client,
-    verifier: impl chain_proof::Verifier,
+    verifier: impl chain_proof::IVerifier,
     destinations: Vec<(BlockNumber, BlockHash)>,
 ) -> Result<(), Error> {
-    ZkVerifier::new(chain_client, verifier)
+    Verifier::new(chain_client, verifier)
         .verify(CHAIN_ID, destinations)
         .await
 }

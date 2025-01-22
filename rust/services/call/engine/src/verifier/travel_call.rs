@@ -41,19 +41,19 @@ impl<F: Fn(&MultiEvmInput) -> Result + Send + Sync> Verifier for F {
 }
 
 #[derive(new)]
-pub struct ZkVerifier<TT: time_travel::Verifier> {
+pub struct ZkVerifier<TT: time_travel::IVerifier> {
     time_travel: TT,
 }
 
-impl<TT: time_travel::Verifier> ZkVerifier<TT> {
+impl<TT: time_travel::IVerifier> ZkVerifier<TT> {
     pub fn into_time_travel_verifier(self) -> TT {
         self.time_travel
     }
 }
 
-impl<TT: time_travel::Verifier> seal::Sealed for ZkVerifier<TT> {}
+impl<TT: time_travel::IVerifier> seal::Sealed for ZkVerifier<TT> {}
 #[async_trait]
-impl<TT: time_travel::Verifier> Verifier for ZkVerifier<TT> {
+impl<TT: time_travel::IVerifier> Verifier for ZkVerifier<TT> {
     async fn verify(&self, input: &MultiEvmInput) -> Result {
         for (chain_id, blocks) in input.blocks_by_chain() {
             self.time_travel.verify(chain_id, blocks).await?;

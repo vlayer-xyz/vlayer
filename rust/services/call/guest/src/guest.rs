@@ -20,9 +20,8 @@ pub async fn main(
     chain_guest_ids: impl IntoIterator<Item = Digest>,
 ) -> GuestOutput {
     let chain_client = CachedClient::new(chain_proofs);
-    let chain_proof_verifier =
-        chain_proof::ZkVerifier::new(chain_guest_ids, zk_proof::GuestVerifier);
-    let time_travel_verifier = time_travel::ZkVerifier::new(chain_client, chain_proof_verifier);
+    let chain_proof_verifier = chain_proof::Verifier::new(chain_guest_ids, zk_proof::GuestVerifier);
+    let time_travel_verifier = time_travel::Verifier::new(chain_client, chain_proof_verifier);
     let travel_call_verifier = travel_call::ZkVerifier::new(time_travel_verifier);
     let verified_input = verify_input(travel_call_verifier, multi_evm_input).await;
     VerifiedEnv::new(verified_input, start_execution_location).exec_call(&call)

@@ -36,22 +36,22 @@ mod seal {
 }
 
 #[cfg_attr(test, auto_impl::auto_impl(Fn))]
-pub trait Verifier: seal::Sealed + Send + Sync + 'static {
+pub trait IVerifier: seal::Sealed + Send + Sync + 'static {
     fn verify(&self, proof: &ChainProof) -> Result;
 }
 
-assert_obj_safe!(Verifier);
+assert_obj_safe!(IVerifier);
 
-pub struct ZkVerifier {
+pub struct Verifier {
     chain_guest_ids: Box<[Digest]>,
-    zk_verifier: Box<dyn zk_proof::Verifier>,
+    zk_verifier: Box<dyn zk_proof::IVerifier>,
 }
 
-impl ZkVerifier {
+impl Verifier {
     #[must_use]
     pub fn new(
         chain_guest_ids: impl IntoIterator<Item = Digest>,
-        zk_verifier: impl zk_proof::Verifier,
+        zk_verifier: impl zk_proof::IVerifier,
     ) -> Self {
         Self {
             chain_guest_ids: chain_guest_ids.into_iter().collect(),
@@ -60,8 +60,8 @@ impl ZkVerifier {
     }
 }
 
-impl seal::Sealed for ZkVerifier {}
-impl Verifier for ZkVerifier {
+impl seal::Sealed for Verifier {}
+impl IVerifier for Verifier {
     fn verify(&self, proof: &ChainProof) -> Result {
         let receipt: ChainProofReceipt = (&proof.proof).try_into()?;
         let (proven_root, elf_id) = receipt.journal.decode()?;

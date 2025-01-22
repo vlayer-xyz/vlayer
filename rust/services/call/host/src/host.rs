@@ -43,7 +43,7 @@ pub struct Host {
     prover: Prover,
     // None means that chain service is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
     chain_client: Option<chain_client::RecordingClient>,
-    chain_proof_verifier: chain_proof::ZkVerifier,
+    chain_proof_verifier: chain_proof::Verifier,
     guest_elf: GuestElf,
 }
 
@@ -84,7 +84,7 @@ impl Host {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_proof_verifier =
-            chain_proof::ZkVerifier::new(config.chain_guest_ids, zk_proof::HostVerifier);
+            chain_proof::Verifier::new(config.chain_guest_ids, zk_proof::HostVerifier);
         let chain_client = chain_client.map(chain_client::RecordingClient::new);
 
         Host {
@@ -201,7 +201,7 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
 async fn get_chain_proofs(
     multi_evm_input: &MultiEvmInput,
     client: Option<chain_client::RecordingClient>,
-    verifier: chain_proof::ZkVerifier,
+    verifier: chain_proof::Verifier,
 ) -> Result<ChainProofCache, PreflightError> {
     if multi_evm_input.is_single_location() {
         Ok(HashMap::new())
@@ -209,7 +209,7 @@ async fn get_chain_proofs(
         let Some(client) = client else {
             return Err(PreflightError::ChainServiceNotAvailable);
         };
-        let time_travel_verifier = time_travel::ZkVerifier::new(client, verifier);
+        let time_travel_verifier = time_travel::Verifier::new(client, verifier);
         let travel_call_verifier = travel_call::ZkVerifier::new(time_travel_verifier);
         travel_call_verifier.verify(multi_evm_input).await?;
         let (chain_proof_client, _) = travel_call_verifier

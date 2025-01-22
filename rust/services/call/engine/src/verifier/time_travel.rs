@@ -38,37 +38,37 @@ mod seal {
 }
 
 #[async_trait]
-pub trait Verifier: seal::Sealed + Send + Sync {
+pub trait IVerifier: seal::Sealed + Send + Sync {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result;
 }
 
-assert_obj_safe!(Verifier);
+assert_obj_safe!(IVerifier);
 
 // Useful to mock verifier in tests
 // [auto_impl(Fn)] doesn't work with async_trait
 #[cfg(feature = "testing")]
 #[async_trait]
-impl<F: Fn(ChainId, Vec<(BlockNumber, BlockHash)>) -> Result + Send + Sync> Verifier for F {
+impl<F: Fn(ChainId, Vec<(BlockNumber, BlockHash)>) -> Result + Send + Sync> IVerifier for F {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result {
         self(chain_id, blocks)
     }
 }
 
 #[derive(new)]
-pub struct ZkVerifier<C: chain_client::Client, V: chain_proof::Verifier> {
+pub struct Verifier<C: chain_client::Client, V: chain_proof::IVerifier> {
     chain_client: C,
     chain_proof_verifier: V,
 }
 
-impl<C: chain_client::Client, V: chain_proof::Verifier> ZkVerifier<C, V> {
+impl<C: chain_client::Client, V: chain_proof::IVerifier> Verifier<C, V> {
     pub fn into_parts(self) -> (C, V) {
         (self.chain_client, self.chain_proof_verifier)
     }
 }
 
-impl<C: chain_client::Client, V: chain_proof::Verifier> seal::Sealed for ZkVerifier<C, V> {}
+impl<C: chain_client::Client, V: chain_proof::IVerifier> seal::Sealed for Verifier<C, V> {}
 #[async_trait]
-impl<C: chain_client::Client, V: chain_proof::Verifier> Verifier for ZkVerifier<C, V> {
+impl<C: chain_client::Client, V: chain_proof::IVerifier> IVerifier for Verifier<C, V> {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result {
         if blocks.len() == 1 {
             return Ok(()); // No need to verify chain proofs for a single location
