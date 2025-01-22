@@ -1,6 +1,7 @@
 import { expect, test, describe } from "vitest";
 import { parseHttpMessage } from "./parseHttpMessage";
-import { InvalidEncodingError, InvalidHttpMessageError } from "../../error";
+import { InvalidEncodingError, InvalidHttpMessageError } from "../error";
+import { Encoding } from "./Encoding";
 
 describe("parseHttpMessage", () => {
   test("should parse a valid HTTP message correctly", () => {
@@ -134,5 +135,31 @@ describe("parseHttpMessage", () => {
         message.indexOf(bodyContent) +
         [...new TextEncoder().encode(bodyContent)].length,
     });
+  });
+  test("should not throw error when content-type header is missing and enforceContentType is false", () => {
+    const messageWithoutContentType = `POST /path HTTP/1.1\r\nOther-Header: value\r\n\r\nBody content`;
+    expect(() =>
+      parseHttpMessage(messageWithoutContentType, {
+        enforceContentType: false,
+        defaultEncoding: Encoding.UTF8,
+      }),
+    ).not.toThrow();
+  });
+
+  test("should use default encoding when content-type header is missing and enforceContentType is false", () => {
+    const messageWithoutContentType = `POST /path HTTP/1.1\r\nOther-Header: value\r\n\r\nBody content`;
+    const transcript = parseHttpMessage(messageWithoutContentType, {
+      enforceContentType: false,
+      defaultEncoding: Encoding.UTF16,
+    });
+    expect(transcript.encoding).toEqual(Encoding.UTF16);
+  });
+  test("should use default encoding when content-type header contains no charset", () => {
+    const message = `POST /path HTTP/1.1\r\nContent-Type: application/json\r\n\r\nBody content`;
+    const transcript = parseHttpMessage(message, {
+      enforceContentType: false,
+      defaultEncoding: Encoding.UTF16,
+    });
+    expect(transcript.encoding).toEqual(Encoding.UTF16);
   });
 });

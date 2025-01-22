@@ -1,4 +1,4 @@
-import { EncodedString } from "hooks/tlsnProve/utils/encodeString/EncodedString";
+import { EncodedString } from "hooks/tlsnProve/redaction/utils/encodeString/EncodedString";
 import { expect } from "vitest";
 
 function isEncodedStringComparator(a: unknown): a is EncodedString {

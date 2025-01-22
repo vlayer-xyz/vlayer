@@ -1,4 +1,4 @@
-import { EncodingMismatchError } from "../../error";
+import { EncodingMismatchError } from "../error";
 import { encoder, Encoding } from "./Encoding";
 
 export function indexInArray(
@@ -96,5 +96,12 @@ export class EncodedString {
       new TextDecoder(this.encoding).decode(slicedBytes),
       this.encoding,
     );
+  }
+
+  caseInsensitiveIndexOf(needle: string): number {
+    return new EncodedString(
+      this.stringRepresentation.toLowerCase(),
+      this.encoding,
+    ).indexOf(needle.toLowerCase());
   }
 }

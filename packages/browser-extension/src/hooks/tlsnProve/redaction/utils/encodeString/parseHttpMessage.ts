@@ -1,7 +1,5 @@
-import {
-  InvalidEncodingError,
-  InvalidHttpMessageError,
-} from "hooks/tlsnProve/error";
+import { MessageTranscript } from "../../types";
+import { InvalidEncodingError, InvalidHttpMessageError } from "../error";
 import { EncodedString } from "./EncodedString";
 import { Encoding } from "./Encoding";
 
@@ -9,7 +7,16 @@ const bodyHeaderDelimiter = "\r\n\r\n";
 const newLine = "\r\n";
 const keyValueDelimiter = ": ";
 
-export function parseHttpMessage(message: string) {
+export function parseHttpMessage(
+  message: string,
+  {
+    enforceContentType,
+    defaultEncoding,
+  }: { enforceContentType: boolean; defaultEncoding: Encoding } = {
+    enforceContentType: true,
+    defaultEncoding: Encoding.UTF8,
+  },
+): MessageTranscript {
   const [headerPart, bodyPart] = message.split(bodyHeaderDelimiter);
   if (typeof headerPart === "undefined" || typeof bodyPart === "undefined") {
     throw new InvalidHttpMessageError(
@@ -29,11 +36,12 @@ export function parseHttpMessage(message: string) {
 
   const contentType = contentTypeHeader?.split(keyValueDelimiter)[1];
 
-  if (!contentType) {
+  if (!contentType && enforceContentType) {
     throw new InvalidHttpMessageError("No content-type header found");
   }
 
-  const encoding = contentType.split("charset=")[1].trim();
+  //if we do not enforce content type, we use the default encoding
+  const encoding = contentType?.split("charset=")[1]?.trim() ?? defaultEncoding;
 
   if (!validateEncoding(encoding)) {
     throw new InvalidEncodingError(encoding);
@@ -48,6 +56,7 @@ export function parseHttpMessage(message: string) {
   const bodyEncoded = new EncodedString(bodyPart, encoding);
 
   return {
+    encoding,
     message: {
       content: messageEncoded,
       range: {
@@ -81,4 +90,20 @@ export function parseHttpMessage(message: string) {
 
 const validateEncoding = (encoding: string): encoding is Encoding => {
   return Object.values(Encoding).includes(encoding as Encoding);
+};
+
+export const parseTlsnTranscript = ({
+  recv,
+  sent,
+}: {
+  recv: string;
+  sent: string;
+}) => {
+  return {
+    recv: parseHttpMessage(recv),
+    sent: parseHttpMessage(sent, {
+      enforceContentType: false,
+      defaultEncoding: Encoding.UTF8,
+    }),
+  };
 };
