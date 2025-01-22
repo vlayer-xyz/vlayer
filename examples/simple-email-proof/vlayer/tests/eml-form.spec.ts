@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.skip("verifies valid eml file", async ({ page }) => {
+test("verifies valid eml file", async ({ page }) => {
   await page.goto("/");
   await page
     .getByLabel("EML File Upload")
