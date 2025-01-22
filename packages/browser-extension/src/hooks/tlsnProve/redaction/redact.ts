@@ -18,7 +18,7 @@ const emptyCommit: Commit = {
 
 export function calcRedactionRanges(
   transcript: EncodedTranscript,
-  redactionConfig: RedactionConfig,
+  redactionConfig: RedactionConfig = [],
 ) {
   return redactionConfig.reduce((commit, redactionItem) => {
     return match(redactionItem)
