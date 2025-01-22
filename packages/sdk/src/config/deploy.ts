@@ -3,9 +3,9 @@ import { createContext } from "./createContext";
 import { type ContractArg, type ContractSpec } from "types/ethereum";
 import { type Address } from "viem";
 import { getChainConfirmations } from "./getChainConfirmations";
-import Debug from "debug";
+import debug from "debug";
 
-const log = Debug("vlayer:prover");
+const log = debug("vlayer:prover");
 
 export const waitForContractDeploy = async ({
   hash,

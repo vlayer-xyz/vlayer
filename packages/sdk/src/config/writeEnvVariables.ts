@@ -1,8 +1,8 @@
 import fs from "fs";
 import dotenv from "dotenv";
-import Debug from "debug";
+import debug from "debug";
 
-const log = Debug("vlayer:config");
+const log = debug("vlayer:config");
 
 export const writeEnvVariables = async (
   envPath: string,

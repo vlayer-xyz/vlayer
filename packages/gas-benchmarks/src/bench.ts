@@ -5,9 +5,9 @@ import { Benchmark, GasWithCycles } from "./types";
 import { benchmark as noopBenchmark } from "./benches/noop";
 import { benchmarks as noopWithCalldataBenchmarks } from "./benches/noop_with_calldata";
 import { benchmarks as arithOpBenchmarks } from "./benches/arith_ops";
-import Debug from "debug";
+import debug from "debug";
 
-const log = Debug("gas-benchmarks");
+const log = debug("gas-benchmarks");
 
 const benchmarks = [
   noopBenchmark,

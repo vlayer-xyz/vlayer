@@ -1,6 +1,6 @@
-import Debug from "debug";
+import debug from "debug";
 
-const log = Debug("vlayer:v_versions");
+const log = debug("vlayer:v_versions");
 
 const v_versionsBody = {
   method: "v_versions",

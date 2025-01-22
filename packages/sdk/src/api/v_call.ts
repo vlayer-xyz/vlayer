@@ -4,9 +4,9 @@ import {
   type VCallResponse,
 } from "types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
-import Debug from "debug";
+import debug from "debug";
 
-const log = Debug("vlayer:v_call");
+const log = debug("vlayer:v_call");
 
 function v_callBody(call: CallParams, context: CallContext) {
   return {

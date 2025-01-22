@@ -16,9 +16,9 @@ import {
   assertUrlPattern,
 } from "../../../web-proof-commons";
 
-import Debug from "debug";
+import debug from "debug";
 
-const log = Debug("vlayer:WebProof:provider");
+const log = debug("vlayer:WebProof:provider");
 
 const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 

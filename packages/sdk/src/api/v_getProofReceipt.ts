@@ -4,9 +4,9 @@ import {
 } from "types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
 import { vGetProofReceiptSchema } from "./lib/types/vlayer";
-import Debug from "debug";
+import debug from "debug";
 
-const log = Debug("vlayer:v_getProofReceipt");
+const log = debug("vlayer:v_getProofReceipt");
 
 function v_getProofReceiptBody(params: VGetProofReceiptParams) {
   return {
