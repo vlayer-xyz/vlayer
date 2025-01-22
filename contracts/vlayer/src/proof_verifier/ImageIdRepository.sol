@@ -2,9 +2,13 @@
 pragma solidity ^0.8.21;
 
 contract ImageIdRepository {
-    constructor() {}
+    mapping(bytes32 => bool) private imageIds;
 
-    function isSupported(bytes32) public pure returns (bool) {
-        return true;
+    function addSupport(bytes32 imageId) external {
+        imageIds[imageId] = true;
+    }
+
+    function isSupported(bytes32 imageId) public view returns (bool) {
+        return imageIds[imageId];
     }
 }
