@@ -1,4 +1,19 @@
 import { CommitData } from "tlsn-js/src/types";
+import { Encoding } from "./encodeString/Encoding";
+
+export class InvalidEncodingError extends Error {
+  constructor(encoding: string) {
+    super(
+      `Invalid encoding: ${encoding} only ${Object.values(Encoding).join(", ")} are supported`,
+    );
+  }
+}
+
+export class EncodingMismatchError extends Error {
+  constructor(encoding: Encoding, needleEncoding: Encoding) {
+    super(`Encoding mismatch: ${encoding} and ${needleEncoding}`);
+  }
+}
 
 export class RedactionError extends Error {
   constructor(message: string) {
@@ -36,8 +51,8 @@ export class InvalidPathError extends RedactionError {
 }
 
 export class InvalidJsonError extends RedactionError {
-  constructor() {
-    super("Invalid JSON");
+  constructor(message: string) {
+    super(`Invalid JSON: ${message}`);
     this.name = "InvalidJsonError";
   }
 }
@@ -56,9 +71,23 @@ export class InvalidRangeError extends RedactionError {
   }
 }
 
-export class HeaderNotFound extends RedactionError {
+export class InvalidHttpStringError extends RedactionError {
+  constructor() {
+    super("Invalid HTTP request string: No header-body delimiter found.");
+    this.name = "InvalidHttpStringError";
+  }
+}
+
+export class InvalidHttpMessageError extends RedactionError {
+  constructor(message: string) {
+    super(`Invalid HTTP message: ${message}`);
+    this.name = "InvalidHttpMessageError";
+  }
+}
+
+export class HeaderNotFoundError extends RedactionError {
   constructor(header: string) {
-    super(`Header ${header} not found`);
-    this.name = "HeaderNotFound";
+    super(`Header ${header} not found in transcript`);
+    this.name = "HeaderNotFoundError";
   }
 }

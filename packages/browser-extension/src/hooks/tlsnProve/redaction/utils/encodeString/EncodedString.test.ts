@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { EncodedString } from "./EncodedString";
 import { Encoding } from "./Encoding";
-import { EncodingMismatchError } from "../../error";
+import { EncodingMismatchError } from "../error";
 
 describe("EncodedStrings", () => {
   describe("indexOf", () => {
@@ -121,7 +121,6 @@ describe("EncodedStrings", () => {
   describe("length", () => {
     test("returns the length of the string", () => {
       const encodedString = new EncodedString("hello world", Encoding.UTF8);
-      console.log(encodedString.bytesRepresentation);
       expect(encodedString.length).toEqual(11);
     });
 
@@ -162,6 +161,37 @@ describe("EncodedStrings", () => {
       expect(encodedString.slice(0, 5)).toEqual(
         new EncodedString("résu", Encoding.UTF8),
       );
+    });
+
+    describe("caseInsensitiveIndexOf", () => {
+      test("finds exact match with emojis", () => {
+        const str = new EncodedString("Hello 👋 World 🌎", Encoding.UTF8);
+        expect(str.caseInsensitiveIndexOf("Hello 👋")).toBe(0);
+      });
+
+      test("finds case insensitive match with special characters", () => {
+        const str = new EncodedString("Café 🍵 RÉSUMÉ", Encoding.UTF8);
+        expect(str.caseInsensitiveIndexOf("café")).toBe(0);
+        expect(str.caseInsensitiveIndexOf("rÉSuMÉ")).toBe(11);
+      });
+
+      test("returns -1 when emoji not found", () => {
+        const str = new EncodedString("Hello 👋 World 🌎", Encoding.UTF8);
+        expect(str.caseInsensitiveIndexOf("🎉")).toBe(-1);
+      });
+
+      test("works with string containing only emojis", () => {
+        const str = new EncodedString("🎮🎲🎯🎪", Encoding.UTF8);
+        expect(str.caseInsensitiveIndexOf("🎲")).toBe(4);
+      });
+
+      test("works with mixed characters", () => {
+        const str = new EncodedString(
+          "你好 Hello こんにちは 👋",
+          Encoding.UTF8,
+        );
+        expect(str.caseInsensitiveIndexOf("HELLO")).toBe(7);
+      });
     });
   });
 });
