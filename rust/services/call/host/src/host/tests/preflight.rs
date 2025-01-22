@@ -171,7 +171,7 @@ mod view {
     }
 }
 
-// Generated using `simple_teleport` example
+// Generated using old `simple_teleport` example
 mod teleport {
     use super::*;
     use crate::test_harness::contracts::teleport::{
@@ -187,6 +187,26 @@ mod teleport {
         let err = result.unwrap_err().to_string();
         let expected_err = "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(Opaque(Provider factory: No rpc cache for chain: 8453";
         assert!(err.contains(expected_err));
+
+        Ok(())
+    }
+}
+mod teleport_v2 {
+    use super::*;
+    use crate::test_harness::contracts::teleport_v2::{
+        SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
+        BLOCK_NO, JOHN, SIMPLE_TELEPORT,
+    };
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn success() -> anyhow::Result<()> {
+        let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
+        let call = call(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner: JOHN });
+        let crossChainBalanceOfReturn {
+            _2: cross_chain_balance,
+            ..
+        } = preflight::<crossChainBalanceOfCall>("teleport_v2", call, &location).await?;
+        assert_eq!(cross_chain_balance, uint!(100_U256));
 
         Ok(())
     }
