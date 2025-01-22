@@ -42,7 +42,13 @@ export type GetWebProofArgs<
 export type WebProofProvider = {
   getWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
     args: GetWebProofArgs<T, F>,
-  ) => Promise<PresentationJSON>;
+  ) => Promise<{
+    presentationJSON: PresentationJSON;
+    decodedTranscript: {
+      sent: string;
+      recv: string;
+    };
+  }>;
 
   requestWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
     args: GetWebProofArgs<T, F>,

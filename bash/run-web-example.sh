@@ -26,8 +26,8 @@ function build_example_contracts {
 }
 
 function run_web_app {
-    cd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
-    bun run web:dev &
+    cd ${VLAYER_HOME}/packages/test-web-app
+    bun run dev &
 }
 
 function run_browser_extension {

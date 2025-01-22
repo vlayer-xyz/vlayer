@@ -127,10 +127,20 @@ class ExtensionWebProofProvider implements WebProofProvider {
     });
   }
 
-  public async getWebProof(
-    webProofRequest: WebProofRequestInput,
-  ): Promise<PresentationJSON> {
-    return new Promise<PresentationJSON>((resolve, reject) => {
+  public async getWebProof(webProofRequest: WebProofRequestInput): Promise<{
+    presentationJSON: PresentationJSON;
+    decodedTranscript: {
+      sent: string;
+      recv: string;
+    };
+  }> {
+    return new Promise<{
+      presentationJSON: PresentationJSON;
+      decodedTranscript: {
+        sent: string;
+        recv: string;
+      };
+    }>((resolve, reject) => {
       chrome.runtime.sendMessage(EXTENSION_ID, {
         action: ExtensionAction.RequestWebProof,
         payload: {
@@ -144,7 +154,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
       this.connectToExtension().onMessage.addListener(
         (message: ExtensionMessage) => {
           if (message.type === ExtensionMessageType.ProofDone) {
-            resolve(message.payload.proof);
+            resolve(message.payload);
           }
           if (message.type === ExtensionMessageType.ProofError) {
             reject(new Error(message.payload.error));

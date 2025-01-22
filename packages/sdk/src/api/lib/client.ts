@@ -131,23 +131,27 @@ export const createVlayerClient = (
         { name: "webProof" }
       >;
 
-      const webProofPromise: Promise<PresentationJSON> = new Promise(
-        (resolve, reject) => {
-          webProofProvider.addEventListeners(
-            ExtensionMessageType.ProofDone,
-            ({ payload: { proof } }) => {
-              resolve(proof);
-            },
-          );
+      const webProofPromise: Promise<{
+        presentationJSON: PresentationJSON;
+        decodedTranscript: {
+          sent: string;
+          recv: string;
+        };
+      }> = new Promise((resolve, reject) => {
+        webProofProvider.addEventListeners(
+          ExtensionMessageType.ProofDone,
+          ({ payload: { presentationJSON, decodedTranscript } }) => {
+            resolve({ presentationJSON, decodedTranscript });
+          },
+        );
 
-          webProofProvider.addEventListeners(
-            ExtensionMessageType.ProofError,
-            ({ payload: { error } }) => {
-              reject(new Error(error));
-            },
-          );
-        },
-      );
+        webProofProvider.addEventListeners(
+          ExtensionMessageType.ProofError,
+          ({ payload: { error } }) => {
+            reject(new Error(error));
+          },
+        );
+      });
 
       webProofProvider.requestWebProof({
         proverCallCommitment: {
