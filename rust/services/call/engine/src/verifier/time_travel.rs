@@ -1,9 +1,11 @@
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
 use derive_new::new;
-use static_assertions::assert_obj_safe;
 
-use super::{chain_proof, impl_verifier_for_fn, sealed_trait, verifier_trait};
+use super::{
+    chain_proof, impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking,
+    verifier_trait,
+};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -22,10 +24,7 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-
-sealed_trait!((ChainId, Vec<(BlockNumber, BlockHash)>));
-verifier_trait!(async (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
-impl_verifier_for_fn!(async (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
+setup_verifier_mocking!(async (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
 
 #[derive(new)]
 pub struct Verifier<C: chain_client::Client, V: chain_proof::IVerifier> {

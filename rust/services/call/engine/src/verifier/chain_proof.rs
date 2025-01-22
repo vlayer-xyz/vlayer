@@ -3,9 +3,11 @@ use block_header::Hashable;
 use chain_common::{ChainProof, ChainProofReceipt};
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
-use static_assertions::assert_obj_safe;
 
-use super::{impl_verifier_for_fn, sealed_trait, verifier_trait, zk_proof};
+use super::{
+    impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking, verifier_trait,
+    zk_proof,
+};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -25,10 +27,7 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-
-sealed_trait!((&ChainProof));
-verifier_trait!((proof: &ChainProof) -> Result);
-impl_verifier_for_fn!((proof: &ChainProof) -> Result);
+setup_verifier_mocking!((proof: &ChainProof) -> Result);
 
 pub struct Verifier<ZK: zk_proof::IVerifier> {
     chain_guest_ids: Box<[Digest]>,
