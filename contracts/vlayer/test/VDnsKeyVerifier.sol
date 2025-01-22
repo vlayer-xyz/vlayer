@@ -34,7 +34,9 @@ contract VDnsKeyVerifierTest is Test {
         bytes memory key = "0x1234";
 
         vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(123), keyVault.KEY_MANAGER_ROLE())
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector, address(123), keyVault.KEY_MANAGER_ROLE()
+            )
         );
         vm.prank(address(123));
         keyVault.addDnsKey(key);
@@ -62,7 +64,9 @@ contract VDnsKeyVerifierTest is Test {
         keyVault.addDnsKey(key);
 
         vm.expectRevert(
-            abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, address(123), keyVault.KEY_MANAGER_ROLE())
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector, address(123), keyVault.KEY_MANAGER_ROLE()
+            )
         );
         vm.prank(address(123));
         keyVault.revokeDnsKey(key);
