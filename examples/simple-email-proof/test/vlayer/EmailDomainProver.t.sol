@@ -23,7 +23,6 @@ contract EmailDomainProverTest is VTest {
     }
 
     function test_verifiesEmailDomain() public {
-        vm.skip(true);
         EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
         address johnDoe = vm.addr(1);
         EmailDomainProver prover = new EmailDomainProver();

@@ -49,3 +49,13 @@ sol!(
     function getProof() external returns (Proof memory);
     function preverifyEmail(string memory email) external returns (UnverifiedEmail memory);
 );
+
+impl From<verifiable_dns::VerificationData> for VerificationData {
+    fn from(value: verifiable_dns::VerificationData) -> Self {
+        Self {
+            validUntil: value.valid_until,
+            signature: value.signature.0.into(),
+            pubKey: value.pub_key.0.into(),
+        }
+    }
+}

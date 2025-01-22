@@ -52,6 +52,7 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
+verifiable_dns = { workspace = true, features = ["signer"] }
 yansi = { workspace = true }
 
 [dev-dependencies]
