@@ -38,3 +38,30 @@ macro_rules! verifier_trait {
     };
 }
 pub(crate) use verifier_trait;
+
+macro_rules! impl_verifier_for_fn {
+    (($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
+        #[cfg(any(test, feature = "testing"))]
+        impl<F> IVerifier for F
+        where
+            F: Fn($($arg_type),*) -> $result + Send + Sync
+        {
+            fn verify(&self, $($arg_name: $arg_type),*) -> $result {
+                self($($arg_name),*)
+            }
+        }
+    };
+    (async ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
+        #[cfg(any(test, feature = "testing"))]
+        #[async_trait::async_trait]
+        impl<F> IVerifier for F
+        where
+            F: Fn($($arg_type),*) -> $result + Send + Sync
+        {
+            async fn verify(&self, $($arg_name: $arg_type),*) -> $result {
+                self($($arg_name),*)
+            }
+        }
+    };
+}
+pub(crate) use impl_verifier_for_fn;

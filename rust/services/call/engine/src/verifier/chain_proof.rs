@@ -5,7 +5,7 @@ use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
 use static_assertions::assert_obj_safe;
 
-use super::{sealed_trait, verifier_trait, zk_proof};
+use super::{impl_verifier_for_fn, sealed_trait, verifier_trait, zk_proof};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -28,13 +28,7 @@ pub type Result = std::result::Result<(), Error>;
 
 sealed_trait!(&super::ChainProof);
 verifier_trait!((proof: &ChainProof) -> Result);
-
-#[cfg(any(test, feature = "testing"))]
-impl<F: Fn(&ChainProof) -> Result + Send + Sync> IVerifier for F {
-    fn verify(&self, proof: &ChainProof) -> Result {
-        self(proof)
-    }
-}
+impl_verifier_for_fn!((proof: &ChainProof) -> Result);
 
 pub struct Verifier<ZK: zk_proof::IVerifier> {
     chain_guest_ids: Box<[Digest]>,

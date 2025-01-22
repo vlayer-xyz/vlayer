@@ -2,19 +2,13 @@ pub use risc0_zkp::verify::VerificationError as Error;
 use risc0_zkvm::{guest, sha::Digest, Receipt};
 use static_assertions::assert_obj_safe;
 
-use super::{sealed_trait, verifier_trait};
+use super::{impl_verifier_for_fn, sealed_trait, verifier_trait};
 
 pub type Result = std::result::Result<(), Error>;
 
 sealed_trait!(&super::Receipt, super::Digest);
 verifier_trait!((receipt: &Receipt, elf_id: Digest) -> Result);
-
-#[cfg(any(test, feature = "testing"))]
-impl<F: Fn(&Receipt, Digest) -> Result + Send + Sync> IVerifier for F {
-    fn verify(&self, receipt: &Receipt, elf_id: Digest) -> Result {
-        self(receipt, elf_id)
-    }
-}
+impl_verifier_for_fn!((receipt: &Receipt, elf_id: Digest) -> Result);
 
 pub struct GuestVerifier;
 
