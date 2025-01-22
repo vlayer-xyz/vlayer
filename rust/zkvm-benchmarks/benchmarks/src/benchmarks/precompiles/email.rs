@@ -1,7 +1,7 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
 use call_precompiles::verify_and_parse_email::verify_and_parse_run as verify;
-use email_proof::UnverifiedEmail;
+use email_proof::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
 
 use crate::{with_fixture, Benchmark};
 
@@ -11,7 +11,17 @@ const SMALL_EMAIL: &str = include_str!(concat!("../../../assets/email.eml"));
 fn fixture() -> Bytes {
     let email: UnverifiedEmail = UnverifiedEmail {
         email: SMALL_EMAIL.to_string(),
-        dnsRecords: vec![DNS_RECORD.to_string()],
+        dnsRecord: SolDnsRecord {
+            name: "google._domainkey.vlayer.xyz".into(),
+            recordType: 16,
+            data: DNS_RECORD.into(),
+            ttl: 0,
+        },
+        verificationData: SolVerificationData {
+            validUntil: 0,
+            signature: Default::default(),
+            pubKey: Default::default(),
+        },
     };
 
     email.abi_encode().into()

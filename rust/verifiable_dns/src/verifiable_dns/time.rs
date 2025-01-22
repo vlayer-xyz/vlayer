@@ -19,16 +19,3 @@ impl Now for RTClock {
         now.timestamp() as Timestamp
     }
 }
-
-#[cfg(test)]
-pub(crate) mod tests_utils {
-    use super::*;
-
-    pub(crate) struct MockClock<const T: Timestamp>;
-
-    impl<const T: Timestamp> Now for MockClock<T> {
-        fn now() -> super::Timestamp {
-            T
-        }
-    }
-}

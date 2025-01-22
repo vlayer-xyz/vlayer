@@ -5,10 +5,13 @@ use std::marker::PhantomData;
 use futures::future::join_all;
 use responses_validation::{responses_match, validate_response};
 
-use super::{record::Record, signer::Signer, time::Now, VerificationData};
-use crate::dns_over_https::{
-    types::{Record as DNSRecord, RecordType},
-    Provider as DoHProvider, Query, Response,
+use super::{sign_record, signer::Signer, time::Now};
+use crate::{
+    dns_over_https::{
+        types::{Record as DNSRecord, RecordType},
+        Provider as DoHProvider, Query, Response,
+    },
+    VerificationData,
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -34,21 +37,16 @@ impl<C: Now, P: DoHProvider, const Q: usize> Resolver<C, P, Q> {
     pub fn new(providers: [P; Q]) -> Self {
         Self {
             providers,
-            signer: Signer::new(),
+            signer: Signer::default(),
             clock: PhantomData,
         }
     }
 
-    pub(crate) fn sign_record(&self, record: &DNSRecord) -> VerificationData {
+    fn sign_record(&self, record: &DNSRecord) -> VerificationData {
         let now = C::now();
         let valid_until = now + record.ttl;
-        let signature = self.signer.sign(&Record::new(record, valid_until));
 
-        VerificationData {
-            signature,
-            valid_until,
-            pub_key: self.signer.public_key(),
-        }
+        sign_record::sign_record(&self.signer, record, valid_until)
     }
 }
 
@@ -114,10 +112,7 @@ impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resol
 #[cfg(test)]
 pub(crate) mod tests_utils {
     use super::*;
-    use crate::{
-        dns_over_https::provider::test_utils::MockProvider,
-        verifiable_dns::time::tests_utils::MockClock,
-    };
+    use crate::common::test_utils::{MockClock, MockProvider};
 
     pub(crate) type MockResolver = Resolver<MockClock<64>, MockProvider, 1>;
 
@@ -247,8 +242,8 @@ mod tests {
         mod sign_record {
             use super::*;
             use crate::{
-                dns_over_https::{provider::test_utils::MockProvider, types::RecordType},
-                verifiable_dns::time::tests_utils::MockClock,
+                common::test_utils::{MockClock, MockProvider},
+                dns_over_https::types::RecordType,
             };
 
             #[test]

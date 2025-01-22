@@ -7,22 +7,20 @@ mod from_header;
 #[cfg(test)]
 mod test_utils;
 
-pub use email::sol::UnverifiedEmail;
+pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
 
 pub use crate::{email::Email, errors::Error};
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
-    let (raw_email, dns_records) =
-        UnverifiedEmail::parse_calldata(calldata).map_err(Error::Calldata)?;
+    let (raw_email, dns_record, verification_data) = UnverifiedEmail::parse_calldata(calldata)?;
 
-    let email = mailparse::parse_mail(&raw_email).map_err(Error::EmailParse)?;
-    let dns_record = dns_records
-        .first()
-        .ok_or(Error::InvalidDkimRecord("No DNS records provided".into()))?;
+    verification_data.verify_signature(&dns_record)?;
+
+    let email = mailparse::parse_mail(&raw_email)?;
 
     let from_domain = from_header::extract_from_domain(&email)?;
 
-    dkim::verify_email(email, &from_domain, dns::parse_dns_record(dns_record)?)
+    dkim::verify_email(email, &from_domain, dns::parse_dns_record(&dns_record.data)?)
         .map_err(Error::DkimVerification)?
         .try_into()
         .map_err(Error::EmailParse)
@@ -30,23 +28,45 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
 
 #[cfg(test)]
 mod test {
-    use alloy_sol_types::SolValue;
+    use alloy_sol_types::{private::bytes, SolValue};
     use lazy_static::lazy_static;
+    use verifiable_dns::{
+        verifiable_dns::{sign_record::sign_record, signer::Signer},
+        DNSRecord, RecordType, VerificationData,
+    };
 
     use super::*;
     use crate::test_utils::{read_file, signed_email_fixture, unsigned_email_fixture};
 
     lazy_static! {
-        static ref DNS_FIXTURE: Vec<String> = vec![
-            "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".into()
-        ];
+        static ref DNS_FIXTURE: SolDnsRecord = SolDnsRecord {
+            name: "google._domainkey.vlayer.xyz".into(),
+            recordType: 16,
+            data: "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".into(),
+            ttl: 0,
+        };
+
+        static ref VERIFICATION_DATA_SIGNED: VerificationData = sign_record(&Signer::default(), &DNSRecord {
+            data: DNS_FIXTURE.data.clone(),
+            name: DNS_FIXTURE.name.clone(),
+            record_type: RecordType::TXT,
+            ttl: DNS_FIXTURE.ttl,
+        }, 0);
+
+        static ref VERIFICATION_DATA: SolVerificationData = SolVerificationData {
+            validUntil: VERIFICATION_DATA_SIGNED.valid_until,
+            signature: VERIFICATION_DATA_SIGNED.signature.0.clone().into(),
+            pubKey: VERIFICATION_DATA_SIGNED.pub_key.0.clone().into(),
+        };
+
     }
     #[test]
     fn passes_for_valid_email() -> anyhow::Result<()> {
         let email = String::from_utf8(signed_email_fixture())?;
         let calldata = UnverifiedEmail {
             email,
-            dnsRecords: DNS_FIXTURE.to_vec(),
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: VERIFICATION_DATA.clone(),
         }
         .abi_encode();
 
@@ -67,7 +87,8 @@ mod test {
         let email = String::from_utf8(unsigned_email_fixture())?;
         let calldata = UnverifiedEmail {
             email,
-            dnsRecords: DNS_FIXTURE.to_vec(),
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: VERIFICATION_DATA.clone(),
         }
         .abi_encode();
         assert_eq!(
@@ -82,7 +103,8 @@ mod test {
         let email = String::from_utf8(read_file("./testdata/signed_email_modified_body.txt"))?;
         let calldata = UnverifiedEmail {
             email,
-            dnsRecords: DNS_FIXTURE.to_vec(),
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: VERIFICATION_DATA.clone(),
         }
         .abi_encode();
         assert_eq!(
@@ -93,16 +115,61 @@ mod test {
     }
 
     #[test]
-    fn fails_for_missing_public_key() -> anyhow::Result<()> {
+    fn fails_for_missing_dns_record() -> anyhow::Result<()> {
         let email = String::from_utf8(signed_email_fixture())?;
         let calldata = UnverifiedEmail {
             email,
-            dnsRecords: vec![],
+            dnsRecord: SolDnsRecord {
+                name: "".into(),
+                recordType: 0,
+                data: "".into(),
+                ttl: 0,
+            },
+            verificationData: VERIFICATION_DATA.clone(),
         }
         .abi_encode();
         assert_eq!(
             parse_and_verify(&calldata).unwrap_err().to_string(),
-            "Invalid DKIM public key record: No DNS records provided".to_string()
+            "Invalid UnverifiedEmail calldata: Unexpected DNS record type: 0. Supported types: TXT(16)".to_string()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn fails_for_invalid_vdns_signature() -> anyhow::Result<()> {
+        let email = String::from_utf8(signed_email_fixture())?;
+        let calldata = UnverifiedEmail {
+            email,
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: SolVerificationData {
+                signature: bytes!("1234"),
+                ..VERIFICATION_DATA.clone()
+            },
+        }
+        .abi_encode();
+        assert_eq!(
+            parse_and_verify(&calldata).unwrap_err().to_string(),
+            "VDNS signature verification failed: Signature verification error".to_string()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn fails_for_missing_vdns_signature() -> anyhow::Result<()> {
+        let email = String::from_utf8(signed_email_fixture())?;
+        let calldata = UnverifiedEmail {
+            email,
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: SolVerificationData {
+                signature: Default::default(),
+                pubKey: Default::default(),
+                validUntil: 0,
+            },
+        }
+        .abi_encode();
+        assert_eq!(
+            parse_and_verify(&calldata).unwrap_err().to_string(),
+            "VDNS signature verification failed: Public key decoding error: ASN.1 error: ASN.1 DER message is incomplete: expected 1, actual 0 at DER byte 0".to_string()
         );
         Ok(())
     }
@@ -112,9 +179,8 @@ mod test {
         let email = String::from_utf8(read_file("./testdata/signed_email_different_domains.txt"))?;
         let calldata = UnverifiedEmail {
             email,
-            dnsRecords: vec![
-                "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3gWcOhCm99qzN+h7/2+LeP3CLsJkQQ4EP/2mrceXle5pKq8uZmBl1U4d2Vxn4w+pWFANDLmcHolLboESLFqEL5N6ae7u9b236dW4zn9AFkXAGenTzQEeif9VUFtLAZ0Qh2eV7OQgz/vPj5IaNqJ7h9hpM9gO031fe4v+J0DLCE8Rgo7hXbNgJavctc0983DaCDQaznHZ44LZ6TtZv9TBs+QFvsy4+UCTfsuOtHzoEqOOuXsVXZKLP6B882XbEnBpXEF8QzV4J26HiAJFUbO3mAqZL2UeKC0hhzoIZqZXNG0BfuzOF0VLpDa18GYMUiu+LhEJPJO9D8zhzvQIHNrpGwIDAQAB".into()
-            ],
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: VERIFICATION_DATA.clone(),
         }
         .abi_encode();
 
@@ -130,7 +196,8 @@ mod test {
         let email = String::from_utf8(read_file("./testdata/signed_email_from_subdomain.txt"))?;
         let calldata = UnverifiedEmail {
             email,
-            dnsRecords: DNS_FIXTURE.to_vec(),
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: VERIFICATION_DATA.clone(),
         }
         .abi_encode();
 
@@ -147,7 +214,8 @@ mod test {
         let email = String::from_utf8(read_file("./testdata/signed_email_from_subdomain.txt"))?;
         let calldata = UnverifiedEmail {
             email,
-            dnsRecords: DNS_FIXTURE.to_vec(),
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: VERIFICATION_DATA.clone(),
         }
         .abi_encode();
 
