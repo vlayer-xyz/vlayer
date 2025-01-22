@@ -35,12 +35,6 @@ pub struct Verifier<C: chain_client::Client, V: chain_proof::IVerifier> {
     chain_proof_verifier: V,
 }
 
-impl<C: chain_client::Client, V: chain_proof::IVerifier> Verifier<C, V> {
-    pub fn into_parts(self) -> (C, V) {
-        (self.chain_client, self.chain_proof_verifier)
-    }
-}
-
 impl<C: chain_client::Client, V: chain_proof::IVerifier> seal::Sealed for Verifier<C, V> {}
 #[async_trait]
 impl<C: chain_client::Client, V: chain_proof::IVerifier> IVerifier for Verifier<C, V> {
@@ -58,7 +52,7 @@ impl<C: chain_client::Client, V: chain_proof::IVerifier> IVerifier for Verifier<
             let trie_block_hash = chain_proof
                 .block_trie
                 .get(block_num)
-                .ok_or_else(|| Error::BlockNotFound { block_num })?;
+                .ok_or(Error::BlockNotFound { block_num })?;
             if trie_block_hash != block_hash {
                 return Err(Error::BlockHash {
                     block_num,

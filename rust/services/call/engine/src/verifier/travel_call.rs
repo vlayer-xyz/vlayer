@@ -24,12 +24,6 @@ pub struct Verifier<TT: time_travel::IVerifier> {
     time_travel: TT,
 }
 
-impl<TT: time_travel::IVerifier> Verifier<TT> {
-    pub fn into_inner(self) -> TT {
-        self.time_travel
-    }
-}
-
 impl<TT: time_travel::IVerifier> seal::Sealed for Verifier<TT> {}
 #[async_trait]
 impl<TT: time_travel::IVerifier> IVerifier for Verifier<TT> {

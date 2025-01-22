@@ -200,19 +200,18 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
 
 async fn get_chain_proofs(
     multi_evm_input: &MultiEvmInput,
-    client: Option<chain_client::RecordingClient>,
+    chain_proof_client: Option<chain_client::RecordingClient>,
     verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
 ) -> Result<ChainProofCache, PreflightError> {
     if multi_evm_input.is_single_location() {
         Ok(HashMap::new())
     } else {
-        let Some(client) = client else {
+        let Some(chain_proof_client) = chain_proof_client else {
             return Err(PreflightError::ChainServiceNotAvailable);
         };
-        let time_travel_verifier = time_travel::Verifier::new(client, verifier);
+        let time_travel_verifier = time_travel::Verifier::new(chain_proof_client.clone(), verifier);
         let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier);
         travel_call_verifier.verify(multi_evm_input).await?;
-        let (chain_proof_client, _) = travel_call_verifier.into_inner().into_parts();
         Ok(chain_proof_client.into_cache())
     }
 }
