@@ -8,6 +8,7 @@ import {Proof} from "../Proof.sol";
 import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
 import {IProofVerifier} from "./IProofVerifier.sol";
+import {ImageIdRepository} from "./ImageIdRepository.sol";
 
 abstract contract ProofVerifierBase is IProofVerifier {
     using SealLib for Seal;
@@ -17,9 +18,11 @@ abstract contract ProofVerifierBase is IProofVerifier {
     ProofMode public immutable PROOF_MODE;
     IRiscZeroVerifier public immutable VERIFIER;
     bytes32 public immutable CALL_GUEST_ID;
+    ImageIdRepository public immutable IMAGE_ID_REPOSITORY;
 
     constructor() {
         CALL_GUEST_ID = ImageID.RISC0_CALL_GUEST_ID;
+        IMAGE_ID_REPOSITORY = new ImageIdRepository();
     }
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
@@ -57,5 +60,6 @@ abstract contract ProofVerifierBase is IProofVerifier {
         // CALL_GUEST_ID is not a part of the verified arguments
         // and the following require is just to enable better error handling.
         require(proof.callGuestId == CALL_GUEST_ID, "CallGuestId mismatched");
+        require(IMAGE_ID_REPOSITORY.isSupported(proof.callGuestId), "Unsupported CallGuestId");
     }
 }
