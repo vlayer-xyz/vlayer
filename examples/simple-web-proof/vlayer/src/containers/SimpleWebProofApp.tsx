@@ -1,7 +1,7 @@
 import { WelcomeScreen } from "../components/WelcomeScreen";
-import { ConnectWallet } from "../components/ConnectWallet";
-import { StartProving } from "../components/StartProving";
-import { Minting } from "../components/Minting";
+import { WalletContainer } from "./WalletContainer";
+import { ProvingContainer } from "./ProvingContainer";
+import { MintingContainer } from "./MintingContainer";
 import { Success } from "../components/Success";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
@@ -50,9 +50,9 @@ const SimpleWebProofApp = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<WelcomeScreen />} />
-              <Route path="/connect-wallet" element={<ConnectWallet />} />
-              <Route path="/start-proving" element={<StartProving />} />
-              <Route path="/minting" element={<Minting />} />
+              <Route path="/connect-wallet" element={<WalletContainer />} />
+              <Route path="/start-proving" element={<ProvingContainer />} />
+              <Route path="/minting" element={<MintingContainer />} />
               <Route path="/success" element={<Success />} />
             </Routes>
           </BrowserRouter>

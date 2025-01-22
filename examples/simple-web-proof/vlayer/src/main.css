@@ -37,3 +37,15 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+#nextButton {
+  @apply btn w-[188px] px-4 bg-[#915bf8] rounded-lg border-none text-white hover:bg-[#915bf8]/80 hover:text-white
+}
+
+.header {
+  @apply text-center text-black text-3xl font-bold mt-7
+}
+
+.desc {
+  @apply text-center font-normal text-lg text-gray-500 py-4
+}

@@ -22,17 +22,12 @@ export const Success = () => {
               className="w-[282px] h-[155px]"
             />
           </div>
-          <h3 className="mt-7 text-center text-black text-3xl font-bold ">
-            Success
-          </h3>
+          <h3 className="mt-7 header">Success</h3>
           <p className="py-4 text-gray-500">
             @satoshi NFT was minted to 0x1234...abcd
           </p>
           <div className="mt-7 flex justify-center">
-            <Link
-              to="/"
-              className="btn w-[188px] px-4 bg-[#915bf8] rounded-lg border-none text-white hover:bg-[#915bf8]/80 hover:text-white"
-            >
+            <Link to="/" id="nextButton">
               Start again
             </Link>
           </div>
