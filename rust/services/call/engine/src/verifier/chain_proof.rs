@@ -26,7 +26,7 @@ pub enum Error {
 
 pub type Result = std::result::Result<(), Error>;
 
-sealed_trait!(&super::ChainProof);
+sealed_trait!((&ChainProof));
 verifier_trait!((proof: &ChainProof) -> Result);
 impl_verifier_for_fn!((proof: &ChainProof) -> Result);
 

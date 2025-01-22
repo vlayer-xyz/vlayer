@@ -7,16 +7,15 @@ pub mod zk_proof;
 mod tests;
 
 macro_rules! sealed_trait {
-    ($($arg_type:ty),*) => {
+    (($($arg_type:ty),*)) => {
         mod seal {
             pub trait Sealed {}
-
-            #[cfg(any(test, feature = "testing"))]
-            impl<F> Sealed for F
-            where
-                F: Fn($($arg_type),*) -> super::Result + Send + Sync
-            {
-            }
+        }
+        #[cfg(any(test, feature = "testing"))]
+        impl<F> seal::Sealed for F
+        where
+            F: Fn($($arg_type),*) -> Result + Send + Sync
+        {
         }
     };
 }

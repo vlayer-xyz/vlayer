@@ -23,7 +23,7 @@ pub enum Error {
 
 pub type Result = std::result::Result<(), Error>;
 
-sealed_trait!(super::ChainId, Vec<(super::BlockNumber, super::BlockHash)>);
+sealed_trait!((ChainId, Vec<(BlockNumber, BlockHash)>));
 verifier_trait!(async (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
 impl_verifier_for_fn!(async (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
 

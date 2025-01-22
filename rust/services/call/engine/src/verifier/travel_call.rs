@@ -13,7 +13,7 @@ pub enum Error {
 
 pub type Result = std::result::Result<(), Error>;
 
-sealed_trait!(&super::MultiEvmInput);
+sealed_trait!((&MultiEvmInput));
 verifier_trait!(async (input: &MultiEvmInput) -> Result);
 impl_verifier_for_fn!(async (input: &MultiEvmInput) -> Result);
 

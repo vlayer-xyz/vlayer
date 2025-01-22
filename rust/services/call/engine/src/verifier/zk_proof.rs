@@ -6,7 +6,7 @@ use super::{impl_verifier_for_fn, sealed_trait, verifier_trait};
 
 pub type Result = std::result::Result<(), Error>;
 
-sealed_trait!(&super::Receipt, super::Digest);
+sealed_trait!((&Receipt, Digest));
 verifier_trait!((receipt: &Receipt, elf_id: Digest) -> Result);
 impl_verifier_for_fn!((receipt: &Receipt, elf_id: Digest) -> Result);
 
