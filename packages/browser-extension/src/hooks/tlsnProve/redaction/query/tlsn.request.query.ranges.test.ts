@@ -8,7 +8,12 @@ import {
   XAPICallTranscript,
 } from "../tlsn.ranges.test.fixtures";
 
-import { EncodedString, Encoding, findUrlInRequest } from "../utils";
+import {
+  EncodedString,
+  Encoding,
+  findUrlInRequest,
+  NoGivenParamInUrlError,
+} from "../utils";
 
 describe("request url query", () => {
   test("url_query", () => {
@@ -99,6 +104,23 @@ describe("request url query", () => {
         end: 114,
       },
     ]);
+  });
+
+  test("no given param in url", () => {
+    const redactionItem = {
+      request: {
+        url_query: ["fregfnergeiogneorgi"],
+      },
+    };
+
+    const { url, url_offset } = findUrlInRequest(XAPICallTranscript.sent);
+    expect(() =>
+      calculateRequestQueryParamsRanges(
+        redactionItem.request.url_query,
+        url,
+        url_offset,
+      ),
+    ).toThrow(new NoGivenParamInUrlError("fregfnergeiogneorgi"));
   });
 
   test("url_query_except", () => {

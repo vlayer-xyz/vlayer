@@ -91,3 +91,10 @@ export class HeaderNotFoundError extends RedactionError {
     this.name = "HeaderNotFoundError";
   }
 }
+
+export class NoGivenParamInUrlError extends RedactionError {
+  constructor(param: string) {
+    super(`No given param in url: ${param}`);
+    this.name = "NoGivenParamInUrlError";
+  }
+}
