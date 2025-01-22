@@ -25,6 +25,7 @@ contract VTest is Test {
         );
     }
 
+    // solhint-disable-next-line no-empty-blocks
     function setUp() internal {
         // setUp is not allowed in VTest tests
     }
