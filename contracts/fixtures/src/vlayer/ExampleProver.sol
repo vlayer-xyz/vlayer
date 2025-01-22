@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
+import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
+
 import {Prover} from "vlayer/Prover.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 
-import "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 /*
  * This contract is used in rust/server integration tests. The test fixture
  * (compiled contract) is placed in rust/server/testdata/ExampleProver.json.
