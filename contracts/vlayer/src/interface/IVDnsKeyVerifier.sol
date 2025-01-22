@@ -5,5 +5,5 @@ interface IVDnsKeyVerifier {
     event KeyAdded(address indexed who, bytes key);
     event KeyRevoked(address indexed who, bytes key);
 
-    function isKeyValid(bytes memory key) external view returns (bool);
+    function isDnsKeyValid(bytes memory key) external view returns (bool);
 }

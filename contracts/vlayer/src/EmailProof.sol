@@ -39,7 +39,7 @@ bytes constant TEST_DNS_PUBLIC_KEY = "TEST_DNS_PUBLIC_KEY";
 library EmailProofLib {
     function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory) {
         if (ChainIdLibrary.is_mainnet() || ChainIdLibrary.is_testnet()) {
-            require(KEY_VAULT.isKeyValid(unverifiedEmail.verificationData.pubKey), "Not a valid VDNS public key");
+            require(KEY_VAULT.isDnsKeyValid(unverifiedEmail.verificationData.pubKey), "Not a valid VDNS public key");
         } else if (ChainIdLibrary.is_devnet()) {
             require(keccak256(unverifiedEmail.verificationData.pubKey) == keccak256(TEST_DNS_PUBLIC_KEY), "Not a valid VDNS hardcoded key");
         }
