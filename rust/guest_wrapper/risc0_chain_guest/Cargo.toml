@@ -9,3 +9,6 @@ edition = "2021"
 chain_guest = { path = "../../services/chain/guest" }
 risc0-zkvm = { version = "1.2.0", default-features = false, features = ["std"] }
 tokio = { version = "1.41.0", features = ["rt", "macros"] }
+
+[build-dependencies]
+guest_build_utils = { path = "../build_utils" }
