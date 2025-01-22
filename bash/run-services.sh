@@ -59,4 +59,6 @@ if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
 fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
+startup_vdns_server
+
 echo "Services have been successfully started"
