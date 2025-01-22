@@ -27,7 +27,7 @@ where
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
     let host = create_host(multi_provider, location, chain_proof_server.url())?;
     let PreflightResult { host_output, .. } = host.preflight(call).await?;
-    let return_value = C::abi_decode_returns(&host_output, false)?;
+    let return_value = C::abi_decode_returns(&host_output, true)?;
 
     chain_proof_server.assert();
 

@@ -44,7 +44,10 @@ lazy_static! {
     static ref op_sepolia_url: String =
         format!("https://opt-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref anvil_url: String = format!("http://localhost:8545");
+    static ref op_anvil_url: String = format!("http://localhost:8546");
 }
+
+const OP_ANVIL: ChainId = 31_338;
 
 pub fn rpc_snapshot_file(chain: &str, test_name: &str) -> String {
     format!("test_data/{chain}_{test_name}_rpc_cache.json")
@@ -57,6 +60,7 @@ pub fn rpc_snapshot_files(test_name: &str) -> HashMap<ChainId, String> {
         (Chain::optimism_mainnet().id(), rpc_snapshot_file("op_mainnet", test_name)),
         (Chain::optimism_sepolia().id(), rpc_snapshot_file("op_sepolia", test_name)),
         (NamedChain::AnvilHardhat.into(), rpc_snapshot_file("anvil", test_name)),
+        (OP_ANVIL, rpc_snapshot_file("op_anvil", test_name)),
     ])
 }
 
@@ -67,6 +71,7 @@ fn rpc_urls() -> HashMap<ChainId, String> {
         (Chain::optimism_mainnet().id(), op_mainnet_url.clone()),
         (Chain::optimism_sepolia().id(), op_sepolia_url.clone()),
         (NamedChain::AnvilHardhat.into(), anvil_url.clone()),
+        (OP_ANVIL, op_anvil_url.clone()),
     ])
 }
 
