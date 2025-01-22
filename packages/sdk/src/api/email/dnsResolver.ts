@@ -62,7 +62,7 @@ function takeLastAnswer(response: DnsResponse) {
 }
 
 export class DnsResolver {
-  constructor(private host = "https://dns.google/resolve") {}
+  constructor(private host: string) {}
 
   async resolveDkimDns(selector: string, domain: string) {
     const response = (await (

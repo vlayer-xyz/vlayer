@@ -75,7 +75,7 @@ export const useEmailProofVerification = () => {
       : (connectedAddr as Address);
 
     const eml = await getStrFromFile(uploadedEmlFile);
-    const email = await preverifyEmail(eml, "https://dns.google/resolve");
+    const email = await preverifyEmail(eml, "http://127.0.0.1:3002/dns-query");
     await callProver([email, claimerAddr]);
     setCurrentStep("Waiting for proof...");
   };
