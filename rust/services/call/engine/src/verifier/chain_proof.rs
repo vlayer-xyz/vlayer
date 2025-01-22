@@ -5,7 +5,10 @@ use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
 
 use super::{
-    impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking, verifier_trait,
+    mocking::{
+        impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking,
+        verifier_trait,
+    },
     zk_proof,
 };
 

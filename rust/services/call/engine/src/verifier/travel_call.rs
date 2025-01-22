@@ -2,8 +2,11 @@ use async_trait::async_trait;
 use derive_new::new;
 
 use super::{
-    impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking, time_travel,
-    verifier_trait,
+    mocking::{
+        impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking,
+        verifier_trait,
+    },
+    time_travel,
 };
 use crate::evm::input::MultiEvmInput;
 

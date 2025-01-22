@@ -3,8 +3,11 @@ use async_trait::async_trait;
 use derive_new::new;
 
 use super::{
-    chain_proof, impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking,
-    verifier_trait,
+    chain_proof,
+    mocking::{
+        impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking,
+        verifier_trait,
+    },
 };
 
 #[derive(thiserror::Error, Debug)]
