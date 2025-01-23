@@ -85,8 +85,14 @@ impl MultiEvmInput {
         Self { inputs }
     }
 
-    pub fn is_single_location(&self) -> bool {
-        self.inputs.len() == 1
+    pub fn contains_time_travel(&self) -> bool {
+        self.block_nums_by_chain()
+            .values()
+            .any(|block_nums| block_nums.len() > 1)
+    }
+
+    pub fn contains_teleport(&self) -> bool {
+        self.block_nums_by_chain().len() > 1
     }
 
     pub fn assert_coherency(&self) {

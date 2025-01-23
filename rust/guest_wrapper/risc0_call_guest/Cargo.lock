@@ -915,7 +915,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
- "static_assertions",
  "thiserror 2.0.11",
  "tracing",
 ]

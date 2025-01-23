@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, sync::Arc};
 
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
@@ -64,22 +64,25 @@ pub type ChainProofCache = HashMap<ChainId, (Vec<BlockNumber>, ChainProof)>;
 /// `Client` implementation which wraps around another client (e.g. `RpcClient`) and stores all obtained proofs in a `ChainProofCache`.
 ///
 /// The cache can be dumped via `into_cache` and used to create an instance of `CachedClient`.
+#[derive(Clone)]
 pub struct RecordingClient {
-    inner: Box<dyn Client>,
-    cache: RwLock<ChainProofCache>,
+    inner: Arc<dyn Client>,
+    cache: Arc<RwLock<ChainProofCache>>,
 }
 
 impl RecordingClient {
     #[must_use]
     pub fn new(inner: Box<dyn Client>) -> Self {
         Self {
-            inner,
-            cache: RwLock::new(Default::default()),
+            inner: inner.into(),
+            cache: Arc::new(RwLock::new(Default::default())),
         }
     }
 
     pub fn into_cache(self) -> ChainProofCache {
-        self.cache.into_inner()
+        let cache =
+            Arc::try_unwrap(self.cache).expect("Trying to access cache while it's still in use");
+        cache.into_inner()
     }
 
     pub fn into_cached_client(self) -> CachedClient {
