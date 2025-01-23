@@ -13,7 +13,7 @@ runs:
     - name: Package release
       id: package-release
       run: |
-        bins=(vlayer worker call_server chain_server)
+        bins=(vlayer worker call_server chain_server dns_server)
         mkdir -p target/${{ inputs.target }}/bin
         cd target/${{ inputs.target }}
 
