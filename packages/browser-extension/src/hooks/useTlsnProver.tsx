@@ -23,11 +23,13 @@ const TlsnProofContext = createContext({
   prove: async () => {},
   proof: null as object | null,
   isProving: false,
+  error: null as string | null,
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   const [proof, setProof] = useState<object | null>(null);
   const [isProving, setIsProving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formattedHeaders, setFormattedHeaders] = useState<{
     headers: Record<string, string>;
     secretHeaders: string[];
@@ -93,6 +95,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
       setProof(tlsnProof);
     } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
       void sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofError,
         payload: {
@@ -106,7 +109,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   }, [provenUrl, formattedHeaders, provingSessionConfig]);
 
   return (
-    <TlsnProofContext.Provider value={{ prove, proof, isProving }}>
+    <TlsnProofContext.Provider value={{ prove, proof, isProving, error }}>
       {children}
     </TlsnProofContext.Provider>
   );

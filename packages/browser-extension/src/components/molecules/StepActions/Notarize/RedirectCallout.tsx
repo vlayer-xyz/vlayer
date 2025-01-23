@@ -8,6 +8,7 @@ import { useInterval } from "usehooks-ts";
 import { AnimatedContainer } from "components/molecules/AnimationContainer";
 
 const useRedirectCallout = ({ isVisible }: { isVisible: boolean }) => {
+  console.log("-isVisible--", isVisible);
   const [timeout, setTimeout] = useState(
     import.meta.env.REDIRECT_DELAY_SECONDS || DEFAULT_REDIRECT_DELAY_SECONDS,
   );
@@ -39,14 +40,14 @@ const useRedirectCallout = ({ isVisible }: { isVisible: boolean }) => {
 export const RedirectCallout: FC<{ isVisible: boolean }> = (props) => {
   const { show, timeout } = useRedirectCallout(props);
   return (
-    <AnimatedContainer isVisible={show}>
+    <AnimatedContainer isVisible={show} data-testid="redirect-callout">
       <Callout.Root>
         <Callout.Icon>
           <InfoCircledIcon />
         </Callout.Icon>
         <Callout.Text>
-          You will be redirected back in <b data-testid="timeout">{timeout}</b>{" "}
-          second
+          You will be redirected back in {`${show}`}{" "}
+          <b data-testid="timeout">{timeout}</b> second
           {timeout != 1 ? "s" : ""}.
         </Callout.Text>
       </Callout.Root>

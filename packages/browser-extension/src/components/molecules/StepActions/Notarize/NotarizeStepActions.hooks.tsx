@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { StepStatus } from "constants/step";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import { useZkProvingState } from "hooks/useZkProvingState";
 import { ProvingStatus, type NotarizeStepActionProps } from "./types";
+import { useDebounceValue } from "usehooks-ts";
+
+export const CALLOUT_DEBOUNCE_TIME = 1500;
 
 const useProveButton = () => {
   const { prove, isProving: isWebProving, proof } = useTlsnProver();
@@ -17,9 +20,17 @@ const useProveButton = () => {
 };
 
 const useFinishCallout = () => {
-  const [isFinishCalloutVisible, setIsFinishCalloutVisible] = useState(false);
+  const [isFinishCalloutVisible, setIsFinishCalloutVisible] = useDebounceValue(
+    false,
+    CALLOUT_DEBOUNCE_TIME,
+  );
   const { isDone: isZkProvingDone } = useZkProvingState();
-
+  const { error } = useTlsnProver();
+  useEffect(() => {
+    if (error) {
+      setIsFinishCalloutVisible(false);
+    }
+  }, [error]);
   useEffect(() => {
     if (isZkProvingDone) {
       setIsFinishCalloutVisible(true);
@@ -36,23 +47,38 @@ const useFinishCallout = () => {
 };
 
 const useProgress = () => {
-  const { isProving: isZkProving, isDone: isZkProvingDone } =
-    useZkProvingState();
-  const { isProving: isWebProving } = useTlsnProver();
+  const {
+    isProving: isZkProving,
+    isDone: isZkProvingDone,
+    error: isZkProvingError,
+  } = useZkProvingState();
+  const { isProving: isWebProving, error: isWebProvingError } = useTlsnProver();
   const [isProvingProgressVisible, setIsProvingProgressVisible] =
-    useState(false);
+    useDebounceValue(false, CALLOUT_DEBOUNCE_TIME);
 
   useEffect(() => {
+    const isError = isWebProvingError || isZkProvingError;
+
+    if (isWebProving || isZkProving) {
+      setIsProvingProgressVisible(true);
+    }
+    if (isError) {
+      setIsProvingProgressVisible(false);
+    }
     if (isZkProvingDone) {
       setTimeout(() => {
         setIsProvingProgressVisible(false);
       }, 2000);
     }
-    if (isWebProving || isZkProving) {
-      setIsProvingProgressVisible(true);
-    }
+
     return () => {};
-  }, [isZkProvingDone, isWebProving, isZkProving]);
+  }, [
+    isZkProvingDone,
+    isWebProving,
+    isZkProving,
+    isWebProvingError,
+    isZkProvingError,
+  ]);
 
   return {
     isProvingProgressVisible,
@@ -83,16 +109,19 @@ const useProvingStatus = () => {
 };
 
 const useRedirectCallout = () => {
-  const { isProving: isWebProving } = useTlsnProver();
-
+  const { isProving: isWebProving, error: isWebProvingError } = useTlsnProver();
+  const { error: isZkProvingError } = useZkProvingState();
   const [isRedirectCalloutVisible, setIsRedirectCalloutVisible] =
-    useState(false);
+    useDebounceValue(false, CALLOUT_DEBOUNCE_TIME);
 
   useEffect(() => {
-    if (isWebProving) {
+    const isError = isWebProvingError || isZkProvingError;
+    if (isWebProving && !isError) {
       setIsRedirectCalloutVisible(true);
+    } else if (isError) {
+      setIsRedirectCalloutVisible(false);
     }
-  }, [isWebProving]);
+  }, [isWebProving, isWebProvingError, isZkProvingError]);
 
   return {
     isRedirectCalloutVisible,
@@ -105,6 +134,9 @@ const useNotarizeStepActions = (props: NotarizeStepActionProps) => {
   const { isProvingProgressVisible } = useProgress();
   const { provingStatus } = useProvingStatus();
   const { isRedirectCalloutVisible } = useRedirectCallout();
+  const { error } = useTlsnProver();
+  console.log("error__", error);
+  console.log("isRedirectCalloutVisible", isRedirectCalloutVisible);
   return {
     provingStatus,
     onButtonClick,
@@ -112,6 +144,7 @@ const useNotarizeStepActions = (props: NotarizeStepActionProps) => {
     isFinishCalloutVisible,
     isProvingProgressVisible,
     isRedirectCalloutVisible,
+    errorMessage: error,
     isVisible: !props.isVisited && props.status === StepStatus.Current,
   };
 };
