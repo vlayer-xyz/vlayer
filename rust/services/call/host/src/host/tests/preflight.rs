@@ -172,12 +172,10 @@ mod view {
 }
 
 mod teleport_v2 {
-    use anyhow::ensure;
-
     use super::*;
     use crate::test_harness::contracts::teleport_v2::{
         SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
-        BLOCK_NO, JOHN, SIMPLE_TELEPORT, TOKEN, WRONG_CHAIN_ID, WRONG_TOKEN,
+        BLOCK_NO, JOHN, SIMPLE_TELEPORT, TOKEN,
     };
 
     #[tokio::test(flavor = "multi_thread")]
@@ -201,23 +199,27 @@ mod teleport_v2 {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn failure() -> anyhow::Result<()> {
+        let mut wrong_token = TOKEN;
+        wrong_token.chainId = uint!(331337_U256);
+        let wrong_chain_id = wrong_token.chainId.to_string();
+
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
+
         let call = call(
             SIMPLE_TELEPORT,
             &crossChainBalanceOfCall {
                 owner: JOHN,
-                tokens: vec![WRONG_TOKEN],
+                tokens: vec![wrong_token],
             },
         );
 
         let error = preflight::<crossChainBalanceOfCall>("teleport_v2", call, &location)
             .await
-            .err()
-            .unwrap();
+            .unwrap_err();
 
         assert!(error
             .to_string()
-            .contains(&format!("No rpc cache for chain: {WRONG_CHAIN_ID}")));
+            .contains(&format!("No rpc cache for chain: {wrong_chain_id}")));
 
         Ok(())
     }

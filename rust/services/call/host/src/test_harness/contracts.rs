@@ -140,15 +140,9 @@ pub mod teleport_v2 {
     pub const SIMPLE_TELEPORT: Address = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
     pub const JOHN: Address = address!("70997970C51812dc3A010C7d01b50e0d17dc79C8");
     pub const BLOCK_NO: u64 = 3;
-    pub const WRONG_CHAIN_ID: Uint<256, 4> = uint!(331337_U256);
     pub const TOKEN: Erc20Token = Erc20Token {
         addr: address!("5FbDB2315678afecb367f032d93F642f64180aa3"),
         chainId: OP_ANVIL_CHAIN_ID,
-        blockNumber: OP_BLOCK_NO,
-    };
-    pub const WRONG_TOKEN: Erc20Token = Erc20Token {
-        addr: address!("5FbDB2315678afecb367f032d93F642f64180aa3"),
-        chainId: WRONG_CHAIN_ID,
         blockNumber: OP_BLOCK_NO,
     };
     const OP_BLOCK_NO: Uint<256, 4> = uint!(3_U256);
