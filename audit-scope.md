@@ -27,19 +27,19 @@
 │   │   └── flake.nix
 │   ├── **quarantine [OUT OF SCOPE]**
 │   ├── **teams.yml [OUT OF SCOPE]**
-│   └── workflows
+│   └── **workflows [??]**
 │       ├── build_docker.yaml
 │       ├── **build_examples.yaml [OUT OF SCOPE]**
-│       ├── build_extension.yaml
-│       ├── build_gas_benchmarks.yaml
+│       ├── **build_extension.yaml [OUT OF SCOPE]**
+│       ├── **build_gas_benchmarks.yaml [OUT OF SCOPE]**
 │       ├── build_guest_artifacts.yaml
 │       ├── build_rust_release.yaml
-│       ├── build_sdk.yaml
-│       ├── deploy_book.yaml
+│       ├── **build_sdk.yaml [OUT OF SCOPE]**
+│       ├── **deploy_book.yaml [OUT OF SCOPE]**
 │       ├── deploy_chain_services.yaml
 │       ├── deploy_provers.yaml
-│       ├── deploy_simple_email_proof.yaml
-│       ├── deploy_simple_web_proof.yaml
+│       ├── **deploy_simple_email_proof.yaml [OUT OF SCOPE]**
+│       ├── **deploy_simple_web_proof.yaml [OUT OF SCOPE]**
 │       ├── **lint_bash.yaml [OUT OF SCOPE]**
 │       ├── **lint_contracts.yaml [OUT OF SCOPE]**
 │       ├── **lint_json.yaml [OUT OF SCOPE]**
@@ -562,7 +562,7 @@
 │   │   │   │       └── version.rs
 │   │   │   └── server_lib
 │   │   │       ├── Cargo.toml
-│   │   │       ├── README.md
+│   │   │       ├── **README.md [OUT OF SCOPE]**
 │   │   │       ├── src
 │   │   │       │   ├── chain_proof.rs
 │   │   │       │   ├── config.rs
