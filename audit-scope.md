@@ -74,7 +74,7 @@
 │   ├── check-llvm-clang.sh
 │   ├── common.sh
 │   ├── deploy-to-vercel.sh
-│   ├── e2e
+│   ├── **e2e [OUT OF SCOPE]**
 │   │   └── lib.sh
 │   ├── e2e-test.sh
 │   ├── e2e-web-apps-test.sh
@@ -118,7 +118,7 @@
 │       ├── src
 │       │   ├── CallAssumptions.sol
 │       │   ├── EmailProof.sol
-│       │   ├── ImageID.sol
+│       │   ├── **ImageID.sol [OUT OF SCOPE]**
 │       │   ├── PrecompilesAddresses.sol
 │       │   ├── Proof.sol
 │       │   ├── Prover.sol
@@ -129,39 +129,15 @@
 │       │   ├── WebProof.sol
 │       │   ├── proof_verifier
 │       │   │   ├── ChainId.sol
-│       │   │   ├── FakeProofVerifier.sol
+│       │   │   ├── **FakeProofVerifier.sol [??]**
 │       │   │   ├── Groth16ProofVerifier.sol
 │       │   │   ├── IProofVerifier.sol
 │       │   │   ├── ImageIdRepository.sol
 │       │   │   ├── ProofVerifierBase.sol
 │       │   │   ├── ProofVerifierFactory.sol
 │       │   │   └── ProofVerifierRouter.sol
-│       │   └── testing
-│       │       ├── VTest.sol
-│       │       └── libraries
-│       │           └── EmailTestUtils.sol
-│       ├── test
-│       │   ├── Seal.t.sol
-│       │   ├── Verifier.t.sol
-│       │   ├── helpers
-│       │   │   ├── Groth16VerifierSelector.sol
-│       │   │   └── TestHelpers.sol
-│       │   ├── integration
-│       │   │   ├── ProofVerifier.t.sol
-│       │   │   └── VTest.t.sol
-│       │   ├── proof_verifier
-│       │   │   ├── FakeProofVerifier.t.sol
-│       │   │   ├── Groth16ProofVerifier.t.sol
-│       │   │   ├── ImageIdRepository.t.sol
-│       │   │   ├── ProofVerifier.t.sol
-│       │   │   ├── ProofVerifierFactory.t.sol
-│       │   │   └── ProofVerifierRouter.t.sol
-│       │   └── vlayer
-│       │       ├── EmailProofLib.t.sol
-│       │       ├── RegexLib.t.sol
-│       │       ├── UrlPatternLib.t.sol
-│       │       ├── WebLib.t.sol
-│       │       └── WebProofLib.t.sol
+│       │   └── **testing [OUT OF SCOPE]**
+│       ├── **test [OUT OF SCOPE]**
 │       └── **testdata [OUT OF SCOPE]**
 ├── docker
 │   ├── anvil.yaml
@@ -537,7 +513,7 @@
 │   │   │           └── retry.rs
 │   │   └── **dns [OUT OF SCOPE]**
 │   ├── **test_runner [OUT OF SCOPE]**
-│   ├── verifiable_dns
+│   ├── **verifiable_dns [TODO: Piotr]**
 │   │   ├── Cargo.toml
 │   │   ├── **assets [OUT OF SCOPE]**
 │   │   └── src
@@ -559,7 +535,7 @@
 │   │   ├── build.rs
 │   │   └── src
 │   │       └── lib.rs
-│   ├── web_proof
+│   ├── **web_proof [TODO: Wiktor]**
 │   │   ├── Cargo.toml
 │   │   ├── src
 │   │   │   ├── errors.rs
