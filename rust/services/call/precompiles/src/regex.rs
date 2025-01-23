@@ -1,7 +1,7 @@
 use ::regex::Regex;
 use alloy_primitives::Bytes;
 use alloy_sol_types::{sol_data, SolType, SolValue};
-use regex::{Captures, Match};
+use regex::{Captures, Match, RegexBuilder};
 use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
 
 use crate::{gas_used, map_to_fatal};
@@ -11,6 +11,8 @@ pub(super) const CAPTURE: Precompile = Precompile::Standard(capture_run);
 
 const BASE_COST: u64 = 10;
 const PER_WORD_COST: u64 = 1;
+
+const REGEX_SIZE_LIMIT: usize = 1_000_000;
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
@@ -54,7 +56,11 @@ fn match_into_string(maybe_match: Option<Match>) -> String {
 fn decode_args(input: &Bytes) -> Result<(String, Regex), PrecompileErrors> {
     let [source, pattern] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     validate_regex(&pattern).map_err(map_to_fatal)?;
-    let regex = Regex::new(&pattern).map_err(map_to_fatal)?;
+    let regex = RegexBuilder::new(&pattern)
+        .size_limit(REGEX_SIZE_LIMIT)
+        .dfa_size_limit(REGEX_SIZE_LIMIT)
+        .build()
+        .map_err(map_to_fatal)?;
     Ok((source, regex))
 }
 
@@ -83,6 +89,34 @@ mod test {
             let result = bool::abi_decode(&result.bytes, true).unwrap();
 
             assert!(result);
+        }
+
+        #[test]
+        fn regex_has_max_size_limit() {
+            let source = "Hello, World!";
+            let regex = r"^Hello, World!\w{100}$";
+
+            let input = [source, regex].abi_encode();
+
+            let result = match_run(&Bytes::from(input), 1000);
+            assert_eq!(
+                result,
+                Err(PrecompileErrors::Fatal {
+                    msg: "Compiled regex exceeds size limit of 1000000 bytes.".into()
+                })
+            );
+        }
+
+        #[test]
+        fn regex_size_can_be_optimized() {
+            let source = "Hello, World!";
+            let regex = r"^Hello, World![a-zA-Z0-9]{10000}$";
+
+            let input = [source, regex].abi_encode();
+
+            let result = match_run(&Bytes::from(input), 1000);
+
+            assert!(result.is_ok());
         }
 
         #[test]
