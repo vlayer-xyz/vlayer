@@ -664,6 +664,40 @@ mod tests {
                         ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: Hello"
                     ));
                 }
+
+                #[test]
+                fn key_full_redaction_for_empty_object_value() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\"\0\0\0\0\0\0\": {}}";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                    println!("{err:?}");
+                    assert!(matches!(
+                        err,
+                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: "
+                    ));
+                }
+
+                #[test]
+                fn key_full_redaction_for_empty_array() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json\r\n"
+                        + "Content-Length: 136\r\n"
+                        + "\r\n"
+                        + "{\"\0\0\0\0\0\0\": []}";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                    println!("{err:?}");
+                    assert!(matches!(
+                        err,
+                        ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: "
+                    ));
+                }
             }
         }
     }
