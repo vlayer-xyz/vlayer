@@ -4,13 +4,7 @@ use chain_common::{ChainProof, ChainProofReceipt};
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
 
-use super::{
-    mocking::{
-        impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking,
-        verifier_trait,
-    },
-    zk_proof,
-};
+use super::{sealing::sealed_with_test_mock, zk_proof};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -30,7 +24,7 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-setup_verifier_mocking!((proof: &ChainProof) -> Result);
+sealed_with_test_mock!((proof: &ChainProof) -> Result);
 
 pub struct Verifier<ZK: zk_proof::IVerifier> {
     chain_guest_ids: Box<[Digest]>,

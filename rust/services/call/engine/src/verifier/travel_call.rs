@@ -1,13 +1,7 @@
 use async_trait::async_trait;
 use derive_new::new;
 
-use super::{
-    mocking::{
-        impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking,
-        verifier_trait,
-    },
-    time_travel,
-};
+use super::{sealing::sealed_with_test_mock, time_travel};
 use crate::evm::input::MultiEvmInput;
 
 #[derive(thiserror::Error, Debug)]
@@ -17,7 +11,7 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-setup_verifier_mocking!(async (input: &MultiEvmInput) -> Result);
+sealed_with_test_mock!(async (input: &MultiEvmInput) -> Result);
 
 #[derive(new)]
 pub struct Verifier<TT: time_travel::IVerifier> {

@@ -1,12 +1,10 @@
 pub use risc0_zkp::verify::VerificationError as Error;
 use risc0_zkvm::{guest, sha::Digest, Receipt};
 
-use super::mocking::{
-    impl_sealed_for_fn, impl_verifier_for_fn, sealed_trait, setup_verifier_mocking, verifier_trait,
-};
+use super::sealing::sealed_with_test_mock;
 
 pub type Result = std::result::Result<(), Error>;
-setup_verifier_mocking!((receipt: &Receipt, elf_id: Digest) -> Result);
+sealed_with_test_mock!((receipt: &Receipt, elf_id: Digest) -> Result);
 
 pub struct GuestVerifier;
 

@@ -11,7 +11,7 @@ mod tests;
 /// * Provide clear interfaces for both synchronous and asynchronous verifiers (verifier_trait!).
 /// * Allow for lightweight, mockable verifier implementations in testing (impl_verifier_for_fn!).
 /// * Consolidate these components for easy reuse (setup_verifier_mocking!).
-mod mocking {
+mod sealing {
     /// Defines a seal module containing the Sealed trait, ensuring verifier traits cannot be implemented externally.
     /// This protects against unintended extensions or security bypasses.
     macro_rules! sealed_trait {
@@ -41,7 +41,7 @@ mod mocking {
     pub(crate) use verifier_trait;
 
     /// Implements the `IVerifier`` trait for functions, enabling simple mock implementations during testing.
-    /// Is disabled in non-testing environments.
+    /// Disabled in non-testing environments.
     /// "testing" feature is needed to enable this functionality in dependent crates tests.
     macro_rules! impl_verifier_for_fn {
         (($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
@@ -71,7 +71,7 @@ mod mocking {
     pub(crate) use impl_verifier_for_fn;
 
     /// Implements the `Sealed` trait for functions with the appropriate signature.
-    /// Is disabled in non-testing environments.
+    /// Disabled in non-testing environments.
     macro_rules! impl_sealed_for_fn {
         (($($arg_type:ty),*)) => {
             #[cfg(any(test, feature = "testing"))]
@@ -85,19 +85,19 @@ mod mocking {
     pub(crate) use impl_sealed_for_fn;
 
     /// Combines all macros into a single invocation.
-    macro_rules! setup_verifier_mocking {
+    macro_rules! sealed_with_test_mock {
         (($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
-            sealed_trait!();
-            impl_sealed_for_fn!(($($arg_type),*));
-            verifier_trait!(($($arg_name: $arg_type),*) -> $result);
-            impl_verifier_for_fn!(($($arg_name: $arg_type),*) -> $result);
+            crate::verifier::sealing::sealed_trait!();
+            crate::verifier::sealing::impl_sealed_for_fn!(($($arg_type),*));
+            crate::verifier::sealing::verifier_trait!(($($arg_name: $arg_type),*) -> $result);
+            crate::verifier::sealing::impl_verifier_for_fn!(($($arg_name: $arg_type),*) -> $result);
         };
         (async ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
-            sealed_trait!();
-            impl_sealed_for_fn!(($($arg_type),*));
-            verifier_trait!(async ($($arg_name: $arg_type),*) -> $result);
-            impl_verifier_for_fn!(async ($($arg_name: $arg_type),*) -> $result);
+            crate::verifier::sealing::sealed_trait!();
+            crate::verifier::sealing::impl_sealed_for_fn!(($($arg_type),*));
+            crate::verifier::sealing::verifier_trait!(async ($($arg_name: $arg_type),*) -> $result);
+            crate::verifier::sealing::impl_verifier_for_fn!(async ($($arg_name: $arg_type),*) -> $result);
         };
     }
-    pub(crate) use setup_verifier_mocking;
+    pub(crate) use sealed_with_test_mock;
 }
