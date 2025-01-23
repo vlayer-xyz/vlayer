@@ -214,9 +214,10 @@ mod teleport_v2 {
             .await
             .err()
             .unwrap();
-        let expected_error_message = format!("No rpc cache for chain: {WRONG_CHAIN_ID}");
 
-        assert!(error.to_string().contains(&expected_error_message));
+        assert!(error
+            .to_string()
+            .contains(&format!("No rpc cache for chain: {WRONG_CHAIN_ID}")));
 
         Ok(())
     }
