@@ -10,7 +10,7 @@ use call_engine::{
     },
     travel_call_executor::TravelCallExecutor,
     verifier::{
-        chain_proof, time_travel,
+        chain_proof, teleport, time_travel,
         travel_call::{self, IVerifier},
         zk_proof,
     },
@@ -216,7 +216,8 @@ async fn get_chain_proofs(
     };
 
     let time_travel_verifier = time_travel::Verifier::new(chain_proof_client.clone(), verifier);
-    let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier);
+    let teleport_verifier = teleport::Verifier::new();
+    let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier, teleport_verifier);
     travel_call_verifier
         .verify(multi_evm_input, start_execution_location)
         .await?;

@@ -1,5 +1,5 @@
 use call_engine::{
-    verifier::{chain_proof, time_travel, travel_call, zk_proof},
+    verifier::{chain_proof, teleport, time_travel, travel_call, zk_proof},
     GuestOutput, Input,
 };
 use chain_client::CachedClient;
@@ -22,7 +22,8 @@ pub async fn main(
     let chain_client = CachedClient::new(chain_proofs);
     let chain_proof_verifier = chain_proof::Verifier::new(chain_guest_ids, zk_proof::GuestVerifier);
     let time_travel_verifier = time_travel::Verifier::new(chain_client, chain_proof_verifier);
-    let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier);
+    let teleport_verifier = teleport::Verifier::new();
+    let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier, teleport_verifier);
 
     let verified_input =
         verify_input(travel_call_verifier, multi_evm_input, start_execution_location).await;
