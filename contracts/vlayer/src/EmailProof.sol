@@ -33,6 +33,8 @@ struct VerifiedEmail {
 
 library EmailProofLib {
     function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory) {
+        require(unverifiedEmail.verificationData.validUntil > block.timestamp, "EmailProof: expired DNS verification");
+
         (bool success, bytes memory returnData) = Precompiles.VERIFY_EMAIL.staticcall(abi.encode(unverifiedEmail));
         Address.verifyCallResult(success, returnData);
 
