@@ -119,9 +119,13 @@ impl Host {
 
         let multi_evm_input = into_multi_input(self.envs)?;
 
-        let chain_proofs =
-            get_chain_proofs(&multi_evm_input, self.chain_client, self.chain_proof_verifier)
-                .await?;
+        let chain_proofs = get_chain_proofs(
+            &multi_evm_input,
+            self.start_execution_location,
+            self.chain_client,
+            self.chain_proof_verifier,
+        )
+        .await?;
 
         let input = Input {
             multi_evm_input,
@@ -200,6 +204,7 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
 
 async fn get_chain_proofs(
     multi_evm_input: &MultiEvmInput,
+    start_execution_location: ExecutionLocation,
     chain_proof_client: Option<chain_client::RecordingClient>,
     verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
 ) -> Result<ChainProofCache, PreflightError> {
@@ -212,7 +217,9 @@ async fn get_chain_proofs(
 
     let time_travel_verifier = time_travel::Verifier::new(chain_proof_client.clone(), verifier);
     let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier);
-    travel_call_verifier.verify(multi_evm_input).await?;
+    travel_call_verifier
+        .verify(multi_evm_input, start_execution_location)
+        .await?;
     drop(travel_call_verifier); // Drop verifier to be able to get the chain proof cache
 
     Ok(chain_proof_client.into_cache())

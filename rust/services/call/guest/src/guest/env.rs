@@ -23,13 +23,13 @@ pub struct VerifiedInput(MultiEvmInput);
 pub async fn verify_input(
     verifier: impl travel_call::IVerifier,
     multi_evm_input: MultiEvmInput,
+    start_execution_location: ExecutionLocation,
 ) -> VerifiedInput {
     verifier
-        .verify(&multi_evm_input)
+        .verify(&multi_evm_input, start_execution_location)
         .await
         .expect("invalid guest input");
 
-    multi_evm_input.assert_coherency();
     VerifiedInput(multi_evm_input)
 }
 

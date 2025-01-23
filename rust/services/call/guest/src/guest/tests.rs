@@ -15,11 +15,11 @@ const CHAIN_ID: ChainId = 1;
 const BLOCK_NUM: BlockNumber = 0;
 const EXEC_LOCATION: ExecutionLocation = ExecutionLocation::new(CHAIN_ID, BLOCK_NUM);
 
-const fn input_ok(_: &MultiEvmInput) -> travel_call::Result {
+const fn input_ok(_: &MultiEvmInput, _: ExecutionLocation) -> travel_call::Result {
     Ok(())
 }
 
-const fn input_invalid(_: &MultiEvmInput) -> travel_call::Result {
+const fn input_invalid(_: &MultiEvmInput, _: ExecutionLocation) -> travel_call::Result {
     Err(travel_call::Error::TimeTravel(time_travel::Error::ChainProof(
         chain_proof::Error::Zk(zk_proof::Error::InvalidProof),
     )))
@@ -60,7 +60,7 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_ok, multi_evm_input).await;
+        _ = verify_input(input_ok, multi_evm_input, EXEC_LOCATION).await;
     }
 
     #[tokio::test]
@@ -69,7 +69,7 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = B256::ZERO; // invalid state root hash
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_ok, multi_evm_input).await;
+        _ = verify_input(input_ok, multi_evm_input, EXEC_LOCATION).await;
     }
 
     #[tokio::test]
@@ -78,6 +78,6 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_invalid, multi_evm_input).await;
+        _ = verify_input(input_invalid, multi_evm_input, EXEC_LOCATION).await;
     }
 }
