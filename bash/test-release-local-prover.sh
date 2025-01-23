@@ -29,10 +29,13 @@ VLAYER_ENV="dev"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
+echo "Starting VDNS server"
+docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up vdns_server
+
 for example in $(get_examples); do
     # We're restarting anvils because some examples rely on a clean chain state.
     echo "Restarting anvils"
-    docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart anvil-l1 anvil-l2-op vdns_server
+    docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart anvil-l1 anvil-l2-op
 
     echo "::group::Initializing vlayer template: ${example}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)

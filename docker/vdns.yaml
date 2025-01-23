@@ -6,6 +6,6 @@ services:
     pull_policy: always
     environment:
       RUST_LOG: "info,vdns_server=debug"
-    command: [ "" ]
+    command: [""]
     ports:
       - "127.0.0.1:3002:3002"
