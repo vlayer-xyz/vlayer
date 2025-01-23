@@ -1,6 +1,7 @@
 use alloy_primitives::BlockNumber;
 use anyhow::Result;
 use block_trie::BlockTrie;
+use common::GuestElf;
 use key_value::InMemoryDatabase;
 use mpt::{keccak256, Sha2Node as Node, Sha2Trie as MerkleTrie};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
@@ -9,7 +10,7 @@ use risc0_zkvm::{sha::Digest, FakeReceipt, InnerReceipt, MaybePruned, Receipt};
 use super::*;
 
 fn get_test_db() -> ChainDb {
-    ChainDb::in_memory(GuestElf::default())
+    ChainDb::in_memory([GuestElf::default().id])
 }
 
 fn insert_node(db: &mut ChainDb, node_rlp: &Bytes) {
@@ -68,7 +69,8 @@ fn fake_proof() -> Bytes {
 
 #[test]
 fn read_only_error_on_write() -> Result<()> {
-    let mut db = ChainDb::new(InMemoryDatabase::new(), Mode::ReadOnly, GuestElf::default());
+    let mut db =
+        ChainDb::new(InMemoryDatabase::new(), Mode::ReadOnly, Box::new([GuestElf::default().id]));
     let res = db.begin_rw();
     // Not using .unwrap_err() because res is not Debug
     assert!(res.is_err_and(|e| e == ChainDbError::ReadOnly));

@@ -1,8 +1,9 @@
 use block_trie::BlockTrie;
 use chain_common::{ChainProofReceipt, ProofVerificationError};
-use common::{GuestElf, Hashable};
+use common::Hashable;
 use derive_new::new;
 use mpt::Sha2Trie as MerkleTrie;
+use risc0_zkvm::sha::Digest;
 use u64_range::NonEmptyRange;
 
 #[derive(new)]
@@ -35,14 +36,14 @@ impl ChainTrie {
 
 pub fn verify_chain_trie(
     unverified: UnverifiedChainTrie,
-    elf: &GuestElf,
+    chain_guest_ids: Box<[Digest]>,
 ) -> Result<ChainTrie, ProofVerificationError> {
     let UnverifiedChainTrie {
         block_range,
         trie,
         zk_proof,
     } = unverified;
-    zk_proof.verify(trie.hash_slow(), elf.id)?;
+    zk_proof.verify(trie.hash_slow(), chain_guest_ids)?;
     let block_trie = BlockTrie::from_unchecked(trie);
     Ok(ChainTrie::new(block_range, block_trie, zk_proof))
 }

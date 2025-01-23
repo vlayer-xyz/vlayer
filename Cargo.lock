@@ -2454,6 +2454,7 @@ dependencies = [
  "common",
  "dotenvy",
  "guest_wrapper",
+ "risc0-zkp 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio",
  "version",
 ]
@@ -12622,6 +12623,7 @@ dependencies = [
  "dotenvy",
  "ethers",
  "guest_wrapper",
+ "risc0-zkp 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio",
  "tower 0.5.2",
  "tracing",
