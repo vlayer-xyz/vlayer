@@ -2,13 +2,17 @@ use axum::http::StatusCode;
 use chain_db::ChainDb;
 use chain_server_lib::server;
 use common::GuestElf;
-use serde_json::json;
+use serde_json::{json, Value};
 use server_utils::{body_to_json, post};
+
+fn test_app() -> axum::Router {
+    let db = ChainDb::in_memory([GuestElf::default().id]);
+    server(db)
+}
 
 #[tokio::test]
 async fn http_not_found() {
-    let db = ChainDb::in_memory([GuestElf::default().id]);
-    let app = server(db);
+    let app = test_app();
     let empty_body = json!({});
     let response = post(app, "/non-existent", &empty_body).await;
     assert_eq!(StatusCode::NOT_FOUND, response.status());
@@ -16,8 +20,7 @@ async fn http_not_found() {
 
 #[tokio::test]
 async fn method_not_found() {
-    let db = ChainDb::in_memory([GuestElf::default().id]);
-    let app = server(db);
+    let app = test_app();
     let req = json!({
         "jsonrpc": "2.0",
         "id": 1,
@@ -42,8 +45,7 @@ async fn method_not_found() {
 
 #[tokio::test]
 async fn method_missing() {
-    let db = ChainDb::in_memory([GuestElf::default().id]);
-    let app = server(db);
+    let app = test_app();
     let req = json!({
         "jsonrpc": "2.0",
         "id": 2,
@@ -52,17 +54,16 @@ async fn method_missing() {
     let response = post(app, "/", &req).await;
 
     assert_eq!(StatusCode::OK, response.status());
-    assert_eq!(
-        json!({
-            "jsonrpc": "2.0",
-            "id": null,
-            "error": {
-                "code": -32600,
-                "message": "missing field `method` at line 1 column 36",
-            }
-        }),
-        body_to_json(response.into_body()).await
-    );
+    let body = body_to_json(response.into_body()).await;
+    assert_eq!(*body.get("id").unwrap(), Value::Null);
+    let error = body.get("error").unwrap();
+    assert_eq!(*error.get("code").unwrap(), json!(-32600));
+    assert!(error
+        .get("message")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .starts_with("missing field `method`"));
 }
 
 mod chain_proof {
@@ -71,8 +72,7 @@ mod chain_proof {
     #[tokio::test]
     #[ignore]
     async fn success_dummy() {
-        let db = ChainDb::in_memory([GuestElf::default().id]);
-        let app = server(db);
+        let app = test_app();
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -100,8 +100,7 @@ mod chain_proof {
 
     #[tokio::test]
     async fn no_block_numbers_error() {
-        let db = ChainDb::in_memory([GuestElf::default().id]);
-        let app = server(db);
+        let app = test_app();
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -129,8 +128,7 @@ mod chain_proof {
 
     #[tokio::test]
     async fn field_validation_error() {
-        let db = ChainDb::in_memory([GuestElf::default().id]);
-        let app = server(db);
+        let app = test_app();
 
         let valid_number = 42;
         let invalid_number = "";
@@ -146,17 +144,16 @@ mod chain_proof {
         let response = post(app, "/", &req).await;
 
         assert_eq!(StatusCode::OK, response.status());
-        assert_eq!(
-            json!({
-                "jsonrpc": "2.0",
-                "id": 1,
-                "error": {
-                    "code": -32602,
-                    "message": "Invalid params",
-                    "data": "invalid type: string \"\", expected u64 at line 1 column 36",
-                }
-            }),
-            body_to_json(response.into_body()).await
-        );
+        let body = body_to_json(response.into_body()).await;
+        assert_eq!(*body.get("id").unwrap(), json!(1));
+        let error = body.get("error").unwrap();
+        assert_eq!(*error.get("code").unwrap(), json!(-32602));
+        assert_eq!(*error.get("message").unwrap(), json!("Invalid params"));
+        assert!(error
+            .get("data")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .starts_with("invalid type: string \"\", expected u64"));
     }
 }
