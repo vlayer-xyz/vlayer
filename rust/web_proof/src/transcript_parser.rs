@@ -666,7 +666,7 @@ mod tests {
                 }
 
                 #[test]
-                fn key_full_redaction_for_empty_object_value() {
+                fn key_full_redaction_for_empty_object() {
                     let response = "".to_string()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
@@ -675,7 +675,6 @@ mod tests {
                         + "{\"\0\0\0\0\0\0\": {}}";
                     let err =
                         parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
-                    println!("{err:?}");
                     assert!(matches!(
                         err,
                         ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: "
@@ -692,7 +691,6 @@ mod tests {
                         + "{\"\0\0\0\0\0\0\": []}";
                     let err =
                         parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
-                    println!("{err:?}");
                     assert!(matches!(
                         err,
                         ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: "
