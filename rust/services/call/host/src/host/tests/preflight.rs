@@ -216,11 +216,7 @@ mod teleport_v2 {
             .unwrap();
         let expected_error_message = format!("No rpc cache for chain: {WRONG_CHAIN_ID}");
 
-        ensure!(
-            error.to_string().contains(&expected_error_message),
-            "Unexpected error message: {}",
-            error
-        );
+        assert!(error.to_string().contains(&expected_error_message));
 
         Ok(())
     }
