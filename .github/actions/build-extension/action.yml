@@ -14,7 +14,7 @@ runs:
       uses: ./.github/actions/ts-prerequisites
     - name: Install dependencies
       working-directory: packages/browser-extension
-      run: bun install --frozen-lockfile
+      run: bun install
       shell: bash
     - name: Update extension version
       working-directory: packages/browser-extension
