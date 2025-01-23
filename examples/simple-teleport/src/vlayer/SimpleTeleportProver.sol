@@ -12,15 +12,10 @@ struct Erc20Token {
 }
 
 contract SimpleTeleportProver is Prover {
-    Erc20Token[] public tokens;
-
-    constructor(Erc20Token[] memory _tokens) {
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            tokens.push(_tokens[i]);
-        }
-    }
-
-    function crossChainBalanceOf(address _owner) public returns (Proof memory, address, uint256) {
+    function crossChainBalanceOf(
+        address _owner,
+        Erc20Token[] memory tokens
+    ) public returns (Proof memory, address, uint256) {
         uint256 balance = 0;
 
         for (uint256 i = 0; i < tokens.length; i++) {
