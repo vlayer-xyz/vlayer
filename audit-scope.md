@@ -1,63 +1,8 @@
 .
-├── **.cargo [??]**
-│   └── config.toml
-├── **.dockerignore [??]**
+├── **.cargo [OUT OF SCOPE]**
+├── **.dockerignore [OUT OF SCOPE]**
 ├── **.git-branches.toml [OUT OF SCOPE]**
-├── .**github [??]**
-│   ├── **actionlint.yaml [OUT OF SCOPE]**
-│   ├── actions
-│   │   ├── **build-extension [OUT OF SCOPE]**
-│   │   ├── build-guest-artifacts
-│   │   │   └── action.yml
-│   │   ├── contracts-prerequisites
-│   │   │   └── action.yml
-│   │   ├── darwin-prerequisites
-│   │   │   └── action.yml
-│   │   ├── **example-deploy [OUT OF SCOPE]**
-│   │   ├── package-release-binaries
-│   │   │   └── action.yml
-│   │   ├── replace-guest-artifacts
-│   │   │   └── action.yml
-│   │   ├── rust-prerequisites
-│   │   │   └── action.yml
-│   │   └── **ts-prerequisites [OUT OF SCOPE]**
-│   ├── **docs [OUT OF SCOPE]**
-│   ├── **nix [??]**
-│   │   ├── flake.lock
-│   │   └── flake.nix
-│   ├── **quarantine [OUT OF SCOPE]**
-│   ├── **teams.yml [OUT OF SCOPE]**
-│   └── **workflows [??]**
-│       ├── build_docker.yaml
-│       ├── **build_examples.yaml [OUT OF SCOPE]**
-│       ├── **build_extension.yaml [OUT OF SCOPE]**
-│       ├── **build_gas_benchmarks.yaml [OUT OF SCOPE]**
-│       ├── build_guest_artifacts.yaml
-│       ├── build_rust_release.yaml
-│       ├── **build_sdk.yaml [OUT OF SCOPE]**
-│       ├── **deploy_book.yaml [OUT OF SCOPE]**
-│       ├── deploy_chain_services.yaml
-│       ├── deploy_provers.yaml
-│       ├── **deploy_simple_email_proof.yaml [OUT OF SCOPE]**
-│       ├── **deploy_simple_web_proof.yaml [OUT OF SCOPE]**
-│       ├── **lint_bash.yaml [OUT OF SCOPE]**
-│       ├── **lint_contracts.yaml [OUT OF SCOPE]**
-│       ├── **lint_json.yaml [OUT OF SCOPE]**
-│       ├── **lint_rust.yaml [OUT OF SCOPE]**
-│       ├── **lint_ts.yaml [OUT OF SCOPE]**
-│       ├── **lint_workflows.yaml [OUT OF SCOPE]**
-│       ├── **performance_rust_compilation.yaml [OUT OF SCOPE]**
-│       ├── **pr_team_labeler.yaml [OUT OF SCOPE]**
-│       ├── release.yaml
-│       ├── **test_contracts.yaml [OUT OF SCOPE]**
-│       ├── **test_e2e_devnet.yaml [OUT OF SCOPE]**
-│       ├── **test_e2e_testnet.yaml [OUT OF SCOPE]**
-│       ├── **test_e2e_web_apps.yaml [OUT OF SCOPE]**
-│       ├── **test_e2e_web_flow.yaml [OUT OF SCOPE]**
-│       ├── **test_js.yaml [OUT OF SCOPE]**
-│       ├── test_release.yaml
-│       ├── test_rust.yaml
-│       └── test_vlayer.yaml
+├── .**github [OUT OF SCOPE]**
 ├── **.gitignore [OUT OF SCOPE]**
 ├── **.shellcheckrc [OUT OF SCOPE]**
 ├── **.solhint.json [OUT OF SCOPE]**
@@ -66,44 +11,8 @@
 ├── Cargo.toml
 ├── **LICENSE [OUT OF SCOPE]**
 ├── **README.md [OUT OF SCOPE]**
-├── **ansible [??]**
+├── **ansible [OUT OF SCOPE]**
 ├── **bash [OUT OF SCOPE]**
-│   ├── **CODESTYLE.md [OUT OF SCOPE]**
-│   ├── build-ts-types.sh
-│   ├── check-elf-id.sh
-│   ├── check-llvm-clang.sh
-│   ├── common.sh
-│   ├── deploy-to-vercel.sh
-│   ├── **e2e [OUT OF SCOPE]**
-│   │   └── lib.sh
-│   ├── e2e-test.sh
-│   ├── e2e-web-apps-test.sh
-│   ├── e2e-webproof-test.sh
-│   ├── generate-extension-id.sh
-│   ├── lib
-│   │   ├── examples.sh
-│   │   └── io.sh
-│   ├── **lint-fix.sh [OUT OF SCOPE]**
-│   ├── **lint-json.sh [OUT OF SCOPE]**
-│   ├── **lint-solidity-examples.sh [OUT OF SCOPE]**
-│   ├── **lint-ts.sh [OUT OF SCOPE]**
-│   ├── **mock-imageid.sh [OUT OF SCOPE]**
-│   ├── **pack-examples.sh [OUT OF SCOPE]**
-│   ├── playwright-test.sh
-│   ├── run-services.sh
-│   ├── run-web-example.sh
-│   ├── **run_services [OUT OF SCOPE]**
-│   ├── **test-js-sdk-release.sh [OUT OF SCOPE]**
-│   ├── test-release-local-prover.sh
-│   ├── test-release-remote-prover.sh
-│   ├── tsc-examples.sh
-│   ├── tsc.sh
-│   ├── version-test.sh
-│   ├── vlayer-init-test.sh
-│   ├── vlayer-test-examples.sh
-│   └── vlayerup
-│       ├── install
-│       └── vlayerup
 ├── **book [OUT OF SCOPE]**
 ├── **bun.lockb [OUT OF SCOPE]**
 ├── **clippy.toml [OUT OF SCOPE]**
@@ -129,34 +38,17 @@
 │       │   ├── WebProof.sol
 │       │   ├── proof_verifier
 │       │   │   ├── ChainId.sol
-│       │   │   ├── **FakeProofVerifier.sol [??]**
+│       │   │   ├── **FakeProofVerifier.sol [OUT OF SCOPE]**
 │       │   │   ├── Groth16ProofVerifier.sol
 │       │   │   ├── IProofVerifier.sol
 │       │   │   ├── ImageIdRepository.sol
 │       │   │   ├── ProofVerifierBase.sol
-│       │   │   ├── ProofVerifierFactory.sol
-│       │   │   └── ProofVerifierRouter.sol
+│       │   │   ├── **ProofVerifierFactory.sol [OUT OF SCOPE]**
+│       │   │   └── **ProofVerifierRouter.sol [OUT OF SCOPE]**
 │       │   └── **testing [OUT OF SCOPE]**
 │       ├── **test [OUT OF SCOPE]**
 │       └── **testdata [OUT OF SCOPE]**
-├── docker
-│   ├── anvil.yaml
-│   ├── call_server
-│   │   └── Dockerfile.nightly
-│   ├── chain_server
-│   │   └── Dockerfile.nightly
-│   ├── chain_worker
-│   │   └── Dockerfile.nightly
-│   ├── docker-compose.devnet.yaml
-│   ├── json-server
-│   │   └── Dockerfile
-│   ├── vlayer
-│   │   └── Dockerfile.nightly
-│   ├── web-proof
-│   │   ├── docker-compose-release.yaml
-│   │   └── notary-config
-│   │       └── config.yaml
-│   └── web.yaml
+├── **docker [OUT OF SCOPE]**
 ├── **examples [OUT OF SCOPE]**
 ├── **flake.lock [OUT OF SCOPE]**
 ├── **flake.nix [OUT OF SCOPE]**
@@ -186,12 +78,12 @@
 │   │   ├── Cargo.toml
 │   │   └── src
 │   │       ├── cache.rs
-│   │       ├── cli.rs
+│   │       ├── **cli.rs [OUT OF SCOPE]**
 │   │       ├── guest.rs
 │   │       ├── hashable.rs
 │   │       ├── lib.rs
-│   │       ├── rpc.rs
-│   │       └── trace.rs
+│   │       ├── **rpc.rs [OUT OF SCOPE]**
+│   │       └── **trace.rs [OUT OF SCOPE]**
 │   ├── email_proof
 │   │   ├── Cargo.toml
 │   │   ├── src
@@ -221,38 +113,23 @@
 │   │   │       ├── data_layout.rs
 │   │   │       ├── lib.rs
 │   │   │       └── risc0_builder.rs
-│   │   ├── chain_guest_elf_id
+│   │   ├── **chain_guest_elf_id [OUT OF SCOPE]**
 │   │   ├── risc0_call_guest
-│   │   │   ├── Cargo.lock
+│   │   │   ├── **Cargo.lock [OUT OF SCOPE]**
 │   │   │   ├── Cargo.toml
 │   │   │   ├── build.rs
 │   │   │   └── src
 │   │   │       └── main.rs
 │   │   ├── risc0_chain_guest
-│   │   │   ├── Cargo.lock
+│   │   │   ├── **Cargo.lock [OUT OF SCOPE]**
 │   │   │   ├── Cargo.toml
 │   │   │   ├── build.rs
 │   │   │   └── src
 │   │   │       └── main.rs
 │   │   └── src
 │   │       └── lib.rs
-│   ├── host_utils
-│   │   ├── Cargo.toml
-│   │   └── src
-│   │       ├── config.rs
-│   │       ├── lib.rs
-│   │       ├── prover.rs
-│   │       └── proving.rs
-│   ├── key_value
-│   │   ├── Cargo.toml
-│   │   ├── benches
-│   │   │   └── mdbx_insert.rs
-│   │   └── src
-│   │       ├── in_memory.rs
-│   │       ├── lib.rs
-│   │       ├── mdbx
-│   │       │   └── tests.rs
-│   │       └── mdbx.rs
+│   ├── **host_utils [OUT OF SCOPE]**
+│   ├── **key_value [OUT OF SCOPE]**
 │   ├── mpt
 │   │   ├── Cargo.toml
 │   │   ├── **README.md [OUT OF SCOPE]**
@@ -271,7 +148,7 @@
 │   │   │   │   │   ├── insert_entry_into_extension
 │   │   │   │   │   │   └── from_extension_and_entry_empty_common_prefix.rs
 │   │   │   │   │   ├── insert_entry_into_extension.rs
-│   │   │   │   │   ├── tests.rs
+│   │   │   │   │   ├── **tests.rs [OUT OF SCOPE]**
 │   │   │   │   │   └── utils.rs
 │   │   │   │   ├── insert.rs
 │   │   │   │   ├── rlp.rs
@@ -280,53 +157,17 @@
 │   │   │   ├── node_ref.rs
 │   │   │   ├── path.rs
 │   │   │   ├── trie
-│   │   │   │   ├── tests
-│   │   │   │   │   ├── from_rlp_nodes.rs
-│   │   │   │   │   ├── get.rs
-│   │   │   │   │   ├── hashable.rs
-│   │   │   │   │   └── insert.rs
-│   │   │   │   ├── tests.rs
+│   │   │   │   ├── **tests [OUT OF SCOPE]**
+│   │   │   │   ├── **tests.rs [OUT OF SCOPE]**
 │   │   │   │   └── utils.rs
 │   │   │   ├── trie.rs
 │   │   │   └── utils.rs
 │   │   └── **tests [OUT OF SCOPE]**
-│   ├── provider
-│   │   ├── Cargo.toml
-│   │   ├── src
-│   │   │   ├── cache
-│   │   │   │   └── json.rs
-│   │   │   ├── cache.rs
-│   │   │   ├── default.rs
-│   │   │   ├── ethers.rs
-│   │   │   ├── factory.rs
-│   │   │   ├── lib.rs
-│   │   │   ├── multi.rs
-│   │   │   ├── never.rs
-│   │   │   ├── profiling.rs
-│   │   │   ├── proof.rs
-│   │   │   └── provider_ext.rs
-│   │   └── **testdata [OUT OF SCOPE]**
-│   ├── range
-│   │   ├── Cargo.toml
-│   │   └── src
-│   │       ├── lib.rs
-│   │       ├── non_empty_range.rs
-│   │       └── range.rs
-│   ├── server_utils
-│   │   ├── Cargo.toml
-│   │   └── src
-│   │       ├── field_validation.rs
-│   │       ├── json_rpc.rs
-│   │       ├── layers
-│   │       │   ├── request_id.rs
-│   │       │   └── trace.rs
-│   │       ├── layers.rs
-│   │       ├── lib.rs
-│   │       ├── proof_mode.rs
-│   │       ├── rpc.rs
-│   │       └── **test_utils.rs [OUT OF SCOPE]**
+│   ├── **provider [OUT OF SCOPE]**
+│   ├── **range [OUT OF SCOPE]**
+│   ├── **server_utils [OUT OF SCOPE]**
 │   ├── services
-│   │   ├── call
+│   │   ├── **call [TODO: Leo]**
 │   │   │   ├── engine
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
@@ -357,10 +198,8 @@
 │   │   │   │       ├── utils.rs
 │   │   │   │       ├── verifier
 │   │   │   │       │   ├── chain_proof.rs
-│   │   │   │       │   ├── tests
-│   │   │   │       │   │   ├── chain_proof.rs
-│   │   │   │       │   │   └── time_travel.rs
-│   │   │   │       │   ├── tests.rs
+│   │   │   │       │   ├── **tests [OUT OF SCOPE]**
+│   │   │   │       │   ├── **tests.rs [OUT OF SCOPE]**
 │   │   │   │       │   ├── time_travel.rs
 │   │   │   │       │   ├── travel_call.rs
 │   │   │   │       │   └── zk_proof.rs
@@ -374,34 +213,10 @@
 │   │   │   │       ├── db.rs
 │   │   │   │       ├── guest
 │   │   │   │       │   ├── env.rs
-│   │   │   │       │   └── tests.rs
+│   │   │   │       │   └── **tests.rs [OUT OF SCOPE]**
 │   │   │   │       ├── guest.rs
 │   │   │   │       └── lib.rs
-│   │   │   ├── host
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   ├── src
-│   │   │   │   │   ├── db
-│   │   │   │   │   │   ├── proof.rs
-│   │   │   │   │   │   └── provider.rs
-│   │   │   │   │   ├── db.rs
-│   │   │   │   │   ├── evm_env
-│   │   │   │   │   │   └── factory.rs
-│   │   │   │   │   ├── evm_env.rs
-│   │   │   │   │   ├── host
-│   │   │   │   │   │   ├── builder.rs
-│   │   │   │   │   │   ├── config.rs
-│   │   │   │   │   │   ├── error.rs
-│   │   │   │   │   │   ├── prover.rs
-│   │   │   │   │   │   ├── **tests [OUT OF SCOPE]**
-│   │   │   │   │   ├── host.rs
-│   │   │   │   │   ├── into_input.rs
-│   │   │   │   │   ├── lib.rs
-│   │   │   │   │   ├── test_harness
-│   │   │   │   │   │   ├── contracts.rs
-│   │   │   │   │   │   ├── rpc.rs
-│   │   │   │   │   │   └── types.rs
-│   │   │   │   │   └── test_harness.rs
-│   │   │   │   └── **test_data [OUT OF SCOPE]**
+│   │   │   ├── **host [OUT OF SCOPE]**
 │   │   │   ├── precompiles
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
@@ -415,102 +230,29 @@
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
 │   │   │   │       └── lib.rs
-│   │   │   ├── server
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   └── src
-│   │   │   │       ├── main.rs
-│   │   │   │       └── version.rs
-│   │   │   └── server_lib
-│   │   │       ├── Cargo.toml
-│   │   │       ├── **README.md [OUT OF SCOPE]**
-│   │   │       ├── src
-│   │   │       │   ├── chain_proof.rs
-│   │   │       │   ├── config.rs
-│   │   │       │   ├── gas_meter.rs
-│   │   │       │   ├── handlers
-│   │   │       │   │   ├── v_call
-│   │   │       │   │   │   └── types.rs
-│   │   │       │   │   ├── v_call.rs
-│   │   │       │   │   ├── v_get_proof_receipt
-│   │   │       │   │   │   └── types.rs
-│   │   │       │   │   ├── v_get_proof_receipt.rs
-│   │   │       │   │   └── v_versions.rs
-│   │   │       │   ├── handlers.rs
-│   │   │       │   ├── lib.rs
-│   │   │       │   ├── metrics.rs
-│   │   │       │   ├── preflight.rs
-│   │   │       │   ├── proof.rs
-│   │   │       │   ├── proving.rs
-│   │   │       │   ├── ser.rs
-│   │   │       │   └── server.rs
-│   │   │       ├── **testdata [OUT OF SCOPE]**
-│   │   │       └── **tests [OUT OF SCOPE]**
+│   │   │   ├── **server [OUT OF SCOPE]**
+│   │   │   └── **server_lib [OUT OF SCOPE]**
 │   │   ├── **chain [TODO: Leo]**
 │   │   │   ├── block_trie
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
 │   │   │   │       └── lib.rs
-│   │   │   ├── client
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   └── src
-│   │   │   │       ├── fake.rs
-│   │   │   │       ├── lib.rs
-│   │   │   │       ├── rpc.rs
-│   │   │   │       └── **tests.rs [OUT OF SCOPE]**}
+│   │   │   ├── **client [OUT OF SCOPE]**
 │   │   │   ├── common
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
 │   │   │   │       └── lib.rs
-│   │   │   ├── db
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   └── src
-│   │   │   │       ├── chain_trie.rs
-│   │   │   │       ├── db_node.rs
-│   │   │   │       ├── error.rs
-│   │   │   │       ├── lib.rs
-│   │   │   │       ├── proof_builder.rs
-│   │   │   │       └── **tests.rs [OUT OF SCOPE]**
+│   │   │   ├── **db [OUT OF SCOPE]**
 │   │   │   ├── guest
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
 │   │   │   │       └── lib.rs
-│   │   │   ├── host
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   └── src
-│   │   │   │       ├── host
-│   │   │   │       │   ├── block_fetcher.rs
-│   │   │   │       │   ├── config.rs
-│   │   │   │       │   ├── error.rs
-│   │   │   │       │   ├── prover.rs
-│   │   │   │       │   └── strategy.rs
-│   │   │   │       ├── host.rs
-│   │   │   │       └── lib.rs
-│   │   │   ├── mock_server
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   └── src
-│   │   │   │       └── lib.rs
-│   │   │   ├── server
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   └── src
-│   │   │   │       └── main.rs
-│   │   │   ├── server_lib
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   ├── src
-│   │   │   │   │   ├── config.rs
-│   │   │   │   │   ├── error.rs
-│   │   │   │   │   ├── handlers
-│   │   │   │   │   │   ├── chain_proof.rs
-│   │   │   │   │   │   └── status.rs
-│   │   │   │   │   ├── handlers.rs
-│   │   │   │   │   ├── lib.rs
-│   │   │   │   │   └── server.rs
-│   │   │   │   └── **tests [OUT OF SCOPE]**
+│   │   │   ├── **host [OUT OF SCOPE]**
+│   │   │   ├── **mock_server [OUT OF SCOPE]**
+│   │   │   ├── **server [OUT OF SCOPE]**
+│   │   │   ├── **server_lib [OUT OF SCOPE]**
 │   │   │   ├── **test_utils [OUT OF SCOPE]**
-│   │   │   └── worker
-│   │   │       ├── Cargo.toml
-│   │   │       └── src
-│   │   │           ├── main.rs
-│   │   │           └── retry.rs
+│   │   │   └── **worker [OUT OF SCOPE]**
 │   │   └── **dns [OUT OF SCOPE]**
 │   ├── **test_runner [OUT OF SCOPE]**
 │   ├── **verifiable_dns [TODO: Piotr]**
@@ -530,11 +272,7 @@
 │   │       ├── verifiable_dns.rs
 │   │       └── verifier
 │   │           └── mod.rs
-│   ├── version
-│   │   ├── Cargo.toml
-│   │   ├── build.rs
-│   │   └── src
-│   │       └── lib.rs
+│   ├── **version [OUT OF SCOPE]**
 │   ├── **web_proof [TODO: Wiktor]**
 │   │   ├── Cargo.toml
 │   │   ├── src
@@ -556,5 +294,5 @@
 │   │   │   └── web_proof.rs
 │   │   └── **testdata [OUT OF SCOPE]**
 │   └── **zkvm-benchmarks [OUT OF SCOPE]**
-├── rust-toolchain.toml
+├── **rust-toolchain.toml [OUT OF SCOPE]**
 └── **rustfmt.toml [OUT OF SCOPE]**
