@@ -26,14 +26,14 @@ mod sealing {
     /// Defines a verifier trait (`IVerifier`) with a `verify` method. Supports both synchronous and asynchronous variants.
     /// Uses async_trait for async verifiers.
     macro_rules! verifier_trait {
-        (($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
-            pub trait IVerifier: seal::Sealed + Send + Sync {
+        ($trait_name:ident ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
+            pub trait $trait_name: seal::Sealed + Send + Sync {
                 fn verify(&self, $($arg_name: $arg_type),*) -> $result;
             }
         };
-        (async ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
+        (async $trait_name:ident ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
             #[async_trait]
-            pub trait IVerifier: seal::Sealed + Send + Sync {
+            pub trait $trait_name: seal::Sealed + Send + Sync {
                 async fn verify(&self, $($arg_name: $arg_type),*) -> $result;
             }
         };
@@ -44,9 +44,9 @@ mod sealing {
     /// Disabled in non-testing environments.
     /// "testing" feature is needed to enable this functionality in dependent crates tests.
     macro_rules! impl_verifier_for_fn {
-        (($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
+        ($trait_name:ident ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
             #[cfg(any(test, feature = "testing"))]
-            impl<F> IVerifier for F
+            impl<F> $trait_name for F
             where
                 F: Fn($($arg_type),*) -> $result + Send + Sync
             {
@@ -55,10 +55,10 @@ mod sealing {
                 }
             }
         };
-        (async ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
+        (async $trait_name:ident ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
             #[cfg(any(test, feature = "testing"))]
             #[async_trait::async_trait]
-            impl<F> IVerifier for F
+            impl<F> $trait_name for F
             where
                 F: Fn($($arg_type),*) -> $result + Send + Sync
             {
@@ -86,17 +86,17 @@ mod sealing {
 
     /// Combines all macros into a single invocation.
     macro_rules! sealed_with_test_mock {
-        (($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
+        ($trait_name:ident ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
             crate::verifier::sealing::sealed_trait!();
             crate::verifier::sealing::impl_sealed_for_fn!(($($arg_type),*));
-            crate::verifier::sealing::verifier_trait!(($($arg_name: $arg_type),*) -> $result);
-            crate::verifier::sealing::impl_verifier_for_fn!(($($arg_name: $arg_type),*) -> $result);
+            crate::verifier::sealing::verifier_trait!($trait_name ($($arg_name: $arg_type),*) -> $result);
+            crate::verifier::sealing::impl_verifier_for_fn!($trait_name ($($arg_name: $arg_type),*) -> $result);
         };
-        (async ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
+        (async $trait_name:ident ($($arg_name:ident: $arg_type:ty),*) -> $result:ty) => {
             crate::verifier::sealing::sealed_trait!();
             crate::verifier::sealing::impl_sealed_for_fn!(($($arg_type),*));
-            crate::verifier::sealing::verifier_trait!(async ($($arg_name: $arg_type),*) -> $result);
-            crate::verifier::sealing::impl_verifier_for_fn!(async ($($arg_name: $arg_type),*) -> $result);
+            crate::verifier::sealing::verifier_trait!(async $trait_name ($($arg_name: $arg_type),*) -> $result);
+            crate::verifier::sealing::impl_verifier_for_fn!(async $trait_name ($($arg_name: $arg_type),*) -> $result);
         };
     }
     pub(crate) use sealed_with_test_mock;

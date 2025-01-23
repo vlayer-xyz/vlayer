@@ -11,7 +11,7 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-sealed_with_test_mock!(async (input: &MultiEvmInput) -> Result);
+sealed_with_test_mock!(async IVerifier (input: &MultiEvmInput) -> Result);
 
 #[derive(new)]
 pub struct Verifier<TT: time_travel::IVerifier> {

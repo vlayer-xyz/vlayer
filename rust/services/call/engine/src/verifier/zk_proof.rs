@@ -4,7 +4,7 @@ use risc0_zkvm::{guest, sha::Digest, Receipt};
 use super::sealing::sealed_with_test_mock;
 
 pub type Result = std::result::Result<(), Error>;
-sealed_with_test_mock!((receipt: &Receipt, elf_id: Digest) -> Result);
+sealed_with_test_mock!(IVerifier (receipt: &Receipt, elf_id: Digest) -> Result);
 
 pub struct GuestVerifier;
 

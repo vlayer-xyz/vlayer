@@ -24,7 +24,7 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-sealed_with_test_mock!((proof: &ChainProof) -> Result);
+sealed_with_test_mock!(IVerifier (proof: &ChainProof) -> Result);
 
 pub struct Verifier<ZK: zk_proof::IVerifier> {
     chain_guest_ids: Box<[Digest]>,

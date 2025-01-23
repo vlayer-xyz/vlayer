@@ -21,7 +21,7 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-sealed_with_test_mock!(async (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
+sealed_with_test_mock!(async IVerifier (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
 
 #[derive(new)]
 pub struct Verifier<C: chain_client::Client, V: chain_proof::IVerifier> {
