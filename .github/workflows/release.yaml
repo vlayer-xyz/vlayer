@@ -30,7 +30,7 @@ jobs:
 
   build-extension:
     name: Build browser extension
-    needs: [ build-release ]
+    needs: [build-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
 
   push-contracts:
     name: Push vlayer contracts
-    needs: [ build-release ]
+    needs: [build-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -94,7 +94,7 @@ jobs:
   create-release:
     name: Create GH releases
     runs-on: ubuntu-latest
-    needs: [ build-examples, build-extension, push-contracts ]
+    needs: [build-examples, build-extension, push-contracts]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -124,7 +124,7 @@ jobs:
   push-artifacts-to-s3:
     name: Push artifacts to AWS S3
     runs-on: ubuntu-latest
-    needs: [ build-release, build-examples, build-extension, push-contracts ]
+    needs: [build-release, build-examples, build-extension, push-contracts]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -181,7 +181,7 @@ jobs:
 
   publish-sdk-to-npm:
     name: Publish SDK to NPM
-    needs: [ build-release, build-examples, build-extension, push-contracts ]
+    needs: [build-release, build-examples, build-extension, push-contracts]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -211,7 +211,7 @@ jobs:
 
   publish-react-hooks-to-npm:
     name: Publish React hooks to NPM
-    needs: [ build-release, publish-sdk-to-npm ]
+    needs: [build-release, publish-sdk-to-npm]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -242,11 +242,18 @@ jobs:
 
   push-docker-image:
     name: Push docker image to github registry
-    needs: [ build-release, push-artifacts-to-s3 ]
+    needs: [build-release, push-artifacts-to-s3]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        docker_image: [ "vlayer", "call_server", "chain_server", "chain_worker", "vdns_server" ]
+        docker_image:
+          [
+            "vlayer",
+            "call_server",
+            "chain_server",
+            "chain_worker",
+            "vdns_server",
+          ]
     permissions:
       contents: read
       packages: write

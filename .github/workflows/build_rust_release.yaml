@@ -41,7 +41,7 @@ jobs:
 
   build-x86_64-unknown-linux-gnu-release:
     name: Build release for x86_64-unknown-linux-gnu
-    needs: [ build-guest-wrapper ]
+    needs: [build-guest-wrapper]
     runs-on: aws-linux-medium
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
@@ -84,7 +84,7 @@ jobs:
 
   build-x86_64-unknown-linux-musl-release:
     name: Build release for x86_64-unknown-linux-musl
-    needs: [ build-guest-wrapper ]
+    needs: [build-guest-wrapper]
     runs-on: aws-linux-medium
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
@@ -141,7 +141,7 @@ jobs:
 
   build-darwin-arm64-release:
     name: Build release for aarch64-apple-darwin
-    needs: [ build-guest-wrapper ]
+    needs: [build-guest-wrapper]
     runs-on: macos-14-xlarge
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
