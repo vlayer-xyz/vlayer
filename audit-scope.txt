@@ -1292,47 +1292,6 @@
 │   │       ├── redacted_sent_request.txt
 │   │       ├── sent_request.txt
 │   │       └── web_proof.json
-│   └── zkvm-benchmarks
-│       ├── benchmarks
-│       │   ├── Cargo.toml
-│       │   ├── assets
-│       │   │   ├── email.eml
-│       │   │   ├── rsa2048-priv.pem
-│       │   │   ├── rsa2048-pub.pem
-│       │   │   └── rsa3072-priv.pem
-│       │   └── src
-│       │       ├── benchmarks
-│       │       │   ├── accelerators
-│       │       │   │   ├── hash
-│       │       │   │   │   ├── keccak.rs
-│       │       │   │   │   └── sha2.rs
-│       │       │   │   ├── hash.rs
-│       │       │   │   └── rsa.rs
-│       │       │   ├── accelerators.rs
-│       │       │   ├── block_trie.rs
-│       │       │   ├── mpt.rs
-│       │       │   ├── precompiles
-│       │       │   │   ├── email.rs
-│       │       │   │   └── url_pattern.rs
-│       │       │   └── precompiles.rs
-│       │       ├── benchmarks.rs
-│       │       └── lib.rs
-│       └── runner
-│           ├── Cargo.toml
-│           ├── build.rs
-│           ├── risc0_guest
-│           │   ├── Cargo.lock
-│           │   ├── Cargo.toml
-│           │   └── src
-│           │       └── main.rs
-│           └── src
-│               ├── cycle.rs
-│               ├── guest.rs
-│               ├── main.rs
-│               ├── row.rs
-│               ├── runner.rs
-│               └── tolerance.rs
+│   └── ** zkvm-benchmarks [OUT OF SCOPE]**
 ├── rust-toolchain.toml
 └── rustfmt.toml
-
-384 directories, 1109 files
