@@ -171,9 +171,9 @@ mod view {
     }
 }
 
-mod teleport_v2 {
+mod teleport {
     use super::*;
-    use crate::test_harness::contracts::teleport_v2::{
+    use crate::test_harness::contracts::teleport::{
         SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
         BLOCK_NO, JOHN, SIMPLE_TELEPORT, TOKEN,
     };
@@ -191,7 +191,7 @@ mod teleport_v2 {
         let crossChainBalanceOfReturn {
             _2: cross_chain_balance,
             ..
-        } = preflight::<crossChainBalanceOfCall>("teleport_v2", call, &location).await?;
+        } = preflight::<crossChainBalanceOfCall>("teleport", call, &location).await?;
         assert_eq!(cross_chain_balance, uint!(100_U256));
 
         Ok(())
@@ -212,7 +212,7 @@ mod teleport_v2 {
             },
         );
 
-        let error = preflight::<crossChainBalanceOfCall>("teleport_v2", call, &location)
+        let error = preflight::<crossChainBalanceOfCall>("teleport", call, &location)
             .await
             .unwrap_err();
 

@@ -118,20 +118,6 @@ pub mod simple {
 }
 
 pub mod teleport {
-    use super::*;
-
-    // Generated using old `simple_teleport` example
-    pub const SIMPLE_TELEPORT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
-    pub const BLOCK_NO: u64 = 3;
-    sol! {
-        contract SimpleTravelProver {
-            #[derive(Debug)]
-            function crossChainBalanceOf(address owner) public returns (address, uint256);
-        }
-    }
-}
-
-pub mod teleport_v2 {
     use alloy_primitives::{uint, Uint};
 
     use super::*;
