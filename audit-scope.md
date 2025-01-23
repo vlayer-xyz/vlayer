@@ -1,40 +1,35 @@
 .
 ├── .cargo
 │   └── config.toml
-├── .dockerignore
-├── .git-branches.toml
-├── .github
-│   ├── actionlint.yaml
+├── **.dockerignore [??]**
+├── **.git-branches.toml [OUT OF SCOPE]**
+├── .**github [??]**
+│   ├── **actionlint.yaml [OUT OF SCOPE]**
 │   ├── actions
-│   │   ├── build-extension
-│   │   │   └── action.yml
+│   │   ├── **build-extension [OUT OF SCOPE]**
 │   │   ├── build-guest-artifacts
 │   │   │   └── action.yml
 │   │   ├── contracts-prerequisites
 │   │   │   └── action.yml
 │   │   ├── darwin-prerequisites
 │   │   │   └── action.yml
-│   │   ├── example-deploy
-│   │   │   └── action.yaml
+│   │   ├── **example-deploy [OUT OF SCOPE]**
 │   │   ├── package-release-binaries
 │   │   │   └── action.yml
 │   │   ├── replace-guest-artifacts
 │   │   │   └── action.yml
 │   │   ├── rust-prerequisites
 │   │   │   └── action.yml
-│   │   └── ts-prerequisites
-│   │       └── action.yml
-│   ├── docs
-│   │   └── README.md
-│   ├── nix
+│   │   └── **ts-prerequisites [OUT OF SCOPE]**
+│   ├── **docs [OUT OF SCOPE]**
+│   ├── **nix [??]**
 │   │   ├── flake.lock
 │   │   └── flake.nix
-│   ├── quarantine
-│   │   └── lint_ansible.yaml
-│   ├── teams.yml
+│   ├── **quarantine [OUT OF SCOPE]**
+│   ├── **teams.yml [OUT OF SCOPE]**
 │   └── workflows
 │       ├── build_docker.yaml
-│       ├── build_examples.yaml
+│       ├── **build_examples.yaml [OUT OF SCOPE]**
 │       ├── build_extension.yaml
 │       ├── build_gas_benchmarks.yaml
 │       ├── build_guest_artifacts.yaml
@@ -45,36 +40,33 @@
 │       ├── deploy_provers.yaml
 │       ├── deploy_simple_email_proof.yaml
 │       ├── deploy_simple_web_proof.yaml
-│       ├── lint_bash.yaml
-│       ├── lint_contracts.yaml
-│       ├── lint_json.yaml
-│       ├── lint_rust.yaml
-│       ├── lint_ts.yaml
-│       ├── lint_workflows.yaml
-│       ├── performance_rust_compilation.yaml
-│       ├── pr_team_labeler.yaml
+│       ├── **lint_bash.yaml [OUT OF SCOPE]**
+│       ├── **lint_contracts.yaml [OUT OF SCOPE]**
+│       ├── **lint_json.yaml [OUT OF SCOPE]**
+│       ├── **lint_rust.yaml [OUT OF SCOPE]**
+│       ├── **lint_ts.yaml [OUT OF SCOPE]**
+│       ├── **lint_workflows.yaml [OUT OF SCOPE]**
+│       ├── **performance_rust_compilation.yaml [OUT OF SCOPE]**
+│       ├── **pr_team_labeler.yaml [OUT OF SCOPE]**
 │       ├── release.yaml
-│       ├── test_contracts.yaml
-│       ├── test_e2e_devnet.yaml
-│       ├── test_e2e_testnet.yaml
-│       ├── test_e2e_web_apps.yaml
-│       ├── test_e2e_web_flow.yaml
-│       ├── test_js.yaml
+│       ├── **test_contracts.yaml [OUT OF SCOPE]**
+│       ├── **test_e2e_devnet.yaml [OUT OF SCOPE]**
+│       ├── **test_e2e_testnet.yaml [OUT OF SCOPE]**
+│       ├── **test_e2e_web_apps.yaml [OUT OF SCOPE]**
+│       ├── **test_e2e_web_flow.yaml [OUT OF SCOPE]**
+│       ├── **test_js.yaml [OUT OF SCOPE]**
 │       ├── test_release.yaml
 │       ├── test_rust.yaml
 │       └── test_vlayer.yaml
-├── .gitignore
-├── .shellcheckrc
-├── .solhint.json
-├── .vscode
-│   ├── extensions.json
-│   ├── ltex.dictionary.en-US.txt
-│   └── settings.json
-├── Cargo.lock
+├── **.gitignore [OUT OF SCOPE]**
+├── **.shellcheckrc [OUT OF SCOPE]**
+├── **.solhint.json [OUT OF SCOPE]**
+├── **.vscode [OUT OF SCOPE]**
+├── **Cargo.lock [OUT OF SCOPE]**
 ├── Cargo.toml
-├── LICENSE
-├── README.md
-├── ansible
+├── **LICENSE [OUT OF SCOPE]**
+├── **README.md [OUT OF SCOPE]**
+├── **ansible [??]**
 │   ├── README.md
 │   ├── ansible.cfg
 │   ├── chain_service.yml
@@ -191,8 +183,8 @@
 │   │       └── templates
 │   │           └── verifiable-dns.conf.j2
 │   └── verifiable_dns_service.yml
-├── bash
-│   ├── CODESTYLE.md
+├── **bash [OUT OF SCOPE]**
+│   ├── **CODESTYLE.md [OUT OF SCOPE]**
 │   ├── build-ts-types.sh
 │   ├── check-elf-id.sh
 │   ├── check-llvm-clang.sh
@@ -211,17 +203,13 @@
 │   ├── lint-json.sh
 │   ├── lint-solidity-examples.sh
 │   ├── lint-ts.sh
-│   ├── mock-imageid.sh
-│   ├── pack-examples.sh
+│   ├── **mock-imageid.sh [OUT OF SCOPE]**
+│   ├── **pack-examples.sh [OUT OF SCOPE]**
 │   ├── playwright-test.sh
 │   ├── run-services.sh
 │   ├── run-web-example.sh
-│   ├── run_services
-│   │   ├── chain_worker.sh
-│   │   ├── cleanup.sh
-│   │   ├── config.sh
-│   │   └── lib.sh
-│   ├── test-js-sdk-release.sh
+│   ├── **run_services [OUT OF SCOPE]**
+│   ├── **test-js-sdk-release.sh [OUT OF SCOPE]**
 │   ├── test-release-local-prover.sh
 │   ├── test-release-remote-prover.sh
 │   ├── tsc-examples.sh
@@ -232,112 +220,17 @@
 │   └── vlayerup
 │       ├── install
 │       └── vlayerup
-├── book
-│   ├── book.toml
-│   ├── mermaid-init.js
-│   ├── mermaid.min.js
-│   ├── src
-│   │   ├── SUMMARY.md
-│   │   ├── advanced
-│   │   │   ├── dev-and-production.md
-│   │   │   ├── prover-global-variables.md
-│   │   │   ├── prover.md
-│   │   │   ├── tests.md
-│   │   │   └── verifier.md
-│   │   ├── api
-│   │   │   └── auth.js
-│   │   ├── appendix
-│   │   │   ├── api.md
-│   │   │   ├── architecture
-│   │   │   │   ├── block_proof
-│   │   │   │   │   ├── canonicity.md
-│   │   │   │   │   └── coherence.md
-│   │   │   │   ├── block_proof.md
-│   │   │   │   ├── multi.md
-│   │   │   │   ├── overview.md
-│   │   │   │   ├── prover.md
-│   │   │   │   ├── releasing.md
-│   │   │   │   └── solidity.md
-│   │   │   ├── contributing
-│   │   │   │   ├── book.md
-│   │   │   │   ├── extension.md
-│   │   │   │   ├── javascript.md
-│   │   │   │   ├── overview.md
-│   │   │   │   └── rust.md
-│   │   │   └── proof_composition.md
-│   │   ├── coming.html
-│   │   ├── features
-│   │   │   ├── email.md
-│   │   │   ├── json-and-regex.md
-│   │   │   ├── teleport.md
-│   │   │   ├── time-travel.md
-│   │   │   └── web.md
-│   │   ├── getting-started
-│   │   │   ├── first-steps.md
-│   │   │   ├── how-it-works.md
-│   │   │   └── installation.md
-│   │   ├── images
-│   │   │   ├── architecture
-│   │   │   │   ├── block_proof
-│   │   │   │   │   ├── chain_proof.png
-│   │   │   │   │   ├── naive_chain_proof.png
-│   │   │   │   │   └── on-off-chain.png
-│   │   │   │   ├── guest-output.png
-│   │   │   │   ├── mmr.png
-│   │   │   │   ├── overview.png
-│   │   │   │   ├── prover-verifier-data-ecoding.png
-│   │   │   │   ├── prover.png
-│   │   │   │   └── releasing.png
-│   │   │   ├── cover.jpg
-│   │   │   ├── offchain-execution.png
-│   │   │   └── vlayer-browser-extension.jpg
-│   │   ├── introduction.md
-│   │   ├── javascript
-│   │   │   ├── email-proofs.md
-│   │   │   ├── javascript.md
-│   │   │   ├── react-hooks.md
-│   │   │   └── web-proofs.md
-│   │   ├── middleware.js
-│   │   ├── package-lock.json
-│   │   ├── package.json
-│   │   └── static
-│   │       ├── appendixMenuV3.js
-│   │       ├── solidity.min.js
-│   │       └── vlayer-eml-1.gif
-│   └── theme
-│       ├── asidev2.css
-│       ├── favicon.png
-│       ├── favicon.svg
-│       ├── head.hbs
-│       ├── menuv3.css
-│       ├── menuv3.js
-│       ├── tabs.css
-│       └── tabs.js
-├── bun.lockb
-├── clippy.toml
+├── **book [OUT OF SCOPE]**
+├── **bun.lockb [OUT OF SCOPE]**
+├── **clippy.toml [OUT OF SCOPE]**
 ├── contracts
-│   ├── fixtures
-│   │   ├── README.md
-│   │   ├── foundry.toml
-│   │   ├── package.json
-│   │   ├── remappings.txt
-│   │   ├── soldeer.lock
-│   │   └── src
-│   │       └── vlayer
-│   │           ├── ArithOpProver.sol
-│   │           ├── EmailProver.sol
-│   │           ├── ExampleProver.sol
-│   │           ├── LotrApiProver.sol
-│   │           ├── NoopProver.sol
-│   │           ├── NoopWithCalldataProver.sol
-│   │           └── utils
-│   │               └── AddressParser.sol
-│   ├── package.json
+│   ├── **fixtures [OUT OF SCOPE]**
+│   ├── **package.json [OUT OF SCOPE]**
 │   └── vlayer
 │       ├── foundry.toml
-│       ├── package.json
-│       ├── remappings.txt
-│       ├── soldeer.lock
+│       ├── **package.json [OUT OF SCOPE]**
+│       ├── **remappings.txt [OUT OF SCOPE]**
+│       ├── **soldeer.lock [OUT OF SCOPE]**
 │       ├── src
 │       │   ├── CallAssumptions.sol
 │       │   ├── EmailProof.sol
@@ -385,11 +278,7 @@
 │       │       ├── UrlPatternLib.t.sol
 │       │       ├── WebLib.t.sol
 │       │       └── WebProofLib.t.sol
-│       └── testdata
-│           ├── verify_vlayer.eml
-│           ├── web_proof.json
-│           ├── web_proof_invalid_notary_pub_key.json
-│           └── web_proof_missing_part.json
+│       └── **testdata [OUT OF SCOPE]**
 ├── docker
 │   ├── anvil.yaml
 │   ├── call_server
@@ -409,350 +298,11 @@
 │   │       └── config.yaml
 │   └── web.yaml
 ├── **examples [OUT OF SCOPE]**
-├── flake.lock
-├── flake.nix
-├── nix
-│   └── risc0.nix
+├── **flake.lock [OUT OF SCOPE]**
+├── **flake.nix [OUT OF SCOPE]**
+├── **nix [OUT OF SCOPE]**
 ├── package.json
-├── packages
-│   ├── browser-extension
-│   │   ├── assets
-│   │   │   └── separator.svg
-│   │   ├── package.json
-│   │   ├── public
-│   │   │   ├── bottomlogo.svg
-│   │   │   ├── box.svg
-│   │   │   ├── fonts
-│   │   │   │   ├── Sora-Regular.ttf
-│   │   │   │   └── roobert.woff2
-│   │   │   ├── icon
-│   │   │   │   ├── 128px.png
-│   │   │   │   ├── 16px.png
-│   │   │   │   ├── 32px.png
-│   │   │   │   ├── 48px.png
-│   │   │   │   └── 96px.png
-│   │   │   ├── livebuoy.svg
-│   │   │   ├── logo.png
-│   │   │   ├── separator.svg
-│   │   │   └── vlayer_logo.svg
-│   │   ├── src
-│   │   │   ├── background.test.ts
-│   │   │   ├── background.ts
-│   │   │   ├── components
-│   │   │   │   ├── atoms
-│   │   │   │   │   ├── Button.module.css
-│   │   │   │   │   ├── Button.tsx
-│   │   │   │   │   ├── Circle.module.css
-│   │   │   │   │   ├── Circle.tsx
-│   │   │   │   │   ├── Separator.module.css
-│   │   │   │   │   ├── Separator.tsx
-│   │   │   │   │   ├── VlayerBottomLogo.tsx
-│   │   │   │   │   └── index.ts
-│   │   │   │   ├── framer.ts
-│   │   │   │   ├── index.ts
-│   │   │   │   ├── molecules
-│   │   │   │   │   ├── AnimationContainer.tsx
-│   │   │   │   │   ├── EmptyFlow
-│   │   │   │   │   │   ├── Card.tsx
-│   │   │   │   │   │   ├── CardContent.module.css
-│   │   │   │   │   │   ├── CardContent.tsx
-│   │   │   │   │   │   ├── index.ts
-│   │   │   │   │   │   └── types.ts
-│   │   │   │   │   ├── Step.module.css
-│   │   │   │   │   ├── Step.tsx
-│   │   │   │   │   ├── StepActions
-│   │   │   │   │   │   ├── ExpectUrl
-│   │   │   │   │   │   │   ├── ExpectUrlStepActions.tsx
-│   │   │   │   │   │   │   └── index.ts
-│   │   │   │   │   │   ├── Notarize
-│   │   │   │   │   │   │   ├── FinishCallout.tsx
-│   │   │   │   │   │   │   ├── GenerateProofButton.tsx
-│   │   │   │   │   │   │   ├── NotarizeStepActions.hooks.tsx
-│   │   │   │   │   │   │   ├── NotarizeStepActions.test.tsx
-│   │   │   │   │   │   │   ├── NotarizeStepActions.tsx
-│   │   │   │   │   │   │   ├── ProvingProgress.hooks.ts
-│   │   │   │   │   │   │   ├── ProvingProgress.test.tsx
-│   │   │   │   │   │   │   ├── ProvingProgress.tsx
-│   │   │   │   │   │   │   ├── RedirectCallout.test.tsx
-│   │   │   │   │   │   │   ├── RedirectCallout.tsx
-│   │   │   │   │   │   │   ├── index.ts
-│   │   │   │   │   │   │   └── types.ts
-│   │   │   │   │   │   ├── StartPage
-│   │   │   │   │   │   │   ├── StartPageStepActions.tsx
-│   │   │   │   │   │   │   └── index.ts
-│   │   │   │   │   │   ├── StepActions.tsx
-│   │   │   │   │   │   └── index.ts
-│   │   │   │   │   ├── StepCircle
-│   │   │   │   │   │   ├── CompletedStepCircle.tsx
-│   │   │   │   │   │   ├── CurrentStepCircle.tsx
-│   │   │   │   │   │   ├── FurtherStepCircle.tsx
-│   │   │   │   │   │   ├── StepCircle.tsx
-│   │   │   │   │   │   └── index.ts
-│   │   │   │   │   └── index.ts
-│   │   │   │   ├── organisms
-│   │   │   │   │   ├── HelpSection.module.css
-│   │   │   │   │   ├── HelpSection.tsx
-│   │   │   │   │   ├── Steps.tsx
-│   │   │   │   │   └── index.ts
-│   │   │   │   └── pages
-│   │   │   │       ├── SidePanel.module.css
-│   │   │   │       ├── SidePanel.tsx
-│   │   │   │       ├── SidePanelContent.tsx
-│   │   │   │       ├── StepPanelContent.test.tsx
-│   │   │   │       └── index.ts
-│   │   │   ├── constants
-│   │   │   │   ├── defaults.ts
-│   │   │   │   ├── index.ts
-│   │   │   │   └── step.ts
-│   │   │   ├── hooks
-│   │   │   │   ├── tlsnProve
-│   │   │   │   │   ├── redaction
-│   │   │   │   │   │   ├── body
-│   │   │   │   │   │   │   ├── index.ts
-│   │   │   │   │   │   │   ├── tlsn.response.body.ranges.test.ts
-│   │   │   │   │   │   │   └── tlsn.response.body.ranges.ts
-│   │   │   │   │   │   ├── headers
-│   │   │   │   │   │   │   ├── index.ts
-│   │   │   │   │   │   │   ├── tlsn.headers.ranges.test.ts
-│   │   │   │   │   │   │   └── tlsn.headers.ranges.ts
-│   │   │   │   │   │   ├── query
-│   │   │   │   │   │   │   ├── index.ts
-│   │   │   │   │   │   │   ├── tlsn.request.query.ranges.test.ts
-│   │   │   │   │   │   │   └── tlsn.request.query.ranges.ts
-│   │   │   │   │   │   ├── redact.test.ts
-│   │   │   │   │   │   ├── redact.ts
-│   │   │   │   │   │   ├── tlsn.ranges.test.fixtures.ts
-│   │   │   │   │   │   ├── tlsn.request.ranges.ts
-│   │   │   │   │   │   ├── tlsn.response.ranges.ts
-│   │   │   │   │   │   ├── types.ts
-│   │   │   │   │   │   └── utils
-│   │   │   │   │   │       ├── encodeString
-│   │   │   │   │   │       │   ├── EncodedString.test.ts
-│   │   │   │   │   │       │   ├── EncodedString.ts
-│   │   │   │   │   │       │   ├── Encoding.test.ts
-│   │   │   │   │   │       │   ├── Encoding.ts
-│   │   │   │   │   │       │   ├── index.ts
-│   │   │   │   │   │       │   ├── parseHttpMessage.test.ts
-│   │   │   │   │   │       │   └── parseHttpMessage.ts
-│   │   │   │   │   │       ├── error.ts
-│   │   │   │   │   │       ├── getStringPaths
-│   │   │   │   │   │       │   ├── getStringPaths.test.ts
-│   │   │   │   │   │       │   ├── getStringPaths.ts
-│   │   │   │   │   │       │   └── index.ts
-│   │   │   │   │   │       ├── index.ts
-│   │   │   │   │   │       └── queryParams
-│   │   │   │   │   │           └── index.ts
-│   │   │   │   │   ├── tlsnProve.ts
-│   │   │   │   │   └── tlsnWorker.ts
-│   │   │   │   ├── useBrowsingHistory.ts
-│   │   │   │   ├── useProvenUrl.test.ts
-│   │   │   │   ├── useProvenUrl.ts
-│   │   │   │   ├── useProvingSessionConfig.ts
-│   │   │   │   ├── useSteps.test.data.ts
-│   │   │   │   ├── useSteps.test.helpers.ts
-│   │   │   │   ├── useSteps.test.ts
-│   │   │   │   ├── useSteps.ts
-│   │   │   │   ├── useTlsnProver.tsx
-│   │   │   │   ├── useTrackHistory.ts
-│   │   │   │   ├── useZkProvingState.test.ts
-│   │   │   │   └── useZkProvingState.ts
-│   │   │   ├── lib
-│   │   │   │   ├── formatTlsnHeaders.ts
-│   │   │   │   └── sendMessageToServiceWorker.ts
-│   │   │   ├── manifest.json
-│   │   │   ├── state
-│   │   │   │   ├── history.ts
-│   │   │   │   ├── store.ts
-│   │   │   │   ├── webProverSessionContext.ts
-│   │   │   │   └── zkProvingStatusStore.ts
-│   │   │   ├── templates
-│   │   │   │   └── sidepanel
-│   │   │   │       ├── sidepanel.css
-│   │   │   │       ├── sidepanel.html
-│   │   │   │       └── sidepanel.tsx
-│   │   │   ├── vite-env.d.ts
-│   │   │   └── web-proof-commons
-│   │   ├── tsconfig.json
-│   │   ├── vite.config.ts
-│   │   ├── vitest
-│   │   │   ├── custom.matchers.ts
-│   │   │   └── setup.ts
-│   │   └── vitest.d.ts
-│   ├── bun.lockb
-│   ├── eslint.config.js
-│   ├── extension-hooks
-│   │   ├── README.md
-│   │   ├── package.json
-│   │   ├── src
-│   │   │   ├── constants.ts
-│   │   │   ├── createStorageHook.ts
-│   │   │   ├── index.ts
-│   │   │   ├── storage.test.ts
-│   │   │   ├── useLocalStorage.ts
-│   │   │   ├── useSessionStorage.ts
-│   │   │   └── useSyncStorage.ts
-│   │   ├── storage.setup.ts
-│   │   ├── tsconfig.json
-│   │   └── vitest.config.ts
-│   ├── gas-benchmarks
-│   │   ├── README.md
-│   │   ├── eslint.config.ts
-│   │   ├── package.json
-│   │   ├── src
-│   │   │   ├── bench.ts
-│   │   │   ├── benches
-│   │   │   │   ├── arith_ops.ts
-│   │   │   │   ├── noop.ts
-│   │   │   │   └── noop_with_calldata.ts
-│   │   │   └── types.ts
-│   │   └── tsconfig.json
-│   ├── package.json
-│   ├── playwright-tests
-│   │   ├── config.ts
-│   │   ├── email.e2e.spec.ts
-│   │   ├── fixtures
-│   │   │   └── verify_vlayer.eml
-│   │   ├── helpers.ts
-│   │   ├── sidepanel.e2e.spec.ts
-│   │   └── tsconfig.json
-│   ├── playwright.config.ts
-│   ├── sdk
-│   │   ├── CHANGELOG.md
-│   │   ├── README.md
-│   │   ├── eslint.config.ts
-│   │   ├── package.json
-│   │   ├── src
-│   │   │   ├── api
-│   │   │   │   ├── email
-│   │   │   │   │   ├── dnsResolver.test.ts
-│   │   │   │   │   ├── dnsResolver.ts
-│   │   │   │   │   ├── parseEmail.test.ts
-│   │   │   │   │   ├── parseEmail.ts
-│   │   │   │   │   ├── preverify.test.ts
-│   │   │   │   │   ├── preverify.ts
-│   │   │   │   │   └── testdata
-│   │   │   │   │       ├── test_email.txt
-│   │   │   │   │       ├── test_email_multiple_dkims.txt
-│   │   │   │   │       ├── test_email_subdomain.txt
-│   │   │   │   │       └── test_email_unknown_domain.txt
-│   │   │   │   ├── lib
-│   │   │   │   │   ├── client.test.ts
-│   │   │   │   │   ├── client.ts
-│   │   │   │   │   ├── errors.ts
-│   │   │   │   │   └── types
-│   │   │   │   │       ├── ethereum.ts
-│   │   │   │   │       ├── index.ts
-│   │   │   │   │       ├── viem.ts
-│   │   │   │   │       ├── vlayer.ts
-│   │   │   │   │       └── webProofProvider.ts
-│   │   │   │   ├── prover.ts
-│   │   │   │   ├── utils
-│   │   │   │   │   ├── prefixAllButNthSubstring.test.ts
-│   │   │   │   │   ├── prefixAllButNthSubstring.ts
-│   │   │   │   │   ├── versions.test.ts
-│   │   │   │   │   └── versions.ts
-│   │   │   │   ├── v_call.ts
-│   │   │   │   ├── v_getProofReceipt.ts
-│   │   │   │   ├── v_versions.ts
-│   │   │   │   └── webProof
-│   │   │   │       ├── createWebProofRequest.ts
-│   │   │   │       ├── index.ts
-│   │   │   │       ├── providers
-│   │   │   │       │   ├── extension.test.ts
-│   │   │   │       │   ├── extension.ts
-│   │   │   │       │   └── index.ts
-│   │   │   │       ├── redactionFunctions.test.ts
-│   │   │   │       ├── redactionFunctions.ts
-│   │   │   │       └── steps
-│   │   │   │           ├── expectUrl.ts
-│   │   │   │           ├── index.ts
-│   │   │   │           ├── notarize.ts
-│   │   │   │           └── startPage.ts
-│   │   │   ├── config
-│   │   │   │   ├── createContext.ts
-│   │   │   │   ├── deploy.ts
-│   │   │   │   ├── getChainConfirmations.ts
-│   │   │   │   ├── getConfig.ts
-│   │   │   │   ├── index.ts
-│   │   │   │   ├── types.ts
-│   │   │   │   └── writeEnvVariables.ts
-│   │   │   ├── index.ts
-│   │   │   ├── testHelpers
-│   │   │   │   └── readFile.ts
-│   │   │   └── web-proof-commons
-│   │   ├── tsconfig.base.json
-│   │   ├── tsconfig.build.json
-│   │   ├── tsconfig.json
-│   │   ├── vite.config.ts
-│   │   └── vitest.setup.ts
-│   ├── sdk-hooks
-│   │   ├── README.md
-│   │   ├── bun.lockb
-│   │   ├── eslint.config.ts
-│   │   ├── package.json
-│   │   ├── src
-│   │   │   ├── context.test.tsx
-│   │   │   ├── context.tsx
-│   │   │   ├── defaults.ts
-│   │   │   ├── index.ts
-│   │   │   ├── interface.test.ts
-│   │   │   ├── types.ts
-│   │   │   ├── useCallProver
-│   │   │   │   ├── useCallProver.test.ts
-│   │   │   │   └── useCallProver.ts
-│   │   │   ├── useWaitForProvingResult
-│   │   │   │   ├── useWaitForProvingResult.test.ts
-│   │   │   │   └── useWaitForProvingResult.ts
-│   │   │   └── useWebproof
-│   │   │       ├── extension.mock.ts
-│   │   │       ├── useWebProof.test.tsx
-│   │   │       └── useWebProof.ts
-│   │   ├── tsconfig.base.json
-│   │   ├── tsconfig.build.json
-│   │   ├── tsconfig.json
-│   │   └── vitest.config.ts
-│   ├── test-json-server
-│   │   ├── README.md
-│   │   ├── certs
-│   │   │   ├── lotr-api_online.crt
-│   │   │   └── lotr-api_online.key
-│   │   ├── package.json
-│   │   ├── src
-│   │   │   └── index.ts
-│   │   └── tsconfig.json
-│   ├── test-web-app
-│   │   ├── deploy.ts
-│   │   ├── index.html
-│   │   ├── package.json
-│   │   ├── src
-│   │   │   ├── Dapp.tsx
-│   │   │   ├── DappProveWeb.tsx
-│   │   │   ├── Dashboard.tsx
-│   │   │   ├── Email.tsx
-│   │   │   ├── Login.tsx
-│   │   │   ├── Profile.tsx
-│   │   │   ├── main.css
-│   │   │   └── main.tsx
-│   │   ├── tsconfig.json
-│   │   ├── vite-env.d.ts
-│   │   └── vite.config.ts
-│   ├── tsconfig.base.json
-│   ├── tsconfig.json
-│   ├── web-components
-│   │   ├── README.md
-│   │   ├── package.json
-│   │   ├── src
-│   │   │   ├── components
-│   │   │   │   ├── index.ts
-│   │   │   │   ├── theme.css
-│   │   │   │   └── theme.tsx
-│   │   │   └── index.ts
-│   │   └── tsconfig.json
-│   └── web-proof-commons
-│       ├── index.ts
-│       ├── types
-│       │   └── message.ts
-│       └── utils.ts
+├── **packages [OUT OF SCOPE]**
 ├── rust
 │   ├── block_header
 │   │   ├── Cargo.toml
@@ -761,9 +311,7 @@
 │   │   │   ├── eth.rs
 │   │   │   ├── forge.rs
 │   │   │   └── lib.rs
-│   │   └── testdata
-│   │       ├── invalid_header.json
-│   │       └── mainnet_rpc_cache.json
+│   │   └── **testdata [OUT OF SCOPE]**
 │   ├── chain
 │   │   ├── Cargo.toml
 │   │   ├── chain_specs.toml
@@ -818,14 +366,7 @@
 │   │   │   ├── from_header.rs
 │   │   │   ├── lib.rs
 │   │   │   └── test_utils.rs
-│   │   └── testdata
-│   │       ├── email.txt
-│   │       ├── multipart_email.eml
-│   │       ├── signed_email.eml
-│   │       ├── signed_email_different_domains.txt
-│   │       ├── signed_email_dkim_subdomain.txt
-│   │       ├── signed_email_from_subdomain.txt
-│   │       └── signed_email_modified_body.txt
+│   │   └── **testdata [OUT OF SCOPE]**
 │   ├── guest_wrapper
 │   │   ├── Cargo.toml
 │   │   ├── artifacts
@@ -875,18 +416,9 @@
 │   │       └── mdbx.rs
 │   ├── mpt
 │   │   ├── Cargo.toml
-│   │   ├── README.md
-│   │   ├── clippy.toml
-│   │   ├── images
-│   │   │   ├── into_branch_0.png
-│   │   │   ├── into_branch_1.png
-│   │   │   ├── into_branch_2.png
-│   │   │   ├── into_extension_0.png
-│   │   │   ├── into_extension_1.png
-│   │   │   ├── into_extension_2.png
-│   │   │   ├── into_leaf_0.png
-│   │   │   ├── into_leaf_1.png
-│   │   │   └── into_leaf_2.png
+│   │   ├── **README.md [OUT OF SCOPE]**
+│   │   ├── **clippy.toml [OUT OF SCOPE]**
+│   │   ├── **images [OUT OF SCOPE]**
 │   │   ├── src
 │   │   │   ├── hash.rs
 │   │   │   ├── key_nibbles.rs
@@ -918,12 +450,7 @@
 │   │   │   │   └── utils.rs
 │   │   │   ├── trie.rs
 │   │   │   └── utils.rs
-│   │   └── tests
-│   │       ├── consistent_with_alloy_trie.rs
-│   │       ├── insert_and_get.rs
-│   │       ├── insert_is_commutative.rs
-│   │       ├── parse_eth_get_proof.rs
-│   │       └── utils.rs
+│   │   └── **tests [OUT OF SCOPE]**
 │   ├── provider
 │   │   ├── Cargo.toml
 │   │   ├── src
@@ -939,8 +466,7 @@
 │   │   │   ├── profiling.rs
 │   │   │   ├── proof.rs
 │   │   │   └── provider_ext.rs
-│   │   └── testdata
-│   │       └── cache.json
+│   │   └── **testdata [OUT OF SCOPE]**
 │   ├── range
 │   │   ├── Cargo.toml
 │   │   └── src
@@ -1027,14 +553,7 @@
 │   │   │   │   │   │   ├── config.rs
 │   │   │   │   │   │   ├── error.rs
 │   │   │   │   │   │   ├── prover.rs
-│   │   │   │   │   │   ├── tests
-│   │   │   │   │   │   │   ├── number_of_rpc_calls.rs
-│   │   │   │   │   │   │   ├── preflight.rs
-│   │   │   │   │   │   │   ├── snapshots
-│   │   │   │   │   │   │   │   ├── call_host__host__tests__number_of_rpc_calls__time_travel.snap
-│   │   │   │   │   │   │   │   └── call_host__host__tests__number_of_rpc_calls__usdt_erc20_balance_of.snap
-│   │   │   │   │   │   │   └── with_guest.rs
-│   │   │   │   │   │   └── tests.rs
+│   │   │   │   │   │   ├── **tests [OUT OF SCOPE]**
 │   │   │   │   │   ├── host.rs
 │   │   │   │   │   ├── into_input.rs
 │   │   │   │   │   ├── lib.rs
@@ -1043,36 +562,7 @@
 │   │   │   │   │   │   ├── rpc.rs
 │   │   │   │   │   │   └── types.rs
 │   │   │   │   │   └── test_harness.rs
-│   │   │   │   └── test_data
-│   │   │   │       ├── simple
-│   │   │   │       │   └── op_sepolia.json
-│   │   │   │       ├── teleport
-│   │   │   │       │   ├── anvil.json
-│   │   │   │       │   └── mainnet.json
-│   │   │   │       ├── teleport_v2
-│   │   │   │       │   ├── anvil.json
-│   │   │   │       │   └── op_anvil.json
-│   │   │   │       ├── time_travel
-│   │   │   │       │   └── op_sepolia.json
-│   │   │   │       ├── uniswap_factory_owner
-│   │   │   │       │   └── mainnet.json
-│   │   │   │       ├── usdt_erc20_balance_of
-│   │   │   │       │   ├── mainnet.json
-│   │   │   │       │   └── op_mainnet.json
-│   │   │   │       ├── view_blockhash
-│   │   │   │       │   └── sepolia.json
-│   │   │   │       ├── view_call_eoa
-│   │   │   │       │   └── sepolia.json
-│   │   │   │       ├── view_chainid
-│   │   │   │       │   └── sepolia.json
-│   │   │   │       ├── view_eoa_account
-│   │   │   │       │   └── sepolia.json
-│   │   │   │       ├── view_multi_contract_calls
-│   │   │   │       │   └── sepolia.json
-│   │   │   │       ├── view_nonexistent_account
-│   │   │   │       │   └── sepolia.json
-│   │   │   │       └── view_precompile
-│   │   │   │           └── sepolia.json
+│   │   │   │   └── **test_data [OUT OF SCOPE]**
 │   │   │   ├── precompiles
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
@@ -1114,12 +604,8 @@
 │   │   │       │   ├── proving.rs
 │   │   │       │   ├── ser.rs
 │   │   │       │   └── server.rs
-│   │   │       ├── testdata
-│   │   │       │   └── ExampleProver.json
-│   │   │       └── tests
-│   │   │           ├── integration_tests.rs
-│   │   │           └── test_helpers
-│   │   │               └── mod.rs
+│   │   │       ├── **testdata [OUT OF SCOPE]**
+│   │   │       └── **tests [OUT OF SCOPE]**
 │   │   ├── chain
 │   │   │   ├── block_trie
 │   │   │   │   ├── Cargo.toml
@@ -1131,7 +617,7 @@
 │   │   │   │       ├── fake.rs
 │   │   │   │       ├── lib.rs
 │   │   │   │       ├── rpc.rs
-│   │   │   │       └── tests.rs
+│   │   │   │       └── **tests.rs [OUT OF SCOPE]**}
 │   │   │   ├── common
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
@@ -1144,7 +630,7 @@
 │   │   │   │       ├── error.rs
 │   │   │   │       ├── lib.rs
 │   │   │   │       ├── proof_builder.rs
-│   │   │   │       └── tests.rs
+│   │   │   │       └── **tests.rs [OUT OF SCOPE]**
 │   │   │   ├── guest
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
@@ -1179,82 +665,29 @@
 │   │   │   │   │   ├── handlers.rs
 │   │   │   │   │   ├── lib.rs
 │   │   │   │   │   └── server.rs
-│   │   │   │   └── tests
-│   │   │   │       └── integration_tests.rs
-│   │   │   ├── test_utils
-│   │   │   │   ├── Cargo.toml
-│   │   │   │   └── src
-│   │   │   │       └── lib.rs
+│   │   │   │   └── **tests [OUT OF SCOPE]**
+│   │   │   ├── **test_utils [OUT OF SCOPE]**
 │   │   │   └── worker
 │   │   │       ├── Cargo.toml
 │   │   │       └── src
 │   │   │           ├── main.rs
 │   │   │           └── retry.rs
-│   │   └── dns
-│   │       └── server
-│   │           ├── Cargo.toml
-│   │           ├── README.md
-│   │           └── src
-│   │               ├── config.rs
-│   │               ├── main.rs
-│   │               ├── server
-│   │               │   ├── handlers
-│   │               │   │   ├── dns_query
-│   │               │   │   │   └── types.rs
-│   │               │   │   └── dns_query.rs
-│   │               │   └── handlers.rs
-│   │               └── server.rs
-│   ├── test_runner
-│   │   ├── Cargo.toml
-│   │   ├── src
-│   │   │   ├── cheatcode_inspector.rs
-│   │   │   ├── cheatcodes.rs
-│   │   │   ├── composite_inspector.rs
-│   │   │   ├── forked
-│   │   │   │   ├── cli.rs
-│   │   │   │   ├── filter.rs
-│   │   │   │   ├── install.rs
-│   │   │   │   ├── multi_runner.rs
-│   │   │   │   ├── progress.rs
-│   │   │   │   ├── runner.rs
-│   │   │   │   ├── summary.rs
-│   │   │   │   └── test_executor.rs
-│   │   │   ├── forked.rs
-│   │   │   ├── init_global.rs
-│   │   │   ├── lib.rs
-│   │   │   ├── preverify_email.rs
-│   │   │   ├── proof.rs
-│   │   │   └── providers
-│   │   │       ├── mod.rs
-│   │   │       ├── pending_state_provider.rs
-│   │   │       └── test_provider.rs
-│   │   └── testdata
-│   │       └── dumped_evm_state.json
+│   │   └── **dns [OUT OF SCOPE]**
+│   ├── **test_runner [OUT OF SCOPE]**
 │   ├── verifiable_dns
 │   │   ├── Cargo.toml
-│   │   ├── assets
-│   │   │   ├── private_key.pem
-│   │   │   └── public_key.pem
+│   │   ├── **assets [OUT OF SCOPE]**
 │   │   └── src
 │   │       ├── common
 │   │       │   ├── record.rs
-│   │       │   ├── test_utils.rs
+│   │       │   ├── **test_utils.rs [OUT OF SCOPE]**
 │   │       │   ├── to_payload.rs
 │   │       │   └── types.rs
 │   │       ├── common.rs
-│   │       ├── dns_over_https
-│   │       │   ├── external_provider.rs
-│   │       │   ├── provider.rs
-│   │       │   └── types.rs
+│   │       ├── **dns_over_https [OUT OF SCOPE]**
 │   │       ├── dns_over_https.rs
 │   │       ├── lib.rs
-│   │       ├── verifiable_dns
-│   │       │   ├── resolver
-│   │       │   │   └── responses_validation.rs
-│   │       │   ├── resolver.rs
-│   │       │   ├── sign_record.rs
-│   │       │   ├── signer.rs
-│   │       │   └── time.rs
+│   │       ├── **verifiable_dns [OUT OF SCOPE]**
 │   │       ├── verifiable_dns.rs
 │   │       └── verifier
 │   │           └── mod.rs
@@ -1282,16 +715,7 @@
 │   │   │   ├── verifier.rs
 │   │   │   ├── web.rs
 │   │   │   └── web_proof.rs
-│   │   └── testdata
-│   │       ├── chunked_response.txt
-│   │       ├── many_headers_sent_request.txt
-│   │       ├── no_body_response.txt
-│   │       ├── no_headers_response.txt
-│   │       ├── received_response.txt
-│   │       ├── redacted_received_response.txt
-│   │       ├── redacted_sent_request.txt
-│   │       ├── sent_request.txt
-│   │       └── web_proof.json
-│   └── ** zkvm-benchmarks [OUT OF SCOPE]**
+│   │   └── **testdata [OUT OF SCOPE]**
+│   └── **zkvm-benchmarks [OUT OF SCOPE]**
 ├── rust-toolchain.toml
-└── rustfmt.toml
+└── **rustfmt.toml [OUT OF SCOPE]**
