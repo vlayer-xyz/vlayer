@@ -1,5 +1,6 @@
 include:
   - anvil.yaml
+  - vdns.yaml
   - web.yaml
 services:
   vlayer-call-server:

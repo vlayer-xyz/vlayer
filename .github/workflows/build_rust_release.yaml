@@ -41,7 +41,7 @@ jobs:
 
   build-x86_64-unknown-linux-gnu-release:
     name: Build release for x86_64-unknown-linux-gnu
-    needs: [build-guest-wrapper]
+    needs: [ build-guest-wrapper ]
     runs-on: aws-linux-medium
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
@@ -67,7 +67,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
-          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server
+          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server
 
       - name: "Print build version"
         id: vlayer_build
@@ -84,7 +84,7 @@ jobs:
 
   build-x86_64-unknown-linux-musl-release:
     name: Build release for x86_64-unknown-linux-musl
-    needs: [build-guest-wrapper]
+    needs: [ build-guest-wrapper ]
     runs-on: aws-linux-medium
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
@@ -124,7 +124,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
-          nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server"
+          nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server -p dns_server"
 
       - name: "Print build version"
         id: vlayer_build
@@ -141,7 +141,7 @@ jobs:
 
   build-darwin-arm64-release:
     name: Build release for aarch64-apple-darwin
-    needs: [build-guest-wrapper]
+    needs: [ build-guest-wrapper ]
     runs-on: macos-14-xlarge
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
@@ -182,7 +182,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
-          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server
+          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server
 
       - name: "Print build version"
         id: vlayer_build
