@@ -1,5 +1,5 @@
 use alloy_chains::{Chain, NamedChain::AnvilHardhat};
-use alloy_primitives::{address, b256, uint, Address};
+use alloy_primitives::{address, b256, uint};
 use ethers_core::types::BlockNumber as BlockTag;
 
 use crate::{
@@ -171,42 +171,56 @@ mod view {
     }
 }
 
-// Generated using old `simple_teleport` example
-mod teleport {
-    use super::*;
-    use crate::test_harness::contracts::teleport::{
-        SimpleTravelProver::crossChainBalanceOfCall, BLOCK_NO, SIMPLE_TELEPORT,
-    };
-
-    #[tokio::test(flavor = "multi_thread")]
-    async fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
-        let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
-        let owner = Address::ZERO;
-        let call = call(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner });
-        let result = preflight::<crossChainBalanceOfCall>("teleport", call, &location).await;
-        let err = result.unwrap_err().to_string();
-        let expected_err = "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(Opaque(Provider factory: No rpc cache for chain: 8453";
-        assert!(err.contains(expected_err));
-
-        Ok(())
-    }
-}
 mod teleport_v2 {
+    use anyhow::ensure;
+
     use super::*;
     use crate::test_harness::contracts::teleport_v2::{
         SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
-        BLOCK_NO, JOHN, SIMPLE_TELEPORT,
+        BLOCK_NO, JOHN, SIMPLE_TELEPORT, TOKEN, WRONG_CHAIN_ID, WRONG_TOKEN,
     };
 
     #[tokio::test(flavor = "multi_thread")]
     async fn success() -> anyhow::Result<()> {
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
-        let call = call(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner: JOHN });
+        let call = call(
+            SIMPLE_TELEPORT,
+            &crossChainBalanceOfCall {
+                owner: JOHN,
+                tokens: vec![TOKEN],
+            },
+        );
         let crossChainBalanceOfReturn {
             _2: cross_chain_balance,
             ..
         } = preflight::<crossChainBalanceOfCall>("teleport_v2", call, &location).await?;
         assert_eq!(cross_chain_balance, uint!(100_U256));
+
+        Ok(())
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn failure() -> anyhow::Result<()> {
+        let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
+        let call = call(
+            SIMPLE_TELEPORT,
+            &crossChainBalanceOfCall {
+                owner: JOHN,
+                tokens: vec![WRONG_TOKEN],
+            },
+        );
+
+        let error = preflight::<crossChainBalanceOfCall>("teleport_v2", call, &location)
+            .await
+            .err()
+            .unwrap();
+        let expected_error_message = format!("No rpc cache for chain: {WRONG_CHAIN_ID}");
+
+        ensure!(
+            error.to_string().contains(&expected_error_message),
+            "Unexpected error message: {}",
+            error
+        );
 
         Ok(())
     }
