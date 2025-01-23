@@ -10,8 +10,8 @@ use call_engine::{
     },
     travel_call_executor::TravelCallExecutor,
     verifier::{
-        chain_proof,
-        guest_input::{self, Verifier},
+        chain_proof, time_travel,
+        travel_call::{self, IVerifier},
         zk_proof,
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
@@ -43,7 +43,7 @@ pub struct Host {
     prover: Prover,
     // None means that chain service is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
     chain_client: Option<chain_client::RecordingClient>,
-    chain_proof_verifier: chain_proof::ZkVerifier,
+    chain_proof_verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
     guest_elf: GuestElf,
 }
 
@@ -84,7 +84,7 @@ impl Host {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_proof_verifier =
-            chain_proof::ZkVerifier::new(config.chain_guest_ids, zk_proof::HostVerifier);
+            chain_proof::Verifier::new(config.chain_guest_ids, zk_proof::HostVerifier);
         let chain_client = chain_client.map(chain_client::RecordingClient::new);
 
         Host {
@@ -200,18 +200,20 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
 
 async fn get_chain_proofs(
     multi_evm_input: &MultiEvmInput,
-    client: Option<chain_client::RecordingClient>,
-    verifier: chain_proof::ZkVerifier,
+    chain_proof_client: Option<chain_client::RecordingClient>,
+    verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
 ) -> Result<ChainProofCache, PreflightError> {
-    if multi_evm_input.is_single_location() {
-        Ok(HashMap::new())
-    } else {
-        let Some(client) = client else {
-            return Err(PreflightError::ChainServiceNotAvailable);
-        };
-        let verifier = guest_input::ZkVerifier::new(client, verifier);
-        verifier.verify(multi_evm_input).await?;
-        let (chain_proof_client, _) = verifier.into_parts();
-        Ok(chain_proof_client.into_cache())
+    if !multi_evm_input.contains_time_travel() {
+        return Ok(HashMap::new());
     }
+    let Some(chain_proof_client) = chain_proof_client else {
+        return Err(PreflightError::ChainServiceNotAvailable);
+    };
+
+    let time_travel_verifier = time_travel::Verifier::new(chain_proof_client.clone(), verifier);
+    let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier);
+    travel_call_verifier.verify(multi_evm_input).await?;
+    drop(travel_call_verifier); // Drop verifier to be able to get the chain proof cache
+
+    Ok(chain_proof_client.into_cache())
 }
