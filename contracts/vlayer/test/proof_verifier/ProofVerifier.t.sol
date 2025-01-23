@@ -93,7 +93,7 @@ contract ProofVerifier_Verify_Tests is Test {
         uint256 fakeGuestId = uint256(proof.callGuestId) + 1;
         proof.callGuestId = bytes32(fakeGuestId);
 
-        vm.expectRevert("CallGuestId mismatched");
+        vm.expectRevert("Unsupported CallGuestId");
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 }
