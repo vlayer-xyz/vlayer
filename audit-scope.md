@@ -321,28 +321,7 @@
 │   │       ├── fork.rs
 │   │       ├── lib.rs
 │   │       └── spec.rs
-│   ├── cli
-│   │   ├── Cargo.toml
-│   │   ├── deny.toml
-│   │   ├── src
-│   │   │   ├── commands
-│   │   │   │   ├── args.rs
-│   │   │   │   ├── common
-│   │   │   │   │   ├── mod.rs
-│   │   │   │   │   └── soldeer.rs
-│   │   │   │   ├── init.rs
-│   │   │   │   ├── test.rs
-│   │   │   │   └── update.rs
-│   │   │   ├── commands.rs
-│   │   │   ├── errors.rs
-│   │   │   ├── main.rs
-│   │   │   ├── test_utils.rs
-│   │   │   └── utils
-│   │   │       ├── mod.rs
-│   │   │       ├── parse_toml.rs
-│   │   │       └── path.rs
-│   │   └── test_static
-│   │       └── contracts.tar.gz
+│   ├── **cli [OUT OF SCOPE]**
 │   ├── common
 │   │   ├── Cargo.toml
 │   │   └── src
@@ -365,7 +344,7 @@
 │   │   │   ├── errors.rs
 │   │   │   ├── from_header.rs
 │   │   │   ├── lib.rs
-│   │   │   └── test_utils.rs
+│   │   │   └── **test_utils.rs [OUT OF SCOPE]**
 │   │   └── **testdata [OUT OF SCOPE]**
 │   ├── guest_wrapper
 │   │   ├── Cargo.toml
@@ -485,7 +464,7 @@
 │   │       ├── lib.rs
 │   │       ├── proof_mode.rs
 │   │       ├── rpc.rs
-│   │       └── test_utils.rs
+│   │       └── **test_utils.rs [OUT OF SCOPE]**
 │   ├── services
 │   │   ├── call
 │   │   │   ├── engine
