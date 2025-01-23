@@ -8,4 +8,4 @@ services:
       RUST_LOG: "info,vdns_server=debug"
     command: [""]
     ports:
-      - "127.0.0.1:3002:3002"
+      - "3002:3002"
