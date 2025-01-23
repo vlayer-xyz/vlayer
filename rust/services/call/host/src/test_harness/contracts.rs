@@ -141,12 +141,13 @@ pub mod teleport_v2 {
     pub const JOHN: Address = address!("70997970C51812dc3A010C7d01b50e0d17dc79C8");
     pub const BLOCK_NO: u64 = 3;
     pub const TOKEN: Erc20Token = Erc20Token {
-        addr: address!("5FbDB2315678afecb367f032d93F642f64180aa3"),
+        addr: TOKEN_ADDR,
         chainId: OP_ANVIL_CHAIN_ID,
         blockNumber: OP_BLOCK_NO,
     };
     const OP_BLOCK_NO: Uint<256, 4> = uint!(3_U256);
     const OP_ANVIL_CHAIN_ID: Uint<256, 4> = uint!(31338_U256);
+    const TOKEN_ADDR: Address = address!("5FbDB2315678afecb367f032d93F642f64180aa3");
 
     sol! {
         #[derive(Debug)]
