@@ -5,19 +5,6 @@ name: E2E test against testnet
 
 on:
   push:
-    branches:
-      - main
-    # If any path names do not match patterns in paths-ignore,
-    # even if some path names match the patterns,
-    # the workflow will run.
-    paths-ignore:
-      - "README.md"
-      - "LICENSE"
-      - "book/**"
-  workflow_dispatch:
-concurrency:
-  group: ${{ github.workflow }}-main
-  cancel-in-progress: false
 
 jobs:
   test-e2e-testnet:
@@ -48,7 +35,7 @@ jobs:
       - name: Build binaries
         env:
           RISC0_USE_DOCKER: 1
-        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker
+        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
       - name: Run e2e test in prod mode
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
