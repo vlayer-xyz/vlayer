@@ -104,15 +104,8 @@
 │   │   │   ├── errors.rs
 │   │   │   ├── from_header.rs
 │   │   │   ├── lib.rs
-│   │   │   └── test_utils.rs
-│   │   └── testdata
-│   │       ├── email.txt
-│   │       ├── multipart_email.eml
-│   │       ├── signed_email.eml
-│   │       ├── signed_email_different_domains.txt
-│   │       ├── signed_email_dkim_subdomain.txt
-│   │       ├── signed_email_from_subdomain.txt
-│   │       └── signed_email_modified_body.txt
+│   │   │   └── test_utils.rs [OUT OF SCOPE]
+│   │   └── testdata [OUT OF SCOPE]
 │   ├── guest_wrapper
 │   │   ├── Cargo.toml [OUT OF SCOPE]
 │   │   ├── artifacts
