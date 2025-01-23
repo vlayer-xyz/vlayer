@@ -3,7 +3,7 @@ import {
   RedactRequestHeadersExcept,
   RedactRequestUrlQueryParam,
   RedactRequestUrlQueryParamExcept,
-} from "src/web-proof-commons/types/message";
+} from "src/web-proof-commons";
 import { CommitData } from "tlsn-js/src/types";
 import { match, P } from "ts-pattern";
 import {

@@ -1,5 +1,6 @@
 import type { Branded } from "../utils";
 import { URLPattern } from "urlpattern-polyfill";
+import { type RedactionConfig } from "./redaction";
 import urlRegex from "url-regex";
 import type { PresentationJSON as TLSNPresentationJSON } from "tlsn-js/src/types";
 
@@ -95,19 +96,6 @@ export function isEmptyWebProverSessionConfig(
   );
 }
 
-export function getRedactionConfig(
-  provingSessionConfig: WebProverSessionConfig,
-): RedactionConfig {
-  const notarizeStep = provingSessionConfig.steps.find(
-    (step): step is WebProofStepNotarize => step.step === "notarize",
-  );
-  const redactionConfig =
-    notarizeStep !== undefined
-      ? (notarizeStep as WebProofStepNotarize).redact
-      : [];
-  return redactionConfig;
-}
-
 export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
@@ -116,66 +104,6 @@ export type WebProofStep =
 export type UrlPattern = Branded<string, "UrlPattern">;
 
 export type Url = Branded<UrlPattern, "Url">;
-
-export type RedactRequestHeaders = {
-  request: {
-    headers: string[];
-  };
-};
-
-export type RedactRequestHeadersExcept = {
-  request: {
-    headers_except: string[];
-  };
-};
-
-export type RedactRequestUrlQueryParam = {
-  request: {
-    url_query: string[];
-  };
-};
-
-export type RedactRequestUrlQueryParamExcept = {
-  request: {
-    url_query_except: string[];
-  };
-};
-
-export type RedactResponseHeaders = {
-  response: {
-    headers: string[];
-  };
-};
-
-export type RedactResponseHeadersExcept = {
-  response: {
-    headers_except: string[];
-  };
-};
-
-export type RedactResponseJsonBody = {
-  response: {
-    json_body: string[];
-  };
-};
-
-export type RedactResponseJsonBodyExcept = {
-  response: {
-    json_body_except: string[];
-  };
-};
-
-export type RedactionItem =
-  | RedactRequestHeaders
-  | RedactRequestHeadersExcept
-  | RedactRequestUrlQueryParam
-  | RedactRequestUrlQueryParamExcept
-  | RedactResponseHeaders
-  | RedactResponseHeadersExcept
-  | RedactResponseJsonBody
-  | RedactResponseJsonBodyExcept;
-
-export type RedactionConfig = RedactionItem[];
 
 export type WebProofStepNotarize = Branded<
   {
