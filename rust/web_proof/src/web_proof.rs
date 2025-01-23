@@ -24,7 +24,7 @@ impl WebProof {
     {
         let provider = CryptoProvider::default();
 
-        let presentation = Presentation::from(self);
+        let presentation = self.deserialize()?;
         let verifying_key = presentation.verifying_key().clone();
 
         let PresentationOutput {
@@ -55,11 +55,20 @@ pub struct PresentationJsonMeta {
     pub plugin_url: Option<String>,
 }
 
-impl From<WebProof> for Presentation {
-    fn from(web_proof: WebProof) -> Self {
-        let bytes = hex::decode(web_proof.data).unwrap();
-        bincode::deserialize(&bytes).unwrap()
+impl WebProof {
+    pub fn deserialize(&self) -> Result<Presentation, DeserializeError> {
+        let bytes = hex::decode(&self.data)?;
+        let presentation = bincode::deserialize(&bytes)?;
+        Ok(presentation)
     }
+}
+
+#[derive(Error, Debug)]
+pub enum DeserializeError {
+    #[error("Hex decode error: {0}")]
+    HexDecode(#[from] hex::FromHexError),
+    #[error("Bincode deserialize error: {0}")]
+    Bincode(#[from] bincode::Error),
 }
 
 #[derive(Error, Debug)]
@@ -75,6 +84,9 @@ pub enum VerificationError {
 
     #[error("Empty transcript")]
     EmptyTranscript,
+
+    #[error("Deserialization error: {0}")]
+    Deserialize(#[from] DeserializeError),
 }
 
 #[cfg(test)]
@@ -156,7 +168,7 @@ mod tests {
         let web_proof = read_fixture("./testdata/web_proof.json");
         let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
-        let presentation: Presentation = web_proof.into();
+        let presentation: Presentation = web_proof.deserialize().unwrap();
         assert_eq!(presentation.verifying_key().alg, KeyAlgId::K256);
     }
 }
