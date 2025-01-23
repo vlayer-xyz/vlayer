@@ -201,7 +201,6 @@ mod teleport_v2 {
     async fn failure() -> anyhow::Result<()> {
         let mut wrong_token = TOKEN;
         wrong_token.chainId = uint!(331337_U256);
-        let wrong_chain_id = wrong_token.chainId.to_string();
 
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
 
@@ -209,13 +208,15 @@ mod teleport_v2 {
             SIMPLE_TELEPORT,
             &crossChainBalanceOfCall {
                 owner: JOHN,
-                tokens: vec![wrong_token],
+                tokens: vec![wrong_token.clone()],
             },
         );
 
         let error = preflight::<crossChainBalanceOfCall>("teleport_v2", call, &location)
             .await
             .unwrap_err();
+
+        let wrong_chain_id = wrong_token.chainId.to_string();
 
         assert!(error
             .to_string()
