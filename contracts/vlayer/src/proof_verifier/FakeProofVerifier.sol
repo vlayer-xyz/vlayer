@@ -14,7 +14,7 @@ contract FakeProofVerifier is ProofVerifierBase {
     using SealLib for Seal;
 
     constructor() {
-        if (ChainIdLibrary.is_mainnet()) {
+        if (ChainIdLibrary.isMainnet()) {
             revert InvalidChainId();
         }
 

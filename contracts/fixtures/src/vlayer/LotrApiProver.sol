@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
+import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
+
 import {Prover} from "vlayer/Prover.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
-
-import "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 
 // this prover contract is used in playwright e2e tests
 contract LotrApiProver is Prover {
@@ -16,8 +16,7 @@ contract LotrApiProver is Prover {
     string private constant NOTARY_PUB_KEY =
         "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
 
-    constructor() {}
-
+    // solhint-disable-next-line func-name-mixedcase
     function web_proof(WebProof calldata webProof) public view returns (bool) {
         Web memory web = WebProofLib.recover(webProof);
 
