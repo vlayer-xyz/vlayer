@@ -167,7 +167,7 @@
 │   ├── **range [OUT OF SCOPE]**
 │   ├── **server_utils [OUT OF SCOPE]**
 │   ├── services
-│   │   ├── **call [TODO: Leo]**
+│   │   ├── call
 │   │   │   ├── engine
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
@@ -232,7 +232,7 @@
 │   │   │   │       └── lib.rs
 │   │   │   ├── **server [OUT OF SCOPE]**
 │   │   │   └── **server_lib [OUT OF SCOPE]**
-│   │   ├── **chain [TODO: Leo]**
+│   │   ├── chain
 │   │   │   ├── block_trie
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
@@ -255,7 +255,7 @@
 │   │   │   └── **worker [OUT OF SCOPE]**
 │   │   └── **dns [OUT OF SCOPE]**
 │   ├── **test_runner [OUT OF SCOPE]**
-│   ├── **verifiable_dns [TODO: Piotr]**
+│   ├── verifiable_dns
 │   │   ├── Cargo.toml
 │   │   ├── **assets [OUT OF SCOPE]**
 │   │   └── src
@@ -273,7 +273,7 @@
 │   │       └── verifier
 │   │           └── mod.rs
 │   ├── **version [OUT OF SCOPE]**
-│   ├── **web_proof [TODO: Wiktor]**
+│   ├── web_proof
 │   │   ├── Cargo.toml
 │   │   ├── src
 │   │   │   ├── errors.rs
