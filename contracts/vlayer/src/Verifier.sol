@@ -46,29 +46,4 @@ abstract contract Verifier {
 
         return (proof, journalHash);
     }
-
-    function shiftOffset(bytes memory data, uint256 shiftBy, uint256 offsetPosition)
-        public
-        pure
-        returns (bytes memory)
-    {
-        uint256 offsetPositionRelativeToJournal = CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH + offsetPosition;
-
-        require(data.length >= offsetPositionRelativeToJournal, "Encoded data too short");
-
-        uint256 dataOffset;
-        assembly {
-            dataOffset := mload(add(data, offsetPositionRelativeToJournal))
-        }
-
-        uint256 shiftedOffset = dataOffset - shiftBy;
-
-        bytes memory dataCopy = data;
-
-        assembly {
-            mstore(add(dataCopy, offsetPositionRelativeToJournal), shiftedOffset)
-        }
-
-        return dataCopy;
-    }
 }
