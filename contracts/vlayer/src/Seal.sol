@@ -13,7 +13,7 @@ struct Seal {
 }
 
 library SealLib {
-    uint256 constant ETH_WORD_SIZE = 32;
+    uint256 public constant ETH_WORD_SIZE = 32;
 
     uint256 public constant VERIFIER_SELECTOR_LENGTH = 4;
     uint256 public constant FAKE_SEAL_LENGTH = VERIFIER_SELECTOR_LENGTH + 32;

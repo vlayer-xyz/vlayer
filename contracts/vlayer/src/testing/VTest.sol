@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import "forge-std-1.9.4/src/Test.sol";
+// solhint-disable-next-line no-global-import
+import "forge-std-1.9.4/src/Test.sol"; // reexports foundry test modules
+
 import {UnverifiedEmail} from "../EmailProof.sol";
 import {Proof} from "../Proof.sol";
 import {EmailTestUtils} from "./libraries/EmailTestUtils.sol";
@@ -25,6 +27,7 @@ contract VTest is Test {
         );
     }
 
+    // solhint-disable-next-line no-empty-blocks
     function setUp() internal {
         // setUp is not allowed in VTest tests
     }
