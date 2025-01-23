@@ -11,6 +11,10 @@ export const useWebProof = (
   const [webProof, setWebProof] = useState<{
     webProofJson: string;
   } | null>(null);
+  const [decodedTranscript, setDecodedTranscript] = useState<{
+    sent: string;
+    recv: string;
+  } | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<WebProofRequestStatus>(
     WebProofRequestStatus.idle,
@@ -19,10 +23,11 @@ export const useWebProof = (
   useEffect(() => {
     webProofProvider.addEventListeners(
       ExtensionMessageType.ProofDone,
-      ({ payload: { presentationJSON } }) => {
+      ({ payload: { presentationJSON, decodedTranscript } }) => {
         setWebProof({
           webProofJson: JSON.stringify(presentationJSON),
         });
+        setDecodedTranscript(decodedTranscript);
         setStatus(WebProofRequestStatus.success);
       },
     );
@@ -38,6 +43,7 @@ export const useWebProof = (
 
   return {
     webProof,
+    decodedTranscript,
     error,
     status,
     isIdle: status === WebProofRequestStatus.idle,

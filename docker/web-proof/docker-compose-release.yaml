@@ -4,7 +4,7 @@ services:
     platform: linux/amd64
     ports:
       - "55688:80" 
-    command: "80 lotr-api.online:3011"
+    command: "80 x.com:443"
       
   notary-server:
     image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
@@ -12,15 +12,5 @@ services:
       - "7047:7047"
     volumes:
       - ./notary-config:/root/.notary-server/config
-  json-server:
-    build:
-      context: ../../
-      dockerfile: ./docker/json-server/Dockerfile
-    ports:
-      - "3011:3011"
-    networks:
-      default:
-        aliases:
-          - lotr-api.online
 
 

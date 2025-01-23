@@ -34,12 +34,12 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
   },
   logoUrl: "http://twitterswap.com/logo.png",
   steps: [
-    startPage("https://x.com", "Go to x.com login page"),
+    startPage("https://x.com", "Go to X"),
     expectUrl("https://x.com/home", "Log in"),
     notarize(
-      "https://api.x.com/1.1/account/settings.json",
+      "https://x.com/i/api/graphql/*/Followers",
       "GET",
-      "Generate Proof of Twitter profile",
+      "Generate Proof of Followers",
     ),
   ],
 };
@@ -48,6 +48,7 @@ export const useSimpleWebProof = () => {
   const {
     requestWebProof,
     webProof,
+    decodedTranscript,
     isPending: isWebProofPending,
   } = useWebProof(webProofConfig);
 
@@ -62,13 +63,19 @@ export const useSimpleWebProof = () => {
 
   const [, setWebProof] = useLocalStorage("webProof", "");
   const [, setProverResult] = useLocalStorage("proverResult", "");
-
+  const [, setDecodedTranscript] = useLocalStorage("decodedTranscript", "");
   useEffect(() => {
     if (webProof) {
       console.log("webProof ready", webProof);
       setWebProof(JSON.stringify(webProof));
     }
   }, [webProof]);
+
+  useEffect(() => {
+    if (decodedTranscript) {
+      setDecodedTranscript(JSON.stringify(decodedTranscript));
+    }
+  }, [decodedTranscript]);
 
   useEffect(() => {
     if (result) {
@@ -78,6 +85,7 @@ export const useSimpleWebProof = () => {
   }, [result]);
 
   return {
+    decodedTranscript,
     requestWebProof,
     webProof,
     isPending:

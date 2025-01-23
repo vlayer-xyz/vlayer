@@ -45,14 +45,14 @@ const SimpleWebProofApp = () => {
         <ProofProvider
           config={{
             proverUrl: import.meta.env.VITE_PROVER_URL,
+            notaryUrl: "https://notary.pse.dev/v0.1.0-alpha.7",
+            wsProxyUrl: "http://127.0.0.1:55688",
           }}
         >
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<WelcomeScreen />} />
-              <Route path="/connect-wallet" element={<WalletContainer />} />
               <Route path="/start-proving" element={<ProvingContainer />} />
-              <Route path="/minting" element={<MintingContainer />} />
               <Route path="/success" element={<Success />} />
             </Routes>
           </BrowserRouter>

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { Modal } from "../components/Modal";
 import { useSimpleWebProof } from "../hooks/useSimpleWebProof";
 import { StartProving } from "../components/StartProving";
-import { useAppKitAccount } from "@reown/appkit/react";
 import {
   isMobile,
   isSupportedBrowser,
@@ -12,27 +11,26 @@ import {
 
 export const ProvingContainer = () => {
   const navigate = useNavigate();
-  const { address } = useAppKitAccount();
   const [disabled, setDisabled] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { requestWebProof, webProof, callProver, isPending, result } =
+  const { requestWebProof, webProof, decodedTranscript, isPending } =
     useSimpleWebProof();
 
   useEffect(() => {
     console.log("webProof", webProof);
-    if (webProof) {
-      callProver([webProof, address]);
-    }
+    // if (webProof) {
+    //   callProver([webProof, address]);
+    // }
   }, [webProof]);
 
   useEffect(() => {
-    console.log("result", result);
-    if (result) {
-      navigate("/minting");
+    console.log("decodedTranscript", decodedTranscript);
+    if (decodedTranscript) {
+      navigate("/success");
     }
-  }, [result]);
+  }, [decodedTranscript]);
 
   const isExtensionReady = async () => {
     if (isMobile) {
@@ -59,7 +57,7 @@ export const ProvingContainer = () => {
   }, []);
 
   return (
-    <Modal backUrl="/connect-wallet">
+    <Modal backUrl="/">
       <StartProving
         requestWebProof={requestWebProof}
         isPending={isPending}
