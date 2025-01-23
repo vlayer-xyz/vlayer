@@ -13,6 +13,7 @@ derivative = { workspace = true }
 dotenvy = { workspace = true }
 ethers = { workspace = true }
 guest_wrapper = { workspace = true }
+risc0-zkp = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, features = ["retry", "timeout"] }
 tracing = { workspace = true }

@@ -6,8 +6,9 @@ use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 use ethers::types::BlockNumber as BlockTag;
-use guest_wrapper::CHAIN_GUEST_ELF;
+use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
 use retry::HostErrorFilter;
+use risc0_zkp::core::digest::Digest;
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};
 
@@ -78,6 +79,10 @@ impl From<Cli> for HostConfig {
             proof_mode: cli.proof_mode,
             db_path: cli.db_path,
             elf: CHAIN_GUEST_ELF.clone(),
+            chain_guest_ids: CHAIN_GUEST_IDS
+                .iter()
+                .map(|bytes| Digest::from_bytes(*bytes))
+                .collect(),
             start_block: cli.start_block,
             prepend_strategy: PrependStrategy::new(cli.max_back_propagation_blocks),
             append_strategy: AppendStrategy::new(cli.max_head_blocks, cli.confirmations),

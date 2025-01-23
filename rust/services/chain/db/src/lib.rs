@@ -24,10 +24,11 @@ mod proof_builder;
 mod tests;
 
 pub use chain_trie::ChainTrie;
-use common::{GuestElf, Hashable};
+use common::Hashable;
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
+use risc0_zkvm::sha::Digest;
 use tracing::warn;
 use u64_range::NonEmptyRange;
 
@@ -151,34 +152,40 @@ impl From<ChainProof> for RpcChainProof {
 pub struct ChainDb {
     db: DB,
     mode: Mode,
-    elf: GuestElf,
+    chain_guest_ids: Box<[Digest]>,
 }
 
 impl ChainDb {
-    pub fn in_memory(elf: GuestElf) -> Self {
+    pub fn in_memory(chain_guest_ids: impl IntoIterator<Item = Digest>) -> Self {
         let db = InMemoryDatabase::new();
         let mode = Mode::ReadWrite;
-        Self::new(db, mode, elf)
+        let chain_guest_ids = chain_guest_ids.into_iter().collect();
+        Self::new(db, mode, chain_guest_ids)
     }
 
-    pub fn mdbx(path: impl AsRef<Path>, mode: Mode, elf: GuestElf) -> ChainDbResult<Self> {
+    pub fn mdbx(
+        path: impl AsRef<Path>,
+        mode: Mode,
+        chain_guest_ids: impl IntoIterator<Item = Digest>,
+    ) -> ChainDbResult<Self> {
         let mut db = Mdbx::open(path)?;
         let mut tx = db.begin_rw()?;
         tx.create_table(NODES)?;
         tx.create_table(CHAINS)?;
         Box::new(tx).commit()?;
-        Ok(Self::new(db, mode, elf))
+        let chain_guest_ids = chain_guest_ids.into_iter().collect();
+        Ok(Self::new(db, mode, chain_guest_ids))
     }
 
     fn new(
         db: impl for<'a> Database<'a> + Send + Sync + 'static,
         mode: Mode,
-        elf: GuestElf,
+        chain_guest_ids: Box<[Digest]>,
     ) -> Self {
         Self {
             db: Box::new(db),
             mode,
-            elf,
+            chain_guest_ids,
         }
     }
 
@@ -234,7 +241,7 @@ impl ChainDb {
     pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
         Ok(self
             .get_chain_trie_inner(chain_id)?
-            .map(|unverified| verify_chain_trie(unverified, &self.elf)) // Verifies ZK proof
+            .map(|unverified| verify_chain_trie(unverified, self.chain_guest_ids.clone())) // Verifies ZK proof
             .transpose()?)
     }
 
