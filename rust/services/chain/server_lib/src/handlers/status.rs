@@ -31,7 +31,7 @@ mod tests {
     #[tokio::test]
     async fn empty_db() {
         let chain_id: ChainId = 1;
-        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
+        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory([GuestElf::default().id])));
         assert_eq!(
             v_sync_status(chain_db, chain_id).await.unwrap_err(),
             AppError::UnsupportedChainId(1)
@@ -41,7 +41,7 @@ mod tests {
     #[tokio::test]
     async fn single_block() {
         let chain_id: ChainId = 1;
-        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
+        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory([GuestElf::default().id])));
         let chain_info = ChainInfo::new(
             NonEmptyRange::from_single_value(0),
             Default::default(),

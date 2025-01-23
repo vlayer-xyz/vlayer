@@ -38,7 +38,7 @@ mod tests {
     async fn empty_block_hashes() {
         let chain_id: ChainId = 1;
         let block_numbers: Vec<BlockNumber> = vec![];
-        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
+        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory([GuestElf::default().id])));
         assert_eq!(
             v_get_chain_proof(chain_db, chain_id, block_numbers)
                 .await
@@ -67,7 +67,7 @@ mod tests {
             static ref db_trie: MerkleTrie =
                 MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
             static ref chain_db: Arc<RwLock<ChainDb>> = {
-                let db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
+                let db = Arc::new(RwLock::new(ChainDb::in_memory([GuestElf::default().id])));
                 let range = NonEmptyRange::try_from_range(1..=2).unwrap();
                 let chain_info = ChainInfo::new(range, db_trie.hash_slow(), zk_proof.clone());
                 db.write().update_chain(1, ChainUpdate::new(chain_info, &*db_trie, [])).expect("update_chain failed");
