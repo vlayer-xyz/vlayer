@@ -5,6 +5,19 @@ name: E2E test against testnet
 
 on:
   push:
+    branches:
+      - main
+    # If any path names do not match patterns in paths-ignore,
+    # even if some path names match the patterns,
+    # the workflow will run.
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-main
+  cancel-in-progress: false
 
 jobs:
   test-e2e-testnet:
