@@ -16,7 +16,7 @@ use crate::{
 
 const MAX_HEADERS_NUMBER: usize = 40;
 
-pub(crate) fn parse_request_and_validate_redaction(request: &[u8]) -> Result<String, ParsingError> {
+pub fn parse_request_and_validate_redaction(request: &[u8]) -> Result<String, ParsingError> {
     let request_primary_replacement =
         replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_PRIMARY);
     let (path_primary, headers_primary) = parse_request(&request_primary_replacement)?;
@@ -50,7 +50,7 @@ fn parse_request(request: &[u8]) -> Result<(String, [Header; MAX_HEADERS_NUMBER]
     Ok((path, headers))
 }
 
-pub(crate) fn parse_response_and_validate_redaction(
+pub fn parse_response_and_validate_redaction(
     response: &[u8],
 ) -> Result<String, ParsingError> {
     let response_primary_replacement =
@@ -164,11 +164,11 @@ mod tests {
                 vec![
                     RedactedTranscriptNameValue {
                         name: "param1".to_string(),
-                        value: "value1".to_string().into_bytes()
+                        value: b"value1".to_vec()
                     },
                     RedactedTranscriptNameValue {
                         name: "param2".to_string(),
-                        value: "value2".to_string().into_bytes()
+                        value: b"value2".to_vec()
                     }
                 ]
             );
@@ -298,7 +298,7 @@ mod tests {
 
                 #[test]
                 fn no_redaction() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "Content-Length: 136\r\n"
@@ -333,7 +333,7 @@ mod tests {
 
                 #[test]
                 fn blank_body() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "\r\n";
@@ -343,7 +343,7 @@ mod tests {
 
                 #[test]
                 fn fully_redacted_string_value() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "Content-Length: 136\r\n"
@@ -378,7 +378,7 @@ mod tests {
 
                 #[test]
                 fn fully_redacted_nested_string_value() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "Content-Length: 136\r\n"
@@ -413,7 +413,7 @@ mod tests {
 
                 #[test]
                 fn redact_string_value_inside_array() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "\r\n"
@@ -574,7 +574,7 @@ mod tests {
 
                 #[test]
                 fn number_redaction() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "Content-Length: 136\r\n"
@@ -596,7 +596,7 @@ mod tests {
 
                 #[test]
                 fn boolean_redaction() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "Content-Length: 136\r\n"
@@ -618,7 +618,7 @@ mod tests {
 
                 #[test]
                 fn key_partial_redaction() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "Content-Length: 136\r\n"
@@ -634,7 +634,7 @@ mod tests {
 
                 #[test]
                 fn nested_key_partial_redaction() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "Content-Length: 136\r\n"
@@ -650,7 +650,7 @@ mod tests {
 
                 #[test]
                 fn key_full_redaction() {
-                    let response = "".to_string()
+                    let response = String::new()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "Content-Length: 136\r\n"

@@ -9,14 +9,14 @@ pub(crate) mod tlsn_core_types;
 pub const NOTARY_PUB_KEY_PEM_EXAMPLE: &str = "-----BEGIN PUBLIC KEY-----\nMDYwEAYHKoZIzj0CAQYFK4EEAAoDIgADZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlg=\n-----END PUBLIC KEY-----";
 const WEB_PROOF_FIXTURE: &str = include_str!(".././testdata/web_proof.json");
 
-pub fn read_fixture(path: &str) -> String {
+#[must_use] pub fn read_fixture(path: &str) -> String {
     str::from_utf8(&fs::read(path).unwrap())
         .unwrap()
         .to_string()
         .replace('\n', "\r\n")
 }
 
-pub fn load_web_proof_fixture() -> WebProof {
+#[must_use] pub fn load_web_proof_fixture() -> WebProof {
     serde_json::from_str(WEB_PROOF_FIXTURE).unwrap()
 }
 
@@ -34,7 +34,7 @@ pub(crate) mod utils {
     };
     use crate::web_proof::{PresentationJsonMeta, WebProof};
 
-    pub(crate) fn load_web_proof_fixture_and_modify<F>(modify: F) -> WebProof
+    pub fn load_web_proof_fixture_and_modify<F>(modify: F) -> WebProof
     where
         F: FnOnce(&Presentation) -> Presentation,
     {
@@ -57,7 +57,7 @@ pub(crate) mod utils {
         }
     }
 
-    pub(crate) fn corrupt_signature(test_presentation: &Presentation) -> Presentation {
+    pub fn corrupt_signature(test_presentation: &Presentation) -> Presentation {
         Presentation {
             attestation: AttestationProof {
                 signature: Signature {
@@ -70,7 +70,7 @@ pub(crate) mod utils {
         }
     }
 
-    pub(crate) fn change_server_name(test_presentation: &Presentation) -> Presentation {
+    pub fn change_server_name(test_presentation: &Presentation) -> Presentation {
         Presentation {
             identity: Some(ServerIdentityProof {
                 name: ServerName::new("api.y.com".to_string()),
@@ -80,7 +80,7 @@ pub(crate) mod utils {
         }
     }
 
-    pub(crate) fn corrupt_verifying_key(test_presentation: &Presentation) -> Presentation {
+    pub fn corrupt_verifying_key(test_presentation: &Presentation) -> Presentation {
         Presentation {
             attestation: AttestationProof {
                 body: BodyProof {

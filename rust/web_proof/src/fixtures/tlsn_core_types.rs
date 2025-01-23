@@ -15,33 +15,33 @@ use tlsn_core::{
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct Presentation {
+pub struct Presentation {
     pub(crate) attestation: AttestationProof,
     pub(crate) identity: Option<ServerIdentityProof>,
     pub(crate) transcript: Option<TranscriptProof>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct ServerIdentityProof {
+pub struct ServerIdentityProof {
     pub(crate) name: ServerName,
     pub(crate) opening: ServerCertOpening,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct AttestationProof {
+pub struct AttestationProof {
     pub(crate) signature: Signature,
     pub(crate) header: Header,
     pub(crate) body: BodyProof,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct BodyProof {
+pub struct BodyProof {
     pub(crate) body: Body,
     pub(crate) proof: MerkleProof,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct Body {
+pub struct Body {
     pub(crate) verifying_key: Field<VerifyingKey>,
     pub(crate) connection_info: Field<ConnectionInfo>,
     pub(crate) server_ephemeral_key: Field<ServerEphemKey>,
@@ -51,13 +51,13 @@ pub(crate) struct Body {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct EncodingCommitment {
+pub struct EncodingCommitment {
     pub(crate) root: TypedHash,
     pub(crate) seed: Vec<u8>,
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Index<T> {
+pub struct Index<T> {
     items: Vec<T>,
     #[allow(dead_code)]
     field_ids: HashMap<FieldId, usize>,
@@ -76,13 +76,13 @@ impl<T: Serialize> Serialize for Index<T> {
 
 impl<'de, T: Deserialize<'de>> Deserialize<'de> for Index<T>
 where
-    Index<T>: From<Vec<T>>,
+    Self: From<Vec<T>>,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        Vec::<T>::deserialize(deserializer).map(Index::from)
+        Vec::<T>::deserialize(deserializer).map(Self::from)
     }
 }
 
@@ -119,7 +119,7 @@ impl From<Vec<Field<PlaintextHash>>> for Index<Field<PlaintextHash>> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) struct PlaintextHash {
+pub struct PlaintextHash {
     pub(crate) direction: Direction,
     pub(crate) idx: Idx,
     pub(crate) hash: TypedHash,
@@ -127,7 +127,7 @@ pub(crate) struct PlaintextHash {
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(deny_unknown_fields)]
-pub(crate) struct MerkleProof {
+pub struct MerkleProof {
     pub(crate) alg: HashAlgId,
     pub(crate) tree_len: usize,
     pub(crate) proof: rs_merkle::MerkleProof<Hash>,
@@ -136,7 +136,7 @@ mod rs_merkle {
     use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub(crate) struct MerkleProof<H> {
+    pub struct MerkleProof<H> {
         pub(crate) proof_hashes: Vec<H>,
     }
 }

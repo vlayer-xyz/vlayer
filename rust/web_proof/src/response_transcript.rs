@@ -3,7 +3,7 @@ use derive_new::new;
 use crate::{errors::ParsingError, transcript_parser::parse_response_and_validate_redaction};
 
 #[derive(Debug, new)]
-pub(crate) struct ResponseTranscript {
+pub struct ResponseTranscript {
     pub(crate) transcript: Vec<u8>,
 }
 
@@ -74,7 +74,7 @@ mod tests {
         );
 
         let body = transcript.parse_body();
-        assert_eq!(body.unwrap(), "".to_string());
+        assert_eq!(body.unwrap(), String::new());
     }
 
     #[test]

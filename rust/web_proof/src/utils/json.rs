@@ -2,7 +2,7 @@ use serde_json::Value;
 
 use crate::{errors::ParsingError, redaction::RedactedTranscriptNameValue};
 
-pub(crate) fn json_to_redacted_transcript(
+pub fn json_to_redacted_transcript(
     json_str: &str,
 ) -> Result<Vec<RedactedTranscriptNameValue>, ParsingError> {
     let parsed_json: Value = serde_json::from_str(json_str)?;

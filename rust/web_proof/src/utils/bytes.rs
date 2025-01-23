@@ -1,11 +1,11 @@
-pub(crate) fn replace_bytes(input: &[u8], from: u8, to: u8) -> Vec<u8> {
+pub fn replace_bytes(input: &[u8], from: u8, to: u8) -> Vec<u8> {
     input
         .iter()
         .map(|&b| if b == from { to } else { b })
         .collect()
 }
 
-pub(crate) fn all_match(input: &[u8], target: u8) -> bool {
+pub fn all_match(input: &[u8], target: u8) -> bool {
     input.iter().all(|&c| c == target)
 }
 

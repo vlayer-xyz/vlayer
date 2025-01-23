@@ -4,16 +4,16 @@ use strum::Display;
 
 use crate::{errors::ParsingError, utils::bytes::all_match};
 
-pub(crate) const REDACTED_BYTE_CODE: u8 = 0;
+pub const REDACTED_BYTE_CODE: u8 = 0;
 
 // Both '*' and '+' are valid header characters. Replacing redacted '\0' bytes with
 // two different characters ensures the request is parsable and allows analysis
 // of redacted content via diffs.
-pub(crate) const REDACTION_REPLACEMENT_CHAR_PRIMARY: char = '*';
-pub(crate) const REDACTION_REPLACEMENT_CHAR_SECONDARY: char = '+';
+pub const REDACTION_REPLACEMENT_CHAR_PRIMARY: char = '*';
+pub const REDACTION_REPLACEMENT_CHAR_SECONDARY: char = '+';
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) struct RedactedTranscriptNameValue {
+pub struct RedactedTranscriptNameValue {
     pub(crate) name: String,
     pub(crate) value: Vec<u8>,
 }
@@ -50,7 +50,7 @@ pub enum RedactionElementType {
     ResponseBody,
 }
 
-pub(crate) fn validate_name_value_redaction(
+pub fn validate_name_value_redaction(
     name_values_with_replacement_primary: &[RedactedTranscriptNameValue],
     name_values_with_replacement_secondary: &[RedactedTranscriptNameValue],
     redaction_element_type: RedactionElementType,

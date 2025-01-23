@@ -3,7 +3,7 @@ use derive_new::new;
 use crate::{errors::ParsingError, transcript_parser::parse_request_and_validate_redaction};
 
 #[derive(Debug, new)]
-pub(crate) struct RequestTranscript {
+pub struct RequestTranscript {
     pub(crate) transcript: Vec<u8>,
 }
 

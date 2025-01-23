@@ -9,7 +9,7 @@ use tlsn_core::{
 
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
 
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
+#[derive(Deserialize, Serialize, PartialEq, Eq, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
     pub(crate) version: String,
@@ -44,7 +44,7 @@ impl WebProof {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct PresentationJsonMeta {
     #[serde(rename = "notaryUrl")]
