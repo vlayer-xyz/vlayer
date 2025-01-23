@@ -1,14 +1,13 @@
 ```
-├── AUDIT_TREE.md
-├── Cargo.lock
-├── Cargo.toml
-├── LICENSE
-├── README.md
+├── Cargo.lock [OUT OF SCOPE]
+├── Cargo.toml [OUT OF SCOPE]
+├── LICENSE [OUT OF SCOPE]
+├── README.md [OUT OF SCOPE]
 ├── ansible [OUT OF SCOPE]
 ├── bash [OUT OF SCOPE]
 ├── book [OUT OF SCOPE]
-├── bun.lockb
-├── clippy.toml
+├── bun.lockb [OUT OF SCOPE]
+├── clippy.toml [OUT OF SCOPE]
 ├── contracts
 │   ├── fixtures
 │   │   ├── README.md
@@ -66,17 +65,15 @@
 ├── packages [OUT OF SCOPE]
 ├── rust
 │   ├── block_header
-│   │   ├── Cargo.toml
+│   │   ├── Cargo.toml [OUT OF SCOPE]
 │   │   ├── src
 │   │   │   ├── casting_utils.rs
 │   │   │   ├── eth.rs
 │   │   │   ├── forge.rs
 │   │   │   └── lib.rs
-│   │   └── testdata
-│   │       ├── invalid_header.json
-│   │       └── mainnet_rpc_cache.json
+│   │   └── testdata [OUT OF SCOPE]
 │   ├── chain
-│   │   ├── Cargo.toml
+│   │   ├── Cargo.toml [OUT OF SCOPE]
 │   │   ├── chain_specs.toml
 │   │   └── src
 │   │       ├── config.rs
@@ -84,28 +81,7 @@
 │   │       ├── fork.rs
 │   │       ├── lib.rs
 │   │       └── spec.rs
-│   ├── cli
-│   │   ├── Cargo.toml
-│   │   ├── deny.toml
-│   │   ├── src
-│   │   │   ├── commands
-│   │   │   │   ├── args.rs
-│   │   │   │   ├── common
-│   │   │   │   │   ├── mod.rs
-│   │   │   │   │   └── soldeer.rs
-│   │   │   │   ├── init.rs
-│   │   │   │   ├── test.rs
-│   │   │   │   └── update.rs
-│   │   │   ├── commands.rs
-│   │   │   ├── errors.rs
-│   │   │   ├── main.rs
-│   │   │   ├── test_utils.rs
-│   │   │   └── utils
-│   │   │       ├── mod.rs
-│   │   │       ├── parse_toml.rs
-│   │   │       └── path.rs
-│   │   └── test_static
-│   │       └── contracts.tar.gz
+│   ├── cli [OUT OF SCOPE]
 │   ├── common
 │   │   ├── Cargo.toml
 │   │   └── src
@@ -172,7 +148,7 @@
 │   ├── mpt
 │   │   ├── Cargo.toml
 │   │   ├── README.md
-│   │   ├── clippy.toml
+│   │   ├── clippy.toml [OUT OF SCOPE]
 │   │   ├── images [OUT OF SCOPE]
 │   │   ├── src
 │   │   │   ├── hash.rs
@@ -196,12 +172,8 @@
 │   │   │   ├── node_ref.rs
 │   │   │   ├── path.rs
 │   │   │   ├── trie
-│   │   │   │   ├── tests
-│   │   │   │   │   ├── from_rlp_nodes.rs
-│   │   │   │   │   ├── get.rs
-│   │   │   │   │   ├── hashable.rs
-│   │   │   │   │   └── insert.rs
-│   │   │   │   ├── tests.rs
+│   │   │   │   ├── tests [OUT OF SCOPE]
+│   │   │   │   ├── tests.rs [OUT OF SCOPE]
 │   │   │   │   └── utils.rs
 │   │   │   ├── trie.rs
 │   │   │   └── utils.rs
@@ -221,8 +193,7 @@
 │   │   │   ├── profiling.rs
 │   │   │   ├── proof.rs
 │   │   │   └── provider_ext.rs
-│   │   └── testdata
-│   │       └── cache.json
+│   │   └── testdata  [OUT OF SCOPE]
 │   ├── range
 │   │   ├── Cargo.toml
 │   │   └── src
@@ -233,7 +204,7 @@
 │   ├── services
 │   │   ├── call
 │   │   │   ├── engine
-│   │   │   │   ├── Cargo.toml
+│   │   │   │   ├── Cargo.toml  [OUT OF SCOPE]
 │   │   │   │   └── src
 │   │   │   │       ├── config.rs
 │   │   │   │       ├── consts.rs
@@ -270,7 +241,7 @@
 │   │   │   │       │   └── zk_proof.rs
 │   │   │   │       └── verifier.rs
 │   │   │   ├── guest
-│   │   │   │   ├── Cargo.toml
+│   │   │   │   ├── Cargo.toml  [OUT OF SCOPE]
 │   │   │   │   └── src
 │   │   │   │       ├── db
 │   │   │   │       │   ├── state.rs
@@ -278,12 +249,12 @@
 │   │   │   │       ├── db.rs
 │   │   │   │       ├── guest
 │   │   │   │       │   ├── env.rs
-│   │   │   │       │   └── tests.rs
+│   │   │   │       │   └── tests.rs  [OUT OF SCOPE]
 │   │   │   │       ├── guest.rs
 │   │   │   │       └── lib.rs
 │   │   │   ├── host [OUT OF SCOPE]
 │   │   │   ├── precompiles
-│   │   │   │   ├── Cargo.toml
+│   │   │   │   ├── Cargo.toml  [OUT OF SCOPE]
 │   │   │   │   └── src
 │   │   │   │       ├── json.rs
 │   │   │   │       ├── lib.rs
@@ -292,24 +263,24 @@
 │   │   │   │       ├── verify_and_parse.rs
 │   │   │   │       └── verify_and_parse_email.rs
 │   │   │   ├── seal
-│   │   │   │   ├── Cargo.toml
+│   │   │   │   ├── Cargo.toml  [OUT OF SCOPE]
 │   │   │   │   └── src
 │   │   │   │       └── lib.rs
 │   │   │   ├── server [OUT OF SCOPE]
 │   │   │   └── server_lib [OUT OF SCOPE]
 │   │   ├── chain
 │   │   │   ├── block_trie
-│   │   │   │   ├── Cargo.toml
+│   │   │   │   ├── Cargo.toml  [OUT OF SCOPE]
 │   │   │   │   └── src
 │   │   │   │       └── lib.rs
 │   │   │   ├── client [OUT OF SCOPE]
 │   │   │   ├── common
-│   │   │   │   ├── Cargo.toml
+│   │   │   │   ├── Cargo.toml  [OUT OF SCOPE]
 │   │   │   │   └── src
 │   │   │   │       └── lib.rs
 │   │   │   ├── db [OUT OF SCOPE]
 │   │   │   ├── guest
-│   │   │   │   ├── Cargo.toml
+│   │   │   │   ├── Cargo.toml  [OUT OF SCOPE]
 │   │   │   │   └── src
 │   │   │   │       └── lib.rs
 │   │   │   ├── host [OUT OF SCOPE]
@@ -320,7 +291,7 @@
 │   │   │   └── worker [OUT OF SCOPE]
 │   │   └── dns
 │   │       └── server
-│   │           ├── Cargo.toml
+│   │           ├── Cargo.toml  [OUT OF SCOPE]
 │   │           ├── README.md
 │   │           └── src
 │   │               ├── config.rs
@@ -334,10 +305,8 @@
 │   │               └── server.rs
 │   ├── test_runner [OUT OF SCOPE]
 │   ├── verifiable_dns
-│   │   ├── Cargo.toml
-│   │   ├── assets
-│   │   │   ├── private_key.pem
-│   │   │   └── public_key.pem
+│   │   ├── Cargo.toml  [OUT OF SCOPE]
+│   │   ├── assets  [OUT OF SCOPE]
 │   │   └── src
 │   │       ├── common
 │   │       │   ├── record.rs
@@ -363,7 +332,7 @@
 │   │           └── mod.rs
 │   ├── version [OUT OF SCOPE]
 │   ├── web_proof
-│   │   ├── Cargo.toml
+│   │   ├── Cargo.toml  [OUT OF SCOPE]
 │   │   ├── src
 │   │   │   ├── errors.rs
 │   │   │   ├── fixtures
@@ -383,6 +352,6 @@
 │   │   │   └── web_proof.rs
 │   │   └── testdata [OUT OF SCOPE]
 │   └── zkvm-benchmarks [OUT OF SCOPE]
-├── rust-toolchain.toml
-└── rustfmt.toml
+├── rust-toolchain.toml  [OUT OF SCOPE]
+└── rustfmt.toml  [OUT OF SCOPE]
 ```
