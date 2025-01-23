@@ -61,7 +61,7 @@
 ├── flake.lock [OUT OF SCOPE]
 ├── flake.nix [OUT OF SCOPE]
 ├── nix [OUT OF SCOPE]
-├── package.json
+├── package.json [OUT OF SCOPE]
 ├── packages [OUT OF SCOPE]
 ├── rust
 │   ├── block_header
@@ -86,12 +86,12 @@
 │   │   ├── Cargo.toml
 │   │   └── src
 │   │       ├── cache.rs
-│   │       ├── cli.rs
+│   │       ├── cli.rs [OUT OF SCOPE]
 │   │       ├── guest.rs
 │   │       ├── hashable.rs
 │   │       ├── lib.rs
-│   │       ├── rpc.rs
-│   │       └── trace.rs
+│   │       ├── rpc.rs [OUT OF SCOPE]
+│   │       └── trace.rs [OUT OF SCOPE]
 │   ├── email_proof
 │   │   ├── Cargo.toml
 │   │   ├── src
@@ -114,7 +114,7 @@
 │   │       ├── signed_email_from_subdomain.txt
 │   │       └── signed_email_modified_body.txt
 │   ├── guest_wrapper
-│   │   ├── Cargo.toml
+│   │   ├── Cargo.toml [OUT OF SCOPE]
 │   │   ├── artifacts
 │   │   │   └── chain_guest
 │   │   │       ├── CHANGELOG.md
@@ -122,7 +122,7 @@
 │   │   │       └── elf_id_history
 │   │   ├── build.rs
 │   │   ├── build_utils
-│   │   │   ├── Cargo.toml
+│   │   │   ├── Cargo.toml [OUT OF SCOPE]
 │   │   │   └── src
 │   │   │       ├── chain_guest_id.rs
 │   │   │       ├── data_layout.rs
@@ -130,14 +130,14 @@
 │   │   │       └── risc0_builder.rs
 │   │   ├── chain_guest_elf_id
 │   │   ├── risc0_call_guest
-│   │   │   ├── Cargo.lock
-│   │   │   ├── Cargo.toml
+│   │   │   ├── Cargo.lock [OUT OF SCOPE]
+│   │   │   ├── Cargo.toml [OUT OF SCOPE]
 │   │   │   ├── build.rs
 │   │   │   └── src
 │   │   │       └── main.rs
 │   │   ├── risc0_chain_guest
-│   │   │   ├── Cargo.lock
-│   │   │   ├── Cargo.toml
+│   │   │   ├── Cargo.lock [OUT OF SCOPE]
+│   │   │   ├── Cargo.toml [OUT OF SCOPE]
 │   │   │   ├── build.rs
 │   │   │   └── src
 │   │   │       └── main.rs
@@ -178,28 +178,8 @@
 │   │   │   ├── trie.rs
 │   │   │   └── utils.rs
 │   │   └── tests [OUT OF SCOPE]
-│   ├── provider
-│   │   ├── Cargo.toml
-│   │   ├── src
-│   │   │   ├── cache
-│   │   │   │   └── json.rs
-│   │   │   ├── cache.rs
-│   │   │   ├── default.rs
-│   │   │   ├── ethers.rs
-│   │   │   ├── factory.rs
-│   │   │   ├── lib.rs
-│   │   │   ├── multi.rs
-│   │   │   ├── never.rs
-│   │   │   ├── profiling.rs
-│   │   │   ├── proof.rs
-│   │   │   └── provider_ext.rs
-│   │   └── testdata  [OUT OF SCOPE]
-│   ├── range
-│   │   ├── Cargo.toml
-│   │   └── src
-│   │       ├── lib.rs
-│   │       ├── non_empty_range.rs
-│   │       └── range.rs
+│   ├── provider [OUT OF SCOPE]
+│   ├── range [OUT OF SCOPE]
 │   ├── server_utils [OUT OF SCOPE]
 │   ├── services
 │   │   ├── call
