@@ -1,5 +1,5 @@
 .
-├── .cargo
+├── **.cargo [??]**
 │   └── config.toml
 ├── **.dockerignore [??]**
 ├── **.git-branches.toml [OUT OF SCOPE]**
@@ -83,10 +83,10 @@
 │   ├── lib
 │   │   ├── examples.sh
 │   │   └── io.sh
-│   ├── lint-fix.sh
-│   ├── lint-json.sh
-│   ├── lint-solidity-examples.sh
-│   ├── lint-ts.sh
+│   ├── **lint-fix.sh [OUT OF SCOPE]**
+│   ├── **lint-json.sh [OUT OF SCOPE]**
+│   ├── **lint-solidity-examples.sh [OUT OF SCOPE]**
+│   ├── **lint-ts.sh [OUT OF SCOPE]**
 │   ├── **mock-imageid.sh [OUT OF SCOPE]**
 │   ├── **pack-examples.sh [OUT OF SCOPE]**
 │   ├── playwright-test.sh
@@ -161,7 +161,7 @@
 ├── **flake.lock [OUT OF SCOPE]**
 ├── **flake.nix [OUT OF SCOPE]**
 ├── **nix [OUT OF SCOPE]**
-├── package.json
+├── **package.json [OUT OF SCOPE]**
 ├── **packages [OUT OF SCOPE]**
 ├── rust
 │   ├── block_header
@@ -445,7 +445,7 @@
 │   │   │       │   └── server.rs
 │   │   │       ├── **testdata [OUT OF SCOPE]**
 │   │   │       └── **tests [OUT OF SCOPE]**
-│   │   ├── chain
+│   │   ├── **chain [TODO: Leo]**
 │   │   │   ├── block_trie
 │   │   │   │   ├── Cargo.toml
 │   │   │   │   └── src
