@@ -36,6 +36,9 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
 for example in $(get_examples); do
+    echo "Starting VDNS server"
+    docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart vdns_server
+
     echo "::group::Initializing vlayer template: ${example}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
