@@ -28,18 +28,17 @@ const whaleBadgeNFTAddress = await waitForContractDeploy({
   hash: deployWhaleBadgeHash,
 });
 
-const tokensToCheck: [Address, bigint, bigint][] = (
-  process.env.PROVER_ERC20_ADDRESSES?.split(",") || []
-).map((addr, i) => [
-  addr as Address,
-  BigInt(process.env.PROVER_ERC20_CHAIN_IDS?.split(",")[i]),
-  BigInt(process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",")[i]),
-]);
+const tokensToCheck: { addr: Address; chainId: bigint; blockNumber: bigint }[] =
+  (process.env.PROVER_ERC20_ADDRESSES?.split(",") || []).map((addr, i) => ({
+    addr: addr as Address,
+    chainId: BigInt(process.env.PROVER_ERC20_CHAIN_IDS?.split(",")[i]),
+    blockNumber: BigInt(process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",")[i]),
+  }));
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [tokensToCheck],
+  proverArgs: [],
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
@@ -48,7 +47,7 @@ const proofHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "crossChainBalanceOf",
-  args: [john],
+  args: [john, tokensToCheck],
   chainId: chain.id,
   token: config.token,
 });
