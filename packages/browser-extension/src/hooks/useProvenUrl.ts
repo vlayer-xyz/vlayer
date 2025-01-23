@@ -2,6 +2,7 @@ import { useBrowsingHistory } from "./useBrowsingHistory";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { BrowsingHistoryItem } from "../state/history";
 import { LOADING } from "@vlayer/extension-hooks";
+import { URLPattern } from "urlpattern-polyfill";
 
 export function useProvenUrl(): BrowsingHistoryItem | null {
   const [config] = useProvingSessionConfig();
@@ -9,10 +10,9 @@ export function useProvenUrl(): BrowsingHistoryItem | null {
 
   const steps = config !== LOADING ? config.steps : [];
   const provenUrlAddress = steps.find(({ step }) => step === "notarize")?.url;
-
   return (
-    browsingHistory.find((item) =>
-      item.url.includes(provenUrlAddress as string),
-    ) ?? null
+    browsingHistory.find((item: BrowsingHistoryItem) => {
+      return new URLPattern(provenUrlAddress as string).test(item.url);
+    }) ?? null
   );
 }
