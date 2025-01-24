@@ -36,7 +36,8 @@ export default defineConfig({
   // Run your local dev server before starting the tests.
   webServer: {
     // we want to be able to modify WEB_SERVER_COMMAND when running in CI
-    command: process.env.WEB_SERVER_COMMAND || "bun run web:" + process.env.VLAYER_ENV,
+    command:
+      process.env.WEB_SERVER_COMMAND || "bun run web:" + process.env.VLAYER_ENV,
     url: "http://localhost:5173",
     stdout: "pipe",
     stderr: "pipe",
