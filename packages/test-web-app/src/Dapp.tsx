@@ -157,7 +157,9 @@ function DappNewWay() {
             <button
               data-testid="zk-prove-button"
               onClick={handleZkProofRequestClick}
-            />
+            >
+            Request zk proof
+            </button>
           </>
         ) : (
           <h1> No web proof </h1>
@@ -250,6 +252,10 @@ function Dapp() {
         },
       ],
     });
+    if(!hash){
+      throw new Error("Hash is undefined");
+    }
+
     const zkProof = await vlayerClient.current?.waitForProvingResult({ hash });
     console.log("ZK proof", zkProof);
     setZkProof(zkProof);
@@ -283,7 +289,9 @@ function Dapp() {
             <button
               data-testid="zk-prove-button"
               onClick={handleZkProofRequestClick}
-            />
+            >
+              Request zk proof
+            </button>
           </>
         ) : (
           <h1> No web proof </h1>
