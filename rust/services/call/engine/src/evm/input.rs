@@ -3,7 +3,7 @@ use std::{collections::HashMap, iter::once};
 use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader, Hashable};
 use derivative::Derivative;
-use derive_more::{From, Into, IntoIterator};
+use derive_more::{Deref, DerefMut, From, Into, IntoIterator};
 use derive_new::new;
 use itertools::Itertools;
 use mpt::KeccakMerkleTrie as MerkleTrie;
@@ -71,6 +71,15 @@ impl EvmInput {
     }
 }
 
+#[derive(Debug, Clone, From, Deref, DerefMut, IntoIterator)]
+pub struct BlocksByChain(HashMap<ChainId, Vec<(BlockNumber, BlockHash)>>);
+
+impl BlocksByChain {
+    pub fn chain_ids(&self) -> Box<[ChainId]> {
+        self.0.keys().cloned().collect()
+    }
+}
+
 #[derive(Debug, Default, Serialize, Deserialize, Clone, From, Into, IntoIterator, new)]
 pub struct MultiEvmInput {
     pub inputs: HashMap<ExecutionLocation, EvmInput>,
@@ -109,8 +118,9 @@ impl MultiEvmInput {
             .into_group_map()
     }
 
-    pub fn blocks_by_chain(&self) -> HashMap<ChainId, Vec<(BlockNumber, BlockHash)>> {
+    pub fn blocks_by_chain(&self) -> BlocksByChain {
         self.group_blocks(|loc, evm_input| (loc.block_number, evm_input.header.hash_slow()))
+            .into()
     }
 
     pub fn block_nums_by_chain(&self) -> HashMap<ChainId, Vec<BlockNumber>> {

@@ -18,6 +18,8 @@ pub enum Error {
         hash_in_input: B256,
         proven_hash: B256,
     },
+    #[error("Attempted time travel while chain service is not available")]
+    ChainServiceNotAvailable,
 }
 
 pub type Result = std::result::Result<(), Error>;
@@ -25,7 +27,7 @@ sealed_with_test_mock!(async IVerifier (chain_id: ChainId, blocks: Vec<(BlockNum
 
 #[derive(new)]
 pub struct Verifier<C: chain_client::Client, V: chain_proof::IVerifier> {
-    chain_client: C,
+    chain_client: Option<C>,
     chain_proof_verifier: V,
 }
 
@@ -36,11 +38,11 @@ impl<C: chain_client::Client, V: chain_proof::IVerifier> IVerifier for Verifier<
         if blocks.len() == 1 {
             return Ok(()); // No need to verify chain proofs for a single location
         }
+        let Some(ref client) = self.chain_client else {
+            return Err(Error::ChainServiceNotAvailable);
+        };
         let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
-        let chain_proof = self
-            .chain_client
-            .get_chain_proof(chain_id, block_numbers)
-            .await?;
+        let chain_proof = client.get_chain_proof(chain_id, block_numbers).await?;
         self.chain_proof_verifier.verify(&chain_proof)?;
         for (block_num, block_hash) in blocks {
             let trie_block_hash = chain_proof
