@@ -28,6 +28,7 @@ impl IVerifier for Verifier {
         _start_exec_location: ExecutionLocation,
     ) -> Result {
         let chains = blocks_by_chain.keys().cloned().collect::<Vec<_>>();
+        #[allow(clippy::match_same_arms)]
         match chains.as_slice() {
             [] => unreachable!(
                 "Empty list of execution locations. At least start one should always be there"
