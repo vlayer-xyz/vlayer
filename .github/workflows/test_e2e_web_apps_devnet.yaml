@@ -1,4 +1,4 @@
-name: E2E test of example web apps
+name: E2E test of example web apps on devnet
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       - "packages/**"
       - "bash/run-services.sh"
       - "bash/e2e-web-apps-test.sh"
-      - ".github/workflows/test_e2e_web_apps.yaml"
+      - ".github/workflows/test_e2e_web_apps_devnet.yaml"
       - "contracts/**"
   merge_group:
   push:
