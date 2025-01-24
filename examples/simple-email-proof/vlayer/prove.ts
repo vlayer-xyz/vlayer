@@ -31,6 +31,7 @@ console.log("Proving...");
 const vlayer = createVlayerClient({
   url: proverUrl,
 });
+console.log(await preverifyEmail(mimeEmail, "http://127.0.0.1:3002/dns-query"));
 const hash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
