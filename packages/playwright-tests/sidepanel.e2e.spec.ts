@@ -1,6 +1,6 @@
 import { expect, test } from "./config";
 import { sidePanel } from "./helpers";
-import { Response } from "@playwright/test";
+import { type Response } from "@playwright/test";
 
 const config = {
   loginUrl: "/login",
