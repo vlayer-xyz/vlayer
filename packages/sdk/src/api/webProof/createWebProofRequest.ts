@@ -1,7 +1,7 @@
 import {
   type WebProofRequest,
   type WebProofRequestInput,
-} from "types/webProofProvider";
+} from "../lib/types/webProofProvider";
 
 export const createWebProofRequest = ({
   logoUrl,
