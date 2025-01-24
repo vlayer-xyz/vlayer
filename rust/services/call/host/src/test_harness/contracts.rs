@@ -124,7 +124,7 @@ pub mod teleport {
 
     // Generated using `simple_teleport` example
     pub const SIMPLE_TELEPORT: Address = address!("9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
-    pub const JOHN: Address = address!("70997970C51812dc3A010C7d01b50e0d17dc79C8");
+    pub const JOHN: Address = address!("e2148eE53c0755215Df69b2616E552154EdC584f");
     pub const BLOCK_NO: u64 = 3;
     pub const TOKEN: Erc20Token = Erc20Token {
         addr: TOKEN_ADDR,
@@ -133,7 +133,7 @@ pub mod teleport {
     };
     const OP_BLOCK_NO: Uint<256, 4> = uint!(3_U256);
     const OP_ANVIL_CHAIN_ID: Uint<256, 4> = uint!(31338_U256);
-    const TOKEN_ADDR: Address = address!("5FbDB2315678afecb367f032d93F642f64180aa3");
+    const TOKEN_ADDR: Address = address!("da52b25ddB0e3B9CC393b0690Ac62245Ac772527");
 
     sol! {
         #[derive(Debug)]
