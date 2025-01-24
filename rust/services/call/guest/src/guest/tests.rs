@@ -1,11 +1,9 @@
-use std::collections::HashMap;
-
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use call_engine::{
     evm::{
         env::location::ExecutionLocation,
-        input::{EvmInput, MultiEvmInput},
+        input::{BlocksByChain, EvmInput, MultiEvmInput},
     },
     verifier::{time_travel, travel_call},
 };
@@ -30,10 +28,7 @@ fn time_travel_invalid_zk_proof(
     )))
 }
 
-fn teleport_ok(
-    _: HashMap<ChainId, Vec<(BlockNumber, BlockHash)>>,
-    _: ExecutionLocation,
-) -> teleport::Result {
+fn teleport_ok(_: BlocksByChain, _: ExecutionLocation) -> teleport::Result {
     Ok(())
 }
 

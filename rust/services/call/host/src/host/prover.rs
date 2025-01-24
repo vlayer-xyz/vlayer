@@ -52,7 +52,7 @@ mod tests {
 
         assert_eq!(
             res.map(|_| ()).unwrap_err().to_string(),
-            "Prover: Guest panicked: travel call execution failed: EvmEnv(NullEvmEnvFactory)"
+            "Prover: Guest panicked: internal error: entered unreachable code: Empty list of execution locations. At least start one should always be there"
         );
     }
 }
