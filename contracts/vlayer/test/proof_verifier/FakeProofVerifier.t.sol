@@ -16,10 +16,6 @@ contract FakeProofVerifier_Tests is Test {
         assert(verifier.PROOF_MODE() == ProofMode.FAKE);
     }
 
-    function test_usesProperImageId() public view {
-        assert(verifier.CALL_GUEST_ID() == ImageID.RISC0_CALL_GUEST_ID);
-    }
-
     function test_usesMockRiscZeroVerifier() public {
         RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
 

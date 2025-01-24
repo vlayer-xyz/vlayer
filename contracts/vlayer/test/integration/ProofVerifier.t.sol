@@ -23,14 +23,12 @@ interface PinnedSimpleProver {
 contract FakeProofVerifierUnderTest is FakeProofVerifier {
     constructor() {
         IMAGE_ID_REPOSITORY.addSupport(ProofFixtures.FIXED_CALL_GUEST_ID);
-        CALL_GUEST_ID = ProofFixtures.FIXED_CALL_GUEST_ID;
     }
 }
 
 contract Groth16ProofVerifierUnderTest is Groth16ProofVerifier {
     constructor() {
         IMAGE_ID_REPOSITORY.addSupport(ProofFixtures.FIXED_CALL_GUEST_ID);
-        CALL_GUEST_ID = ProofFixtures.FIXED_CALL_GUEST_ID;
     }
 }
 

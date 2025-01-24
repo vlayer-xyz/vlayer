@@ -13,10 +13,6 @@ contract ProofVerifierRouter is IProofVerifier {
     FakeProofVerifier public fakeProofVerifier = new FakeProofVerifier();
     Groth16ProofVerifier public groth16ProofVerifier = new Groth16ProofVerifier();
 
-    function callGuestId() external view returns (bytes32) {
-        return groth16ProofVerifier.callGuestId();
-    }
-
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
         external
         view

@@ -17,10 +17,6 @@ contract Groth16ProofVerifier_Tests is Test {
         assert(verifier.PROOF_MODE() == ProofMode.GROTH16);
     }
 
-    function test_usesProperImageId() public view {
-        assert(verifier.CALL_GUEST_ID() == ImageID.RISC0_CALL_GUEST_ID);
-    }
-
     function test_usesGroth16RiscZeroVerifier() public {
         RiscZeroGroth16Verifier mockVerifier =
             new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
