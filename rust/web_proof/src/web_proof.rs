@@ -6,6 +6,7 @@ use tlsn_core::{
     signing::VerifyingKey,
     CryptoProvider,
 };
+use std::convert::TryFrom;
 
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
 
@@ -24,7 +25,7 @@ impl WebProof {
     {
         let provider = CryptoProvider::default();
 
-        let presentation = self.deserialize()?;
+        let presentation = Presentation::try_from(self)?;
         let verifying_key = presentation.verifying_key().clone();
 
         let PresentationOutput {
@@ -55,9 +56,11 @@ pub struct PresentationJsonMeta {
     pub plugin_url: Option<String>,
 }
 
-impl WebProof {
-    pub fn deserialize(&self) -> Result<Presentation, DeserializeError> {
-        let bytes = hex::decode(&self.data)?;
+impl TryFrom<WebProof> for Presentation {
+    type Error = DeserializeError;
+
+    fn try_from(web_proof: WebProof) -> Result<Self, DeserializeError> {
+        let bytes = hex::decode(&web_proof.data)?;
         let presentation = bincode::deserialize(&bytes)?;
         Ok(presentation)
     }
@@ -96,11 +99,11 @@ mod tests {
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::fixtures::{
+    use crate::{fixtures::{
         load_web_proof_fixture, read_fixture,
         utils::{corrupt_signature, corrupt_verifying_key, load_web_proof_fixture_and_modify},
         NOTARY_PUB_KEY_PEM_EXAMPLE,
-    };
+    }, web};
 
     #[test]
     fn serialize_deserialize_web_proof() {
@@ -168,7 +171,7 @@ mod tests {
         let web_proof = read_fixture("./testdata/web_proof.json");
         let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
-        let presentation: Presentation = web_proof.deserialize().unwrap();
+        let presentation: Presentation = Presentation::try_from(web_proof).unwrap();
         assert_eq!(presentation.verifying_key().alg, KeyAlgId::K256);
     }
 }
