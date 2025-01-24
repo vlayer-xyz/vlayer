@@ -16,7 +16,7 @@
     "test:dev": "echo \"No tests specified yet\"",
     "test:testnet": "echo \"No tests specified yet\"",
     "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
-    "web:testnet": "VLAYER_ENV=testnet bun run bun run deploy.ts && vite"
+    "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
