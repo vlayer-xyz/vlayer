@@ -1,11 +1,13 @@
-use alloy_primitives::{BlockNumber, ChainId, B256};
+use std::collections::HashMap;
+
+use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use call_engine::{
     evm::{
         env::location::ExecutionLocation,
         input::{EvmInput, MultiEvmInput},
     },
-    verifier::{chain_proof, time_travel, travel_call, zk_proof},
+    verifier::{time_travel, travel_call},
 };
 use mpt::KeccakMerkleTrie as MerkleTrie;
 
@@ -15,14 +17,24 @@ const CHAIN_ID: ChainId = 1;
 const BLOCK_NUM: BlockNumber = 0;
 const EXEC_LOCATION: ExecutionLocation = ExecutionLocation::new(CHAIN_ID, BLOCK_NUM);
 
-const fn input_ok(_: &MultiEvmInput, _: ExecutionLocation) -> travel_call::Result {
+fn time_travel_ok(_: ChainId, _: Vec<(BlockNumber, BlockHash)>) -> time_travel::Result {
     Ok(())
 }
 
-const fn input_invalid(_: &MultiEvmInput, _: ExecutionLocation) -> travel_call::Result {
-    Err(travel_call::Error::TimeTravel(time_travel::Error::ChainProof(
-        chain_proof::Error::Zk(zk_proof::Error::InvalidProof),
+fn time_travel_invalid_zk_proof(
+    _: ChainId,
+    _: Vec<(BlockNumber, BlockHash)>,
+) -> time_travel::Result {
+    Err(time_travel::Error::ChainProof(chain_proof::Error::Zk(
+        zk_proof::Error::InvalidProof,
     )))
+}
+
+fn teleport_ok(
+    _: HashMap<ChainId, Vec<(BlockNumber, BlockHash)>>,
+    _: ExecutionLocation,
+) -> teleport::Result {
+    Ok(())
 }
 
 fn mock_header(state_root: B256) -> Box<dyn EvmBlockHeader> {
@@ -60,7 +72,8 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_ok, multi_evm_input, EXEC_LOCATION).await;
+        let verifier = travel_call::Verifier::new(time_travel_ok, teleport_ok);
+        _ = verify_input(verifier, multi_evm_input, EXEC_LOCATION).await;
     }
 
     #[tokio::test]
@@ -69,7 +82,8 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = B256::ZERO; // invalid state root hash
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_ok, multi_evm_input, EXEC_LOCATION).await;
+        let verifier = travel_call::Verifier::new(time_travel_ok, teleport_ok);
+        _ = verify_input(verifier, multi_evm_input, EXEC_LOCATION).await;
     }
 
     #[tokio::test]
@@ -78,6 +92,7 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_invalid, multi_evm_input, EXEC_LOCATION).await;
+        let verifier = travel_call::Verifier::new(time_travel_invalid_zk_proof, teleport_ok);
+        _ = verify_input(verifier, multi_evm_input, EXEC_LOCATION).await;
     }
 }
