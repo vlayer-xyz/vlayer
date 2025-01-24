@@ -38,6 +38,7 @@ bytes constant TEST_DNS_PUBLIC_KEY = "TEST_DNS_PUBLIC_KEY";
 
 library EmailProofLib {
     function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory) {
+        require(unverifiedEmail.verificationData.validUntil > block.timestamp, "EmailProof: expired DNS verification");
         if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
             require(KEY_VAULT.isDnsKeyValid(unverifiedEmail.verificationData.pubKey), "Not a valid VDNS public key");
         } else {
@@ -46,7 +47,6 @@ library EmailProofLib {
                 "Not a valid VDNS hardcoded key"
             );
         }
-        require(unverifiedEmail.verificationData.validUntil > block.timestamp, "EmailProof: expired DNS verification");
 
         (bool success, bytes memory returnData) = Precompiles.VERIFY_EMAIL.staticcall(abi.encode(unverifiedEmail));
         Address.verifyCallResult(success, returnData);
