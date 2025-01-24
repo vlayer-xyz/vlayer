@@ -15,6 +15,11 @@ contract ProofVerifierRouter is IProofVerifier {
     Groth16ProofVerifier public immutable groth16ProofVerifier;
 
     constructor(FakeProofVerifier _fakeProofVerifier, Groth16ProofVerifier _groth16ProofVerifier) {
+        require(
+            _groth16ProofVerifier.imageIdRepository() == _fakeProofVerifier.imageIdRepository(),
+            "Verifiers should use same repository"
+        );
+
         fakeProofVerifier = _fakeProofVerifier;
         groth16ProofVerifier = _groth16ProofVerifier;
     }

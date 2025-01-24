@@ -8,6 +8,9 @@ import {SelectorMismatch} from "risc0-ethereum-1.2.0/src/groth16/RiscZeroGroth16
 import {Proof} from "../../src/Proof.sol";
 import {ProofMode} from "../../src/Seal.sol";
 import {IProofVerifier} from "../../src/proof_verifier/IProofVerifier.sol";
+import {ImageIdRepository} from "../../src/proof_verifier/ImageIdRepository.sol";
+import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";
+import {Groth16ProofVerifier} from "../../src/proof_verifier/Groth16ProofVerifier.sol";
 import {ProofVerifierRouter} from "../../src/proof_verifier/ProofVerifierRouter.sol";
 
 import {TestHelpers, PROVER, SELECTOR} from "../helpers/TestHelpers.sol";
@@ -20,6 +23,14 @@ contract Router_Verify_Tests is Test {
 
     constructor() {
         router = testDeployer.proofVerifierRouter();
+    }
+
+    function test_failsToConstructWhenVerifiersUseDifferentImageIDRepositories() public {
+        FakeProofVerifier fakeVerifier = new FakeProofVerifier(ImageIdRepository(address(1)));
+        Groth16ProofVerifier groth16ProofVerifier = testDeployer.groth16ProofVerifier();
+
+        vm.expectRevert("Verifiers should use same repository");
+        new ProofVerifierRouter(fakeVerifier, groth16ProofVerifier);
     }
 
     function test_runsFakeVerifierForFakeProof() public {
