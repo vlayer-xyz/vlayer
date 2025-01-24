@@ -47,7 +47,7 @@ pub async fn await_proving(
     metrics.times.proving = metrics::elapsed_time_as_millis_u64(elapsed_time)?;
 
     gas_meter_client
-        .refund(ComputationStage::Proving, 0)
+        .refund(ComputationStage::Proving, metrics.gas)
         .await?;
 
     Ok(raw_data)
