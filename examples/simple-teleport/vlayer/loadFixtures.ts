@@ -12,6 +12,7 @@ import { foundry } from "viem/chains";
 import MockERC20 from "../out/MockERC20.sol/MockERC20";
 import { privateKeyToAccount } from "viem/accounts";
 import L2State from "../out/L2State.sol/L2State";
+import { type Address } from "viem";
 
 const l1 = {
   ...foundry,
@@ -45,20 +46,22 @@ function computeOutputRoot(
     latestBlock.hash.slice(2),
   ].join("");
 
-  return keccak256(`0x${payload}` as `0x${string}`);
+  return keccak256(`0x${payload}` as Address);
 }
 
 export const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
 export const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
 
-const [_, john] = await l2TestClient.getAddresses();
+const account = privateKeyToAccount(config.privateKey as Address);
 
-const account = privateKeyToAccount(config.privateKey as `0x${string}`);
+const opAccount = privateKeyToAccount(
+  process.env.EXAMPLES_TEST_OP_PRIVATE_KEY as Address,
+);
 
 const hash = await l2TestClient.deployContract({
   abi: MockERC20.abi,
   bytecode: MockERC20.bytecode.object,
-  account,
+  account: opAccount,
   args: ["L2 ERC20 Token", "L2ERC20"],
 });
 
@@ -70,15 +73,15 @@ await l2TestClient.writeContract({
   address: erc20addr,
   abi: MockERC20.abi,
   functionName: "mint",
-  args: [account.address, 1000n],
-  account,
+  args: [opAccount.address, 1000n],
+  account: opAccount,
 });
 await l2TestClient.writeContract({
   address: erc20addr,
   abi: MockERC20.abi,
   functionName: "transfer",
-  args: [john, 100n],
-  account,
+  args: [process.env.TOKEN_HOLDER as Address, 100n],
+  account: opAccount,
 });
 
 const latestBlock = await l2TestClient.getBlock({ blockTag: "latest" });
