@@ -1,4 +1,4 @@
-name: E2E test of example web apps
+name: E2E test of example web apps on testnet
 
 on:
   pull_request:
