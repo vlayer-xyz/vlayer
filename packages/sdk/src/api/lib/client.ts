@@ -167,8 +167,6 @@ export const createVlayerClient = (
 
       const webProof = await webProofPromise;
 
-      console.log("webProof", webProof);
-      console.log("webProofJson", JSON.stringify(webProof.presentationJSON));
       const hash = await this.prove({
         address,
         functionName,
