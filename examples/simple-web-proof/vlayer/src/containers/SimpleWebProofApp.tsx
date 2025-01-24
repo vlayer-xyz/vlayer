@@ -2,7 +2,7 @@ import { WelcomeScreen } from "../components/WelcomeScreen";
 import { WalletContainer } from "./WalletContainer";
 import { ProvingContainer } from "./ProvingContainer";
 import { MintingContainer } from "./MintingContainer";
-import { Success } from "../components/Success";
+import { SuccessContainer } from "./SuccessContainer";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -53,7 +53,7 @@ const SimpleWebProofApp = () => {
               <Route path="/connect-wallet" element={<WalletContainer />} />
               <Route path="/start-proving" element={<ProvingContainer />} />
               <Route path="/minting" element={<MintingContainer />} />
-              <Route path="/success" element={<Success />} />
+              <Route path="/success" element={<SuccessContainer />} />
             </Routes>
           </BrowserRouter>
         </ProofProvider>
