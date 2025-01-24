@@ -68,9 +68,6 @@ pub enum PreflightError {
     #[error("Calldata too large: {0} bytes")]
     CalldataTooLargeError(usize),
 
-    #[error("Attempted teleport while chain service is not available")]
-    ChainServiceNotAvailable,
-
     #[error("TravelCallExecutor error: {0}")]
     Engine(#[from] TravelCallExecutorError),
 

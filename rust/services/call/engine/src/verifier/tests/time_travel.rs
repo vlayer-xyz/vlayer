@@ -49,7 +49,7 @@ async fn verify_time_travel_destinations(
     verifier: impl chain_proof::IVerifier,
     destinations: Vec<(BlockNumber, BlockHash)>,
 ) -> Result<(), Error> {
-    Verifier::new(chain_client, verifier)
+    Verifier::new(Some(chain_client), verifier)
         .verify(CHAIN_ID, destinations)
         .await
 }
