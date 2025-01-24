@@ -20,6 +20,6 @@ contract TestDeployer {
 
         fakeProofVerifier = new FakeProofVerifier();
         groth16ProofVerifier = new Groth16ProofVerifier();
-        proofVerifierRouter = new ProofVerifierRouter();
+        proofVerifierRouter = new ProofVerifierRouter(fakeProofVerifier, groth16ProofVerifier);
     }
 }
