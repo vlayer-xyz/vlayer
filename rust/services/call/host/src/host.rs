@@ -208,13 +208,6 @@ async fn get_chain_proofs(
     chain_proof_client: Option<chain_client::RecordingClient>,
     verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
 ) -> Result<ChainProofCache, PreflightError> {
-    if !multi_evm_input.contains_time_travel() {
-        return Ok(HashMap::new());
-    }
-    let Some(chain_proof_client) = chain_proof_client else {
-        return Err(PreflightError::ChainServiceNotAvailable);
-    };
-
     let time_travel_verifier = time_travel::Verifier::new(chain_proof_client.clone(), verifier);
     let teleport_verifier = teleport::Verifier::new();
     let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier, teleport_verifier);
@@ -223,5 +216,7 @@ async fn get_chain_proofs(
         .await?;
     drop(travel_call_verifier); // Drop verifier to be able to get the chain proof cache
 
-    Ok(chain_proof_client.into_cache())
+    let chain_proofs =
+        chain_proof_client.map_or(HashMap::new(), chain_client::RecordingClient::into_cache);
+    Ok(chain_proofs)
 }
