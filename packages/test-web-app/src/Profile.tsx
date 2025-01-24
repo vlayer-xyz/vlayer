@@ -7,7 +7,7 @@ function Profile() {
     const getGandalf = async () => {
       setIsLoading(true);
       const response = await fetch(
-        "https://lotr-api.online:3011/regular_json?are_you_sure=yes",
+        "https://lotr-api.online:3011/regular_json?are_you_sure=yes&really=yes",
       );
       const data = (await response.json()) as { name: string };
       setGandalf(data);

@@ -84,7 +84,7 @@ function DappNewWay() {
         expectUrl(dashboardUrl, "At dashboard page"),
         expectUrl(profileUrl, "At profile page"),
         notarize(
-          "https://lotr-api.online:3011/regular_json?are_you_sure=yes",
+          "https://lotr-api.online:3011/regular_json?are_you_sure=yes*",
           "GET",
           "Prove",
           [
@@ -103,7 +103,7 @@ function DappNewWay() {
             },
             {
               request: {
-                url_query: ["are_you_sure"],
+                url_query: ["really"],
               },
             },
             {
