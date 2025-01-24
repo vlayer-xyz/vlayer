@@ -63,7 +63,6 @@ jobs:
           QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
           QUICKNODE_ENDPOINT: "dry-alpha-tab"
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
-          VLAYER_ENV: testnet
           CHAIN_NAME: "optimismSepolia"
           JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
           PROVER_URL: http://127.0.0.1:3000
