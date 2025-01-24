@@ -37,7 +37,7 @@ contract Router_Verify_Tests is Test {
         (Proof memory proof, bytes32 journalHash) = helpers.createProof();
 
         vm.expectCall(
-            address(router.fakeProofVerifier()),
+            address(router.FAKE_PROOF_VERIFIER()),
             abi.encodeCall(IProofVerifier.verify, (proof, journalHash, PROVER, SELECTOR))
         );
         router.verify(proof, journalHash, PROVER, SELECTOR);

@@ -11,8 +11,8 @@ import {Groth16ProofVerifier} from "./Groth16ProofVerifier.sol";
 contract ProofVerifierRouter is IProofVerifier {
     using SealLib for Seal;
 
-    FakeProofVerifier public immutable fakeProofVerifier;
-    Groth16ProofVerifier public immutable groth16ProofVerifier;
+    FakeProofVerifier public immutable FAKE_PROOF_VERIFIER;
+    Groth16ProofVerifier public immutable GROTH16_PROOF_VERIFIER;
 
     constructor(FakeProofVerifier _fakeProofVerifier, Groth16ProofVerifier _groth16ProofVerifier) {
         require(
@@ -20,12 +20,12 @@ contract ProofVerifierRouter is IProofVerifier {
             "Verifiers should use same repository"
         );
 
-        fakeProofVerifier = _fakeProofVerifier;
-        groth16ProofVerifier = _groth16ProofVerifier;
+        FAKE_PROOF_VERIFIER = _fakeProofVerifier;
+        GROTH16_PROOF_VERIFIER = _groth16ProofVerifier;
     }
 
     function imageIdRepository() external view returns (ImageIdRepository) {
-        return groth16ProofVerifier.imageIdRepository();
+        return GROTH16_PROOF_VERIFIER.imageIdRepository();
     }
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
@@ -33,9 +33,9 @@ contract ProofVerifierRouter is IProofVerifier {
         view
     {
         if (proof.seal.proofMode() == ProofMode.FAKE) {
-            fakeProofVerifier.verify(proof, journalHash, expectedProver, expectedSelector);
+            FAKE_PROOF_VERIFIER.verify(proof, journalHash, expectedProver, expectedSelector);
         } else if (proof.seal.proofMode() == ProofMode.GROTH16) {
-            groth16ProofVerifier.verify(proof, journalHash, expectedProver, expectedSelector);
+            GROTH16_PROOF_VERIFIER.verify(proof, journalHash, expectedProver, expectedSelector);
         }
     }
 }
