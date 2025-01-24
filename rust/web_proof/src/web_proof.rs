@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tlsn_core::{
@@ -6,7 +8,6 @@ use tlsn_core::{
     signing::VerifyingKey,
     CryptoProvider,
 };
-use std::convert::TryFrom;
 
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
 
@@ -99,11 +100,11 @@ mod tests {
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::{fixtures::{
+    use crate::fixtures::{
         load_web_proof_fixture, read_fixture,
         utils::{corrupt_signature, corrupt_verifying_key, load_web_proof_fixture_and_modify},
         NOTARY_PUB_KEY_PEM_EXAMPLE,
-    }, web};
+    };
 
     #[test]
     fn serialize_deserialize_web_proof() {
