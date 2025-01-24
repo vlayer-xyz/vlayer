@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
+import {console} from "forge-std-1.9.4/src/Test.sol";
+
 import {ImageID} from "../../src/ImageID.sol";
 
 import {ImageIdRepository} from "../../src/proof_verifier/ImageIdRepository.sol";
@@ -18,8 +20,9 @@ contract TestDeployer {
         repository = new ImageIdRepository();
         repository.addSupport(ImageID.RISC0_CALL_GUEST_ID);
 
-        fakeProofVerifier = new FakeProofVerifier();
-        groth16ProofVerifier = new Groth16ProofVerifier();
+        fakeProofVerifier = new FakeProofVerifier(repository);
+        groth16ProofVerifier = new Groth16ProofVerifier(repository);
+
         proofVerifierRouter = new ProofVerifierRouter(fakeProofVerifier, groth16ProofVerifier);
     }
 }

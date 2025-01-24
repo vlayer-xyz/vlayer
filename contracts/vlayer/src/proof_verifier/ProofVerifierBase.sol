@@ -3,7 +3,6 @@ pragma solidity ^0.8.21;
 
 import {IRiscZeroVerifier} from "risc0-ethereum-1.2.0/src/IRiscZeroVerifier.sol";
 
-import {ImageID} from "../ImageID.sol";
 import {Proof} from "../Proof.sol";
 import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
@@ -19,9 +18,8 @@ abstract contract ProofVerifierBase is IProofVerifier {
     IRiscZeroVerifier public immutable VERIFIER;
     ImageIdRepository public immutable IMAGE_ID_REPOSITORY;
 
-    constructor() {
-        IMAGE_ID_REPOSITORY = new ImageIdRepository();
-        IMAGE_ID_REPOSITORY.addSupport(ImageID.RISC0_CALL_GUEST_ID);
+    constructor(ImageIdRepository _repository) {
+        IMAGE_ID_REPOSITORY = _repository;
     }
 
     function imageIdRepository() external view returns (ImageIdRepository) {
