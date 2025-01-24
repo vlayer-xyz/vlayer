@@ -225,6 +225,31 @@ test.describe("Full flow of webproof using extension", () => {
       await expect(proveButton).toBeVisible();
     });
 
+    await test.step("Request and response should be displayed with correctly redacted headers", async () => {
+      const redactedRequest = page
+        .locator("body")
+        .getByTestId("redacted-request");
+      const redactedResponse = page
+        .locator("body")
+        .getByTestId("redacted-response");
+      await expect(redactedRequest).toBeVisible();
+      await expect(redactedResponse).toBeVisible();
+
+      const requestText = await redactedRequest.textContent();
+      const responseText = await redactedResponse.textContent();
+
+      expect(requestText).toContain("accept-encoding: identity");
+      expect(requestText).toContain("content-type: ****************");
+
+      expect(responseText).toContain("Access-Control-Allow-Methods: GET");
+      expect(responseText).toContain(
+        "Access-Control-Expose-Headers: ****************************************************************************************************************************",
+      );
+      expect(responseText).toContain(
+        "Access-Control-Allow-Headers: ****************************************************************************************************************************",
+      );
+    });
+
     await test.step("Proving request has succeeded", async () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
 
