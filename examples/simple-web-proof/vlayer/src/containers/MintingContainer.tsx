@@ -54,7 +54,7 @@ export const MintingContainer = () => {
   useEffect(() => {
     if (status === "success") {
       setIsMinting(false);
-      navigate("/success");
+      navigate(`/success?tx=${txHash}&handle=${mintedHandle}`);
     }
   }, [status]);
 
