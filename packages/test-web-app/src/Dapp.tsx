@@ -183,13 +183,23 @@ function DappNewWay() {
         {decodedRequest && (
           <div>
             <h2>Request:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }} data-testid="redacted-request">{decodedRequest}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="redacted-request"
+            >
+              {decodedRequest}
+            </pre>
           </div>
         )}
         {decodedResponse && (
           <div>
             <h2>Response:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }} data-testid="redacted-response">{decodedResponse}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="redacted-response"
+            >
+              {decodedResponse}
+            </pre>
           </div>
         )}
       </div>
