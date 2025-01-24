@@ -10,9 +10,9 @@ contract ImageIdRepository is AccessControlEnumerable {
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
     mapping(bytes32 => bool) private imageIds;
 
-    constructor() {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(OWNER_ROLE, msg.sender);
+    constructor(address admin, address owner) {
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(OWNER_ROLE, owner);
     }
 
     function transferAdminRole(address newAdmin) public {
