@@ -1,6 +1,14 @@
 import { Link } from "react-router";
 
-export const Success = ({ tx, handle }: { tx: string; handle: string }) => {
+export const Success = ({
+  tx,
+  handle,
+  blockExplorer,
+}: {
+  tx: string;
+  handle: string;
+  blockExplorer?: string;
+}) => {
   return (
     <>
       <div className="flex justify-center">
@@ -12,7 +20,15 @@ export const Success = ({ tx, handle }: { tx: string; handle: string }) => {
       </div>
       <h3 className="mt-7 header">Success</h3>
       <p className="py-4 text-gray-500">
-        @{handle} was minted to {tx.slice(0, 6)}...{tx.slice(-4)}
+        @{handle} was minted to{" "}
+        <a
+          href={`${blockExplorer}/tx/${tx}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-violet-500 underline"
+        >
+          {tx.slice(0, 6)}...{tx.slice(-4)}
+        </a>
       </p>
       <div className="mt-7 flex justify-center">
         <Link to="/" id="nextButton">
