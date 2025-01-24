@@ -3,9 +3,8 @@ use block_header::Hashable;
 use chain_common::{ChainProof, ChainProofReceipt};
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
-use static_assertions::assert_obj_safe;
 
-use super::zk_proof;
+use super::{sealing::sealed_with_test_mock, zk_proof};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -25,43 +24,25 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
+sealed_with_test_mock!(IVerifier (proof: &ChainProof) -> Result);
 
-mod seal {
-    // This trait prevents adding new implementations of Verifier
-    pub trait Sealed {}
-
-    // Useful to mock verifier in tests
-    #[cfg(test)]
-    impl<F: Fn(&super::ChainProof) -> super::Result> Sealed for F {}
-}
-
-#[cfg_attr(test, auto_impl::auto_impl(Fn))]
-pub trait Verifier: seal::Sealed + Send + Sync + 'static {
-    fn verify(&self, proof: &ChainProof) -> Result;
-}
-
-assert_obj_safe!(Verifier);
-
-pub struct ZkVerifier {
+pub struct Verifier<ZK: zk_proof::IVerifier> {
     chain_guest_ids: Box<[Digest]>,
-    zk_verifier: Box<dyn zk_proof::Verifier>,
+    zk_verifier: ZK,
 }
 
-impl ZkVerifier {
+impl<ZK: zk_proof::IVerifier> Verifier<ZK> {
     #[must_use]
-    pub fn new(
-        chain_guest_ids: impl IntoIterator<Item = Digest>,
-        zk_verifier: impl zk_proof::Verifier,
-    ) -> Self {
+    pub fn new(chain_guest_ids: impl IntoIterator<Item = Digest>, zk_verifier: ZK) -> Self {
         Self {
             chain_guest_ids: chain_guest_ids.into_iter().collect(),
-            zk_verifier: Box::new(zk_verifier),
+            zk_verifier,
         }
     }
 }
 
-impl seal::Sealed for ZkVerifier {}
-impl Verifier for ZkVerifier {
+impl<ZK: zk_proof::IVerifier> seal::Sealed for Verifier<ZK> {}
+impl<ZK: zk_proof::IVerifier> IVerifier for Verifier<ZK> {
     fn verify(&self, proof: &ChainProof) -> Result {
         let receipt: ChainProofReceipt = (&proof.proof).try_into()?;
         let (proven_root, elf_id) = receipt.journal.decode()?;

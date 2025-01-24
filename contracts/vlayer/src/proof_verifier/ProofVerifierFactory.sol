@@ -7,9 +7,9 @@ import {ProofVerifierRouter} from "./ProofVerifierRouter.sol";
 
 library ProofVerifierFactory {
     function produce() internal returns (IProofVerifier) {
-        if (ChainIdLibrary.is_mainnet()) {
+        if (ChainIdLibrary.isMainnet()) {
             return IProofVerifier(address(0));
-        } else if (ChainIdLibrary.is_devnet() || ChainIdLibrary.is_testnet()) {
+        } else if (ChainIdLibrary.isDevnet() || ChainIdLibrary.isTestnet()) {
             return new ProofVerifierRouter();
         }
 

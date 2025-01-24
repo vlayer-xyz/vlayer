@@ -1,10 +1,10 @@
-import { NotaryServer } from "tlsn-js";
+import { NotaryServer, Transcript } from "tlsn-js";
 import { wrap } from "comlink";
 import { Prover as TProver, Presentation as TPresentation } from "tlsn-js";
 import type { PresentationJSON } from "tlsn-js/src/types";
 import { Reveal } from "tlsn-wasm";
 import { type RedactionConfig } from "../../web-proof-commons";
-import { redact } from "./redact";
+import { redact } from "./redaction/redact";
 
 type ProverConfig = {
   serverDns: string;
@@ -44,7 +44,13 @@ export async function tlsnProve(
     secretHeaders: string[];
   },
   redactionConfig: RedactionConfig,
-): Promise<PresentationJSON> {
+): Promise<{
+  presentationJSON: PresentationJSON;
+  decodedTranscript: {
+    sent: string;
+    recv: string;
+  };
+}> {
   await init({ loggingLevel: "Debug" });
   const notary = NotaryServer.from(notaryUrl);
   const prover = await new Prover({
@@ -84,5 +90,20 @@ export async function tlsnProve(
     reveal: commit,
   });
 
-  return await presentation.json();
+  const presentationJSON = await presentation.json();
+  const decodedProof = await presentation.verify();
+  console.log("Decoded proof", decodedProof);
+
+  const decodedTranscript = new Transcript({
+    sent: decodedProof?.transcript.sent,
+    recv: decodedProof?.transcript.recv,
+  });
+  console.log("Decoded transcript", decodedTranscript);
+  return {
+    presentationJSON,
+    decodedTranscript: {
+      sent: decodedTranscript.sent(),
+      recv: decodedTranscript.recv(),
+    },
+  };
 }

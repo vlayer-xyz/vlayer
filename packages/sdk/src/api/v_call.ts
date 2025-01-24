@@ -9,6 +9,8 @@ import debug from "debug";
 const log = debug("vlayer:v_call");
 
 function v_callBody(call: CallParams, context: CallContext) {
+  console.log("call", call);
+  console.log("context", context);
   return {
     method: "v_call",
     params: [call, context],

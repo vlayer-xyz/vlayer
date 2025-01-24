@@ -10,7 +10,7 @@ struct CallAssumptions {
 }
 
 library CallAssumptionsLib {
-    uint256 constant ETH_WORD_SIZE = 32;
+    uint256 public constant ETH_WORD_SIZE = 32;
 
     uint256 public constant PROVER_CONTRACT_ADDRESS_ENCODING_LENGTH = ETH_WORD_SIZE;
     uint256 public constant FUNCTION_SELECTOR_ENCODING_LENGTH = ETH_WORD_SIZE;

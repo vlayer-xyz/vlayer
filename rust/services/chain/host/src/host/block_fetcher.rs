@@ -7,12 +7,14 @@ use ethers::{
     providers::{Http, JsonRpcClient, Provider},
     types::BlockNumber as BlockTag,
 };
-use futures::future::join_all;
+use futures::{stream, StreamExt, TryStreamExt};
 use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
 use thiserror::Error;
 use tracing::{debug, instrument};
 use u64_range::Range;
 use url::ParseError;
+
+const MAX_CONCURRENT_RPC_REQUESTS: usize = 10;
 
 pub struct BlockFetcher<P>
 where
@@ -57,8 +59,11 @@ where
 
     #[instrument(skip(self))]
     pub async fn get_blocks_range(&self, range: Range) -> Result<Vec<Box<dyn EvmBlockHeader>>> {
-        let blocks = join_all(range.into_iter().map(|n| self.get_block(n.into()))).await;
-        blocks.into_iter().collect()
+        stream::iter(range)
+            .map(|n| self.get_block(n.into()))
+            .buffered(MAX_CONCURRENT_RPC_REQUESTS)
+            .try_collect()
+            .await
     }
 
     #[instrument(skip(self))]

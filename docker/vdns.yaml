@@ -1,0 +1,11 @@
+services:
+  vdns_server:
+    image: ghcr.io/vlayer-xyz/vdns_server:latest
+    container_name: vlayer-vdns-server
+    platform: linux/amd64
+    pull_policy: always
+    environment:
+      RUST_LOG: "info,vdns_server=debug"
+    command: ["-l", "0.0.0.0:3002"]
+    ports:
+      - "127.0.0.1:3002:3002"

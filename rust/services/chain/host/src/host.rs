@@ -44,7 +44,7 @@ impl Host<Http> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let block_fetcher = BlockFetcher::<Http>::new(config.rpc_url)?;
         let prover = Prover::new(config.proof_mode, config.elf.clone());
-        let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite, config.elf.clone())?;
+        let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite, config.chain_guest_ids.clone())?;
 
         Ok(Host::from_parts(
             prover,
@@ -161,6 +161,7 @@ where
             prepend_blocks,
             append_blocks,
             old_leftmost_block,
+            prev_zk_proof: Box::new((*old_zk_proof).clone()),
             block_trie: old_trie.clone(),
         };
         let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
@@ -172,12 +173,15 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::iter;
+
     use alloy_primitives::BlockNumber;
     use chain_test_utils::mock_provider;
     use ethers::providers::{MockProvider, Provider};
-    use guest_wrapper::CHAIN_GUEST_ELF;
+    use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
     use host_utils::ProofMode;
     use lazy_static::lazy_static;
+    use risc0_zkvm::sha::Digest;
 
     use super::*;
 
@@ -198,7 +202,14 @@ mod tests {
     }
 
     fn test_db() -> ChainDb {
-        ChainDb::in_memory(CHAIN_GUEST_ELF.clone())
+        ChainDb::in_memory(
+            // Current chain guest ELF ID is **not** included in `CHAIN_GUEST_IDS` when running without
+            // `USE_DOCKER=1`. Therefore we need the .chain() call to add it.
+            CHAIN_GUEST_IDS
+                .iter()
+                .map(|bytes| Digest::from_bytes(*bytes))
+                .chain(iter::once(CHAIN_GUEST_ELF.id)),
+        )
     }
 
     fn create_host(db: ChainDb, provider: Provider<MockProvider>) -> Host<MockProvider> {

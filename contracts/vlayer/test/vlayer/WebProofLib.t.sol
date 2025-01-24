@@ -66,7 +66,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight(Engine(Panic(\"called `Result::unwrap()` on an `Err` value: Custom(\\\"invalid length 64, expected an array at most 64 bytes long\\\")\")))"
+                "Preflight(Engine(TransactError(Revert(\"Verification error: Deserialization error: Bincode deserialize error: invalid length 64, expected an array at most 64 bytes long\"))))"
             );
         }
     }

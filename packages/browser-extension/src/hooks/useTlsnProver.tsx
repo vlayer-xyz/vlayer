@@ -87,7 +87,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       void sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofDone,
         payload: {
-          proof: tlsnProof,
+          ...tlsnProof,
         },
       });
 

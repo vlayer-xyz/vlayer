@@ -48,6 +48,13 @@ export const setupProveWebButton = (element: HTMLButtonElement) => {
           "https://api.x.com/1.1/account/settings.json",
           "GET",
           "Generate Proof of Twitter profile",
+          [
+            {
+              response: {
+                json_body_except: ["screen_name"],
+              },
+            },
+          ],
         ),
       ],
     });

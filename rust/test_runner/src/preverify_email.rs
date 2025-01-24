@@ -6,8 +6,12 @@ use hickory_resolver::{
 };
 use mailparse::MailHeaderMap;
 use thiserror::Error;
+use verifiable_dns::{
+    verifiable_dns::{sign_record::sign_record, signer::Signer},
+    DNSRecord, RecordType,
+};
 
-use crate::cheatcodes::{preverifyEmailCall, DnsRecord, UnverifiedEmail, VerificationData};
+use crate::cheatcodes::{preverifyEmailCall, DnsRecord, UnverifiedEmail};
 
 #[derive(Error, Debug)]
 pub enum EnhanceEmailError {
@@ -28,15 +32,21 @@ pub fn preverify_email(input: &Bytes) -> Result<UnverifiedEmail, EnhanceEmailErr
     let dkim_header = get_dkim_header(&email)?;
     let (selector, domain) = parse_dkim_header(&dkim_header)?;
     let dns_record = resolve_dkim_dns(selector, domain)?;
+    let verification_data = sign_record(
+        &Signer::default(),
+        &DNSRecord {
+            data: dns_record.data.clone(),
+            name: dns_record.name.clone(),
+            record_type: RecordType::TXT,
+            ttl: dns_record.ttl,
+        },
+        u64::MAX,
+    );
 
     Ok(UnverifiedEmail {
         email,
         dnsRecord: dns_record,
-        verificationData: VerificationData {
-            validUntil: u64::MAX,
-            signature: Bytes::default(),
-            pubKey: Bytes::default(),
-        },
+        verificationData: verification_data.into(),
     })
 }
 

@@ -5,7 +5,8 @@ use chain_server_lib::{serve, ServerConfig};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
-use guest_wrapper::CHAIN_GUEST_ELF;
+use guest_wrapper::CHAIN_GUEST_IDS;
+use risc0_zkp::core::digest::Digest;
 use version::version;
 
 #[derive(Parser)]
@@ -40,7 +41,11 @@ async fn main() -> anyhow::Result<()> {
     init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
     let config = ServerConfig::new(cli.listen_addr);
-    let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, CHAIN_GUEST_ELF.clone())?;
+    let db = ChainDb::mdbx(
+        cli.db_path,
+        Mode::ReadOnly,
+        CHAIN_GUEST_IDS.into_iter().map(Digest::from_bytes),
+    )?;
 
     serve(config, db).await?;
 

@@ -4,12 +4,12 @@ pragma solidity ^0.8.21;
 error InvalidChainId();
 
 library ChainIdLibrary {
-    function is_devnet() internal view returns (bool) {
+    function isDevnet() internal view returns (bool) {
         return block.chainid == 3_1337 // Anvil local network
             || block.chainid == 30_1337; // vlayer test
     }
 
-    function is_testnet() internal view returns (bool) {
+    function isTestnet() internal view returns (bool) {
         return block.chainid == 11155111 // Ethereum Sepolia
             || block.chainid == 11155420 // Optimism Sepolia
             || block.chainid == 84532 // Base Sepolia
@@ -18,7 +18,7 @@ library ChainIdLibrary {
             || block.chainid == 300; // zkSync Sepolia
     }
 
-    function is_mainnet() internal view returns (bool) {
+    function isMainnet() internal view returns (bool) {
         return block.chainid == 1 // Ethereum
             || block.chainid == 10 // Optimism
             || block.chainid == 8453 // Base

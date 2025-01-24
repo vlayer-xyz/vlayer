@@ -10,6 +10,6 @@ bun install --frozen-lockfile
 for example in $(get_examples); do (
     echo "Running solhint of: ${example}"
     cd "$VLAYER_HOME/examples/$example/vlayer"
-    bun run lint:solidity
+    bun run lint:solidity --max-warnings 0
 ) done
  

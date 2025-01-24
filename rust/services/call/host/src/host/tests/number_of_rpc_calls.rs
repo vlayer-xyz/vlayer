@@ -59,7 +59,7 @@ async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
 async fn time_travel() -> anyhow::Result<()> {
     let location: ExecutionLocation = (OptimismSepolia, time_travel::BLOCK_NO).into();
     let call = call(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
-    let state = profile("op_sepolia", "simple_time_travel", location, &call)?;
+    let state = profile("op_sepolia", "time_travel", location, &call)?;
 
     assert_eq!(state.total_count(), 70);
     insta::with_settings!({sort_maps => true}, {

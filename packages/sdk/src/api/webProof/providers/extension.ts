@@ -14,6 +14,9 @@ import {
   ZkProvingStatus,
   assertUrl,
   assertUrlPattern,
+  type RedactionConfig,
+  RedactionItemsArray,
+  type MessageToExtension,
 } from "../../../web-proof-commons";
 
 import debug from "debug";
@@ -21,8 +24,6 @@ import debug from "debug";
 const log = debug("vlayer:WebProof:provider");
 
 const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
-
-import { type MessageToExtension } from "../../../web-proof-commons";
 
 declare let chrome: {
   runtime: {
@@ -109,7 +110,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
     if (!this.listeners[messageType]) {
       this.listeners[messageType] = [];
     }
-    this.listeners[messageType]!.push(
+    this.listeners[messageType].push(
       listener as (args: ExtensionMessage) => void,
     );
   }
@@ -127,10 +128,20 @@ class ExtensionWebProofProvider implements WebProofProvider {
     });
   }
 
-  public async getWebProof(
-    webProofRequest: WebProofRequestInput,
-  ): Promise<PresentationJSON> {
-    return new Promise<PresentationJSON>((resolve, reject) => {
+  public async getWebProof(webProofRequest: WebProofRequestInput): Promise<{
+    presentationJSON: PresentationJSON;
+    decodedTranscript: {
+      sent: string;
+      recv: string;
+    };
+  }> {
+    return new Promise<{
+      presentationJSON: PresentationJSON;
+      decodedTranscript: {
+        sent: string;
+        recv: string;
+      };
+    }>((resolve, reject) => {
       chrome.runtime.sendMessage(EXTENSION_ID, {
         action: ExtensionAction.RequestWebProof,
         payload: {
@@ -144,7 +155,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
       this.connectToExtension().onMessage.addListener(
         (message: ExtensionMessage) => {
           if (message.type === ExtensionMessageType.ProofDone) {
-            resolve(message.payload.proof);
+            resolve(message.payload);
           }
           if (message.type === ExtensionMessageType.ProofError) {
             reject(new Error(message.payload.error));
@@ -156,13 +167,20 @@ class ExtensionWebProofProvider implements WebProofProvider {
 }
 
 const validateSteps = (steps: WebProofStep[]) => {
-  steps.forEach(({ step, url }) => {
-    if (step === EXTENSION_STEP.startPage) {
-      assertUrl(url);
+  steps.forEach((step) => {
+    if (step.step === EXTENSION_STEP.startPage) {
+      assertUrl(step.url);
     } else {
-      assertUrlPattern(url);
+      assertUrlPattern(step.url);
+    }
+    if (step.step === EXTENSION_STEP.notarize) {
+      validateRedaction(step.redact ?? []);
     }
   });
+};
+
+const validateRedaction = (redaction: RedactionConfig) => {
+  RedactionItemsArray.parse(redaction);
 };
 
 export const validateWebProofRequest = (

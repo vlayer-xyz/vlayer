@@ -21,6 +21,21 @@ function get_latest_block() {
     printf "%d\n" "${block_hex}"
 }
 
+function startup_vdns_server() {
+    echo "Starting VDNS server"
+    pushd "${VLAYER_HOME}"
+
+    RUST_LOG=info \
+    ./target/debug/dns_server >>"${LOGS_DIR}/dns_server.out" &
+
+    DNS_SERVER=$!
+    
+    echo "DNS server started with PID ${DNS_SERVER}."
+    wait_for_port_and_pid 3002 "${DNS_SERVER}" 30m "dns server"
+
+    popd
+}
+
 function startup_chain_server() {
     local db_path="$1"
 
@@ -33,7 +48,7 @@ function startup_chain_server() {
         >>"${LOGS_DIR}/chain_server.out" &
 
     CHAIN_SERVER=$!
-    
+
     echo "Chain server started with PID ${CHAIN_SERVER}."
     wait_for_port_and_pid 3001 "${CHAIN_SERVER}" 30m "chain server"
 
@@ -95,7 +110,7 @@ function startup_vlayer() {
 function ensure_binaries_built() {
     if [[ "${BUILD_BINARIES}" == "1" ]] ; then
         pushd "${VLAYER_HOME}"
-        silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker
+        silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker --bin dns_server
         popd
     fi
 }

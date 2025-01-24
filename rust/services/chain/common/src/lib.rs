@@ -46,8 +46,11 @@ pub enum ProofVerificationError {
     ),
     #[error("failed to deserialize journal: {0}")]
     DeserializeJournalFailed(#[from] risc0_zkvm::serde::Error),
-    #[error("elf id mismatch: expected: {expected} != decoded: {decoded}")]
-    ElfIdMismatch { expected: Digest, decoded: Digest },
+    #[error("illegal elf id: {decoded} not in {expected:?}")]
+    IllegalElfId {
+        expected: Box<[Digest]>,
+        decoded: Digest,
+    },
     #[error("mpt root mismatch: expected: {expected} != decoded: {decoded}")]
     MptRootMismatch { expected: B256, decoded: B256 },
 }
@@ -59,24 +62,25 @@ impl ChainProofReceipt {
     pub fn verify(
         &self,
         expected_hash: B256,
-        expected_elf_id: Digest,
+        chain_guest_ids: Box<[Digest]>,
     ) -> Result<(), ProofVerificationError> {
         let receipt = &self.0;
-        receipt.verify(expected_elf_id)?;
         let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
 
-        if elf_id != expected_elf_id {
-            return Err(ProofVerificationError::ElfIdMismatch {
-                expected: expected_elf_id,
+        if !chain_guest_ids.iter().any(|id| id == &elf_id) {
+            return Err(ProofVerificationError::IllegalElfId {
+                expected: chain_guest_ids,
                 decoded: elf_id,
             });
         }
+
         if expected_hash != proven_root {
             return Err(ProofVerificationError::MptRootMismatch {
                 expected: expected_hash,
                 decoded: proven_root,
             });
         }
+        receipt.verify(elf_id)?;
         Ok(())
     }
 }
