@@ -9,12 +9,12 @@ export const DEFAULT_CONFIG = {
   //for now we use the same urls for testnet and prod
   [ProofEnv.TESTNET]: {
     proverUrl: "https://test-prover.vlayer.xyz",
-    notaryUrl: "https://test-notary.vlayer.xyz",
+    notaryUrl: "https://notary.pse.dev/v0.1.0-alpha.7",
     wsProxyUrl: "wss://test-wsproxy.vlayer.xyz",
   },
   [ProofEnv.PROD]: {
     proverUrl: "https://test-prover.vlayer.xyz",
-    notaryUrl: "https://test-notary.vlayer.xyz",
+    notaryUrl: "https://notary.pse.dev/v0.1.0-alpha.7",
     wsProxyUrl: "wss://test-wsproxy.vlayer.xyz",
   },
 };
