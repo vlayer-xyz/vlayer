@@ -158,7 +158,7 @@ function DappNewWay() {
               data-testid="zk-prove-button"
               onClick={handleZkProofRequestClick}
             >
-            Request zk proof
+              Request zk proof
             </button>
           </>
         ) : (
@@ -252,7 +252,7 @@ function Dapp() {
         },
       ],
     });
-    if(!hash){
+    if (!hash) {
       throw new Error("Hash is undefined");
     }
 
