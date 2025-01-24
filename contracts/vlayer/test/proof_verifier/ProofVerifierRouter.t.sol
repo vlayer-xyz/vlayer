@@ -11,10 +11,16 @@ import {IProofVerifier} from "../../src/proof_verifier/IProofVerifier.sol";
 import {ProofVerifierRouter} from "../../src/proof_verifier/ProofVerifierRouter.sol";
 
 import {TestHelpers, PROVER, SELECTOR} from "../helpers/TestHelpers.sol";
+import {TestDeployer} from "../helpers/TestDeployer.sol";
 
 contract Router_Verify_Tests is Test {
     TestHelpers helpers = new TestHelpers();
-    ProofVerifierRouter router = new ProofVerifierRouter();
+    TestDeployer testDeployer = new TestDeployer();
+    ProofVerifierRouter immutable router;
+
+    constructor() {
+        router = testDeployer.proofVerifierRouter();
+    }
 
     function test_runsFakeVerifierForFakeProof() public {
         (Proof memory proof, bytes32 journalHash) = helpers.createProof();

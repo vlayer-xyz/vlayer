@@ -9,8 +9,15 @@ import {FakeProofVerifier, FAKE_VERIFIER_SELECTOR} from "../../src/proof_verifie
 import {ImageID} from "../../src/ImageID.sol";
 import {ProofMode} from "../../src/Seal.sol";
 
+import {TestDeployer} from "../helpers/TestDeployer.sol";
+
 contract FakeProofVerifier_Tests is Test {
-    FakeProofVerifier verifier = new FakeProofVerifier();
+    TestDeployer testDeployer = new TestDeployer();
+    FakeProofVerifier immutable verifier;
+
+    constructor() {
+        verifier = testDeployer.fakeProofVerifier();
+    }
 
     function test_usesFakeProofMode() public view {
         assert(verifier.PROOF_MODE() == ProofMode.FAKE);
