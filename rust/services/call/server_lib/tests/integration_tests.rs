@@ -488,7 +488,7 @@ mod server_tests {
                     json!({
                         "hash": EXPECTED_HASH,
                         "computation_stage": "proving",
-                        "gas_used": 0,
+                        "gas_used": EXPECTED_GAS_USED,
                     }),
                     false,
                 )
