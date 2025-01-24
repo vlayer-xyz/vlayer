@@ -16,7 +16,6 @@ const { chain, ethClient, account, proverUrl, confirmations } =
 const vlayer = createVlayerClient({
   url: proverUrl,
 });
-const [_, john] = await ethClient.getAddresses();
 
 const deployWhaleBadgeHash = await ethClient.deployContract({
   abi: whaleBadgeNFTSpec.abi,
@@ -47,7 +46,7 @@ const proofHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "crossChainBalanceOf",
-  args: [john, tokensToCheck],
+  args: [process.env.TOKEN_HOLDER as Address, tokensToCheck],
   chainId: chain.id,
   token: config.token,
 });

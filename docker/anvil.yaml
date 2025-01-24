@@ -10,6 +10,6 @@ services:
     image: ghcr.io/foundry-rs/foundry:latest
     container_name: anvil-l2-op
     platform: linux/amd64
-    command: ["anvil --host 0.0.0.0 --chain-id 31338 --optimism"]
+    command: ["anvil --host 0.0.0.0 --chain-id 31338 --optimism -m 'indoor dish desk flag debris potato excuse depart ticket judge file exit'"]
     ports:
       - "127.0.0.1:8546:8545"
