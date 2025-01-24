@@ -22,7 +22,10 @@ abstract contract ProofVerifierBase is IProofVerifier {
     constructor() {
         IMAGE_ID_REPOSITORY = new ImageIdRepository();
         IMAGE_ID_REPOSITORY.addSupport(ImageID.RISC0_CALL_GUEST_ID);
+    }
 
+    function imageIdRepository() external view returns (ImageIdRepository) {
+        return IMAGE_ID_REPOSITORY;
     }
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
