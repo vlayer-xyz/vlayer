@@ -137,7 +137,7 @@ test.describe("Full flow of webproof using extension", () => {
       expect(extension).toBeDefined();
     });
 
-    await test.step("Extension should stay ok after clinking request button multiple times", async () => {
+    await test.step("Extension should stay ok after clicking request button multiple times", async () => {
       await page.goto("/dapp-new-way");
       const requestProofButton = page
         .locator("body")
