@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tlsn_core::{
@@ -24,7 +26,7 @@ impl WebProof {
     {
         let provider = CryptoProvider::default();
 
-        let presentation = Presentation::from(self);
+        let presentation = Presentation::try_from(self)?;
         let verifying_key = presentation.verifying_key().clone();
 
         let PresentationOutput {
@@ -55,11 +57,22 @@ pub struct PresentationJsonMeta {
     pub plugin_url: Option<String>,
 }
 
-impl From<WebProof> for Presentation {
-    fn from(web_proof: WebProof) -> Self {
-        let bytes = hex::decode(web_proof.data).unwrap();
-        bincode::deserialize(&bytes).unwrap()
+impl TryFrom<WebProof> for Presentation {
+    type Error = DeserializeError;
+
+    fn try_from(web_proof: WebProof) -> Result<Self, DeserializeError> {
+        let bytes = hex::decode(&web_proof.data)?;
+        let presentation = bincode::deserialize(&bytes)?;
+        Ok(presentation)
     }
+}
+
+#[derive(Error, Debug)]
+pub enum DeserializeError {
+    #[error("Hex decode error: {0}")]
+    HexDecode(#[from] hex::FromHexError),
+    #[error("Bincode deserialize error: {0}")]
+    Bincode(#[from] bincode::Error),
 }
 
 #[derive(Error, Debug)]
@@ -75,6 +88,9 @@ pub enum VerificationError {
 
     #[error("Empty transcript")]
     EmptyTranscript,
+
+    #[error("Deserialization error: {0}")]
+    Deserialize(#[from] DeserializeError),
 }
 
 #[cfg(test)]
@@ -156,7 +172,7 @@ mod tests {
         let web_proof = read_fixture("./testdata/web_proof.json");
         let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
-        let presentation: Presentation = web_proof.into();
+        let presentation: Presentation = Presentation::try_from(web_proof).unwrap();
         assert_eq!(presentation.verifying_key().alg, KeyAlgId::K256);
     }
 }
