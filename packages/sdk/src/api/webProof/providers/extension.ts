@@ -14,6 +14,9 @@ import {
   ZkProvingStatus,
   assertUrl,
   assertUrlPattern,
+  type RedactionConfig,
+  RedactionItemsArray,
+  type MessageToExtension,
 } from "../../../web-proof-commons";
 
 import debug from "debug";
@@ -21,8 +24,6 @@ import debug from "debug";
 const log = debug("vlayer:WebProof:provider");
 
 const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
-
-import { type MessageToExtension } from "../../../web-proof-commons";
 
 declare let chrome: {
   runtime: {
@@ -109,7 +110,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
     if (!this.listeners[messageType]) {
       this.listeners[messageType] = [];
     }
-    this.listeners[messageType]!.push(
+    this.listeners[messageType].push(
       listener as (args: ExtensionMessage) => void,
     );
   }
@@ -166,13 +167,20 @@ class ExtensionWebProofProvider implements WebProofProvider {
 }
 
 const validateSteps = (steps: WebProofStep[]) => {
-  steps.forEach(({ step, url }) => {
-    if (step === EXTENSION_STEP.startPage) {
-      assertUrl(url);
+  steps.forEach((step) => {
+    if (step.step === EXTENSION_STEP.startPage) {
+      assertUrl(step.url);
     } else {
-      assertUrlPattern(url);
+      assertUrlPattern(step.url);
+    }
+    if (step.step === EXTENSION_STEP.notarize) {
+      validateRedaction(step.redact ?? []);
     }
   });
+};
+
+const validateRedaction = (redaction: RedactionConfig) => {
+  RedactionItemsArray.parse(redaction);
 };
 
 export const validateWebProofRequest = (
