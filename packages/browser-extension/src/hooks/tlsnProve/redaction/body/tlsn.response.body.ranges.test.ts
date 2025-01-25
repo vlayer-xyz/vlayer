@@ -77,7 +77,50 @@ describe("json body redaction", () => {
         transcript,
         redactionItem.response.json_body,
       );
+      console.log("Result", result);
       expect(result).toEqual([valueRange(transcript, name)]);
+    });
+
+    test("simple json without whitespace at all", () => {
+      const transcript = createTestData(`{"iam":"a","ve":{"ry":"valid JSON"}}`);
+      const redactionItem = {
+        response: {
+          json_body: ["ve.ry"],
+        },
+      } as RedactResponseJsonBody;
+      const result = calculateJsonBodyRanges(
+        transcript,
+        redactionItem.response.json_body,
+      );
+      console.log("Result", result);
+      expect(result).toEqual([valueRange(transcript, "valid JSON")]);
+    });
+    test("simple json paths with unnecessary whitespace and newlines in the value", () => {
+      const name = "José 🌟";
+      const transcript = createTestData(
+        `{"name":"${name}","age":30, "im" : {  
+                 "very" :{               "nested" : {  
+            
+           "and" : 
+           "ugly"} }   } 
+            \n
+            \n
+            \n
+          }`,
+      );
+
+      const redactionItem = {
+        response: {
+          json_body: ["im.very.nested.and"],
+        },
+      } as RedactResponseJsonBody;
+
+      const result = calculateJsonBodyRanges(
+        transcript,
+        redactionItem.response.json_body,
+      );
+      console.log("Result", result);
+      expect(result).toEqual([valueRange(transcript, "ugly")]);
     });
 
     test("multiple json paths", () => {
