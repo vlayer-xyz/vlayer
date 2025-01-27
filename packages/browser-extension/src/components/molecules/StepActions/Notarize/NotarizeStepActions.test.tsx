@@ -1,11 +1,17 @@
-import { render, screen, cleanup, renderHook } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  renderHook,
+  act,
+} from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { NotarizeStepActions } from "./NotarizeStepActions";
 import { StepStatus } from "constants/step";
 
 import React from "react";
 import { useNotarizeStepActions } from "./NotarizeStepActions.hooks";
-
+import { CALLOUT_DEBOUNCE_TIME } from "./NotarizeStepActions.hooks";
 const mocks = vi.hoisted(() => {
   return {
     useTlsnProver: vi.fn(),
@@ -24,6 +30,7 @@ vi.mock("hooks/useTlsnProver", () => ({
 describe("NotarizeStepActions", () => {
   beforeEach(() => {
     cleanup();
+    vi.clearAllMocks();
     vi.useFakeTimers();
   });
 
@@ -46,6 +53,9 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     const webProvingIndicator = screen.getByTestId("step_proving_web");
     expect(webProvingIndicator).toBeInTheDocument();
   });
@@ -67,6 +77,9 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     const zkProvingIndicator = screen.getByTestId("step_proving_zk");
     expect(zkProvingIndicator).toBeInTheDocument();
   });
@@ -86,6 +99,9 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     const button = screen.getByTestId("prove-button");
     expect(button).toBeInTheDocument();
   });
@@ -106,6 +122,9 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     mocks.useZkProvingState.mockReturnValue({
       isProving: false,
       isDone: true,
@@ -137,6 +156,9 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     mocks.useZkProvingState.mockReturnValue({
       isProving: false,
       isDone: true,
@@ -166,6 +188,9 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     const finishCallout = screen.getByTestId("finish-callout");
     expect(finishCallout).toBeInTheDocument();
     expect(finishCallout).toHaveTextContent(
@@ -186,6 +211,9 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     const finishCallout = screen.getByTestId("finish-callout");
     expect(finishCallout).not.toBeVisible();
 
@@ -208,6 +236,9 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     const redirectCallout = screen.queryByText(
       /You will be redirected back in/i,
     );
@@ -227,7 +258,9 @@ describe("NotarizeStepActions", () => {
         link: "https://example.com",
       }),
     );
-
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     render(
       <NotarizeStepActions
         buttonText={"click me "}
@@ -236,14 +269,16 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
 
     const redirectCallout = screen.getByText(/You will be redirected back in/i);
 
     expect(result.current.isRedirectCalloutVisible).toBe(true);
     expect(redirectCallout).toBeInTheDocument();
   });
-
-  it("once rerender, redirect callout should stay visible after web proving finished", () => {
+  it("redirect callout should be hidden when error occurs during web proving", () => {
     mocks.useTlsnProver.mockReturnValue({
       isProving: true,
     });
@@ -256,6 +291,9 @@ describe("NotarizeStepActions", () => {
         link: "https://example.com",
       }),
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     expect(result.current.isRedirectCalloutVisible).toBe(true);
 
     render(
@@ -266,13 +304,61 @@ describe("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     mocks.useTlsnProver.mockReturnValue({
       isProving: false,
+      error: "Some error occurred during web proving",
     });
     rerender();
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
+    expect(result.current.isRedirectCalloutVisible).toBe(false);
+    const redirectCallout = screen.queryByTestId("redirect-callout");
+    expect(redirectCallout).not.toBeVisible();
+  });
+  it("once rerender, redirect callout should stay visible after web proving finished if no error occurs", () => {
+    mocks.useTlsnProver.mockReturnValue({
+      isProving: true,
+    });
+
+    const { result, rerender } = renderHook(() =>
+      useNotarizeStepActions({
+        isVisited: false,
+        status: StepStatus.Current,
+        buttonText: "click me ",
+        link: "https://example.com",
+      }),
+    );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
     expect(result.current.isRedirectCalloutVisible).toBe(true);
 
-    const redirectCallout = screen.getByText(/You will be redirected back in/i);
+    render(
+      <NotarizeStepActions
+        buttonText={"click me "}
+        link={"https://example.com"}
+        isVisited={false}
+        status={StepStatus.Current}
+      />,
+    );
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
+    mocks.useTlsnProver.mockReturnValue({
+      isProving: false,
+      error: null,
+    });
+    rerender();
+    act(() => {
+      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+    });
+    expect(result.current.isRedirectCalloutVisible).toBe(true);
+
+    const redirectCallout = screen.getByTestId("redirect-callout");
     expect(redirectCallout).toBeInTheDocument();
   });
 });

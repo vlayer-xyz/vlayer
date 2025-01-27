@@ -55,6 +55,9 @@ describe("SidePanelContent", () => {
     mocks.useProvingSessionConfig.mockReturnValue([{ steps: [] }]);
     mocks.isEmptyWebProverSessionConfig.mockReturnValue(false);
     mocks.useSteps.mockReturnValue([]);
+    mocks.useTlsnProver.mockReturnValue({
+      error: null,
+    });
     render(<SidePanelContent />);
     expect(screen.getByTestId("steps")).toBeInTheDocument();
     //help section
