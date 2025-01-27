@@ -268,7 +268,7 @@ contract Repository_DnsKeys is Test {
         repository.addDnsKey(key);
     }
 
-    function test_onlyAdminCanAddKey() public {
+    function test_onlyOwnerCanAddKey() public {
         bytes memory key = "0x1234";
 
         vm.expectRevert(
@@ -297,7 +297,7 @@ contract Repository_DnsKeys is Test {
         assertFalse(repository.isDnsKeyValid(key));
     }
 
-    function test_onlyAdminCanRevokeKey() public {
+    function test_onlyOwnerCanRevokeKey() public {
         bytes memory key = "0x1234";
         repository.addDnsKey(key);
 
@@ -350,7 +350,7 @@ contract Repository_NotaryKeys is Test {
         repository.addNotaryKey(NOTARY_PUB_KEY);
     }
 
-    function test_onlyAdminCanAddKey() public {
+    function test_onlyOwnerCanAddKey() public {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector, alice, repository.OWNER_ROLE()
@@ -374,7 +374,7 @@ contract Repository_NotaryKeys is Test {
         assertFalse(repository.isNotaryKeyValid(NOTARY_PUB_KEY));
     }
 
-    function test_onlyAdminCanRevokeKey() public {
+    function test_onlyOwnerCanRevokeKey() public {
         repository.addNotaryKey(NOTARY_PUB_KEY);
 
         vm.expectRevert(
