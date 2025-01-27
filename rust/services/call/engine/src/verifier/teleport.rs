@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use derive_new::new;
 
 use super::sealing::sealed_with_test_mock;
-use crate::evm::{env::location::ExecutionLocation, input::BlocksByChain};
+use crate::evm::env::{location::ExecutionLocation, BlocksByChain};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

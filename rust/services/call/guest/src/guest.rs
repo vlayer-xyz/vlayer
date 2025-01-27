@@ -1,9 +1,15 @@
 use call_engine::{
-    verifier::{chain_proof, teleport, time_travel, travel_call, zk_proof},
-    GuestOutput, Input,
+    evm::env::cached::CachedEvmEnv,
+    travel_call_executor::TravelCallExecutor,
+    verifier::{
+        chain_proof, teleport, time_travel,
+        travel_call::{self, IVerifier},
+        zk_proof,
+    },
+    CallAssumptions, GuestOutput, Input,
 };
-use chain_client::CachedClient;
-use env::{verify_input, VerifiedEnv};
+use chain_client::{CachedClient, ChainProofCache};
+use env::create_envs_from_input;
 use risc0_zkvm::sha::Digest;
 
 mod env;
@@ -19,14 +25,41 @@ pub async fn main(
     }: Input,
     chain_guest_ids: impl IntoIterator<Item = Digest>,
 ) -> GuestOutput {
+    multi_evm_input.assert_coherency();
+
+    let envs = create_envs_from_input(multi_evm_input);
+    let cached_envs = CachedEvmEnv::from_envs(envs);
+
+    let travel_call_verifier = build_guest_travel_call_verifier(chain_proofs, chain_guest_ids);
+    travel_call_verifier
+        .verify(&cached_envs, start_execution_location)
+        .await
+        .expect("travel call verification failed");
+
+    let evm_call_result = TravelCallExecutor::new(&cached_envs)
+        .call(&call, start_execution_location)
+        .expect("travel call execution failed")
+        .output;
+
+    let start_env = cached_envs
+        .get(start_execution_location)
+        .expect("cannot get start evm env");
+
+    let call_assumptions = CallAssumptions::new(start_env.header(), call.to, call.selector());
+
+    GuestOutput::new(call_assumptions, evm_call_result)
+}
+
+fn build_guest_travel_call_verifier(
+    chain_proofs: ChainProofCache,
+    chain_guest_ids: impl IntoIterator<Item = Digest>,
+) -> travel_call::Verifier<
+    time_travel::Verifier<CachedClient, chain_proof::Verifier<zk_proof::GuestVerifier>>,
+    teleport::Verifier,
+> {
     let chain_client = CachedClient::new(chain_proofs);
     let chain_proof_verifier = chain_proof::Verifier::new(chain_guest_ids, zk_proof::GuestVerifier);
     let time_travel_verifier = time_travel::Verifier::new(Some(chain_client), chain_proof_verifier);
     let teleport_verifier = teleport::Verifier::new();
-    let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier, teleport_verifier);
-
-    let verified_input =
-        verify_input(travel_call_verifier, multi_evm_input, start_execution_location).await;
-
-    VerifiedEnv::new(verified_input, start_execution_location).exec_call(&call)
+    travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
 }

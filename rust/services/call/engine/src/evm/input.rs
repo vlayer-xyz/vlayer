@@ -1,11 +1,10 @@
 use std::{collections::HashMap, iter::once};
 
-use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
+use alloy_primitives::{Bytes, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader, Hashable};
 use derivative::Derivative;
-use derive_more::{Deref, DerefMut, From, Into, IntoIterator};
+use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
-use itertools::Itertools;
 use mpt::KeccakMerkleTrie as MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -71,15 +70,6 @@ impl EvmInput {
     }
 }
 
-#[derive(Debug, Clone, From, Deref, DerefMut, IntoIterator)]
-pub struct BlocksByChain(HashMap<ChainId, Vec<(BlockNumber, BlockHash)>>);
-
-impl BlocksByChain {
-    pub fn chain_ids(&self) -> Box<[ChainId]> {
-        self.0.keys().cloned().collect()
-    }
-}
-
 #[derive(Debug, Default, Serialize, Deserialize, Clone, From, Into, IntoIterator, new)]
 pub struct MultiEvmInput {
     pub inputs: HashMap<ExecutionLocation, EvmInput>,
@@ -94,37 +84,8 @@ impl MultiEvmInput {
         Self { inputs }
     }
 
-    pub fn contains_time_travel(&self) -> bool {
-        self.block_nums_by_chain()
-            .values()
-            .any(|block_nums| block_nums.len() > 1)
-    }
-
-    pub fn contains_teleport(&self) -> bool {
-        self.block_nums_by_chain().len() > 1
-    }
-
     pub fn assert_coherency(&self) {
         self.inputs.values().for_each(EvmInput::assert_coherency);
-    }
-
-    fn group_blocks<F, T>(&self, f: F) -> HashMap<ChainId, Vec<T>>
-    where
-        F: Fn(&ExecutionLocation, &EvmInput) -> T,
-    {
-        self.inputs
-            .iter()
-            .map(|(loc, evm_input)| (loc.chain_id, f(loc, evm_input)))
-            .into_group_map()
-    }
-
-    pub fn blocks_by_chain(&self) -> BlocksByChain {
-        self.group_blocks(|loc, evm_input| (loc.block_number, evm_input.header.hash_slow()))
-            .into()
-    }
-
-    pub fn block_nums_by_chain(&self) -> HashMap<ChainId, Vec<BlockNumber>> {
-        self.group_blocks(|loc, _| loc.block_number)
     }
 }
 

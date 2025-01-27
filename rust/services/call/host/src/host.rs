@@ -6,7 +6,6 @@ use call_engine::{
     evm::{
         env::{cached::CachedEvmEnv, location::ExecutionLocation},
         execution_result::SuccessfulExecutionResult,
-        input::MultiEvmInput,
     },
     travel_call_executor::TravelCallExecutor,
     verifier::{
@@ -24,7 +23,7 @@ pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, Pr
 pub use prover::Prover;
 use provider::CachedMultiProvider;
 use revm::primitives::HashMap;
-use risc0_zkvm::{ProveInfo, SessionStats};
+use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
 use seal::EncodableReceipt;
 use tracing::instrument;
 
@@ -37,13 +36,21 @@ mod prover;
 #[cfg(test)]
 mod tests;
 
+type HostTravelCallVerifier = travel_call::Verifier<
+    time_travel::Verifier<
+        chain_client::RecordingClient,
+        chain_proof::Verifier<zk_proof::HostVerifier>,
+    >,
+    teleport::Verifier,
+>;
+
 pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<HostDb>,
     prover: Prover,
     // None means that chain service is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
     chain_client: Option<chain_client::RecordingClient>,
-    chain_proof_verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
+    travel_call_verifier: HostTravelCallVerifier,
     guest_elf: GuestElf,
 }
 
@@ -83,18 +90,31 @@ impl Host {
     ) -> Self {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
-        let chain_proof_verifier =
-            chain_proof::Verifier::new(config.chain_guest_ids, zk_proof::HostVerifier);
         let chain_client = chain_client.map(chain_client::RecordingClient::new);
+
+        let travel_call_verifier =
+            Host::build_travel_call_verifier(config.chain_guest_ids, &chain_client);
 
         Host {
             envs,
             start_execution_location,
             prover,
             chain_client,
-            chain_proof_verifier,
+            travel_call_verifier,
             guest_elf: config.call_guest_elf,
         }
+    }
+
+    fn build_travel_call_verifier(
+        chain_guest_ids: impl IntoIterator<Item = Digest>,
+        chain_client: &Option<chain_client::RecordingClient>,
+    ) -> HostTravelCallVerifier {
+        let chain_proof_verifier =
+            chain_proof::Verifier::new(chain_guest_ids, zk_proof::HostVerifier);
+        let time_travel_verifier =
+            time_travel::Verifier::new(chain_client.clone(), chain_proof_verifier);
+        let teleport_verifier = teleport::Verifier::new();
+        travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
     }
 
     pub async fn chain_proof_ready(&self) -> Result<bool, AwaitingChainProofError> {
@@ -117,15 +137,15 @@ impl Host {
         } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
         let elapsed_time = now.elapsed();
 
-        let multi_evm_input = into_multi_input(self.envs)?;
-
         let chain_proofs = get_chain_proofs(
-            &multi_evm_input,
+            &self.envs,
             self.start_execution_location,
             self.chain_client,
-            self.chain_proof_verifier,
+            self.travel_call_verifier,
         )
         .await?;
+
+        let multi_evm_input = into_multi_input(self.envs)?;
 
         let input = Input {
             multi_evm_input,
@@ -203,18 +223,13 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
 }
 
 async fn get_chain_proofs(
-    multi_evm_input: &MultiEvmInput,
+    evm_envs: &CachedEvmEnv<HostDb>,
     start_execution_location: ExecutionLocation,
     chain_proof_client: Option<chain_client::RecordingClient>,
-    verifier: chain_proof::Verifier<zk_proof::HostVerifier>,
+    verifier: HostTravelCallVerifier,
 ) -> Result<ChainProofCache, PreflightError> {
-    let time_travel_verifier = time_travel::Verifier::new(chain_proof_client.clone(), verifier);
-    let teleport_verifier = teleport::Verifier::new();
-    let travel_call_verifier = travel_call::Verifier::new(time_travel_verifier, teleport_verifier);
-    travel_call_verifier
-        .verify(multi_evm_input, start_execution_location)
-        .await?;
-    drop(travel_call_verifier); // Drop verifier to be able to get the chain proof cache
+    verifier.verify(evm_envs, start_execution_location).await?;
+    drop(verifier); // Drop verifier to be able to get the chain proof cache
 
     let chain_proofs =
         chain_proof_client.map_or(HashMap::new(), chain_client::RecordingClient::into_cache);
