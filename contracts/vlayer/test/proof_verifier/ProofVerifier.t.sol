@@ -6,17 +6,21 @@ import {Test, console} from "forge-std-1.9.4/src/Test.sol";
 import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum-1.2.0/src/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum-1.2.0/src/test/RiscZeroMockVerifier.sol";
 
+import {ImageIdRepository} from "../../src/proof_verifier/ImageIdRepository.sol";
 import {ProofVerifierBase} from "../../src/proof_verifier/ProofVerifierBase.sol";
 import {CallAssumptions} from "../../src/CallAssumptions.sol";
+import {ImageID} from "../../src/ImageID.sol";
 import {Proof} from "../../src/Proof.sol";
 import {ProofMode} from "../../src/Seal.sol";
 
 import {TestHelpers, PROVER, SELECTOR} from "../helpers/TestHelpers.sol";
 
 contract ProofVerifierUnderTest is ProofVerifierBase {
-    constructor(IRiscZeroVerifier _verifier, ProofMode _proofMode) {
+    constructor(IRiscZeroVerifier _verifier, ProofMode _proofMode) ProofVerifierBase(new ImageIdRepository()) {
         VERIFIER = _verifier;
         PROOF_MODE = _proofMode;
+
+        IMAGE_ID_REPOSITORY.addSupport(ImageID.RISC0_CALL_GUEST_ID);
     }
 }
 

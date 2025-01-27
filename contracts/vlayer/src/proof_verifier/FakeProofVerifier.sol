@@ -7,13 +7,14 @@ import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
 import {ChainIdLibrary, InvalidChainId} from "./ChainId.sol";
 import {ProofVerifierBase} from "./ProofVerifierBase.sol";
+import {ImageIdRepository} from "./ImageIdRepository.sol";
 
 bytes4 constant FAKE_VERIFIER_SELECTOR = bytes4(0xdeafbeef);
 
 contract FakeProofVerifier is ProofVerifierBase {
     using SealLib for Seal;
 
-    constructor() {
+    constructor(ImageIdRepository _repository) ProofVerifierBase(_repository) {
         if (ChainIdLibrary.isMainnet()) {
             revert InvalidChainId();
         }

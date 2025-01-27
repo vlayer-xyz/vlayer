@@ -9,16 +9,18 @@ import {ImageID} from "../../src/ImageID.sol";
 import {ProofMode} from "../../src/Seal.sol";
 
 import {Groth16VerifierSelector} from "../helpers/Groth16VerifierSelector.sol";
+import {TestDeployer} from "../helpers/TestDeployer.sol";
 
 contract Groth16ProofVerifier_Tests is Test {
-    Groth16ProofVerifier public verifier = new Groth16ProofVerifier();
+    TestDeployer testDeployer = new TestDeployer();
+    Groth16ProofVerifier immutable verifier;
+
+    constructor() {
+        verifier = testDeployer.groth16ProofVerifier();
+    }
 
     function test_usesGroth16ProofMode() public view {
         assert(verifier.PROOF_MODE() == ProofMode.GROTH16);
-    }
-
-    function test_usesProperImageId() public view {
-        assert(verifier.CALL_GUEST_ID() == ImageID.RISC0_CALL_GUEST_ID);
     }
 
     function test_usesGroth16RiscZeroVerifier() public {

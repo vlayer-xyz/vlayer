@@ -5,19 +5,25 @@ import {Test, console} from "forge-std-1.9.4/src/Test.sol";
 
 import {RiscZeroMockVerifier} from "risc0-ethereum-1.2.0/src/test/RiscZeroMockVerifier.sol";
 
+import {InvalidChainId} from "../../src/proof_verifier/ChainId.sol";
+
 import {FakeProofVerifier, FAKE_VERIFIER_SELECTOR} from "../../src/proof_verifier/FakeProofVerifier.sol";
+import {ImageIdRepository} from "../../src/proof_verifier/ImageIdRepository.sol";
 import {ImageID} from "../../src/ImageID.sol";
 import {ProofMode} from "../../src/Seal.sol";
 
+import {TestDeployer} from "../helpers/TestDeployer.sol";
+
 contract FakeProofVerifier_Tests is Test {
-    FakeProofVerifier verifier = new FakeProofVerifier();
+    TestDeployer testDeployer = new TestDeployer();
+    FakeProofVerifier immutable verifier;
+
+    constructor() {
+        verifier = testDeployer.fakeProofVerifier();
+    }
 
     function test_usesFakeProofMode() public view {
         assert(verifier.PROOF_MODE() == ProofMode.FAKE);
-    }
-
-    function test_usesProperImageId() public view {
-        assert(verifier.CALL_GUEST_ID() == ImageID.RISC0_CALL_GUEST_ID);
     }
 
     function test_usesMockRiscZeroVerifier() public {
@@ -28,8 +34,9 @@ contract FakeProofVerifier_Tests is Test {
 
     function test_cannotBeCreatedOnMainnet() public {
         vm.chainId(1);
+        ImageIdRepository repository = testDeployer.repository();
 
-        vm.expectRevert();
-        new FakeProofVerifier();
+        vm.expectRevert(InvalidChainId.selector);
+        new FakeProofVerifier(repository);
     }
 }

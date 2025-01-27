@@ -3,6 +3,7 @@ pragma solidity ^0.8.21;
 
 import {Proof} from "../Proof.sol";
 import {ProofMode, Seal, SealLib} from "../Seal.sol";
+import {ImageIdRepository} from "./ImageIdRepository.sol";
 import {IProofVerifier} from "./IProofVerifier.sol";
 import {FakeProofVerifier} from "./FakeProofVerifier.sol";
 import {Groth16ProofVerifier} from "./Groth16ProofVerifier.sol";
@@ -10,11 +11,21 @@ import {Groth16ProofVerifier} from "./Groth16ProofVerifier.sol";
 contract ProofVerifierRouter is IProofVerifier {
     using SealLib for Seal;
 
-    FakeProofVerifier public fakeProofVerifier = new FakeProofVerifier();
-    Groth16ProofVerifier public groth16ProofVerifier = new Groth16ProofVerifier();
+    FakeProofVerifier public immutable FAKE_PROOF_VERIFIER;
+    Groth16ProofVerifier public immutable GROTH16_PROOF_VERIFIER;
 
-    function callGuestId() external view returns (bytes32) {
-        return groth16ProofVerifier.callGuestId();
+    constructor(FakeProofVerifier _fakeProofVerifier, Groth16ProofVerifier _groth16ProofVerifier) {
+        require(
+            _groth16ProofVerifier.imageIdRepository() == _fakeProofVerifier.imageIdRepository(),
+            "Verifiers should use same repository"
+        );
+
+        FAKE_PROOF_VERIFIER = _fakeProofVerifier;
+        GROTH16_PROOF_VERIFIER = _groth16ProofVerifier;
+    }
+
+    function imageIdRepository() external view returns (ImageIdRepository) {
+        return GROTH16_PROOF_VERIFIER.imageIdRepository();
     }
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
@@ -22,9 +33,9 @@ contract ProofVerifierRouter is IProofVerifier {
         view
     {
         if (proof.seal.proofMode() == ProofMode.FAKE) {
-            fakeProofVerifier.verify(proof, journalHash, expectedProver, expectedSelector);
+            FAKE_PROOF_VERIFIER.verify(proof, journalHash, expectedProver, expectedSelector);
         } else if (proof.seal.proofMode() == ProofMode.GROTH16) {
-            groth16ProofVerifier.verify(proof, journalHash, expectedProver, expectedSelector);
+            GROTH16_PROOF_VERIFIER.verify(proof, journalHash, expectedProver, expectedSelector);
         }
     }
 }
