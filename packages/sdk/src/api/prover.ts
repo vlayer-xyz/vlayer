@@ -58,8 +58,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   const context: CallContext = {
     chain_id: chainId,
   };
-  const fullUrl = url.concat(token !== undefined ? "/?token=" + token : "");
-  const resp = await v_call(call, context, fullUrl);
+  const resp = await v_call(call, context, url, token);
   return { hash: resp.result } as BrandedHash<T, F>;
 }
 

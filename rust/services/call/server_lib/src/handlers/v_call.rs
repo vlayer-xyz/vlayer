@@ -4,10 +4,11 @@ use provider::Address;
 use tracing::info;
 use types::{Call, CallContext, CallHash, Result as VCallResult};
 
-use super::{QueryParams, SharedConfig, SharedProofs};
+use super::{SharedConfig, SharedProofs};
 use crate::{
     gas_meter,
     proof::{self, Status as ProofStatus},
+    user_token::Token as UserToken,
     Config,
 };
 
@@ -16,7 +17,7 @@ pub mod types;
 pub async fn v_call(
     config: SharedConfig,
     state: SharedProofs,
-    params: QueryParams,
+    user_token: Option<UserToken>,
     call: Call,
     context: CallContext,
 ) -> VCallResult<CallHash> {
@@ -30,7 +31,7 @@ pub async fn v_call(
         host.start_execution_location()
     );
     let gas_meter_client =
-        gas_meter::init(config.gas_meter_config(), call_hash, params.token, call.gas_limit).await?;
+        gas_meter::init(config.gas_meter_config(), call_hash, user_token, call.gas_limit).await?;
 
     let mut found_existing = true;
     state.entry(call_hash).or_insert_with(|| {

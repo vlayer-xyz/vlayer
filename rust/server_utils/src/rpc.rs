@@ -39,6 +39,12 @@ impl RequestBuilder {
         self
     }
 
+    #[must_use]
+    pub fn with_bearer_auth(mut self, token: &str) -> Self {
+        self.0 = self.0.bearer_auth(token);
+        self
+    }
+
     pub async fn send(self) -> Result<Value> {
         let response = self.0.send().await?.error_for_status()?;
         let response_body = response.json::<Value>().await?;
@@ -86,6 +92,7 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value> {
 }
 
 pub mod mock {
+    use axum::http::header::AUTHORIZATION;
     use derive_new::new;
     use mockito::{Matcher, Mock, ServerGuard};
     use serde::Serialize;
@@ -174,6 +181,13 @@ pub mod mock {
         #[must_use]
         pub fn with_expected_header(mut self, key: &str, value: &str) -> Self {
             self.mock = self.mock.match_header(key, value);
+            self
+        }
+
+        #[must_use]
+        pub fn with_bearer_auth(mut self, token: &str) -> Self {
+            let value = format!("Bearer {token}");
+            self = self.with_expected_header(AUTHORIZATION.as_str(), &value);
             self
         }
 
