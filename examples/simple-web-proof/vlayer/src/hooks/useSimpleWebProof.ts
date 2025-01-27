@@ -40,6 +40,15 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
       "https://api.x.com/1.1/account/settings.json",
       "GET",
       "Generate Proof of Twitter profile",
+      [
+        {
+          request: {
+            // redact all the headers
+            // there is no wildcard support yet (headers: ["*"] is not supported)
+            headers_except: [],
+          },
+        },
+      ],
     ),
   ],
 };
