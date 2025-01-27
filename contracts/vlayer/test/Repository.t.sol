@@ -4,8 +4,8 @@ pragma solidity ^0.8.21;
 import {Test, console} from "forge-std-1.9.4/src/Test.sol";
 import {IAccessControl} from "@openzeppelin-contracts-5.0.1/access/IAccessControl.sol";
 
-import {ImageID} from "../../src/ImageID.sol";
-import {Repository, IImageIdRepository, IVDnsKeyRepository, INotaryKeyRepository} from "../../src/Repository.sol";
+import {ImageID} from "../src/ImageID.sol";
+import {Repository, IImageIdRepository, IVDnsKeyRepository, INotaryKeyRepository} from "../src/Repository.sol";
 
 bytes32 constant MOCK_IMAGE_ID = bytes32(0x1111111111111111111111111111111111111111111111111111111111111111);
 address constant deployer = address(0);
