@@ -56,6 +56,7 @@ forks = [
 ]
 
 # https://docs.optimism.io/builders/node-operators/network-upgrades
+# https://docs.optimism.io/chain/addresses#ethereum-l1
 [[chains]]
 name = "optimism"
 id = 10
@@ -70,10 +71,11 @@ forks = [
 ]
 
 # https://github.com/ethereum-optimism/optimism/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
+# https://docs.optimism.io/chain/addresses#sepolia-l1
 [[chains]]
 name = "optimism-sepolia"
 id = 11155420
-optimism = { parent_chain = 1, state_contract = "0xE51eBbc8a8B9c9bc710b99B3033945569c39C36C" }
+optimism = { parent_chain = 1, state_contract = "0x218CD9489199F321E1177b56385d333c5B598629" }
 forks = [
     { spec = "BEDROCK", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1699981200 } },
