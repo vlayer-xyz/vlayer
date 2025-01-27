@@ -243,6 +243,31 @@ function Dapp() {
           "https://lotr-api.online:3011/regular_json?are_you_sure=yes",
           "GET",
           "Prove",
+          [
+            {
+              response: {
+                json_body_except: ["screen_name"],
+              },
+            },
+            {
+              response: {
+                headers: [
+                  "AcceSs-COntrol-ExposE-Headers",
+                  "Access-Control-Allow-Headers",
+                ],
+              },
+            },
+            {
+              request: {
+                url_query: ["are_you_sure"],
+              },
+            },
+            {
+              request: {
+                headers: ["content-type"],
+              },
+            },
+          ],
         ),
       ],
     });
