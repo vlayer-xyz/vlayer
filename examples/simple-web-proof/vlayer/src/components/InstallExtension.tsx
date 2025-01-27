@@ -1,14 +1,6 @@
-export const StartProving = ({
-  requestWebProof,
-  isPending,
-  disabled,
-  setDisabled,
-}: {
-  requestWebProof: () => void;
-  isPending: boolean;
-  disabled: boolean;
-  setDisabled: (disabled: boolean) => void;
-}) => {
+import { vlayerPovingExtensionId } from "../utils";
+
+export const InstallExtension = ({ error }: { error?: string }) => {
   return (
     <>
       <ul className="steps w-full">
@@ -25,17 +17,18 @@ export const StartProving = ({
       </p>
       <div className="mt-7 flex justify-center">
         <button
-          disabled={disabled}
           id="nextButton"
           onClick={() => {
-            console.log("open extension");
-            requestWebProof();
-            setDisabled(true);
+            window.open(
+              `https://chromewebstore.google.com/detail/vlayer/${vlayerPovingExtensionId}/reviews`,
+              "_blank",
+            );
           }}
         >
-          {isPending ? "Proving in progress..." : "Open Extension"}
+          Install Extension
         </button>
       </div>
+      {error && <p className="text-red-400 w-full block mt-3">{error}</p>}
     </>
   );
 };
