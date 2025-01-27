@@ -12,10 +12,7 @@ library ChainIdLibrary {
     function isTestnet() internal view returns (bool) {
         return block.chainid == 11155111 // Ethereum Sepolia
             || block.chainid == 11155420 // Optimism Sepolia
-            || block.chainid == 84532 // Base Sepolia
-            || block.chainid == 80002 // Polygon Amoy
-            || block.chainid == 421614 // Arbitrum Sepolia
-            || block.chainid == 300; // zkSync Sepolia
+            || block.chainid == 84532; // Base Sepolia
     }
 
     function isMainnet() internal view returns (bool) {
