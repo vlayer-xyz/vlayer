@@ -14,6 +14,13 @@ use crate::{request_transcript::RequestTranscript, response_transcript::Response
 #[derive(Deserialize, Serialize, PartialEq, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
+    #[serde(rename = "presentationJSON")]
+    pub(crate) presentation_json: PresentationJSON,
+}
+
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct PresentationJSON {
     pub(crate) version: String,
     pub(crate) data: String,
     pub(crate) meta: PresentationJsonMeta,
@@ -61,7 +68,7 @@ impl TryFrom<WebProof> for Presentation {
     type Error = DeserializeError;
 
     fn try_from(web_proof: WebProof) -> Result<Self, DeserializeError> {
-        let bytes = hex::decode(&web_proof.data)?;
+        let bytes = hex::decode(&web_proof.presentation_json.data)?;
         let presentation = bincode::deserialize(&bytes)?;
         Ok(presentation)
     }
