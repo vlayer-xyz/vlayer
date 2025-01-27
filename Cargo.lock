@@ -2195,7 +2195,6 @@ dependencies = [
  "ethers",
  "guest_wrapper",
  "hex",
- "http 1.2.0",
  "jsonrpsee",
  "lazy_static",
  "mime",

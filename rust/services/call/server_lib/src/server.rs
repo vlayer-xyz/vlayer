@@ -1,9 +1,11 @@
-use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post, Router};
+use axum::{
+    body::Bytes, extract::State, http::header::AUTHORIZATION, response::IntoResponse,
+    routing::post, Router,
+};
 use axum_extra::{
     headers::{authorization::Bearer, Authorization},
     TypedHeader,
 };
-use http::header::AUTHORIZATION;
 use server_utils::{cors, init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use std::iter::once;
 use tokio::net::TcpListener;

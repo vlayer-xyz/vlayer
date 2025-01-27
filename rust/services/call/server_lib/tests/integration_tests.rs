@@ -190,13 +190,12 @@ mod server_tests {
         async fn gasmeter_with_user_token() {
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
-            const USER_TOKEN_QUERY_KEY: &str = "key";
             const USER_TOKEN: &str = "sk_1234567890";
 
             let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
-                .with_query(USER_TOKEN_QUERY_KEY, USER_TOKEN)
+                .with_bearer_auth(USER_TOKEN)
                 .with_params(allocate_gas_body(EXPECTED_HASH), false)
                 .with_result(json!({}))
                 .add()
@@ -213,9 +212,7 @@ mod server_tests {
                 .unwrap();
 
             let req = v_call_body(contract.address(), &call_data);
-
-            let path = format!("/?token={USER_TOKEN}");
-            let response = app.post(&path, &req).await;
+            let response = app.post_with_bearer_auth("/", &req, USER_TOKEN).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_jrpc_ok(response, EXPECTED_HASH).await;
