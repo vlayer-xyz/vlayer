@@ -10,8 +10,6 @@ pub struct ChainSpec {
     id: ChainId,
     name: String,
     forks: Box<[Fork]>,
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-    is_optimism: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     optimism: Option<OptimismSpec>,
 }
@@ -35,7 +33,6 @@ impl ChainSpec {
         id: ChainId,
         name: impl Into<String>,
         forks: impl IntoIterator<Item = F>,
-        is_optimism: bool,
         optimism: Option<OptimismSpec>,
     ) -> Self
     where
@@ -53,7 +50,6 @@ impl ChainSpec {
             id,
             name,
             forks,
-            is_optimism,
             optimism,
         }
     }
@@ -77,7 +73,7 @@ impl ChainSpec {
     }
 
     pub const fn is_optimism(&self) -> bool {
-        self.is_optimism
+        self.optimism.is_some()
     }
 }
 
@@ -103,7 +99,7 @@ mod tests {
         #[test]
         #[should_panic(expected = "chain spec must have at least one fork")]
         fn panics_if_no_forks() {
-            ChainSpec::new(1, "", [] as [Fork; 0], false, None);
+            ChainSpec::new(1, "", [] as [Fork; 0], None);
         }
 
         #[test]
@@ -118,7 +114,6 @@ mod tests {
                     Fork::after_timestamp(SpecId::MERGE, MAINNET_MERGE_BLOCK_TIMESTAMP),
                     Fork::after_block(SpecId::SHANGHAI, 0),
                 ],
-                false,
                 None,
             );
         }
@@ -132,7 +127,6 @@ mod tests {
                     Fork::after_block(SpecId::MERGE, 0),
                     Fork::after_timestamp(SpecId::SHANGHAI, MAINNET_MERGE_BLOCK_TIMESTAMP),
                 ],
-                false,
                 None,
             );
         }

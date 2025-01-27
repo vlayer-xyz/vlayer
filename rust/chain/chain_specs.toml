@@ -35,7 +35,6 @@ forks = [
 [[chains]]
 name = "base"
 id = 8453
-is_optimism = true
 optimism = { parent_chain = 1, state_contract = "0xdB9091e48B1C42992A1213e6916184f9eBDbfEDf" }
 forks = [
     { spec = "REGOLITH", activation = { Block = 0 } },
@@ -49,7 +48,6 @@ forks = [
 # https://docs.base.org/docs/base-contracts/#ethereum-testnet-sepolia
 name = "base-sepolia"
 id = 84532
-is_optimism = true
 optimism = { parent_chain = 1, state_contract = "0x4C8BA32A5DAC2A720bb35CeDB51D6B067D104205" }
 forks = [
     { spec = "CANYON", activation = { Block = 0 } },
@@ -61,7 +59,6 @@ forks = [
 [[chains]]
 name = "optimism"
 id = 10
-is_optimism = true
 optimism = { parent_chain = 1, state_contract = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
 forks = [
     { spec = "MERGE", activation = { Block = 0 } },
@@ -76,7 +73,6 @@ forks = [
 [[chains]]
 name = "optimism-sepolia"
 id = 11155420
-is_optimism = true
 optimism = { parent_chain = 1, state_contract = "0xE51eBbc8a8B9c9bc710b99B3033945569c39C36C" }
 forks = [
     { spec = "BEDROCK", activation = { Block = 0 } },
@@ -174,7 +170,6 @@ forks = [
 [[chains]]
 name = "local-testnet-optimism"
 id = 31338
-is_optimism = true
 optimism = { parent_chain = 1, state_contract = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
 forks = [
     { spec = "GRANITE", activation = { Block = 0 } }
@@ -192,7 +187,6 @@ forks = [
 [[chains]]
 name = "worldchain"
 id = 480
-is_optimism = true
 optimism = { parent_chain = 1, state_contract = "0xD4D7A57DCC563756DeD99e224E144A6Bf0327099" }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
@@ -205,7 +199,6 @@ forks = [
 [[chains]]
 name = "worldchain-sepolia"
 id = 4801
-is_optimism = true
 optimism = { parent_chain = 1, state_contract = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
@@ -218,7 +211,6 @@ forks = [
 [[chains]]
 name = "unichain-sepolia"
 id = 1301
-is_optimism = true
 optimism = { parent_chain = 1, state_contract = "0xf971F1b0D80eb769577135b490b913825BfcF00B" }
 forks = [
     { spec = "GRANITE", activation = { Block = 0 } },
