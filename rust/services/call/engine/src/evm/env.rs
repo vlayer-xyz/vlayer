@@ -1,19 +1,29 @@
+use std::collections::HashMap;
+
+use alloy_primitives::{BlockHash, BlockNumber, ChainId};
 use block_header::EvmBlockHeader;
 use chain::{ChainSpec, Error};
-use revm::primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId};
+use derive_more::{Deref, DerefMut, From, Into, IntoIterator};
+use revm::{
+    primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId},
+    DatabaseRef,
+};
 
 pub mod cached;
 pub mod factory;
 pub mod location;
 
 /// The environment to execute the contract calls in.
-pub struct EvmEnv<D> {
+pub struct EvmEnv<D: DatabaseRef + Send + Sync> {
     pub db: D,
     pub cfg_env: CfgEnvWithHandlerCfg,
     pub header: Box<dyn EvmBlockHeader>,
 }
 
-impl<D> EvmEnv<D> {
+impl<D> EvmEnv<D>
+where
+    D: DatabaseRef + Send + Sync,
+{
     /// Creates a new environment.
     /// It uses the default configuration for the latest specification.
     pub fn new(db: D, header: Box<dyn EvmBlockHeader>) -> Self {
@@ -39,5 +49,14 @@ impl<D> EvmEnv<D> {
     /// Returns the header of the environment.
     pub fn header(&self) -> &dyn EvmBlockHeader {
         self.header.as_ref()
+    }
+}
+
+#[derive(Debug, Clone, From, Deref, DerefMut, IntoIterator, Into)]
+pub struct BlocksByChain(HashMap<ChainId, Vec<(BlockNumber, BlockHash)>>);
+
+impl BlocksByChain {
+    pub fn chain_ids(&self) -> Box<[ChainId]> {
+        self.0.keys().cloned().collect()
     }
 }

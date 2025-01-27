@@ -2,8 +2,8 @@ use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use call_engine::{
     evm::{
-        env::location::ExecutionLocation,
-        input::{BlocksByChain, EvmInput, MultiEvmInput},
+        env::{location::ExecutionLocation, BlocksByChain},
+        input::{EvmInput, MultiEvmInput},
     },
     verifier::{time_travel, travel_call},
 };
@@ -14,10 +14,6 @@ use super::*;
 const CHAIN_ID: ChainId = 1;
 const BLOCK_NUM: BlockNumber = 0;
 const EXEC_LOCATION: ExecutionLocation = ExecutionLocation::new(CHAIN_ID, BLOCK_NUM);
-
-fn time_travel_ok(_: ChainId, _: Vec<(BlockNumber, BlockHash)>) -> time_travel::Result {
-    Ok(())
-}
 
 fn time_travel_invalid_zk_proof(
     _: ChainId,
@@ -67,8 +63,7 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        let verifier = travel_call::Verifier::new(time_travel_ok, teleport_ok);
-        _ = verify_input(verifier, multi_evm_input, EXEC_LOCATION).await;
+        multi_evm_input.assert_coherency();
     }
 
     #[tokio::test]
@@ -77,8 +72,7 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = B256::ZERO; // invalid state root hash
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        let verifier = travel_call::Verifier::new(time_travel_ok, teleport_ok);
-        _ = verify_input(verifier, multi_evm_input, EXEC_LOCATION).await;
+        multi_evm_input.assert_coherency();
     }
 
     #[tokio::test]
@@ -87,7 +81,9 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
+        let envs = create_envs_from_input(multi_evm_input);
+        let cached_envs = CachedEvmEnv::from_envs(envs);
         let verifier = travel_call::Verifier::new(time_travel_invalid_zk_proof, teleport_ok);
-        _ = verify_input(verifier, multi_evm_input, EXEC_LOCATION).await;
+        verifier.verify(&cached_envs, EXEC_LOCATION).await.unwrap();
     }
 }

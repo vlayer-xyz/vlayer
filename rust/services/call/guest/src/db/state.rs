@@ -1,4 +1,4 @@
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, sync::Arc};
 
 use alloy_primitives::{b256, keccak256, Address, Bytes, TxNumber, B256, U256};
 use alloy_rlp_derive::{RlpDecodable, RlpEncodable};
@@ -41,7 +41,7 @@ impl Default for StateAccount {
 #[derive(Default)]
 pub struct StateDb {
     state_trie: MerkleTrie,
-    storage_tries: HashMap<B256, Rc<MerkleTrie>>,
+    storage_tries: HashMap<B256, Arc<MerkleTrie>>,
     contracts: HashMap<B256, Bytes>,
     block_hashes: HashMap<u64, B256>,
 }
@@ -60,7 +60,7 @@ impl StateDb {
             .collect();
         let storage_tries = storage_tries
             .into_iter()
-            .map(|trie| (trie.hash_slow(), Rc::new(trie)))
+            .map(|trie| (trie.hash_slow(), Arc::new(trie)))
             .collect();
         Self {
             state_trie,
@@ -90,7 +90,7 @@ impl StateDb {
         *hash
     }
 
-    pub fn storage_trie(&self, root: &B256) -> Option<&Rc<MerkleTrie>> {
+    pub fn storage_trie(&self, root: &B256) -> Option<&Arc<MerkleTrie>> {
         self.storage_tries.get(root)
     }
 }

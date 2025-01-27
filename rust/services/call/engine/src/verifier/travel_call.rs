@@ -1,8 +1,9 @@
 use async_trait::async_trait;
 use derive_new::new;
+use revm::DatabaseRef;
 
 use super::{teleport, time_travel};
-use crate::evm::{env::location::ExecutionLocation, input::MultiEvmInput};
+use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -13,29 +14,39 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-crate::verifier::sealing::sealed_trait!();
+mod seal {
+    use revm::DatabaseRef;
+
+    pub trait Sealed<D: DatabaseRef> {}
+}
 
 #[cfg(any(test, feature = "testing"))]
-impl<F> seal::Sealed for F where F: Fn(&MultiEvmInput, ExecutionLocation) -> Result + Send + Sync {}
+impl<F, D> seal::Sealed<D> for F
+where
+    F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result + Send + Sync,
+    D: DatabaseRef,
+{
+}
 
 #[async_trait]
-pub trait IVerifier: seal::Sealed + Send + Sync {
+pub trait IVerifier<D: DatabaseRef + Send + Sync>: seal::Sealed<D> + Send + Sync {
     async fn verify(
         &self,
-        input: &MultiEvmInput,
+        input: &CachedEvmEnv<D>,
         start_execution_location: ExecutionLocation,
     ) -> Result;
 }
 
 #[cfg(any(test, feature = "testing"))]
-#[async_trait::async_trait]
-impl<F> IVerifier for F
+#[async_trait]
+impl<F, D> IVerifier<D> for F
 where
-    F: Fn(&MultiEvmInput, ExecutionLocation) -> Result + Send + Sync,
+    D: DatabaseRef + Send + Sync,
+    F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result + Send + Sync,
 {
     async fn verify(
         &self,
-        input: &MultiEvmInput,
+        input: &CachedEvmEnv<D>,
         start_execution_location: ExecutionLocation,
     ) -> Result {
         self(input, start_execution_location)
@@ -48,12 +59,18 @@ pub struct Verifier<TT: time_travel::IVerifier, TP: teleport::IVerifier> {
     teleport: TP,
 }
 
-impl<TT: time_travel::IVerifier, TP: teleport::IVerifier> seal::Sealed for Verifier<TT, TP> {}
+impl<TT: time_travel::IVerifier, TP: teleport::IVerifier, D: DatabaseRef + Send + Sync>
+    seal::Sealed<D> for Verifier<TT, TP>
+{
+}
+
 #[async_trait]
-impl<TT: time_travel::IVerifier, TP: teleport::IVerifier> IVerifier for Verifier<TT, TP> {
+impl<TT: time_travel::IVerifier, TP: teleport::IVerifier, D: DatabaseRef + Send + Sync> IVerifier<D>
+    for Verifier<TT, TP>
+{
     async fn verify(
         &self,
-        input: &MultiEvmInput,
+        input: &CachedEvmEnv<D>,
         start_execution_location: ExecutionLocation,
     ) -> Result {
         self.teleport
@@ -62,7 +79,6 @@ impl<TT: time_travel::IVerifier, TP: teleport::IVerifier> IVerifier for Verifier
         for (chain_id, blocks) in input.blocks_by_chain() {
             self.time_travel.verify(chain_id, blocks).await?;
         }
-        input.assert_coherency();
         Ok(())
     }
 }

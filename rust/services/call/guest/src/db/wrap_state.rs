@@ -1,4 +1,8 @@
-use std::{cell::RefCell, collections::HashMap, convert::Infallible, rc::Rc};
+use std::{
+    collections::HashMap,
+    convert::Infallible,
+    sync::{Arc, RwLock},
+};
 
 use alloy_primitives::{keccak256, Address, B256, U256};
 use call_engine::evm::input::EvmInput;
@@ -13,7 +17,7 @@ use super::state::StateDb;
 #[derive(Default)]
 pub struct WrapStateDb {
     inner: StateDb,
-    account_storage: RefCell<HashMap<Address, Option<Rc<MerkleTrie>>>>,
+    account_storage: RwLock<HashMap<Address, Option<Arc<MerkleTrie>>>>,
 }
 
 impl WrapStateDb {
@@ -21,7 +25,7 @@ impl WrapStateDb {
     pub(crate) fn new(inner: StateDb) -> Self {
         Self {
             inner,
-            account_storage: RefCell::new(HashMap::new()),
+            account_storage: RwLock::new(HashMap::new()),
         }
     }
 }
@@ -38,7 +42,8 @@ impl DatabaseRef for WrapStateDb {
                 // link storage trie to the account, if it exists
                 if let Some(storage_trie) = self.inner.storage_trie(&account.storage_root) {
                     self.account_storage
-                        .borrow_mut()
+                        .write()
+                        .expect("poisoned lock")
                         .insert(address, Some(storage_trie.clone()));
                 }
 
@@ -50,7 +55,10 @@ impl DatabaseRef for WrapStateDb {
                 }))
             }
             None => {
-                self.account_storage.borrow_mut().insert(address, None);
+                self.account_storage
+                    .write()
+                    .expect("poisoned lock")
+                    .insert(address, None);
 
                 Ok(None)
             }
@@ -65,7 +73,7 @@ impl DatabaseRef for WrapStateDb {
 
     /// Get storage value of address at index.
     fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
-        let account_storage = self.account_storage.borrow();
+        let account_storage = self.account_storage.read().expect("poisoned lock");
         let storage = account_storage
             .get(&address)
             .unwrap_or_else(|| panic!("storage not found: {address:?}@{index}"));
@@ -119,8 +127,9 @@ mod storage_ref {
             MerkleTrie::from_iter(vec![(keccak256(index.to_be_bytes::<32>()), invalid_value)]);
 
         db.account_storage
-            .borrow_mut()
-            .insert(address, Some(Rc::new(storage)));
+            .write()
+            .expect("poisoned lock")
+            .insert(address, Some(Arc::new(storage)));
 
         db.storage_ref(address, index).unwrap();
     }
@@ -131,7 +140,10 @@ mod storage_ref {
         let address = Address::default();
         let index = U256::from(0);
 
-        db.account_storage.borrow_mut().insert(address, None);
+        db.account_storage
+            .write()
+            .expect("poisoned lock")
+            .insert(address, None);
 
         let value = db.storage_ref(address, index).unwrap();
 
@@ -150,8 +162,9 @@ mod storage_ref {
             .unwrap();
 
         db.account_storage
-            .borrow_mut()
-            .insert(address, Some(Rc::new(storage)));
+            .write()
+            .expect("poisoned lock")
+            .insert(address, Some(Arc::new(storage)));
 
         let value = db.storage_ref(address, index).unwrap();
 
