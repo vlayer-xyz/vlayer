@@ -44,7 +44,6 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
         {
           request: {
             // redact all the headers
-            // there is no wildcard support yet (headers: ["*"] is not supported)
             headers_except: [],
           },
         },
