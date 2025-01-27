@@ -40,7 +40,9 @@ library EmailProofLib {
     function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory) {
         require(unverifiedEmail.verificationData.validUntil > block.timestamp, "EmailProof: expired DNS verification");
         if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
-            require(DNS_REPOSITORY.isDnsKeyValid(unverifiedEmail.verificationData.pubKey), "Not a valid VDNS public key");
+            require(
+                DNS_REPOSITORY.isDnsKeyValid(unverifiedEmail.verificationData.pubKey), "Not a valid VDNS public key"
+            );
         } else {
             require(
                 keccak256(unverifiedEmail.verificationData.pubKey) == TEST_DNS_PUBLIC_KEY_HASH,
