@@ -75,16 +75,18 @@ mod tests {
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::fixtures::load_web_proof_fixture;
+    use crate::{fixtures::load_web_proof_fixture, redaction::RedactionElementType};
 
     const X_TEST_URL: &str = "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
 
     mod verify_and_parse {
         use k256::PublicKey;
         use pkcs8::DecodePublicKey;
+        use serde_json::Value;
 
         use super::*;
         use crate::fixtures::{
+            read_fixture,
             utils::{change_server_name, load_web_proof_fixture_and_modify},
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         };
@@ -135,6 +137,70 @@ mod tests {
                 PublicKey::from_public_key_pem(&web.notary_pub_key).unwrap(),
                 PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap()
             );
+        }
+
+        #[test]
+        fn success_all_redaction_turned_on() {
+            let web_proof = read_fixture("./testdata/web_proof_all_redaction_types.json");
+            let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
+
+            let web = verify_and_parse(web_proof).unwrap();
+
+            let body = &web.body;
+            let parsed: Value = serde_json::from_str(body).unwrap();
+
+            let name = parsed.get("name").unwrap().as_str().unwrap();
+            let eye_color = parsed.get("eye_color").unwrap().as_str().unwrap();
+
+            assert_eq!(name, "Luke Skywalker");
+            assert_eq!(eye_color, "****");
+
+            let url = &web.url;
+            assert_eq!(url, "https://swapi.dev/api/people/1?format=****");
+        }
+
+        #[test]
+        fn fail_request_url_partial_redaction() {
+            let web_proof = read_fixture("./testdata/web_proof_request_url_partial_redaction.json");
+            let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
+
+            assert!(matches!(
+                verify_and_parse(web_proof).err().unwrap(),
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestUrlParam, err)) if err == "format: j***"
+            ));
+        }
+        #[test]
+        fn fail_request_header_partial_redaction() {
+            let web_proof =
+                read_fixture("./testdata/web_proof_request_header_partial_redaction.json");
+            let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
+
+            assert!(matches!(
+                verify_and_parse(web_proof).err().unwrap(),
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestHeader, err)) if err == "connection: c****"
+            ));
+        }
+        #[test]
+        fn fail_response_header_partial_redaction() {
+            let web_proof =
+                read_fixture("./testdata/web_proof_response_header_partial_redaction.json");
+            let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
+
+            assert!(matches!(
+                verify_and_parse(web_proof).err().unwrap(),
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseHeader, err)) if err == "Server: n***********"
+            ));
+        }
+        #[test]
+        fn fail_response_body_json_value_partial_redaction() {
+            let web_proof =
+                read_fixture("./testdata/web_proof_response_json_partial_redaction.json");
+            let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
+
+            assert!(matches!(
+                verify_and_parse(web_proof).err().unwrap(),
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseBody, err)) if err == "$.eye_color: b***"
+            ));
         }
     }
 
