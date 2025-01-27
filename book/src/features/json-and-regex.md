@@ -64,6 +64,15 @@ We provide functions to match and capture a substring using regular expressions:
 - `matches` checks if a string matches a regular expression and returns `true` if a match is found;
 - `capture` checks if a string matched a regular expression and returns an array of strings. First string is the whole matched text, followed by the captures.
 
+## Regex size optimization
+Internally, the regular expression is compiled into a [DFA](https://en.wikipedia.org/wiki/Deterministic_finite_automaton).
+The size of the DFA is determined by the regular expression itself, and it can get quite large even for seemingly simple patterns.
+It's important to remember that the DFA size corresponds to the cycles used in the ZK proof computation, and therfore it is important to keep it as small as possible. 
+We have a hard limit for a DFA size which should be enough for most use cases. 
+For example the regex `"\w"` includes all letters including the ones from unicode and as a result will be over 100x larger than a simple `"[a-zA-Z0-9]"` pattern.
+In general, to bring the compiled regular expression size down, it is recommended to use more specific patterns.
+
+
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
 import {RegexLib} from "vlayer/Regex.sol";
