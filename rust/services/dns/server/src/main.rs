@@ -1,7 +1,5 @@
 mod config;
-mod dns_over_https;
 mod server;
-mod verifiable_dns;
 
 use std::net::SocketAddr;
 

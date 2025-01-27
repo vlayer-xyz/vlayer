@@ -1,13 +1,13 @@
 use chrono::prelude::Utc;
 
-pub(crate) type Timestamp = u64;
+pub type Timestamp = u64;
 
-pub(crate) trait Now {
+pub trait Now {
     fn now() -> Timestamp;
 }
 
 #[derive(Clone)]
-pub(crate) struct RTClock;
+pub struct RTClock;
 
 impl Now for RTClock {
     #[allow(clippy::cast_sign_loss)]

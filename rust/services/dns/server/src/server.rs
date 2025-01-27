@@ -4,8 +4,9 @@ use axum::Router;
 use server_utils::{cors, init_trace_layer, RequestIdLayer};
 use tokio::net::TcpListener;
 use tracing::info;
+use verifiable_dns::VerifiableDNSResolver;
 
-use crate::{config::Config, verifiable_dns::VerifiableDNSResolver};
+use crate::config::Config;
 
 #[derive(Clone)]
 struct AppState {
@@ -15,7 +16,7 @@ struct AppState {
 impl AppState {
     fn new() -> Self {
         Self {
-            vdns_resolver: VerifiableDNSResolver::new(),
+            vdns_resolver: VerifiableDNSResolver::default(),
         }
     }
 }

@@ -26,7 +26,6 @@ impl<'a> Record<'a> {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
     use crate::{dns_over_https::types::RecordType, verifiable_dns::signer::ToSignablePayload};
 

@@ -7,11 +7,9 @@ use tracing::info;
 
 use crate::{
     gas_meter::{Client as GasMeterClient, ComputationStage, Error as GasMeterError},
-    handlers::{ProofStatus, SharedProofs},
     metrics::{self, Error as MetricsError, Metrics},
     ser::ProofDTO,
-    v_call::CallHash,
-    v_get_proof_receipt::Status,
+    v_get_proof_receipt::State,
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -28,20 +26,17 @@ pub enum Error {
 
 pub async fn await_proving(
     prover: &Prover,
-    state: &SharedProofs,
-    call_hash: CallHash,
     call_guest_id: CallGuestId,
     preflight_result: PreflightResult,
     gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
 ) -> Result<RawData, Error> {
-    state.insert(call_hash, ProofStatus::Proving);
     let host_output = Host::prove(prover, call_guest_id, preflight_result)?;
     let cycles_used = host_output.cycles_used;
     let elapsed_time = host_output.elapsed_time;
 
     info!(
-        state = tracing::field::debug(Status::Proving),
+        state = tracing::field::debug(State::Proving),
         cycles_used = cycles_used,
         elapsed_time = elapsed_time.as_millis(),
         "Finished stage"

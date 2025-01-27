@@ -1,13 +1,14 @@
-import { describe, it, expect, test } from "vitest";
-import { calculateResponseRanges, calculateRequestRanges } from "./tlsn.ranges";
 import {
   RedactResponseHeaders,
   RedactResponseHeadersExcept,
 } from "src/web-proof-commons/types/message";
+import { describe, expect, test } from "vitest";
 import {
-  fixtureTranscript,
   fixtureAllResponseHeaders,
+  fixtureTranscript,
 } from "./tlsn.ranges.test.fixtures";
+import { calculateResponseRanges } from "./tlsn.response.ranges";
+
 describe("response headers", () => {
   test("single header", () => {
     const redactionItem: RedactResponseHeaders = {
@@ -79,11 +80,5 @@ describe("response headers", () => {
         end: 493,
       },
     ]);
-  });
-});
-
-describe("calculateRequestRanges", () => {
-  it("should be defined", () => {
-    expect(calculateRequestRanges).toBeDefined();
   });
 });

@@ -73,7 +73,7 @@ const EmlForm: FC<EmlFormProps> = ({
         <dialog id="my_modal_1" className="modal">
           <div className="modal-box">
             <h3 className="font-bold text-lg">Getting .eml files from inbox</h3>
-            <p className="py-4">
+            <div className="py-4">
               <b>Gmail</b>
               <ol className="list-decimal list-inside mt-2">
                 <li>Open the email you want to save</li>
@@ -82,15 +82,15 @@ const EmlForm: FC<EmlFormProps> = ({
                 </li>
                 <li>Select Download message</li>
               </ol>
-            </p>
-            <p className="py-4">
+            </div>
+            <div className="py-4">
               <b>Outlook / Thunderbird</b>
               <ol className="list-decimal list-inside mt-2">
                 <li>Open the email you want to save</li>
                 <li>Click on the File menu.</li>
                 <li>Select "Save As".</li>
               </ol>
-            </p>
+            </div>
             <p className="py-4 text-center">
               More info in{" "}
               <a

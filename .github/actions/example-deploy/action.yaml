@@ -58,6 +58,11 @@ runs:
       run: bun install && bun run build
       working-directory: ./packages/sdk
 
+    - name: Build vlayer react hooks
+      shell: bash
+      run: bun install && bun run build
+      working-directory: ./packages/sdk-hooks
+
     - name: Build example contracts
       shell: bash
       run: forge soldeer install && forge clean && forge build
@@ -77,6 +82,7 @@ runs:
       run: bun run deploy:testnet
       env:
         VLAYER_ENV: testnet
+        USE_WINDOW_ETHEREUM_TRANSPORT: true
         JSON_RPC_URL: ${{ inputs.JSON_RPC_URL }}
         EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.EXAMPLES_TEST_PRIVATE_KEY }}
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer

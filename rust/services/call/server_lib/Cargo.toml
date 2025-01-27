@@ -27,6 +27,7 @@ risc0-zkp = { workspace = true }
 seal = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
+serde_with = { workspace = true, features = ["macros"] }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
