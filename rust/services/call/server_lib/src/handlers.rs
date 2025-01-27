@@ -4,23 +4,15 @@ use async_trait::async_trait;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
 use jsonrpsee::{proc_macros::rpc, Extensions};
-use serde::Deserialize;
 use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
 use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};
 use v_versions::Versions;
 
-use crate::{config::Config, proof::Status as ProofStatus};
+use crate::{config::Config, proof::Status as ProofStatus, user_token::Token as UserToken};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
 pub mod v_versions;
-
-pub type UserToken = String;
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct QueryParams {
-    token: Option<UserToken>,
-}
 
 #[rpc(server)]
 #[async_trait]
@@ -63,10 +55,11 @@ impl RpcServer for State {
         call: Call,
         ctx: CallContext,
     ) -> VCallResult<CallHash> {
-        let params = extensions
-            .get::<QueryParams>()
-            .expect("query params should be extracted in the handler");
-        v_call::v_call(self.config.clone(), self.proofs.clone(), params.clone(), call, ctx).await
+        let user_token = extensions
+            .get::<Option<UserToken>>()
+            .expect("user token should be extracted in the handler");
+        v_call::v_call(self.config.clone(), self.proofs.clone(), user_token.clone(), call, ctx)
+            .await
     }
 
     async fn v_get_proof_receipt(&self, hash: CallHash) -> VGetProofReceiptResult<CallResult> {

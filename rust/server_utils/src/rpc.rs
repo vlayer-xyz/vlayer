@@ -39,6 +39,12 @@ impl RequestBuilder {
         self
     }
 
+    #[must_use]
+    pub fn with_bearer_auth(mut self, token: &str) -> Self {
+        self.0 = self.0.bearer_auth(token);
+        self
+    }
+
     pub async fn send(self) -> Result<Value> {
         let response = self.0.send().await?.error_for_status()?;
         let response_body = response.json::<Value>().await?;
