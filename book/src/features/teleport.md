@@ -13,7 +13,7 @@
 </div>
 
 ## Ethereum ecosystem of chains
-The Ethereum ecosystem is fragmented, consisting of various EVM chains such as Arbitrum, Optimism, Base, and many more. Developing applications that interact with multiple chains used to be challenging, but Teleport makes it easy.
+The Ethereum ecosystem is fragmented, consisting of various EVM chains such as Base, Arbitrum, Optimism, and many more. Developing applications that interact with multiple chains used to be challenging, but Teleport makes it easy.
 
 ## Teleporting betweens chains
 `setChain(uint chainId, uint blockNo)` function, available in Prover contracts, allows to switch the context of execution to another chain (teleport).  It takes two arguments:

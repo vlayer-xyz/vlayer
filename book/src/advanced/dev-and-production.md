@@ -16,9 +16,9 @@ The Test Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prov
 
 | chain | time travel | teleport | email/web |
 |---------|-------------|----------|-----------|
+| baseSepolia | 🚧        | ✅      | ✅         |
 | sepolia | 🚧         | ✅      | ✅         |
 | optimismSepolia | ✅         | ✅      | ✅         |
-| baseSepolia | 🚧        | ✅      | ✅         |
 | polygonAmoy |          |       | ✅         |
 | arbitrumSepolia |          |       | ✅         |
 | lineaSepolia |          |       | ✅         |
