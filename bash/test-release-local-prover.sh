@@ -21,8 +21,8 @@ cargo binstall -y cargo-risczero@1.2.1
 cargo risczero install
 echo '::endgroup::'
 
-git config --global user.email "test@example.com"
-git config --global user.name "Github Runner"
+# git config --global user.email "test@example.com"
+# git config --global user.name "Github Runner"
 
 BUN_NO_FROZEN_LOCKFILE=1
 VLAYER_ENV="dev"
