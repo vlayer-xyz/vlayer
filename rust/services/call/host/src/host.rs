@@ -37,6 +37,7 @@ mod prover;
 mod tests;
 
 type HostTravelCallVerifier = travel_call::Verifier<
+    HostDb,
     time_travel::Verifier<
         chain_client::RecordingClient,
         chain_proof::Verifier<zk_proof::HostVerifier>,

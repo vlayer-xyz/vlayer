@@ -2,7 +2,7 @@ use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use call_engine::{
     evm::{
-        env::{location::ExecutionLocation, BlocksByChain},
+        env::location::ExecutionLocation,
         input::{EvmInput, MultiEvmInput},
     },
     verifier::{time_travel, travel_call},
@@ -24,7 +24,7 @@ fn time_travel_invalid_zk_proof(
     )))
 }
 
-fn teleport_ok(_: BlocksByChain, _: ExecutionLocation) -> teleport::Result {
+const fn teleport_ok(_: &CachedEvmEnv<GuestDb>, _: ExecutionLocation) -> teleport::Result {
     Ok(())
 }
 

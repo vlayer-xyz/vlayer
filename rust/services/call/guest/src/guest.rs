@@ -12,6 +12,8 @@ use chain_client::{CachedClient, ChainProofCache};
 use env::create_envs_from_input;
 use risc0_zkvm::sha::Digest;
 
+use crate::db::GuestDb;
+
 mod env;
 #[cfg(test)]
 mod tests;
@@ -54,6 +56,7 @@ fn build_guest_travel_call_verifier(
     chain_proofs: ChainProofCache,
     chain_guest_ids: impl IntoIterator<Item = Digest>,
 ) -> travel_call::Verifier<
+    GuestDb,
     time_travel::Verifier<CachedClient, chain_proof::Verifier<zk_proof::GuestVerifier>>,
     teleport::Verifier,
 > {

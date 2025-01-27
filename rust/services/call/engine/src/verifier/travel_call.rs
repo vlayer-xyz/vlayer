@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use async_trait::async_trait;
 use derive_new::new;
 use revm::DatabaseRef;
@@ -54,19 +56,25 @@ where
 }
 
 #[derive(new)]
-pub struct Verifier<TT: time_travel::IVerifier, TP: teleport::IVerifier> {
+pub struct Verifier<D, TT, TP>
+where
+    TT: time_travel::IVerifier,
+    TP: teleport::IVerifier<D>,
+    D: DatabaseRef + Send + Sync,
+{
     time_travel: TT,
     teleport: TP,
+    _phantom_d: PhantomData<D>,
 }
 
-impl<TT: time_travel::IVerifier, TP: teleport::IVerifier, D: DatabaseRef + Send + Sync>
-    seal::Sealed<D> for Verifier<TT, TP>
+impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: DatabaseRef + Send + Sync>
+    seal::Sealed<D> for Verifier<D, TT, TP>
 {
 }
 
 #[async_trait]
-impl<TT: time_travel::IVerifier, TP: teleport::IVerifier, D: DatabaseRef + Send + Sync> IVerifier<D>
-    for Verifier<TT, TP>
+impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: DatabaseRef + Send + Sync>
+    IVerifier<D> for Verifier<D, TT, TP>
 {
     async fn verify(
         &self,
@@ -74,7 +82,7 @@ impl<TT: time_travel::IVerifier, TP: teleport::IVerifier, D: DatabaseRef + Send 
         start_execution_location: ExecutionLocation,
     ) -> Result {
         self.teleport
-            .verify(input.blocks_by_chain(), start_execution_location)
+            .verify(input, start_execution_location)
             .await?;
         for (chain_id, blocks) in input.blocks_by_chain() {
             self.time_travel.verify(chain_id, blocks).await?;
