@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import {AccessControlEnumerable} from "openzeppelin-contracts/access/extensions/AccessControlEnumerable.sol";
+import {AccessControlEnumerable} from "@openzeppelin-contracts-5.0.1/access/extensions/AccessControlEnumerable.sol";
 
 interface IImageIdRepository {
     event ImageIDAdded(bytes32 imageID);
