@@ -1,0 +1,27 @@
+name: Publish image ID on-chain
+description: Call ImageIdRepository with fresh ImageId
+inputs:
+  chains:
+    description: Comma-separated list of chain names
+    required: true
+  repository_address:
+    description: Address of ImageIdRepository contract
+    required: true
+  private_key:
+    description: Private key
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Run step for each param
+      working-directory: contracts/vlayer
+      env:
+        REPOSITORY_CONTRACT_ADDRESS: ${{ inputs.repository_address }}
+        REPOSITORY_CONTRACT_OWNER_PRIVATE_KEY: ${{ inputs.private_key }}
+      shell: bash
+      run: |
+        forge soldeer install
+        forge build
+        for param in $(echo "${{ inputs.chains }}" | tr ',' ' '); do
+          forge script --chain $param script/PushImageId.s.sol --broadcast
+        done
