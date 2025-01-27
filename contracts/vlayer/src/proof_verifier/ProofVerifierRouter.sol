@@ -3,7 +3,7 @@ pragma solidity ^0.8.21;
 
 import {Proof} from "../Proof.sol";
 import {ProofMode, Seal, SealLib} from "../Seal.sol";
-import {ImageIdRepository} from "./ImageIdRepository.sol";
+import {IImageIdRepository} from "../Repository.sol";
 import {IProofVerifier} from "./IProofVerifier.sol";
 import {FakeProofVerifier} from "./FakeProofVerifier.sol";
 import {Groth16ProofVerifier} from "./Groth16ProofVerifier.sol";
@@ -24,7 +24,7 @@ contract ProofVerifierRouter is IProofVerifier {
         GROTH16_PROOF_VERIFIER = _groth16ProofVerifier;
     }
 
-    function imageIdRepository() external view returns (ImageIdRepository) {
+    function imageIdRepository() external view returns (IImageIdRepository) {
         return GROTH16_PROOF_VERIFIER.imageIdRepository();
     }
 

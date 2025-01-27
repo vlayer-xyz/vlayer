@@ -2,12 +2,12 @@
 pragma solidity ^0.8.21;
 
 import {Proof} from "../Proof.sol";
-import {ImageIdRepository} from "./ImageIdRepository.sol";
+import {IImageIdRepository} from "../Repository.sol";
 
 interface IProofVerifier {
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
         external
         view;
 
-    function imageIdRepository() external view returns (ImageIdRepository);
+    function imageIdRepository() external view returns (IImageIdRepository);
 }
