@@ -17,7 +17,7 @@ contract ImageIdRepository_addSupport_Tests is Test {
     ImageIdRepository public repository;
 
     function setUp() public {
-        repository = new ImageIdRepository();
+        repository = new ImageIdRepository(address(this), address(this));
     }
 
     function test_byDefaultCurrentImageIdIsNotSupported() public view {
@@ -59,7 +59,7 @@ contract ImageIdRepository_revokeSupport_Tests is Test {
     ImageIdRepository public repository;
 
     function setUp() public {
-        repository = new ImageIdRepository();
+        repository = new ImageIdRepository(address(this), address(this));
     }
 
     function test_canRevokeSupport() public {
@@ -99,14 +99,14 @@ contract ImageIdRepository_AdminRole is Test {
 
     constructor() {
         // deployed only to get DEFAULT_ADMIN_ROLE value, so that is acts as a constant within the tests
-        ImageIdRepository tmpRepository = new ImageIdRepository();
+        ImageIdRepository tmpRepository = new ImageIdRepository(address(this), address(this));
         ADMIN_ROLE = tmpRepository.DEFAULT_ADMIN_ROLE();
         OWNER_ROLE = tmpRepository.OWNER_ROLE();
     }
 
     function setUp() public {
         vm.startPrank(deployer);
-        repository = new ImageIdRepository();
+        repository = new ImageIdRepository(deployer, deployer);
         repository.addSupport(MOCK_IMAGE_ID);
         vm.stopPrank();
     }
@@ -191,8 +191,7 @@ contract ImageIdRepository_OwnerRole is Test {
 
     function setUp() public {
         vm.startPrank(deployer);
-        repository = new ImageIdRepository();
-        repository.transferOwnership(owner);
+        repository = new ImageIdRepository(deployer, owner);
         vm.stopPrank();
     }
 

@@ -16,7 +16,9 @@ import {ProofMode} from "../../src/Seal.sol";
 import {TestHelpers, PROVER, SELECTOR} from "../helpers/TestHelpers.sol";
 
 contract ProofVerifierUnderTest is ProofVerifierBase {
-    constructor(IRiscZeroVerifier _verifier, ProofMode _proofMode) ProofVerifierBase(new ImageIdRepository()) {
+    constructor(IRiscZeroVerifier _verifier, ProofMode _proofMode)
+        ProofVerifierBase(new ImageIdRepository(address(this), address(this)))
+    {
         VERIFIER = _verifier;
         PROOF_MODE = _proofMode;
 

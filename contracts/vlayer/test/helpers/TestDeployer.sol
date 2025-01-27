@@ -17,7 +17,7 @@ contract TestDeployer {
     ProofVerifierRouter public immutable proofVerifierRouter;
 
     constructor() {
-        repository = new ImageIdRepository();
+        repository = new ImageIdRepository(address(this), address(this));
         repository.addSupport(ImageID.RISC0_CALL_GUEST_ID);
 
         fakeProofVerifier = new FakeProofVerifier(repository);
