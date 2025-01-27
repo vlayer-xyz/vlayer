@@ -25,7 +25,9 @@ export async function v_call(
   url: string = "http://127.0.0.1:3000",
   token?: string,
 ): Promise<VCallResponse> {
-  let headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
   if (token !== undefined) {
     headers["Authorization"] = "Bearer " + token;
   }
