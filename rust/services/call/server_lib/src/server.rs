@@ -1,3 +1,5 @@
+use std::iter::once;
+
 use axum::{
     body::Bytes, extract::State, http::header::AUTHORIZATION, response::IntoResponse,
     routing::post, Router,
@@ -7,7 +9,6 @@ use axum_extra::{
     TypedHeader,
 };
 use server_utils::{cors, init_trace_layer, RequestIdLayer, Router as JrpcRouter};
-use std::iter::once;
 use tokio::net::TcpListener;
 use tower_http::{
     sensitive_headers::SetSensitiveRequestHeadersLayer,
