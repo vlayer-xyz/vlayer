@@ -20,6 +20,12 @@ pub struct OptimismSpec {
     state_contract: Address,
 }
 
+impl OptimismSpec {
+    pub const fn parent_chain(&self) -> ChainId {
+        self.parent_chain
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("Unsupported fork for block {0}")]
@@ -74,6 +80,10 @@ impl ChainSpec {
 
     pub const fn is_optimism(&self) -> bool {
         self.optimism.is_some()
+    }
+
+    pub fn optimism_spec(&self) -> Option<OptimismSpec> {
+        self.optimism.clone()
     }
 }
 

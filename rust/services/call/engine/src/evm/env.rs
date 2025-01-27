@@ -1,5 +1,5 @@
 use block_header::EvmBlockHeader;
-use chain::{ChainSpec, Error};
+use chain::{ChainSpec, Error, OptimismSpec};
 use revm::primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId};
 
 pub mod cached;
@@ -11,6 +11,7 @@ pub struct EvmEnv<D> {
     pub db: D,
     pub cfg_env: CfgEnvWithHandlerCfg,
     pub header: Box<dyn EvmBlockHeader>,
+    pub optimism: Option<OptimismSpec>,
 }
 
 impl<D> EvmEnv<D> {
@@ -23,6 +24,7 @@ impl<D> EvmEnv<D> {
             db,
             cfg_env,
             header,
+            optimism: None,
         }
     }
 
@@ -32,6 +34,7 @@ impl<D> EvmEnv<D> {
         let spec_id = chain_spec.active_fork(self.header.number(), self.header.timestamp())?;
         let handler_cfg = HandlerCfg::new_with_optimism(spec_id, chain_spec.is_optimism());
         self.cfg_env.handler_cfg = handler_cfg;
+        self.optimism = chain_spec.optimism_spec();
 
         Ok(self)
     }
@@ -39,5 +42,42 @@ impl<D> EvmEnv<D> {
     /// Returns the header of the environment.
     pub fn header(&self) -> &dyn EvmBlockHeader {
         self.header.as_ref()
+    }
+
+    pub fn is_committing_to_chain(&self, chain_id: u64) -> bool {
+        self.optimism
+            .as_ref()
+            .is_some_and(|optimism| optimism.parent_chain() == chain_id)
+    }
+}
+
+#[cfg(test)]
+mod emv_env {
+    use alloy_primitives::ChainId;
+    use block_header::EthBlockHeader;
+
+    use super::*;
+
+    const ETH_MAINNET_ID: ChainId = 1;
+    const OPTIMISM_ID: ChainId = 10;
+    const ETH_SEPOLIA_ID: ChainId = 11_155_111;
+
+    fn setup_env(chain_id: ChainId) -> EvmEnv<()> {
+        let header = Box::new(EthBlockHeader::default());
+        EvmEnv::new((), header)
+            .with_chain_spec(&chain_id.try_into().unwrap())
+            .unwrap()
+    }
+
+    #[test]
+    fn optimism_commits_to_mainnet() {
+        let env = setup_env(OPTIMISM_ID);
+        assert!(env.is_committing_to_chain(ETH_MAINNET_ID));
+    }
+
+    #[test]
+    fn sepolia_doesnt_commit_to_mainnet() {
+        let env = setup_env(ETH_SEPOLIA_ID);
+        assert!(!env.is_committing_to_chain(ETH_MAINNET_ID));
     }
 }
