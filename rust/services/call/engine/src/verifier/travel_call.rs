@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use derive_new::new;
 
-use super::{sealing::sealed_with_test_mock, teleport, time_travel};
+use super::{teleport, time_travel};
 use crate::evm::{env::location::ExecutionLocation, input::MultiEvmInput};
 
 #[derive(thiserror::Error, Debug)]
@@ -13,7 +13,34 @@ pub enum Error {
 }
 
 pub type Result = std::result::Result<(), Error>;
-sealed_with_test_mock!(async IVerifier (input: &MultiEvmInput, start_execution_location: ExecutionLocation) -> Result);
+crate::verifier::sealing::sealed_trait!();
+
+#[cfg(any(test, feature = "testing"))]
+impl<F> seal::Sealed for F where F: Fn(&MultiEvmInput, ExecutionLocation) -> Result + Send + Sync {}
+
+#[async_trait]
+pub trait IVerifier: seal::Sealed + Send + Sync {
+    async fn verify(
+        &self,
+        input: &MultiEvmInput,
+        start_execution_location: ExecutionLocation,
+    ) -> Result;
+}
+
+#[cfg(any(test, feature = "testing"))]
+#[async_trait::async_trait]
+impl<F> IVerifier for F
+where
+    F: Fn(&MultiEvmInput, ExecutionLocation) -> Result + Send + Sync,
+{
+    async fn verify(
+        &self,
+        input: &MultiEvmInput,
+        start_execution_location: ExecutionLocation,
+    ) -> Result {
+        self(input, start_execution_location)
+    }
+}
 
 #[derive(new)]
 pub struct Verifier<TT: time_travel::IVerifier, TP: teleport::IVerifier> {
