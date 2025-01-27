@@ -71,8 +71,8 @@ pub struct RpcClient {
 }
 
 impl RpcClient {
-    const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
-    const USER_TOKEN_QUERY_KEY: &str = "key";
+    const PROVER_API_KEY_HEADER_NAME: &str = "x-prover-api-key";
+    const AUTHORIZATION_HEADER_NAME: &str = "Authorization";
 
     pub fn new(
         Config {
@@ -96,10 +96,11 @@ impl RpcClient {
     async fn call(&self, method: impl Method) -> Result<()> {
         let mut req = self.client.request(method);
         if let Some(api_key) = &self.api_key {
-            req = req.with_header(Self::API_KEY_HEADER_NAME, api_key);
+            req = req.with_header(Self::PROVER_API_KEY_HEADER_NAME, api_key);
         }
         if let Some(user_token) = &self.user_token {
-            req = req.with_query(Self::USER_TOKEN_QUERY_KEY, user_token);
+            let user_token = format!("Bearer {user_token}");
+            req = req.with_header(Self::AUTHORIZATION_HEADER_NAME, &user_token);
         }
         let _resp = req.send().await?;
         Ok(())
