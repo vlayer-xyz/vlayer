@@ -135,8 +135,7 @@ const useNotarizeStepActions = (props: NotarizeStepActionProps) => {
   const { provingStatus } = useProvingStatus();
   const { isRedirectCalloutVisible } = useRedirectCallout();
   const { error } = useTlsnProver();
-  console.log("error__", error);
-  console.log("isRedirectCalloutVisible", isRedirectCalloutVisible);
+
   return {
     provingStatus,
     onButtonClick,

@@ -8,7 +8,6 @@ import { useInterval } from "usehooks-ts";
 import { AnimatedContainer } from "components/molecules/AnimationContainer";
 
 const useRedirectCallout = ({ isVisible }: { isVisible: boolean }) => {
-  console.log("-isVisible--", isVisible);
   const [timeout, setTimeout] = useState(
     import.meta.env.REDIRECT_DELAY_SECONDS || DEFAULT_REDIRECT_DELAY_SECONDS,
   );

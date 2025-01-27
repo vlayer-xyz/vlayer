@@ -55,7 +55,6 @@ export const calculateHeadersRangesExcept = (
     getAllHeaders,
     (headers) => filterExceptHeaders(exceptHeaders, headers),
     (filteredHeaders) => {
-      console.log(filteredHeaders);
       return filteredHeaders;
     },
     (filteredHeaders) =>
