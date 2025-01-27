@@ -94,6 +94,7 @@ describe("json body redaction", () => {
       );
       expect(result).toEqual([valueRange(transcript, "valid JSON")]);
     });
+
     test("simple json paths with unnecessary whitespace and newlines in the value", () => {
       const name = "José 🌟";
       const transcript = createTestData(
