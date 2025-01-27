@@ -76,9 +76,6 @@ mod verify_env {
     }
 
     #[tokio::test]
-    #[should_panic(
-        expected = "called `Result::unwrap()` on an `Err` value: TimeTravel(ChainProof(Zk(verification indicates proof is invalid)))"
-    )]
     async fn zk_verification_failed() {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
@@ -86,6 +83,15 @@ mod verify_env {
         let envs = create_envs_from_input(multi_evm_input);
         let cached_envs = CachedEvmEnv::from_envs(envs);
         let verifier = travel_call::Verifier::new(time_travel_invalid_zk_proof, teleport_ok);
-        verifier.verify(&cached_envs, EXEC_LOCATION).await.unwrap();
+        let verification_err = verifier
+            .verify(&cached_envs, EXEC_LOCATION)
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            verification_err,
+            travel_call::Error::TimeTravel(time_travel::Error::ChainProof(chain_proof::Error::Zk(
+                zk_proof::Error::InvalidProof
+            )))
+        ));
     }
 }
