@@ -130,7 +130,8 @@ function DappNewWay() {
       ],
     });
     const zkProof = await vlayerClient.waitForProvingResult({ hash });
-    const [_, name, greeting] = zkProof;
+    const name = zkProof[1];
+    const greeting = zkProof[2];
     setName(name);
     setGreeting(greeting);
     setZkProof(zkProof);
@@ -175,9 +176,19 @@ function DappNewWay() {
           <div>
             <h1 data-testid="has-zkproof">Has zk proof</h1>
             <h2>Name from prover:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }} data-testid="name-from-prover">{name}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="name-from-prover"
+            >
+              {name}
+            </pre>
             <h2>Greeting from prover:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }} data-testid="greeting-from-prover">{greeting}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="greeting-from-prover"
+            >
+              {greeting}
+            </pre>
           </div>
         ) : (
           <h1> No zk proof </h1>
@@ -226,7 +237,7 @@ function Dapp() {
 
   const [decodedResponse, setDecodedResponse] = useState<string>();
   const [decodedRequest, setDecodedRequest] = useState<string>();
-  
+
   const vlayerClient = useRef<VlayerClient>();
   const requestWebProof = useCallback(async () => {
     const provider = createExtensionWebProofProvider({
@@ -311,7 +322,8 @@ function Dapp() {
     }
 
     const zkProof = await vlayerClient.current?.waitForProvingResult({ hash });
-    const [_, name, greeting] = zkProof;
+    const name = zkProof[1];
+    const greeting = zkProof[2];
     setName(name);
     setGreeting(greeting);
     setZkProof(zkProof);
@@ -358,9 +370,19 @@ function Dapp() {
           <div>
             <h1 data-testid="has-zkproof">Has zk proof</h1>
             <h2>Name from prover:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }} data-testid="name-from-prover">{name}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="name-from-prover"
+            >
+              {name}
+            </pre>
             <h2>Greeting from prover:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }} data-testid="greeting-from-prover">{greeting}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="greeting-from-prover"
+            >
+              {greeting}
+            </pre>
           </div>
         ) : (
           <h1> No zk proof </h1>

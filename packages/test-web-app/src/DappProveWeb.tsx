@@ -87,7 +87,8 @@ function DappProveWeb() {
     });
 
     const zkProof = await vlayerClient.waitForProvingResult({ hash });
-    const [_, name, greeting] = zkProof;
+    const name = zkProof[1];
+    const greeting = zkProof[2];
     setName(name);
     setGreeting(greeting);
     setZkProof(zkProof);
@@ -115,9 +116,19 @@ function DappProveWeb() {
           <div>
             <h1 data-testid="has-zkproof">Has zk proof</h1>
             <h2>Name from prover:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }} data-testid="name-from-prover">{name}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="name-from-prover"
+            >
+              {name}
+            </pre>
             <h2>Greeting from prover:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }} data-testid="greeting-from-prover">{greeting}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="greeting-from-prover"
+            >
+              {greeting}
+            </pre>
           </div>
         ) : (
           <h1> No zk proof </h1>
