@@ -17,7 +17,7 @@ pub struct ChainSpec {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OptimismSpec {
     parent_chain: ChainId,
-    state_contract: Address
+    state_contract: Address,
 }
 
 #[derive(Debug, Error)]
