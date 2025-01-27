@@ -20,7 +20,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 pub trait EvmEnvFactory<D>: Send + Sync
 where
-    D: DatabaseRef,
+    D: DatabaseRef + Send + Sync,
 {
     fn create(&self, location: ExecutionLocation) -> Result<EvmEnv<D>>;
 }

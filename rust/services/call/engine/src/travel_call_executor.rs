@@ -22,7 +22,7 @@ use crate::{
 #[derive(new)]
 pub struct TravelCallExecutor<'envs, D>
 where
-    D: DatabaseRef,
+    D: DatabaseRef + Send + Sync,
 {
     envs: &'envs CachedEvmEnv<D>,
 }
@@ -46,7 +46,7 @@ type Result<T> = std::result::Result<T, Error>;
 
 impl<'envs, D> TravelCallExecutor<'envs, D>
 where
-    D: DatabaseRef,
+    D: DatabaseRef + Send + Sync,
     D::Error: std::fmt::Debug,
 {
     pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
@@ -86,7 +86,7 @@ fn build_evm<'inspector, 'envs, D>(
     inspector: TravelInspector<'inspector>,
 ) -> Evm<'inspector, TravelInspector<'inspector>, WrapDatabaseRef<&'envs D>>
 where
-    D: DatabaseRef,
+    D: DatabaseRef + Send + Sync,
     D::Error: std::fmt::Debug,
 {
     let precompiles_handle_register = |handler: &mut Handler<_, _, _>| {
