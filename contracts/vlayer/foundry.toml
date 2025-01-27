@@ -19,7 +19,7 @@ risc0-ethereum = { version = "1.2.0", url = "https://github.com/vlayer-xyz/risc0
 [rpc_endpoints]
 optimism-sepolia = "https://sepolia.optimism.io"
 base-sepolia = "https://sepolia.base.org"
-etherum-sepolia = "https://eth-sepolia.public.blastapi.io"
+sepolia = "https://eth-sepolia.public.blastapi.io"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
