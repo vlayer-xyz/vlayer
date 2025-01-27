@@ -1,4 +1,4 @@
-use alloy_primitives::{BlockNumber, ChainId};
+use alloy_primitives::{Address, BlockNumber, ChainId};
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -12,6 +12,14 @@ pub struct ChainSpec {
     forks: Box<[Fork]>,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     is_optimism: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    optimism: Option<OptimismSpec>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OptimismSpec {
+    parent_chain: ChainId,
+    state_contract: Address
 }
 
 #[derive(Debug, Error)]
@@ -28,6 +36,7 @@ impl ChainSpec {
         name: impl Into<String>,
         forks: impl IntoIterator<Item = F>,
         is_optimism: bool,
+        optimism: Option<OptimismSpec>,
     ) -> Self
     where
         F: Into<Fork>,
@@ -45,6 +54,7 @@ impl ChainSpec {
             name,
             forks,
             is_optimism,
+            optimism,
         }
     }
 
@@ -93,7 +103,7 @@ mod tests {
         #[test]
         #[should_panic(expected = "chain spec must have at least one fork")]
         fn panics_if_no_forks() {
-            ChainSpec::new(1, "", [] as [Fork; 0], false);
+            ChainSpec::new(1, "", [] as [Fork; 0], false, None);
         }
 
         #[test]
@@ -109,6 +119,7 @@ mod tests {
                     Fork::after_block(SpecId::SHANGHAI, 0),
                 ],
                 false,
+                None,
             );
         }
 
@@ -122,6 +133,7 @@ mod tests {
                     Fork::after_timestamp(SpecId::SHANGHAI, MAINNET_MERGE_BLOCK_TIMESTAMP),
                 ],
                 false,
+                None,
             );
         }
     }
