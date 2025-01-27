@@ -17,7 +17,7 @@ new Elysia({
         error_message: "Missing or incorrect query parameter 'are_you_sure'",
       };
     }
-    return { success: true, name: "Gandalf" };
+    return { success: true, name: "Gandalf", greeting: "Hello, Frodo!" };
   })
   .get("/json_two_bytes_char", () => {
     return { success: true, place: "Barad-dûr" };

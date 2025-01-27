@@ -248,6 +248,9 @@ test.describe("Full flow of webproof using extension", () => {
       expect(responseText).toContain(
         "Access-Control-Allow-Headers: ****************************************************************************************************************************",
       );
+
+      expect(responseText).toContain('"name":"Gandalf"');
+      expect(responseText).toContain('"greeting":"*************"');
     });
 
     await test.step("Proving request has succeeded", async () => {
@@ -286,6 +289,21 @@ test.describe("Full flow of webproof using extension", () => {
           },
         },
       });
+    });
+
+    await test.step("Prover returned correctly redacted parts of response body", async () => {
+      const nameFromProver = page
+        .locator("body")
+        .getByTestId("name-from-prover");
+      const greetingFromProver = page
+        .locator("body")
+        .getByTestId("greeting-from-prover");
+
+      const name = await nameFromProver.textContent();
+      const greeting = await greetingFromProver.textContent();
+
+      expect(name).toEqual("Gandalf");
+      expect(greeting).toEqual("*************");
     });
   });
 

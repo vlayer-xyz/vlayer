@@ -29,6 +29,8 @@ console.log(PROVER_ADDRESS);
 function DappNewWay() {
   const [webProof, setWebProof] = useState<PresentationJSON>();
   const [zkProof, setZkProof] = useState<boolean>();
+  const [name, setName] = useState<string>();
+  const [greeting, setGreeting] = useState<string>();
 
   const [decodedResponse, setDecodedResponse] = useState<string>();
   const [decodedRequest, setDecodedRequest] = useState<string>();
@@ -88,7 +90,7 @@ function DappNewWay() {
           [
             {
               response: {
-                json_body_except: ["screen_name"],
+                json_body_except: ["name"],
               },
             },
             {
@@ -128,6 +130,9 @@ function DappNewWay() {
       ],
     });
     const zkProof = await vlayerClient.waitForProvingResult({ hash });
+    const [_, name, greeting] = zkProof;
+    setName(name);
+    setGreeting(greeting);
     setZkProof(zkProof);
   }, [webProof]);
 
@@ -167,7 +172,13 @@ function DappNewWay() {
       </div>
       <div>
         {zkProof ? (
-          <h1 data-testid="has-zkproof">Has zk proof</h1>
+          <div>
+            <h1 data-testid="has-zkproof">Has zk proof</h1>
+            <h2>Name from prover:</h2>
+            <pre style={{ whiteSpace: "break-spaces" }} data-testid="name-from-prover">{name}</pre>
+            <h2>Greeting from prover:</h2>
+            <pre style={{ whiteSpace: "break-spaces" }} data-testid="greeting-from-prover">{greeting}</pre>
+          </div>
         ) : (
           <h1> No zk proof </h1>
         )}
