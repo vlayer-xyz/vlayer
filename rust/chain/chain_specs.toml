@@ -185,7 +185,7 @@ forks = [
 ]
 
 # https://github.com/worldcoin/world-id-docs/blob/524b92581b06b46dde08d7a31fc1f0c99aea180c/src/pages/world-chain/reference/node-setup.mdx#running-world-chain-mainnet
-# https://l2beat.com/scaling/projects/world
+# https://docs.world.org/world-chain/developers/world-chain-contracts#ethereum-mainnet
 [[chains]]
 name = "worldchain"
 id = 480
@@ -197,11 +197,11 @@ forks = [
 ]
 
 # https://github.com/worldcoin/world-id-docs/blob/524b92581b06b46dde08d7a31fc1f0c99aea180c/src/pages/world-chain/reference/node-setup.mdx#running-world-chain-sepolia
-# todo: update state_contract address to correct one
+# https://docs.world.org/world-chain/developers/world-chain-contracts#ethereum-sepolia-testnet
 [[chains]]
 name = "worldchain-sepolia"
 id = 4801
-optimism = { parent_chain = 1, state_contract = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
+optimism = { parent_chain = 1, state_contract = "0x1333d5E5201D760444A399E77b3D337eBDB0DD07" }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
     { spec = "FJORD", activation = { Timestamp = 1721826000 } },
