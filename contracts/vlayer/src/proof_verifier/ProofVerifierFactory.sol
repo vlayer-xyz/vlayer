@@ -14,7 +14,7 @@ library ProofVerifierFactory {
         if (ChainIdLibrary.isMainnet()) {
             return IProofVerifier(address(0));
         } else if (ChainIdLibrary.isDevnet() || ChainIdLibrary.isTestnet()) {
-            ImageIdRepository repository = new ImageIdRepository();
+            ImageIdRepository repository = new ImageIdRepository(address(this), address(this));
             repository.addSupport(ImageID.RISC0_CALL_GUEST_ID);
             return new ProofVerifierRouter(new FakeProofVerifier(repository), new Groth16ProofVerifier(repository));
         }
