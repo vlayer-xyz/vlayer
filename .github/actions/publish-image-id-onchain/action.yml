@@ -23,5 +23,5 @@ runs:
         forge soldeer install
         forge build
         for param in $(echo "${{ inputs.chains }}" | tr ',' ' '); do
-          forge script --chain $param script/PushImageId.s.sol --broadcast
+          forge script --chain $param scripts/PushImageId.s.sol --broadcast
         done
