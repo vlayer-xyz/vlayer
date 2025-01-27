@@ -25,15 +25,20 @@ jobs:
         uses: ./.github/actions/ts-prerequisites
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh
+      - name: Install solhint
+        working-directory: contracts
+        run: bun install --frozen-lockfile
       - name: Contracts vlayer lint:solidity
-        working-directory: contracts/vlayer
+        working-directory: ./contracts/vlayer/
         run: |
-          bun install --frozen-lockfile
           bun run lint:solidity --max-warnings 0
       - name: Contracts fixtures lint:solidity
-        working-directory: contracts/fixtures
+        working-directory: ./contracts/fixtures/
         run: |
-          bun install --frozen-lockfile
+          bun run lint:solidity --max-warnings 0
+      - name: Contracts scripts lint:solidity
+        working-directory: ./contracts/vlayer/scripts/
+        run: |
           bun run lint:solidity --max-warnings 0
       - name: lint Solidity examples
         run: ./bash/lint-solidity-examples.sh
