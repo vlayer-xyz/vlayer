@@ -1,20 +1,23 @@
 [profile.default]
 src = "src"
 out = "out"
-fs_permissions = [{ access = "read", path = "./testdata"}]
+fs_permissions = [{ access = "read", path = "./testdata" }]
 
 libs = ["dependencies"]
 
 [profile.no-vlayer]
-no-match-path="test/vlayer/*"
+no-match-path = "test/vlayer/*"
 
 [profile.vlayer]
-match-path="test/vlayer/*"
+match-path = "test/vlayer/*"
 
 [dependencies]
 forge-std = "1.9.4"
 "@openzeppelin-contracts" = "5.0.1"
 risc0-ethereum = { version = "1.2.0", url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip" }
+
+[rpc_endpoints]
+optimism-sepolia = "https://sepolia.optimism.io"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
