@@ -21,7 +21,7 @@ pub use config::Config;
 use derive_new::new;
 pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
 pub use prover::Prover;
-use provider::{multi, CachedMultiProvider};
+use provider::CachedMultiProvider;
 use revm::primitives::HashMap;
 use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
 use seal::EncodableReceipt;
