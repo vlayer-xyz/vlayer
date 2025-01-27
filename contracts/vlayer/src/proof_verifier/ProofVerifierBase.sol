@@ -7,7 +7,7 @@ import {Proof} from "../Proof.sol";
 import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
 import {IProofVerifier} from "./IProofVerifier.sol";
-import {ImageIdRepository} from "./ImageIdRepository.sol";
+import {IImageIdRepository} from "../Repository.sol";
 
 abstract contract ProofVerifierBase is IProofVerifier {
     using SealLib for Seal;
@@ -16,13 +16,13 @@ abstract contract ProofVerifierBase is IProofVerifier {
 
     ProofMode public immutable PROOF_MODE;
     IRiscZeroVerifier public immutable VERIFIER;
-    ImageIdRepository public immutable IMAGE_ID_REPOSITORY;
+    IImageIdRepository public immutable IMAGE_ID_REPOSITORY;
 
-    constructor(ImageIdRepository _repository) {
+    constructor(IImageIdRepository _repository) {
         IMAGE_ID_REPOSITORY = _repository;
     }
 
-    function imageIdRepository() external view returns (ImageIdRepository) {
+    function imageIdRepository() external view returns (IImageIdRepository) {
         return IMAGE_ID_REPOSITORY;
     }
 
@@ -56,6 +56,6 @@ abstract contract ProofVerifierBase is IProofVerifier {
 
         // CALL_GUEST_ID is not a part of the verified arguments
         // and the following require is just to enable better error handling.
-        require(IMAGE_ID_REPOSITORY.isSupported(proof.callGuestId), "Unsupported CallGuestId");
+        require(IMAGE_ID_REPOSITORY.isImageSupported(proof.callGuestId), "Unsupported CallGuestId");
     }
 }

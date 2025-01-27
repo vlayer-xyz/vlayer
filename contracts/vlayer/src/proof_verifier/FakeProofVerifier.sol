@@ -6,15 +6,14 @@ import {RiscZeroMockVerifier} from "risc0-ethereum-1.2.0/src/test/RiscZeroMockVe
 import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
 import {ChainIdLibrary, InvalidChainId} from "./ChainId.sol";
-import {ProofVerifierBase} from "./ProofVerifierBase.sol";
-import {ImageIdRepository} from "./ImageIdRepository.sol";
+import {ProofVerifierBase, IImageIdRepository} from "./ProofVerifierBase.sol";
 
 bytes4 constant FAKE_VERIFIER_SELECTOR = bytes4(0xdeafbeef);
 
 contract FakeProofVerifier is ProofVerifierBase {
     using SealLib for Seal;
 
-    constructor(ImageIdRepository _repository) ProofVerifierBase(_repository) {
+    constructor(IImageIdRepository _repository) ProofVerifierBase(_repository) {
         if (ChainIdLibrary.isMainnet()) {
             revert InvalidChainId();
         }
