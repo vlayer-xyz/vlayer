@@ -8,12 +8,12 @@ import {ImageIdRepository} from "../src/proof_verifier/ImageIdRepository.sol";
 contract PushImageId is Script {
     function run() external {
         bytes32 imageId = ImageID.RISC0_CALL_GUEST_ID;
-        address repositoryAddress = vm.envAddress("IMAGE_ID_REPOSITORY");
+        address repositoryAddress = vm.envAddress("REPOSITORY_CONTRACT_ADDRESS");
         require(repositoryAddress != address(0), "IMAGE_ID_REPOSITORY not set");
         ImageIdRepository repository = ImageIdRepository(repositoryAddress);
 
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+        uint256 ownerPrivateKey = vm.envUint("REPOSITORY_OWNER_PRIVATE_KEY");
+        vm.startBroadcast(ownerPrivateKey);
         repository.addSupport(imageId);
         vm.stopBroadcast();
     }

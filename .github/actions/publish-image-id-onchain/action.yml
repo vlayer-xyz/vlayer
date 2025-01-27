@@ -16,12 +16,12 @@ runs:
     - name: Run step for each param
       working-directory: contracts/vlayer
       env:
-        IMAGE_ID_REPOSITORY: ${{ inputs.repository_address }}
-        PRIVATE_KEY: ${{ inputs.private_key }}
+        REPOSITORY_CONTRACT_ADDRESS: ${{ inputs.repository_address }}
+        REPOSITORY_CONTRACT_OWNER_PRIVATE_KEY: ${{ inputs.private_key }}
       shell: bash
       run: |
         forge soldeer install
         forge build
         for param in $(echo "${{ inputs.chains }}" | tr ',' ' '); do
-          forge script --chain $param scripts/PushImageId.s.sol
+          forge script --chain $param script/PushImageId.s.sol --broadcast
         done
