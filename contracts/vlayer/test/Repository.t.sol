@@ -5,7 +5,7 @@ import {Test, console} from "forge-std-1.9.4/src/Test.sol";
 import {IAccessControl} from "@openzeppelin-contracts-5.0.1/access/IAccessControl.sol";
 
 import {ImageID} from "../../src/ImageID.sol";
-import {Repository, IImageIdRepository, IVDnsKeyRepository} from "../../src/Repository.sol";
+import {Repository, IImageIdRepository, IVDnsKeyRepository, INotaryKeyRepository} from "../../src/Repository.sol";
 
 bytes32 constant MOCK_IMAGE_ID = bytes32(0x1111111111111111111111111111111111111111111111111111111111111111);
 address constant deployer = address(0);
@@ -323,5 +323,79 @@ contract Repository_DnsKeys is Test {
         bytes memory key = "0x1234";
         vm.expectRevert("Cannot revoke invalid key");
         repository.revokeDnsKey(key);
+    }
+}
+
+contract Repository_NotaryKeys is Test {
+    Repository public repository;
+    string private constant NOTARY_PUB_KEY =
+        "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
+
+    function setUp() public {
+        repository = new Repository(deployer, owner);
+        vm.startPrank(owner);
+    }
+
+    function test_addKeyMakesKeyCorrect() public {
+        assertFalse(repository.isNotaryKeyValid(NOTARY_PUB_KEY));
+
+        repository.addNotaryKey(NOTARY_PUB_KEY);
+        assertTrue(repository.isNotaryKeyValid(NOTARY_PUB_KEY));
+    }
+
+    function test_revertsIf_keyIsAlreadyCorrect() public {
+        repository.addNotaryKey(NOTARY_PUB_KEY);
+
+        vm.expectRevert("Key is already valid");
+        repository.addNotaryKey(NOTARY_PUB_KEY);
+    }
+
+    function test_onlyAdminCanAddKey() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector, alice, repository.OWNER_ROLE()
+            )
+        );
+        vm.startPrank(alice);
+        repository.addNotaryKey(NOTARY_PUB_KEY);
+    }
+
+    function test_addKeyEmitsEvent() public {
+        vm.expectEmit();
+        emit INotaryKeyRepository.NotaryKeyAdded(owner, NOTARY_PUB_KEY);
+        repository.addNotaryKey(NOTARY_PUB_KEY);
+    }
+
+    function test_revokeKeyMakesKeyInvalid() public {
+        repository.addNotaryKey(NOTARY_PUB_KEY);
+        assertTrue(repository.isNotaryKeyValid(NOTARY_PUB_KEY));
+
+        repository.revokeNotaryKey(NOTARY_PUB_KEY);
+        assertFalse(repository.isNotaryKeyValid(NOTARY_PUB_KEY));
+    }
+
+    function test_onlyAdminCanRevokeKey() public {
+        repository.addNotaryKey(NOTARY_PUB_KEY);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector, alice, repository.OWNER_ROLE()
+            )
+        );
+        vm.startPrank(alice);
+        repository.revokeNotaryKey(NOTARY_PUB_KEY);
+    }
+
+    function test_revokeKeyEmitsEvent() public {
+        repository.addNotaryKey(NOTARY_PUB_KEY);
+
+        vm.expectEmit();
+        emit INotaryKeyRepository.NotaryKeyRevoked(owner, NOTARY_PUB_KEY);
+        repository.revokeNotaryKey(NOTARY_PUB_KEY);
+    }
+
+    function test_revertsIf_revokingInvalidKey() public {
+        vm.expectRevert("Cannot revoke invalid key");
+        repository.revokeNotaryKey(NOTARY_PUB_KEY);
     }
 }
