@@ -2,7 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {Test, console} from "forge-std-1.9.4/src/Test.sol";
-import {IAccessControl} from "openzeppelin-contracts/access/IAccessControl.sol";
+import {IAccessControl} from "@openzeppelin-contracts-5.0.1/access/IAccessControl.sol";
 
 import {ImageID} from "../../src/ImageID.sol";
 import {Repository, IImageIdRepository, IVDnsKeyVerifier} from "../../src/Repository.sol";
@@ -249,6 +249,7 @@ contract Repository_DnsKeys is Test {
 
     function setUp() public {
         repository = new Repository(deployer, owner);
+        vm.startPrank(owner);
     }
 
     function test_addKeyMakesKeyValid() public {
@@ -272,10 +273,10 @@ contract Repository_DnsKeys is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector, address(123), repository.OWNER_ROLE()
+                IAccessControl.AccessControlUnauthorizedAccount.selector, alice, repository.OWNER_ROLE()
             )
         );
-        vm.prank(address(123));
+        vm.startPrank(alice);
         repository.addDnsKey(key);
     }
 
@@ -283,7 +284,7 @@ contract Repository_DnsKeys is Test {
         bytes memory key = "0x1234";
 
         vm.expectEmit();
-        emit IVDnsKeyVerifier.DnsKeyAdded(address(this), key);
+        emit IVDnsKeyVerifier.DnsKeyAdded(owner, key);
         repository.addDnsKey(key);
     }
 
@@ -302,10 +303,10 @@ contract Repository_DnsKeys is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector, address(123), repository.OWNER_ROLE()
+                IAccessControl.AccessControlUnauthorizedAccount.selector, alice, repository.OWNER_ROLE()
             )
         );
-        vm.prank(address(123));
+        vm.startPrank(alice);
         repository.revokeDnsKey(key);
     }
 
@@ -314,13 +315,13 @@ contract Repository_DnsKeys is Test {
         repository.addDnsKey(key);
 
         vm.expectEmit();
-        emit IVDnsKeyVerifier.DnsKeyRevoked(address(this), key);
+        emit IVDnsKeyVerifier.DnsKeyRevoked(owner, key);
         repository.revokeDnsKey(key);
     }
 
     function test_revertsIf_keyIsAlreadyInvalid() public {
         bytes memory key = "0x1234";
-        vm.expectRevert("Key is invalid");
+        vm.expectRevert("Cannot revoke invalid key");
         repository.revokeDnsKey(key);
     }
 }
