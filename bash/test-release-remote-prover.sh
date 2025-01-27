@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/set-missing-git-config.sh"
 
 set -ueo pipefail
+
+echo '::group::setting git config'
+set_missing_git_config
+echo '::endgroup::'
 
 echo '::group::foundry installation'
 curl -L https://foundry.paradigm.xyz | bash
@@ -27,8 +32,6 @@ cargo binstall -y cargo-risczero@1.2.1
 cargo risczero install
 echo '::endgroup::'
 
-git config --global user.email "test@example.com"
-git config --global user.name "Github Runner"
 
 BUN_NO_FROZEN_LOCKFILE=1
 VLAYER_ENV="testnet"
