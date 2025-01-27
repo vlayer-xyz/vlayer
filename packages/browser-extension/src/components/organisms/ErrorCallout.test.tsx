@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ErrorCalloutPresentational } from "./ErrorCallout";
 import React from "react";
 import { SidePanelContent } from "components/pages/SidePanelContent";
-// Mock the hooks
 
 const mocks = vi.hoisted(() => ({
   useTlsnProver: vi.fn(),
