@@ -2,7 +2,10 @@ use alloy_primitives::hex::ToHexExt;
 use assert_json_diff::assert_json_include;
 use axum::{
     body::Body,
-    http::{header::CONTENT_TYPE, HeaderName, Request, Response},
+    http::{
+        header::{AUTHORIZATION, CONTENT_TYPE},
+        HeaderName, Request, Response,
+    },
     Router,
 };
 use axum_jrpc::Value;
@@ -32,6 +35,20 @@ pub fn function_selector(calldata: &Bytes) -> String {
 pub async fn post<T: Serialize>(app: Router, url: &str, body: &T) -> Response<Body> {
     let request = Request::post(url)
         .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
+        .body(Body::from(to_string(body).unwrap()))
+        .unwrap();
+    app.oneshot(request).await.unwrap()
+}
+
+pub async fn post_with_bearer_auth<T: Serialize>(
+    app: Router,
+    url: &str,
+    body: &T,
+    token: &str,
+) -> Response<Body> {
+    let request = Request::post(url)
+        .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
+        .header(AUTHORIZATION, format!("Bearer {token}"))
         .body(Body::from(to_string(body).unwrap()))
         .unwrap();
     app.oneshot(request).await.unwrap()

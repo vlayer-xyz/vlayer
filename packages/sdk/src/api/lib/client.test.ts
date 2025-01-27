@@ -136,17 +136,30 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
   });
   it("should pass token if present", async () => {
-    const token = "deadbeef";
+    const userToken = "deadbeef";
 
     fetchMocker.mockResponseOnce((req) => {
-      if (req.url === "http://127.0.0.1:3000/?token=" + token) {
+      const token = (req.headers.get("authorization") || "")
+        .split("Bearer ")
+        .at(1);
+      if (token !== undefined && token === userToken) {
         return {
           body: JSON.stringify({
             result: hashStr,
           }),
         };
       }
-      return { status: 501 };
+      return {
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          error: {
+            code: -32603,
+            message:
+              "Gas meter error: RPC error: HTTP error: HTTP status client error (401 Unauthorized) for url (http://localhost:3000)",
+          },
+        }),
+      };
     });
 
     const result = await vlayer.prove({
@@ -155,7 +168,7 @@ describe("Success zk-proving", () => {
       proverAbi: [],
       args: [],
       chainId: 42,
-      token,
+      token: userToken,
     });
     expect(result.hash).toBe(hashStr);
     expect(zkProvingSpy).toBeCalledTimes(1);

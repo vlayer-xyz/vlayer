@@ -142,7 +142,7 @@ pub(crate) mod mock {
     use mock_chain_server::ChainProofServerMock;
     use provider::to_eth_block_header;
     use serde::Serialize;
-    use server_utils::{post, rpc::mock::Server as RpcServerMock};
+    use server_utils::{post, post_with_bearer_auth, rpc::mock::Server as RpcServerMock};
 
     abigen!(ExampleProver, "./testdata/ExampleProver.json");
 
@@ -158,6 +158,15 @@ pub(crate) mod mock {
 
         pub(crate) async fn post(&self, url: &str, body: impl Serialize) -> Response<Body> {
             post(self.0.clone(), url, &body).await
+        }
+
+        pub(crate) async fn post_with_bearer_auth(
+            &self,
+            url: &str,
+            body: impl Serialize,
+            token: &str,
+        ) -> Response<Body> {
+            post_with_bearer_auth(self.0.clone(), url, &body, token).await
         }
     }
 
