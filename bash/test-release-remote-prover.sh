@@ -49,5 +49,11 @@ for example in $(get_examples); do
     vlayer test
     echo '::endgroup::'
 
+    echo "::group::vlayer run prove.ts: ${example}"
     run_prover_script
+    echo '::endgroup::'
+
+    echo "::group::vlayer run Playwright test: ${example}"
+    WEB_SERVER_URL="https://web-proofs-demo.vlayer.xyz/" run_playwright_tests
+    echo '::endgroup::'
 done
