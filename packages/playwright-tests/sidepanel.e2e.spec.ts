@@ -393,6 +393,34 @@ test.describe("Full flow of webproof using extension", () => {
       void expect(proveButton).toBeVisible();
     });
 
+    await test.step("Request and response should be displayed with correctly redacted headers", async () => {
+      const redactedRequest = page
+        .locator("body")
+        .getByTestId("redacted-request");
+      const redactedResponse = page
+        .locator("body")
+        .getByTestId("redacted-response");
+      await expect(redactedRequest).toBeVisible();
+      await expect(redactedResponse).toBeVisible();
+
+      const requestText = await redactedRequest.textContent();
+      const responseText = await redactedResponse.textContent();
+
+      expect(requestText).toContain("accept-encoding: identity");
+      expect(requestText).toContain("content-type: ****************");
+
+      expect(responseText).toContain("Access-Control-Allow-Methods: GET");
+      expect(responseText).toContain(
+        "Access-Control-Expose-Headers: ****************************************************************************************************************************",
+      );
+      expect(responseText).toContain(
+        "Access-Control-Allow-Headers: ****************************************************************************************************************************",
+      );
+
+      expect(responseText).toContain('"name":"Gandalf"');
+      expect(responseText).toContain('"greeting":"*************"');
+    });
+
     await test.step("Proving request has succeeded", async () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
 
@@ -429,6 +457,21 @@ test.describe("Full flow of webproof using extension", () => {
           },
         },
       });
+    });
+
+    await test.step("Prover returned correctly redacted parts of response body", async () => {
+      const nameFromProver = page
+        .locator("body")
+        .getByTestId("name-from-prover");
+      const greetingFromProver = page
+        .locator("body")
+        .getByTestId("greeting-from-prover");
+
+      const name = await nameFromProver.textContent();
+      const greeting = await greetingFromProver.textContent();
+
+      expect(name).toEqual("Gandalf");
+      expect(greeting).toEqual("*************");
     });
   });
 });

@@ -221,6 +221,12 @@ function DappNewWay() {
 function Dapp() {
   const [webProof, setWebProof] = useState<PresentationJSON>();
   const [zkProof, setZkProof] = useState<boolean>();
+  const [name, setName] = useState<string>();
+  const [greeting, setGreeting] = useState<string>();
+
+  const [decodedResponse, setDecodedResponse] = useState<string>();
+  const [decodedRequest, setDecodedRequest] = useState<string>();
+  
   const vlayerClient = useRef<VlayerClient>();
   const requestWebProof = useCallback(async () => {
     const provider = createExtensionWebProofProvider({
@@ -257,7 +263,7 @@ function Dapp() {
           [
             {
               response: {
-                json_body_except: ["screen_name"],
+                json_body_except: ["name"],
               },
             },
             {
@@ -284,6 +290,8 @@ function Dapp() {
     });
 
     setWebProof(webproof.presentationJSON);
+    setDecodedResponse(webproof.decodedTranscript.recv);
+    setDecodedRequest(webproof.decodedTranscript.sent);
   }, []);
 
   const requestZkProof = useCallback(async () => {
@@ -303,7 +311,9 @@ function Dapp() {
     }
 
     const zkProof = await vlayerClient.current?.waitForProvingResult({ hash });
-    console.log("ZK proof", zkProof);
+    const [_, name, greeting] = zkProof;
+    setName(name);
+    setGreeting(greeting);
     setZkProof(zkProof);
   }, [webProof]);
 
@@ -345,9 +355,46 @@ function Dapp() {
       </div>
       <div>
         {zkProof ? (
-          <h1 data-testid="has-zkproof">Has zk proof</h1>
+          <div>
+            <h1 data-testid="has-zkproof">Has zk proof</h1>
+            <h2>Name from prover:</h2>
+            <pre style={{ whiteSpace: "break-spaces" }} data-testid="name-from-prover">{name}</pre>
+            <h2>Greeting from prover:</h2>
+            <pre style={{ whiteSpace: "break-spaces" }} data-testid="greeting-from-prover">{greeting}</pre>
+          </div>
         ) : (
           <h1> No zk proof </h1>
+        )}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          marginTop: "20px",
+        }}
+      >
+        {decodedRequest && (
+          <div>
+            <h2>Request:</h2>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="redacted-request"
+            >
+              {decodedRequest}
+            </pre>
+          </div>
+        )}
+        {decodedResponse && (
+          <div>
+            <h2>Response:</h2>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="redacted-response"
+            >
+              {decodedResponse}
+            </pre>
+          </div>
         )}
       </div>
     </div>
