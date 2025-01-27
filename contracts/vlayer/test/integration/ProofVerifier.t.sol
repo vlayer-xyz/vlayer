@@ -9,6 +9,8 @@ import {IProofVerifier} from "../../src/proof_verifier/IProofVerifier.sol";
 import {CallAssumptions} from "../../src/CallAssumptions.sol";
 import {Seal, ProofMode} from "../../src/Seal.sol";
 
+import {ImageIdRepository} from "../../src/proof_verifier/ImageIdRepository.sol";
+
 import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";
 import {Groth16ProofVerifier} from "../../src/proof_verifier/Groth16ProofVerifier.sol";
 
@@ -21,16 +23,14 @@ interface PinnedSimpleProver {
 }
 
 contract FakeProofVerifierUnderTest is FakeProofVerifier {
-    constructor() {
+    constructor() FakeProofVerifier(new ImageIdRepository()) {
         IMAGE_ID_REPOSITORY.addSupport(ProofFixtures.FIXED_CALL_GUEST_ID);
-        CALL_GUEST_ID = ProofFixtures.FIXED_CALL_GUEST_ID;
     }
 }
 
 contract Groth16ProofVerifierUnderTest is Groth16ProofVerifier {
-    constructor() {
+    constructor() Groth16ProofVerifier(new ImageIdRepository()) {
         IMAGE_ID_REPOSITORY.addSupport(ProofFixtures.FIXED_CALL_GUEST_ID);
-        CALL_GUEST_ID = ProofFixtures.FIXED_CALL_GUEST_ID;
     }
 }
 
