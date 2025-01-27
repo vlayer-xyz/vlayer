@@ -183,13 +183,23 @@ function DappNewWay() {
         {decodedRequest && (
           <div>
             <h2>Request:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }}>{decodedRequest}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="redacted-request"
+            >
+              {decodedRequest}
+            </pre>
           </div>
         )}
         {decodedResponse && (
           <div>
             <h2>Response:</h2>
-            <pre style={{ whiteSpace: "break-spaces" }}>{decodedResponse}</pre>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="redacted-response"
+            >
+              {decodedResponse}
+            </pre>
           </div>
         )}
       </div>
@@ -233,6 +243,31 @@ function Dapp() {
           "https://lotr-api.online:3011/regular_json?are_you_sure=yes",
           "GET",
           "Prove",
+          [
+            {
+              response: {
+                json_body_except: ["screen_name"],
+              },
+            },
+            {
+              response: {
+                headers: [
+                  "AcceSs-COntrol-ExposE-Headers",
+                  "Access-Control-Allow-Headers",
+                ],
+              },
+            },
+            {
+              request: {
+                url_query: ["are_you_sure"],
+              },
+            },
+            {
+              request: {
+                headers: ["content-type"],
+              },
+            },
+          ],
         ),
       ],
     });

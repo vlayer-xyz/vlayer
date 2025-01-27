@@ -137,7 +137,7 @@ test.describe("Full flow of webproof using extension", () => {
       expect(extension).toBeDefined();
     });
 
-    await test.step("Extension should stay ok after clinking request button multiple times", async () => {
+    await test.step("Extension should stay ok after clicking request button multiple times", async () => {
       await page.goto("/dapp-new-way");
       const requestProofButton = page
         .locator("body")
@@ -223,6 +223,31 @@ test.describe("Full flow of webproof using extension", () => {
     await test.step("Zk prove button should appear after receiving webProof", async () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
       await expect(proveButton).toBeVisible();
+    });
+
+    await test.step("Request and response should be displayed with correctly redacted headers", async () => {
+      const redactedRequest = page
+        .locator("body")
+        .getByTestId("redacted-request");
+      const redactedResponse = page
+        .locator("body")
+        .getByTestId("redacted-response");
+      await expect(redactedRequest).toBeVisible();
+      await expect(redactedResponse).toBeVisible();
+
+      const requestText = await redactedRequest.textContent();
+      const responseText = await redactedResponse.textContent();
+
+      expect(requestText).toContain("accept-encoding: identity");
+      expect(requestText).toContain("content-type: ****************");
+
+      expect(responseText).toContain("Access-Control-Allow-Methods: GET");
+      expect(responseText).toContain(
+        "Access-Control-Expose-Headers: ****************************************************************************************************************************",
+      );
+      expect(responseText).toContain(
+        "Access-Control-Allow-Headers: ****************************************************************************************************************************",
+      );
     });
 
     await test.step("Proving request has succeeded", async () => {
