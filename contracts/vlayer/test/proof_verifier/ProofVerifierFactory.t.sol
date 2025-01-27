@@ -26,7 +26,7 @@ contract VerifierFactory_Tests is Test {
         vm.chainId(31337);
 
         IProofVerifier verifier = ProofVerifierFactory.produce();
-        assertTrue(verifier.imageIdRepository().isSupported(ImageID.RISC0_CALL_GUEST_ID));
+        assertTrue(verifier.imageIdRepository().isImageSupported(ImageID.RISC0_CALL_GUEST_ID));
     }
 
     function test_failsForOtherNetworks() public {

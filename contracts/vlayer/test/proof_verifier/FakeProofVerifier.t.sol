@@ -8,7 +8,7 @@ import {RiscZeroMockVerifier} from "risc0-ethereum-1.2.0/src/test/RiscZeroMockVe
 import {InvalidChainId} from "../../src/proof_verifier/ChainId.sol";
 
 import {FakeProofVerifier, FAKE_VERIFIER_SELECTOR} from "../../src/proof_verifier/FakeProofVerifier.sol";
-import {ImageIdRepository} from "../../src/proof_verifier/ImageIdRepository.sol";
+import {Repository} from "../../src/Repository.sol";
 import {ImageID} from "../../src/ImageID.sol";
 import {ProofMode} from "../../src/Seal.sol";
 
@@ -34,7 +34,7 @@ contract FakeProofVerifier_Tests is Test {
 
     function test_cannotBeCreatedOnMainnet() public {
         vm.chainId(1);
-        ImageIdRepository repository = testDeployer.repository();
+        Repository repository = testDeployer.repository();
 
         vm.expectRevert(InvalidChainId.selector);
         new FakeProofVerifier(repository);

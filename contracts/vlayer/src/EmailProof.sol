@@ -3,7 +3,7 @@ pragma solidity ^0.8.21;
 
 import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 import {ChainIdLibrary} from "./proof_verifier/ChainId.sol";
-import {IVDnsKeyVerifier} from "./interface/IVDnsKeyVerifier.sol";
+import {IVDnsKeyVerifier} from "./Repository.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
 
 struct DnsRecord {

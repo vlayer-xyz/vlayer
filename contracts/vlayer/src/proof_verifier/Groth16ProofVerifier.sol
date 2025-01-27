@@ -6,10 +6,10 @@ import {ControlID, RiscZeroGroth16Verifier} from "risc0-ethereum-1.2.0/src/groth
 import {ProofMode} from "../Seal.sol";
 
 import {ProofVerifierBase} from "./ProofVerifierBase.sol";
-import {ImageIdRepository} from "./ImageIdRepository.sol";
+import {IImageIdRepository} from "../Repository.sol";
 
 contract Groth16ProofVerifier is ProofVerifierBase {
-    constructor(ImageIdRepository _repository) ProofVerifierBase(_repository) {
+    constructor(IImageIdRepository _repository) ProofVerifierBase(_repository) {
         PROOF_MODE = ProofMode.GROTH16;
         VERIFIER = new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
     }

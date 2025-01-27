@@ -2,7 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {ChainIdLibrary, InvalidChainId} from "./ChainId.sol";
-import {ImageIdRepository} from "./ImageIdRepository.sol";
+import {Repository} from "../Repository.sol";
 import {ImageID} from "../ImageID.sol";
 import {IProofVerifier} from "./IProofVerifier.sol";
 import {FakeProofVerifier} from "./FakeProofVerifier.sol";
@@ -14,8 +14,8 @@ library ProofVerifierFactory {
         if (ChainIdLibrary.isMainnet()) {
             return IProofVerifier(address(0));
         } else if (ChainIdLibrary.isDevnet() || ChainIdLibrary.isTestnet()) {
-            ImageIdRepository repository = new ImageIdRepository(address(this), address(this));
-            repository.addSupport(ImageID.RISC0_CALL_GUEST_ID);
+            Repository repository = new Repository(address(this), address(this));
+            repository.addImageIdSupport(ImageID.RISC0_CALL_GUEST_ID);
             return new ProofVerifierRouter(new FakeProofVerifier(repository), new Groth16ProofVerifier(repository));
         }
 
