@@ -76,7 +76,9 @@ mod verify_env {
     }
 
     #[tokio::test]
-    #[should_panic(expected = "invalid guest input")]
+    #[should_panic(
+        expected = "called `Result::unwrap()` on an `Err` value: TimeTravel(ChainProof(Zk(verification indicates proof is invalid)))"
+    )]
     async fn zk_verification_failed() {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
