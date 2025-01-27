@@ -2,7 +2,7 @@ import {
   type CallContext,
   type CallParams,
   type VCallResponse,
-} from "types/vlayer";
+} from "./lib/types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
 import debug from "debug";
 
