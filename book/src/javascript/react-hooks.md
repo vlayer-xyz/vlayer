@@ -76,17 +76,17 @@ Wrap the application with the required [React Context Providers](https://react.d
 
 ```javascript
 import { WagmiProvider, http, createConfig } from "wagmi";
-import { sepolia, baseSepolia,optimismSepolia, foundry } from "wagmi/chains";
+import { baseSepolia, sepolia,optimismSepolia, foundry } from "wagmi/chains";
 import { metaMask } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProofProvider } from "@vlayer/react";
 
 const wagmiConfig = createConfig({
-  chains: [sepolia, baseSepolia, optimismSepolia, foundry],
+  chains: [baseSepolia, sepolia, optimismSepolia, foundry],
   connectors: [metaMask()],
   transports: {
-    [sepolia.id]: http(),
     [baseSepolia.id]: http(),
+    [sepolia.id]: http(),
     [optimismSepolia.id]: http(),
     [foundry.id]: http(),
   },
