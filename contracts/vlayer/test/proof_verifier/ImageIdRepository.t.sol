@@ -5,7 +5,7 @@ import {Test, console} from "forge-std-1.9.4/src/Test.sol";
 import {IAccessControl} from "@openzeppelin-contracts-5.0.1/access/IAccessControl.sol";
 
 import {ImageID} from "../../src/ImageID.sol";
-import {Repository, IImageIdRepository, IVDnsKeyVerifier} from "../../src/Repository.sol";
+import {Repository, IImageIdRepository, IVDnsKeyRepository} from "../../src/Repository.sol";
 
 bytes32 constant MOCK_IMAGE_ID = bytes32(0x1111111111111111111111111111111111111111111111111111111111111111);
 address constant deployer = address(0);
@@ -284,7 +284,7 @@ contract Repository_DnsKeys is Test {
         bytes memory key = "0x1234";
 
         vm.expectEmit();
-        emit IVDnsKeyVerifier.DnsKeyAdded(owner, key);
+        emit IVDnsKeyRepository.DnsKeyAdded(owner, key);
         repository.addDnsKey(key);
     }
 
@@ -315,7 +315,7 @@ contract Repository_DnsKeys is Test {
         repository.addDnsKey(key);
 
         vm.expectEmit();
-        emit IVDnsKeyVerifier.DnsKeyRevoked(owner, key);
+        emit IVDnsKeyRepository.DnsKeyRevoked(owner, key);
         repository.revokeDnsKey(key);
     }
 

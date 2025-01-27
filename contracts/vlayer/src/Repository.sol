@@ -12,14 +12,14 @@ interface IImageIdRepository {
     function isImageSupported(bytes32 imageId) external view returns (bool);
 }
 
-interface IVDnsKeyVerifier {
+interface IVDnsKeyRepository {
     event DnsKeyAdded(address indexed who, bytes key);
     event DnsKeyRevoked(address indexed who, bytes key);
 
     function isDnsKeyValid(bytes memory key) external view returns (bool);
 }
 
-contract Repository is AccessControlEnumerable, IImageIdRepository, IVDnsKeyVerifier {
+contract Repository is AccessControlEnumerable, IImageIdRepository, IVDnsKeyRepository {
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
     mapping(bytes => bool) internal dnsKeys;
