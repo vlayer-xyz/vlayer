@@ -1,7 +1,7 @@
 import {
   type VGetProofReceiptParams,
   type VGetProofReceiptResponse,
-} from "./lib/types/vlayer";
+} from "types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
 import { vGetProofReceiptSchema } from "./lib/types/vlayer";
 import debug from "debug";

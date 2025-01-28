@@ -3,28 +3,16 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": {
-        "development": "./src/index.ts",
-        "default": "./dist/index.js"
-      },
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./web_proof": {
-      "import": {
-        "development": "./src/api/webProof/index.ts",
-        "default": "./dist/api/webProof/index.js"
-      },
-      "types": "./dist/api/webProof/index.d.ts",
-      "default": "./dist/api/webProof/index.js"
+      "import": "./dist/api/webProof/index.js",
+      "types": "./dist/api/webProof/index.d.ts"
     },
     "./config": {
-      "import": {
-        "development": "./src/config/index.ts",
-        "default": "./dist/config/index.js"
-      },
-      "types": "./dist/config/index.d.ts",
-      "default": "./dist/config/index.js"
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
     }
   },
   "version": "0.1.0",
