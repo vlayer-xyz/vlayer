@@ -3,7 +3,7 @@ import { WalletContainer } from "./WalletContainer";
 import { ProvingContainer } from "./ProvingContainer";
 import { MintingContainer } from "./MintingContainer";
 import { SuccessContainer } from "./SuccessContainer";
-import { ExtensionCheck } from "./ExtensionCheck";
+// import { ExtensionCheck } from "./ExtensionCheck";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -13,6 +13,7 @@ import { createAppKit } from "@reown/appkit/react";
 import { optimismSepolia, anvil } from "@reown/appkit/networks";
 import { Layout } from "./Layout";
 import { Outlet } from "react-router";
+import { useState } from "react";
 const queryClient = new QueryClient();
 
 const wagmiAdapter = new WagmiAdapter({
@@ -53,6 +54,8 @@ const SimpleWebProofApp = () => {
             <Routes>
               <Route path="/" element={<Outlet />}>
                 <Route index element={<WelcomeScreen />} />
+                {/* <Route path="/extension-check" element={<ExtensionCheck />} /> */}
+
                 <Route path="/proof" element={<Layout />}>
                   <Route path="connect-wallet" element={<WalletContainer />} />
                   <Route path="start-proving" element={<ProvingContainer />} />
