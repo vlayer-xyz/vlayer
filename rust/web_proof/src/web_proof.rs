@@ -12,7 +12,6 @@ use tlsn_core::{
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
 
 #[derive(Deserialize, Serialize, PartialEq, Debug)]
-#[serde(deny_unknown_fields)]
 pub struct WebProof {
     #[serde(rename = "presentationJSON")]
     pub(crate) presentation_json: PresentationJSON,
