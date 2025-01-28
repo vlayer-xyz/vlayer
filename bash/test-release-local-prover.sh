@@ -53,5 +53,5 @@ for example in $(get_examples); do
     run_playwright_tests
     echo '::endgroup::'
 
-    docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yamll down
+    docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml down
 done
