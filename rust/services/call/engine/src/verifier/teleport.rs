@@ -103,12 +103,6 @@ struct MultiOpRpcClient {
     clients: HashMap<ChainId, Box<dyn OpRpcClient>>,
 }
 
-const ABI: () = ();
-
-fn abi_decode(_abi: (), _value: U256) -> (B256, U256) {
-    todo!()
-}
-
 #[derive(Default)]
 pub struct Verifier {
     multi_op_rpc_client: MultiOpRpcClient,
