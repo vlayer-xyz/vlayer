@@ -11,13 +11,6 @@ export const StartProving = ({
 }) => {
   return (
     <>
-      <ul className="steps w-full">
-        <li className="step step-primary text-black text-xs">Connect Wallet</li>
-        <li className="step step-primary text-black text-xs font-bold">
-          Get data from X
-        </li>
-        <li className="step text-black text-xs">Mint NFT</li>
-      </ul>
       <h3 className="header">X NFT</h3>
       <p className="desc">
         Open vlayer browser extension and follow instructions in order to

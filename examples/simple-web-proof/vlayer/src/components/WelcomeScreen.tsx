@@ -25,7 +25,7 @@ export const WelcomeScreen = () => {
       )}
       {!isMobile && (
         <div className="mt-5 flex justify-center">
-          <Link to="/connect-wallet" id="nextButton">
+          <Link to="proof/connect-wallet" id="nextButton">
             Start
           </Link>
         </div>

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Modal } from "../components/Modal";
 import { useSimpleWebProof } from "../hooks/useSimpleWebProof";
 import { StartProving } from "../components/StartProving";
 import { useAppKitAccount } from "@reown/appkit/react";
@@ -15,14 +14,12 @@ export const ProvingContainer = () => {
     useSimpleWebProof();
 
   useEffect(() => {
-    console.log("webProof", webProof);
     if (webProof) {
       callProver([webProof, address]);
     }
   }, [webProof]);
 
   useEffect(() => {
-    console.log("result", result);
     if (result) {
       navigate("/minting");
     }
@@ -33,13 +30,11 @@ export const ProvingContainer = () => {
   }, []);
 
   return (
-    <Modal backUrl="/connect-wallet">
-      <StartProving
-        requestWebProof={requestWebProof}
-        isPending={isPending}
-        disabled={disabled}
-        setDisabled={setDisabled}
-      />
-    </Modal>
+    <StartProving
+      requestWebProof={requestWebProof}
+      isPending={isPending}
+      disabled={disabled}
+      setDisabled={setDisabled}
+    />
   );
 };
