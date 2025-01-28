@@ -1,10 +1,7 @@
 /// The code in this module is a skeleton and is not up to our quality standards.
-use std::{
-    collections::HashMap,
-    fmt::{format, Debug},
-};
+use std::{collections::HashMap, fmt::Debug};
 
-use alloy_primitives::{uint, BlockNumber, ChainId, B256, U256};
+use alloy_primitives::{BlockNumber, ChainId, B256, U256};
 use anyhow::anyhow;
 use async_trait::async_trait;
 use chain::ChainSpec;
@@ -74,11 +71,13 @@ where
     }
 }
 
+#[derive(Debug)]
 struct BlockRef {
     number: u64,
     hash: B256,
 }
 
+#[derive(Debug)]
 struct Output {
     block_ref: BlockRef,
 }
@@ -221,6 +220,7 @@ where
         .unwrap()
         .get_output_at_block(l2_block_number)
         .await;
+
     if l2_output.hash_slow() == B256::from(root) {
         return Err(Error::L2OutputHashMismatch);
     }

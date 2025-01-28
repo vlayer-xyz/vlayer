@@ -172,7 +172,7 @@ forks = [
 [[chains]]
 name = "local-testnet-op_spec"
 id = 31338
-op_spec = { anchor_chain = 1, anchor_state_registry = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
+op_spec = { anchor_chain = 31_337, anchor_state_registry = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
 forks = [
     { spec = "GRANITE", activation = { Block = 0 } }
 ]
