@@ -16,7 +16,7 @@ import {
   ProofState,
   type VGetProofReceiptParams,
   type VGetProofReceiptResponse,
-} from "./lib/types/vlayer";
+} from "types/vlayer";
 import { match } from "ts-pattern";
 import { v_call } from "./v_call";
 import { v_getProofReceipt } from "./v_getProofReceipt";

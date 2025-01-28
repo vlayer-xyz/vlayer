@@ -1,5 +1,5 @@
-import { type VlayerClient, type BrandedHash } from "./types/vlayer";
-import { type WebProofProvider } from "./types/webProofProvider";
+import { type VlayerClient, type BrandedHash } from "types/vlayer";
+import { type WebProofProvider } from "types/webProofProvider";
 import { prove, waitForProof } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import {
@@ -15,8 +15,8 @@ import {
   ZkProvingStatus,
   type PresentationJSON,
 } from "../../web-proof-commons";
-import { type ContractFunctionArgsWithout } from "./types/viem";
-import { type ProveArgs } from "./types/vlayer";
+import { type ContractFunctionArgsWithout } from "types/viem";
+import { type ProveArgs } from "types/vlayer";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
