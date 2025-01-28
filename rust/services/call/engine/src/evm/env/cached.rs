@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, Mutex, RwLock},
 };
 
-use alloy_primitives::{BlockNumber, ChainId};
+use alloy_primitives::ChainId;
 use common::InteriorMutabilityCache;
 use itertools::Itertools;
 use revm::DatabaseRef;
@@ -83,9 +83,5 @@ where
     pub fn blocks_by_chain(&self) -> BlocksByChain {
         self.group_blocks(|loc, evm_env| (loc.block_number, evm_env.header.hash_slow()))
             .into()
-    }
-
-    pub fn block_nums_by_chain(&self) -> HashMap<ChainId, Vec<BlockNumber>> {
-        self.group_blocks(|loc, _| loc.block_number)
     }
 }
