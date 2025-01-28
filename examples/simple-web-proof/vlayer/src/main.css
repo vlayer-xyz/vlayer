@@ -49,3 +49,11 @@
 .desc {
   @apply text-center font-normal text-lg text-gray-500 py-4
 }
+
+.steps .step:before {
+  transition: all 1s ease-in-out;
+}
+
+.steps .step::after {
+  transition: all 0.5s ease-in-out;
+}

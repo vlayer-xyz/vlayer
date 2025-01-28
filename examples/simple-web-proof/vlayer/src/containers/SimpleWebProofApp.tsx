@@ -11,7 +11,8 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { createAppKit } from "@reown/appkit/react";
 import { optimismSepolia, anvil } from "@reown/appkit/networks";
-
+import { Layout } from "./Layout";
+import { Outlet } from "react-router";
 const queryClient = new QueryClient();
 
 const wagmiAdapter = new WagmiAdapter({
@@ -50,12 +51,15 @@ const SimpleWebProofApp = () => {
         >
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<WelcomeScreen />} />
-              <Route path="/connect-wallet" element={<WalletContainer />} />
-              <Route path="/extension-check" element={<ExtensionCheck />} />
-              <Route path="/start-proving" element={<ProvingContainer />} />
-              <Route path="/minting" element={<MintingContainer />} />
-              <Route path="/success" element={<SuccessContainer />} />
+              <Route path="/" element={<Outlet />}>
+                <Route index element={<WelcomeScreen />} />
+                <Route path="/proof" element={<Layout />}>
+                  <Route path="connect-wallet" element={<WalletContainer />} />
+                  <Route path="start-proving" element={<ProvingContainer />} />
+                  <Route path="minting" element={<MintingContainer />} />
+                  <Route path="success" element={<SuccessContainer />} />
+                </Route>
+              </Route>
             </Routes>
           </BrowserRouter>
         </ProofProvider>

@@ -9,7 +9,6 @@ import {
 import { useLocalStorage } from "usehooks-ts";
 
 import webProofProofVerifier from "../../../out/WebProofVerifier.sol/WebProofVerifier.json";
-import { Modal } from "../components/Modal";
 import { Minting } from "../components/Minting";
 import { testPrivateKey, useTestPrivateKey } from "../utils";
 import { ensureBalance } from "../utils/ethFaucet";
@@ -74,13 +73,13 @@ export const MintingContainer = () => {
   }, [error]);
 
   return (
-    <Modal backUrl="/start-proving">
-      <Minting
-        mintedHandle={mintedHandle ?? ""}
-        handleMint={handleMint}
-        isMinting={isMinting}
-        errorMsg={error?.message}
-      />
-    </Modal>
+    // <Modal backUrl="/start-proving">
+    <Minting
+      mintedHandle={mintedHandle ?? ""}
+      handleMint={handleMint}
+      isMinting={isMinting}
+      errorMsg={error?.message}
+    />
+    // </Modal>
   );
 };

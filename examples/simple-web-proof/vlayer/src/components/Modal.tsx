@@ -1,5 +1,6 @@
 import { cloneElement, isValidElement, useEffect, useRef } from "react";
 import { Link } from "react-router";
+import { motion } from "motion/react";
 
 export const Modal = ({
   backUrl,
@@ -36,25 +37,26 @@ export const Modal = ({
     : children;
 
   return (
-    <>
-      <button className="btn" onClick={showModal}>
-        Start
-      </button>
-      <dialog className="modal" ref={modalRef}>
-        <div className="modal-box bg-white rounded-2xl">
-          {backUrl && (
-            <form method="dialog">
-              <Link
-                to={backUrl}
-                className="absolute left-3 text-black top-3 text-xs font-normal"
-              >
-                Back
-              </Link>
-            </form>
-          )}
-          {childrenWithProps}
-        </div>
-      </dialog>
-    </>
+    <dialog className="modal" ref={modalRef}>
+      <motion.div
+        className="modal-box bg-white rounded-2xl"
+        initial={{ opacity: 0, scale: 0.1 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.1 }}
+        transition={{ ease: "easeOut", duration: 0.5 }}
+      >
+        {backUrl && (
+          <form method="dialog">
+            <Link
+              to={backUrl}
+              className="absolute left-3 text-black top-3 text-xs font-normal"
+            >
+              Back
+            </Link>
+          </form>
+        )}
+        {childrenWithProps}
+      </motion.div>
+    </dialog>
   );
 };

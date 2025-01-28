@@ -20,13 +20,6 @@ export const ConnectWallet = ({
 
   return (
     <>
-      <ul className="steps w-full">
-        <li className="step step-primary text-black text-xs font-bold">
-          Connect Wallet
-        </li>
-        <li className="step text-black text-xs">Get data from X</li>
-        <li className="step text-black text-xs">Mint NFT</li>
-      </ul>
       <h3 className="header">X NFT</h3>
       <p className="desc">
         To proceed to the next step, please connect your wallet now by clicking
