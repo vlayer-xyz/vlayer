@@ -197,11 +197,9 @@ mod tests {
         #[test]
         fn optimism_mainnet_commits_to_eth_mainnet() -> anyhow::Result<()> {
             let optimism_chain_spec: ChainSpec = OPTIMISM.try_into()?;
-            let anchor_state_registry = optimism_chain_spec
-                .validate_anchored_against(ETHEREUM_MAINNET)
-                .unwrap();
-            
-            assert_eq!(anchor_state_registry, ANCHOR_STATE_REGISTRY_ADDRESS);
+            let registry = optimism_chain_spec.validate_anchored_against(ETHEREUM_MAINNET)?;
+
+            assert_eq!(registry, ANCHOR_STATE_REGISTRY_ADDRESS);
             Ok(())
         }
 
