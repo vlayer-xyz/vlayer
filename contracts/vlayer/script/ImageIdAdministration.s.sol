@@ -8,15 +8,17 @@ import {IImageIdRepository} from "../src/Repository.sol";
 import {ChainIdLibrary} from "../src/proof_verifier/ChainId.sol";
 
 contract AddSupportForCurrentImageId is Script {
-    function run(IImageIdRepository repository) external {
+    function run() external {
         AddImageIdSupport addImageIdSupportScript = new AddImageIdSupport();
-        addImageIdSupportScript.run(repository, ImageID.RISC0_CALL_GUEST_ID);
+        address repository = vm.envAddress("REPOSITORY_CONTRACT_ADDRESS");
+
+        addImageIdSupportScript.run(IImageIdRepository(repository), ImageID.RISC0_CALL_GUEST_ID);
     }
 }
 
 contract AddImageIdSupport is Script {
     function run(IImageIdRepository repository, bytes32 imageId) external {
-        uint256 ownerPrivateKey = vm.envUint("REPOSITORY_OWNER_PRIVATE_KEY");
+        uint256 ownerPrivateKey = vm.envUint("REPOSITORY_CONTRACT_OWNER_PRIVATE_KEY");
 
         console.log("REPOSITORY_ADDRESS=%s", address(repository));
         console.log("IMAGE_ID=");
@@ -30,7 +32,7 @@ contract AddImageIdSupport is Script {
 
 contract RevokeImageIdSupport is Script {
     function run(IImageIdRepository repository, bytes32 imageId) external {
-        uint256 ownerPrivateKey = vm.envUint("REPOSITORY_OWNER_PRIVATE_KEY");
+        uint256 ownerPrivateKey = vm.envUint("REPOSITORY_CONTRACT_OWNER_PRIVATE_KEY");
 
         console.log("REPOSITORY_ADDRESS=%s", address(repository));
         console.log("IMAGE_ID=");
