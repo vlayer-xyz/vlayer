@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 /// See: <https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/id.go#L33>
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct L2BlockRef {
+pub struct L2BlockRef {
     /// The l1 block info.
     #[serde(flatten)]
     pub l1_block_info: BlockInfo,
@@ -23,7 +23,7 @@ struct L2BlockRef {
 ///
 /// [ss]: https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/sync_status.go#L5
 #[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-struct SyncStatus {
+pub struct SyncStatus {
     /// The current L1 block.
     pub current_l1: BlockInfo,
     /// The current L1 finalized block.
@@ -67,7 +67,7 @@ pub struct OutputResponse {
 /// Block Header Info
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, Eq, Hash, PartialEq)]
 #[serde(rename_all = "camelCase")]
-struct BlockInfo {
+pub struct BlockInfo {
     /// The block hash
     pub hash: B256,
     /// The block number
