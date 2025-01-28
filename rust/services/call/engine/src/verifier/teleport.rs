@@ -199,16 +199,18 @@ where
     let anchor_state_registry_address = destination_chain_spec
         .validate_anchored_against(source_chain_id)
         .unwrap();
-    let value = source_db
+    let root = source_db
         .storage_ref(anchor_state_registry_address, *ANCHOR_SLOT)
         .map_err(|err| Error::Database(anyhow!(err)))?;
-    let (root, l2_block_number) = abi_decode(ABI, value);
+    let l2_block_number = source_db
+        .storage_ref(anchor_state_registry_address, *ANCHOR_SLOT + U256::from(1))
+        .map_err(|err| Error::Database(anyhow!(err)))?;
     let l2_output = multi_op_rpc_client
         .get(&dest_chain_id)
         .unwrap()
         .get_output_at_block(l2_block_number)
         .await;
-    if l2_output.hash_slow() == root {
+    if l2_output.hash_slow() == B256::from(root) {
         return Err(Error::L2OutputHashMismatch);
     }
     Ok(l2_output)
