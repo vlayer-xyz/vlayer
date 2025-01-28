@@ -85,8 +85,6 @@ impl ChainSpec {
     /// Returns AnchorStateRegistry address.
     /// AnchorStateRegistry stores on the L1 chain the latest state root of the L2 chain.
     pub fn validate_anchored_against(&self, chain_id: ChainId) -> Result<Address, Error> {
-        let op_spec = self.op_spec.as_ref().ok_or(Error::UnsupportedChainId(self.id))?;
-        dbg!(op_spec);
         self.op_spec
             .as_ref()
             .filter(|op_spec| op_spec.anchor_chain == chain_id)
@@ -182,6 +180,34 @@ mod tests {
             assert_eq!(spec_id, SpecId::CANCUN);
 
             Ok(())
+        }
+    }
+
+    mod validate_anchored_against {
+        use alloy_primitives::address;
+
+        use super::*;
+
+        const OPTIMISM: ChainId = 10;
+        const ETHEREUM_MAINNET: ChainId = 1;
+        const ETHEREUM_SEPOLIA: ChainId = 11_155_111;
+        const ANCHOR_STATE_REGISTRY_ADDRESS: Address =
+            address!("18dac71c228d1c32c99489b7323d441e1175e443");
+
+        #[test]
+        fn optimism_mainnet_commits_to_eth_mainnet() {
+            let optimism_chain_spec: ChainSpec = OPTIMISM.try_into().unwrap();
+            let anchor_state_registry = optimism_chain_spec
+                .validate_anchored_against(ETHEREUM_MAINNET)
+                .unwrap();
+            assert_eq!(anchor_state_registry, ANCHOR_STATE_REGISTRY_ADDRESS);
+        }
+
+        #[test]
+        fn optimism_mainnet_doesnt_commit_to_eth_sepolia() {
+            let optimism_chain_spec: ChainSpec = OPTIMISM.try_into().unwrap();
+            let result = optimism_chain_spec.validate_anchored_against(ETHEREUM_SEPOLIA);
+            assert!(matches!(result, Err(Error::UnsupportedTeleport(OPTIMISM, ETHEREUM_SEPOLIA))));
         }
     }
 }
