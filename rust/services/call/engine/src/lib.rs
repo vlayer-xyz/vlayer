@@ -14,4 +14,5 @@ pub use sol::{
     proof::Proof,
     seal::{ProofMode, Seal},
 };
+pub mod output;
 pub mod verifier;
