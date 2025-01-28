@@ -1,7 +1,7 @@
 /// The code in this module is a skeleton and is not up to our quality standards.
 use std::{collections::HashMap, fmt::Debug};
 
-use alloy_primitives::{BlockNumber, ChainId, B256, U256};
+use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256, U256};
 use anyhow::anyhow;
 use async_trait::async_trait;
 use chain::ChainSpec;
@@ -11,7 +11,7 @@ use derive_new::new;
 use lazy_static::lazy_static;
 use revm::DatabaseRef;
 
-use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
+use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -116,29 +116,22 @@ where
     ) -> Result<()> {
         let source_evm_env = evm_envs.get(start_exec_location)?;
         let blocks_by_chain = evm_envs.blocks_by_chain();
-        let chain_ids = blocks_by_chain.chain_ids();
-        let destinations = get_destinations(chain_ids, start_exec_location);
-        for destination_chain_id in destinations {
+        let destinations = get_destinations(blocks_by_chain, start_exec_location);
+        for (chain_id, blocks) in destinations {
             let l2_output = get_l2_output(
                 start_exec_location.chain_id,
                 &source_evm_env.db,
-                destination_chain_id,
+                chain_id,
                 &self.multi_op_rpc_client,
             )
             .await?;
 
-            let latest_confirmed_location =
-                (destination_chain_id, l2_output.block_ref.number).into();
+            let latest_confirmed_location = (chain_id, l2_output.block_ref.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
             if latest_confirmed_evm_env.header.hash_slow() != l2_output.block_ref.hash {
                 return Err(Error::HeaderHashMismatch);
             }
-
-            let destination_blocks = blocks_by_chain.get(&destination_chain_id).unwrap();
-            ensure_latest_teleport_location_is_confirmed(
-                destination_blocks,
-                l2_output.block_ref.number,
-            )?;
+            ensure_latest_teleport_location_is_confirmed(&blocks, l2_output.block_ref.number)?;
         }
         Ok(())
     }
@@ -162,12 +155,12 @@ fn ensure_latest_teleport_location_is_confirmed(
 }
 
 fn get_destinations(
-    chain_ids: impl IntoIterator<Item = ChainId>,
+    blocks_by_chain: BlocksByChain,
     start_exec_location: ExecutionLocation,
-) -> impl Iterator<Item = ChainId> {
-    chain_ids
+) -> impl Iterator<Item = (ChainId, Vec<(BlockNumber, BlockHash)>)> {
+    blocks_by_chain
         .into_iter()
-        .filter(move |&chain_id| chain_id != start_exec_location.chain_id)
+        .filter(move |(chain_id, _)| *chain_id != start_exec_location.chain_id)
 }
 
 lazy_static! {

@@ -24,7 +24,7 @@ fn time_travel_invalid_zk_proof(
     )))
 }
 
-const fn teleport_ok(_: &CachedEvmEnv<GuestDb>, _: ExecutionLocation) -> teleport::Result {
+const fn teleport_ok(_: &CachedEvmEnv<GuestDb>, _: ExecutionLocation) -> teleport::Result<()> {
     Ok(())
 }
 
