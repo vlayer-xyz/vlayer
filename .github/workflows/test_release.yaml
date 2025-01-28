@@ -26,6 +26,11 @@ jobs:
           submodules: recursive
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
+       - name: Install Node
+         uses: actions/setup-node@v4
+         with:
+           node-version: "22.x"
+           registry-url: "https://registry.npmjs.org" 
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/docker-compose.devnet.yaml
