@@ -35,3 +35,4 @@ runs:
         path: packages/browser-extension/browser-extension.tar.gz
         if-no-files-found: error
         retention-days: 3
+

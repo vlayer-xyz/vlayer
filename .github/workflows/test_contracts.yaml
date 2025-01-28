@@ -73,3 +73,16 @@ jobs:
           DEPLOYER_PRIVATE_KEY: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
           REPOSITORY_CONTRACT_ADMIN_ADDRESS: ${{ vars.REPOSITORY_CONTRACT_ADMIN_ADDRESS }}
         run: ./bash/deploy-verifiers.sh
+
+      - name: Save transactions
+        if: failure()
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: transactions
+          path: contracts/vlayer/broadcast
+      - name: Save compilation outputs
+        if: failure()
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: compiled-contracts
+          path: contracts/vlayer/out
