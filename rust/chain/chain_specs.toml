@@ -30,12 +30,12 @@ forks = [
     { spec = "CANCUN", activation = { Timestamp = 1706655072 } }
 ]
 
-# https://github.com/base-org/optimism/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
+# https://github.com/base-org/op_spec/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
 # https://docs.base.org/docs/base-contracts/#ethereum-mainnet
 [[chains]]
 name = "base"
 id = 8453
-optimism = { anchor_chain = 1, anchor_state_registry = "0xdB9091e48B1C42992A1213e6916184f9eBDbfEDf" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0xdB9091e48B1C42992A1213e6916184f9eBDbfEDf" }
 forks = [
     { spec = "REGOLITH", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1704992401 } },
@@ -48,19 +48,19 @@ forks = [
 # https://docs.base.org/docs/base-contracts/#ethereum-testnet-sepolia
 name = "base-sepolia"
 id = 84532
-optimism = { anchor_chain = 1, anchor_state_registry = "0x4C8BA32A5DAC2A720bb35CeDB51D6B067D104205" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0x4C8BA32A5DAC2A720bb35CeDB51D6B067D104205" }
 forks = [
     { spec = "CANYON", activation = { Block = 0 } },
     { spec = "ECOTONE", activation = { Timestamp = 1706634000 } },
     { spec = "FJORD", activation = { Timestamp = 1715961600 } },
 ]
 
-# https://docs.optimism.io/builders/node-operators/network-upgrades
-# https://docs.optimism.io/chain/addresses#ethereum-l1
+# https://docs.op_spec.io/builders/node-operators/network-upgrades
+# https://docs.op_spec.io/chain/addresses#ethereum-l1
 [[chains]]
-name = "optimism"
+name = "op_spec"
 id = 10
-optimism = { anchor_chain = 1, anchor_state_registry = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
 forks = [
     { spec = "MERGE", activation = { Block = 0 } },
     { spec = "BEDROCK", activation = { Timestamp = 1686079703 } },
@@ -70,12 +70,12 @@ forks = [
     { spec = "GRANITE", activation = { Timestamp = 1726070401 } },
 ]
 
-# https://github.com/ethereum-optimism/optimism/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
-# https://docs.optimism.io/chain/addresses#sepolia-l1
+# https://github.com/ethereum-op_spec/op_spec/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
+# https://docs.op_spec.io/chain/addresses#sepolia-l1
 [[chains]]
-name = "optimism-sepolia"
+name = "op_spec-sepolia"
 id = 11155420
-optimism = { anchor_chain = 1, anchor_state_registry = "0x218CD9489199F321E1177b56385d333c5B598629" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0x218CD9489199F321E1177b56385d333c5B598629" }
 forks = [
     { spec = "BEDROCK", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1699981200 } },
@@ -170,9 +170,9 @@ forks = [
 ]
 
 [[chains]]
-name = "local-testnet-optimism"
+name = "local-testnet-op_spec"
 id = 31338
-optimism = { anchor_chain = 1, anchor_state_registry = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
 forks = [
     { spec = "GRANITE", activation = { Block = 0 } }
 ]
@@ -189,7 +189,7 @@ forks = [
 [[chains]]
 name = "worldchain"
 id = 480
-optimism = { anchor_chain = 1, anchor_state_registry = "0xD4D7A57DCC563756DeD99e224E144A6Bf0327099" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0xD4D7A57DCC563756DeD99e224E144A6Bf0327099" }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
     { spec = "FJORD", activation = { Timestamp = 1721826000 } },
@@ -201,7 +201,7 @@ forks = [
 [[chains]]
 name = "worldchain-sepolia"
 id = 4801
-optimism = { anchor_chain = 1, anchor_state_registry = "0x1333d5E5201D760444A399E77b3D337eBDB0DD07" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0x1333d5E5201D760444A399E77b3D337eBDB0DD07" }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
     { spec = "FJORD", activation = { Timestamp = 1721826000 } },
@@ -213,7 +213,7 @@ forks = [
 [[chains]]
 name = "unichain-sepolia"
 id = 1301
-optimism = { anchor_chain = 1, anchor_state_registry = "0xf971F1b0D80eb769577135b490b913825BfcF00B" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0xf971F1b0D80eb769577135b490b913825BfcF00B" }
 forks = [
     { spec = "GRANITE", activation = { Block = 0 } },
 ]

@@ -35,7 +35,7 @@ impl ChainSpec {
         id: ChainId,
         name: impl Into<String>,
         forks: impl IntoIterator<Item = F>,
-        optimism: Option<OptimismSpec>,
+        op_spec: Option<OptimismSpec>,
     ) -> Self
     where
         F: Into<Fork>,
@@ -52,7 +52,7 @@ impl ChainSpec {
             id,
             name,
             forks,
-            op_spec: optimism,
+            op_spec,
         }
     }
 
@@ -85,6 +85,8 @@ impl ChainSpec {
     /// Returns AnchorStateRegistry address.
     /// AnchorStateRegistry stores on the L1 chain the latest state root of the L2 chain.
     pub fn validate_anchored_against(&self, chain_id: ChainId) -> Result<Address, Error> {
+        let op_spec = self.op_spec.as_ref().ok_or(Error::UnsupportedChainId(self.id))?;
+        dbg!(op_spec);
         self.op_spec
             .as_ref()
             .filter(|op_spec| op_spec.anchor_chain == chain_id)
