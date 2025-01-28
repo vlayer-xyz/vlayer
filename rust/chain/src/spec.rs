@@ -26,6 +26,8 @@ pub enum Error {
     UnsupportedForkForBlock(BlockNumber),
     #[error("Unsupported chain id: {0}")]
     UnsupportedChainId(ChainId),
+    #[error("Teleport from chain {0} to chain {1} is not supported")]
+    UnsupportedTeleport(ChainId, ChainId),
 }
 
 impl ChainSpec {
@@ -80,9 +82,14 @@ impl ChainSpec {
         self.op_spec.is_some()
     }
 
-    /// AnchorStateRegistry
-    pub fn validate_anchored_against(&self, _chain_id: ChainId) -> Result<Address, Error> {
-        todo!();
+    /// Returns AnchorStateRegistry address.
+    /// AnchorStateRegistry stores on the L1 chain the latest state root of the L2 chain.
+    pub fn validate_anchored_against(&self, chain_id: ChainId) -> Result<Address, Error> {
+        self.op_spec
+            .as_ref()
+            .filter(|op_spec| op_spec.anchor_chain == chain_id)
+            .map(|op_spec| op_spec.anchor_state_registry)
+            .ok_or(Error::UnsupportedTeleport(self.id, chain_id))
     }
 }
 
