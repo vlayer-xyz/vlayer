@@ -45,7 +45,6 @@ for example in $(get_examples); do
     cd ${VLAYER_TEMP_DIR}
 
     vlayer init --template "${example}"
-    forge clean
     forge build
     vlayer test
     echo '::endgroup::'
