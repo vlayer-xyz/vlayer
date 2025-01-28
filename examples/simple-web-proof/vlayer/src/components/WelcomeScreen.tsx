@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Modal } from "./Modal";
+import { isMobile } from "../utils";
 
 export const WelcomeScreen = () => {
   return (
@@ -17,11 +18,18 @@ export const WelcomeScreen = () => {
         account can mint NFT for specific handle. This example demonstrates use
         of Web Proofs.
       </p>
-      <div className="mt-5 flex justify-center">
-        <Link to="/connect-wallet" id="nextButton">
-          Start
-        </Link>
-      </div>
+      {isMobile && (
+        <p className="text-red-400 w-full block mt-3">
+          Mobile is not supported. <br /> Please use desktop browser.
+        </p>
+      )}
+      {!isMobile && (
+        <div className="mt-5 flex justify-center">
+          <Link to="/connect-wallet" id="nextButton">
+            Start
+          </Link>
+        </div>
+      )}
     </Modal>
   );
 };
