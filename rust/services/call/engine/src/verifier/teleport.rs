@@ -1,12 +1,13 @@
 /// The code in this module is a skeleton and is not up to our quality standards.
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Debug};
 
-use alloy_primitives::{ChainId, B256, U256};
+use alloy_primitives::{BlockNumber, ChainId, B256, U256};
 use async_trait::async_trait;
 use chain::ChainSpec;
 use common::Hashable;
 use derive_more::Deref;
 use derive_new::new;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use revm::DatabaseRef;
 
@@ -122,47 +123,87 @@ where
         let source_evm_env = evm_envs.get(start_exec_location)?;
         let blocks_by_chain = evm_envs.blocks_by_chain();
         let chain_ids = blocks_by_chain.chain_ids();
-        let destinations: Vec<ChainId> = chain_ids
-            .iter()
-            .filter(|&&chain_id| chain_id != start_exec_location.chain_id)
-            .copied()
-            .collect();
+        let destinations = get_destinations(chain_ids, start_exec_location);
         for destination_chain_id in destinations {
-            let destination_chain_spec: ChainSpec = destination_chain_id.try_into().unwrap();
-            let anchor_state_registry_address = destination_chain_spec
-                .validate_anchored_against(start_exec_location.chain_id)
-                .unwrap();
-            let value = source_evm_env
-                .db
-                .storage_ref(anchor_state_registry_address, *ANCHOR_SLOT)
-                .unwrap();
-            let (root, l2_block_number) = abi_decode(ABI, value);
-            let l2_output = self
-                .multi_op_rpc_client
-                .get(&destination_chain_id)
-                .unwrap()
-                .get_output_at_block(l2_block_number)
-                .await;
+            let l2_output = get_l2_output(
+                start_exec_location.chain_id,
+                &source_evm_env.db,
+                destination_chain_id,
+                &self.multi_op_rpc_client,
+            )
+            .await?;
 
-            if l2_output.hash_slow() == root {
-                return Err(Error::L2OutputHashMismatch);
-            }
-
-            let latest_confirmed_location = ExecutionLocation {
-                chain_id: destination_chain_id,
-                block_number: l2_output.block_ref.number,
-            };
+            let latest_confirmed_location =
+                (destination_chain_id, l2_output.block_ref.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
             if latest_confirmed_evm_env.header.hash_slow() == l2_output.block_ref.hash {
                 return Err(Error::HeaderHashMismatch);
             }
-            let destination_blocks = blocks_by_chain.get(&destination_chain_id).unwrap();
-            let latest_destination_block = destination_blocks.first().unwrap().0;
 
-            if latest_confirmed_evm_env.header.number() < latest_destination_block {
-                return Err(Error::TeleportOnUnconfirmed);
-            }
+            let destination_blocks = blocks_by_chain.get(&destination_chain_id).unwrap();
+            ensure_latest_teleport_location_is_confirmed(
+                destination_blocks,
+                l2_output.block_ref.number,
+            )?;
         }
         Ok(())
     }
+}
+
+fn ensure_latest_teleport_location_is_confirmed(
+    destination_blocks: &[(u64, B256)],
+    latest_confirmed_block: BlockNumber,
+) -> std::result::Result<(), Error> {
+    let latest_destination_block = destination_blocks
+        .iter()
+        .sorted()
+        .last()
+        .expect("Empty list of destination blocks")
+        .0;
+
+    if latest_confirmed_block < latest_destination_block {
+        return Err(Error::TeleportOnUnconfirmed);
+    }
+
+    Ok(())
+}
+
+fn get_destinations(
+    chain_ids: impl IntoIterator<Item = ChainId>,
+    start_exec_location: ExecutionLocation,
+) -> Vec<ChainId> {
+    let destinations: Vec<ChainId> = chain_ids
+        .into_iter()
+        .filter(|&chain_id| chain_id != start_exec_location.chain_id)
+        .collect();
+    destinations
+}
+
+async fn get_l2_output<D>(
+    source_chain_id: ChainId,
+    source_db: D,
+    dest_chain_id: ChainId,
+    multi_op_rpc_client: &MultiOpRpcClient,
+) -> std::result::Result<Output, Error>
+where
+    D: DatabaseRef + Send + Sync,
+    D::Error: Debug,
+{
+    let destination_chain_spec: ChainSpec = dest_chain_id.try_into().unwrap();
+    let anchor_state_registry_address = destination_chain_spec
+        .validate_anchored_against(source_chain_id)
+        .unwrap();
+    let value = source_db
+        .storage_ref(anchor_state_registry_address, *ANCHOR_SLOT)
+        .unwrap();
+    let (root, l2_block_number) = abi_decode(ABI, value);
+    let l2_output = multi_op_rpc_client
+        .get(&dest_chain_id)
+        .unwrap()
+        .get_output_at_block(l2_block_number)
+        .await;
+    if l2_output.hash_slow() == root {
+        return Err(Error::L2OutputHashMismatch);
+    }
+    Ok(l2_output)
 }
