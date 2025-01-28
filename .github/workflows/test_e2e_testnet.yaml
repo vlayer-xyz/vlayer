@@ -62,6 +62,9 @@ jobs:
           CHAIN_NAME: "optimismSepolia"
           JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
           PROVER_URL: http://127.0.0.1:3000
+          GAS_METER_URL: ${{ vars.GAS_METER_URL }}
+          GAS_METER_API_KEY: ${{ secrets.GAS_METER_API_KEY }}
+          VLAYER_API_TOKEN: ${{ secrets.VLAYER_API_TOKEN }}
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
           CONFIRMATIONS: 2
