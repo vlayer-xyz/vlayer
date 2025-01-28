@@ -20,14 +20,22 @@ pub struct OptimismSpec {
     anchor_state_registry: Address,
 }
 
+impl OptimismSpec {
+    pub const fn anchor_chain(&self) -> ChainId {
+        self.anchor_chain
+    }
+
+    pub const fn anchor_state_registry(&self) -> Address {
+        self.anchor_state_registry
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("Unsupported fork for block {0}")]
     UnsupportedForkForBlock(BlockNumber),
     #[error("Unsupported chain id: {0}")]
     UnsupportedChainId(ChainId),
-    #[error("Teleport from chain {0} to chain {1} is not supported")]
-    UnsupportedTeleport(ChainId, ChainId),
 }
 
 impl ChainSpec {
@@ -80,16 +88,6 @@ impl ChainSpec {
 
     pub const fn is_optimism(&self) -> bool {
         self.op_spec.is_some()
-    }
-
-    /// Returns AnchorStateRegistry address.
-    /// AnchorStateRegistry stores on the L1 chain the latest state root of the L2 chain.
-    pub fn validate_anchored_against(&self, chain_id: ChainId) -> Result<Address, Error> {
-        self.op_spec
-            .as_ref()
-            .filter(|op_spec| op_spec.anchor_chain == chain_id)
-            .map(|op_spec| op_spec.anchor_state_registry)
-            .ok_or(Error::UnsupportedTeleport(self.id, chain_id))
     }
 }
 
@@ -179,39 +177,6 @@ mod tests {
             let spec_id = ETHEREUM_MAINNET.active_fork(0, u64::MAX)?;
             assert_eq!(spec_id, SpecId::CANCUN);
 
-            Ok(())
-        }
-    }
-
-    mod validate_anchored_against {
-        use alloy_primitives::address;
-
-        use super::*;
-
-        const OP_MAINNET: ChainId = 10;
-        const ETHEREUM_MAINNET: ChainId = 1;
-        const ETHEREUM_SEPOLIA: ChainId = 11_155_111;
-        const ANCHOR_STATE_REGISTRY_ADDRESS: Address =
-            address!("18dac71c228d1c32c99489b7323d441e1175e443");
-
-        #[test]
-        fn optimism_mainnet_commits_to_eth_mainnet() -> anyhow::Result<()> {
-            let optimism_chain_spec: ChainSpec = OP_MAINNET.try_into()?;
-            let registry = optimism_chain_spec.validate_anchored_against(ETHEREUM_MAINNET)?;
-
-            assert_eq!(registry, ANCHOR_STATE_REGISTRY_ADDRESS);
-            Ok(())
-        }
-
-        #[test]
-        fn optimism_mainnet_doesnt_commit_to_eth_sepolia() -> anyhow::Result<()> {
-            let optimism_chain_spec: ChainSpec = OP_MAINNET.try_into()?;
-            let result = optimism_chain_spec.validate_anchored_against(ETHEREUM_SEPOLIA);
-
-            assert!(matches!(
-                result,
-                Err(Error::UnsupportedTeleport(OP_MAINNET, ETHEREUM_SEPOLIA))
-            ));
             Ok(())
         }
     }
