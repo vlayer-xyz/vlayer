@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 alloy-chains = { workspace = true }
-alloy-primitives = { workspace = true, features = ["rlp", "serde", "tiny-keccak"] }
+alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 auto_impl = { workspace = true }
