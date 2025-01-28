@@ -9,7 +9,7 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-alloy-eips = { workspace = true, features = ["serde"]}
+alloy-eips = { workspace = true, features = ["serde"] }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-rlp = { workspace = true }
 alloy-serde = { workspace = true }
