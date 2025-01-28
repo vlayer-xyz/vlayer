@@ -1,0 +1,20 @@
+{
+  "contracts": [
+    {
+      "contractName": "Repository",
+      "contractAddress": "0x7a2dfbd7001ef8bcebf941110dddaa69947c2725"
+    },
+    {
+      "contractName": "FakeProofVerifier",
+      "contractAddress": "0x53391f71efbfc780ac6728c9dbbfc03f1c88b7ce"
+    },
+    {
+      "contractName": "Groth16ProofVerifier",
+      "contractAddress": "0xae595cf6d69f655f92ccf359b3f24ec0105cdb5f"
+    },
+    {
+      "contractName": "ProofVerifierRouter",
+      "contractAddress": "0xcb27b9d3e87583e52fcae4c2e5956be6b068e13f"
+    }
+  ]
+}
