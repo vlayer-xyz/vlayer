@@ -37,7 +37,7 @@ jobs:
         run: |
           bun run lint:solidity --max-warnings 0
       - name: Contracts scripts lint:solidity
-        working-directory: ./contracts/vlayer/scripts/
+        working-directory: ./contracts/vlayer/script/
         run: |
           bun run lint:solidity --max-warnings 0
       - name: lint Solidity examples

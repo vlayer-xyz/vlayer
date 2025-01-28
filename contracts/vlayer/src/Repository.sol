@@ -19,11 +19,19 @@ interface IVDnsKeyRepository {
     function isDnsKeyValid(bytes memory key) external view returns (bool);
 }
 
-contract Repository is AccessControlEnumerable, IImageIdRepository, IVDnsKeyRepository {
+interface INotaryKeyRepository {
+    event NotaryKeyAdded(address indexed who, string key);
+    event NotaryKeyRevoked(address indexed who, string key);
+
+    function isNotaryKeyValid(string memory key) external view returns (bool);
+}
+
+contract Repository is AccessControlEnumerable, IImageIdRepository, IVDnsKeyRepository, INotaryKeyRepository {
     bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
 
-    mapping(bytes => bool) internal dnsKeys;
+    mapping(bytes32 => bool) internal dnsKeys;
     mapping(bytes32 => bool) internal imageIds;
+    mapping(bytes32 => bool) internal notaryKeys;
 
     constructor(address admin, address owner) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -40,6 +48,8 @@ contract Repository is AccessControlEnumerable, IImageIdRepository, IVDnsKeyRepo
         revokeRole(OWNER_ROLE, owner);
         grantRole(OWNER_ROLE, newOwner);
     }
+
+    ///===============*** IMAGE ID ***===============///
 
     function addImageIdSupport(bytes32 imageId) external onlyRole(OWNER_ROLE) {
         require(!isImageSupported(imageId), "ImageID is already supported");
@@ -59,21 +69,47 @@ contract Repository is AccessControlEnumerable, IImageIdRepository, IVDnsKeyRepo
         return imageIds[imageId];
     }
 
-    function addDnsKey(bytes memory key) external onlyRole(OWNER_ROLE) {
-        require(!dnsKeys[key], "Key is already valid");
+    ///===============*** DNS KEYS ***===============///
 
-        dnsKeys[key] = true;
+    function addDnsKey(bytes memory key) external onlyRole(OWNER_ROLE) {
+        bytes32 hash = keccak256(key);
+        require(!dnsKeys[hash], "Key is already valid");
+
+        dnsKeys[hash] = true;
         emit DnsKeyAdded(msg.sender, key);
     }
 
     function revokeDnsKey(bytes memory key) external onlyRole(OWNER_ROLE) {
-        require(dnsKeys[key], "Cannot revoke invalid key");
+        bytes32 hash = keccak256(key);
+        require(dnsKeys[hash], "Cannot revoke invalid key");
 
-        dnsKeys[key] = false;
+        dnsKeys[hash] = false;
         emit DnsKeyRevoked(msg.sender, key);
     }
 
     function isDnsKeyValid(bytes memory key) external view override returns (bool) {
-        return dnsKeys[key];
+        return dnsKeys[keccak256(key)];
+    }
+
+    ///===============*** NOTARY KEYS ***===============///
+
+    function addNotaryKey(string memory key) external onlyRole(OWNER_ROLE) {
+        bytes32 hash = keccak256(bytes(key));
+        require(!notaryKeys[hash], "Key is already valid");
+
+        notaryKeys[hash] = true;
+        emit NotaryKeyAdded(msg.sender, key);
+    }
+
+    function revokeNotaryKey(string memory key) external onlyRole(OWNER_ROLE) {
+        bytes32 hash = keccak256(bytes(key));
+        require(notaryKeys[hash], "Cannot revoke invalid key");
+
+        notaryKeys[hash] = false;
+        emit NotaryKeyRevoked(msg.sender, key);
+    }
+
+    function isNotaryKeyValid(string memory key) external view override returns (bool) {
+        return notaryKeys[keccak256(bytes(key))];
     }
 }
