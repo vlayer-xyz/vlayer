@@ -3,6 +3,7 @@ import { WalletContainer } from "./WalletContainer";
 import { ProvingContainer } from "./ProvingContainer";
 import { MintingContainer } from "./MintingContainer";
 import { SuccessContainer } from "./SuccessContainer";
+import { ExtensionCheck } from "./ExtensionCheck";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -51,6 +52,7 @@ const SimpleWebProofApp = () => {
             <Routes>
               <Route path="/" element={<WelcomeScreen />} />
               <Route path="/connect-wallet" element={<WalletContainer />} />
+              <Route path="/extension-check" element={<ExtensionCheck />} />
               <Route path="/start-proving" element={<ProvingContainer />} />
               <Route path="/minting" element={<MintingContainer />} />
               <Route path="/success" element={<SuccessContainer />} />

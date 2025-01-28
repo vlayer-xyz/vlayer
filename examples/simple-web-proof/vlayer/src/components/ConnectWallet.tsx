@@ -36,7 +36,7 @@ export const ConnectWallet = ({
         {isWalletConnected ? (
           <button
             onClick={() => {
-              navigate("/start-proving");
+              navigate("/extension-check");
             }}
             id="nextButton"
           >

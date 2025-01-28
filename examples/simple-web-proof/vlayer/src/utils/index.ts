@@ -42,4 +42,5 @@ export {
   checkExtensionInstalled,
   useTestPrivateKey,
   testPrivateKey,
+  vlayerPovingExtensionId,
 };
