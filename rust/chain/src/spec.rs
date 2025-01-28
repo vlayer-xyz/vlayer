@@ -11,13 +11,23 @@ pub struct ChainSpec {
     name: String,
     forks: Box<[Fork]>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    optimism: Option<OptimismSpec>,
+    op_spec: Option<OptimismSpec>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OptimismSpec {
-    parent_chain: ChainId,
-    state_contract: Address,
+    anchor_chain: ChainId,
+    anchor_state_registry: Address,
+}
+
+impl OptimismSpec {
+    pub const fn anchor_chain(&self) -> ChainId {
+        self.anchor_chain
+    }
+
+    pub const fn anchor_state_registry(&self) -> Address {
+        self.anchor_state_registry
+    }
 }
 
 #[derive(Debug, Error)]
@@ -33,7 +43,7 @@ impl ChainSpec {
         id: ChainId,
         name: impl Into<String>,
         forks: impl IntoIterator<Item = F>,
-        optimism: Option<OptimismSpec>,
+        op_spec: Option<OptimismSpec>,
     ) -> Self
     where
         F: Into<Fork>,
@@ -50,7 +60,7 @@ impl ChainSpec {
             id,
             name,
             forks,
-            optimism,
+            op_spec,
         }
     }
 
@@ -72,8 +82,12 @@ impl ChainSpec {
         &self.name
     }
 
+    pub fn op_spec(&self) -> Option<OptimismSpec> {
+        self.op_spec.clone()
+    }
+
     pub const fn is_optimism(&self) -> bool {
-        self.optimism.is_some()
+        self.op_spec.is_some()
     }
 }
 
