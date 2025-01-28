@@ -3,8 +3,10 @@ pragma solidity ^0.8.21;
 
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
+import {ChainIdLibrary} from "./proof_verifier/ChainId.sol";
 import {URLPatternLib} from "./URLPattern.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
+import {INotaryKeyRepository} from "./Repository.sol";
 
 struct WebProof {
     string webProofJson;
@@ -16,6 +18,9 @@ struct Web {
     string url;
 }
 
+INotaryKeyRepository constant NOTARY_REPOSITORY =
+    INotaryKeyRepository(address(0x916B850652b5B03Aa21709321c5f80A9E306BEcd));
+
 library WebProofLib {
     using Strings for string;
     using URLPatternLib for string;
@@ -26,7 +31,12 @@ library WebProofLib {
 
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         Web memory web = recover(webProof);
-        require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Incorrect notary public key");
+        if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
+            require(NOTARY_REPOSITORY.isNotaryKeyValid(web.notaryPubKey), "Invalid notary public key");
+        } else {
+            require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
+        }
+
         require(web.url.test(dataUrl), "Incorrect URL");
         return web;
     }

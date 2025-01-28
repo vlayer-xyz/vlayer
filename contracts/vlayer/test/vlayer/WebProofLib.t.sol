@@ -17,11 +17,23 @@ contract WebProverTest is VTest {
 
     string public constant DATA_URL = "https://api.x.com/1.1/*/settings.json";
 
+    function test_revertsIf_notaryKeyIsInvalid() public {
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
+        WebProofLibWrapper wrapper = new WebProofLibWrapper();
+        try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
+            revert("Expected error");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Invalid notary public key");
+        }
+    }
+
     function test_verifiesWebProof() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
 
         callProver();
+
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
+
         Web memory web = wrapper.verify(webProof, DATA_URL);
         assertEq(bytes(web.body)[0], "{");
     }
