@@ -52,5 +52,11 @@ for example in $(get_examples); do
     vlayer test
     echo '::endgroup::'
 
+    echo "::group::vlayer run prove.ts: ${example}"
     run_prover_script
+    echo '::endgroup::'
+
+    echo "::group::vlayer run Playwright test: ${example}"
+    USE_PROD_WEB_SERVER=true run_playwright_tests
+    echo '::endgroup::'
 done
