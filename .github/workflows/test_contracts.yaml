@@ -64,4 +64,11 @@ jobs:
       - name: Run Forge formatter (vlayer contracts)
         working-directory: ./contracts/vlayer
         run: |
+
           forge fmt --check
+      - name: Check release stable verifier addresses
+        env:
+          DRY_RUN: true
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
+          REPOSITORY_CONTRACT_ADMIN_ADDRESS: ${{ vars.REPOSITORY_CONTRACT_ADMIN_ADDRESS }}
+        run: ./bash/deploy-verifiers.sh
