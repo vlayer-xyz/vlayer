@@ -131,7 +131,7 @@ where
             let latest_confirmed_location =
                 (destination_chain_id, l2_output.block_ref.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
-            if latest_confirmed_evm_env.header.hash_slow() == l2_output.block_ref.hash {
+            if latest_confirmed_evm_env.header.hash_slow() != l2_output.block_ref.hash {
                 return Err(Error::HeaderHashMismatch);
             }
 
@@ -151,8 +151,7 @@ fn ensure_latest_teleport_location_is_confirmed(
 ) -> std::result::Result<(), Error> {
     let latest_destination_block = destination_blocks
         .iter()
-        .sorted()
-        .last()
+        .max()
         .expect("Empty list of destination blocks")
         .0;
 
@@ -166,12 +165,10 @@ fn ensure_latest_teleport_location_is_confirmed(
 fn get_destinations(
     chain_ids: impl IntoIterator<Item = ChainId>,
     start_exec_location: ExecutionLocation,
-) -> Vec<ChainId> {
-    let destinations: Vec<ChainId> = chain_ids
+) -> impl Iterator<Item = ChainId> {
+    chain_ids
         .into_iter()
-        .filter(|&chain_id| chain_id != start_exec_location.chain_id)
-        .collect();
-    destinations
+        .filter(move |&chain_id| chain_id != start_exec_location.chain_id)
 }
 
 lazy_static! {
@@ -221,7 +218,7 @@ where
         .get_output_at_block(l2_block_number)
         .await;
 
-    if l2_output.hash_slow() == B256::from(root) {
+    if l2_output.hash_slow() != B256::from(root) {
         return Err(Error::L2OutputHashMismatch);
     }
     Ok(l2_output)

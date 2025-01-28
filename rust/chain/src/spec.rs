@@ -188,7 +188,7 @@ mod tests {
 
         use super::*;
 
-        const OPTIMISM: ChainId = 10;
+        const OP_MAINNET: ChainId = 10;
         const ETHEREUM_MAINNET: ChainId = 1;
         const ETHEREUM_SEPOLIA: ChainId = 11_155_111;
         const ANCHOR_STATE_REGISTRY_ADDRESS: Address =
@@ -196,7 +196,7 @@ mod tests {
 
         #[test]
         fn optimism_mainnet_commits_to_eth_mainnet() -> anyhow::Result<()> {
-            let optimism_chain_spec: ChainSpec = OPTIMISM.try_into()?;
+            let optimism_chain_spec: ChainSpec = OP_MAINNET.try_into()?;
             let registry = optimism_chain_spec.validate_anchored_against(ETHEREUM_MAINNET)?;
 
             assert_eq!(registry, ANCHOR_STATE_REGISTRY_ADDRESS);
@@ -205,10 +205,13 @@ mod tests {
 
         #[test]
         fn optimism_mainnet_doesnt_commit_to_eth_sepolia() -> anyhow::Result<()> {
-            let optimism_chain_spec: ChainSpec = OPTIMISM.try_into()?;
+            let optimism_chain_spec: ChainSpec = OP_MAINNET.try_into()?;
             let result = optimism_chain_spec.validate_anchored_against(ETHEREUM_SEPOLIA);
 
-            assert!(matches!(result, Err(Error::UnsupportedTeleport(OPTIMISM, ETHEREUM_SEPOLIA))));
+            assert!(matches!(
+                result,
+                Err(Error::UnsupportedTeleport(OP_MAINNET, ETHEREUM_SEPOLIA))
+            ));
             Ok(())
         }
     }
