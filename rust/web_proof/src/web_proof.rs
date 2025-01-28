@@ -14,7 +14,7 @@ use crate::{request_transcript::RequestTranscript, response_transcript::Response
 #[derive(Deserialize, Serialize, PartialEq, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
-    #[serde(rename = "presentationJSON")]
+    #[serde(rename = "presentationJson")]
     pub(crate) presentation_json: PresentationJSON,
 }
 

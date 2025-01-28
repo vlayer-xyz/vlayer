@@ -21,7 +21,7 @@ export const useWebProof = (
       ExtensionMessageType.ProofDone,
       ({ payload: { presentationJSON } }) => {
         setWebProof({
-          webProofJson: JSON.stringify({ presentationJSON }),
+          webProofJson: JSON.stringify({ presentationJson: presentationJSON }),
         });
         setStatus(WebProofRequestStatus.success);
       },

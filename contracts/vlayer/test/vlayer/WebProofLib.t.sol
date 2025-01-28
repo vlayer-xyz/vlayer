@@ -52,7 +52,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight(Engine(TransactError(Revert(\"missing field `presentationJSON` at line 1 column 2\"))))"
+                "Preflight(Engine(TransactError(Revert(\"missing field `presentationJson` at line 1 column 2\"))))"
             );
         }
     }

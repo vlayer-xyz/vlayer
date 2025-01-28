@@ -123,7 +123,7 @@ function DappNewWay() {
       chainId: foundry.id,
       args: [
         {
-          webProofJson: JSON.stringify({ presentationJSON: webProof }),
+          webProofJson: JSON.stringify({ presentationJson: webProof }),
         },
       ],
     });
@@ -283,7 +283,7 @@ function Dapp() {
       chainId: foundry.id,
       args: [
         {
-          webProofJson: JSON.stringify({ presentationJSON: webProof }),
+          webProofJson: JSON.stringify({ presentationJson: webProof }),
         },
       ],
     });

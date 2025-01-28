@@ -177,7 +177,7 @@ export const createVlayerClient = (
         args: [
           {
             webProofJson: JSON.stringify({
-              presentationJSON: webProof.presentationJSON,
+              presentationJson: webProof.presentationJSON,
             }),
           },
           ...commitmentArgs,

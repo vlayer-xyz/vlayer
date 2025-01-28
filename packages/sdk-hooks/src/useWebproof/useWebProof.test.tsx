@@ -105,7 +105,7 @@ describe("useWebproof", () => {
 
     expect(result.current).toMatchObject({
       webProof: {
-        webProofJson: JSON.stringify({ presentationJSON: { mock: "proof" } }),
+        webProofJson: JSON.stringify({ presentationJson: { mock: "proof" } }),
       },
       status: WebProofRequestStatus.success,
       isIdle: false,
