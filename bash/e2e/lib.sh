@@ -43,6 +43,6 @@ function build_contracts() {
 function run_playwright_tests() {
   pushd vlayer
     silent_unless_fails bunx playwright install --with-deps chromium
-    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:dev" bun run test:dev
+    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test:"${VLAYER_ENV}"
   popd
 }
