@@ -8,7 +8,6 @@ use chain::ChainSpec;
 use common::Hashable;
 use derive_more::Deref;
 use derive_new::new;
-use itertools::Itertools;
 use lazy_static::lazy_static;
 use revm::DatabaseRef;
 
@@ -30,7 +29,7 @@ pub enum Error {
     Database(anyhow::Error),
 }
 
-pub type Result = std::result::Result<(), Error>;
+pub type Result<T> = std::result::Result<T, Error>;
 mod seal {
     pub trait Sealed<D> {}
 }
@@ -39,7 +38,7 @@ mod seal {
 impl<F, D> seal::Sealed<D> for F
 where
     D: DatabaseRef,
-    F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result + Send + Sync,
+    F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result<()> + Send + Sync,
 {
 }
 
@@ -52,7 +51,7 @@ where
         &self,
         evm_envs: &CachedEvmEnv<D>,
         start_exec_location: ExecutionLocation,
-    ) -> Result;
+    ) -> Result<()>;
 }
 
 #[cfg(any(test, feature = "testing"))]
@@ -60,13 +59,13 @@ where
 impl<F, D> IVerifier<D> for F
 where
     D: DatabaseRef + Send + Sync,
-    F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result + Send + Sync,
+    F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result<()> + Send + Sync,
 {
     async fn verify(
         &self,
         evm_envs: &CachedEvmEnv<D>,
         start_exec_location: ExecutionLocation,
-    ) -> Result {
+    ) -> Result<()> {
         self(evm_envs, start_exec_location)
     }
 }
@@ -114,7 +113,7 @@ where
         &self,
         evm_envs: &CachedEvmEnv<D>,
         start_exec_location: ExecutionLocation,
-    ) -> Result {
+    ) -> Result<()> {
         let source_evm_env = evm_envs.get(start_exec_location)?;
         let blocks_by_chain = evm_envs.blocks_by_chain();
         let chain_ids = blocks_by_chain.chain_ids();
@@ -148,7 +147,7 @@ where
 fn ensure_latest_teleport_location_is_confirmed(
     destination_blocks: &[(u64, B256)],
     latest_confirmed_block: BlockNumber,
-) -> std::result::Result<(), Error> {
+) -> Result<()> {
     let latest_destination_block = destination_blocks
         .iter()
         .max()
@@ -195,7 +194,7 @@ async fn get_l2_output<D>(
     source_db: D,
     dest_chain_id: ChainId,
     multi_op_rpc_client: &MultiOpRpcClient,
-) -> std::result::Result<Output, Error>
+) -> Result<Output>
 where
     D: DatabaseRef + Send + Sync,
     D::Error: Debug + std::error::Error + Send + Sync + 'static,
