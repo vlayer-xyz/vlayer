@@ -32,7 +32,7 @@ pub(crate) mod utils {
         tlsn_core_types::{AttestationProof, Body, BodyProof, Presentation, ServerIdentityProof},
         WEB_PROOF_FIXTURE,
     };
-    use crate::web_proof::{PresentationJsonMeta, WebProof};
+    use crate::web_proof::{PresentationJSON, PresentationJsonMeta, WebProof};
 
     pub(crate) fn load_web_proof_fixture_and_modify<F>(modify: F) -> WebProof
     where
@@ -40,19 +40,21 @@ pub(crate) mod utils {
     {
         let web_proof: WebProof = serde_json::from_str(WEB_PROOF_FIXTURE).unwrap();
         let test_presentation: Presentation =
-            bincode::deserialize(&hex::decode(web_proof.data).unwrap()).unwrap();
+            bincode::deserialize(&hex::decode(web_proof.presentation_json.data).unwrap()).unwrap();
 
         let modified_presentation = modify(&test_presentation);
 
         let data = hex::encode(bincode::serialize(&modified_presentation).unwrap());
 
         WebProof {
-            version: "0.1.0-alpha.7".to_string(),
-            data,
-            meta: PresentationJsonMeta {
-                notary_url: Some("wss://notary.pse.dev/v0.1.0-alpha.7/notarize?sessionId=47a8a400-a25f-4571-9825-714b6e4a6689".to_string()),
-                websocket_proxy_url: Some("ws://localhost:55688".to_string()),
-                plugin_url: None
+            presentation_json: PresentationJSON {
+                version: "0.1.0-alpha.7".to_string(),
+                data,
+                meta: PresentationJsonMeta {
+                    notary_url: Some("wss://notary.pse.dev/v0.1.0-alpha.7/notarize?sessionId=47a8a400-a25f-4571-9825-714b6e4a6689".to_string()),
+                    websocket_proxy_url: Some("ws://localhost:55688".to_string()),
+                    plugin_url: None
+                }
             }
         }
     }
