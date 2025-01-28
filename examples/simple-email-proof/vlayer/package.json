@@ -5,13 +5,13 @@
   "scripts": {
     "devnet": "docker compose --file docker-compose.devnet.yaml up -d",
     "lint:solidity": "solhint '../src/**/*.sol'",
-    "deploy:dev": "VLAYER_ENV=dev bun run --conditions=development deploy.ts",
+    "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
-    "prove:dev": "VLAYER_ENV=dev bun run --conditions=development prove.ts",
+    "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
-    "web:dev": "VLAYER_ENV=dev bun run --conditions=development deploy.ts && vite",
+    "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
     "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
-    "test:dev": "VLAYER_ENV=dev bun run --conditions=development playwright test",
+    "test:dev": "VLAYER_ENV=dev bun run playwright test",
     "test:testnet": "echo \"No tests specified yet\""
   },
   "dependencies": {

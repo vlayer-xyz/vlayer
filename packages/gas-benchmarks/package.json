@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint .",
     "build": "bun tsc --build --noEmit",
-    "bench:dev": "VLAYER_ENV=dev bun --conditions=development run src/bench.ts"
+    "bench:dev": "VLAYER_ENV=dev bun run src/bench.ts"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
