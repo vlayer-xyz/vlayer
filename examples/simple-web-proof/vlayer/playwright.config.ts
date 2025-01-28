@@ -21,7 +21,7 @@ export default defineConfig({
 
   use: {
     // Base URL to use in actions like `await page.goto("/")`.
-    baseURL: process.env.WEB_SERVER_URL || "http://localhost:5173",
+    baseURL: process.env.USE_PROD_WEB_SERVER ? "https://web-proofs-demo.vlayer.xyz/" : "http://localhost:5173",
 
     // Collect trace when retrying the failed test.
     trace: "on-first-retry",
@@ -34,7 +34,7 @@ export default defineConfig({
     },
   ],
   // Run your local dev server before starting the tests.
-  webServer: {
+  webServer: process.env.USE_PROD_WEB_SERVER ? undefined : {
     // we want to be able to modify WEB_SERVER_COMMAND when running in CI
     command:
       process.env.WEB_SERVER_COMMAND || "bun run web:" + process.env.VLAYER_ENV,

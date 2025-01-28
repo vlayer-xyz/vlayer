@@ -46,7 +46,6 @@ jobs:
         env:
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_RELEASE_PRIVATE_KEY }}
           JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
-          EXAMPLE: "simple-web-proof"
         run: bash/test-release-remote-prover.sh
   test-release-js-sdk:
     name: Test JS SDK release

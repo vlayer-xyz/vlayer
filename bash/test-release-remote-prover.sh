@@ -45,6 +45,7 @@ for example in $(get_examples); do
     cd ${VLAYER_TEMP_DIR}
 
     vlayer init --template "${example}"
+    forge clean
     forge build
     vlayer test
     echo '::endgroup::'
@@ -54,6 +55,6 @@ for example in $(get_examples); do
     echo '::endgroup::'
 
     echo "::group::vlayer run Playwright test: ${example}"
-    WEB_SERVER_URL="https://web-proofs-demo.vlayer.xyz/" run_playwright_tests
+    USE_PROD_WEB_SERVER=true run_playwright_tests
     echo '::endgroup::'
 done
