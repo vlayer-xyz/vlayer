@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   test-e2e-web-apps:
-    name: E2E web apps test against devnet
+    name: E2E web apps test against testnet
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
