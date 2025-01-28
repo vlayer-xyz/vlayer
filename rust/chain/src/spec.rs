@@ -200,8 +200,8 @@ mod tests {
             let anchor_state_registry = optimism_chain_spec
                 .validate_anchored_against(ETHEREUM_MAINNET)
                 .unwrap();
+            
             assert_eq!(anchor_state_registry, ANCHOR_STATE_REGISTRY_ADDRESS);
-
             Ok(())
         }
 
@@ -209,8 +209,8 @@ mod tests {
         fn optimism_mainnet_doesnt_commit_to_eth_sepolia() -> anyhow::Result<()> {
             let optimism_chain_spec: ChainSpec = OPTIMISM.try_into()?;
             let result = optimism_chain_spec.validate_anchored_against(ETHEREUM_SEPOLIA);
-            assert!(matches!(result, Err(Error::UnsupportedTeleport(OPTIMISM, ETHEREUM_SEPOLIA))));
 
+            assert!(matches!(result, Err(Error::UnsupportedTeleport(OPTIMISM, ETHEREUM_SEPOLIA))));
             Ok(())
         }
     }
