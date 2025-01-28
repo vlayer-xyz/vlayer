@@ -30,7 +30,10 @@ ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
 {%- for url in vlayer_prover_rpc_urls|default([]) %}
 {{-  ' --rpc-url ' ~ url | trim -}}
 {% endfor %}
-
+{% if vlayer_prover_gas_meter_url is defined %}
+{{- ' --gas-meter-url ' ~ vlayer_prover_gas_meter_url }}
+{{- ' --gas-meter-api-key ' ~ vlayer_prover_gas_meter_api_key}}
+{% endif %}
 
 [Install]
 WantedBy=multi-user.target
