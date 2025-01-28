@@ -43,7 +43,7 @@ for example in $(get_examples); do
     echo '::endgroup::'
 
     echo "Starting docker-compose"
-    docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d
+    docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d --force-recreate
 
     echo "::group::vlayer run prove.ts: ${example}"
     run_prover_script
