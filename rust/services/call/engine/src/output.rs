@@ -102,15 +102,12 @@ mod hash_slow {
     use super::*;
 
     lazy_static! {
-        static ref STATE_ROOT: B256 = B256::from(hex!(
-            "b96b23e8db3147cf46b80eda0b97e6612cbdcec43128d5bd81a8360093cfcf17"
-        ));
-        static ref WITHDRAWAL_STORAGE_ROOT: B256 = B256::from(hex!(
-            "1e346b4b9774c44851b6e75760e09da0495f0b9124282e0f652df80d9a876b44"
-        ));
-        static ref FINALIZED_L2_HASH: B256 = B256::from(hex!(
-            "4cd86d480704aef6106fcd200a26f2d6e6025f1032dd9b6ae09af85198973cd9"
-        ));
+        static ref STATE_ROOT: B256 =
+            B256::from(hex!("b96b23e8db3147cf46b80eda0b97e6612cbdcec43128d5bd81a8360093cfcf17"));
+        static ref WITHDRAWAL_STORAGE_ROOT: B256 =
+            B256::from(hex!("1e346b4b9774c44851b6e75760e09da0495f0b9124282e0f652df80d9a876b44"));
+        static ref FINALIZED_L2_HASH: B256 =
+            B256::from(hex!("4cd86d480704aef6106fcd200a26f2d6e6025f1032dd9b6ae09af85198973cd9"));
         static ref OUTPUT: OutputResponse = OutputResponse {
             state_root: *STATE_ROOT,
             withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
@@ -131,7 +128,7 @@ mod hash_slow {
     #[test]
     fn hash_slow_test() {
         let output = OUTPUT.clone();
-        
+
         let hash = output.hash_slow();
 
         let expected_hash =
