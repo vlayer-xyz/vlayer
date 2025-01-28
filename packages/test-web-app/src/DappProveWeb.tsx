@@ -18,6 +18,8 @@ console.log(PROVER_ADDRESS);
 
 function DappProveWeb() {
   const [zkProof, setZkProof] = useState<boolean>();
+  const [name, setName] = useState<string>();
+  const [greeting, setGreeting] = useState<string>();
 
   const webProofProvider = useMemo(() => {
     return createExtensionWebProofProvider({
@@ -50,7 +52,7 @@ function DappProveWeb() {
           [
             {
               response: {
-                json_body_except: ["screen_name"],
+                json_body_except: ["name"],
               },
             },
             {
@@ -85,6 +87,11 @@ function DappProveWeb() {
     });
 
     const zkProof = await vlayerClient.waitForProvingResult({ hash });
+    const name = zkProof[1];
+    const greeting = zkProof[2];
+    setName(name);
+    setGreeting(greeting);
+    setZkProof(zkProof);
     setZkProof(zkProof);
   }, []);
 
@@ -106,7 +113,23 @@ function DappProveWeb() {
       </div>
       <div>
         {zkProof ? (
-          <h1 data-testid="has-zkproof">Has zk proof</h1>
+          <div>
+            <h1 data-testid="has-zkproof">Has zk proof</h1>
+            <h2>Name from prover:</h2>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="name-from-prover"
+            >
+              {name}
+            </pre>
+            <h2>Greeting from prover:</h2>
+            <pre
+              style={{ whiteSpace: "break-spaces" }}
+              data-testid="greeting-from-prover"
+            >
+              {greeting}
+            </pre>
+          </div>
         ) : (
           <h1> No zk proof </h1>
         )}
