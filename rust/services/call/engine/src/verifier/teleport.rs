@@ -4,7 +4,7 @@ use std::{
     fmt::{format, Debug},
 };
 
-use alloy_primitives::{BlockNumber, ChainId, B256, U256};
+use alloy_primitives::{uint, BlockNumber, ChainId, B256, U256};
 use anyhow::anyhow;
 use async_trait::async_trait;
 use chain::ChainSpec;
@@ -72,10 +72,6 @@ where
     ) -> Result {
         self(evm_envs, start_exec_location)
     }
-}
-
-lazy_static! {
-    static ref ANCHOR_SLOT: U256 = U256::from(0);
 }
 
 struct BlockRef {
@@ -179,6 +175,25 @@ fn get_destinations(
     destinations
 }
 
+lazy_static! {
+    // https://etherscan.deth.net/address/0x18DAc71c228D1C32c99489B7323d441E1175e443#readProxyContract
+    // mapping: GameType -> OutputRoot
+    // struct OutputRoot {
+    //     hash: bytes32,
+    //     blockNumber: uint256,
+    // }
+    static ref L2_OUTPUT_HASH_SLOT: U256 = U256::from_str_radix(
+        // keccak(key . position).
+        // Key = game type = 0
+        // Position = 1
+        "a6eef7e35abe7026729641147f7915573c7e97b47efa546f5f6e3230263bcb4a",
+        16
+    )
+    .unwrap();
+    // Second field of a struct
+    static ref L2_BLOCK_NUMBER_SLOT: U256 = *L2_OUTPUT_HASH_SLOT + U256::from(1);
+}
+
 async fn get_l2_output<D>(
     source_chain_id: ChainId,
     source_db: D,
@@ -193,12 +208,14 @@ where
     let anchor_state_registry_address = destination_chain_spec
         .validate_anchored_against(source_chain_id)
         .unwrap();
+
     let root = source_db
-        .storage_ref(anchor_state_registry_address, *ANCHOR_SLOT)
+        .storage_ref(anchor_state_registry_address, *L2_OUTPUT_HASH_SLOT)
         .map_err(|err| Error::Database(anyhow!(err)))?;
     let l2_block_number = source_db
-        .storage_ref(anchor_state_registry_address, *ANCHOR_SLOT + U256::from(1))
+        .storage_ref(anchor_state_registry_address, *L2_BLOCK_NUMBER_SLOT)
         .map_err(|err| Error::Database(anyhow!(err)))?;
+
     let l2_output = multi_op_rpc_client
         .get(&dest_chain_id)
         .unwrap()
