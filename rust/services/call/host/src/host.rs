@@ -114,7 +114,7 @@ impl Host {
             chain_proof::Verifier::new(chain_guest_ids, zk_proof::HostVerifier);
         let time_travel_verifier =
             time_travel::Verifier::new(chain_client.clone(), chain_proof_verifier);
-        let teleport_verifier = teleport::Verifier::new();
+        let teleport_verifier = teleport::Verifier::default();
         travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
     }
 

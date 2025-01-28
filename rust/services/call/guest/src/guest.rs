@@ -63,6 +63,6 @@ fn build_guest_travel_call_verifier(
     let chain_client = CachedClient::new(chain_proofs);
     let chain_proof_verifier = chain_proof::Verifier::new(chain_guest_ids, zk_proof::GuestVerifier);
     let time_travel_verifier = time_travel::Verifier::new(Some(chain_client), chain_proof_verifier);
-    let teleport_verifier = teleport::Verifier::new();
+    let teleport_verifier = teleport::Verifier::default();
     travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
 }
