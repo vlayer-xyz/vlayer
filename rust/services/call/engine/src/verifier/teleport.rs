@@ -1,7 +1,11 @@
 /// The code in this module is a skeleton and is not up to our quality standards.
-use std::{collections::HashMap, fmt::Debug};
+use std::{
+    collections::HashMap,
+    fmt::{format, Debug},
+};
 
 use alloy_primitives::{BlockNumber, ChainId, B256, U256};
+use anyhow::anyhow;
 use async_trait::async_trait;
 use chain::ChainSpec;
 use common::Hashable;
@@ -25,6 +29,8 @@ pub enum Error {
     HeaderHashMismatch,
     #[error("Teleport on unconfirmed")]
     TeleportOnUnconfirmed,
+    #[error("Database error: {0}")]
+    Database(anyhow::Error),
 }
 
 pub type Result = std::result::Result<(), Error>;
@@ -113,7 +119,7 @@ impl<D> seal::Sealed<D> for Verifier {}
 impl<D> IVerifier<D> for Verifier
 where
     D: DatabaseRef + Send + Sync,
-    D::Error: std::error::Error,
+    D::Error: std::error::Error + Send + Sync + 'static,
 {
     async fn verify(
         &self,
@@ -187,7 +193,7 @@ async fn get_l2_output<D>(
 ) -> std::result::Result<Output, Error>
 where
     D: DatabaseRef + Send + Sync,
-    D::Error: Debug,
+    D::Error: Debug + std::error::Error + Send + Sync + 'static,
 {
     let destination_chain_spec: ChainSpec = dest_chain_id.try_into().unwrap();
     let anchor_state_registry_address = destination_chain_spec
@@ -195,7 +201,7 @@ where
         .unwrap();
     let value = source_db
         .storage_ref(anchor_state_registry_address, *ANCHOR_SLOT)
-        .unwrap();
+        .map_err(|err| Error::Database(anyhow!(err)))?;
     let (root, l2_block_number) = abi_decode(ABI, value);
     let l2_output = multi_op_rpc_client
         .get(&dest_chain_id)
