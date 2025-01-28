@@ -9,9 +9,12 @@ use common::Hashable;
 use derive_more::Deref;
 use derive_new::new;
 use lazy_static::lazy_static;
+use optimism::{OpRpcClient, OutputResponse};
 use revm::DatabaseRef;
 
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
+
+mod optimism;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -76,28 +79,6 @@ where
     }
 }
 
-#[derive(Debug)]
-struct BlockRef {
-    number: u64,
-    hash: B256,
-}
-
-#[derive(Debug)]
-struct Output {
-    block_ref: BlockRef,
-}
-
-impl Hashable for Output {
-    fn hash_slow(&self) -> B256 {
-        todo!()
-    }
-}
-
-#[async_trait]
-trait OpRpcClient: Send + Sync {
-    async fn get_output_at_block(&self, block_number: U256) -> Output;
-}
-
 #[derive(new, Deref, Default)]
 struct MultiOpRpcClient {
     clients: HashMap<ChainId, Box<dyn OpRpcClient>>,
@@ -132,12 +113,17 @@ where
             )
             .await?;
 
-            let latest_confirmed_location = (chain_id, l2_output.block_ref.number).into();
+            let latest_confirmed_location =
+                (chain_id, l2_output.block_ref.l1_block_info.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
-            if latest_confirmed_evm_env.header.hash_slow() != l2_output.block_ref.hash {
+            if latest_confirmed_evm_env.header.hash_slow() != l2_output.block_ref.l1_block_info.hash
+            {
                 return Err(Error::HeaderHashMismatch);
             }
-            ensure_latest_teleport_location_is_confirmed(&blocks, l2_output.block_ref.number)?;
+            ensure_latest_teleport_location_is_confirmed(
+                &blocks,
+                l2_output.block_ref.l1_block_info.number,
+            )?;
         }
         Ok(())
     }
@@ -193,7 +179,7 @@ async fn get_l2_output<D>(
     source_db: D,
     dest_chain_id: ChainId,
     multi_op_rpc_client: &MultiOpRpcClient,
-) -> Result<Output>
+) -> Result<OutputResponse>
 where
     D: DatabaseRef + Send + Sync,
     D::Error: Debug + std::error::Error + Send + Sync + 'static,

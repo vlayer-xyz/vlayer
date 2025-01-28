@@ -47,6 +47,8 @@ lto = false # debug + LTO leads to ICE in 1.84: https://github.com/rust-lang/rus
 
 [workspace.dependencies]
 alloy-chains = "0.1.42"
+alloy-eips = { version = "0.9.2", features = ["serde"] }
+alloy-serde = "0.9.2"
 alloy-dyn-abi = "=0.8.16"
 alloy-json-abi = "=0.8.16"
 alloy-primitives = { version = "=0.8.16", default-features = false, features = ["serde", "tiny-keccak"] }
