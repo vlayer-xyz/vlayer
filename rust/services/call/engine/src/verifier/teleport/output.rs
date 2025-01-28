@@ -1,5 +1,5 @@
 use alloy_eips::BlockNumHash;
-use alloy_primitives::{B256, U256};
+use alloy_primitives::{keccak256, B256, U256};
 use async_trait::async_trait;
 use common::Hashable;
 use serde::{Deserialize, Serialize};
@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 /// The block reference for an L2 block.
 ///
 /// See: <https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/id.go#L33>
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct L2BlockRef {
     /// The l1 block info.
@@ -39,7 +39,7 @@ pub struct BlockInfo {
 /// The [`SyncStatus`][ss] of an Optimism Rollup Node.
 ///
 /// [ss]: https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/sync_status.go#L5
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct SyncStatus {
     /// The current L1 block.
     pub current_l1: BlockInfo,
@@ -64,7 +64,7 @@ pub struct SyncStatus {
 /// An [output response][or] for Optimism Rollup.
 ///
 /// [or]: https://github.com/ethereum-optimism/optimism/blob/f20b92d3eb379355c876502c4f28e72a91ab902f/op-service/eth/output.go#L10-L17
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputResponse {
     /// The output version.
@@ -81,13 +81,64 @@ pub struct OutputResponse {
     pub sync_status: SyncStatus,
 }
 
-impl Hashable for OutputResponse {
-    fn hash_slow(&self) -> B256 {
-        todo!()
-    }
-}
-
 #[async_trait]
 pub trait OpRpcClient: Send + Sync {
     async fn get_output_at_block(&self, block_number: U256) -> OutputResponse;
+}
+
+impl Hashable for OutputResponse {
+    fn hash_slow(&self) -> B256 {
+        let payload: Vec<u8> = [
+            vec![0_u8; 32],
+            self.state_root.to_vec(),
+            self.withdrawal_storage_root.to_vec(),
+            self.sync_status.finalized_l2.l1_block_info.hash.to_vec(),
+        ]
+        .concat();
+
+        keccak256(payload)
+    }
+}
+
+#[cfg(test)]
+mod hash_slow {
+    use alloy_primitives::hex;
+    use lazy_static::lazy_static;
+
+    use super::*;
+
+    lazy_static! {
+        static ref STATE_ROOT: B256 =
+            B256::from(hex!("b96b23e8db3147cf46b80eda0b97e6612cbdcec43128d5bd81a8360093cfcf17"));
+        static ref WITHDRAWAL_STORAGE_ROOT: B256 =
+            B256::from(hex!("1e346b4b9774c44851b6e75760e09da0495f0b9124282e0f652df80d9a876b44"));
+        static ref FINALIZED_L2_HASH: B256 =
+            B256::from(hex!("4cd86d480704aef6106fcd200a26f2d6e6025f1032dd9b6ae09af85198973cd9"));
+        static ref OUTPUT: OutputResponse = OutputResponse {
+            state_root: *STATE_ROOT,
+            withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
+            sync_status: SyncStatus {
+                finalized_l2: L2BlockRef {
+                    l1_block_info: BlockInfo {
+                        hash: *FINALIZED_L2_HASH,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+    }
+
+    #[test]
+    fn hash_slow_test() {
+        let output = OUTPUT.clone();
+
+        let hash = output.hash_slow();
+
+        let expected_hash =
+            B256::from(hex!("39e47bbb42c1043f6f05950f4af9dd673a521c31001cb87e47c2642040580f54"));
+        assert_eq!(hash, expected_hash);
+    }
 }
