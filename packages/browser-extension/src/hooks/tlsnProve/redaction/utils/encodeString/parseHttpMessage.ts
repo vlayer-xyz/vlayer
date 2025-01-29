@@ -99,13 +99,14 @@ export const parseTlsnTranscript = ({
   recv: string;
   sent: string;
 }) => {
-  const parserOptions = {
-    enforceContentType: false,
-    defaultEncoding: Encoding.UTF8,
-  };
-
   return {
-    recv: parseHttpMessage(recv, parserOptions),
-    sent: parseHttpMessage(sent, parserOptions),
+    recv: parseHttpMessage(recv, {
+      enforceContentType: false,
+      defaultEncoding: Encoding.UTF8,
+    }),
+    sent: parseHttpMessage(sent, {
+      enforceContentType: false,
+      defaultEncoding: Encoding.UTF8,
+    }),
   };
 };
