@@ -1,30 +1,28 @@
 use alloy_primitives::{Address, B256, U256};
 use anyhow::anyhow;
 use derive_new::new;
-use lazy_static::lazy_static;
 use revm::DatabaseRef;
 
 use super::{Error, Result};
 
-lazy_static! {
-    // https://etherscan.deth.net/address/0x18DAc71c228D1C32c99489B7323d441E1175e443#readProxyContract
-    // mapping: GameType -> OutputRoot
-    // struct OutputRoot {
-    //     hash: bytes32,
-    //     blockNumber: uint256,
-    // }
-    static ref OUTPUT_HASH_SLOT: U256 = U256::from_str_radix(
-        // keccak(key . position).
-        // Key = game type = 0
-        // Position = 1
-        "a6eef7e35abe7026729641147f7915573c7e97b47efa546f5f6e3230263bcb4a",
-        16
-    )
-    .unwrap();
-    // Second field of a struct
-    static ref BLOCK_NUMBER_SLOT: U256 = *OUTPUT_HASH_SLOT + U256::from(1);
+/// Storage layout:
+/// `OutputRoot` struct is stored at mapping(GameType -> OutputRoot) in slot 1.
+/// - Field 0: `hash` (bytes32) -> Located at keccak(GameType . 1)
+/// - Field 1: `blockNumber` (uint256) -> Located at keccak(GameType . 1) + 1
+mod layout {
+    use alloy_primitives::U256;
+    use lazy_static::lazy_static;
+    lazy_static! {
+        pub static ref OUTPUT_HASH_SLOT: U256 = U256::from_str_radix(
+            "a6eef7e35abe7026729641147f7915573c7e97b47efa546f5f6e3230263bcb4a",
+            16
+        )
+        .unwrap();
+        pub static ref BLOCK_NUMBER_SLOT: U256 = *OUTPUT_HASH_SLOT + U256::from(1);
+    }
 }
 
+#[derive(Clone, Debug)]
 pub struct L2Commitment {
     pub output_hash: B256,
     pub block_number: U256,
@@ -42,10 +40,10 @@ impl AnchorStateRegistry {
         D::Error: std::fmt::Debug + std::error::Error + Send + Sync + 'static,
     {
         let root = db
-            .storage_ref(self.address, *OUTPUT_HASH_SLOT)
+            .storage_ref(self.address, *layout::OUTPUT_HASH_SLOT)
             .map_err(|err| Error::Database(anyhow!(err)))?;
         let block_number = db
-            .storage_ref(self.address, *BLOCK_NUMBER_SLOT)
+            .storage_ref(self.address, *layout::BLOCK_NUMBER_SLOT)
             .map_err(|err| Error::Database(anyhow!(err)))?;
 
         Ok(L2Commitment {

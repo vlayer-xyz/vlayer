@@ -5,6 +5,7 @@ use thiserror::Error;
 
 use crate::{config::CHAIN_ID_TO_CHAIN_SPEC, fork::Fork};
 
+#[derive(Debug, Clone)]
 pub struct OptimismChainSpec {
     pub chain_spec: ChainSpec,
     pub anchor_chain: ChainId,

@@ -104,12 +104,13 @@ where
         for (chain_id, blocks) in destinations {
             let dest_chain_spec = OptimismChainSpec::try_from(chain_id)?;
             dest_chain_spec.assert_commmits_into(source_chain_id)?;
-            let client = self.multi_op_rpc_client.get(&chain_id).unwrap();
 
             let anchor_state_registry =
                 AnchorStateRegistry::new(dest_chain_spec.anchor_state_registry);
             let l2_commitment =
                 anchor_state_registry.get_latest_confirmed_l2_commitment(&source_evm_env.db)?;
+
+            let client = self.multi_op_rpc_client.get(&chain_id).unwrap();
             let l2_output = client.get_output_at_block(l2_commitment.block_number).await;
 
             if l2_output.hash_slow() != l2_commitment.output_hash {
