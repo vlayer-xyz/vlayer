@@ -247,9 +247,9 @@ mod deserialize {
     #[test]
     fn success() -> anyhow::Result<()> {
         let json_value = read_and_parse_json_file("testdata/mainnet_rpc_cache.json")?;
-        let eth_block_header_json = &json_value["partial_blocks"][0][BLOCK_HEADER_INDEX]["Eth"];
+        let eth_block_header_json = &json_value["partial_blocks"][0][BLOCK_HEADER_INDEX]["Header"];
         let deserialized_eth_header: EthBlockHeader = from_value(eth_block_header_json.clone())?;
-        let expected_parent_hash = eth_block_header_json["parent_hash"].as_str().unwrap();
+        let expected_parent_hash = eth_block_header_json["parentHash"].as_str().unwrap();
         let deserialized_parent_hash =
             hex::encode(deserialized_eth_header.parent_hash.as_ref() as &[u8]);
 
@@ -266,7 +266,7 @@ mod deserialize {
 
         if let Err(err) = result {
             let err_msg = err.to_string();
-            assert_eq!(err_msg, "invalid type: null, expected struct EthBlockHeader");
+            assert_eq!(err_msg, "invalid type: null, expected struct Header");
         } else {
             panic!("Expected serialization to fail for unsupported type");
         }
