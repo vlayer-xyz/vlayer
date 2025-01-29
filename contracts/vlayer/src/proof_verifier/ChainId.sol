@@ -13,9 +13,11 @@ library ChainIdLibrary {
         return block.chainid == 11155111 // Ethereum Sepolia
             || block.chainid == 11155420 // Optimism Sepolia
             || block.chainid == 84532 // Base Sepolia
-            || block.chainid == 80002 // Polygon Amoy
             || block.chainid == 421614 // Arbitrum Sepolia
-            || block.chainid == 300; // zkSync Sepolia
+            || block.chainid == 80002 // Polygon Amoy
+            || block.chainid == 300 // zkSync Sepolia
+            || block.chainid == 59141 // Linea Sepolia
+            || block.chainid == 4801; // Worldchain Sepolia
     }
 
     function isMainnet() internal view returns (bool) {
@@ -25,6 +27,8 @@ library ChainIdLibrary {
             || block.chainid == 42161 // Arbitrum One
             || block.chainid == 42170 // Arbitrum Nova
             || block.chainid == 137 // Polygon
-            || block.chainid == 324; // zkSync
+            || block.chainid == 324 // zkSync
+            || block.chainid == 59144 // Linea
+            || block.chainid == 480; // Worldchain
     }
 }
