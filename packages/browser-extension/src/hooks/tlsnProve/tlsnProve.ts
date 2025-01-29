@@ -71,6 +71,10 @@ export async function tlsnProve(
     },
   });
 
+  if (res.status < 200 || res.status >= 300) {
+    throw new Error("Authentication failed. Please restart the process.");
+  }
+
   console.log("Received response", res);
 
   const transcript = await prover.transcript();
