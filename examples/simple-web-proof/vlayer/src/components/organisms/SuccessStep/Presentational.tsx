@@ -11,7 +11,7 @@ export const SuccessStepPresentational = ({
 }) => {
   return (
     <>
-      <p className="text-gray-500">
+      <p className="4text-gray-500">
         @{handle} was minted to{" "}
         <a
           href={`${blockExplorer}/tx/${tx}`}

@@ -36,6 +36,7 @@ export const steps: Step[] = [
   {
     path: "connect-wallet",
     kind: STEP_KIND.CONNECT_WALLET,
+    backUrl: "",
     component: ConnectWalletStep,
     title: "X NFT",
     description:

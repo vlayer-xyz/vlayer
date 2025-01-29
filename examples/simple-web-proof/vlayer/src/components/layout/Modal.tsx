@@ -41,52 +41,55 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
     }, 300);
   }, [currentStep?.description]);
 
+  console.log(currentStep);
   return (
     <dialog className="modal" ref={modalRef}>
-      <motion.div
-        className="modal-box bg-white rounded-2xl h-[490px] flex flex-col items-center justify-between
+      <div className="modal-box bg-white rounded-2xl">
+        <motion.div
+          className="h-[490px] flex flex-col items-center justify-between
 
 "
-        initial={{ opacity: 0, scale: 0.1 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.1 }}
-        transition={{ ease: "easeOut", duration: 0.3 }}
-      >
-        <AnimatePresence>{!isWelcome && <ProgressBar />}</AnimatePresence>
-        {currentStep?.backUrl && (
-          <form method="dialog">
-            <Link
-              to={currentStep?.backUrl}
-              className="absolute left-3 text-black top-3 text-xs font-normal"
-            >
-              Back
-            </Link>
-          </form>
-        )}
-        <AnimatePresence>
-          {currentStep?.headerIcon && (
-            <motion.img
-              initial={{ opacity: 0, scale: 0.1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.1 }}
-              transition={{ ease: "easeOut", duration: 0.3 }}
-              src={currentStep?.headerIcon}
-              alt="Success Icon"
-              className="w-[282px] h-[150px]"
-            />
+          initial={{ opacity: 0, scale: 0.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.1 }}
+          transition={{ ease: "easeOut", duration: 0.3 }}
+        >
+          <AnimatePresence>{!isWelcome && <ProgressBar />}</AnimatePresence>
+          {currentStep?.backUrl && (
+            <form method="dialog">
+              <Link
+                to={currentStep?.backUrl}
+                className="absolute left-3 text-black top-3 text-xs font-normal"
+              >
+                Back
+              </Link>
+            </form>
           )}
-        </AnimatePresence>
-        <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
-          {currentStep?.title && (
-            <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
-          )}
-          <p className={`h-[116px] desc ${descClass}`}>{description}</p>
+          <AnimatePresence>
+            {currentStep?.headerIcon && (
+              <motion.img
+                initial={{ opacity: 0, scale: 0.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.1 }}
+                transition={{ ease: "easeOut", duration: 0.3 }}
+                src={currentStep?.headerIcon}
+                alt="Success Icon"
+                className="w-[282px] h-[150px]"
+              />
+            )}
+          </AnimatePresence>
+          <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
+            {currentStep?.title && (
+              <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
+            )}
+            <p className={`h-[116px] desc ${descClass}`}>{description}</p>
 
-          <modalContext.Provider value={{ showModal, closeModal }}>
-            {children}
-          </modalContext.Provider>
-        </div>
-      </motion.div>
+            <modalContext.Provider value={{ showModal, closeModal }}>
+              {children}
+            </modalContext.Provider>
+          </div>
+        </motion.div>
+      </div>
     </dialog>
   );
 };

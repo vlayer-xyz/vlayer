@@ -1,4 +1,4 @@
-import { vlayerPovingExtensionId } from "../utils";
+import { vlayerPovingExtensionId } from "../../utils";
 
 export const InstallExtension = ({ error }: { error?: string }) => {
   return (

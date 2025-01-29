@@ -75,7 +75,6 @@ export const MintStep = () => {
 
   return (
     <MintStepPresentational
-      mintedHandle={mintedHandle ?? ""}
       handleMint={handleMint}
       isMinting={isMinting}
       errorMsg={error?.message}

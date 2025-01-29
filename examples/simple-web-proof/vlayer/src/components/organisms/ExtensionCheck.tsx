@@ -54,7 +54,7 @@ export const ExtensionCheck = () => {
   }, []);
 
   return (
-    <Modal backUrl="/connect-wallet">
+    <Modal>
       <InstallExtension error={error} />
     </Modal>
   );
