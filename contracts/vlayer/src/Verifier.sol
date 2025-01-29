@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import {Proof, ProofLib} from "./Proof.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
-import {ProofVerifierFactory} from "./proof_verifier/ProofVerifierFactory.sol";
+import {ProofVerifierFactory, ChainIdLibrary} from "./proof_verifier/ProofVerifierFactory.sol";
 import {CallAssumptionsLib} from "./CallAssumptions.sol";
 
 abstract contract Verifier {
@@ -45,5 +45,13 @@ abstract contract Verifier {
         bytes32 journalHash = sha256(journalWithEmptyProof);
 
         return (proof, journalHash);
+    }
+
+    // Intentionally underscored as it's a helper function
+    function _setTestVerifier(IProofVerifier newVerifier) external {
+        require(ChainIdLibrary.isDevnet(), "Changing verifiers is only allowed on devnet");
+        require(address(newVerifier.imageIdRepository()) != address(0), "Verifier's repository address is not set");
+
+        verifier = newVerifier;
     }
 }
