@@ -92,7 +92,7 @@ impl Hashable for OutputResponse {
             self.version.to_vec(),
             self.state_root.to_vec(),
             self.withdrawal_storage_root.to_vec(),
-            self.sync_status.finalized_l2.l1_block_info.hash.to_vec(),
+            self.block_ref.l1_block_info.hash.to_vec(),
         ]
         .concat();
 
