@@ -1,4 +1,4 @@
-import { useCurrentStep } from "../hooks/useCurentStep";
+import { useCurrentStep } from "../../hooks/useCurentStep";
 
 export const ProgressBar = () => {
   const { currentStep } = useCurrentStep();

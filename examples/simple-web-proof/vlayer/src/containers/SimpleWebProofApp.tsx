@@ -1,4 +1,4 @@
-import { WelcomeScreen } from "../components/WelcomeScreen";
+import { WelcomeScreen } from "../components/organisms/WelcomeScreen";
 import { WalletContainer } from "./WalletContainer";
 import { ProvingContainer } from "./ProvingContainer";
 import { MintingContainer } from "./MintingContainer";
@@ -11,7 +11,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { createAppKit } from "@reown/appkit/react";
 import { optimismSepolia, anvil } from "@reown/appkit/networks";
-import { Layout } from "./Layout";
+import { Layout } from "../components/layout/Layout";
 import { Outlet } from "react-router";
 const queryClient = new QueryClient();
 

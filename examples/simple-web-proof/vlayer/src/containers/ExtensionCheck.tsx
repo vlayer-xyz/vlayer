@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Modal } from "../components/Modal";
+import { Modal } from "../components/layout/Modal";
 import { InstallExtension } from "../components/InstallExtension";
 import {
   isMobile,

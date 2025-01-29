@@ -1,7 +1,7 @@
 // Layout.js
 import { Outlet } from "react-router";
-import { Modal } from "../components/Modal";
-import { ProgressBar } from "../components/ProgressBar";
+import { Modal } from "./Modal";
+import { ProgressBar } from "../molecules/ProgressBar";
 
 export const Layout = () => {
   return (

@@ -1,6 +1,6 @@
 import { Link } from "react-router";
-import { Modal } from "./Modal";
-import { isMobile } from "../utils";
+import { Modal } from "../layout/Modal";
+import { isMobile } from "../../utils";
 
 export const WelcomeScreen = () => {
   return (

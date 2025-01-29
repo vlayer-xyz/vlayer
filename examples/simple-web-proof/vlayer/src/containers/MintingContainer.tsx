@@ -9,7 +9,7 @@ import {
 import { useLocalStorage } from "usehooks-ts";
 
 import webProofProofVerifier from "../../../out/WebProofVerifier.sol/WebProofVerifier.json";
-import { Minting } from "../components/Minting";
+import { Minting } from "../components/organisms/Minting";
 import { testPrivateKey, useTestPrivateKey } from "../utils";
 import { ensureBalance } from "../utils/ethFaucet";
 
