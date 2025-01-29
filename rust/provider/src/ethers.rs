@@ -1,6 +1,6 @@
 use core::future::Future;
 
-use alloy_primitives::{BlockNumber, B256, U256};
+use alloy_primitives::{b256, fixed_bytes, hex, BlockNumber, B256, U256};
 use anyhow::{anyhow, Context};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use derive_new::new;
@@ -122,6 +122,12 @@ impl<T: JsonRpcClient> BlockingProvider for EthersProvider<T> {
 }
 
 pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
+    let requests_hash = block.other.get("requestsHash").map(|v| {
+        let requests_hash = v.as_str().expect("requestsHash should be a string");
+        requests_hash
+            .parse::<B256>()
+            .expect("requestsHash should be a B256")
+    });
     Ok(EthBlockHeader {
         parent_hash: from_ethers_h256(block.parent_hash),
         ommers_hash: from_ethers_h256(block.uncles_hash),
@@ -140,7 +146,7 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
         extra_data: block.extra_data.0.into(),
         mix_hash: from_ethers_h256(block.mix_hash.context("mix_hash")?),
         nonce: block.nonce.context("nonce")?.0.into(),
-        base_fee_per_gas: from_ethers_u256(block.base_fee_per_gas.context("base_fee_per_gas")?),
+        base_fee_per_gas: Some(block.base_fee_per_gas.context("base_fee_per_gas")?.as_u64()),
         withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
         blob_gas_used: block
             .blob_gas_used
@@ -153,6 +159,7 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
             .transpose()
             .map_err(|e: &str| anyhow!(e))?,
         parent_beacon_block_root: block.parent_beacon_block_root.map(from_ethers_h256),
+        requests_hash,
     })
 }
 
