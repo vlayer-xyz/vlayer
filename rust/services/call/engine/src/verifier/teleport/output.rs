@@ -115,18 +115,15 @@ mod hash_slow {
         static ref FINALIZED_L2_HASH: B256 =
             B256::from(hex!("4cd86d480704aef6106fcd200a26f2d6e6025f1032dd9b6ae09af85198973cd9"));
         static ref OUTPUT: OutputResponse = OutputResponse {
-            state_root: *STATE_ROOT,
-            withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
-            sync_status: SyncStatus {
-                finalized_l2: L2BlockRef {
-                    l1_block_info: BlockInfo {
-                        hash: *FINALIZED_L2_HASH,
-                        ..Default::default()
-                    },
+            block_ref: L2BlockRef {
+                l1_block_info: BlockInfo {
+                    hash: *FINALIZED_L2_HASH,
                     ..Default::default()
                 },
                 ..Default::default()
             },
+            state_root: *STATE_ROOT,
+            withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
             ..Default::default()
         };
     }
