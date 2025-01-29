@@ -15,6 +15,8 @@ use serde::{Deserialize, Serialize};
 use serde_with::{hex::Hex, serde_as};
 use thiserror::Error;
 
+pub mod verifier;
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, new)]
 pub struct GetChainProof {
     pub chain_id: ChainId,

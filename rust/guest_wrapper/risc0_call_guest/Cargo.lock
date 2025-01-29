@@ -960,6 +960,7 @@ dependencies = [
  "block_header",
  "call_engine",
  "chain_client",
+ "chain_common",
  "common",
  "mpt",
  "revm",

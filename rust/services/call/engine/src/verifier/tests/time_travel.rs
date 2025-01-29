@@ -5,10 +5,7 @@ use chain_common::ChainProof;
 use risc0_zkp::verify::VerificationError;
 
 use super::*;
-use crate::verifier::{
-    chain_proof,
-    time_travel::{Error, IVerifier, Verifier},
-};
+use crate::verifier::time_travel::{Error, IVerifier, Verifier};
 
 const CHAIN_ID: ChainId = 1;
 const INVALID_BLOCK_HASH: B256 = B256::ZERO;
@@ -37,17 +34,17 @@ fn mock_time_travel_destinations(
         .collect()
 }
 
-const fn proof_ok(_: &ChainProof) -> chain_proof::Result {
+const fn proof_ok(_: &ChainProof) -> chain_common::verifier::Result {
     Ok(())
 }
 
-const fn proof_invalid(_: &ChainProof) -> chain_proof::Result {
-    Err(chain_proof::Error::Zk(VerificationError::InvalidProof))
+const fn proof_invalid(_: &ChainProof) -> chain_common::verifier::Result {
+    Err(chain_common::verifier::Error::Zk(VerificationError::InvalidProof))
 }
 
 async fn verify_time_travel_destinations(
     chain_client: impl chain_client::Client,
-    verifier: impl chain_proof::IVerifier,
+    verifier: impl chain_common::verifier::IVerifier,
     destinations: Vec<(BlockNumber, BlockHash)>,
 ) -> Result<(), Error> {
     Verifier::new(Some(chain_client), verifier)

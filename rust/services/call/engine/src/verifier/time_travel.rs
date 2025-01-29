@@ -3,12 +3,10 @@ use async_trait::async_trait;
 use common::sealed_with_test_mock;
 use derive_new::new;
 
-use super::chain_proof;
-
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Chain proof error: {0}")]
-    ChainProof(#[from] chain_proof::Error),
+    ChainProof(#[from] chain_common::verifier::Error),
     #[error("Chain client error: {0}")]
     ChainClient(#[from] chain_client::Error),
     #[error("Block not found in chain proof trie: {block_num}")]
@@ -27,14 +25,14 @@ pub type Result = std::result::Result<(), Error>;
 sealed_with_test_mock!(async IVerifier (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
 
 #[derive(new)]
-pub struct Verifier<C: chain_client::Client, V: chain_proof::IVerifier> {
+pub struct Verifier<C: chain_client::Client, V: chain_common::verifier::IVerifier> {
     chain_client: Option<C>,
     chain_proof_verifier: V,
 }
 
-impl<C: chain_client::Client, V: chain_proof::IVerifier> seal::Sealed for Verifier<C, V> {}
+impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> seal::Sealed for Verifier<C, V> {}
 #[async_trait]
-impl<C: chain_client::Client, V: chain_proof::IVerifier> IVerifier for Verifier<C, V> {
+impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> IVerifier for Verifier<C, V> {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result {
         if blocks.len() == 1 {
             return Ok(()); // No need to verify chain proofs for a single location

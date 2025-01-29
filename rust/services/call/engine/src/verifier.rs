@@ -1,4 +1,3 @@
-pub mod chain_proof;
 pub mod teleport;
 pub mod time_travel;
 pub mod travel_call;
