@@ -13,7 +13,7 @@ use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksB
 
 mod anchor_state_registry;
 mod output;
-mod rpc_client;
+pub mod rpc_client;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
