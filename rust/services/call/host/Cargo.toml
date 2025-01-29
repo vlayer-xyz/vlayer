@@ -21,7 +21,7 @@ host_utils = { workspace = true }
 lazy_static = { workspace = true }
 mock_chain_server = { workspace = true }
 mpt = { workspace = true }
-optimism = { workspace = true }
+optimism = { workspace = true, features = ["http"] }
 provider = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 risc0-zkp = { workspace = true }

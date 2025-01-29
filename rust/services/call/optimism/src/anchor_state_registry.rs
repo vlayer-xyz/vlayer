@@ -1,4 +1,4 @@
-use alloy_primitives::{Address, B256, U256};
+use alloy_primitives::{Address, BlockNumber, B256};
 use anyhow::anyhow;
 use derive_new::new;
 use revm::DatabaseRef;
@@ -30,7 +30,7 @@ mod layout {
 #[derive(Clone, Debug)]
 pub struct L2Commitment {
     pub output_hash: B256,
-    pub block_number: U256,
+    pub block_number: BlockNumber,
 }
 
 #[derive(Clone, Debug, new)]
@@ -53,7 +53,7 @@ impl AnchorStateRegistry {
 
         Ok(L2Commitment {
             output_hash: B256::from(root),
-            block_number,
+            block_number: block_number.to::<BlockNumber>(),
         })
     }
 }

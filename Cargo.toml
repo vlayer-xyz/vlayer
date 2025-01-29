@@ -111,7 +111,7 @@ hyper = "1.5.2"
 indicatif = "0.17.8"
 inferno = "0.12.1"
 itertools = { version = "0.14.0" }
-jsonrpsee = { version = "0.24.7", features = ["server-core", "macros"] }
+jsonrpsee = { version = "0.24.8", features = ["server-core", "macros", "http-client"] }
 lazy_static = "1.5.0"
 libmdbx = "0.5.3"
 mailparse = "0.15.0"

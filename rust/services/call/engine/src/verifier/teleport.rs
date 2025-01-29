@@ -23,10 +23,12 @@ pub enum Error {
     AnchorStateRegistry(#[from] optimism::anchor_state_registry::Error),
     #[error(transparent)]
     Conversion(#[from] chain::optimism::ConversionError),
-    #[error(transparent)]
+    #[error("Commit error: {0}")]
     Commit(#[from] chain::optimism::CommitError),
-    #[error(transparent)]
-    Rpc(#[from] optimism::rpc::client::FactoryError),
+    #[error("Client factory error: {0}")]
+    OptimismClientFactory(#[from] optimism::client::FactoryError),
+    #[error("Client error: {0}")]
+    OptimismClient(#[from] optimism::ClientError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -71,11 +73,11 @@ where
 }
 
 pub struct Verifier {
-    factory: Arc<dyn optimism::rpc::client::IFactory>,
+    factory: Arc<dyn optimism::client::IFactory>,
 }
 
 impl Verifier {
-    pub fn new(factory: impl optimism::rpc::client::IFactory + 'static) -> Self {
+    pub fn new(factory: impl optimism::client::IFactory + 'static) -> Self {
         Self {
             factory: Arc::new(factory),
         }
@@ -108,7 +110,9 @@ where
                 anchor_state_registry.get_latest_confirmed_l2_commitment(&source_evm_env.db)?;
 
             let client = self.factory.create(chain_id)?;
-            let l2_output = client.get_output_at_block(l2_commitment.block_number).await;
+            let l2_output = client
+                .get_output_at_block(l2_commitment.block_number)
+                .await?;
 
             if l2_output.hash_slow() != l2_commitment.output_hash {
                 return Err(Error::L2OutputHashMismatch);
