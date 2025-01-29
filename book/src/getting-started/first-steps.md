@@ -68,6 +68,7 @@ VLAYER_API_TOKEN=sk_...
 ```
 
 > ❗️ We will be inviting new users periodically to join our testnet. In order to join the waitlist, head to [accounts.vlayer.xyz/waitlist](https://accounts.vlayer.xyz/waitlist).
+>
 > There are two steps in order to join the waitlist - first, specify your email address and then fill in our typeform with some additional info about yourself.
 > We want to invite folks who are really driven members of our community and would really like to test our products and help us make them even better, therefore
 > filling in the typeform will be a proof of your determination and a necessary ingredient to get you in through the door.
