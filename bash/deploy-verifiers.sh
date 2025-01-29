@@ -56,7 +56,7 @@ function cleanup(){
   forge clean
 
   echo "Building contracts..."
-  forge build 
+  forge build --extra-output-files metadata
 }
 
 cd "${CONTRACTS_DIR}"
