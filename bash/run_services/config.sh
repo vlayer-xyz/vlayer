@@ -34,7 +34,7 @@ function set_external_rpc_urls() {
 function set_devnet_chain_worker_args() {
     CHAIN_WORKER_ARGS=()
 
-    if [[ "${EXAMPLE_NAME:-}" == "simple_teleport" || "${EXAMPLE_NAME:-}" == "simple_time_travel" ]]; then
+    if [[ "${EXAMPLE_NAME:-}" == "simple-teleport" || "${EXAMPLE_NAME:-}" == "simple-time-travel" ]]; then
         latest_anvil_block=$(get_latest_block "http://localhost:8545")
         CHAIN_WORKER_ARGS=(
             "http://localhost:8545 31337 ${latest_anvil_block} ${latest_anvil_block}"
@@ -45,7 +45,7 @@ function set_devnet_chain_worker_args() {
 function set_testnet_chain_worker_args() {
     latest_op_sepolia_block=$(get_latest_block "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY}")
 
-    if [[ "${EXAMPLE_NAME:-}" == "simple_time_travel" ]]; then
+    if [[ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]]; then
         # Time travel example needs to travel 10 block back
         start_op_sepolia_block=$(($latest_op_sepolia_block - 10))
     else
@@ -54,7 +54,7 @@ function set_testnet_chain_worker_args() {
 
     CHAIN_WORKER_ARGS=()
 
-    if [ "${EXAMPLE_NAME:-}" == "simple_time_travel" ]; then
+    if [ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]; then
         CHAIN_WORKER_ARGS+=(
             "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420 ${start_op_sepolia_block} ${latest_op_sepolia_block}"
         )
