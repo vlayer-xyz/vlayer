@@ -1,7 +1,7 @@
 use call_engine::Call as EngineCall;
 use call_host::Host;
 use dashmap::Entry;
-use tracing::info;
+use tracing::{error, info};
 
 pub use crate::proving::RawData;
 use crate::{
@@ -107,6 +107,7 @@ pub async fn generate(
             set_state(&proofs, call_hash, State::PreflightPending);
         }
         Err(err) => {
+            error!("Chain proof failed with error: {err}");
             set_state(&proofs, call_hash, State::ChainProofError(err.into()));
             return;
         }
@@ -123,6 +124,7 @@ pub async fn generate(
                 res
             }
             Err(err) => {
+                error!("Preflight failed with error: {err}");
                 let entry = set_state(&proofs, call_hash, State::PreflightError(err.into()));
                 set_metrics(entry, metrics);
                 return;
@@ -144,6 +146,7 @@ pub async fn generate(
             set_metrics(entry, metrics);
         }
         Err(err) => {
+            error!("Proving failed with error: {err}");
             let entry = set_state(&proofs, call_hash, State::ProvingError(err.into()));
             set_metrics(entry, metrics);
         }
