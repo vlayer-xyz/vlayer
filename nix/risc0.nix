@@ -2,12 +2,6 @@
 
 let
   releases = {
-    "1.2.1" = {
-      "aarch64-darwin" = {
-        arch = "aarch64-apple-darwin";
-        hash = "sha256-q3+mhhOO8E0z8sDNkHowMFXN/87fcenPOl/3ML9UILg=";
-      };
-    };
     "1.2.0" = {
       "aarch64-darwin" = {
         arch = "aarch64-apple-darwin";
@@ -58,8 +52,7 @@ let
 in
 rec {
   risc0 = {
-    default = risc0."1.2.1";
-    inherit (package "1.2.1") "1.2.1";
+    default = risc0."1.2.0";
     inherit (package "1.2.0") "1.2.0";
   };
 }
