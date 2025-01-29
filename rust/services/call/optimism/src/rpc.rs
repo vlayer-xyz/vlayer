@@ -1,16 +1,17 @@
-use alloy_primitives::{hex, ChainId, B256, U256};
+pub mod client;
+
+use alloy_primitives::{hex, B256, U256};
 use async_trait::async_trait;
 use lazy_static::lazy_static;
-use thiserror::Error;
 
-use super::output::{BlockInfo, L2BlockRef, OutputResponse};
+use crate::types::{BlockInfo, L2BlockRef, OutputResponse};
 
 #[async_trait]
-pub trait OpRpcClient: Send + Sync {
+pub trait Client: Send + Sync {
     async fn get_output_at_block(&self, block_number: U256) -> OutputResponse;
 }
 
-pub struct DummyOpRpcClient;
+pub struct DummyClient;
 
 lazy_static! {
     static ref STATE_ROOT: B256 =
@@ -35,23 +36,8 @@ lazy_static! {
 }
 
 #[async_trait]
-impl OpRpcClient for DummyOpRpcClient {
+impl Client for DummyClient {
     async fn get_output_at_block(&self, _block_number: U256) -> OutputResponse {
         OUTPUT.clone()
-    }
-}
-
-#[derive(Debug, Error)]
-pub enum OpRpcClientFactoryError {}
-
-pub trait OpRpcClientFactory: Send + Sync {
-    fn create(&self, chain_id: ChainId) -> Result<Box<dyn OpRpcClient>, OpRpcClientFactoryError>;
-}
-
-pub struct DummyOpRpcClientFactory;
-
-impl OpRpcClientFactory for DummyOpRpcClientFactory {
-    fn create(&self, _chain_id: ChainId) -> Result<Box<dyn OpRpcClient>, OpRpcClientFactoryError> {
-        Ok(Box::new(DummyOpRpcClient))
     }
 }

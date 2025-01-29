@@ -1,0 +1,20 @@
+[package]
+name = "optimism"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-eips = { workspace = true }
+alloy-primitives = { workspace = true }
+alloy-serde = { workspace = true }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+common = { workspace = true }
+derive-new = { workspace = true }
+lazy_static = { workspace = true }
+revm = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

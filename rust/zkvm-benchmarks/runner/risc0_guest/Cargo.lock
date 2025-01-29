@@ -791,7 +791,6 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "alloy-rlp-derive",
- "alloy-serde",
  "as-any",
  "auto_impl",
  "common",

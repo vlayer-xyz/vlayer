@@ -7,10 +7,10 @@ edition = "2021"
 anyhow = { workspace = true }
 hex = { workspace = true }
 lazy_static = { workspace = true }
-risc0-zkp = { workspace = true }
 
 risc0-build = { workspace = true, optional = true }
 risc0-build-ethereum = { workspace = true, optional = true }
+risc0-zkp = { workspace = true }
 
 [features]
 risc0 = ["risc0-build", "risc0-build-ethereum"]

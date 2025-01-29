@@ -3,7 +3,12 @@ use anyhow::anyhow;
 use derive_new::new;
 use revm::DatabaseRef;
 
-use super::{Error, Result};
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("Database error: {0}")]
+    Database(anyhow::Error),
+}
+type Result<T> = std::result::Result<T, Error>;
 
 /// Storage layout:
 /// `OutputRoot` struct is stored at mapping(GameType -> OutputRoot) in slot 1.

@@ -1,19 +1,13 @@
 /// The code in this module is a skeleton and is not up to our quality standards.
 use std::{fmt::Debug, sync::Arc};
 
-use ::chain::optimism;
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
-use anchor_state_registry::AnchorStateRegistry;
 use async_trait::async_trait;
 use common::Hashable;
+use optimism::anchor_state_registry::AnchorStateRegistry;
 use revm::DatabaseRef;
-use rpc_client::OpRpcClientFactory;
 
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
-
-mod anchor_state_registry;
-mod output;
-pub mod rpc_client;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -25,14 +19,14 @@ pub enum Error {
     HeaderHashMismatch,
     #[error("Teleport on unconfirmed")]
     TeleportOnUnconfirmed,
-    #[error("Database error: {0}")]
-    Database(anyhow::Error),
+    #[error("Anchor state registry: {0}")]
+    AnchorStateRegistry(#[from] optimism::anchor_state_registry::Error),
     #[error(transparent)]
-    Conversion(#[from] optimism::ConversionError),
+    Conversion(#[from] chain::optimism::ConversionError),
     #[error(transparent)]
-    Commit(#[from] optimism::CommitError),
+    Commit(#[from] chain::optimism::CommitError),
     #[error(transparent)]
-    Rpc(#[from] rpc_client::OpRpcClientFactoryError),
+    Rpc(#[from] optimism::rpc::client::FactoryError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -77,13 +71,13 @@ where
 }
 
 pub struct Verifier {
-    op_rpc_client_factory: Arc<dyn OpRpcClientFactory>,
+    factory: Arc<dyn optimism::rpc::client::Factory>,
 }
 
 impl Verifier {
-    pub fn new(op_rpc_client_factory: impl OpRpcClientFactory + 'static) -> Self {
+    pub fn new(factory: impl optimism::rpc::client::Factory + 'static) -> Self {
         Self {
-            op_rpc_client_factory: Arc::new(op_rpc_client_factory),
+            factory: Arc::new(factory),
         }
     }
 }
@@ -105,7 +99,7 @@ where
         let blocks_by_chain = evm_envs.blocks_by_chain();
         let destinations = get_destinations(blocks_by_chain, start_exec_location);
         for (chain_id, blocks) in destinations {
-            let dest_chain_spec = optimism::ChainSpec::try_from(chain_id)?;
+            let dest_chain_spec = chain::optimism::ChainSpec::try_from(chain_id)?;
             dest_chain_spec.assert_anchor(source_chain_id)?;
 
             let anchor_state_registry =
@@ -113,7 +107,7 @@ where
             let l2_commitment =
                 anchor_state_registry.get_latest_confirmed_l2_commitment(&source_evm_env.db)?;
 
-            let client = self.op_rpc_client_factory.create(chain_id)?;
+            let client = self.factory.create(chain_id)?;
             let l2_output = client.get_output_at_block(l2_commitment.block_number).await;
 
             if l2_output.hash_slow() != l2_commitment.output_hash {

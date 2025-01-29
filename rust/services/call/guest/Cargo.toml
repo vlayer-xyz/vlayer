@@ -11,6 +11,7 @@ block_header = { workspace = true }
 call_engine = { workspace = true }
 chain_client = { workspace = true }
 mpt = { workspace = true }
+optimism = { workspace = true }
 revm = { workspace = true }
 risc0-zkvm = { workspace = true }
 
