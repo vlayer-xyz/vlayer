@@ -103,7 +103,7 @@ where
         let destinations = get_destinations(blocks_by_chain, start_exec_location);
         for (chain_id, blocks) in destinations {
             let dest_chain_spec = optimism::ChainSpec::try_from(chain_id)?;
-            dest_chain_spec.assert_commmits_into(source_chain_id)?;
+            dest_chain_spec.assert_anchor(source_chain_id)?;
 
             let anchor_state_registry =
                 AnchorStateRegistry::new(dest_chain_spec.anchor_state_registry);

@@ -21,7 +21,7 @@ pub enum CommitError {
 }
 
 impl ChainSpec {
-    pub const fn assert_commmits_into(&self, chain_id: ChainId) -> Result<(), CommitError> {
+    pub const fn assert_anchor(&self, chain_id: ChainId) -> Result<(), CommitError> {
         if self.anchor_chain != chain_id {
             return Err(CommitError::WrongAnchorChain {
                 src: chain_id,
@@ -44,14 +44,14 @@ mod assert_commits_into {
     #[test]
     fn optimism_mainnet_commits_to_eth_mainnet() -> anyhow::Result<()> {
         let spec = ChainSpec::try_from(OP_MAINNET)?;
-        spec.assert_commmits_into(ETHEREUM_MAINNET)?;
+        spec.assert_anchor(ETHEREUM_MAINNET)?;
         Ok(())
     }
 
     #[test]
     fn optimism_mainnet_doesnt_commit_to_eth_sepolia() -> anyhow::Result<()> {
         let spec = ChainSpec::try_from(OP_MAINNET)?;
-        let result = spec.assert_commmits_into(ETHEREUM_SEPOLIA);
+        let result = spec.assert_anchor(ETHEREUM_SEPOLIA);
 
         assert!(matches!(
             result,
