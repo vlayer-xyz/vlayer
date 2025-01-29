@@ -63,11 +63,11 @@ function DappWithProfile(profile: string) {
         payload,
       }: {
         payload: {
-          presentationJSON: PresentationJSON;
+          presentationJson: PresentationJSON;
           decodedTranscript: { sent: string; recv: string };
         };
       }) => {
-        setWebProof(payload.presentationJSON);
+        setWebProof(payload.presentationJson);
         setDecodedResponse(payload.decodedTranscript.recv);
         setDecodedRequest(payload.decodedTranscript.sent);
       },
@@ -257,7 +257,7 @@ function Dapp() {
     });
 
     const webproof: {
-      presentationJSON: PresentationJSON;
+      presentationJson: PresentationJSON;
       decodedTranscript: { sent: string; recv: string };
     } = await provider.getWebProof({
       proverCallCommitment: {
@@ -305,7 +305,7 @@ function Dapp() {
       ],
     });
 
-    setWebProof(webproof.presentationJSON);
+    setWebProof(webproof.presentationJson);
     setDecodedResponse(webproof.decodedTranscript.recv);
     setDecodedRequest(webproof.decodedTranscript.sent);
   }, []);

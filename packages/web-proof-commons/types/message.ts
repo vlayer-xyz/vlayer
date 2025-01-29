@@ -51,7 +51,7 @@ export type ExtensionMessage =
   | {
       type: ExtensionMessageType.ProofDone;
       payload: {
-        presentationJSON: PresentationJSON;
+        presentationJson: PresentationJSON;
         decodedTranscript: {
           sent: string;
           recv: string;
