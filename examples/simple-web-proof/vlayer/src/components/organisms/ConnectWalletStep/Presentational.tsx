@@ -9,12 +9,7 @@ export const ConnectWalletStepPresentational = ({
 }) => {
   return (
     <>
-      <h3 className="header">X NFT</h3>
-      <p className="desc">
-        To proceed to the next step, please connect your wallet now by clicking
-        the button below.
-      </p>
-      <div className="mt-7 flex justify-center">
+      <div className="flex justify-center modal-action">
         {isWalletConnected ? (
           <button onClick={navigateToStartProving} id="nextButton">
             Start Proving

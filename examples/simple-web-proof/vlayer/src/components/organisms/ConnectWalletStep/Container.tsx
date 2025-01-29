@@ -12,7 +12,7 @@ const useConnectWallet = () => {
   const { isConnected: isWalletConnected } = useAppKitAccount();
 
   const navigateToStartProving = () => {
-    navigate("/proof/start-proving");
+    navigate("/start-proving");
   };
 
   const connectWallet = () => {

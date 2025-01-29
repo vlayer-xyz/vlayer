@@ -1,9 +1,14 @@
 import { useCurrentStep } from "../../hooks/useCurentStep";
-
+import { motion } from "motion/react";
 export const ProgressBar = () => {
   const { currentStep } = useCurrentStep();
   return (
-    <ul className="steps w-full">
+    <motion.ul
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ ease: "easeOut", duration: 0.3, delay: 0.4 }}
+      className="steps w-full"
+    >
       <li
         className={`step ${currentStep?.index !== undefined && currentStep?.index >= 1 ? "step-primary" : ""} text-black text-xs`}
       >
@@ -19,6 +24,6 @@ export const ProgressBar = () => {
       >
         Mint NFT
       </li>
-    </ul>
+    </motion.ul>
   );
 };

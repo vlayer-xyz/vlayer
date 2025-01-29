@@ -11,15 +11,7 @@ export const SuccessStepPresentational = ({
 }) => {
   return (
     <>
-      <div className="flex justify-center">
-        <img
-          src="/success-illustration.svg"
-          alt="Success Icon"
-          className="w-[282px] h-[155px]"
-        />
-      </div>
-      <h3 className="mt-7 header">Success</h3>
-      <p className="py-4 text-gray-500">
+      <p className="text-gray-500">
         @{handle} was minted to{" "}
         <a
           href={`${blockExplorer}/tx/${tx}`}
@@ -30,7 +22,7 @@ export const SuccessStepPresentational = ({
           {tx.slice(0, 6)}...{tx.slice(-4)}
         </a>
       </p>
-      <div className="mt-7 flex justify-center">
+      <div className="mt-2 flex justify-center">
         <Link to="/" id="nextButton">
           Start again
         </Link>

@@ -1,10 +1,4 @@
-import {
-  WelcomeScreen,
-  ConnectWalletStep,
-  ProveStep,
-  MintingContainer,
-  SuccessContainer,
-} from "./components";
+import { steps } from "./utils/steps";
 // import { ExtensionCheck } from "./ExtensionCheck";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
@@ -14,7 +8,6 @@ import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { createAppKit } from "@reown/appkit/react";
 import { optimismSepolia, anvil } from "@reown/appkit/networks";
 import { Layout } from "./components/layout/Layout";
-import { Outlet } from "react-router";
 const queryClient = new QueryClient();
 
 const wagmiAdapter = new WagmiAdapter({
@@ -54,22 +47,14 @@ const App = () => {
           >
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Outlet />}>
-                  <Route index element={<WelcomeScreen />} />
-                  {/* <Route path="/extension-check" element={<ExtensionCheck />} /> */}
-
-                  <Route path="/proof" element={<Layout />}>
+                <Route path="/" element={<Layout />}>
+                  {steps.map((step) => (
                     <Route
-                      path="connect-wallet"
-                      element={<ConnectWalletStep />}
+                      key={step.path}
+                      path={step.path}
+                      element={<step.component />}
                     />
-                    <Route
-                      path="start-proving"
-                      element={<ProvingContainer />}
-                    />
-                    <Route path="minting" element={<MintingContainer />} />
-                    <Route path="success" element={<SuccessContainer />} />
-                  </Route>
+                  ))}
                 </Route>
               </Routes>
             </BrowserRouter>

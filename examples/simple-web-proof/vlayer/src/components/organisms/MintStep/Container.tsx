@@ -27,6 +27,7 @@ export const MintStep = () => {
   });
 
   useEffect(() => {
+    console.log("proverResult", proverResult);
     if (proverResult) {
       setMintedHandle(JSON.parse(proverResult)[1]);
     }

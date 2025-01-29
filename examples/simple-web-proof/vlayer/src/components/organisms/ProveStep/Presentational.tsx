@@ -11,11 +11,6 @@ export const ProveStepPresentational = ({
 }) => {
   return (
     <>
-      <h3 className="header">X NFT</h3>
-      <p className="desc">
-        Open vlayer browser extension and follow instructions in order to
-        produce the Proof of X account ownership.
-      </p>
       <div className="mt-7 flex justify-center">
         <button
           disabled={disabled}
