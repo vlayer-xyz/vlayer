@@ -1,6 +1,6 @@
 use core::future::Future;
 
-use alloy_primitives::{b256, fixed_bytes, hex, BlockNumber, B256, U256};
+use alloy_primitives::{BlockNumber, B256, U256};
 use anyhow::{anyhow, Context};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use derive_new::new;

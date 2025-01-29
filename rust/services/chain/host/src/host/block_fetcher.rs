@@ -1,6 +1,5 @@
 use std::result;
 
-use common::Hashable;
 use derivative::Derivative;
 use ethers::{
     middleware::Middleware,
