@@ -46,7 +46,7 @@ function computeOutputRoot(
     latestBlock.hash.slice(2),
   ].join("");
 
-  return keccak256(`0x${payload}` as Address);
+  return keccak256(`0x${payload}`);
 }
 
 export const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
