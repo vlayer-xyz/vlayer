@@ -5,6 +5,91 @@ use thiserror::Error;
 
 use crate::{config::CHAIN_ID_TO_CHAIN_SPEC, fork::Fork};
 
+pub struct OptimismChainSpec {
+    pub chain_spec: ChainSpec,
+    pub anchor_chain: ChainId,
+    pub anchor_state_registry: Address,
+}
+
+#[derive(Debug, Error)]
+pub enum OptimismCommitError {
+    #[error("{src} chain does not commit into {dest} chain but into {anchor}")]
+    WrongAnchorChain {
+        src: ChainId,
+        dest: ChainId,
+        anchor: ChainId,
+    },
+}
+
+impl OptimismChainSpec {
+    pub const fn assert_commmits_into(&self, chain_id: ChainId) -> Result<(), OptimismCommitError> {
+        if self.anchor_chain != chain_id {
+            return Err(OptimismCommitError::WrongAnchorChain {
+                src: chain_id,
+                dest: self.chain_spec.id(),
+                anchor: self.anchor_chain,
+            });
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod assert_commits_into {
+    use super::*;
+
+    const OP_MAINNET: ChainId = 10;
+    const ETHEREUM_MAINNET: ChainId = 1;
+    const ETHEREUM_SEPOLIA: ChainId = 11_155_111;
+
+    #[test]
+    fn optimism_mainnet_commits_to_eth_mainnet() -> anyhow::Result<()> {
+        let spec = OptimismChainSpec::try_from(OP_MAINNET)?;
+        spec.assert_commmits_into(ETHEREUM_MAINNET)?;
+        Ok(())
+    }
+
+    #[test]
+    fn optimism_mainnet_doesnt_commit_to_eth_sepolia() -> anyhow::Result<()> {
+        let spec = OptimismChainSpec::try_from(OP_MAINNET)?;
+        let result = spec.assert_commmits_into(ETHEREUM_SEPOLIA);
+
+        assert!(matches!(
+            result,
+            Err(OptimismCommitError::WrongAnchorChain {
+                src: ETHEREUM_SEPOLIA,
+                dest: OP_MAINNET,
+                anchor: ETHEREUM_MAINNET
+            })
+        ));
+        Ok(())
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum OptimismConversionError {
+    #[error("Conversion: {0}")]
+    ConversionError(#[from] ConversionError),
+    #[error("NotAnoptimism: {0}")]
+    NotAnOptimism(ChainId),
+}
+
+impl TryFrom<ChainId> for OptimismChainSpec {
+    type Error = OptimismConversionError;
+
+    fn try_from(value: ChainId) -> Result<Self, Self::Error> {
+        let chain_spec = ChainSpec::try_from(value)?;
+        let op_spec = chain_spec
+            .op_spec()
+            .ok_or(OptimismConversionError::NotAnOptimism(value))?;
+        Ok(OptimismChainSpec {
+            chain_spec,
+            anchor_chain: op_spec.anchor_chain(),
+            anchor_state_registry: op_spec.anchor_state_registry(),
+        })
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
     id: ChainId,
@@ -31,11 +116,9 @@ impl OptimismSpec {
 }
 
 #[derive(Debug, Error)]
-pub enum Error {
+pub enum ForkError {
     #[error("Unsupported fork for block {0}")]
     UnsupportedForkForBlock(BlockNumber),
-    #[error("Unsupported chain id: {0}")]
-    UnsupportedChainId(ChainId),
 }
 
 impl ChainSpec {
@@ -65,13 +148,17 @@ impl ChainSpec {
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
-    pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> Result<SpecId, Error> {
+    pub fn active_fork(
+        &self,
+        block_number: BlockNumber,
+        timestamp: u64,
+    ) -> Result<SpecId, ForkError> {
         for fork in self.forks.iter().rev() {
             if fork.active(block_number, timestamp) {
                 return Ok(**fork);
             }
         }
-        Err(Error::UnsupportedForkForBlock(block_number))
+        Err(ForkError::UnsupportedForkForBlock(block_number))
     }
 
     pub const fn id(&self) -> ChainId {
@@ -91,13 +178,19 @@ impl ChainSpec {
     }
 }
 
+#[derive(Debug, Error)]
+pub enum ConversionError {
+    #[error("Unsupported chain id: {0}")]
+    UnsupportedChainId(ChainId),
+}
+
 impl TryFrom<ChainId> for ChainSpec {
-    type Error = Error;
+    type Error = ConversionError;
 
     fn try_from(chain_id: ChainId) -> Result<Self, Self::Error> {
         let chain_spec = CHAIN_ID_TO_CHAIN_SPEC
             .get(&chain_id)
-            .ok_or(Error::UnsupportedChainId(chain_id))?;
+            .ok_or(ConversionError::UnsupportedChainId(chain_id))?;
         Ok((*chain_spec).clone())
     }
 }

@@ -89,7 +89,7 @@ pub trait OpRpcClient: Send + Sync {
 impl Hashable for OutputResponse {
     fn hash_slow(&self) -> B256 {
         let payload: Vec<u8> = [
-            vec![0_u8; 32],
+            self.version.to_vec(),
             self.state_root.to_vec(),
             self.withdrawal_storage_root.to_vec(),
             self.sync_status.finalized_l2.l1_block_info.hash.to_vec(),
