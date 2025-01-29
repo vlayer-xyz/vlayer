@@ -17,8 +17,7 @@ contract StableTestDeployment_Tests is Test {
     address public constant INITIAL_ADMIN = address(0xAeb4F991499dDC040d28653b42209e1eA6E8c151);
     address public constant CREATE2_DEPLOYER_CONTRACT = address(0x4e59b44847b379578588920cA78FbF26c0B4956C);
 
-    function test_repositoryAddressIsStable() public {
-        vm.skip(true);
+    function test_repositoryAddressIsStable() public pure {
         (Repository repository,,,) = ProofVerifierFactory.testnetStableDeployment();
 
         bytes memory bytecode =
@@ -29,8 +28,7 @@ contract StableTestDeployment_Tests is Test {
         assertEq(computedAddress, address(repository));
     }
 
-    function test_FakeProofVerifierAddressIsStable() public {
-        vm.skip(true);
+    function test_FakeProofVerifierAddressIsStable() public pure {
         (Repository repository, FakeProofVerifier fakeProofVerifier,,) = ProofVerifierFactory.testnetStableDeployment();
 
         bytes memory bytecode = abi.encodePacked(type(FakeProofVerifier).creationCode, abi.encode(repository));
@@ -40,8 +38,7 @@ contract StableTestDeployment_Tests is Test {
         assertEq(computedAddress, address(fakeProofVerifier));
     }
 
-    function test_groth16ProofVerifierAddressIsStable() public {
-        vm.skip(true);
+    function test_groth16ProofVerifierAddressIsStable() public pure {
         (Repository repository,, Groth16ProofVerifier groth16ProofVerifier,) =
             ProofVerifierFactory.testnetStableDeployment();
 
@@ -52,8 +49,7 @@ contract StableTestDeployment_Tests is Test {
         assertEq(computedAddress, address(groth16ProofVerifier));
     }
 
-    function test_proofVerifiierRouterIsStable() public {
-        vm.skip(true);
+    function test_proofVerifiierRouterIsStable() public pure {
         (, FakeProofVerifier fakeProofVerifier, Groth16ProofVerifier groth16ProofVerifier, ProofVerifierRouter router) =
             ProofVerifierFactory.testnetStableDeployment();
 
