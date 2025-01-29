@@ -9,7 +9,9 @@ use call_engine::{
     },
     travel_call_executor::TravelCallExecutor,
     verifier::{
-        chain_proof, teleport, time_travel,
+        chain_proof,
+        teleport::{self, GuestOpRpcClientFactory},
+        time_travel,
         travel_call::{self, IVerifier},
         zk_proof,
     },
@@ -114,7 +116,7 @@ impl Host {
             chain_proof::Verifier::new(chain_guest_ids, zk_proof::HostVerifier);
         let time_travel_verifier =
             time_travel::Verifier::new(chain_client.clone(), chain_proof_verifier);
-        let teleport_verifier = teleport::Verifier::default();
+        let teleport_verifier = teleport::Verifier::new(GuestOpRpcClientFactory);
         travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
     }
 

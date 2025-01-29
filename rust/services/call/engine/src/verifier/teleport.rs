@@ -1,20 +1,19 @@
 /// The code in this module is a skeleton and is not up to our quality standards.
-use std::{collections::HashMap, fmt::Debug};
+use std::{fmt::Debug, sync::Arc};
 
 use ::chain::optimism;
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use anchor_state_registry::AnchorStateRegistry;
 use async_trait::async_trait;
 use common::Hashable;
-use derive_more::Deref;
-use derive_new::new;
-use output::OpRpcClient;
 use revm::DatabaseRef;
+use rpc_client::OpRpcClientFactory;
 
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
 
 mod anchor_state_registry;
 mod output;
+mod rpc_client;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -32,6 +31,8 @@ pub enum Error {
     Conversion(#[from] optimism::ConversionError),
     #[error(transparent)]
     Commit(#[from] optimism::CommitError),
+    #[error(transparent)]
+    Rpc(#[from] rpc_client::OpRpcClientFactoryError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -75,14 +76,16 @@ where
     }
 }
 
-#[derive(new, Deref, Default)]
-struct MultiOpRpcClient {
-    clients: HashMap<ChainId, Box<dyn OpRpcClient>>,
+pub struct Verifier {
+    op_rpc_client_factory: Arc<dyn OpRpcClientFactory>,
 }
 
-#[derive(Default)]
-pub struct Verifier {
-    multi_op_rpc_client: MultiOpRpcClient,
+impl Verifier {
+    pub fn new(op_rpc_client_factory: impl OpRpcClientFactory + 'static) -> Self {
+        Self {
+            op_rpc_client_factory: Arc::new(op_rpc_client_factory),
+        }
+    }
 }
 
 impl<D> seal::Sealed<D> for Verifier {}
@@ -110,20 +113,21 @@ where
             let l2_commitment =
                 anchor_state_registry.get_latest_confirmed_l2_commitment(&source_evm_env.db)?;
 
-            let client = self.multi_op_rpc_client.get(&chain_id).unwrap();
+            let client = self.op_rpc_client_factory.create(chain_id)?;
             let l2_output = client.get_output_at_block(l2_commitment.block_number).await;
 
             if l2_output.hash_slow() != l2_commitment.output_hash {
                 return Err(Error::L2OutputHashMismatch);
             }
-            let l1_block = l2_output.block_ref.l1_block_info;
+            let l2_block = l2_output.block_ref.l2_block_info;
 
-            let latest_confirmed_location = (chain_id, l1_block.number).into();
+            let latest_confirmed_location = (chain_id, l2_block.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
-            if latest_confirmed_evm_env.header.hash_slow() != l1_block.hash {
+
+            if latest_confirmed_evm_env.header.hash_slow() != l2_block.hash {
                 return Err(Error::HeaderHashMismatch);
             }
-            ensure_latest_teleport_location_is_confirmed(&blocks, l1_block.number)?;
+            ensure_latest_teleport_location_is_confirmed(&blocks, l2_block.number)?;
         }
         Ok(())
     }
