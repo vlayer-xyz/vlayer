@@ -35,4 +35,13 @@ pub enum ParsingError {
 
     #[error("Json parsing error: {0}")]
     Json(#[from] serde_json::Error),
+
+    #[error("Invalid content-type: {0}")]
+    InvalidContentType(String),
+
+    #[error("Invalid charset: {0}")]
+    InvalidCharset(String),
+
+    #[error("Invalid mime type: {0}")]
+    MimeParsing(#[from] mime::FromStrError),
 }

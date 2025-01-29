@@ -2,6 +2,7 @@ use std::{io::Read, string::ToString};
 
 use chunked_transfer::Decoder;
 use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
+use mime::Mime;
 use url::Url;
 
 use crate::{
@@ -11,10 +12,14 @@ use crate::{
         REDACTED_BYTE_CODE, REDACTION_REPLACEMENT_CHAR_PRIMARY,
         REDACTION_REPLACEMENT_CHAR_SECONDARY,
     },
-    utils::{bytes::replace_bytes, json::json_to_redacted_transcript},
+    utils::{
+        bytes::{all_match, replace_bytes},
+        json::json_to_redacted_transcript,
+    },
 };
 
 const MAX_HEADERS_NUMBER: usize = 40;
+const CONTENT_TYPE: &str = "Content-Type";
 
 pub(crate) fn parse_request_and_validate_redaction(request: &[u8]) -> Result<String, ParsingError> {
     let request_primary_replacement =
@@ -66,6 +71,8 @@ pub(crate) fn parse_response_and_validate_redaction(
         &convert_headers(&headers_secondary),
         RedactionElementType::ResponseHeader,
     )?;
+
+    validate_content_type_and_charset(&headers_primary)?;
 
     let body_primary = &response_primary_replacement[body_primary..];
     let body_secondary = &response_secondary_replacement[body_secondary..];
@@ -146,6 +153,34 @@ fn convert_path(path: &str) -> Result<Vec<RedactedTranscriptNameValue>, ParsingE
             value: param.1.to_string().into_bytes(),
         })
         .collect())
+}
+
+fn validate_content_type_and_charset(headers: &[Header]) -> Result<(), ParsingError> {
+    let content_type_header = headers
+        .iter()
+        .find(|header| header.name.eq_ignore_ascii_case(CONTENT_TYPE));
+
+    if let Some(header) = content_type_header {
+        let content_type = String::from_utf8_lossy(header.value).to_string();
+        if all_match(content_type.as_bytes(), REDACTION_REPLACEMENT_CHAR_PRIMARY as u8) {
+            return Ok(());
+        }
+
+        let mime: Mime = content_type.parse()?;
+
+        if mime.type_() != "application" || mime.subtype() != "json" {
+            return Err(ParsingError::InvalidContentType(content_type));
+        }
+
+        if let Some(charset) = mime.get_param("charset") {
+            if !charset.as_str().eq_ignore_ascii_case("utf-8")
+                && !charset.as_str().eq_ignore_ascii_case("utf-16")
+            {
+                return Err(ParsingError::InvalidCharset(content_type));
+            }
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -288,6 +323,20 @@ mod tests {
                 fn fully_redacted_header_value() {
                     let response =
                         b"HTTP/1.1 200 OK\r\nContent-Type: \0\0\0\0\0\0\0\0\0\0\r\n\r\n{}";
+                    let body = parse_response_and_validate_redaction(response).unwrap();
+                    assert_eq!(body, "{}");
+                }
+
+                #[test]
+                fn no_redaction_explicit_utf8_charset() {
+                    let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{}";
+                    let body = parse_response_and_validate_redaction(response).unwrap();
+                    assert_eq!(body, "{}");
+                }
+
+                #[test]
+                fn no_redaction_explicit_utf16_charset() {
+                    let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=UTF-16\r\n\r\n{}";
                     let body = parse_response_and_validate_redaction(response).unwrap();
                     assert_eq!(body, "{}");
                 }
@@ -694,6 +743,36 @@ mod tests {
                     assert!(matches!(
                         err,
                         ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: "
+                    ));
+                }
+
+                #[test]
+                fn invalid_content_type() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: text/plain\r\n"
+                        + "\r\n";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+
+                    assert!(matches!(
+                        err,
+                        ParsingError::InvalidContentType(err_string) if err_string == "text/plain"
+                    ));
+                }
+
+                #[test]
+                fn invalid_content_type_charset() {
+                    let response = "".to_string()
+                        + "HTTP/1.1 200 OK\r\n"
+                        + "Content-Type: application/json; charset=ISO-8859-1\r\n"
+                        + "\r\n";
+                    let err =
+                        parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+
+                    assert!(matches!(
+                        err,
+                        ParsingError::InvalidCharset(err_string) if err_string == "application/json; charset=ISO-8859-1"
                     ));
                 }
             }
