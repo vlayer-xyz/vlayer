@@ -18,6 +18,8 @@ struct Web {
     string url;
 }
 
+
+//address of the repository contract deployed by our multi-sig using ../script/VlayerDeployer.s.sol 
 INotaryKeyRepository constant NOTARY_REPOSITORY =
     INotaryKeyRepository(address(0x916B850652b5B03Aa21709321c5f80A9E306BEcd));
 
