@@ -7,9 +7,11 @@ contract L2State {
         uint256 l2BlockNumber;
     }
 
+    uint256 padding;
     mapping(uint32 => Anchor) public anchors;
 
     constructor(bytes32 root, uint256 l2BlockNumber) {
+        padding = 1;
         anchors[0] = Anchor(root, l2BlockNumber);
     }
 }
