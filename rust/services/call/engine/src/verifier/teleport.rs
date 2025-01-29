@@ -71,11 +71,11 @@ where
 }
 
 pub struct Verifier {
-    factory: Arc<dyn optimism::rpc::client::Factory>,
+    factory: Arc<dyn optimism::rpc::client::IFactory>,
 }
 
 impl Verifier {
-    pub fn new(factory: impl optimism::rpc::client::Factory + 'static) -> Self {
+    pub fn new(factory: impl optimism::rpc::client::IFactory + 'static) -> Self {
         Self {
             factory: Arc::new(factory),
         }

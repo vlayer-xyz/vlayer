@@ -1,19 +1,23 @@
 use alloy_primitives::ChainId;
 use thiserror::Error;
 
-use crate::rpc::{Client, DummyClient};
+use crate::rpc::{self, IClient};
 
 #[derive(Debug, Error)]
 pub enum FactoryError {}
 
-pub trait Factory: Send + Sync {
-    fn create(&self, chain_id: ChainId) -> Result<Box<dyn Client>, FactoryError>;
+pub trait IFactory: Send + Sync {
+    fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError>;
 }
 
-pub struct DummyFactory;
+pub mod mock {
+    use super::*;
 
-impl Factory for DummyFactory {
-    fn create(&self, _chain_id: ChainId) -> Result<Box<dyn Client>, FactoryError> {
-        Ok(Box::new(DummyClient))
+    pub struct Factory;
+
+    impl IFactory for Factory {
+        fn create(&self, _chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError> {
+            Ok(Box::new(rpc::mock::Client))
+        }
     }
 }
