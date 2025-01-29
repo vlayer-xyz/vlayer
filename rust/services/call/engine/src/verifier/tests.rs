@@ -10,12 +10,3 @@ mod chain_proof;
 mod time_travel;
 
 const CHAIN_GUEST_ID: Digest = Digest::new([0, 0, 0, 0, 0, 0, 0, 1]);
-
-fn mock_block_trie(blocks: RangeInclusive<BlockNumber>) -> BlockTrie {
-    let mut trie = BlockTrie::default();
-    for header in mock_block_headers(blocks) {
-        trie.insert_unchecked(header.number(), &header.hash_slow())
-            .unwrap();
-    }
-    trie
-}

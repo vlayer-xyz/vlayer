@@ -1,10 +1,9 @@
 use alloy_primitives::B256;
 use block_header::Hashable;
 use chain_common::{ChainProof, ChainProofReceipt};
+use common::{sealed_with_test_mock, verifier::zk_proof};
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
-
-use super::{sealing::sealed_with_test_mock, zk_proof};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

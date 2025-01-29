@@ -1,4 +1,5 @@
 use alloy_primitives::{BlockHash, ChainId};
+use block_trie::mock_block_trie;
 use chain_client::CachedClient;
 use chain_common::ChainProof;
 use risc0_zkp::verify::VerificationError;

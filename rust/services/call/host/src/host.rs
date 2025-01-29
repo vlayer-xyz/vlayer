@@ -11,12 +11,11 @@ use call_engine::{
     verifier::{
         chain_proof, teleport, time_travel,
         travel_call::{self, IVerifier},
-        zk_proof,
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
 use chain_client::{ChainProofCache, Client as ChainClient};
-use common::GuestElf;
+use common::{verifier::zk_proof, GuestElf};
 pub use config::Config;
 use derive_new::new;
 pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};

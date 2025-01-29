@@ -4,6 +4,7 @@ mod guest;
 mod hashable;
 mod rpc;
 mod trace;
+pub mod verifier;
 
 pub use cache::InteriorMutabilityCache;
 pub use cli::{GlobalArgs, LogFormat};

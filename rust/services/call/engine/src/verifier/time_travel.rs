@@ -1,13 +1,14 @@
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
+use common::sealed_with_test_mock;
 use derive_new::new;
 
-use super::{chain_proof, sealing::sealed_with_test_mock};
+use super::chain_proof;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Chain proof error: {0}")]
-    ChainProof(#[from] super::chain_proof::Error),
+    ChainProof(#[from] chain_proof::Error),
     #[error("Chain client error: {0}")]
     ChainClient(#[from] chain_client::Error),
     #[error("Block not found in chain proof trie: {block_num}")]

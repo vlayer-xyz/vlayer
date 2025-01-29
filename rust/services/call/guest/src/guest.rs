@@ -4,11 +4,11 @@ use call_engine::{
     verifier::{
         chain_proof, teleport, time_travel,
         travel_call::{self, IVerifier},
-        zk_proof,
     },
     CallAssumptions, GuestOutput, Input,
 };
 use chain_client::{CachedClient, ChainProofCache};
+use common::verifier::zk_proof;
 use env::create_envs_from_input;
 use risc0_zkvm::sha::Digest;
 

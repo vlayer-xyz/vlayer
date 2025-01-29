@@ -1,12 +1,11 @@
 use alloy_rlp::Bytes;
+use block_trie::mock_block_trie;
 use chain_common::ChainProof;
+use common::verifier::zk_proof;
 use risc0_zkvm::Receipt;
 
 use super::*;
-use crate::verifier::{
-    chain_proof::{Error, IVerifier, Verifier},
-    zk_proof,
-};
+use crate::verifier::chain_proof::{Error, IVerifier, Verifier};
 
 const INVALID_ROOT_HASH: B256 = B256::ZERO;
 const INVALID_ELF_ID: Digest = Digest::ZERO;
