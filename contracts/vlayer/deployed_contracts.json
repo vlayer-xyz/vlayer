@@ -2,19 +2,19 @@
   "contracts": [
     {
       "contractName": "Repository",
-      "contractAddress": "0x7a2dfbd7001ef8bcebf941110dddaa69947c2725"
+      "contractAddress": "0xc9708b07ae9906b92ff19281fd660fb19206a8fa"
     },
     {
       "contractName": "FakeProofVerifier",
-      "contractAddress": "0x53391f71efbfc780ac6728c9dbbfc03f1c88b7ce"
+      "contractAddress": "0x67bacaaf3b7e9b3e86b05479a9ee5b6ad611e34a"
     },
     {
       "contractName": "Groth16ProofVerifier",
-      "contractAddress": "0xae595cf6d69f655f92ccf359b3f24ec0105cdb5f"
+      "contractAddress": "0x39599ac412c14f9635f5b5bf8f4d4c1aeecf6307"
     },
     {
       "contractName": "ProofVerifierRouter",
-      "contractAddress": "0xcb27b9d3e87583e52fcae4c2e5956be6b068e13f"
+      "contractAddress": "0x782860ffa50b0cd234453612a56cf699f77a0687"
     }
   ]
 }
