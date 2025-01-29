@@ -179,8 +179,11 @@ mod teleport {
     };
 
     #[tokio::test(flavor = "multi_thread")]
-    #[ignore = "not yet implemented"]
-    async fn success() -> anyhow::Result<()> {
+    #[should_panic(
+        expected = "called `Result::unwrap()` on an `Err` value: Travel call verification error: Teleport error: Header hash mismatch"
+    )]
+    async fn temporarily_panics_but_we_are_working_on_a_fix_at_the_same_time_output_hash_is_already_working(
+    ) {
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
         let call = call(
             SIMPLE_TELEPORT,
@@ -190,12 +193,11 @@ mod teleport {
             },
         );
         let crossChainBalanceOfReturn {
-            _2: cross_chain_balance,
+            _2: _cross_chain_balance,
             ..
-        } = preflight::<crossChainBalanceOfCall>("teleport", call, &location).await?;
-        assert_eq!(cross_chain_balance, uint!(100_U256));
-
-        Ok(())
+        } = preflight::<crossChainBalanceOfCall>("teleport", call, &location)
+            .await
+            .unwrap();
     }
 
     #[tokio::test(flavor = "multi_thread")]
