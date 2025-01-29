@@ -3,11 +3,12 @@ import proverSpec from "../out/AverageBalance.sol/AverageBalance";
 import verifierSpec from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
 import {
   createContext,
-  deployVlayerContracts,
+  deployTestingVlayerContracts,
   getConfig,
   waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
 import { type Address } from "viem";
+
 const config = getConfig();
 const { ethClient, account, proverUrl } = await createContext(config);
 
@@ -36,7 +37,7 @@ const usdcTokenAddr = process.env.PROVER_ERC20_CONTRACT_ADDR as Address;
 
 const step = BigInt(process.env.PROVER_STEP);
 
-const { prover, verifier } = await deployVlayerContracts({
+const { prover, verifier } = await deployTestingVlayerContracts({
   proverSpec,
   verifierSpec,
   proverArgs: [usdcTokenAddr, startBlock, endBlock, step],

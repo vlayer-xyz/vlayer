@@ -2,12 +2,12 @@ import proverSpec from "../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
 import {
-  deployVlayerContracts,
+  deployTestingVlayerContracts,
   writeEnvVariables,
   getConfig,
 } from "@vlayer/sdk/config";
 
-const { prover, verifier } = await deployVlayerContracts({
+const { prover, verifier } = await deployTestingVlayerContracts({
   proverSpec,
   verifierSpec,
   proverArgs: [],
