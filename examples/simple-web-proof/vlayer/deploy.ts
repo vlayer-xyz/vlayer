@@ -21,4 +21,6 @@ writeEnvVariables(".env", {
   VITE_JSON_RPC_URL: config.jsonRpcUrl,
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
+  VITE_USE_WINDOW_ETHEREUM_TRANSPORT:
+    process.env.USE_WINDOW_ETHEREUM_TRANSPORT || "",
 });
