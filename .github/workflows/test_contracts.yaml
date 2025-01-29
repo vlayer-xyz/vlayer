@@ -43,7 +43,7 @@ jobs:
           forge --version
 
           forge soldeer install
-          forge build --sizes
+          forge build --sizes --extra-output-files metadata
 
       - name: Run Forge build fixtures
         working-directory: ./contracts/fixtures
