@@ -41,14 +41,11 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
     }, 300);
   }, [currentStep?.description]);
 
-  console.log(currentStep);
   return (
     <dialog className="modal" ref={modalRef}>
       <div className="modal-box bg-white rounded-2xl">
         <motion.div
-          className="h-[490px] flex flex-col items-center justify-between
-
-"
+          className="h-[490px] flex flex-col items-center justify-between"
           initial={{ opacity: 0, scale: 0.1 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.1 }}
