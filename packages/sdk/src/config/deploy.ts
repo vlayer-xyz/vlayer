@@ -4,6 +4,7 @@ import { type ContractArg, type ContractSpec } from "types/ethereum";
 import { type Address } from "viem";
 import { getChainConfirmations } from "./getChainConfirmations";
 import debug from "debug";
+import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
 
 const log = debug("vlayer:prover");
 
@@ -63,6 +64,41 @@ export const deployProver = async ({
   log(`Prover hash: ${proverHash}`);
   const prover = await waitForContractDeploy({ hash: proverHash });
   return prover;
+};
+
+export const deployTestingVlayerContracts = async (args: {
+  proverSpec: ContractSpec;
+  verifierSpec: ContractSpec;
+  proverArgs?: ContractArg[];
+  verifierArgs?: ContractArg[];
+}) => {
+  const { prover, verifier } = await deployVlayerContracts(args);
+
+  const config = getConfig();
+  const { chain, ethClient, account } = createContext(config);
+
+  log("Swapping internal verifier");
+  const routedDeployerHash = await ethClient.deployContract({
+    chain,
+    account,
+    args: [],
+    abi: TestVerifierRouterDeployer.abi,
+    bytecode: TestVerifierRouterDeployer.bytecode.object,
+  });
+  const routerDeployerAddress = await waitForContractDeploy({
+    hash: routedDeployerHash,
+  });
+  const swapTxHash = await ethClient.writeContract({
+    chain,
+    account,
+    address: routerDeployerAddress,
+    functionName: "swapProofVerifier",
+    args: [verifier],
+    abi: TestVerifierRouterDeployer.abi,
+  });
+  await waitForTransactionReceipt({ hash: swapTxHash });
+
+  return { prover, verifier };
 };
 
 export const deployVlayerContracts = async ({

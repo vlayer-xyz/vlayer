@@ -4,7 +4,7 @@ import verifierSpec from "../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifi
 import whaleBadgeNFTSpec from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
 import {
   createContext,
-  deployVlayerContracts,
+  deployTestingVlayerContracts,
   getConfig,
   waitForContractDeploy,
 } from "@vlayer/sdk/config";
@@ -34,7 +34,7 @@ const tokensToCheck: { addr: Address; chainId: bigint; blockNumber: bigint }[] =
     blockNumber: BigInt(process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",")[i]),
   }));
 
-const { prover, verifier } = await deployVlayerContracts({
+const { prover, verifier } = await deployTestingVlayerContracts({
   proverSpec,
   verifierSpec,
   proverArgs: [],

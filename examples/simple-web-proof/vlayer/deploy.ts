@@ -1,12 +1,12 @@
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
 import {
-  deployVlayerContracts,
+  deployTestingVlayerContracts,
   writeEnvVariables,
   getConfig,
 } from "@vlayer/sdk/config";
 
-const { prover, verifier } = await deployVlayerContracts({
+const { prover, verifier } = await deployTestingVlayerContracts({
   proverSpec,
   verifierSpec,
 });
