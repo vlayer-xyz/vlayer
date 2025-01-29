@@ -25,10 +25,7 @@ contract WebProofVerifier is Verifier, ERC721 {
         require(_ownerOf(tokenId) == address(0), "User has already minted a TwitterNFT");
 
         _safeMint(account, tokenId);
-        tokenIdToMetadataUri[tokenId] = string.concat(
-            "https://faucet.vlayer.xyz/api/xBadgeMeta?handle=",
-            username
-        );
+        tokenIdToMetadataUri[tokenId] = string.concat("https://faucet.vlayer.xyz/api/xBadgeMeta?handle=", username);
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
