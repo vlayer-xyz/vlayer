@@ -13,7 +13,6 @@ import { createAppKit } from "@reown/appkit/react";
 import { optimismSepolia, anvil } from "@reown/appkit/networks";
 import { Layout } from "./Layout";
 import { Outlet } from "react-router";
-import { useState } from "react";
 const queryClient = new QueryClient();
 
 const wagmiAdapter = new WagmiAdapter({

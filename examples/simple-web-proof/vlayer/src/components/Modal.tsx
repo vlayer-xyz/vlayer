@@ -1,6 +1,11 @@
-import { cloneElement, isValidElement, useEffect, useRef } from "react";
+import { createContext, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
+
+export const modalContext = createContext({
+  showModal: () => {},
+  closeModal: () => {},
+});
 
 export const Modal = ({
   backUrl,
@@ -11,30 +16,17 @@ export const Modal = ({
 }) => {
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const showModal = () => {
+  const showModal = useCallback(() => {
     modalRef.current?.showModal();
-  };
+  }, [modalRef]);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     modalRef.current?.close();
-  };
+  }, [modalRef]);
 
   useEffect(() => {
     showModal();
-  }, []);
-
-  const childrenWithProps = isValidElement(children)
-    ? cloneElement(
-        children as React.ReactElement<{
-          showModal?: () => void;
-          closeModal?: () => void;
-        }>,
-        {
-          showModal,
-          closeModal,
-        },
-      )
-    : children;
+  }, [showModal]);
 
   return (
     <dialog className="modal" ref={modalRef}>
@@ -55,7 +47,9 @@ export const Modal = ({
             </Link>
           </form>
         )}
-        {childrenWithProps}
+        <modalContext.Provider value={{ showModal, closeModal }}>
+          {children}
+        </modalContext.Provider>
       </motion.div>
     </dialog>
   );
