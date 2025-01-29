@@ -22,6 +22,9 @@ inputs:
   JSON_RPC_URL:
     description: 'JSON RPC URL'
     required: true
+  VLAYER_API_TOKEN:
+    description: 'Vlayer API token'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -85,6 +88,7 @@ runs:
         USE_WINDOW_ETHEREUM_TRANSPORT: true
         JSON_RPC_URL: ${{ inputs.JSON_RPC_URL }}
         EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.EXAMPLES_TEST_PRIVATE_KEY }}
+        VLAYER_API_TOKEN: ${{ inputs.VLAYER_API_TOKEN }}
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
 
     - name: Build vite
