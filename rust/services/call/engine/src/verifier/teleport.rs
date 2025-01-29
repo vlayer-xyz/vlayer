@@ -1,7 +1,7 @@
 /// The code in this module is a skeleton and is not up to our quality standards.
 use std::{collections::HashMap, fmt::Debug};
 
-use ::chain::{OptimismChainSpec, OptimismCommitError, OptimismConversionError};
+use ::chain::optimism;
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use anchor_state_registry::AnchorStateRegistry;
 use async_trait::async_trait;
@@ -29,9 +29,9 @@ pub enum Error {
     #[error("Database error: {0}")]
     Database(anyhow::Error),
     #[error(transparent)]
-    Conversion(#[from] OptimismConversionError),
+    Conversion(#[from] optimism::ConversionError),
     #[error(transparent)]
-    Commit(#[from] OptimismCommitError),
+    Commit(#[from] optimism::CommitError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -102,7 +102,7 @@ where
         let blocks_by_chain = evm_envs.blocks_by_chain();
         let destinations = get_destinations(blocks_by_chain, start_exec_location);
         for (chain_id, blocks) in destinations {
-            let dest_chain_spec = OptimismChainSpec::try_from(chain_id)?;
+            let dest_chain_spec = optimism::ChainSpec::try_from(chain_id)?;
             dest_chain_spec.assert_commmits_into(source_chain_id)?;
 
             let anchor_state_registry =
