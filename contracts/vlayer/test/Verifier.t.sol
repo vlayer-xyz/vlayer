@@ -162,14 +162,14 @@ contract Verifier_SetTestVerifier is Test {
         vm.expectRevert("Changing verifiers is only allowed on devnet");
         exampleVerifier._setTestVerifier(IProofVerifier(address(123)));
 
-        vm.chainId(11155111);
+        vm.chainId(8453);
         vm.expectRevert("Changing verifiers is only allowed on devnet");
         exampleVerifier._setTestVerifier(IProofVerifier(address(123)));
     }
 
     function test_RevertsIf_RepositoryIsNotSetForVerifier() external {
         FakeProofVerifier newVerifier = new FakeProofVerifier(IImageIdRepository(address(0)));
-        vm.expectRevert("Repository address is not set");
+        vm.expectRevert("Verifier's repository address is not set");
         exampleVerifier._setTestVerifier(newVerifier);
     }
 

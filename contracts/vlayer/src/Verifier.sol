@@ -50,7 +50,7 @@ abstract contract Verifier {
     // Intentionally underscored as it's a helper function
     function _setTestVerifier(IProofVerifier newVerifier) external {
         require(ChainIdLibrary.isDevnet(), "Changing verifiers is only allowed on devnet");
-        require(address(newVerifier.imageIdRepository()) != address(0), "Repository address is not set");
+        require(address(newVerifier.imageIdRepository()) != address(0), "Verifier's repository address is not set");
 
         verifier = newVerifier;
     }
