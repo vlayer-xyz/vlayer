@@ -29,8 +29,8 @@ pub enum BuilderError {
     #[error("Multi provider error: {0}")]
     MultiProvider(#[from] provider::multi::Error),
 
-    #[error("Chain error: {0}")]
-    Chain(#[from] chain::Error),
+    #[error("Fork error: {0}")]
+    Fork(#[from] chain::ForkError),
 
     #[error("Evm env factory error: {0}")]
     EvmEnvFactory(#[from] EvmEnvFactoryError),

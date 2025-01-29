@@ -31,11 +31,9 @@ impl OptimismSpec {
 }
 
 #[derive(Debug, Error)]
-pub enum Error {
+pub enum ForkError {
     #[error("Unsupported fork for block {0}")]
     UnsupportedForkForBlock(BlockNumber),
-    #[error("Unsupported chain id: {0}")]
-    UnsupportedChainId(ChainId),
 }
 
 impl ChainSpec {
@@ -65,13 +63,17 @@ impl ChainSpec {
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
-    pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> Result<SpecId, Error> {
+    pub fn active_fork(
+        &self,
+        block_number: BlockNumber,
+        timestamp: u64,
+    ) -> Result<SpecId, ForkError> {
         for fork in self.forks.iter().rev() {
             if fork.active(block_number, timestamp) {
                 return Ok(**fork);
             }
         }
-        Err(Error::UnsupportedForkForBlock(block_number))
+        Err(ForkError::UnsupportedForkForBlock(block_number))
     }
 
     pub const fn id(&self) -> ChainId {
@@ -91,13 +93,19 @@ impl ChainSpec {
     }
 }
 
+#[derive(Debug, Error)]
+pub enum ConversionError {
+    #[error("Unsupported chain id: {0}")]
+    UnsupportedChainId(ChainId),
+}
+
 impl TryFrom<ChainId> for ChainSpec {
-    type Error = Error;
+    type Error = ConversionError;
 
     fn try_from(chain_id: ChainId) -> Result<Self, Self::Error> {
         let chain_spec = CHAIN_ID_TO_CHAIN_SPEC
             .get(&chain_id)
-            .ok_or(Error::UnsupportedChainId(chain_id))?;
+            .ok_or(ConversionError::UnsupportedChainId(chain_id))?;
         Ok((*chain_spec).clone())
     }
 }

@@ -1,12 +1,13 @@
 use alloy_eips::BlockNumHash;
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::{keccak256, B256, U256};
+use async_trait::async_trait;
 use common::Hashable;
 use serde::{Deserialize, Serialize};
 
 /// The block reference for an L2 block.
 ///
 /// See: <https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/id.go#L33>
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct L2BlockRef {
     /// The l1 block info.
@@ -19,10 +20,26 @@ pub struct L2BlockRef {
     pub sequence_number: u64,
 }
 
+/// Block Header Info
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, Hash, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct BlockInfo {
+    /// The block hash
+    pub hash: B256,
+    /// The block number
+    #[serde(with = "alloy_serde::quantity")]
+    pub number: u64,
+    /// The parent block hash
+    pub parent_hash: B256,
+    /// The block timestamp
+    #[serde(with = "alloy_serde::quantity")]
+    pub timestamp: u64,
+}
+
 /// The [`SyncStatus`][ss] of an Optimism Rollup Node.
 ///
 /// [ss]: https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/sync_status.go#L5
-#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct SyncStatus {
     /// The current L1 block.
     pub current_l1: BlockInfo,
@@ -47,7 +64,7 @@ pub struct SyncStatus {
 /// An [output response][or] for Optimism Rollup.
 ///
 /// [or]: https://github.com/ethereum-optimism/optimism/blob/f20b92d3eb379355c876502c4f28e72a91ab902f/op-service/eth/output.go#L10-L17
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputResponse {
     /// The output version.
@@ -64,26 +81,15 @@ pub struct OutputResponse {
     pub sync_status: SyncStatus,
 }
 
-/// Block Header Info
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, Eq, Hash, PartialEq)]
-#[serde(rename_all = "camelCase")]
-pub struct BlockInfo {
-    /// The block hash
-    pub hash: B256,
-    /// The block number
-    #[serde(with = "alloy_serde::quantity")]
-    pub number: u64,
-    /// The parent block hash
-    pub parent_hash: B256,
-    /// The block timestamp
-    #[serde(with = "alloy_serde::quantity")]
-    pub timestamp: u64,
+#[async_trait]
+pub trait OpRpcClient: Send + Sync {
+    async fn get_output_at_block(&self, block_number: U256) -> OutputResponse;
 }
 
 impl Hashable for OutputResponse {
     fn hash_slow(&self) -> B256 {
         let payload: Vec<u8> = [
-            vec![0_u8; 32],
+            self.version.to_vec(),
             self.state_root.to_vec(),
             self.withdrawal_storage_root.to_vec(),
             self.sync_status.finalized_l2.l1_block_info.hash.to_vec(),

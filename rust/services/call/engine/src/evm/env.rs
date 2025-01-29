@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use alloy_primitives::{BlockHash, BlockNumber, ChainId};
 use block_header::EvmBlockHeader;
-use chain::{ChainSpec, Error};
+use chain::{ChainSpec, ForkError};
 use derive_more::{Deref, DerefMut, From, Into, IntoIterator};
 use revm::{
     primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId},
@@ -37,7 +37,7 @@ where
     }
 
     /// Sets the chain ID and specification ID from the given chain spec.
-    pub fn with_chain_spec(mut self, chain_spec: &ChainSpec) -> Result<Self, Error> {
+    pub fn with_chain_spec(mut self, chain_spec: &ChainSpec) -> Result<Self, ForkError> {
         self.cfg_env.chain_id = chain_spec.id();
         let spec_id = chain_spec.active_fork(self.header.number(), self.header.timestamp())?;
         let handler_cfg = HandlerCfg::new_with_optimism(spec_id, chain_spec.is_optimism());
