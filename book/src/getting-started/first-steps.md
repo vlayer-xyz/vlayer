@@ -36,13 +36,11 @@ The vlayer directory structure resembles a typical Foundry project but with two 
 * `src/vlayer`: Contains the Prover and Verifier smart contracts.
 * `vlayer`: Has contract deployment scripts, client SDK calls to the prover, and verifier transactions.
  
+## Running examples
 
-## Running examples locally
-
-### All examples
 > ❗️ Make sure that you have [Bun](https://bun.sh/) installed in your system to build and run the examples.
 
-To run vlayer examples locally, first build the contracts by navigating to your project folder and running:
+First of, build the contracts by navigating to your project folder and running:
 ```bash
 cd your-project
 forge build
@@ -57,14 +55,25 @@ cd vlayer
 bun install
 ```
 
-### Run on a testnet
-Running examples on testnets doesn't require to run prover or anvil devnets locally. To use a testnet, first provide a private key in the `vlayer/.env.testnet.local` file:
+### Testnet
+In order to use the testnet, you will need to provide a couple of secrets. Firstly, create `vlayer/.env.testnet.local` - this is where you will put all your secret keys in.
+Log in to your [vlayer account](https://accounts.vlayer.xyz/sign-in) next (if you don't yet have a vlayer account, see below) and in the vlayer dashboard, generate a new secret
+API key and save it in `vlayer/.env.testnet.local` as
+
+```sh
+VLAYER_API_TOKEN=sk_...
+```
+
+> ❗️ We will be inviting new users periodically to join our testnet. In order to join the waitlist, head to [accounts.vlayer.xyz/waitlist](https://accounts.vlayer.xyz/waitlist).
+> There are two steps in order to join the waitlist - first, specify your email address and then fill in our typeform with some additional info about yourself.
+> We want to invite folks who are really driven members of our community and would really like to test our products and help us make them even better, therefore
+> filling in the typeform will be a proof of your determination and a necessary ingredient to get you in through the door.
+
+Next provide a private key for deploying example contracts and sending transactions to the verifier in the `vlayer/.env.testnet.local` file as
 
 ```sh
 EXAMPLES_TEST_PRIVATE_KEY=0x....
 ```
-
-This private key is used for deploying example contracts and sending transactions to the verifier.
 
 By default, `optimismSepolia` is configured in the `vlayer/.env.testnet` file. However, you can override this setting to use [other testnets](/advanced/dev-and-production.html#testnet).
 
@@ -76,24 +85,26 @@ Once configured, run the example from within the `vlayer` directory using:
 bun run prove:testnet
 ```
 
-### Run on a local devnet
+### Local devnet
+Running examples on a local devnet requires deploying a local instance of the prover and anvil.
 If you want to run on local environment, use [Docker](/advanced/dev-and-production.html#devnet): 
 
 ```bash
 $ bun run devnet
 ```
 
-Above command starts all required services in the background.
+This command will start all required services in the background.
 
-Once the devnet is up, run the example within the `vlayer` directory:
+Once the devnet is up, run the example from within the `vlayer` directory:
 
 ```sh
 bun run prove:dev
 ```
 
-### Web Proof example
+## Web Proof example
 
-First, install the vlayer browser extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) (works with Chrome and Brave browsers). For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
+First, install the vlayer browser extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) (works with Chrome and Brave browsers).
+For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
 
 Then deploy the `WebProofProver` and `WebProofVerifier` contracts:
 
