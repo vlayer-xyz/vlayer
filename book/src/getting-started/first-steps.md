@@ -56,7 +56,10 @@ bun install
 ```
 
 ### Testnet
-In order to use the testnet, you will need to provide a couple of secrets. Firstly, create `vlayer/.env.testnet.local` - this is where you will put all your secret keys in.
+In order to use the testnet, you will need to provide a couple of secrets.
+
+Firstly, create `vlayer/.env.testnet.local` - this is where you will put all your secret keys in.
+
 Log in to your [vlayer account](https://accounts.vlayer.xyz/sign-in) next (if you don't yet have a vlayer account, see below) and in the vlayer dashboard, generate a new secret
 API key and save it in `vlayer/.env.testnet.local` as
 
