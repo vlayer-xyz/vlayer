@@ -67,9 +67,7 @@ API key and save it in `vlayer/.env.testnet.local` as
 VLAYER_API_TOKEN=sk_...
 ```
 
-> ❗️ Join the waitlist at [accounts.vlayer.xyz/waitlist](https://accounts.vlayer.xyz/waitlist).
->
-> We will be inviting new users periodically to join our testnet.
+> ❗️ We will be inviting new users periodically to our testnet. You can join the waitlist at [accounts.vlayer.xyz/waitlist](https://accounts.vlayer.xyz/waitlist).
 >
 > There are two steps to joining the waitlist:
 >   * specify your email address
