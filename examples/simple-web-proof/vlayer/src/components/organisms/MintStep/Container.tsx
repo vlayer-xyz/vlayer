@@ -8,12 +8,12 @@ import {
 } from "wagmi";
 import { useLocalStorage } from "usehooks-ts";
 
-import webProofProofVerifier from "../../../out/WebProofVerifier.sol/WebProofVerifier.json";
-import { Minting } from "../components/organisms/Minting";
-import { testPrivateKey, useTestPrivateKey } from "../utils";
-import { ensureBalance } from "../utils/ethFaucet";
+import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier.json";
+import { MintStepPresentational } from "./Presentational";
+import { testPrivateKey, useTestPrivateKey } from "../../../utils";
+import { ensureBalance } from "../../../utils/ethFaucet";
 
-export const MintingContainer = () => {
+export const MintStep = () => {
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null);
   const [mintedHandle, setMintedHandle] = useState<string | null>(null);
@@ -73,13 +73,11 @@ export const MintingContainer = () => {
   }, [error]);
 
   return (
-    // <Modal backUrl="/start-proving">
-    <Minting
+    <MintStepPresentational
       mintedHandle={mintedHandle ?? ""}
       handleMint={handleMint}
       isMinting={isMinting}
       errorMsg={error?.message}
     />
-    // </Modal>
   );
 };

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Modal } from "../components/layout/Modal";
-import { InstallExtension } from "../components/InstallExtension";
+import { Modal } from "../layout/Modal";
+import { InstallExtension } from "./InstallExtension";
 import {
   isMobile,
   isSupportedBrowser,
   checkExtensionInstalled,
-} from "../utils";
+} from "../../utils";
 
 export const ExtensionCheck = () => {
   const navigate = useNavigate();

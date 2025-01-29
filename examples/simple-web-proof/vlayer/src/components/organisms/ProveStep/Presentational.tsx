@@ -1,4 +1,4 @@
-export const StartProving = ({
+export const ProveStepPresentational = ({
   requestWebProof,
   isPending,
   disabled,
@@ -21,7 +21,6 @@ export const StartProving = ({
           disabled={disabled}
           id="nextButton"
           onClick={() => {
-            console.log("open extension");
             requestWebProof();
             setDisabled(true);
           }}

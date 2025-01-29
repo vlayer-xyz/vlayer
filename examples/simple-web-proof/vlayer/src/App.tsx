@@ -1,8 +1,10 @@
-import { WelcomeScreen } from "./components/organisms/WelcomeScreen";
-import { ConnectWallet } from "./components/organisms/ConnectWallet";
-import { ProvingContainer } from "./containers/ProvingContainer";
-import { MintingContainer } from "./containers/MintingContainer";
-import { SuccessContainer } from "./containers/SuccessContainer";
+import {
+  WelcomeScreen,
+  ConnectWalletStep,
+  ProveStep,
+  MintingContainer,
+  SuccessContainer,
+} from "./components";
 // import { ExtensionCheck } from "./ExtensionCheck";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
@@ -57,7 +59,10 @@ const App = () => {
                   {/* <Route path="/extension-check" element={<ExtensionCheck />} /> */}
 
                   <Route path="/proof" element={<Layout />}>
-                    <Route path="connect-wallet" element={<ConnectWallet />} />
+                    <Route
+                      path="connect-wallet"
+                      element={<ConnectWalletStep />}
+                    />
                     <Route
                       path="start-proving"
                       element={<ProvingContainer />}

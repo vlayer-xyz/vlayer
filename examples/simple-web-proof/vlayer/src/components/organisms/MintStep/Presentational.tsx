@@ -1,4 +1,4 @@
-export const Minting = ({
+export const MintStepPresentational = ({
   mintedHandle,
   handleMint,
   isMinting,

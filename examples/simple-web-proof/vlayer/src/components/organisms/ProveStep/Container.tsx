@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { useSimpleWebProof } from "../hooks/useSimpleWebProof";
-import { StartProving } from "../components/StartProving";
+import { useSimpleWebProof } from "../../../hooks/useSimpleWebProof";
+import { ProveStepPresentational } from "./Presentational";
 import { useAppKitAccount } from "@reown/appkit/react";
 
-export const ProvingContainer = () => {
+export const ProveStep = () => {
   const navigate = useNavigate();
   const { address } = useAppKitAccount();
   const [disabled, setDisabled] = useState(false);
@@ -30,7 +30,7 @@ export const ProvingContainer = () => {
   }, []);
 
   return (
-    <StartProving
+    <ProveStepPresentational
       requestWebProof={requestWebProof}
       isPending={isPending}
       disabled={disabled}

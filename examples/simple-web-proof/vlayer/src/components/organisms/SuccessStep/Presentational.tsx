@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-export const Success = ({
+export const SuccessStepPresentational = ({
   tx,
   handle,
   blockExplorer,
