@@ -1,10 +1,10 @@
 import { expect, test, describe } from "vitest";
-import { parseHttpMessage } from "./parseHttpMessage";
+import { parseHttpMessage, parseTlsnTranscript } from "./parseHttpMessage";
 import { InvalidEncodingError, InvalidHttpMessageError } from "../error";
 import { Encoding } from "./Encoding";
 
 describe("parseHttpMessage", () => {
-  test("should parse a valid HTTP message correctly", () => {
+  test("parses a valid HTTP message correctly", () => {
     const validMessage = `POST /path HTTP/1.1\r\nContent-Type: application/json; charset=utf-8\r\n\r\n{"key": "value"}`;
     const result = parseHttpMessage(validMessage);
     expect(result.info.content.toString()).toEqual("POST /path HTTP/1.1");
@@ -15,7 +15,7 @@ describe("parseHttpMessage", () => {
     expect(result.message.content.toString()).toBe(validMessage);
   });
 
-  test("should parse a valid HTTP message with UTF-16 and special chars correctly", () => {
+  test("parses a valid HTTP message with UTF-16 and special chars correctly", () => {
     const validMessage = `POST /héllo HTTP/1.1\r\nContent-Type: application/json; charset=utf-16\r\n\r\n{"key": "👋 världen"}`;
     const result = parseHttpMessage(validMessage);
     expect(result.info.content.toString()).toEqual("POST /héllo HTTP/1.1");
@@ -33,21 +33,21 @@ describe("parseHttpMessage", () => {
     );
   });
 
-  test("should throw error for invalid HTTP message format", () => {
+  test("throws error for invalid HTTP message format", () => {
     const invalidMessage = "Invalid message without proper structure";
     expect(() => parseHttpMessage(invalidMessage)).toThrow(
       InvalidHttpMessageError,
     );
   });
 
-  test("should throw error when content-type header is missing", () => {
+  test("throws error when content-type header is missing", () => {
     const messageWithoutContentType = `POST /path HTTP/1.1\r\nOther-Header: value\r\n\r\nBody content`;
     expect(() => parseHttpMessage(messageWithoutContentType)).toThrow(
       new InvalidHttpMessageError("No content-type header found"),
     );
   });
 
-  test("should calculate correct ranges with UTF-8 encoding", () => {
+  test("calculates correct ranges with UTF-8 encoding", () => {
     const message = `POST /path HTTP/1.1\r\nContent-Type: text/plain; charset=utf-8\r\nX-Custom: test\r\n\r\nHello World 👋`;
     const result = parseHttpMessage(message);
 
@@ -79,7 +79,7 @@ describe("parseHttpMessage", () => {
     });
   });
 
-  test("should calculate correct ranges with UTF-16 encoding", () => {
+  test("calculates correct ranges with UTF-16 encoding", () => {
     const message = `POST /path HTTP/1.1\r\nContent-Type: text/plain; charset=utf-16\r\nX-Custom: test\r\n\r\nHéllo World 🌍`;
     const result = parseHttpMessage(message);
 
@@ -107,7 +107,7 @@ describe("parseHttpMessage", () => {
     });
   });
 
-  test("should calculate correct ranges with UTF-8 special characters", () => {
+  test("calculates correct ranges with UTF-8 special characters", () => {
     const message = `POST /path HTTP/1.1\r\nContent-Type: text/plain; charset=utf-8\r\nX-Custom: test\r\n\r\nHéllo Wörld 🌍`;
     const result = parseHttpMessage(message);
 
@@ -136,7 +136,8 @@ describe("parseHttpMessage", () => {
         [...new TextEncoder().encode(bodyContent)].length,
     });
   });
-  test("should not throw error when content-type header is missing and enforceContentType is false", () => {
+
+  test("does not throw error when content-type header is missing and enforceContentType is false", () => {
     const messageWithoutContentType = `POST /path HTTP/1.1\r\nOther-Header: value\r\n\r\nBody content`;
     expect(() =>
       parseHttpMessage(messageWithoutContentType, {
@@ -146,7 +147,7 @@ describe("parseHttpMessage", () => {
     ).not.toThrow();
   });
 
-  test("should use default encoding when content-type header is missing and enforceContentType is false", () => {
+  test("uses default encoding when content-type header is missing and enforceContentType is false", () => {
     const messageWithoutContentType = `POST /path HTTP/1.1\r\nOther-Header: value\r\n\r\nBody content`;
     const transcript = parseHttpMessage(messageWithoutContentType, {
       enforceContentType: false,
@@ -154,12 +155,39 @@ describe("parseHttpMessage", () => {
     });
     expect(transcript.encoding).toEqual(Encoding.UTF16);
   });
-  test("should use default encoding when content-type header contains no charset", () => {
+
+  test("uses default encoding when content-type header contains no charset", () => {
     const message = `POST /path HTTP/1.1\r\nContent-Type: application/json\r\n\r\nBody content`;
     const transcript = parseHttpMessage(message, {
       enforceContentType: false,
       defaultEncoding: Encoding.UTF16,
     });
     expect(transcript.encoding).toEqual(Encoding.UTF16);
+  });
+});
+
+describe("parseTlsnTranscript", () => {
+  test("parses a valid TLSn transcript correctly", () => {
+    const recvMessage = `POST /recv HTTP/1.1\r\nContent-Type: text/plain; charset=utf-8\r\nOther-Header: value\r\n\r\nHello Recv`;
+    const sentMessage = `POST /sent HTTP/1.1\r\nContent-Type: text/plain; charset=utf-8\r\nOther-Header: value\r\n\r\nHello Sent`;
+    const result = parseTlsnTranscript({
+      recv: recvMessage,
+      sent: sentMessage,
+    });
+    expect(result.recv).toMatchObject(parseHttpMessage(recvMessage));
+    expect(result.sent).toMatchObject(parseHttpMessage(sentMessage));
+  });
+
+  test("sets default encoding to UTF-8 when content-type header is missing", () => {
+    const recvMessage = `POST /recv HTTP/1.1\r\nOther-Header: value\r\n\r\nHello Recv`;
+    const sentMessage = `POST /sent HTTP/1.1\r\nOther-Header: value\r\n\r\nHello Sent`;
+
+    const result = parseTlsnTranscript({
+      recv: recvMessage,
+      sent: sentMessage,
+    });
+
+    expect(result.recv.encoding).toEqual(Encoding.UTF8);
+    expect(result.sent.encoding).toEqual(Encoding.UTF8);
   });
 });
