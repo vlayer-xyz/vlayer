@@ -98,6 +98,14 @@ runs:
         VITE_FAUCET_URL: https://faucet.vlayer.xyz
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
 
+    - name: Copy vercel.json (if exists)
+      shell: bash
+      run: |
+        if [ -f "./vercel.json" ]; then
+          cp ./vercel.json ./dist/vercel.json
+        fi
+      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+
     - name: Deploy to Vercel
       if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
       shell: bash
