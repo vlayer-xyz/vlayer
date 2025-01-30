@@ -1,12 +1,19 @@
 use alloy_primitives::ChainId;
 use derive_new::new;
 use revm::primitives::HashMap;
+use thiserror::Error;
 
 use crate::{
     client::{mock, FactoryError, IFactory},
     types::OutputResponse,
     IClient,
 };
+
+#[derive(Debug, Error, PartialEq, Eq)]
+pub enum Error {
+    #[error("No Data for chain {0}")]
+    NoDataForChain(ChainId),
+}
 
 #[derive(Debug, Clone, new, Default)]
 pub struct Factory {
@@ -30,7 +37,7 @@ impl IFactory for Factory {
         let sequencer_output = self
             .sequencer_outputs
             .get(&chain_id)
-            .ok_or(FactoryError::NoDataForChain(chain_id))?;
+            .ok_or(Error::NoDataForChain(chain_id))?;
 
         let client = mock::Client::new(sequencer_output.clone());
         Ok(Box::new(client))

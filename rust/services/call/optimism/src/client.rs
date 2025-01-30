@@ -11,12 +11,10 @@ pub mod mock;
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum FactoryError {
-    #[error("HttpClientBuilder error: {0}")]
-    HttpClientBuilder(String),
-    #[error("No RPC URL for chain {0}")]
-    NoRpcUrl(ChainId),
-    #[error("No Data for chain {0}")]
-    NoDataForChain(ChainId),
+    #[error("Http: {0}")]
+    Http(#[from] factory::http::Error),
+    #[error("Mock: {0}")]
+    Mock(#[from] factory::mock::Error),
 }
 
 #[auto_impl(Box, &, Arc)]
