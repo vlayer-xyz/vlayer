@@ -1,6 +1,7 @@
 use alloy_eips::BlockNumberOrTag;
 use async_trait::async_trait;
 use jsonrpsee::{core::RpcResult, http_client::HttpClient, proc_macros::rpc};
+use thiserror::Error;
 
 use crate::{types::OutputResponse, ClientError, IClient};
 
@@ -10,6 +11,12 @@ pub trait RollupNode {
     #[method(name = "outputAtBlock")]
     async fn op_output_at_block(&self, block_number: BlockNumberOrTag)
         -> RpcResult<OutputResponse>;
+}
+
+#[derive(Debug, Error, PartialEq, Eq)]
+pub enum Error {
+    #[error("JsonRPSee error: {0}")]
+    JsonRPSee(String),
 }
 
 pub struct Client {
@@ -25,8 +32,9 @@ impl Client {
 #[async_trait]
 impl IClient for Client {
     async fn get_output_at_block(&self, block_number: u64) -> Result<OutputResponse, ClientError> {
-        RollupNodeClient::op_output_at_block(&self.client, block_number.into())
+        let output = RollupNodeClient::op_output_at_block(&self.client, block_number.into())
             .await
-            .map_err(|err| ClientError::JsonRPSee(err.to_string()))
+            .map_err(|err| Error::JsonRPSee(err.to_string()))?;
+        Ok(output)
     }
 }

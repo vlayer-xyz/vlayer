@@ -10,7 +10,9 @@ pub mod http;
 pub mod mock;
 
 #[derive(Debug, Error, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum FactoryError {
+    #[cfg(feature = "http")]
     #[error("Http: {0}")]
     Http(#[from] factory::http::Error),
     #[error("Mock: {0}")]

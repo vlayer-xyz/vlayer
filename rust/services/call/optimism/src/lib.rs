@@ -3,21 +3,19 @@ pub mod types;
 
 pub mod client;
 
-use alloy_primitives::BlockNumber;
 use async_trait::async_trait;
 use thiserror::Error;
 
 use crate::types::OutputResponse;
 
 #[derive(Debug, Error, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum ClientError {
-    #[error("JsonRPSee error: {0}")]
-    JsonRPSee(String),
-    #[error("Requested block {requested} but client has only data for block {present}")]
-    BlockNumberMismatch {
-        requested: BlockNumber,
-        present: BlockNumber,
-    },
+    #[cfg(feature = "http")]
+    #[error("Http: {0}")]
+    Http(#[from] client::http::Error),
+    #[error("Mock: {0}")]
+    Mock(#[from] client::mock::Error),
 }
 
 #[async_trait]
