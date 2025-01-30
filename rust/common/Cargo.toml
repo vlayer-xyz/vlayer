@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
-alloy-rlp = { workspace = true }
 anyhow = { workspace = true }
 auto_impl = { workspace = true }
 bytes = { workspace = true }

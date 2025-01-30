@@ -1813,7 +1813,6 @@ dependencies = [
 name = "block_header"
 version = "0.1.0"
 dependencies = [
- "alloy-consensus",
  "alloy-primitives",
  "alloy-rlp",
  "alloy-rlp-derive",
@@ -2935,7 +2934,6 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
- "alloy-rlp",
  "anyhow",
  "auto_impl",
  "bytes",
