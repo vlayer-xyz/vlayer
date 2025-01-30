@@ -173,9 +173,7 @@ fn validate_content_type_and_charset(headers: &[Header]) -> Result<(), ParsingEr
         }
 
         if let Some(charset) = mime.get_param("charset") {
-            if !charset.as_str().eq_ignore_ascii_case("utf-8")
-                && !charset.as_str().eq_ignore_ascii_case("utf-16")
-            {
+            if !charset.as_str().eq_ignore_ascii_case("utf-8") {
                 return Err(ParsingError::InvalidCharset(content_type));
             }
         }
@@ -330,13 +328,6 @@ mod tests {
                 #[test]
                 fn no_redaction_explicit_utf8_charset() {
                     let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{}";
-                    let body = parse_response_and_validate_redaction(response).unwrap();
-                    assert_eq!(body, "{}");
-                }
-
-                #[test]
-                fn no_redaction_explicit_utf16_charset() {
-                    let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=UTF-16\r\n\r\n{}";
                     let body = parse_response_and_validate_redaction(response).unwrap();
                     assert_eq!(body, "{}");
                 }
@@ -762,7 +753,19 @@ mod tests {
                 }
 
                 #[test]
-                fn invalid_content_type_charset() {
+                fn invalid_content_type_charset_utf16() {
+                    let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=UTF-16\r\n\r\n{}";
+
+                    let err = parse_response_and_validate_redaction(response).unwrap_err();
+
+                    assert!(matches!(
+                        err,
+                        ParsingError::InvalidCharset(err_string) if err_string == "application/json; charset=UTF-16"
+                    ));
+                }
+
+                #[test]
+                fn invalid_content_type_charset_iso() {
                     let response = "".to_string()
                         + "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json; charset=ISO-8859-1\r\n"
