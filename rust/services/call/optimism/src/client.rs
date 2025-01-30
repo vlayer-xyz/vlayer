@@ -14,8 +14,8 @@ pub mod recording;
 pub enum FactoryError {
     #[error("Http: {0}")]
     Http(#[from] factory::http::Error),
-    #[error("Mock: {0}")]
-    Mock(#[from] factory::cached::Error),
+    #[error("Cached: {0}")]
+    Cached(#[from] factory::cached::Error),
 }
 
 #[auto_impl(Box, &, Arc)]
