@@ -43,9 +43,39 @@
 }
 
 .header {
-  @apply text-center text-black text-3xl font-bold mt-7
+  @apply text-center text-black text-3xl font-bold mt-7;
+  transition: all 0.3s ease-in-out;
 }
 
 .desc {
-  @apply text-center font-normal text-lg text-gray-500 py-4
+  @apply text-center font-normal text-lg text-gray-500 py-4;
+  transition: all 0.3s ease-in-out;
+}
+
+.header.in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.header.out {
+  opacity: 0;
+  transform: translateX(-10%);
+}
+
+.desc.in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.desc.out {
+  opacity: 0;
+  transform: translateX(-10%);
+}
+
+.steps .step:before {
+  transition: all 0.3s ease-in-out;
+}
+
+.steps .step::after {
+  transition: all 0.3s ease-in-out;
 }
