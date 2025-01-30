@@ -2840,6 +2840,7 @@ dependencies = [
  "alloy-serde",
  "anyhow",
  "async-trait",
+ "auto_impl",
  "common",
  "derive-new",
  "lazy_static",

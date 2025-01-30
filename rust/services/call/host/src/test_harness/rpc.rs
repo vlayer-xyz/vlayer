@@ -47,7 +47,7 @@ lazy_static! {
     static ref op_anvil_url: String = format!("http://localhost:8546");
 }
 
-const OP_ANVIL: ChainId = 31_338;
+pub const OP_ANVIL: ChainId = 31_338;
 
 pub fn rpc_snapshot_file(chain: &str, test_name: &str) -> String {
     format!("test_data/{test_name}/{chain}.json")

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
+use derive_new::new;
 use jsonrpsee::http_client::HttpClientBuilder;
 
 use crate::{
@@ -8,6 +9,7 @@ use crate::{
     IClient,
 };
 
+#[derive(Debug, Clone, new, Default)]
 pub struct Factory {
     rpc_urls: HashMap<ChainId, String>,
 }

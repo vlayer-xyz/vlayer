@@ -1,5 +1,5 @@
 pub mod anchor_state_registry;
-mod types;
+pub mod types;
 
 pub mod client;
 

@@ -19,6 +19,15 @@ pub struct L2BlockRef {
     pub sequence_number: u64,
 }
 
+impl L2BlockRef {
+    pub fn from_l2_block_info(l2_block_info: BlockInfo) -> Self {
+        Self {
+            l2_block_info,
+            ..Default::default()
+        }
+    }
+}
+
 /// Block Header Info
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, Hash, PartialEq, Default)]
 #[serde(rename_all = "camelCase")]
@@ -33,6 +42,16 @@ pub struct BlockInfo {
     /// The block timestamp
     #[serde(with = "alloy_serde::quantity")]
     pub timestamp: u64,
+}
+
+impl BlockInfo {
+    pub fn from_num_hash(number: u64, hash: B256) -> Self {
+        Self {
+            number,
+            hash,
+            ..Default::default()
+        }
+    }
 }
 
 /// The [`SyncStatus`][ss] of an Optimism Rollup Node.

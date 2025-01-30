@@ -1,4 +1,5 @@
 use alloy_primitives::ChainId;
+use auto_impl::auto_impl;
 use thiserror::Error;
 
 use crate::IClient;
@@ -19,6 +20,7 @@ pub enum FactoryError {
     NoDataForChain(ChainId),
 }
 
+#[auto_impl(Box, &, Arc)]
 pub trait IFactory: Send + Sync {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError>;
 }

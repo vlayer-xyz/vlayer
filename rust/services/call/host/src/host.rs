@@ -87,14 +87,18 @@ impl Host {
         providers: CachedMultiProvider,
         start_execution_location: ExecutionLocation,
         chain_client: Option<Box<dyn chain_client::Client>>,
+        op_client_factory: impl optimism::client::IFactory + 'static,
         config: Config,
     ) -> Self {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_client = chain_client.map(chain_client::RecordingClient::new);
 
-        let travel_call_verifier =
-            Host::build_travel_call_verifier(config.chain_guest_ids, &chain_client);
+        let travel_call_verifier = Host::build_travel_call_verifier(
+            config.chain_guest_ids,
+            &chain_client,
+            op_client_factory,
+        );
 
         Host {
             envs,
@@ -109,12 +113,12 @@ impl Host {
     fn build_travel_call_verifier(
         chain_guest_ids: impl IntoIterator<Item = Digest>,
         chain_client: &Option<chain_client::RecordingClient>,
+        op_client_factory: impl optimism::client::IFactory + 'static,
     ) -> HostTravelCallVerifier {
         let chain_proof_verifier =
             chain_proof::Verifier::new(chain_guest_ids, zk_proof::HostVerifier);
         let time_travel_verifier =
             time_travel::Verifier::new(chain_client.clone(), chain_proof_verifier);
-        let op_client_factory = optimism::client::factory::mock::Factory::default();
         let teleport_verifier = teleport::Verifier::new(op_client_factory);
         travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
     }
