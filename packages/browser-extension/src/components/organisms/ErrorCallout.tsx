@@ -48,7 +48,9 @@ export const ErrorCalloutPresentational: FC<{
         <Callout.Icon>
           <ExclamationTriangleIcon />
         </Callout.Icon>
-        <Callout.Text>{props.errorMessage}</Callout.Text>
+        <Callout.Text data-testid="error-message">
+          {props.errorMessage}
+        </Callout.Text>
       </Callout.Root>
     </AnimatedContainer>
   );

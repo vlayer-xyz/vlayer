@@ -8,9 +8,16 @@ new Elysia({
     },
   },
 })
-  .get("/regular_json", (req) => {
-    const url = req.url as string;
+  .get("/regular_json", ({ request, set }) => {
+    const url = request.url;
     const queryParams = new URLSearchParams(url.split("?")[1]);
+    if (queryParams.get("auth") !== "s3cret_t0ken") {
+      set.status(403);
+      return {
+        success: false,
+        error_message: "Missing or wrong authentication",
+      };
+    }
     if (queryParams.get("are_you_sure") !== "yes") {
       return {
         success: false,

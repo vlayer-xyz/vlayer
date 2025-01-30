@@ -5,7 +5,7 @@ use auto_impl::auto_impl;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::rpc::{Client as RawRpcClient, Error as RpcError, Method};
-use tracing::info;
+use tracing::{error, info};
 
 use crate::{handlers::v_call::types::CallHash, user_token::Token as UserToken};
 
@@ -110,13 +110,21 @@ impl Client for RpcClient {
     async fn allocate(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live.as_secs());
         info!("v_allocateGas => {req:#?}");
-        self.call(req).await
+        if let Err(err) = self.call(req).await {
+            error!("v_allocateGas failed with error: {err}");
+            return Err(err);
+        }
+        Ok(())
     }
 
     async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
         let req = RefundUnusedGas::new(self.hash, stage, gas_used);
         info!("v_refundUnusedGas => {req:#?}");
-        self.call(req).await
+        if let Err(err) = self.call(req).await {
+            error!("v_refundGas failed with error: {err}");
+            return Err(err);
+        }
+        Ok(())
     }
 }
 

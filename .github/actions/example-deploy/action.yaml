@@ -94,6 +94,16 @@ runs:
     - name: Build vite
       shell: bash
       run: bun run vite build
+      env:
+        VITE_FAUCET_URL: https://faucet.vlayer.xyz
+      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+
+    - name: Copy vercel.json (if exists)
+      shell: bash
+      run: |
+        if [ -f "./vercel.json" ]; then
+          cp ./vercel.json ./dist/vercel.json
+        fi
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
 
     - name: Deploy to Vercel

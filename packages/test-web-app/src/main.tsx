@@ -1,9 +1,10 @@
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Dapp, DappNewWay } from "./Dapp";
+import { Dapp, DappNewWay, DappFailedAuth } from "./Dapp";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Profile } from "./Profile";
+import { ProfileFailedAuth } from "./ProfileFailedAuth";
 import { Dashboard } from "./Dashboard";
 import { Login } from "./Login";
 import "./main.css";
@@ -26,11 +27,19 @@ const router = createBrowserRouter([
     path: "/dapp-prove-web",
     element: <DappProveWeb />,
   },
+  {
+    path: "/dapp-failed-auth",
+    element: <DappFailedAuth />,
+  },
   // profile is route representing place where user is authenticated
   // and therefore has access to data we gonna prove
   {
     path: "/profile",
     element: <Profile />,
+  },
+  {
+    path: "/profile-failed-auth",
+    element: <ProfileFailedAuth />,
   },
   // dashbord is where user is redirected after successful login
   {

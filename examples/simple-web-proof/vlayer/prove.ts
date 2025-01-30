@@ -96,6 +96,18 @@ async function testSuccessProvingAndVerification() {
   });
 
   assert.strictEqual(twitterUserAddress, tokenOwnerAddress);
+
+  const tokenURI = await ethClient.readContract({
+    address: verifier,
+    abi: verifierSpec.abi,
+    functionName: "tokenURI",
+    args: [generateTokenId(twitterHandle)],
+  });
+
+  assert.strictEqual(
+    tokenURI,
+    `https://faucet.vlayer.xyz/api/xBadgeMeta?handle=${twitterHandle}`,
+  );
 }
 
 async function testFailedProving() {

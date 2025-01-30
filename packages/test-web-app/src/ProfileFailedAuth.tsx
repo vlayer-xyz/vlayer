@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 
-function Profile() {
+function ProfileFailedAuth() {
   const [gandalf, setGandalf] = useState<{ name: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const getGandalf = async () => {
       setIsLoading(true);
       const response = await fetch(
-        "https://lotr-api.online:3011/regular_json?are_you_sure=yes&really=yes&auth=s3cret_t0ken",
+        "https://lotr-api.online:3011/regular_json?are_you_sure=yes&really=yes",
       );
       const data = (await response.json()) as { name: string };
       setGandalf(data);
@@ -23,4 +23,4 @@ function Profile() {
   );
 }
 
-export { Profile };
+export { ProfileFailedAuth };
