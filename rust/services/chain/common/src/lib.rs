@@ -1,13 +1,11 @@
-use alloy_primitives::{BlockNumber, ChainId, B256};
+use alloy_primitives::{BlockNumber, ChainId};
 use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
 use bytes::Bytes;
 use common::{Hashable, Method};
-use derivative::Derivative;
 use derive_more::{AsRef, Deref, From, Into};
 use derive_new::new;
-use mpt::{ParseNodeError, Sha2Trie};
-use risc0_zkp::verify::VerificationError;
+use mpt::{reorder_root_first, ParseNodeError, Sha256, Sha2Trie};
 use risc0_zkvm::{
     serde::to_vec, sha::Digest, AssumptionReceipt, FakeReceipt, Receipt, ReceiptClaim,
 };
@@ -27,64 +25,68 @@ impl Method for GetChainProof {
     const METHOD_NAME: &str = "v_getChainProof";
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, AsRef)]
+#[derive(Clone, Debug, Serialize, Deserialize, AsRef)]
 pub struct ChainProof {
     #[as_ref]
-    pub proof: Bytes,
+    pub receipt: ChainProofReceipt,
     #[as_ref]
     pub block_trie: BlockTrie,
 }
 
-#[derive(Debug, Error, Derivative)]
-#[derivative(PartialEq)]
-pub enum ProofVerificationError {
-    #[error("proof verification failed: {0}")]
-    ProofVerificationFailed(#[from] VerificationError),
-    #[error("failed to deserialize receipt: {0}")]
-    DeserializeReceiptFailed(
-        #[from]
-        #[derivative(PartialEq = "ignore")]
-        bincode::Error,
-    ),
-    #[error("failed to deserialize journal: {0}")]
-    DeserializeJournalFailed(#[from] risc0_zkvm::serde::Error),
-    #[error("illegal elf id: {decoded} not in {expected:?}")]
-    IllegalElfId {
-        expected: Box<[Digest]>,
-        decoded: Digest,
-    },
-    #[error("mpt root mismatch: expected: {expected} != decoded: {decoded}")]
-    MptRootMismatch { expected: B256, decoded: B256 },
+#[cfg(feature = "testing")]
+impl PartialEq for ChainProof {
+    fn eq(&self, other: &Self) -> bool {
+        self.receipt == other.receipt && self.block_trie == other.block_trie
+    }
 }
 
-#[derive(Debug, Clone, From, Into, Deref)]
+#[cfg(feature = "testing")]
+/// Mock chain proof with arbitrary block numbers. Does **not** generate valid block hashes.
+pub fn mock_chain_proof(block_numbers: impl IntoIterator<Item = BlockNumber>) -> ChainProof {
+    use alloy_primitives::BlockHash;
+
+    let mut block_trie = BlockTrie::default();
+    for block_num in block_numbers {
+        block_trie
+            .insert_unchecked(block_num, &BlockHash::default())
+            .expect("insert_unchecked failed");
+    }
+    ChainProof {
+        receipt: mock_chain_proof_receipt(),
+        block_trie,
+    }
+}
+
+#[cfg(feature = "testing")]
+/// Mock chain proof with continuous block range. Does generate valid block hashes.
+pub fn mock_chain_proof_with_hashes(
+    block_numbers: std::ops::RangeInclusive<BlockNumber>,
+) -> ChainProof {
+    use block_trie::mock_block_trie;
+
+    ChainProof {
+        receipt: mock_chain_proof_receipt(),
+        block_trie: mock_block_trie(block_numbers),
+    }
+}
+
+#[derive(Debug, Clone, From, Into, Deref, Serialize, Deserialize)]
 pub struct ChainProofReceipt(Receipt);
 
-impl ChainProofReceipt {
-    pub fn verify(
-        &self,
-        expected_hash: B256,
-        chain_guest_ids: Box<[Digest]>,
-    ) -> Result<(), ProofVerificationError> {
-        let receipt = &self.0;
-        let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
-
-        if !chain_guest_ids.iter().any(|id| id == &elf_id) {
-            return Err(ProofVerificationError::IllegalElfId {
-                expected: chain_guest_ids,
-                decoded: elf_id,
-            });
-        }
-
-        if expected_hash != proven_root {
-            return Err(ProofVerificationError::MptRootMismatch {
-                expected: expected_hash,
-                decoded: proven_root,
-            });
-        }
-        receipt.verify(elf_id)?;
-        Ok(())
+#[cfg(feature = "testing")]
+impl PartialEq for ChainProofReceipt {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.journal == other.0.journal
+            && self.0.metadata == other.0.metadata
+            && to_vec(&self.0.inner) == to_vec(&other.0.inner) // InnerReceipt doesn't implement PartialEq
     }
+}
+
+#[cfg(feature = "testing")]
+pub fn mock_chain_proof_receipt() -> ChainProofReceipt {
+    let claim = ReceiptClaim::ok(Digest::default(), vec![]);
+    let inner = risc0_zkvm::InnerReceipt::Fake(FakeReceipt::new(claim));
+    Receipt::new(inner, vec![]).into()
 }
 
 impl TryFrom<&ChainProofReceipt> for Bytes {
@@ -109,15 +111,6 @@ impl From<ChainProofReceipt> for AssumptionReceipt {
     }
 }
 
-impl TryFrom<&ChainProof> for ChainProofReceipt {
-    type Error = bincode::Error;
-
-    fn try_from(chain_proof: &ChainProof) -> Result<Self, Self::Error> {
-        let bytes: &Bytes = chain_proof.as_ref();
-        bytes.try_into()
-    }
-}
-
 #[serde_as]
 #[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize, new)]
 pub struct RpcChainProof {
@@ -127,14 +120,34 @@ pub struct RpcChainProof {
     pub nodes: Vec<Bytes>,
 }
 
+impl TryFrom<&ChainProof> for RpcChainProof {
+    type Error = bincode::Error;
+
+    fn try_from(chain_proof: &ChainProof) -> Result<Self, Self::Error> {
+        let proof = (&chain_proof.receipt).try_into()?;
+        let root_hash = chain_proof.block_trie.hash_slow();
+        let nodes = reorder_root_first::<_, Sha256>(chain_proof.block_trie.into_iter(), root_hash);
+        Ok(Self { proof, nodes })
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum ParseProofError {
+    #[error("failed to deserialize receipt: {0}")]
+    DeserializeReceiptFailed(#[from] bincode::Error),
+    #[error("failed to parse block trie: {0}")]
+    Mpt(#[from] ParseNodeError),
+}
+
 impl TryFrom<RpcChainProof> for ChainProof {
-    type Error = ParseNodeError;
+    type Error = ParseProofError;
 
     fn try_from(rpc_chain_proof: RpcChainProof) -> Result<Self, Self::Error> {
         let block_trie =
             BlockTrie::from_unchecked(Sha2Trie::from_rlp_nodes(rpc_chain_proof.nodes)?);
+        let receipt = (&rpc_chain_proof.proof).try_into()?;
         Ok(Self {
-            proof: rpc_chain_proof.proof,
+            receipt,
             block_trie,
         })
     }

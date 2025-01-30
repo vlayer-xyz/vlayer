@@ -1,6 +1,5 @@
 use bytes::Bytes;
 use call_engine::Input;
-use chain_common::ChainProofReceipt;
 use host_utils::{proving, ProofMode, Prover as Risc0Prover};
 use risc0_zkvm::{ExecutorEnv, ProveInfo};
 use tracing::instrument;
@@ -32,8 +31,7 @@ fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
         .chain_proofs
         .values()
         .try_fold(ExecutorEnv::builder(), |mut builder, (_, proof)| {
-            let receipt: ChainProofReceipt = proof.try_into()?;
-            builder.add_assumption(receipt);
+            builder.add_assumption(proof.receipt.clone());
             Ok::<_, anyhow::Error>(builder)
         })?
         .write(&input)?

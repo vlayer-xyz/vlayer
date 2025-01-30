@@ -40,8 +40,8 @@ pub enum Error {
     #[error("JSON parse error: {0}")]
     Json(#[from] serde_json::Error),
     #[cfg(feature = "rpc")]
-    #[error("MPT node parse error: {0}")]
-    MptNode(#[from] mpt::ParseNodeError),
+    #[error("Proof parse error: {0}")]
+    ParseProof(#[from] chain_common::ParseProofError),
     #[error("Proof not found in cache. chain_id={chain_id} block_numbers={block_numbers:?}")]
     CacheMiss {
         chain_id: ChainId,

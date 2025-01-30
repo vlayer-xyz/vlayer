@@ -1,15 +1,15 @@
 use alloy_primitives::B256;
 use block_header::Hashable;
 use common::{sealed_with_test_mock, verifier::zk_proof};
+use derivative::Derivative;
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
 
-use super::{ChainProof, ChainProofReceipt};
+use super::ChainProof;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, Derivative)]
+#[derivative(PartialEq)]
 pub enum Error {
-    #[error("Receipt deserialization error: {0}")]
-    Receipt(#[from] bincode::Error),
     #[error("ZK verification error: {0}")]
     Zk(#[from] VerificationError),
     #[error("Journal decoding error: {0}")]
@@ -44,8 +44,7 @@ impl<ZK: zk_proof::IVerifier> Verifier<ZK> {
 impl<ZK: zk_proof::IVerifier> seal::Sealed for Verifier<ZK> {}
 impl<ZK: zk_proof::IVerifier> IVerifier for Verifier<ZK> {
     fn verify(&self, proof: &ChainProof) -> Result {
-        let receipt: ChainProofReceipt = (&proof.proof).try_into()?;
-        let (proven_root, elf_id) = receipt.journal.decode()?;
+        let (proven_root, elf_id) = proof.receipt.journal.decode()?;
         if !self.chain_guest_ids.iter().any(|id| id == &elf_id) {
             return Err(Error::ElfId {
                 expected: self.chain_guest_ids.clone(),
@@ -61,7 +60,7 @@ impl<ZK: zk_proof::IVerifier> IVerifier for Verifier<ZK> {
             });
         }
 
-        self.zk_verifier.verify(&receipt, elf_id)?;
+        self.zk_verifier.verify(&proof.receipt, elf_id)?;
         Ok(())
     }
 }
@@ -73,21 +72,25 @@ mod tests {
     use risc0_zkvm::{serde::to_vec, FakeReceipt, InnerReceipt, Receipt, ReceiptClaim};
 
     use super::*;
+    use crate::ChainProofReceipt;
 
     const CHAIN_GUEST_ID: Digest = Digest::new([0, 0, 0, 0, 0, 0, 0, 1]);
     const INVALID_ROOT_HASH: B256 = B256::ZERO;
     const INVALID_ELF_ID: Digest = Digest::ZERO;
 
-    fn mock_receipt(journal: Vec<u8>) -> Receipt {
+    fn mock_receipt(journal: Vec<u8>) -> ChainProofReceipt {
         let inner: FakeReceipt<ReceiptClaim> =
             FakeReceipt::<ReceiptClaim>::new(ReceiptClaim::ok(CHAIN_GUEST_ID, journal.clone()));
 
-        Receipt::new(InnerReceipt::Fake(inner), journal)
+        Receipt::new(InnerReceipt::Fake(inner), journal).into()
     }
 
     fn mock_chain_proof(block_trie: BlockTrie, journal: Vec<u8>) -> ChainProof {
-        let proof = bincode::serialize(&mock_receipt(journal)).unwrap().into();
-        ChainProof { proof, block_trie }
+        let receipt = mock_receipt(journal);
+        ChainProof {
+            receipt,
+            block_trie,
+        }
     }
 
     fn mock_journal(root_hash: B256, elf_id: Digest) -> Vec<u8> {
@@ -110,17 +113,6 @@ mod tests {
         let journal = mock_journal(block_trie.hash_slow(), CHAIN_GUEST_ID);
         let proof = mock_chain_proof(block_trie, journal);
         verifier.verify(&proof).expect("verify failed");
-    }
-
-    #[test]
-    fn invalid_receipt() {
-        let verifier = Verifier::new([CHAIN_GUEST_ID], proof_ok);
-        let proof = ChainProof {
-            proof: (&[] as &[u8]).into(),
-            block_trie: Default::default(),
-        };
-        let res = verifier.verify(&proof);
-        assert!(matches!(res.unwrap_err(), Error::Receipt(..)));
     }
 
     #[test]

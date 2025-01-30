@@ -30,7 +30,10 @@ pub struct Verifier<C: chain_client::Client, V: chain_common::verifier::IVerifie
     chain_proof_verifier: V,
 }
 
-impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> seal::Sealed for Verifier<C, V> {}
+impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> seal::Sealed
+    for Verifier<C, V>
+{
+}
 #[async_trait]
 impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> IVerifier for Verifier<C, V> {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result {

@@ -1,7 +1,6 @@
 use alloy_primitives::{BlockHash, ChainId};
-use block_trie::mock_block_trie;
 use chain_client::CachedClient;
-use chain_common::ChainProof;
+use chain_common::{mock_chain_proof_receipt, mock_chain_proof_with_hashes, ChainProof};
 use risc0_zkp::verify::VerificationError;
 
 use super::*;
@@ -15,13 +14,6 @@ fn mock_chain_client(
 ) -> impl chain_client::Client {
     let cache = cache.into_iter().collect();
     CachedClient::new(cache)
-}
-
-fn mock_chain_proof(block_trie: BlockTrie) -> ChainProof {
-    ChainProof {
-        block_trie,
-        ..Default::default()
-    }
 }
 
 fn mock_time_travel_destinations(
@@ -54,8 +46,7 @@ async fn verify_time_travel_destinations(
 
 #[tokio::test]
 async fn ok() {
-    let block_trie = mock_block_trie(0..=1);
-    let chain_proof = mock_chain_proof(block_trie);
+    let chain_proof = mock_chain_proof_with_hashes(0..=1);
     let chain_client = mock_chain_client(vec![(CHAIN_ID, (vec![0, 1], chain_proof))]);
     let input = mock_time_travel_destinations(0..=1);
 
@@ -85,8 +76,7 @@ async fn chain_proof_missing() {
 
 #[tokio::test]
 async fn chain_proof_invalid() {
-    let block_trie = mock_block_trie(0..=1);
-    let chain_proof = mock_chain_proof(block_trie);
+    let chain_proof = mock_chain_proof_with_hashes(0..=1);
     let chain_client = mock_chain_client(vec![(CHAIN_ID, (vec![0, 1], chain_proof))]);
     let input = mock_time_travel_destinations(0..=1);
 
@@ -96,8 +86,7 @@ async fn chain_proof_invalid() {
 
 #[tokio::test]
 async fn block_not_in_trie() {
-    let block_trie = mock_block_trie(0..=0);
-    let chain_proof = mock_chain_proof(block_trie);
+    let chain_proof = mock_chain_proof_with_hashes(0..=0);
     let chain_client = mock_chain_client(vec![(CHAIN_ID, (vec![0, 1], chain_proof))]);
     let input = mock_time_travel_destinations(0..=1);
 
@@ -111,7 +100,10 @@ async fn block_hash_mismatch() {
     let _block_hash = block_headers[1].hash_slow();
     let mut block_trie = BlockTrie::init(block_headers.remove(0)).unwrap();
     block_trie.insert_unchecked(1, &INVALID_BLOCK_HASH).unwrap();
-    let chain_proof = mock_chain_proof(block_trie);
+    let chain_proof = ChainProof {
+        receipt: mock_chain_proof_receipt(),
+        block_trie,
+    };
     let chain_client = mock_chain_client(vec![(CHAIN_ID, (vec![0, 1], chain_proof))]);
     let input = mock_time_travel_destinations(0..=1);
 

@@ -927,7 +927,6 @@ dependencies = [
  "alloy-sol-types",
  "anyhow",
  "async-trait",
- "bincode",
  "block_header",
  "bytes",
  "call_precompiles",

@@ -1,9 +1,12 @@
+use std::iter;
+
 use alloy_primitives::B256;
 use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
-use common::Hashable;
+use chain_common::{verifier::IVerifier, ChainProof};
+use common::{verifier::zk_proof::GuestVerifier, Hashable};
 use risc0_zkp::core::digest::Digest;
-use risc0_zkvm::{guest::env, serde::from_slice, Receipt};
+use risc0_zkvm::Receipt;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,20 +36,16 @@ fn verify_previous_proof(
     current_elf_id: &Digest,
     old_elf_ids: impl IntoIterator<Item = Digest>,
 ) {
-    let (prev_proven_hash, prev_elf_id): (B256, Digest) =
-        from_slice(prev_zk_proof.journal.as_ref())
-            .expect("failed to deserialize previous ZK proof");
-    assert!(
-        &prev_elf_id == current_elf_id || old_elf_ids.into_iter().any(|id| id == prev_elf_id),
-        "invalid ELF ID in previous ZK proof"
-    );
-    assert_eq!(
-        prev_proven_hash,
-        block_trie.hash_slow(),
-        "invalid root hash in previous ZK proof"
-    );
-    env::verify(prev_elf_id, prev_zk_proof.journal.as_ref())
-        .expect("failed to verify previous ZK proof");
+    let chain_proof = ChainProof {
+        receipt: prev_zk_proof.clone().into(),
+        block_trie: block_trie.clone(),
+    };
+    let chain_guest_ids = old_elf_ids.into_iter().chain(iter::once(*current_elf_id));
+    let zk_verifier = GuestVerifier;
+    let verifier = chain_common::verifier::Verifier::new(chain_guest_ids, zk_verifier);
+    verifier
+        .verify(&chain_proof)
+        .expect("previous proof verification failed");
 }
 
 fn append_prepend(
