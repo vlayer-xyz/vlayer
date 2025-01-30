@@ -4,18 +4,12 @@ import { steps, Step } from "../utils/steps";
 
 export const useCurrentStep = () => {
   const location = useLocation();
-  const [currentStep, setCurrentStep] = useState<
-    (Step & { index: number }) | undefined
-  >(undefined);
+  const [currentStep, setCurrentStep] = useState<Step | undefined>(undefined);
 
   useEffect(() => {
-    setCurrentStep(steps.map(setIndex).find(byPath(location)));
+    setCurrentStep(steps.find(byPath(location)));
   }, [location.pathname]);
   return { currentStep };
-};
-
-const setIndex = (step: Step, index: number) => {
-  return { ...step, index };
 };
 
 const byPath = (location: Location<unknown>) => (step: Step) => {

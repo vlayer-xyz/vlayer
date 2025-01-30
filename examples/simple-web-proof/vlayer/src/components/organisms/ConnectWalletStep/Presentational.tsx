@@ -1,17 +1,17 @@
 export const ConnectWalletStepPresentational = ({
   isWalletConnected,
-  navigateToStartProving,
+  next,
   connectWallet,
 }: {
   isWalletConnected: boolean;
-  navigateToStartProving: () => void;
+  next: () => void;
   connectWallet: () => void;
 }) => {
   return (
     <>
       <div className="flex justify-center modal-action">
         {isWalletConnected ? (
-          <button onClick={navigateToStartProving} id="nextButton">
+          <button onClick={next} id="nextButton">
             Start Proving
           </button>
         ) : (
