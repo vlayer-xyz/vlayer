@@ -24,6 +24,11 @@ contract AddImageIdSupport is Script {
         console.log("IMAGE_ID=");
         console.logBytes32(imageId);
 
+        if (repository.isImageSupported(imageId)) {
+            console.log("Image ID is already supported");
+            return;
+        }
+
         vm.startBroadcast(ownerPrivateKey);
         repository.addImageIdSupport(imageId);
         vm.stopBroadcast();
