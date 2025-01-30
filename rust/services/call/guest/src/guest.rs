@@ -18,6 +18,12 @@ mod env;
 #[cfg(test)]
 mod tests;
 
+type GuestTravelCallVerifier = travel_call::Verifier<
+    GuestDb,
+    time_travel::Verifier<CachedClient, chain_proof::Verifier<zk_proof::GuestVerifier>>,
+    teleport::Verifier,
+>;
+
 pub async fn main(
     Input {
         multi_evm_input,
@@ -55,14 +61,11 @@ pub async fn main(
 fn build_guest_travel_call_verifier(
     chain_proofs: ChainProofCache,
     chain_guest_ids: impl IntoIterator<Item = Digest>,
-) -> travel_call::Verifier<
-    GuestDb,
-    time_travel::Verifier<CachedClient, chain_proof::Verifier<zk_proof::GuestVerifier>>,
-    teleport::Verifier,
-> {
+) -> GuestTravelCallVerifier {
     let chain_client = CachedClient::new(chain_proofs);
     let chain_proof_verifier = chain_proof::Verifier::new(chain_guest_ids, zk_proof::GuestVerifier);
     let time_travel_verifier = time_travel::Verifier::new(Some(chain_client), chain_proof_verifier);
-    let teleport_verifier = teleport::Verifier::new(optimism::client::factory::mock::Factory);
+    let op_client_factory = optimism::client::factory::mock::Factory::default();
+    let teleport_verifier = teleport::Verifier::new(op_client_factory);
     travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
 }

@@ -14,6 +14,9 @@ pub enum FactoryError {
     HttpClientBuilder(String),
     #[error("No RPC URL for chain {0}")]
     NoRpcUrl(ChainId),
+
+    #[error("No Data for chain {0}")]
+    NoDataForChain(ChainId),
 }
 
 pub trait IFactory: Send + Sync {
