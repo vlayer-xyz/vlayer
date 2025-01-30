@@ -3,7 +3,7 @@ use std::iter;
 use alloy_primitives::B256;
 use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
-use chain_common::{verifier::IVerifier, ChainProof};
+use chain_common::{verifier::IVerifier, ChainProofRef};
 use common::{verifier::zk_proof::GuestVerifier, Hashable};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm::Receipt;
@@ -36,15 +36,12 @@ fn verify_previous_proof(
     current_elf_id: &Digest,
     old_elf_ids: impl IntoIterator<Item = Digest>,
 ) {
-    let chain_proof = ChainProof {
-        receipt: prev_zk_proof.clone().into(),
-        block_trie: block_trie.clone(),
-    };
+    let proof_ref = ChainProofRef::new(prev_zk_proof, block_trie);
     let chain_guest_ids = old_elf_ids.into_iter().chain(iter::once(*current_elf_id));
     let zk_verifier = GuestVerifier;
     let verifier = chain_common::verifier::Verifier::new(chain_guest_ids, zk_verifier);
     verifier
-        .verify(&chain_proof)
+        .verify(proof_ref)
         .expect("previous proof verification failed");
 }
 

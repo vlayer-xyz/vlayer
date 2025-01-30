@@ -1,5 +1,5 @@
 use block_trie::BlockTrie;
-use chain_common::{verifier::IVerifier, ChainProof, ChainProofReceipt};
+use chain_common::{verifier::IVerifier, ChainProofReceipt, ChainProofRef};
 use common::verifier::zk_proof::HostVerifier;
 use derive_new::new;
 use mpt::Sha2Trie as MerkleTrie;
@@ -44,11 +44,8 @@ pub fn verify_chain_trie(
         zk_proof,
     } = unverified;
     let block_trie = BlockTrie::from_unchecked(trie);
-    let chain_proof = ChainProof {
-        receipt: zk_proof.clone(),
-        block_trie: block_trie.clone(),
-    };
+    let proof_ref = ChainProofRef::new(&zk_proof, &block_trie);
     let verifier = chain_common::verifier::Verifier::new(chain_guest_ids, HostVerifier);
-    verifier.verify(&chain_proof)?;
+    verifier.verify(proof_ref)?;
     Ok(ChainTrie::new(block_range, block_trie, zk_proof))
 }

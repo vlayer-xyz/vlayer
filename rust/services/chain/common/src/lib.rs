@@ -3,7 +3,7 @@ use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
 use bytes::Bytes;
 use common::{Hashable, Method};
-use derive_more::{AsRef, Deref, From, Into};
+use derive_more::{Deref, From, Into};
 use derive_new::new;
 use mpt::{reorder_root_first, ParseNodeError, Sha256, Sha2Trie};
 use risc0_zkvm::{
@@ -17,19 +17,17 @@ pub mod verifier;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, new)]
 pub struct GetChainProof {
-    pub chain_id: ChainId,
-    pub block_numbers: Vec<BlockNumber>,
+    pub(crate) chain_id: ChainId,
+    pub(crate) block_numbers: Vec<BlockNumber>,
 }
 
 impl Method for GetChainProof {
     const METHOD_NAME: &str = "v_getChainProof";
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, AsRef)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ChainProof {
-    #[as_ref]
     pub receipt: ChainProofReceipt,
-    #[as_ref]
     pub block_trie: BlockTrie,
 }
 
@@ -68,6 +66,18 @@ pub fn mock_chain_proof_with_hashes(
         receipt: mock_chain_proof_receipt(),
         block_trie: mock_block_trie(block_numbers),
     }
+}
+
+impl ChainProof {
+    pub fn as_ref(&self) -> ChainProofRef<'_, '_> {
+        ChainProofRef::new(&self.receipt, &self.block_trie)
+    }
+}
+
+#[derive(Clone, Debug, new)]
+pub struct ChainProofRef<'receipt, 'trie> {
+    pub(crate) receipt: &'receipt Receipt,
+    pub(crate) block_trie: &'trie BlockTrie,
 }
 
 #[derive(Debug, Clone, From, Into, Deref, Serialize, Deserialize)]

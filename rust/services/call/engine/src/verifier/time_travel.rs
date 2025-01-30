@@ -45,7 +45,7 @@ impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> IVerifier fo
         };
         let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
         let chain_proof = client.get_chain_proof(chain_id, block_numbers).await?;
-        self.chain_proof_verifier.verify(&chain_proof)?;
+        self.chain_proof_verifier.verify(chain_proof.as_ref())?;
         for (block_num, block_hash) in blocks {
             let trie_block_hash = chain_proof
                 .block_trie

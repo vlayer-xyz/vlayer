@@ -1,6 +1,8 @@
 use alloy_primitives::{BlockHash, ChainId};
 use chain_client::CachedClient;
-use chain_common::{mock_chain_proof_receipt, mock_chain_proof_with_hashes, ChainProof};
+use chain_common::{
+    mock_chain_proof_receipt, mock_chain_proof_with_hashes, ChainProof, ChainProofRef,
+};
 use risc0_zkp::verify::VerificationError;
 
 use super::*;
@@ -26,11 +28,11 @@ fn mock_time_travel_destinations(
         .collect()
 }
 
-const fn proof_ok(_: &ChainProof) -> chain_common::verifier::Result {
+const fn proof_ok(_: ChainProofRef) -> chain_common::verifier::Result {
     Ok(())
 }
 
-const fn proof_invalid(_: &ChainProof) -> chain_common::verifier::Result {
+const fn proof_invalid(_: ChainProofRef) -> chain_common::verifier::Result {
     Err(chain_common::verifier::Error::Zk(VerificationError::InvalidProof))
 }
 
