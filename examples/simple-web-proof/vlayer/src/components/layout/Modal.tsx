@@ -1,9 +1,9 @@
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useCurrentStep } from "../../hooks/useCurentStep";
 import { STEP_KIND } from "../../utils/steps";
 import { ProgressBar } from "../molecules/ProgressBar";
+import { Navigation } from "./Navigation";
 
 export const modalContext = createContext({
   showModal: () => {},
@@ -51,17 +51,11 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
           exit={{ opacity: 0, scale: 0.1 }}
           transition={{ ease: "easeOut", duration: 0.3 }}
         >
+          {/* Navigation */}
+          <Navigation />
+          {/* Progress Bar */}
           <AnimatePresence>{!isWelcome && <ProgressBar />}</AnimatePresence>
-          {currentStep?.backUrl && (
-            <form method="dialog">
-              <Link
-                to={currentStep?.backUrl}
-                className="absolute left-3 text-black top-3 text-xs font-normal"
-              >
-                Back
-              </Link>
-            </form>
-          )}
+          {/* Header Icon */}
           <AnimatePresence>
             {currentStep?.headerIcon && (
               <motion.img
@@ -76,11 +70,13 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
             )}
           </AnimatePresence>
           <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
+            {/* Title */}
             {currentStep?.title && (
               <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
             )}
+            {/* Description */}
             <p className={`h-[116px] desc ${descClass}`}>{description}</p>
-
+            {/* Content */}
             <modalContext.Provider value={{ showModal, closeModal }}>
               {children}
             </modalContext.Provider>

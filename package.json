@@ -2,5 +2,8 @@
   "workspaces": [
     "packages/*",
     "examples/*/vlayer"
-  ]
+  ],
+  "dependencies": {
+    "@heroicons/react": "^2.2.0"
+  }
 }
