@@ -9,11 +9,11 @@ import { encodePacked, isAddress, keccak256 } from "viem";
 import {
   getConfig,
   createContext,
-  deployTestingVlayerContracts,
+  deployVlayerContracts,
   writeEnvVariables,
 } from "@vlayer/sdk/config";
 
-const { prover, verifier } = await deployTestingVlayerContracts({
+const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
 });
