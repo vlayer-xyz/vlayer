@@ -7,6 +7,7 @@ use common::Hashable;
 use risc0_zkvm::{serde::to_vec, sha::Digest, FakeReceipt, InnerReceipt, ReceiptClaim};
 
 mod chain_proof;
+mod teleport;
 mod time_travel;
 
 const CHAIN_GUEST_ID: Digest = Digest::new([0, 0, 0, 0, 0, 0, 0, 1]);

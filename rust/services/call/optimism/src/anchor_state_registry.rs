@@ -1,12 +1,18 @@
 use alloy_primitives::{Address, BlockNumber, B256};
 use anyhow::anyhow;
+use derivative::Derivative;
 use derive_new::new;
 use revm::DatabaseRef;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, Derivative)]
+#[derivative(PartialEq, Eq)]
 pub enum Error {
     #[error("Database error: {0}")]
-    Database(anyhow::Error),
+    Database(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        anyhow::Error,
+    ),
 }
 type Result<T> = std::result::Result<T, Error>;
 
@@ -46,10 +52,10 @@ impl AnchorStateRegistry {
     {
         let root = db
             .storage_ref(self.address, *layout::OUTPUT_HASH_SLOT)
-            .map_err(|err| Error::Database(anyhow!(err)))?;
+            .map_err(|err| anyhow!(err))?;
         let block_number = db
             .storage_ref(self.address, *layout::BLOCK_NUMBER_SLOT)
-            .map_err(|err| Error::Database(anyhow!(err)))?;
+            .map_err(|err| anyhow!(err))?;
 
         Ok(L2Commitment {
             output_hash: B256::from(root),

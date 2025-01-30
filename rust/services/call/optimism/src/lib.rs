@@ -9,7 +9,7 @@ use thiserror::Error;
 
 use crate::types::OutputResponse;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum ClientError {
     #[error("JsonRPSee error: {0}")]
     JsonRPSee(String),

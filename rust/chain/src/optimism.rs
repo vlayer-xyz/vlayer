@@ -10,7 +10,7 @@ pub struct ChainSpec {
     pub anchor_state_registry: Address,
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum CommitError {
     #[error("{src} chain does not commit into {dest} chain but into {anchor}")]
     WrongAnchorChain {
@@ -65,7 +65,7 @@ mod assert_commits_into {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum ConversionError {
     #[error("Conversion: {0}")]
     ConversionError(#[from] BaseConversionError),

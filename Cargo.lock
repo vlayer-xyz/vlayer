@@ -8017,6 +8017,7 @@ dependencies = [
  "async-trait",
  "auto_impl",
  "common",
+ "derivative",
  "derive-new",
  "jsonrpsee",
  "lazy_static",

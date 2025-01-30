@@ -9,7 +9,7 @@ pub mod factory;
 pub mod http;
 pub mod mock;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum FactoryError {
     #[error("HttpClientBuilder error: {0}")]
     HttpClientBuilder(String),

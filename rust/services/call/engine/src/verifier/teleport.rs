@@ -9,7 +9,7 @@ use revm::DatabaseRef;
 
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
 
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, PartialEq, Eq)]
 pub enum Error {
     #[error("EvmEnvFactory: {0}")]
     Factory(#[from] crate::evm::env::factory::Error),
@@ -131,7 +131,7 @@ where
     }
 }
 
-fn ensure_latest_teleport_location_is_confirmed(
+pub fn ensure_latest_teleport_location_is_confirmed(
     destination_blocks: &[(u64, B256)],
     latest_confirmed_block: BlockNumber,
 ) -> Result<()> {
@@ -148,7 +148,7 @@ fn ensure_latest_teleport_location_is_confirmed(
     Ok(())
 }
 
-fn get_destinations(
+pub fn get_destinations(
     blocks_by_chain: BlocksByChain,
     start_exec_location: ExecutionLocation,
 ) -> impl Iterator<Item = (ChainId, Vec<(BlockNumber, BlockHash)>)> {
