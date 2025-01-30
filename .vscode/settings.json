@@ -9,7 +9,7 @@
   },
   "rust-analyzer.check.command": "clippy",
   "rust-analyzer.cargo.allTargets": true,
-  "rust-analyzer.cargo.features": ["all"],
+  "rust-analyzer.cargo.features": ["http"],
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
     "editor.formatOnSave": true
