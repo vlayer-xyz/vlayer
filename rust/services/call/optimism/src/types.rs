@@ -19,6 +19,7 @@ pub struct L2BlockRef {
     pub sequence_number: u64,
 }
 
+#[cfg(feature = "testing")]
 impl L2BlockRef {
     pub fn from_l2_block_info(l2_block_info: BlockInfo) -> Self {
         Self {
@@ -44,6 +45,7 @@ pub struct BlockInfo {
     pub timestamp: u64,
 }
 
+#[cfg(feature = "testing")]
 impl BlockInfo {
     pub fn from_num_hash(number: u64, hash: B256) -> Self {
         Self {

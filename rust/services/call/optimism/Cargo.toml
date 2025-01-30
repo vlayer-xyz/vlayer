@@ -24,3 +24,4 @@ workspace = true
 
 [features]
 http = ["jsonrpsee"]
+testing = []
