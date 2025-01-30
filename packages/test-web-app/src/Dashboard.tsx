@@ -10,6 +10,14 @@ function Dashboard() {
       >
         Go to profile
       </button>
+      <button
+        data-testid="go-to-profile-failed-auth-button"
+        onClick={() => {
+          window.location.href = "/profile-failed-auth";
+        }}
+      >
+        Go to profile failed auth
+      </button>
     </div>
   );
 }
