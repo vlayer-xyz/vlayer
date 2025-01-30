@@ -1,19 +1,11 @@
 use alloy_primitives::{Address, BlockNumber, B256};
 use anyhow::anyhow;
-use derivative::Derivative;
 use derive_new::new;
 use revm::DatabaseRef;
 
-#[derive(thiserror::Error, Debug, Derivative)]
-#[derivative(PartialEq, Eq)]
-pub enum Error {
-    #[error("Database error: {0}")]
-    Database(
-        #[from]
-        #[derivative(PartialEq = "ignore")]
-        anyhow::Error,
-    ),
-}
+#[derive(thiserror::Error, Debug)]
+#[error(transparent)]
+pub struct Error(#[from] anyhow::Error);
 type Result<T> = std::result::Result<T, Error>;
 
 /// Storage layout:

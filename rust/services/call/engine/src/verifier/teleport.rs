@@ -4,12 +4,14 @@ use std::{fmt::Debug, sync::Arc};
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
 use common::Hashable;
+use derivative::Derivative;
 use optimism::anchor_state_registry::AnchorStateRegistry;
 use revm::DatabaseRef;
 
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
 
-#[derive(thiserror::Error, Debug, PartialEq, Eq)]
+#[derive(thiserror::Error, Debug, Derivative)]
+#[derivative(PartialEq, Eq)]
 pub enum Error {
     #[error("EvmEnvFactory: {0}")]
     Factory(#[from] crate::evm::env::factory::Error),
@@ -20,7 +22,11 @@ pub enum Error {
     #[error("Teleport on unconfirmed")]
     TeleportOnUnconfirmed,
     #[error("Anchor state registry: {0}")]
-    AnchorStateRegistry(#[from] optimism::anchor_state_registry::Error),
+    AnchorStateRegistry(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        optimism::anchor_state_registry::Error,
+    ),
     #[error(transparent)]
     Conversion(#[from] chain::optimism::ConversionError),
     #[error("Commit error: {0}")]
