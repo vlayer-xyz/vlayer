@@ -195,7 +195,7 @@ mod teleport {
         static ref WITHDRAWAL_STORAGE_ROOT: B256 =
             B256::from(hex!("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
         static ref FINALIZED_L2_HASH: B256 =
-            B256::from(hex!("f8714d13fc9772dc0230587b17c9458b39b1a94815b4bfebd0b0c8e55a6e2aab"));
+            B256::from(hex!("8a3162ac8009f30a115f905e15c1206c89d5bde102e5cf1f72e425d3aec03fbd"));
         static ref OUTPUT: OutputResponse = OutputResponse {
             block_ref: L2BlockRef::from_l2_block_info(BlockInfo::from_num_hash(
                 3,

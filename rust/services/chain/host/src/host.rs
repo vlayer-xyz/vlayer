@@ -116,6 +116,7 @@ where
             elf_id: self.elf.id,
             block: start_block,
         };
+        dbg!(&input);
         let receipt = self.prover.prove(&input, None)?;
 
         let range = NonEmptyRange::from_single_value(start_block_number);

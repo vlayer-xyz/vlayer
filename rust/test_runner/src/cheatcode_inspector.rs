@@ -18,6 +18,7 @@ use foundry_evm::revm::{
 };
 use guest_wrapper::CALL_GUEST_ELF;
 use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
+use optimism::client::factory::mock;
 use provider::CachedMultiProvider;
 
 use crate::{
@@ -181,6 +182,13 @@ fn create_host<DB: Database>(
         .expect("failed to get block number");
     let start_exec_location = (TEST_CHAIN_ID, block_number).into();
     let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_url));
+    let op_client_factory = mock::Factory::default();
 
-    Host::new(providers, start_exec_location, Some(chain_proof_client), config)
+    Host::new(
+        providers,
+        start_exec_location,
+        Some(chain_proof_client),
+        op_client_factory,
+        config,
+    )
 }

@@ -2934,7 +2934,6 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
- "alloy-consensus",
  "alloy-primitives",
  "alloy-rlp",
  "anyhow",
@@ -11117,6 +11116,7 @@ dependencies = [
  "mock_chain_server",
  "mpt",
  "opener",
+ "optimism",
  "parking_lot",
  "proptest",
  "provider",
