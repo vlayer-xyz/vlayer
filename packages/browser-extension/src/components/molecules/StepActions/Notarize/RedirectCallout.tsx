@@ -44,11 +44,12 @@ export const RedirectCallout: FC<{ isVisible: boolean }> = (props) => {
         <Callout.Icon>
           <InfoCircledIcon />
         </Callout.Icon>
-        <Callout.Text>
-          You will be redirected back in {`${show}`}{" "}
-          <b data-testid="timeout">{timeout}</b> second
-          {timeout != 1 ? "s" : ""}.
-        </Callout.Text>
+        {show && (
+          <Callout.Text>
+            You will be redirected back in <b data-testid="timeout">{timeout}</b> second
+            {timeout !== 1 ? "s" : ""}.
+          </Callout.Text>
+        )}
       </Callout.Root>
     </AnimatedContainer>
   );
