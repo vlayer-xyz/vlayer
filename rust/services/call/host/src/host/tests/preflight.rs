@@ -175,7 +175,7 @@ mod teleport {
     use alloy_primitives::{hex, B256};
     use lazy_static::lazy_static;
     use optimism::{
-        client::factory::mock,
+        client::factory::cached,
         types::{BlockInfo, L2BlockRef, OutputResponse},
     };
 
@@ -218,7 +218,7 @@ mod teleport {
             },
         );
         let op_client_factory =
-            mock::Factory::from_single_sequencer_output(OP_ANVIL, OUTPUT.clone());
+            cached::Factory::from_single_sequencer_output(OP_ANVIL, OUTPUT.clone());
         let crossChainBalanceOfReturn {
             _2: cross_chain_balance,
             ..

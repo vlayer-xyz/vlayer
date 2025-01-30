@@ -1,3 +1,3 @@
 #[cfg(feature = "http")]
 pub mod http;
-pub mod mock;
+pub mod cached;

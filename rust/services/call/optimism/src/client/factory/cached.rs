@@ -4,7 +4,7 @@ use revm::primitives::HashMap;
 use thiserror::Error;
 
 use crate::{
-    client::{mock, FactoryError, IFactory},
+    client::{cached, FactoryError, IFactory},
     types::OutputResponse,
     IClient,
 };
@@ -39,7 +39,7 @@ impl IFactory for Factory {
             .get(&chain_id)
             .ok_or(Error::NoDataForChain(chain_id))?;
 
-        let client = mock::Client::new(sequencer_output.clone());
+        let client = cached::Client::new(sequencer_output.clone());
         Ok(Box::new(client))
     }
 }

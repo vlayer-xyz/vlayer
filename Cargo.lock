@@ -8021,6 +8021,7 @@ dependencies = [
  "derive-new",
  "jsonrpsee",
  "lazy_static",
+ "parking_lot",
  "revm",
  "serde",
  "thiserror 2.0.11",

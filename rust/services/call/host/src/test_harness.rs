@@ -3,7 +3,7 @@ use call_engine::HostOutput;
 use chain_client::RpcClient as RpcChainProofClient;
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use mock_chain_server::ChainProofServerMock;
-use optimism::client::factory::mock;
+use optimism::client::factory::cached;
 use provider::CachedMultiProvider;
 pub use rpc::{
     block_tag_to_block_number, create_multi_provider, rpc_snapshot_file, rpc_snapshot_files,
@@ -24,7 +24,7 @@ pub async fn preflight<C>(
 where
     C: SolCall,
 {
-    let op_client_factory = mock::Factory::default();
+    let op_client_factory = cached::Factory::default();
     preflight_with_teleport::<C>(test_name, call, location, op_client_factory).await
 }
 
@@ -55,7 +55,7 @@ pub async fn run(
 ) -> Result<HostOutput, Error> {
     let multi_provider = create_multi_provider(test_name);
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
-    let op_client_factory = mock::Factory::default();
+    let op_client_factory = cached::Factory::default();
     let host = create_host(multi_provider, location, chain_proof_server.url(), op_client_factory)?;
     let result = host.main(call).await?;
 

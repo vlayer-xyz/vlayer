@@ -15,6 +15,7 @@ derivative = { workspace = true }
 derive-new = { workspace = true }
 jsonrpsee = { workspace = true, optional = true }
 lazy_static = { workspace = true }
+parking_lot = { workspace = true }
 revm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
