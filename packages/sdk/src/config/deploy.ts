@@ -74,7 +74,7 @@ export const deployTestingVlayerContracts = async (args: {
 }) => {
   const { prover, verifier } = await deployVlayerContracts(args);
 
-  if (process.env.VLAYER_ENV != "development") {
+  if (process.env.VLAYER_ENV !== "dev") {
     log("Not in development mode, skipping verifier router deployment");
     return { prover, verifier };
   }
