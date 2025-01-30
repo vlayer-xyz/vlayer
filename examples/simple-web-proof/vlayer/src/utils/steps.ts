@@ -80,8 +80,7 @@ export const steps: Step[] = [
     kind: STEP_KIND.SUCCESS,
     component: SuccessStep,
     title: "Success",
-    description:
-      "You have successfully minted your X NFT. Check the details below.",
+    description: "",
     headerIcon: "/success-illustration.svg",
     index: 4,
   },
