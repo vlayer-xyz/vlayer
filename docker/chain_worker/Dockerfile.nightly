@@ -10,7 +10,9 @@ RUN mkdir -p vlayer
 RUN tar -xzf nightly-linux-amd64.tar.gz -C vlayer
 
 FROM --platform=linux/amd64 ubuntu:24.04
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
+
 COPY --from=build /cargo-risczero/r0vm /bin/r0vm
 COPY --from=build /vlayer/bin/worker /bin/worker
 
-ENTRYPOINT ["/bin/worker"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/bin/worker"]
