@@ -1,17 +1,16 @@
-FROM --platform=linux/amd64 ubuntu:24.04 AS vlayer-builder
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates dumb-init
+FROM --platform=linux/amd64 ubuntu:24.04 AS build
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
-RUN useradd -m -s /bin/bash -u 1001 vlayer
-USER vlayer
-WORKDIR /home/vlayer
-
-RUN curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL 'https://sh.rustup.rs' | sh -s -- -y
-ENV PATH="/home/vlayer/.cargo/bin:${PATH}"
-
-RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-RUN cargo binstall -y cargo-risczero@1.2.0
-RUN cargo risczero install
+RUN curl -L https://github.com/risc0/risc0/releases/download/v1.2.0/cargo-risczero-x86_64-unknown-linux-gnu.tgz -o cargo-risczero-x86_64-unknown-linux-gnu.tgz
+RUN mkdir -p cargo-risczero
+RUN tar -xzf cargo-risczero-x86_64-unknown-linux-gnu.tgz -C cargo-risczero
 
 RUN curl -L https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-linux-amd64.tar.gz -o nightly-linux-amd64.tar.gz
-RUN tar -xvf nightly-linux-amd64.tar.gz
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "/home/vlayer/bin/call_server"]
+RUN mkdir -p vlayer
+RUN tar -xzf nightly-linux-amd64.tar.gz -C vlayer
+
+FROM --platform=linux/amd64 ubuntu:24.04
+COPY --from=build /cargo-risczero/r0vm /bin/r0vm
+COPY --from=build /vlayer/bin/call_server /bin/call_server
+
+ENTRYPOINT ["/bin/call_server"]
