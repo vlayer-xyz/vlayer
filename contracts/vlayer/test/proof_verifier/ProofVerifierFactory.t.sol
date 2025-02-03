@@ -44,6 +44,13 @@ contract VerifierFactory_Tests is Test {
         assertTrue(verifier.imageIdRepository().isImageSupported(ImageID.RISC0_CALL_GUEST_ID));
     }
 
+    function test_returnsStableDeploymentForTestnets() public {
+        vm.chainId(11155111);
+        (,, ProofVerifierRouter router) = TestnetStableDeployment.verifiers();
+        IProofVerifier verifier = ProofVerifierFactory.produce();
+        assertEq(address(verifier), address(router));
+    }
+
     function test_stableDeploymentForTestnetsEqualsToTheExpectedOne() public view {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/deployed_contracts.json");
