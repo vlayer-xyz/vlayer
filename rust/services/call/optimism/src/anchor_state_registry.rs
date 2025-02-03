@@ -42,6 +42,9 @@ impl AnchorStateRegistry {
         D: DatabaseRef + Send + Sync,
         D::Error: std::fmt::Debug + std::error::Error + Send + Sync + 'static,
     {
+        // `WrapStateDB` relies on the guarantee that EVM always asks for account state before storage and caches some things
+        // Therefore - without this step - we can't access storage
+        let _ = db.basic_ref(self.address).map_err(|err| anyhow!(err))?;
         let root = db
             .storage_ref(self.address, *layout::OUTPUT_HASH_SLOT)
             .map_err(|err| anyhow!(err))?;
