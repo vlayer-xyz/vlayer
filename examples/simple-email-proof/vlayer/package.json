@@ -16,8 +16,9 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
-    "@vlayer/sdk": "workspace:*",
+    "@vercel/analytics": "^1.4.1",
     "@vlayer/react": "workspace:*",
+    "@vlayer/sdk": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "wagmi": "^2.14.6"
