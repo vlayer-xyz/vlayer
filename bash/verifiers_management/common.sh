@@ -2,7 +2,7 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 CONTRACTS_DIR="${VLAYER_HOME}/contracts/vlayer"
 
 DRY_RUN=${DRY_RUN:-true}
-NETWORKS=( "sepolia" "base-sepolia" "optimism-sepolia" )
+NETWORKS=( "sepolia" "base-sepolia" "optimism-sepolia" "arbitrum-sepolia" "worldchain-sepolia" )
 
 echo "DRY_RUN: ${DRY_RUN}"
 echo "NETWORKS: ${NETWORKS[@]}"
