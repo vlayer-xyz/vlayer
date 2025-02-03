@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use futures::SinkExt;
-use reqwest::{header::ACCEPT, ClientBuilder, RequestBuilder};
+use reqwest::{header::ACCEPT, Client};
+use reqwest_middleware::{ClientBuilder, RequestBuilder};
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 
 use super::{Query, Response, MIME_DNS_JSON_CONTENT_TYPE};
@@ -18,9 +18,11 @@ pub struct ExternalProvider {
 #[derive(thiserror::Error, Debug)]
 pub enum ExternalProviderError {
     #[error("Failed to resolve query: {0}")]
-    ResolveError(#[from] reqwest::Error),
+    ResolveMiddleware(#[from] reqwest_middleware::Error),
+    #[error("Failed to resolve query: {0}")]
+    Resolve(#[from] reqwest::Error),
     #[error("Failed to parse response: {0}")]
-    ParseError(#[from] serde_json::Error),
+    Parse(#[from] serde_json::Error),
 }
 
 impl Provider for ExternalProvider {
@@ -49,7 +51,7 @@ impl ExternalProvider {
     fn client(&self) -> RequestBuilder {
         let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
 
-        ClientBuilder::new()
+        ClientBuilder::new(Client::new())
             .with(RetryTransientMiddleware::new_with_policy(retry_policy))
             .build()
             .get(self.base_url)

@@ -12049,6 +12049,7 @@ dependencies = [
  "olpc-cjson",
  "rand",
  "reqwest 0.12.12",
+ "reqwest-middleware",
  "reqwest-retry",
  "rsa",
  "serde",
