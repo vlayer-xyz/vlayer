@@ -8,6 +8,7 @@ pub mod cached;
 pub mod factory;
 #[cfg(feature = "http")]
 pub mod http;
+pub mod recording;
 
 #[derive(Debug, Error, PartialEq, Eq)]
 #[non_exhaustive]
