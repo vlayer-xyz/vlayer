@@ -100,7 +100,7 @@ export async function waitForProof<
 >(
   hash: BrandedHash<T, F>,
   url: string,
-  numberOfRetries: number = 240,
+  numberOfRetries: number = 900,
   sleepDuration: number = 1000,
 ): Promise<ProofDataWithMetrics> {
   for (let retry = 0; retry < numberOfRetries; retry++) {

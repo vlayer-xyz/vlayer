@@ -83,7 +83,7 @@ Wait for the proving to be finished, and then retrieve the result along with Pro
 const result = await vlayer.waitForProvingResult({ hash });
 ```
 
-By default, the `waitForProvingResult` function polls the server for a proof for 2 minutes. This is achieved through 120 retries with a polling interval of 1 second.
+By default, the `waitForProvingResult` function polls the server for a proof for 15 minutes. This is achieved through 900 retries with a polling interval of 1 second.
 You can customize this behavior by specifying the following optional parameters:
 - `numberOfRetries`: The total number of polling attempts.
 - `sleepDuration`: The delay (in ms) between each polling attempt.
