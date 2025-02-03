@@ -51,7 +51,11 @@ async function testSuccessProvingAndVerification() {
     chainId: chain.id,
     token: config.token,
   });
-  const result = await vlayer.waitForProvingResult({ hash });
+  const result = await vlayer.waitForProvingResult({
+    hash,
+    numberOfRetries: 900,
+    sleepDuration: 1000,
+  });
   const [proof, twitterHandle, address] = result;
   console.log("Has Proof");
 
