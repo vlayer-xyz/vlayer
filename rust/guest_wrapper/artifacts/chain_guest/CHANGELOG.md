@@ -10,3 +10,4 @@
   * `9c027beee25f4f98a7cf995b5d752222673c6743e1cc6f38839b3bc6445f3441` – Initial teleport implementation [#1688](https://github.com/vlayer-xyz/vlayer/pull/1688)
   * `391fa348db0a76c8933fd780d5c4dcc72c2319986352ea8733e96eaa706f9d70` – Refactor optimism errors  * `2a556114dbe077cc7707573e55f2b646daa2bbd28e23bb3e7cc33876956e70f6` – Optimism teleport factories & clients
   * `a7f80dd271ebc7fb9e3f1c01640735dc4831a5de025532c35c1fd6405bd159fe` – Optimism teleport refactor
+  * `eba88a4e54977f87fa67d20d8d449623e8eb2d3679a03bb9eabbec1c728cf4b2` – Merge main
