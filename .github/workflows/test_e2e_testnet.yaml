@@ -19,7 +19,8 @@ on:
       - ".github/workflows/test_e2e_testnet.yaml"
   workflow_dispatch:
 concurrency:
-  group: e2e-testnet-with-private-key
+# Same group for all jobs using EXAMPLES_TEST_PRIVATE_KEY key.
+  group: e2e-testnet
   cancel-in-progress: false
 
 jobs:

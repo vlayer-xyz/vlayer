@@ -1,22 +1,23 @@
 name: E2E test of example web apps on testnet
 
 on:
-  pull_request:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - "packages/**"
-      - "bash/run-services.sh"
-      - "bash/e2e-web-apps-test.sh"
-      - ".github/workflows/test_e2e_web_apps_testnet.yaml"
-      - "contracts/**"
-  merge_group:
   push:
     branches:
       - main
+    # If any path names do not match patterns in paths-ignore,
+    # even if some path names match the patterns,
+    # the workflow will run.
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
+  pull_request:
+    paths:
+      - ".github/workflows/test_e2e_web_apps_testnet.yaml"
+  workflow_dispatch:
 concurrency:
-  group: e2e-testnet-with-private-key
+# Same group for all jobs using WEB_APPS_TEST_PRIVATE_KEY key.
+  group: web-apps-testnet-e2e
   cancel-in-progress: false
 
 jobs:
@@ -61,7 +62,7 @@ jobs:
           VLAYER_ENV: testnet
           QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
           QUICKNODE_ENDPOINT: "dry-alpha-tab"
-          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.WEB_APPS_TEST_PRIVATE_KEY }}
           CHAIN_NAME: "optimismSepolia"
           JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
           PROVER_URL: http://127.0.0.1:3000
