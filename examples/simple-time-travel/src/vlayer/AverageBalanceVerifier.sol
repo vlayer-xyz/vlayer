@@ -5,7 +5,7 @@ import {AverageBalance} from "./AverageBalance.sol";
 import {HodlerBadgeNFT} from "./HodlerBadgeNFT.sol";
 
 import {Proof} from "vlayer-0.1.0/Proof.sol";
-import {Verifier} from "vlayer-0.1.0/Verifier.sol";
+import {Verifier, IProofVerifier} from "vlayer-0.1.0/Verifier.sol";
 
 contract AverageBalanceVerifier is Verifier {
     address public prover;
@@ -27,5 +27,10 @@ contract AverageBalanceVerifier is Verifier {
             claimed[claimer] = true;
             reward.mint(claimer);
         }
+    }
+
+    // Intentionally underscored as it's a helper function
+    function _setTestVerifier(IProofVerifier newVerifier) external {
+        super._setTestVerifier(newVerifier);
     }
 }

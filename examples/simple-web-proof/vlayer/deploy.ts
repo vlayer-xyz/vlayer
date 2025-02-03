@@ -9,6 +9,9 @@ import {
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
+  env: {
+    isTesting: true,
+  },
 });
 
 const config = getConfig();

@@ -12,6 +12,9 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
   proverArgs: [],
   verifierArgs: [],
+  env: {
+    isTesting: true,
+  },
 });
 
 const config = getConfig();

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {Proof} from "vlayer-0.1.0/Proof.sol";
-import {Verifier} from "vlayer-0.1.0/Verifier.sol";
+import {Verifier, IProofVerifier} from "vlayer-0.1.0/Verifier.sol";
 
 import {SimpleProver} from "./SimpleProver.sol";
 import {ExampleNFT} from "./ExampleNFT.sol";
@@ -28,5 +28,10 @@ contract SimpleVerifier is Verifier {
             claimed[claimer] = true;
             whaleNFT.mint(claimer);
         }
+    }
+
+    // Intentionally underscored as it's a helper function
+    function _setTestVerifier(IProofVerifier newVerifier) external {
+        super._setTestVerifier(newVerifier);
     }
 }

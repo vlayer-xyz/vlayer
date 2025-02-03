@@ -25,6 +25,9 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
   proverArgs: [],
   verifierArgs: [],
+  env: {
+    isTesting: true,
+  },
 });
 
 console.log("Proving...");

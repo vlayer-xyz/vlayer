@@ -16,6 +16,9 @@ import {
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
+  env: {
+    isTesting: true,
+  },
 });
 
 writeEnvVariables(".env", {

@@ -46,4 +46,11 @@ abstract contract Verifier {
 
         return (proof, journalHash);
     }
+
+    function _setTestVerifier(IProofVerifier newVerifier) internal {
+        require(!ChainIdLibrary.isMainnet(), "Changing verifiers is not allowed on mainnet");
+        require(address(newVerifier.imageIdRepository()) != address(0), "Verifier's repository address is not set");
+
+        verifier = newVerifier;
+    }
 }

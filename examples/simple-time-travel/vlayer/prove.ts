@@ -41,6 +41,9 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
   proverArgs: [usdcTokenAddr, startBlock, endBlock, step],
   verifierArgs: [],
+  env: {
+    isTesting: true,
+  },
 });
 
 const vlayer = createVlayerClient({

@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import {EmailDomainProver} from "./EmailDomainProver.sol";
 
 import {Proof} from "vlayer-0.1.0/Proof.sol";
-import {Verifier} from "vlayer-0.1.0/Verifier.sol";
+import {Verifier, IProofVerifier} from "vlayer-0.1.0/Verifier.sol";
 import {ERC721} from "@openzeppelin-contracts-5.0.1/token/ERC721/ERC721.sol";
 
 contract EmailDomainVerifier is Verifier, ERC721 {
@@ -29,5 +29,10 @@ contract EmailDomainVerifier is Verifier, ERC721 {
         emailDomains[tokenId] = _emailDomain;
         currentTokenId = tokenId;
         _safeMint(_targetWallet, tokenId);
+    }
+
+    // Intentionally underscored as it's a helper function
+    function _setTestVerifier(IProofVerifier newVerifier) external {
+        super._setTestVerifier(newVerifier);
     }
 }
