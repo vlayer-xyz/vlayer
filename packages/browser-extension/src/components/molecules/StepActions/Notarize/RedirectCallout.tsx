@@ -46,7 +46,8 @@ export const RedirectCallout: FC<{ isVisible: boolean }> = (props) => {
         </Callout.Icon>
         {show && (
           <Callout.Text>
-            You will be redirected back in <b data-testid="timeout">{timeout}</b> second
+            You will be redirected back in{" "}
+            <b data-testid="timeout">{timeout}</b> second
             {timeout !== 1 ? "s" : ""}.
           </Callout.Text>
         )}
