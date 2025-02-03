@@ -16,7 +16,7 @@ on:
       - ".github/workflows/test_e2e_web_apps_testnet.yaml"
   workflow_dispatch:
 concurrency:
-# Same group for all jobs using WEB_APPS_TEST_PRIVATE_KEY key.
+  # Same group for all jobs using WEB_APPS_TEST_PRIVATE_KEY key.
   group: web-apps-testnet-e2e
   cancel-in-progress: false
 
