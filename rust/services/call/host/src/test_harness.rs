@@ -53,9 +53,18 @@ pub async fn run(
     call: Call,
     location: &ExecutionLocation,
 ) -> Result<HostOutput, Error> {
+    let op_client_factory = cached::Factory::default();
+    run_with_teleport(test_name, call, location, op_client_factory).await
+}
+
+pub async fn run_with_teleport(
+    test_name: &str,
+    call: Call,
+    location: &ExecutionLocation,
+    op_client_factory: impl optimism::client::IFactory + 'static,
+) -> Result<HostOutput, Error> {
     let multi_provider = create_multi_provider(test_name);
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
-    let op_client_factory = cached::Factory::default();
     let host = create_host(multi_provider, location, chain_proof_server.url(), op_client_factory)?;
     let result = host.main(call).await?;
 

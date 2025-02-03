@@ -4,6 +4,7 @@ pub mod types;
 pub mod client;
 
 use async_trait::async_trait;
+use auto_impl::auto_impl;
 use thiserror::Error;
 
 use crate::types::OutputResponse;
@@ -19,6 +20,7 @@ pub enum ClientError {
 }
 
 #[async_trait]
+#[auto_impl(Arc)]
 pub trait IClient: Send + Sync {
     async fn get_output_at_block(&self, block_number: u64) -> Result<OutputResponse, ClientError>;
 }

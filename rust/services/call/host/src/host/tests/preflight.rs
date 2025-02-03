@@ -172,40 +172,17 @@ mod view {
 }
 
 mod teleport {
-    use alloy_primitives::{hex, B256};
-    use lazy_static::lazy_static;
-    use optimism::{
-        client::factory::cached,
-        types::{BlockInfo, L2BlockRef, OutputResponse},
-    };
+    use optimism::client::factory::cached;
 
     use super::*;
     use crate::test_harness::{
         contracts::teleport::{
             SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
-            BLOCK_NO, JOHN, SIMPLE_TELEPORT, TOKEN,
+            BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT, TOKEN,
         },
         preflight_with_teleport,
         rpc::OP_ANVIL,
     };
-
-    lazy_static! {
-        static ref STATE_ROOT: B256 =
-            B256::from(hex!("25d65fff68c2248f9b0c0b04d2ce9749dbdb088bd0fe16962476f18794373e5f"));
-        static ref WITHDRAWAL_STORAGE_ROOT: B256 =
-            B256::from(hex!("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
-        static ref FINALIZED_L2_HASH: B256 =
-            B256::from(hex!("8a3162ac8009f30a115f905e15c1206c89d5bde102e5cf1f72e425d3aec03fbd"));
-        static ref OUTPUT: OutputResponse = OutputResponse {
-            block_ref: L2BlockRef::from_l2_block_info(BlockInfo::from_num_hash(
-                3,
-                *FINALIZED_L2_HASH
-            )),
-            state_root: *STATE_ROOT,
-            withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
-            ..Default::default()
-        };
-    }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn success() -> anyhow::Result<()> {

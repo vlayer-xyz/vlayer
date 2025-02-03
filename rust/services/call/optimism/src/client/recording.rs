@@ -2,7 +2,6 @@ use std::sync::{Arc, RwLock};
 
 use alloy_primitives::BlockNumber;
 
-use super::cached;
 use crate::{types::OutputResponse, ClientError, IClient};
 
 pub struct Client {
@@ -11,22 +10,17 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(inner: Box<dyn IClient>) -> Self {
+    pub fn new(inner: impl IClient + 'static) -> Self {
         Self {
-            inner: inner.into(),
+            inner: Arc::new(inner),
             cache: Arc::new(RwLock::new(Default::default())),
         }
     }
 
-    fn into_cache(self) -> OutputResponse {
+    pub fn into_cache(self) -> OutputResponse {
         let cache =
             Arc::try_unwrap(self.cache).expect("Trying to access cache while it's still in use");
         cache.into_inner().expect("poisoned lock")
-    }
-
-    #[allow(unused)]
-    pub fn into_cached_client(self) -> cached::Client {
-        cached::Client::new(self.into_cache())
     }
 }
 

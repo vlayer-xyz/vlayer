@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use alloy_primitives::ChainId;
 use derive_new::new;
@@ -24,7 +24,7 @@ pub struct Factory {
 }
 
 impl IFactory for Factory {
-    fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError> {
+    fn create(&self, chain_id: ChainId) -> Result<Arc<dyn IClient>, FactoryError> {
         let url = self
             .rpc_urls
             .get(&chain_id)
@@ -32,6 +32,6 @@ impl IFactory for Factory {
         let client = HttpClientBuilder::default()
             .build(url)
             .map_err(|err| Error::HttpClientBuilder(err.to_string()))?;
-        Ok(Box::new(http::Client::new(client)))
+        Ok(Arc::new(http::Client::new(client)))
     }
 }

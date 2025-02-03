@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use alloy_primitives::ChainId;
 use derive_new::new;
 use revm::primitives::HashMap;
@@ -14,6 +16,8 @@ pub enum Error {
     #[error("No Data for chain {0}")]
     NoDataForChain(ChainId),
 }
+
+pub type OpOutputCache = HashMap<ChainId, OutputResponse>;
 
 #[derive(Debug, Clone, new, Default)]
 pub struct Factory {
@@ -33,13 +37,13 @@ impl Factory {
 }
 
 impl IFactory for Factory {
-    fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError> {
+    fn create(&self, chain_id: ChainId) -> Result<Arc<dyn IClient>, FactoryError> {
         let sequencer_output = self
             .cache
             .get(&chain_id)
             .ok_or(Error::NoDataForChain(chain_id))?;
 
         let client = cached::Client::new(sequencer_output.clone());
-        Ok(Box::new(client))
+        Ok(Arc::new(client))
     }
 }
