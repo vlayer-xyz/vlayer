@@ -4,7 +4,7 @@ use revm::primitives::HashMap;
 use thiserror::Error;
 
 use crate::{
-    client::{mock, FactoryError, IFactory},
+    client::{cached, FactoryError, IFactory},
     types::OutputResponse,
     IClient,
 };
@@ -17,7 +17,7 @@ pub enum Error {
 
 #[derive(Debug, Clone, new, Default)]
 pub struct Factory {
-    sequencer_outputs: HashMap<ChainId, OutputResponse>,
+    cache: HashMap<ChainId, OutputResponse>,
 }
 
 impl Factory {
@@ -27,7 +27,7 @@ impl Factory {
         sequencer_output: OutputResponse,
     ) -> Self {
         Self {
-            sequencer_outputs: [(chain_id, sequencer_output)].into_iter().collect(),
+            cache: [(chain_id, sequencer_output)].into_iter().collect(),
         }
     }
 }
@@ -35,11 +35,11 @@ impl Factory {
 impl IFactory for Factory {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError> {
         let sequencer_output = self
-            .sequencer_outputs
+            .cache
             .get(&chain_id)
             .ok_or(Error::NoDataForChain(chain_id))?;
 
-        let client = mock::Client::new(sequencer_output.clone());
+        let client = cached::Client::new(sequencer_output.clone());
         Ok(Box::new(client))
     }
 }

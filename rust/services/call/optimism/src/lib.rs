@@ -14,8 +14,8 @@ pub enum ClientError {
     #[cfg(feature = "http")]
     #[error("Http: {0}")]
     Http(#[from] client::http::Error),
-    #[error("Mock: {0}")]
-    Mock(#[from] client::mock::Error),
+    #[error("Cached: {0}")]
+    Cached(#[from] client::cached::Error),
 }
 
 #[async_trait]

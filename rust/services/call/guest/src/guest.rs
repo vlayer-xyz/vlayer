@@ -66,7 +66,7 @@ fn build_guest_travel_call_verifier(
     let chain_proof_verifier =
         chain_common::verifier::Verifier::new(chain_guest_ids, zk_proof::GuestVerifier);
     let time_travel_verifier = time_travel::Verifier::new(Some(chain_client), chain_proof_verifier);
-    let op_client_factory = optimism::client::factory::mock::Factory::default();
+    let op_client_factory = optimism::client::factory::cached::Factory::default();
     let teleport_verifier = teleport::Verifier::new(op_client_factory);
     travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
 }

@@ -17,13 +17,13 @@ pub enum Error {
 
 #[derive(Clone, Debug, new)]
 pub struct Client {
-    output: OutputResponse,
+    cache: OutputResponse,
 }
 
 #[async_trait]
 impl IClient for Client {
     async fn get_output_at_block(&self, block_number: u64) -> Result<OutputResponse, ClientError> {
-        let l2_block_info = self.output.block_ref.l2_block_info;
+        let l2_block_info = self.cache.block_ref.l2_block_info;
         if block_number != l2_block_info.number {
             return Err(Error::BlockNumberMismatch {
                 requested: block_number,
@@ -31,6 +31,6 @@ impl IClient for Client {
             }
             .into());
         }
-        Ok(self.output.clone())
+        Ok(self.cache.clone())
     }
 }
