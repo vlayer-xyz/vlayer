@@ -7,7 +7,21 @@ import {ImageID} from "../../src/ImageID.sol";
 import {IProofVerifier} from "../../src/proof_verifier/IProofVerifier.sol";
 import {ProofVerifierFactory, InvalidChainId} from "../../src/proof_verifier/ProofVerifierFactory.sol";
 
+import {Repository} from "../../src/Repository.sol";
+import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";
+import {Groth16ProofVerifier} from "../../src/proof_verifier/Groth16ProofVerifier.sol";
+import {ProofVerifierRouter} from "../../src/proof_verifier/ProofVerifierRouter.sol";
+
 contract VerifierFactory_Tests is Test {
+    struct DeployedContract {
+        address contractAddress;
+        string contractName;
+    }
+
+    struct Deployment {
+        DeployedContract[] contracts;
+    }
+
     function test_producesAVerifierInDevMode() public {
         vm.chainId(31337);
 
@@ -29,10 +43,41 @@ contract VerifierFactory_Tests is Test {
         assertTrue(verifier.imageIdRepository().isImageSupported(ImageID.RISC0_CALL_GUEST_ID));
     }
 
+    function test_stableDeploymentForTestnetsEqualsToTheExpectedOne() public view {
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(root, "/deployed_contracts.json");
+        string memory json = vm.readFile(path);
+        bytes memory data = vm.parseJson(json);
+
+        Deployment memory deployment = abi.decode(data, (Deployment));
+
+        (
+            Repository repository,
+            FakeProofVerifier fakeProofVerifier,
+            Groth16ProofVerifier groth16ProofVerifier,
+            ProofVerifierRouter router
+        ) = ProofVerifierFactory.testnetStableDeployment();
+
+        assertEq(address(repository), findAddress(deployment, "Repository"));
+        assertEq(address(fakeProofVerifier), findAddress(deployment, "FakeProofVerifier"));
+        assertEq(address(groth16ProofVerifier), findAddress(deployment, "Groth16ProofVerifier"));
+        assertEq(address(router), findAddress(deployment, "ProofVerifierRouter"));
+    }
+
     function test_failsForOtherNetworks() public {
         vm.chainId(11155111 + 1);
 
         vm.expectRevert(InvalidChainId.selector);
         ProofVerifierFactory.produce();
+    }
+
+    function findAddress(Deployment memory deployment, string memory contractName) private pure returns (address) {
+        for (uint256 i = 0; i < deployment.contracts.length; i++) {
+            if (keccak256(bytes(deployment.contracts[i].contractName)) == keccak256(bytes(contractName))) {
+                return deployment.contracts[i].contractAddress;
+            }
+        }
+        console.log("Missing contract: %s", contractName);
+        revert("Did not find contract with expected name");
     }
 }

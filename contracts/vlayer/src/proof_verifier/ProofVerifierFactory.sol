@@ -21,4 +21,19 @@ library ProofVerifierFactory {
 
         revert InvalidChainId();
     }
+
+    function testnetStableDeployment()
+        internal
+        pure
+        returns (Repository, FakeProofVerifier, Groth16ProofVerifier, ProofVerifierRouter)
+    {
+        Repository repository = Repository(address(0xc9708B07ae9906b92FF19281Fd660FB19206a8fA));
+        FakeProofVerifier fakeProofVerifier = FakeProofVerifier(address(0x67bAcaAf3B7E9B3e86B05479A9EE5b6ad611e34A));
+        Groth16ProofVerifier groth16ProofVerifier =
+            Groth16ProofVerifier(address(0x39599aC412c14F9635f5b5Bf8f4D4C1aeeCF6307));
+        ProofVerifierRouter proofVerifierRouter =
+            ProofVerifierRouter(address(0x782860fFa50B0cd234453612A56cf699f77a0687));
+
+        return (repository, fakeProofVerifier, groth16ProofVerifier, proofVerifierRouter);
+    }
 }
