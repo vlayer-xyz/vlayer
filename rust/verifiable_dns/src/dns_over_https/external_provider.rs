@@ -1,6 +1,8 @@
 use std::time::Duration;
 
-use reqwest::{header::ACCEPT, Client, RequestBuilder};
+use futures::SinkExt;
+use reqwest::{header::ACCEPT, ClientBuilder, RequestBuilder};
+use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 
 use super::{Query, Response, MIME_DNS_JSON_CONTENT_TYPE};
 use crate::Provider;
@@ -45,7 +47,11 @@ impl ExternalProvider {
     }
 
     fn client(&self) -> RequestBuilder {
-        Client::new()
+        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
+
+        ClientBuilder::new()
+            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+            .build()
             .get(self.base_url)
             .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
             .timeout(Duration::from_secs(2))
