@@ -71,6 +71,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "Flaky"]
     async fn fetches_record_from_dnssb_doh() {
         let provider = ExternalProvider::dns_sb_provider();
         let query = "vlayer.xyz".into();
@@ -84,6 +85,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "Flaky"]
     async fn providers_fetch_dkim_record() {
         let providers = [ExternalProvider::dns_sb_provider(), ExternalProvider::google_provider()];
         let query = "google._domainkey.vlayer.xyz".into();
