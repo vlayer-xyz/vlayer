@@ -13,7 +13,7 @@ export type EnvConfig = {
   l2JsonRpcUrl?: string;
   privateKey: `0x${string}`;
   token?: string;
-  deployConfig: DeployConfig;
+  deployConfig?: DeployConfig;
 };
 
 // represents what is needed by client to properly
@@ -28,5 +28,5 @@ export type VlayerContextConfig = {
   wsProxyUrl?: string;
   notaryUrl?: string;
   privateKey?: `0x${string}`;
-  deployConfig: DeployConfig;
+  deployConfig?: DeployConfig;
 };
