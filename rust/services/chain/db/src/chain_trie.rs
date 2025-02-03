@@ -1,6 +1,6 @@
 use block_trie::BlockTrie;
-use chain_common::{ChainProofReceipt, ProofVerificationError};
-use common::Hashable;
+use chain_common::{verifier::IVerifier, ChainProofReceipt, ChainProofRef};
+use common::verifier::zk_proof::HostVerifier;
 use derive_new::new;
 use mpt::Sha2Trie as MerkleTrie;
 use risc0_zkvm::sha::Digest;
@@ -37,13 +37,15 @@ impl ChainTrie {
 pub fn verify_chain_trie(
     unverified: UnverifiedChainTrie,
     chain_guest_ids: Box<[Digest]>,
-) -> Result<ChainTrie, ProofVerificationError> {
+) -> Result<ChainTrie, chain_common::verifier::Error> {
     let UnverifiedChainTrie {
         block_range,
         trie,
         zk_proof,
     } = unverified;
-    zk_proof.verify(trie.hash_slow(), chain_guest_ids)?;
     let block_trie = BlockTrie::from_unchecked(trie);
+    let proof_ref = ChainProofRef::new(&zk_proof, &block_trie);
+    let verifier = chain_common::verifier::Verifier::new(chain_guest_ids, HostVerifier);
+    verifier.verify(proof_ref)?;
     Ok(ChainTrie::new(block_range, block_trie, zk_proof))
 }

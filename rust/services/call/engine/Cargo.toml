@@ -16,7 +16,6 @@ alloy-serde = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
-bincode = { workspace = true }
 block_header = { workspace = true }
 bytes = { workspace = true }
 call_precompiles = { workspace = true }
@@ -41,15 +40,16 @@ tracing = { workspace = true }
 [dev-dependencies]
 alloy-trie = { workspace = true }
 auto_impl = { workspace = true }
-block_trie = { workspace = true }
+block_trie = { workspace = true, features = ["test-utils"] }
 bytemuck = { workspace = true }
+chain_common = { workspace = true, features = ["testing"] }
 common = { workspace = true }
 serde_json = { workspace = true }
 test-log = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }
 
 [features]
-testing = []
+testing = ["common/testing"]
 
 [lints]
 workspace = true

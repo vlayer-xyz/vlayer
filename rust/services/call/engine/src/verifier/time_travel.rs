@@ -1,13 +1,12 @@
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
+use common::sealed_with_test_mock;
 use derive_new::new;
-
-use super::{chain_proof, sealing::sealed_with_test_mock};
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Chain proof error: {0}")]
-    ChainProof(#[from] super::chain_proof::Error),
+    ChainProof(#[from] chain_common::verifier::Error),
     #[error("Chain client error: {0}")]
     ChainClient(#[from] chain_client::Error),
     #[error("Block not found in chain proof trie: {block_num}")]
@@ -26,14 +25,17 @@ pub type Result = std::result::Result<(), Error>;
 sealed_with_test_mock!(async IVerifier (chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result);
 
 #[derive(new)]
-pub struct Verifier<C: chain_client::Client, V: chain_proof::IVerifier> {
+pub struct Verifier<C: chain_client::Client, V: chain_common::verifier::IVerifier> {
     chain_client: Option<C>,
     chain_proof_verifier: V,
 }
 
-impl<C: chain_client::Client, V: chain_proof::IVerifier> seal::Sealed for Verifier<C, V> {}
+impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> seal::Sealed
+    for Verifier<C, V>
+{
+}
 #[async_trait]
-impl<C: chain_client::Client, V: chain_proof::IVerifier> IVerifier for Verifier<C, V> {
+impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> IVerifier for Verifier<C, V> {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result {
         if blocks.len() == 1 {
             return Ok(()); // No need to verify chain proofs for a single location
@@ -43,7 +45,7 @@ impl<C: chain_client::Client, V: chain_proof::IVerifier> IVerifier for Verifier<
         };
         let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
         let chain_proof = client.get_chain_proof(chain_id, block_numbers).await?;
-        self.chain_proof_verifier.verify(&chain_proof)?;
+        self.chain_proof_verifier.verify(chain_proof.as_ref())?;
         for (block_num, block_hash) in blocks {
             let trie_block_hash = chain_proof
                 .block_trie

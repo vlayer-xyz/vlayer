@@ -1,4 +1,4 @@
-use alloy_primitives::B256;
+use alloy_primitives::{BlockNumber, B256};
 use alloy_rlp::encode_fixed_size;
 use block_header::EvmBlockHeader;
 use bytes::Bytes;
@@ -11,7 +11,7 @@ use thiserror::Error;
 #[derive(Debug, Error, PartialEq)]
 pub enum BlockTrieError {
     #[error("failed to get block hash: {0}")]
-    GetBlockHashFailed(u64),
+    GetBlockHashFailed(BlockNumber),
     #[error("block hash mismatch: expected: {expected} != actual: {actual}")]
     BlockHashMismatch { expected: B256, actual: B256 },
     #[error("failed to insert block hash: {0}")]
@@ -102,12 +102,16 @@ impl BlockTrie {
         Self(mpt)
     }
 
-    pub fn get(&self, block_number: u64) -> Option<B256> {
+    pub fn get(&self, block_number: BlockNumber) -> Option<B256> {
         let key = Self::encode_key(block_number);
         self.0.get(key).map(B256::from_slice)
     }
 
-    pub fn insert_unchecked(&mut self, block_number: u64, hash: &B256) -> BlockTrieResult<()> {
+    pub fn insert_unchecked(
+        &mut self,
+        block_number: BlockNumber,
+        hash: &B256,
+    ) -> BlockTrieResult<()> {
         let key = Self::encode_key(block_number);
         self.0.insert(key, hash)?;
         Ok(())
@@ -117,7 +121,7 @@ impl BlockTrie {
         self.0.size()
     }
 
-    fn encode_key(block_number: u64) -> impl AsRef<[u8]> {
+    fn encode_key(block_number: BlockNumber) -> impl AsRef<[u8]> {
         encode_fixed_size(&block_number)
     }
 
@@ -139,6 +143,16 @@ impl IntoIterator for &BlockTrie {
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
     }
+}
+
+#[cfg(feature = "test-utils")]
+pub fn mock_block_trie(blocks: std::ops::RangeInclusive<BlockNumber>) -> BlockTrie {
+    let mut trie = BlockTrie::default();
+    for header in block_header::test_utils::mock_block_headers(blocks) {
+        trie.insert_unchecked(header.number(), &header.hash_slow())
+            .unwrap();
+    }
+    trie
 }
 
 #[cfg(test)]

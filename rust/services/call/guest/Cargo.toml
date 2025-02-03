@@ -10,6 +10,8 @@ alloy-rlp-derive = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
 chain_client = { workspace = true }
+chain_common = { workspace = true }
+common = { workspace = true }
 mpt = { workspace = true }
 revm = { workspace = true }
 risc0-zkvm = { workspace = true }
