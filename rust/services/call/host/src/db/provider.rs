@@ -31,6 +31,14 @@ pub(crate) struct ProviderDb {
     code_hashes: RwLock<HashMap<B256, Address>>,
 }
 
+impl Debug for ProviderDb {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ProviderDb")
+            .field("block_number", &self.block_number)
+            .finish()
+    }
+}
+
 impl ProviderDb {
     /// Creates a new [ProviderDb] with the given provider and block number.
     pub(crate) fn new(provider: Arc<dyn BlockingProvider>, block_number: u64) -> Self {

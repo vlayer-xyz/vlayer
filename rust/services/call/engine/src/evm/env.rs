@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fmt::{self, Debug, Formatter},
+};
 
 use alloy_primitives::{BlockHash, BlockNumber, ChainId};
 use block_header::EvmBlockHeader;
@@ -18,6 +21,19 @@ pub struct EvmEnv<D: DatabaseRef + Send + Sync> {
     pub db: D,
     pub cfg_env: CfgEnvWithHandlerCfg,
     pub header: Box<dyn EvmBlockHeader>,
+}
+
+impl<D> Debug for EvmEnv<D>
+where
+    D: DatabaseRef + Send + Sync + Debug,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("EvmEnv")
+            .field("db", &self.db)
+            .field("cfg_env", &self.cfg_env)
+            .field("header", &self.header)
+            .finish()
+    }
 }
 
 impl<D> EvmEnv<D>

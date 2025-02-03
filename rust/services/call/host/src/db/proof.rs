@@ -21,6 +21,7 @@ struct State {
 }
 
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
+#[derive(Debug)]
 pub struct ProofDb {
     db: ProviderDb,
     state: RwLock<State>,
