@@ -2,13 +2,13 @@ use call_engine::{
     evm::env::cached::CachedEvmEnv,
     travel_call_executor::TravelCallExecutor,
     verifier::{
-        chain_proof, teleport, time_travel,
+        teleport, time_travel,
         travel_call::{self, IVerifier},
-        zk_proof,
     },
     CallAssumptions, GuestOutput, Input,
 };
 use chain_client::{CachedClient, ChainProofCache};
+use common::verifier::zk_proof;
 use env::create_envs_from_input;
 use risc0_zkvm::sha::Digest;
 
@@ -20,7 +20,7 @@ mod tests;
 
 type GuestTravelCallVerifier = travel_call::Verifier<
     GuestDb,
-    time_travel::Verifier<CachedClient, chain_proof::Verifier<zk_proof::GuestVerifier>>,
+    time_travel::Verifier<CachedClient, chain_common::verifier::Verifier<zk_proof::GuestVerifier>>,
     teleport::Verifier,
 >;
 
@@ -63,7 +63,8 @@ fn build_guest_travel_call_verifier(
     chain_guest_ids: impl IntoIterator<Item = Digest>,
 ) -> GuestTravelCallVerifier {
     let chain_client = CachedClient::new(chain_proofs);
-    let chain_proof_verifier = chain_proof::Verifier::new(chain_guest_ids, zk_proof::GuestVerifier);
+    let chain_proof_verifier =
+        chain_common::verifier::Verifier::new(chain_guest_ids, zk_proof::GuestVerifier);
     let time_travel_verifier = time_travel::Verifier::new(Some(chain_client), chain_proof_verifier);
     let op_client_factory = optimism::client::factory::mock::Factory::default();
     let teleport_verifier = teleport::Verifier::new(op_client_factory);

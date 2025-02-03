@@ -18,5 +18,8 @@ thiserror = { workspace = true }
 anyhow = { workspace = true }
 chain_test_utils = { workspace = true }
 
+[features]
+test-utils = ["block_header/test-utils"]
+
 [lints]
 workspace = true

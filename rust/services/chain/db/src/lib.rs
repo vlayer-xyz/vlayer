@@ -145,7 +145,7 @@ impl From<ChainProof> for RpcChainProof {
         let nodes = proof.merkle_proof.into_iter().map(|db_node| db_node.rlp);
         let nodes = reorder_root_first::<_, Sha256>(nodes, proof.root_hash);
         let proof = proof.zk_proof;
-        RpcChainProof { proof, nodes }
+        RpcChainProof::new(proof, nodes)
     }
 }
 

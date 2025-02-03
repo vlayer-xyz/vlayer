@@ -1,5 +1,4 @@
 use alloy_primitives::{BlockNumber, ChainId};
-use chain_common::ProofVerificationError;
 use derivative::Derivative;
 use thiserror::Error;
 use u64_range::NonEmptyRange;
@@ -20,7 +19,7 @@ pub enum ChainDbError {
     #[error("Block not found")]
     BlockNotFound,
     #[error("ZK proof verification failed: {0}")]
-    ZkProofVerificationFailed(#[from] ProofVerificationError),
+    ZkProofVerificationFailed(#[from] chain_common::verifier::Error),
     #[error("Chain not found: {0}")]
     ChainNotFound(ChainId),
     #[error("Block number {block_num} outside stored range: {block_range:?}")]

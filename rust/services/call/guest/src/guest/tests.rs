@@ -19,7 +19,7 @@ fn time_travel_invalid_zk_proof(
     _: ChainId,
     _: Vec<(BlockNumber, BlockHash)>,
 ) -> time_travel::Result {
-    Err(time_travel::Error::ChainProof(chain_proof::Error::Zk(
+    Err(time_travel::Error::ChainProof(chain_common::verifier::Error::Zk(
         zk_proof::Error::InvalidProof,
     )))
 }
@@ -89,9 +89,9 @@ mod verify_env {
             .unwrap_err();
         assert!(matches!(
             verification_err,
-            travel_call::Error::TimeTravel(time_travel::Error::ChainProof(chain_proof::Error::Zk(
-                zk_proof::Error::InvalidProof
-            )))
+            travel_call::Error::TimeTravel(time_travel::Error::ChainProof(
+                chain_common::verifier::Error::Zk(zk_proof::Error::InvalidProof)
+            ))
         ));
     }
 }

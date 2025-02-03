@@ -1,20 +1,6 @@
-use alloy_primitives::BlockHash;
-use block_trie::BlockTrie;
+use chain_common::mock_chain_proof;
 
 use super::*;
-
-fn mock_chain_proof(block_numbers: &[BlockNumber]) -> ChainProof {
-    let mut block_trie = BlockTrie::default();
-    for block_num in block_numbers {
-        block_trie
-            .insert_unchecked(*block_num, &BlockHash::default())
-            .expect("insert_unchecked failed");
-    }
-    ChainProof {
-        block_trie,
-        proof: Default::default(),
-    }
-}
 
 fn get_cached_client(
     blocks_by_chain: impl IntoIterator<Item = (ChainId, Vec<BlockNumber>)>,
@@ -22,7 +8,7 @@ fn get_cached_client(
     let cache = blocks_by_chain
         .into_iter()
         .map(|(chain_id, block_numbers)| {
-            let proof = mock_chain_proof(&block_numbers);
+            let proof = mock_chain_proof(block_numbers.clone());
             (chain_id, (block_numbers, proof))
         })
         .collect();
@@ -60,7 +46,7 @@ mod cached_client {
     async fn cache_hit() -> anyhow::Result<()> {
         let client = get_cached_client([(1, vec![1])]);
         let proof = client.get_chain_proof(1, vec![1]).await?;
-        assert_eq!(proof, mock_chain_proof(&[1]));
+        assert_eq!(proof, mock_chain_proof([1]));
         Ok(())
     }
 }
@@ -73,10 +59,10 @@ mod caching_client {
         let mock_client = get_cached_client([(1, vec![1])]);
         let client = RecordingClient::new(Box::new(mock_client));
         let proof = client.get_chain_proof(1, vec![1]).await?;
-        assert_eq!(proof, mock_chain_proof(&[1]));
+        assert_eq!(proof, mock_chain_proof([1]));
         let mut cache = client.into_cache();
         assert_eq!(cache.len(), 1);
-        assert_eq!(cache.remove(&1).unwrap(), (vec![1], mock_chain_proof(&[1])));
+        assert_eq!(cache.remove(&1).unwrap(), (vec![1], mock_chain_proof([1])));
         Ok(())
     }
 }

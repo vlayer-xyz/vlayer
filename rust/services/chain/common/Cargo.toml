@@ -21,5 +21,8 @@ serde = { workspace = true }
 serde_with = { workspace = true, features = ["macros", "hex"] }
 thiserror = { workspace = true }
 
+[features]
+testing = []
+
 [lints]
 workspace = true

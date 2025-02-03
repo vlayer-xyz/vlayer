@@ -11,7 +11,6 @@ derive-new = { workspace = true }
 thiserror = { workspace = true }
 
 # RPC client dependencies (disabled for guest)
-mpt = { workspace = true, optional = true }
 parking_lot = { workspace = true }
 
 # Fake client dependencies (disabled for guest)
@@ -28,7 +27,7 @@ tokio = { workspace = true, features = ["rt", "macros"] }
 
 [features]
 fake = ["provider", "risc0-zkp"]
-rpc = ["mpt", "serde_json", "server_utils", "tracing"]
+rpc = ["serde_json", "server_utils", "tracing"]
 
 [lints]
 workspace = true

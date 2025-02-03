@@ -109,7 +109,7 @@ mod tests {
     use alloy_primitives::B256;
     use block_header::test_utils::mock_block_header;
     use chain_client::{Client, RpcClient};
-    use chain_common::SyncStatus;
+    use chain_common::{mock_chain_proof, SyncStatus};
 
     use super::*;
 
@@ -134,19 +134,19 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn chain_proof() {
         let mut chain_server = ChainProofServerMock::start().await;
-        let rpc_chain_proof = RpcChainProof::new(Default::default(), vec![]);
+        let chain_proof = mock_chain_proof([1]);
+        let rpc_chain_proof: RpcChainProof = (&chain_proof).try_into().unwrap();
         chain_server
             .mock_chain_proof()
             .with_params(GetChainProof::new(1, vec![1]), true)
-            .with_result(rpc_chain_proof.clone())
+            .with_result(rpc_chain_proof)
             .with_expected_calls(1)
             .add()
             .await;
         let client = RpcClient::new(chain_server.url());
 
         let chain_proof_result = client.get_chain_proof(1, vec![1]).await;
-        let expected_result = rpc_chain_proof.try_into().unwrap();
-        assert_eq!(chain_proof_result.unwrap(), expected_result);
+        assert_eq!(chain_proof_result.unwrap(), chain_proof);
         chain_server.assert();
     }
 
