@@ -1,6 +1,5 @@
 use alloy_eips::BlockNumHash;
-use alloy_primitives::{keccak256, B256, U256};
-use async_trait::async_trait;
+use alloy_primitives::{keccak256, B256};
 use common::Hashable;
 use serde::{Deserialize, Serialize};
 
@@ -12,12 +11,22 @@ use serde::{Deserialize, Serialize};
 pub struct L2BlockRef {
     /// The l1 block info.
     #[serde(flatten)]
-    pub l1_block_info: BlockInfo,
+    pub l2_block_info: BlockInfo,
     /// The origin on L1.
     #[serde(rename = "l1origin")]
     pub l1_origin: BlockNumHash,
     /// The sequence number.
     pub sequence_number: u64,
+}
+
+#[cfg(feature = "testing")]
+impl L2BlockRef {
+    pub fn from_l2_block_info(l2_block_info: BlockInfo) -> Self {
+        Self {
+            l2_block_info,
+            ..Default::default()
+        }
+    }
 }
 
 /// Block Header Info
@@ -34,6 +43,17 @@ pub struct BlockInfo {
     /// The block timestamp
     #[serde(with = "alloy_serde::quantity")]
     pub timestamp: u64,
+}
+
+#[cfg(feature = "testing")]
+impl BlockInfo {
+    pub fn from_num_hash(number: u64, hash: B256) -> Self {
+        Self {
+            number,
+            hash,
+            ..Default::default()
+        }
+    }
 }
 
 /// The [`SyncStatus`][ss] of an Optimism Rollup Node.
@@ -81,18 +101,13 @@ pub struct OutputResponse {
     pub sync_status: SyncStatus,
 }
 
-#[async_trait]
-pub trait OpRpcClient: Send + Sync {
-    async fn get_output_at_block(&self, block_number: U256) -> OutputResponse;
-}
-
 impl Hashable for OutputResponse {
     fn hash_slow(&self) -> B256 {
         let payload: Vec<u8> = [
             self.version.to_vec(),
             self.state_root.to_vec(),
             self.withdrawal_storage_root.to_vec(),
-            self.sync_status.finalized_l2.l1_block_info.hash.to_vec(),
+            self.block_ref.l2_block_info.hash.to_vec(),
         ]
         .concat();
 
@@ -115,18 +130,15 @@ mod hash_slow {
         static ref FINALIZED_L2_HASH: B256 =
             B256::from(hex!("4cd86d480704aef6106fcd200a26f2d6e6025f1032dd9b6ae09af85198973cd9"));
         static ref OUTPUT: OutputResponse = OutputResponse {
-            state_root: *STATE_ROOT,
-            withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
-            sync_status: SyncStatus {
-                finalized_l2: L2BlockRef {
-                    l1_block_info: BlockInfo {
-                        hash: *FINALIZED_L2_HASH,
-                        ..Default::default()
-                    },
+            block_ref: L2BlockRef {
+                l2_block_info: BlockInfo {
+                    hash: *FINALIZED_L2_HASH,
                     ..Default::default()
                 },
                 ..Default::default()
             },
+            state_root: *STATE_ROOT,
+            withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
             ..Default::default()
         };
     }

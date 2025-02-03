@@ -1,9 +1,12 @@
-use alloy_primitives::{Address, B256, U256};
+use alloy_primitives::{Address, BlockNumber, B256};
 use anyhow::anyhow;
 use derive_new::new;
 use revm::DatabaseRef;
 
-use super::{Error, Result};
+#[derive(thiserror::Error, Debug)]
+#[error(transparent)]
+pub struct Error(#[from] anyhow::Error);
+type Result<T> = std::result::Result<T, Error>;
 
 /// Storage layout:
 /// `OutputRoot` struct is stored at mapping(GameType -> OutputRoot) in slot 1.
@@ -25,7 +28,7 @@ mod layout {
 #[derive(Clone, Debug)]
 pub struct L2Commitment {
     pub output_hash: B256,
-    pub block_number: U256,
+    pub block_number: BlockNumber,
 }
 
 #[derive(Clone, Debug, new)]
@@ -41,14 +44,14 @@ impl AnchorStateRegistry {
     {
         let root = db
             .storage_ref(self.address, *layout::OUTPUT_HASH_SLOT)
-            .map_err(|err| Error::Database(anyhow!(err)))?;
+            .map_err(|err| anyhow!(err))?;
         let block_number = db
             .storage_ref(self.address, *layout::BLOCK_NUMBER_SLOT)
-            .map_err(|err| Error::Database(anyhow!(err)))?;
+            .map_err(|err| anyhow!(err))?;
 
         Ok(L2Commitment {
             output_hash: B256::from(root),
-            block_number,
+            block_number: block_number.to::<BlockNumber>(),
         })
     }
 }

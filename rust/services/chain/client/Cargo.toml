@@ -8,16 +8,16 @@ alloy-primitives = { workspace = true }
 async-trait = { workspace = true }
 chain_common = { workspace = true }
 derive-new = { workspace = true }
+thiserror = { workspace = true }
+
+# RPC client dependencies (disabled for guest)
+parking_lot = { workspace = true }
 
 # Fake client dependencies (disabled for guest)
 provider = { workspace = true, optional = true }
 risc0-zkp = { workspace = true, optional = true }
-
-# RPC client dependencies (disabled for guest)
-parking_lot = { workspace = true }
 serde_json = { workspace = true, optional = true }
 server_utils = { workspace = true, optional = true }
-thiserror = { workspace = true }
 tracing = { workspace = true, optional = true }
 
 [dev-dependencies]

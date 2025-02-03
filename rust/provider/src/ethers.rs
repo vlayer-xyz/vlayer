@@ -122,6 +122,12 @@ impl<T: JsonRpcClient> BlockingProvider for EthersProvider<T> {
 }
 
 pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
+    let requests_hash = block.other.get("requestsHash").map(|v| {
+        let requests_hash = v.as_str().expect("requestsHash should be a string");
+        requests_hash
+            .parse::<B256>()
+            .expect("requestsHash should be a B256")
+    });
     Ok(EthBlockHeader {
         parent_hash: from_ethers_h256(block.parent_hash),
         ommers_hash: from_ethers_h256(block.uncles_hash),
@@ -153,6 +159,7 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
             .transpose()
             .map_err(|e: &str| anyhow!(e))?,
         parent_beacon_block_root: block.parent_beacon_block_root.map(from_ethers_h256),
+        requests_hash,
     })
 }
 

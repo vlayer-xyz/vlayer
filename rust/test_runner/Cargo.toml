@@ -41,6 +41,7 @@ mailparse = { workspace = true }
 mock_chain_server = { workspace = true }
 mpt = { workspace = true }
 opener = { workspace = true }
+optimism = { workspace = true }
 parking_lot = { workspace = true }
 proptest = { workspace = true }
 provider = { workspace = true }

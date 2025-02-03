@@ -13,6 +13,7 @@ chain_client = { workspace = true }
 chain_common = { workspace = true }
 common = { workspace = true }
 mpt = { workspace = true }
+optimism = { workspace = true }
 revm = { workspace = true }
 risc0-zkvm = { workspace = true }
 

@@ -93,7 +93,7 @@ impl ChainSpec {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum ConversionError {
     #[error("Unsupported chain id: {0}")]
     UnsupportedChainId(ChainId),

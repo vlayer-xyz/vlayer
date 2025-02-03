@@ -98,12 +98,14 @@ impl FromIterator<(ExecutionLocation, EvmInput)> for MultiEvmInput {
 
 #[cfg(test)]
 mod test {
-    use block_header::{EthBlockHeader, Hashable};
+    use block_header::EthBlockHeader;
     use mpt::EMPTY_ROOT_HASH;
 
     use super::EvmInput;
 
     mod block_hashes {
+        use common::Hashable;
+
         use super::*;
 
         #[test]
@@ -127,6 +129,8 @@ mod test {
     }
 
     mod assert_state_root_coherency {
+        use alloy_primitives::B256;
+
         use super::*;
 
         #[test]
@@ -145,12 +149,21 @@ mod test {
         #[test]
         #[should_panic(expected = "State root mismatch")]
         fn mismatch() {
-            let input = EvmInput::default();
+            let input = EvmInput {
+                ancestors: vec![Default::default()],
+                header: Box::new(EthBlockHeader {
+                    state_root: B256::ZERO,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            };
             input.assert_state_root_coherency();
         }
     }
 
     mod assert_ancestors_coherency {
+        use common::Hashable;
+
         use super::*;
 
         #[test]

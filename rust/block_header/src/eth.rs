@@ -52,6 +52,11 @@ pub struct EthBlockHeader {
     pub excess_blob_gas: Option<u64>,
     /// Hash tree root of the parent beacon block for the given execution block.
     pub parent_beacon_block_root: Option<B256>,
+    /// The Keccak 256-bit hash of the an RLP encoded list with each
+    /// [EIP-7685] request in the block body.
+    ///
+    /// [EIP-7685]: https://eips.ethereum.org/EIPS/eip-7685
+    pub requests_hash: Option<B256>,
 }
 
 impl TryFrom<&dyn EvmBlockHeader> for EthBlockHeader {

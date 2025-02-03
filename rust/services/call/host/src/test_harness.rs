@@ -3,6 +3,7 @@ use call_engine::HostOutput;
 use chain_client::RpcClient as RpcChainProofClient;
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use mock_chain_server::ChainProofServerMock;
+use optimism::client::factory::mock;
 use provider::CachedMultiProvider;
 pub use rpc::{
     block_tag_to_block_number, create_multi_provider, rpc_snapshot_file, rpc_snapshot_files,
@@ -12,7 +13,7 @@ pub use types::ExecutionLocation;
 use crate::{BuilderError, Call, Config, Error, Host, PreflightResult};
 
 pub mod contracts;
-mod rpc;
+pub mod rpc;
 mod types;
 
 pub async fn preflight<C>(
@@ -23,9 +24,22 @@ pub async fn preflight<C>(
 where
     C: SolCall,
 {
+    let op_client_factory = mock::Factory::default();
+    preflight_with_teleport::<C>(test_name, call, location, op_client_factory).await
+}
+
+pub async fn preflight_with_teleport<C>(
+    test_name: &str,
+    call: Call,
+    location: &ExecutionLocation,
+    op_client_factory: impl optimism::client::IFactory + 'static,
+) -> anyhow::Result<C::Return>
+where
+    C: SolCall,
+{
     let multi_provider = create_multi_provider(test_name);
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
-    let host = create_host(multi_provider, location, chain_proof_server.url())?;
+    let host = create_host(multi_provider, location, chain_proof_server.url(), op_client_factory)?;
     let PreflightResult { host_output, .. } = host.preflight(call).await?;
     let return_value = C::abi_decode_returns(&host_output, true)?;
 
@@ -41,7 +55,8 @@ pub async fn run(
 ) -> Result<HostOutput, Error> {
     let multi_provider = create_multi_provider(test_name);
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
-    let host = create_host(multi_provider, location, chain_proof_server.url())?;
+    let op_client_factory = mock::Factory::default();
+    let host = create_host(multi_provider, location, chain_proof_server.url(), op_client_factory)?;
     let result = host.main(call).await?;
 
     chain_proof_server.assert();
@@ -67,6 +82,7 @@ fn create_host(
     multi_provider: CachedMultiProvider,
     location: &ExecutionLocation,
     chain_proof_server_url: impl AsRef<str>,
+    op_client_factory: impl optimism::client::IFactory + 'static,
 ) -> Result<Host, BuilderError> {
     let config = Config {
         call_guest_elf: CALL_GUEST_ELF.clone(),
@@ -77,5 +93,11 @@ fn create_host(
         block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
     let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_server_url));
     let start_exec_location = (location.chain_id, block_number).into();
-    Ok(Host::new(multi_provider, start_exec_location, Some(chain_proof_client), config))
+    Ok(Host::new(
+        multi_provider,
+        start_exec_location,
+        Some(chain_proof_client),
+        op_client_factory,
+        config,
+    ))
 }

@@ -38,29 +38,34 @@ pub struct New;
 pub struct WithProviders {
     rpc_urls: HashMap<ChainId, String>,
     providers: CachedMultiProvider,
+    op_client_factory: Box<dyn optimism::client::IFactory>,
 }
 
 pub struct WithChainGuestId {
     rpc_urls: HashMap<ChainId, String>,
     providers: CachedMultiProvider,
+    op_client_factory: Box<dyn optimism::client::IFactory>,
     chain_guest_id: Digest,
 }
 
 pub struct WithChainClient {
     chain_client: Box<dyn chain_client::Client>,
     providers: CachedMultiProvider,
+    op_client_factory: Box<dyn optimism::client::IFactory>,
 }
 
 pub struct WithStartChainId {
     start_chain_id: ChainId,
     chain_client: Box<dyn chain_client::Client>,
     providers: CachedMultiProvider,
+    op_client_factory: Box<dyn optimism::client::IFactory>,
 }
 
 pub struct WithStartExecLocation {
     chain_client: Option<Box<dyn chain_client::Client>>,
     start_exec_location: ExecutionLocation,
     providers: CachedMultiProvider,
+    op_client_factory: Box<dyn optimism::client::IFactory>,
 }
 
 impl New {
@@ -69,9 +74,12 @@ impl New {
     pub fn with_rpc_urls(self, rpc_urls: HashMap<ChainId, String>) -> WithProviders {
         let provider_factory = EthersProviderFactory::new(rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
+        let op_client_factory =
+            Box::new(optimism::client::factory::http::Factory::new(rpc_urls.clone()));
         WithProviders {
             rpc_urls,
             providers,
+            op_client_factory,
         }
     }
 }
@@ -81,6 +89,7 @@ impl WithProviders {
         WithChainGuestId {
             rpc_urls: self.rpc_urls,
             providers: self.providers,
+            op_client_factory: self.op_client_factory,
             chain_guest_id,
         }
     }
@@ -95,6 +104,7 @@ impl WithChainGuestId {
             rpc_urls,
             providers,
             chain_guest_id,
+            op_client_factory,
         } = self;
         let chain_client: Box<dyn chain_client::Client> = match chain_proof_url.as_ref() {
             Some(url) => Box::new(chain_client::RpcClient::new(url)),
@@ -108,6 +118,7 @@ impl WithChainGuestId {
         Ok(WithChainClient {
             chain_client,
             providers,
+            op_client_factory,
         })
     }
 }
@@ -117,11 +128,13 @@ impl WithChainClient {
         let WithChainClient {
             chain_client,
             providers,
+            op_client_factory,
         } = self;
         Ok(WithStartChainId {
             start_chain_id,
             providers,
             chain_client,
+            op_client_factory,
         })
     }
 }
@@ -147,6 +160,7 @@ impl WithStartChainId {
             start_chain_id,
             chain_client,
             providers,
+            op_client_factory,
         } = self;
 
         let prover_contract_deployed =
@@ -167,6 +181,7 @@ impl WithStartChainId {
                 chain_client: None,
                 start_exec_location: (start_chain_id, latest_rpc_block).into(),
                 providers,
+                op_client_factory,
             });
         };
 
@@ -178,6 +193,7 @@ impl WithStartChainId {
             chain_client: Some(chain_client),
             start_exec_location,
             providers,
+            op_client_factory,
         })
     }
 }
@@ -201,8 +217,9 @@ impl WithStartExecLocation {
             chain_client,
             start_exec_location,
             providers,
+            op_client_factory,
         } = self;
-        Host::new(providers, start_exec_location, chain_client, config)
+        Host::new(providers, start_exec_location, chain_client, op_client_factory, config)
     }
 }
 
@@ -225,6 +242,7 @@ mod tests {
         use ethers_core::types::{Bytes, U64};
         use ethers_providers::MockProvider;
         use mock_chain_server::ChainProofServerMock;
+        use optimism::client::factory::mock;
         use provider::{BlockingProvider, EthersProvider};
 
         use super::*;
@@ -263,10 +281,12 @@ mod tests {
             let start_chain_provider = mock_provider(prover_contract_code_results);
             let chain_client = mock_chain_client().await;
             let providers = CachedMultiProvider::from_provider(CHAIN_ID, start_chain_provider);
+            let op_client_factory = Box::new(mock::Factory::default());
             WithStartChainId {
                 start_chain_id: CHAIN_ID,
                 chain_client,
                 providers,
+                op_client_factory,
             }
         }
 
