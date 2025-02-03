@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import {Proof, ProofLib} from "./Proof.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
-import {ProofVerifierFactory} from "./proof_verifier/ProofVerifierFactory.sol";
+import {ProofVerifierFactory, ChainIdLibrary} from "./proof_verifier/ProofVerifierFactory.sol";
 import {CallAssumptionsLib} from "./CallAssumptions.sol";
 
 abstract contract Verifier {

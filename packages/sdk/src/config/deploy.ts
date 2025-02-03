@@ -9,6 +9,7 @@ import {
 } from "viem";
 import { getChainConfirmations } from "./getChainConfirmations";
 import debug from "debug";
+import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
 
 const log = debug("vlayer:prover");
 

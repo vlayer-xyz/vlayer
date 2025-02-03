@@ -29,8 +29,7 @@ contract AverageBalanceVerifier is Verifier {
         }
     }
 
-    // Intentionally underscored as it's a helper function
-    function _setTestVerifier(IProofVerifier newVerifier) external {
+    function setTestVerifier(IProofVerifier newVerifier) external {
         super._setTestVerifier(newVerifier);
     }
 }

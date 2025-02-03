@@ -31,8 +31,7 @@ contract EmailDomainVerifier is Verifier, ERC721 {
         _safeMint(_targetWallet, tokenId);
     }
 
-    // Intentionally underscored as it's a helper function
-    function _setTestVerifier(IProofVerifier newVerifier) external {
-        super._setTestVerifier(newVerifier);
+    function setTestVerifier(IProofVerifier newVerifier) external {
+        _setTestVerifier(newVerifier);
     }
 }

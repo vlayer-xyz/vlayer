@@ -11,13 +11,13 @@ import {
 
 interface ITestingVerifier {
     function verifier() external view returns (IProofVerifier);
-    function _setTestVerifier(IProofVerifier newVerifier) external;
+    function setTestVerifier(IProofVerifier newVerifier) external;
 }
 
 contract TestVerifierRouterDeployer {
     function swapProofVerifier(ITestingVerifier verifier) external {
         IImageIdRepository repository = verifier.verifier().imageIdRepository();
-        verifier._setTestVerifier(
+        verifier.setTestVerifier(
             new ProofVerifierRouter(new FakeProofVerifier(repository), new Groth16ProofVerifier(repository))
         );
     }

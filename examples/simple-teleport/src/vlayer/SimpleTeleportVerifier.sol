@@ -29,8 +29,7 @@ contract SimpleTeleportVerifier is Verifier {
         }
     }
 
-    // Intentionally underscored as it's a helper function
-    function _setTestVerifier(IProofVerifier newVerifier) external {
-        super._setTestVerifier(newVerifier);
+    function setTestVerifier(IProofVerifier newVerifier) external {
+        _setTestVerifier(newVerifier);
     }
 }
