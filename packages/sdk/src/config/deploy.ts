@@ -10,6 +10,7 @@ import {
 import { getChainConfirmations } from "./getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
+import type { DeployConfig } from "./types";
 
 const log = debug("vlayer:prover");
 
@@ -82,9 +83,7 @@ export const deployVlayerContracts = async ({
   verifierSpec: ContractSpec;
   proverArgs?: ContractArg[];
   verifierArgs?: ContractArg[];
-  env?: {
-    isTesting: boolean;
-  };
+  env?: DeployConfig;
 }) => {
   log("Starting contract deployment process...");
   const config = getConfig();

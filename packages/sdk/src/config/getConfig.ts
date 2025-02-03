@@ -1,5 +1,5 @@
 import dotenvflow from "dotenv-flow";
-import { type EnvConfig } from "./types";
+import { type DeployConfig, type EnvConfig } from "./types";
 
 const ensureEnvVariable = (envVar: string) => {
   if (!process.env[envVar]) {
@@ -13,22 +13,28 @@ const ensureEnvVariable = (envVar: string) => {
   return process.env[envVar];
 };
 
-const ensureVlayerEnv = () => {
+const POSSIBLE_VLAYER_ENVS = ["testnet", "dev"] as const;
+type VlayerEnv = (typeof POSSIBLE_VLAYER_ENVS)[number];
+
+const ensureVlayerEnv = (): VlayerEnv => {
   try {
     if (!process.env.VLAYER_ENV) {
-      throw new Error("VLAYER_ENV is not set. Available options: testnet, dev");
-    }
-    if (!["testnet", "dev"].includes(process.env.VLAYER_ENV)) {
       throw new Error(
-        `Invalid VLAYER_ENV: ${process.env.VLAYER_ENV}. Available options: testnet, anvil, mainnet`,
+        `VLAYER_ENV is not set. Available options: ${POSSIBLE_VLAYER_ENVS.join(", ")}`,
+      );
+    }
+    if (!POSSIBLE_VLAYER_ENVS.includes(process.env.VLAYER_ENV as VlayerEnv)) {
+      throw new Error(
+        `Invalid VLAYER_ENV: ${process.env.VLAYER_ENV}. Available options: ${POSSIBLE_VLAYER_ENVS.join(", ")}`,
       );
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
+    console.error(e);
     return "dev";
   }
 
-  return process.env.VLAYER_ENV;
+  return process.env.VLAYER_ENV as VlayerEnv;
 };
 
 const dotEnvFlowConfig = () => {
@@ -55,17 +61,25 @@ const envVars = [
 
 export const getConfig = () => {
   dotEnvFlowConfig();
-  return envVars.reduce((config, envVar) => {
-    try {
-      return {
-        ...config,
-        [envVar.to ?? toCamelCase(envVar.var)]: ensureEnvVariable(envVar.var),
-      };
-    } catch (e) {
-      if (envVar.optional) {
-        return { ...config };
+
+  const deployConfig: DeployConfig = {
+    isTesting: ensureVlayerEnv() === "dev",
+  };
+
+  return envVars.reduce(
+    (config, envVar) => {
+      try {
+        return {
+          ...config,
+          [envVar.to ?? toCamelCase(envVar.var)]: ensureEnvVariable(envVar.var),
+        };
+      } catch (e) {
+        if (envVar.optional) {
+          return { ...config };
+        }
+        throw e;
       }
-      throw e;
-    }
-  }, {} as EnvConfig);
+    },
+    { deployConfig } as EnvConfig,
+  );
 };

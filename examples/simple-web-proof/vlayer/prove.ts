@@ -13,12 +13,12 @@ import {
   writeEnvVariables,
 } from "@vlayer/sdk/config";
 
+let config = getConfig();
+
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  env: {
-    isTesting: true,
-  },
+  env: config.deployConfig,
 });
 
 writeEnvVariables(".env", {
@@ -26,7 +26,7 @@ writeEnvVariables(".env", {
   VITE_VERIFIER_ADDRESS: verifier,
 });
 
-const config = getConfig();
+config = getConfig();
 const { chain, ethClient, account, proverUrl, confirmations } =
   await createContext(config);
 
