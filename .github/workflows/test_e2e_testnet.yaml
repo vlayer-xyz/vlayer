@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 concurrency:
   group: e2e-testnet-with-private-key
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test-e2e-testnet:
