@@ -16,8 +16,7 @@ on:
     branches:
       - main
 concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  group: e2e-testnet-with-private-key
   cancel-in-progress: true
 
 jobs:
