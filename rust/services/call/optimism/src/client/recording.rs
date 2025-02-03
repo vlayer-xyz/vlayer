@@ -2,11 +2,11 @@ use std::sync::{Arc, RwLock};
 
 use alloy_primitives::BlockNumber;
 
-use crate::{types::OutputResponse, ClientError, IClient};
+use crate::{types::SequencerOutput, ClientError, IClient};
 
 pub struct Client {
     inner: Arc<dyn IClient>,
-    cache: Arc<RwLock<OutputResponse>>,
+    cache: Arc<RwLock<SequencerOutput>>,
 }
 
 impl Client {
@@ -17,7 +17,7 @@ impl Client {
         }
     }
 
-    pub fn into_cache(self) -> OutputResponse {
+    pub fn into_cache(self) -> SequencerOutput {
         let cache =
             Arc::try_unwrap(self.cache).expect("Trying to access cache while it's still in use");
         cache.into_inner().expect("poisoned lock")
@@ -29,7 +29,7 @@ impl IClient for Client {
     async fn get_output_at_block(
         &self,
         block_number: BlockNumber,
-    ) -> Result<OutputResponse, ClientError> {
+    ) -> Result<SequencerOutput, ClientError> {
         let output = self.inner.get_output_at_block(block_number).await?;
         self.cache
             .write()

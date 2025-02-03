@@ -120,7 +120,7 @@ pub mod simple {
 pub mod teleport {
     use alloy_primitives::{hex, uint, Uint, B256};
     use lazy_static::lazy_static;
-    use optimism::types::{BlockInfo, L2BlockRef, OutputResponse};
+    use optimism::{types::SequencerOutput, NumHash};
 
     use super::*;
 
@@ -144,15 +144,11 @@ pub mod teleport {
             B256::from(hex!("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
         static ref FINALIZED_L2_HASH: B256 =
             B256::from(hex!("8a3162ac8009f30a115f905e15c1206c89d5bde102e5cf1f72e425d3aec03fbd"));
-        pub static ref OUTPUT: OutputResponse = OutputResponse {
-            block_ref: L2BlockRef::from_l2_block_info(BlockInfo::from_num_hash(
-                3,
-                *FINALIZED_L2_HASH
-            )),
-            state_root: *STATE_ROOT,
-            withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
-            ..Default::default()
-        };
+        pub static ref OUTPUT: SequencerOutput = SequencerOutput::new(
+            *STATE_ROOT,
+            *WITHDRAWAL_STORAGE_ROOT,
+            NumHash::new(3, *FINALIZED_L2_HASH)
+        );
     }
 
     sol! {

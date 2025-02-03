@@ -1,113 +1,52 @@
-use alloy_eips::BlockNumHash;
+use alloy_eips::NumHash;
 use alloy_primitives::{keccak256, B256};
 use common::Hashable;
+use rpc::OutputResponse;
 use serde::{Deserialize, Serialize};
 
-/// The block reference for an L2 block.
-///
-/// See: <https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/id.go#L33>
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct L2BlockRef {
-    /// The l1 block info.
-    #[serde(flatten)]
-    pub l2_block_info: BlockInfo,
-    /// The origin on L1.
-    #[serde(rename = "l1origin")]
-    pub l1_origin: BlockNumHash,
-    /// The sequence number.
-    pub sequence_number: u64,
-}
+pub mod rpc;
 
-#[cfg(feature = "testing")]
-impl L2BlockRef {
-    pub fn from_l2_block_info(l2_block_info: BlockInfo) -> Self {
-        Self {
-            l2_block_info,
-            ..Default::default()
-        }
-    }
-}
-
-/// Block Header Info
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Eq, Hash, PartialEq, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct BlockInfo {
-    /// The block hash
-    pub hash: B256,
-    /// The block number
-    #[serde(with = "alloy_serde::quantity")]
-    pub number: u64,
-    /// The parent block hash
-    pub parent_hash: B256,
-    /// The block timestamp
-    #[serde(with = "alloy_serde::quantity")]
-    pub timestamp: u64,
-}
-
-#[cfg(feature = "testing")]
-impl BlockInfo {
-    pub fn from_num_hash(number: u64, hash: B256) -> Self {
-        Self {
-            number,
-            hash,
-            ..Default::default()
-        }
-    }
-}
-
-/// The [`SyncStatus`][ss] of an Optimism Rollup Node.
-///
-/// [ss]: https://github.com/ethereum-optimism/optimism/blob/develop/op-service/eth/sync_status.go#L5
+/// This is a subset of OutputResponse that is passed between Host and Guest
+/// * It's smaller and contains only the data needed to compute the hash
+/// * It does not use `alloy_serde::quantity` which uses `seq` which is not available on `risc0` version of `serde`
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
-pub struct SyncStatus {
-    /// The current L1 block.
-    pub current_l1: BlockInfo,
-    /// The current L1 finalized block.
-    pub current_l1_finalized: BlockInfo,
-    /// The L1 head block ref.
-    pub head_l1: BlockInfo,
-    /// The L1 safe head block ref.
-    pub safe_l1: BlockInfo,
-    /// The finalized L1 block ref.
-    pub finalized_l1: BlockInfo,
-    /// The unsafe L2 block ref.
-    pub unsafe_l2: L2BlockRef,
-    /// The safe L2 block ref.
-    pub safe_l2: L2BlockRef,
-    /// The finalized L2 block ref.
-    pub finalized_l2: L2BlockRef,
-    /// The pending safe L2 block ref.
-    pub pending_safe_l2: L2BlockRef,
-}
-
-/// An [output response][or] for Optimism Rollup.
-///
-/// [or]: https://github.com/ethereum-optimism/optimism/blob/f20b92d3eb379355c876502c4f28e72a91ab902f/op-service/eth/output.go#L10-L17
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct OutputResponse {
-    /// The output version.
+pub struct SequencerOutput {
     pub version: B256,
-    /// The output root hash.
-    pub output_root: B256,
-    /// A reference to the L2 block.
-    pub block_ref: L2BlockRef,
-    /// The withdrawal storage root.
-    pub withdrawal_storage_root: B256,
-    /// The state root.
     pub state_root: B256,
-    /// The status of the node sync.
-    pub sync_status: SyncStatus,
+    pub withdrawal_storage_root: B256,
+    pub l2_block: NumHash,
 }
 
-impl Hashable for OutputResponse {
+impl SequencerOutput {
+    pub fn new(state_root: B256, withdrawal_storage_root: B256, l2_block: NumHash) -> Self {
+        Self {
+            version: B256::default(),
+            state_root,
+            withdrawal_storage_root,
+            l2_block,
+        }
+    }
+}
+
+impl From<OutputResponse> for SequencerOutput {
+    fn from(output: OutputResponse) -> Self {
+        let l2_block = output.block_ref.l2_block_info;
+        Self {
+            version: output.version,
+            state_root: output.state_root,
+            withdrawal_storage_root: output.withdrawal_storage_root,
+            l2_block: NumHash::new(l2_block.number, l2_block.hash),
+        }
+    }
+}
+
+impl Hashable for SequencerOutput {
     fn hash_slow(&self) -> B256 {
         let payload: Vec<u8> = [
             self.version.to_vec(),
             self.state_root.to_vec(),
             self.withdrawal_storage_root.to_vec(),
-            self.block_ref.l2_block_info.hash.to_vec(),
+            self.l2_block.hash.to_vec(),
         ]
         .concat();
 
@@ -129,18 +68,11 @@ mod hash_slow {
             B256::from(hex!("1e346b4b9774c44851b6e75760e09da0495f0b9124282e0f652df80d9a876b44"));
         static ref FINALIZED_L2_HASH: B256 =
             B256::from(hex!("4cd86d480704aef6106fcd200a26f2d6e6025f1032dd9b6ae09af85198973cd9"));
-        static ref OUTPUT: OutputResponse = OutputResponse {
-            block_ref: L2BlockRef {
-                l2_block_info: BlockInfo {
-                    hash: *FINALIZED_L2_HASH,
-                    ..Default::default()
-                },
-                ..Default::default()
-            },
-            state_root: *STATE_ROOT,
-            withdrawal_storage_root: *WITHDRAWAL_STORAGE_ROOT,
-            ..Default::default()
-        };
+        static ref OUTPUT: SequencerOutput = SequencerOutput::new(
+            *STATE_ROOT,
+            *WITHDRAWAL_STORAGE_ROOT,
+            NumHash::new(3, *FINALIZED_L2_HASH)
+        );
     }
 
     #[test]

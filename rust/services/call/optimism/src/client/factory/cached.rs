@@ -1,13 +1,12 @@
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use alloy_primitives::ChainId;
 use derive_new::new;
-use revm::primitives::HashMap;
 use thiserror::Error;
 
 use crate::{
     client::{cached, FactoryError, IFactory},
-    types::OutputResponse,
+    types::SequencerOutput,
     IClient,
 };
 
@@ -17,18 +16,18 @@ pub enum Error {
     NoDataForChain(ChainId),
 }
 
-pub type OpOutputCache = HashMap<ChainId, OutputResponse>;
+pub type OpOutputCache = HashMap<ChainId, SequencerOutput>;
 
 #[derive(Debug, Clone, new, Default)]
 pub struct Factory {
-    cache: HashMap<ChainId, OutputResponse>,
+    cache: HashMap<ChainId, SequencerOutput>,
 }
 
 impl Factory {
     /// Used in tests for convenience.
     pub fn from_single_sequencer_output(
         chain_id: ChainId,
-        sequencer_output: OutputResponse,
+        sequencer_output: SequencerOutput,
     ) -> Self {
         Self {
             cache: [(chain_id, sequencer_output)].into_iter().collect(),

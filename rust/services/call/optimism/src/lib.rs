@@ -3,11 +3,12 @@ pub mod types;
 
 pub mod client;
 
+pub use alloy_eips::NumHash;
 use async_trait::async_trait;
 use auto_impl::auto_impl;
 use thiserror::Error;
 
-use crate::types::OutputResponse;
+use crate::types::SequencerOutput;
 
 #[derive(Debug, Error, PartialEq, Eq)]
 #[non_exhaustive]
@@ -22,5 +23,5 @@ pub enum ClientError {
 #[async_trait]
 #[auto_impl(Arc)]
 pub trait IClient: Send + Sync {
-    async fn get_output_at_block(&self, block_number: u64) -> Result<OutputResponse, ClientError>;
+    async fn get_output_at_block(&self, block_number: u64) -> Result<SequencerOutput, ClientError>;
 }
