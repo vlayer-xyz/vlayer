@@ -52,10 +52,10 @@ jobs:
       - name: Build binaries
         env:
           RISC0_USE_DOCKER: 1
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
       - name: Run e2e test in prod mode
         env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "prod"
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
