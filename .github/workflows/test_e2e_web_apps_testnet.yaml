@@ -54,6 +54,9 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      # Stateful GH Runners have a separate testnet private key on disk,
+      # to allow concurrent runs of the workflow avoiding nonce issues.
+      # Here we load the key into a variable from a location on disk.
       - name: Read testnet private key
         run: |
           EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
