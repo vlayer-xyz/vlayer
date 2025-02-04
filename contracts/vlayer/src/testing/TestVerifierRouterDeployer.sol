@@ -10,8 +10,9 @@ contract TestVerifierRouterDeployer {
     ProofVerifierRouter immutable verifierRouter;
 
     constructor() {
-        Repository repository = new Repository(msg.sender, msg.sender);
+        Repository repository = new Repository(msg.sender, address(this));
         repository.addImageIdSupport(ImageID.RISC0_CALL_GUEST_ID);
+        repository.transferOwnership(msg.sender);
 
         verifierRouter =
             new ProofVerifierRouter(new FakeProofVerifier(repository), new Groth16ProofVerifier(repository));
