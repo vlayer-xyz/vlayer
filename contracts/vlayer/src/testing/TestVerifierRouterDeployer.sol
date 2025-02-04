@@ -11,6 +11,8 @@ import {ImageID} from "../ImageID.sol";
 import {Verifier} from "../Verifier.sol";
 
 contract TestVerifierRouterDeployer {
+    bool public IS_SCRIPT = true;
+
     function swapProofVerifier(Verifier verifier) external {
         Repository currentRepo = Repository(address (verifier.verifier().imageIdRepository()));
 
