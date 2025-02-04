@@ -120,7 +120,7 @@ where
                 AnchorStateRegistry::new(dest_chain_spec.anchor_state_registry, &source_evm_env.db);
             let sequencer_client = self.sequencer_client_factory.create(chain_id)?;
             let l2_block =
-                fetch_latest_confirmed_l2_block(anchor_state_registry, sequencer_client).await?;
+                fetch_latest_confirmed_l2_block(anchor_state_registry, &sequencer_client).await?;
 
             let latest_confirmed_location = (chain_id, l2_block.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
@@ -136,7 +136,7 @@ where
 
 async fn fetch_latest_confirmed_l2_block<D>(
     anchor_state_registry: AnchorStateRegistry<D>,
-    sequencer_client: Arc<dyn optimism::IClient>,
+    sequencer_client: &dyn optimism::IClient,
 ) -> Result<NumHash>
 where
     D: DatabaseRef + Send + Sync,
