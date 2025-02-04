@@ -5,7 +5,9 @@ import {
   type Account,
   type Address,
   type Chain,
+  type Hex,
   parseAbi,
+  parseAbiItem,
   type PublicClient,
   type WalletClient,
 } from "viem";
@@ -130,10 +132,11 @@ const swapInternalVerifier = async (
   verifierAddress: Address,
 ) => {
   log("Swapping internal verifier");
+  const imageIds = await getImageId(ethClient, verifierAddress);
   const routerDeployerHash = await ethClient.deployContract({
     chain,
     account,
-    args: [],
+    args: [imageIds],
     abi: TestVerifierRouterDeployer.abi,
     bytecode: TestVerifierRouterDeployer.bytecode.object,
   });
@@ -156,3 +159,26 @@ const swapInternalVerifier = async (
   await waitForTransactionReceipt({ hash: swapTxHash });
   log("Internal verifier swapped successfully");
 };
+
+async function getImageId(
+  ethClient: WalletClient & PublicClient,
+  verifierAddress: Address,
+): Promise<Hex[]> {
+  const internalVerifier = await ethClient.readContract({
+    address: verifierAddress,
+    functionName: "verifier",
+    abi: parseAbi(["function verifier() external view returns (address)"]),
+  });
+  const repository = await ethClient.readContract({
+    address: internalVerifier,
+    functionName: "imageIdRepository",
+    abi: parseAbi([
+      "function imageIdRepository() external view returns (address)",
+    ]),
+  });
+  const logs = await ethClient.getLogs({
+    address: repository,
+    event: parseAbiItem(["event ImageIDAdded(bytes32)"]),
+  });
+  return logs.map((log) => log.args[0] as Hex);
+}

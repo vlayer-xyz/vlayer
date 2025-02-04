@@ -3,14 +3,15 @@ pragma solidity ^0.8.21;
 
 import {ProofVerifierRouter, FakeProofVerifier, Groth16ProofVerifier} from "../proof_verifier/ProofVerifierRouter.sol";
 import {Repository} from "../Repository.sol";
-import {ImageID} from "../ImageID.sol";
 
 contract TestVerifierRouterDeployer {
     ProofVerifierRouter public immutable VERIFIER_ROUTER;
 
-    constructor() {
+    constructor(bytes32[] memory imageIds) {
         Repository repository = new Repository(address(this), address(this));
-        repository.addImageIdSupport(ImageID.RISC0_CALL_GUEST_ID);
+        for (uint256 i = 0; i < imageIds.length; i++) {
+            repository.addImageIdSupport(imageIds[i]);
+        }
         repository.transferOwnership(msg.sender);
         repository.transferAdminRole(msg.sender);
 
