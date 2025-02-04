@@ -117,7 +117,8 @@ export const deployVlayerContracts = async ({
   log(`Verifier contract deployed at: ${verifier}`);
 
   log("Contract deployment completed successfully");
-
+  console.log("DEPLOYEDDDDD&*^&&*^78686213821361287");
+  console.log("IS TESTING = ", env?.isTesting);
   if (env?.isTesting) {
     await swapInternalVerifier(ethClient, chain, account, verifier);
   }
@@ -133,6 +134,7 @@ const swapInternalVerifier = async (
 ) => {
   log("Swapping internal verifier");
   const imageIds = await getImageId(ethClient, verifierAddress);
+  console.log(JSON.stringify(imageIds));
   const routerDeployerHash = await ethClient.deployContract({
     chain,
     account,
@@ -176,8 +178,10 @@ async function getImageId(
       "function imageIdRepository() external view returns (address)",
     ]),
   });
+  const blockNumber = await ethClient.getBlockNumber();
   const logs = await ethClient.getLogs({
     address: repository,
+    fromBlock: blockNumber - 100n > 0 ? blockNumber - 100n : 1n,
     event: parseAbiItem(["event ImageIDAdded(bytes32)"]),
   });
   return logs.map((log) => log.args[0] as Hex);

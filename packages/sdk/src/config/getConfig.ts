@@ -61,9 +61,9 @@ const envVars = [
 
 export const getConfig = () => {
   dotEnvFlowConfig();
-
+  console.log(ensureVlayerEnv());
   const deployConfig: DeployConfig = {
-    isTesting: ensureVlayerEnv() === "dev",
+    isTesting: true,
   };
 
   return envVars.reduce(
