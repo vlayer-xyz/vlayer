@@ -5,8 +5,13 @@ function get_examples() {
         "simple-email-proof"
         "simple-web-proof"
         "simple-time-travel"
-        # "simple-teleport"
+        "simple-teleport"
     )
+
+    # "simple-teleport" is not enabled on testnet as we still need to deploy chain workers
+    if [[ "$VLAYER_ENV" == "testnet" ]]; then
+        EXAMPLE_LIST=("${EXAMPLE_LIST[@]/simple-teleport}")
+    fi
 
     if [[ -n ${EXAMPLE:-} ]]; then
         if ! [[ " ${EXAMPLE_LIST[*]} " == *" $EXAMPLE "* ]]; then

@@ -32,23 +32,29 @@ pub struct L2Commitment {
 }
 
 #[derive(Clone, Debug, new)]
-pub struct AnchorStateRegistry {
+pub struct AnchorStateRegistry<D> {
     address: Address,
+    db: D,
 }
 
-impl AnchorStateRegistry {
-    pub fn get_latest_confirmed_l2_commitment<D>(&self, db: D) -> Result<L2Commitment>
-    where
-        D: DatabaseRef + Send + Sync,
-        D::Error: std::fmt::Debug + std::error::Error + Send + Sync + 'static,
-    {
+impl<D> AnchorStateRegistry<D>
+where
+    D: DatabaseRef + Send + Sync,
+    D::Error: std::fmt::Debug + std::error::Error + Send + Sync + 'static,
+{
+    pub fn get_latest_confirmed_l2_commitment(&self) -> Result<L2Commitment> {
         // `WrapStateDB` relies on the guarantee that EVM always asks for account state before storage and caches some things
         // Therefore - without this step - we can't access storage
-        let _ = db.basic_ref(self.address).map_err(|err| anyhow!(err))?;
-        let root = db
+        let _ = self
+            .db
+            .basic_ref(self.address)
+            .map_err(|err| anyhow!(err))?;
+        let root = self
+            .db
             .storage_ref(self.address, *layout::OUTPUT_HASH_SLOT)
             .map_err(|err| anyhow!(err))?;
-        let block_number = db
+        let block_number = self
+            .db
             .storage_ref(self.address, *layout::BLOCK_NUMBER_SLOT)
             .map_err(|err| anyhow!(err))?;
 

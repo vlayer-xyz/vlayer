@@ -50,7 +50,7 @@ mod tests {
 
         assert_eq!(
             res.map(|_| ()).unwrap_err().to_string(),
-            "Prover: Guest panicked: travel call verification failed: Teleport(Factory(NullEvmEnvFactory))"
+            "Prover: Guest panicked: travel call verification failed: Teleport(Conversion(UnsupportedChainId(0)))"
         );
     }
 }

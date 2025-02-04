@@ -5,7 +5,7 @@ use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
 use common::Hashable;
 use derivative::Derivative;
-use optimism::anchor_state_registry::AnchorStateRegistry;
+use optimism::{anchor_state_registry::AnchorStateRegistry, NumHash};
 use revm::DatabaseRef;
 
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
@@ -28,7 +28,9 @@ pub enum Error {
         optimism::anchor_state_registry::Error,
     ),
     #[error(transparent)]
-    Conversion(#[from] chain::optimism::ConversionError),
+    OptimismConversion(#[from] chain::optimism::ConversionError),
+    #[error(transparent)]
+    Conversion(#[from] chain::ConversionError),
     #[error("Commit error: {0}")]
     Commit(#[from] chain::optimism::CommitError),
     #[error("Client factory error: {0}")]
@@ -79,13 +81,13 @@ where
 }
 
 pub struct Verifier {
-    factory: Arc<dyn optimism::client::IFactory>,
+    sequencer_client_factory: Arc<dyn optimism::client::IFactory>,
 }
 
 impl Verifier {
     pub fn new(factory: impl optimism::client::IFactory + 'static) -> Self {
         Self {
-            factory: Arc::new(factory),
+            sequencer_client_factory: Arc::new(factory),
         }
     }
 }
@@ -103,6 +105,10 @@ where
         start_exec_location: ExecutionLocation,
     ) -> Result<()> {
         let source_chain_id = start_exec_location.chain_id;
+        let source_chain_spec = chain::ChainSpec::try_from(source_chain_id)?;
+        if source_chain_spec.is_local_testnet() {
+            return Ok(());
+        }
         let source_evm_env = evm_envs.get(start_exec_location)?;
         let blocks_by_chain = evm_envs.blocks_by_chain();
         let destinations = get_destinations(blocks_by_chain, start_exec_location);
@@ -111,19 +117,10 @@ where
             dest_chain_spec.assert_anchor(source_chain_id)?;
 
             let anchor_state_registry =
-                AnchorStateRegistry::new(dest_chain_spec.anchor_state_registry);
-            let l2_commitment =
-                anchor_state_registry.get_latest_confirmed_l2_commitment(&source_evm_env.db)?;
-
-            let client = self.factory.create(chain_id)?;
-            let l2_output = client
-                .get_output_at_block(l2_commitment.block_number)
-                .await?;
-
-            if l2_output.hash_slow() != l2_commitment.output_hash {
-                return Err(Error::L2OutputHashMismatch);
-            }
-            let l2_block = l2_output.l2_block;
+                AnchorStateRegistry::new(dest_chain_spec.anchor_state_registry, &source_evm_env.db);
+            let sequencer_client = self.sequencer_client_factory.create(chain_id)?;
+            let l2_block =
+                fetch_latest_confirmed_l2_block(anchor_state_registry, &sequencer_client).await?;
 
             let latest_confirmed_location = (chain_id, l2_block.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
@@ -135,6 +132,26 @@ where
         }
         Ok(())
     }
+}
+
+async fn fetch_latest_confirmed_l2_block<D>(
+    anchor_state_registry: AnchorStateRegistry<D>,
+    sequencer_client: &dyn optimism::IClient,
+) -> Result<NumHash>
+where
+    D: DatabaseRef + Send + Sync,
+    D::Error: std::error::Error + Send + Sync + 'static,
+{
+    let l2_commitment = anchor_state_registry.get_latest_confirmed_l2_commitment()?;
+
+    let sequencer_output = sequencer_client
+        .get_output_at_block(l2_commitment.block_number)
+        .await?;
+
+    if sequencer_output.hash_slow() != l2_commitment.output_hash {
+        return Err(Error::L2OutputHashMismatch);
+    }
+    Ok(sequencer_output.l2_block)
 }
 
 pub fn ensure_latest_teleport_location_is_confirmed(

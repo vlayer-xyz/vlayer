@@ -12,6 +12,8 @@ pub struct ChainSpec {
     forks: Box<[Fork]>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     op_spec: Option<OptimismSpec>,
+    #[serde(default)]
+    is_local_testnet: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -42,6 +44,7 @@ impl ChainSpec {
         name: impl Into<String>,
         forks: impl IntoIterator<Item = F>,
         op_spec: Option<OptimismSpec>,
+        is_local_testnet: bool,
     ) -> Self
     where
         F: Into<Fork>,
@@ -59,6 +62,7 @@ impl ChainSpec {
             name,
             forks,
             op_spec,
+            is_local_testnet,
         }
     }
 
@@ -91,6 +95,10 @@ impl ChainSpec {
     pub const fn is_optimism(&self) -> bool {
         self.op_spec.is_some()
     }
+
+    pub const fn is_local_testnet(&self) -> bool {
+        self.is_local_testnet
+    }
 }
 
 #[derive(Debug, Error, PartialEq, Eq)]
@@ -121,7 +129,7 @@ mod tests {
         #[test]
         #[should_panic(expected = "chain spec must have at least one fork")]
         fn panics_if_no_forks() {
-            ChainSpec::new(1, "", [] as [Fork; 0], None);
+            ChainSpec::new(1, "", [] as [Fork; 0], None, false);
         }
 
         #[test]
@@ -137,6 +145,7 @@ mod tests {
                     Fork::after_block(SpecId::SHANGHAI, 0),
                 ],
                 None,
+                false,
             );
         }
 
@@ -150,6 +159,7 @@ mod tests {
                     Fork::after_timestamp(SpecId::SHANGHAI, MAINNET_MERGE_BLOCK_TIMESTAMP),
                 ],
                 None,
+                false,
             );
         }
     }
