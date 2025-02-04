@@ -109,7 +109,7 @@ impl<D: Database> IVerifier<D> for Verifier {
         let blocks_by_chain = evm_envs.blocks_by_chain();
         let destinations = get_destinations(blocks_by_chain, start_exec_location);
         for (chain_id, blocks) in destinations {
-            info!("Verifying teleport to chain: {} blocks: {:?}", chain_id, blocks);
+            info!("Verifying teleport to chain: {chain_id} blocks: {blocks:?}");
             let dest_chain_spec = chain::optimism::ChainSpec::try_from(chain_id)?;
             dest_chain_spec.assert_anchor(source_chain_id)?;
 
@@ -118,7 +118,7 @@ impl<D: Database> IVerifier<D> for Verifier {
             let sequencer_client = self.sequencer_client_factory.create(chain_id)?;
             let l2_block =
                 fetch_latest_confirmed_l2_block(anchor_state_registry, &sequencer_client).await?;
-            info!("Latest confirmed L2 block: {:?}", l2_block);
+            info!("Latest confirmed L2 block: {l2_block:?}");
 
             let latest_confirmed_location = (chain_id, l2_block.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
@@ -127,7 +127,7 @@ impl<D: Database> IVerifier<D> for Verifier {
                 return Err(Error::HeaderHashMismatch);
             }
             ensure_latest_teleport_location_is_confirmed(&blocks, l2_block.number)?;
-            info!("Teleport to chain {} verified", chain_id);
+            info!("Teleport to chain {chain_id} verified");
         }
         Ok(())
     }

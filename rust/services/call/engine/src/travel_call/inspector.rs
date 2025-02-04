@@ -43,18 +43,12 @@ impl<'a> Inspector<'a> {
         let chain_id = self
             .location
             .map_or(self.start_chain_id, |loc| loc.chain_id);
-        info!(
-            "Travel contract called with function: setBlock and block number: {:?}! Chain id remains {:?}.",
-            block_number, chain_id
-        );
+        info!("setBlock({block_number}). Chain id remains {chain_id}.");
         self.location = Some((chain_id, block_number).into());
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
-        info!(
-            "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
-            chain_id, block_number
-        );
+        info!("setChain({chain_id}, {block_number})",);
         self.location = Some((chain_id, block_number).into());
     }
 
@@ -68,7 +62,7 @@ impl<'a> Inspector<'a> {
         );
         let result =
             (self.transaction_callback)(&inputs.into(), location).expect("Intercepted call failed");
-        info!("Intercepted call returned: {:?}", result);
+        info!("Intercepted call returned: {result:?}");
         let outcome = execution_result_to_call_outcome(&result, inputs);
         Some(outcome)
     }

@@ -38,7 +38,7 @@ impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> seal::Sealed
 #[async_trait]
 impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> IVerifier for Verifier<C, V> {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result {
-        info!("Verifying time-travel for chain_id: {}, blocks: {:?}", chain_id, blocks);
+        info!("Verifying time-travel for chain_id: {chain_id}, blocks: {blocks:?}");
         if blocks.len() == 1 {
             info!("Single block, no need to verify chain proof");
             return Ok(());
