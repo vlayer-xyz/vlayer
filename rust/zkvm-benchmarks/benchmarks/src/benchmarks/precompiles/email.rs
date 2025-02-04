@@ -28,7 +28,7 @@ fn fixture() -> Bytes {
 }
 
 fn test_email_verification(calldata: Bytes) {
-    let _ = verify(&calldata, 100_000_000).expect("Verification failed");
+    let _ = verify(&calldata).expect("Verification failed");
 }
 
 pub fn benchmarks() -> Vec<Benchmark> {

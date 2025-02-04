@@ -2,39 +2,28 @@ use std::convert::Into;
 
 use alloy_primitives::Bytes;
 use alloy_sol_types::{sol_data, SolType, SolValue};
-use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
 use serde_json::Value;
 
-use crate::{gas_used, map_to_fatal};
-
-pub(super) const GET_STRING: Precompile = Precompile::Standard(get_string);
-pub(super) const GET_INT: Precompile = Precompile::Standard(get_int);
-pub(super) const GET_BOOL: Precompile = Precompile::Standard(get_bool);
-pub(super) const GET_ARRAY_LENGTH: Precompile = Precompile::Standard(get_array_length);
-
-/// The base cost of the operation.
-const BASE_COST: u64 = 10;
-/// The cost per word.
-const PER_WORD_COST: u64 = 1;
+use crate::helpers::{map_to_fatal, Result};
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
-fn get_string(input: &Bytes, gas_limit: u64) -> PrecompileResult {
-    let (value_by_path, json_path, gas_used) = process_input(input, gas_limit)?;
+pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
+    let (value_by_path, json_path) = process_input(input)?;
     match value_by_path {
-        Value::String(result) => Ok(PrecompileOutput::new(gas_used, result.abi_encode().into())),
+        Value::String(result) => Ok(result.abi_encode().into()),
         _ => Err(map_to_fatal(format!(
             "Expected type 'String' at {json_path}, but found {value_by_path:?}"
         ))),
     }
 }
 
-fn get_int(input: &Bytes, gas_limit: u64) -> PrecompileResult {
-    let (value_by_path, json_path, gas_used) = process_input(input, gas_limit)?;
+pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
+    let (value_by_path, json_path) = process_input(input)?;
     match value_by_path {
         Value::Number(num) if num.is_i64() => {
             let result = num.as_i64().unwrap();
-            Ok(PrecompileOutput::new(gas_used, result.abi_encode().into()))
+            Ok(result.abi_encode().into())
         }
         _ => Err(map_to_fatal(format!(
             "Expected type 'Number' at {json_path}, but found {value_by_path:?}"
@@ -42,26 +31,26 @@ fn get_int(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     }
 }
 
-fn get_bool(input: &Bytes, gas_limit: u64) -> PrecompileResult {
-    let (value_by_path, json_path, gas_used) = process_input(input, gas_limit)?;
+pub(super) fn get_bool(input: &Bytes) -> Result<Bytes> {
+    let (value_by_path, json_path) = process_input(input)?;
     match value_by_path {
-        Value::Bool(result) => Ok(PrecompileOutput::new(gas_used, result.abi_encode().into())),
+        Value::Bool(result) => Ok(result.abi_encode().into()),
         _ => Err(map_to_fatal(format!(
             "Expected type 'Bool' at {json_path}, but found {value_by_path:?}"
         ))),
     }
 }
 
-fn get_array_length(input: &Bytes, gas_limit: u64) -> PrecompileResult {
-    let (len, gas_used) = process_input_arr(input, gas_limit)?;
-    Ok(PrecompileOutput::new(gas_used, len.abi_encode().into()))
+pub(super) fn get_array_length(input: &Bytes) -> Result<Bytes> {
+    let len = process_input_arr(input)?;
+    Ok(len.abi_encode().into())
 }
 
-fn process_input(input: &Bytes, gas_limit: u64) -> Result<(Value, String, u64), PrecompileErrors> {
-    let (gas_used, body, json_path) = pre_process_input(input, gas_limit)?;
+fn process_input(input: &Bytes) -> Result<(Value, String)> {
+    let (body, json_path) = pre_process_input(input)?;
     let value_by_path = get_value_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
-    Ok((value_by_path.clone(), json_path, gas_used))
+    Ok((value_by_path.clone(), json_path))
 }
 
 fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
@@ -81,11 +70,11 @@ fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
     })
 }
 
-fn process_input_arr(input: &Bytes, gas_limit: u64) -> Result<(u64, u64), PrecompileErrors> {
-    let (gas_used, body, json_path) = pre_process_input(input, gas_limit)?;
+fn process_input_arr(input: &Bytes) -> Result<u64> {
+    let (body, json_path) = pre_process_input(input)?;
     let value_by_path = get_array_length_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
-    Ok((value_by_path.try_into().unwrap(), gas_used))
+    Ok(value_by_path.try_into().unwrap())
 }
 
 fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
@@ -96,23 +85,16 @@ fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
     }
 }
 
-fn pre_process_input(
-    input: &Bytes,
-    gas_limit: u64,
-) -> Result<(u64, Value, String), PrecompileErrors> {
-    let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
+fn pre_process_input(input: &Bytes) -> Result<(Value, String)> {
     let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let body = serde_json::from_str(body.as_str())
         .map_err(|err| map_to_fatal(format!("Error converting string body to json: {err}")))?;
-    Ok((gas_used, body, json_path))
+    Ok((body, json_path))
 }
 
 #[cfg(test)]
 mod tests {
-    use revm::precompile::{
-        PrecompileError::OutOfGas,
-        PrecompileErrors::{Error, Fatal},
-    };
+    use revm::precompile::PrecompileErrors::Fatal;
 
     use super::*;
 
@@ -146,10 +128,9 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-        let precompile_output = get_int(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path.into()).unwrap();
 
-        let result =
-            sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let result = sol_data::Int::<256>::abi_decode(precompile_output.as_ref(), false).unwrap();
         let parsed: alloy_primitives::I256 = "12".parse().unwrap();
 
         assert_eq!(parsed, result);
@@ -160,9 +141,9 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-        let precompile_output = get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_bool(&abi_encoded_body_and_json_path.into()).unwrap();
 
-        let result = sol_data::Bool::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let result = sol_data::Bool::abi_decode(precompile_output.as_ref(), false).unwrap();
 
         assert!(result);
     }
@@ -172,12 +153,11 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-        let precompile_output =
-            get_string(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_string(&abi_encoded_body_and_json_path.into()).unwrap();
 
         assert_eq!(
             "field_string_value",
-            sol_data::String::abi_decode(precompile_output.bytes.as_ref(), true).unwrap()
+            sol_data::String::abi_decode(precompile_output.as_ref(), true).unwrap()
         );
     }
 
@@ -186,13 +166,9 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array[1]"]);
 
-        let precompile_output =
-            get_string(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_string(&abi_encoded_body_and_json_path.into()).unwrap();
 
-        assert_eq!(
-            "val2",
-            sol_data::String::abi_decode(precompile_output.bytes.as_ref(), true).unwrap()
-        );
+        assert_eq!("val2", sol_data::String::abi_decode(precompile_output.as_ref(), true).unwrap());
     }
 
     #[test]
@@ -200,12 +176,11 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_objects[1].key"]);
 
-        let precompile_output =
-            get_string(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_string(&abi_encoded_body_and_json_path.into()).unwrap();
 
         assert_eq!(
             "val02",
-            sol_data::String::abi_decode(precompile_output.bytes.as_ref(), true).unwrap()
+            sol_data::String::abi_decode(precompile_output.as_ref(), true).unwrap()
         );
     }
 
@@ -216,10 +191,9 @@ mod tests {
             "root.nested_level.field_array_of_objects_with_numbers[0].key",
         ]);
 
-        let precompile_output = get_int(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path.into()).unwrap();
 
-        let result =
-            sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let result = sol_data::Int::<256>::abi_decode(precompile_output.as_ref(), false).unwrap();
         let parsed: alloy_primitives::I256 = "1".parse().unwrap();
         assert_eq!(parsed, result);
     }
@@ -229,10 +203,9 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_numbers[1]"]);
 
-        let precompile_output = get_int(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path.into()).unwrap();
 
-        let result =
-            sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let result = sol_data::Int::<256>::abi_decode(precompile_output.as_ref(), false).unwrap();
         let parsed: alloy_primitives::I256 = "2".parse().unwrap();
         assert_eq!(parsed, result);
     }
@@ -242,9 +215,9 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_booleans[2]"]);
 
-        let precompile_output = get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_bool(&abi_encoded_body_and_json_path.into()).unwrap();
 
-        let result = sol_data::Bool::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let result = sol_data::Bool::abi_decode(precompile_output.as_ref(), false).unwrap();
 
         assert!(result);
     }
@@ -253,10 +226,9 @@ mod tests {
     fn success_number_in_top_level_array() {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&[TEST_JSON_ARRAY, "[2].key"]);
 
-        let precompile_output = get_int(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path.into()).unwrap();
 
-        let result =
-            sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let result = sol_data::Int::<256>::abi_decode(precompile_output.as_ref(), false).unwrap();
         let parsed: alloy_primitives::I256 = "3".parse().unwrap();
         assert_eq!(parsed, result);
     }
@@ -266,27 +238,12 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
 
-        let precompile_output =
-            get_array_length(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_array_length(&abi_encoded_body_and_json_path.into()).unwrap();
 
-        let result =
-            sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let result = sol_data::Int::<256>::abi_decode(precompile_output.as_ref(), false).unwrap();
         let parsed: alloy_primitives::I256 = "2".parse().unwrap();
 
         assert_eq!(parsed, result);
-    }
-
-    #[test]
-    fn fail_out_of_gas() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
-
-        let insufficient_gas_limit = 1;
-
-        let precompile_output =
-            process_input(&abi_encoded_body_and_json_path.into(), insufficient_gas_limit);
-
-        assert!(matches!(precompile_output, Err(Error(OutOfGas))));
     }
 
     #[test]
@@ -294,7 +251,7 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_missing"]);
 
-        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into(), u64::MAX),
+        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into()),
             Err(Fatal { msg: message }) if message == "Missing value at path root.nested_level.field_missing"));
     }
 
@@ -305,7 +262,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_number, but found Number(12)"));
         }
 
@@ -314,7 +271,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)"));
         }
 
@@ -323,7 +280,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}"));
         }
     }
@@ -335,7 +292,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_boolean, but found Bool(true)"));
         }
 
@@ -344,7 +301,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_string, but found String(\"field_string_value\")"));
         }
 
@@ -353,7 +310,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_object, but found Object {}"));
         }
     }
@@ -365,7 +322,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_string, but found String(\"field_string_value\")"));
         }
         #[test]
@@ -373,7 +330,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_number, but found Number(12)"));
         }
 
@@ -382,7 +339,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into()),
                 Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_object, but found Object {}"));
         }
     }
@@ -391,7 +348,7 @@ mod tests {
     fn fail_empty_json_string() {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["", "field"]);
 
-        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into(), u64::MAX),
+        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into()),
             Err(Fatal { msg: message }) if message == "Error converting string body to json: EOF while parsing a value at line 1 column 0"));
     }
 
@@ -399,7 +356,7 @@ mod tests {
     fn fail_empty_json_body() {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["{}", "field"]);
 
-        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into(), u64::MAX),
+        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into()),
             Err(Fatal { msg: message }) if message == "Missing value at path field"))
     }
 
@@ -407,7 +364,7 @@ mod tests {
     fn fail_string_as_json() {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["a string", "field"]);
 
-        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into(), u64::MAX),
+        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into()),
             Err(Fatal { msg: message }) if message == "Error converting string body to json: expected value at line 1 column 1"))
     }
 }

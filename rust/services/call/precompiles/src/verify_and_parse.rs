@@ -1,30 +1,12 @@
 use std::convert::Into;
 
 use alloy_primitives::Bytes;
-use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
+use revm::precompile::PrecompileErrors;
 use web_proof::verifier::verify_and_parse;
 
-use crate::{gas_used, map_to_fatal};
+use crate::helpers::map_to_fatal;
 
-pub(super) const VERIFY_AND_PARSE: Precompile = Precompile::Standard(verify_and_parse_run);
-
-/// The base cost.
-const VERIFY_AND_PARSE_BASE: u64 = 10;
-/// The cost per word.
-const VERIFY_AND_PARSE_PER_WORD: u64 = 1;
-
-fn verify_and_parse_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
-    let gas_used =
-        gas_used(input.len(), VERIFY_AND_PARSE_BASE, VERIFY_AND_PARSE_PER_WORD, gas_limit)?;
-
-    let web_proof_json = std::str::from_utf8(input).map_err(map_to_fatal)?;
-    let web_proof = serde_json::from_str(web_proof_json).map_err(map_to_fatal)?;
-    let web = verify_and_parse(web_proof).map_err(map_to_fatal)?;
-
-    Ok(PrecompileOutput::new(gas_used, web.abi_encode().into()))
-}
-
-pub(super) fn verify_and_parse_run_2(input: &Bytes) -> Result<Bytes, PrecompileErrors> {
+pub(super) fn verify_and_parse_run(input: &Bytes) -> Result<Bytes, PrecompileErrors> {
     let web_proof_json = std::str::from_utf8(input).map_err(map_to_fatal)?;
     let web_proof = serde_json::from_str(web_proof_json).map_err(map_to_fatal)?;
     let web = verify_and_parse(web_proof).map_err(map_to_fatal)?;

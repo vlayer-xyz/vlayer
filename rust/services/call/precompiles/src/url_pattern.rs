@@ -1,21 +1,14 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::{sol_data, SolType, SolValue};
 use regex::Regex;
-use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
 use url::Url;
 use urlpattern::{UrlPattern, UrlPatternInit, UrlPatternMatchInput, UrlPatternOptions};
 
-use crate::{gas_used, map_to_fatal};
-pub(super) const TEST: Precompile = Precompile::Standard(test);
-
-const BASE_COST: u64 = 10;
-const PER_WORD_COST: u64 = 1;
+use crate::helpers::{map_to_fatal, Result};
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
-pub fn test(input: &Bytes, gas_limit: u64) -> PrecompileResult {
-    let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
-
+pub fn test(input: &Bytes) -> Result<Bytes> {
     let (url_to_test, url_pattern_init) = decode_args(input)?;
     let pattern = <UrlPattern>::parse(url_pattern_init, UrlPatternOptions::default())
         .map_err(map_to_fatal)?;
@@ -25,10 +18,10 @@ pub fn test(input: &Bytes, gas_limit: u64) -> PrecompileResult {
         .test(UrlPatternMatchInput::Url(parsed_url))
         .map_err(map_to_fatal)?;
 
-    Ok(PrecompileOutput::new(gas_used, result.abi_encode().into()))
+    Ok(result.abi_encode().into())
 }
 
-fn decode_args(input: &Bytes) -> Result<(String, UrlPatternInit), PrecompileErrors> {
+fn decode_args(input: &Bytes) -> Result<(String, UrlPatternInit)> {
     let [url_to_test, pattern] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let url_pattern_init: UrlPatternInit =
         UrlPatternInit::parse_constructor_string::<Regex>(pattern.as_str(), None)
@@ -38,16 +31,18 @@ fn decode_args(input: &Bytes) -> Result<(String, UrlPatternInit), PrecompileErro
 
 #[cfg(test)]
 mod test {
+    use revm::precompile::PrecompileErrors;
+
     use super::*;
     fn run_test(source: &str, pattern: &str, expected: bool) {
         let input = [source, pattern].abi_encode();
-        let result = test(&Bytes::from(input), 1000).unwrap();
-        let result = bool::abi_decode(&result.bytes, true).unwrap();
+        let result = test(&Bytes::from(input)).unwrap();
+        let result = bool::abi_decode(&result, true).unwrap();
         assert_eq!(result, expected);
     }
     fn run_test_expect_err(source: &str, pattern: &str, expected_msg: &str) {
         let input = [source, pattern].abi_encode();
-        let result: Result<PrecompileOutput, PrecompileErrors> = test(&Bytes::from(input), 1000);
+        let result = test(&Bytes::from(input));
         assert!(
             matches!(
                 result,

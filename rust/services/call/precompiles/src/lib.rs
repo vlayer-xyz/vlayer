@@ -1,44 +1,32 @@
-mod config;
+#[macro_use]
+mod helpers;
 mod json;
 mod regex;
 pub mod url_pattern;
 mod verify_and_parse;
 pub mod verify_and_parse_email;
 
-use revm::{
-    precompile::{
-        calc_linear_cost_u32, u64_to_address, Error::OutOfGas, PrecompileErrors::Error,
-        PrecompileWithAddress,
-    },
-    primitives::PrecompileErrors,
+use json::{
+    get_array_length as json_get_array_length, get_bool as json_get_bool, get_int as json_get_int,
+    get_string as json_get_string,
 };
+use regex::{capture_run as regex_capture, match_run as regex_match};
+use revm::precompile::PrecompileWithAddress;
+use url_pattern::test as url_pattern_test;
+use verify_and_parse::verify_and_parse_run as web_proof;
+use verify_and_parse_email::verify_and_parse_run as email_proof;
 
-pub const PRECOMPILES: [PrecompileWithAddress; 9] = [
-    PrecompileWithAddress(u64_to_address(0x100), verify_and_parse::VERIFY_AND_PARSE),
-    PrecompileWithAddress(u64_to_address(0x101), verify_and_parse_email::VERIFY_AND_PARSE),
-    PrecompileWithAddress(u64_to_address(0x102), json::GET_STRING),
-    PrecompileWithAddress(u64_to_address(0x103), json::GET_INT),
-    PrecompileWithAddress(u64_to_address(0x104), json::GET_BOOL),
-    PrecompileWithAddress(u64_to_address(0x105), json::GET_ARRAY_LENGTH),
-    PrecompileWithAddress(u64_to_address(0x110), regex::MATCH),
-    PrecompileWithAddress(u64_to_address(0x111), regex::CAPTURE),
-    PrecompileWithAddress(u64_to_address(0x120), url_pattern::TEST),
+const NUM_PRECOMPILES: usize = 9;
+
+#[rustfmt::skip]
+pub const PRECOMPILES: [PrecompileWithAddress; NUM_PRECOMPILES] = generate_precompiles![
+    (0x100, web_proof,             1000, 10),
+    (0x101, email_proof,           1000, 10),
+    (0x102, json_get_string,       1000, 10),
+    (0x103, json_get_int,          1000, 10),
+    (0x104, json_get_bool,         1000, 10),
+    (0x105, json_get_array_length, 1000, 10),
+    (0x110, regex_match,           1000, 10),
+    (0x111, regex_capture,         1000, 10),
+    (0x120, url_pattern_test,      1000, 10),
 ];
-
-pub const PRECOMPILES_2: [PrecompileWithAddress; 1] = config::PRECOMPILES;
-
-#[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
-fn map_to_fatal<E: ToString>(err: E) -> PrecompileErrors {
-    PrecompileErrors::Fatal {
-        msg: err.to_string(),
-    }
-}
-
-fn gas_used(len: usize, base: u64, word: u64, gas_limit: u64) -> Result<u64, PrecompileErrors> {
-    let gas_used = calc_linear_cost_u32(len, base, word);
-    if gas_used > gas_limit {
-        Err(Error(OutOfGas))
-    } else {
-        Ok(gas_used)
-    }
-}
