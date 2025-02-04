@@ -190,7 +190,7 @@ export const validateWebProofRequest = (
 };
 
 export const createExtensionWebProofProvider = ({
-  notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.7",
+  notaryUrl = "https://test-notary.vlayer.xyz",
   wsProxyUrl = "wss://notary.pse.dev/proxy",
 }: WebProofProviderSetup = {}): WebProofProvider => {
   return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);
