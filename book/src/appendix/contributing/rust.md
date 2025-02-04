@@ -109,15 +109,33 @@ which will start the vlayer server. Then just call the JSON RPC API and the serv
 
 ## Working with guest ELF IDs
 
-We are using Dockerized guest builds to ensure that ELF IDs of guests are deterministic. This is handled by the build script of `rust/guest_wapper` crate, which uses `build-utils` crate. Current and historical chain guest IDs are stored in repository so that they can be safely included in call host & guest (see “Repository artifacts” below).
+Dockerized guest builds ensure that guest ELF IDs remain deterministic. This process is managed by the build script in the `rust/guest_wrapper` crate, which relies on the `build-utils` crate. Current and historical chain guest IDs are stored in the repository to maintain consistency when calling host and guest functions (see Repository Artifacts below).
 
-⚠️ The build script of guest wrapper generates `target/assets/ImageID.sol` file which is symlinked into `contracts/vlayer/src/ImageID.sol` . Run `cargo build` to generate it, if compiling contracts fails due to `ImageID.sol` missing. Also, remember to recompile contracts after rebuilding the guest.
+### Generating `ImageID.sol`
 
-⚠️ For running e2e tests with real chain workers, a dockerized build must be done beforehand. This is achieved by building the code with `RISC0_USE_DOCKER=1`. This usually takes ~4-5 minutes (on MacBook Pro with Apple Virtualization, using Rosetta for amd64 emulation). 
+The guest wrapper's build script generates the file `target/assets/ImageID.sol`, which is symlinked to `contracts/vlayer/src/ImageID.sol`.
+If contract compilation fails due to a missing `ImageID.sol`, run:
 
-⚠️ If a dockerized build fails with `Chain guest ELF ID mismatch` error, this indicates that some changes have been made to the chain guest and the ELF ID needs to be updated. This is done by re-running the build with `RISC0_USE_DOCKER=1 UPDATE_GUEST_ELF_ID=1` flags. It will do the following:
+    cargo build
 
-  1. Move the previous chain guest ELF ID to the file with historical IDs,
+Additionally, remember to recompile contracts after rebuilding the guest.
+
+### Running end-to-end tests
+
+To run end-to-end tests with real chain workers, a dockerized build must be completed in advance. This is done by compiling with:
+
+    RISC0_USE_DOCKER=1 cargo build
+
+This process typically takes 4-5 minutes on a MacBook Pro (using Apple Virtualization with Rosetta for amd64 emulation).
+
+### Handling `Chain guest ELF ID mismatch` errors
+
+If a dockerized build fails with a `Chain guest ELF ID mismatch` error, it means the chain guest has changed, and the ELF ID must be updated. To resolve this, re-run the build with:
+
+    RISC0_USE_DOCKER=1 UPDATE_GUEST_ELF_ID=1 cargo build
+
+This will:
+  1. Move the previous chain guest ELF ID to the historical IDs file,
   2. Put the new chain guest ELF ID (generated during the compilation) into the file with current ELF ID,
   3. Generate a TODO changelog entry, which should be consequently filled in with change description by the person introducing the change.
 
