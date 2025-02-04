@@ -146,7 +146,6 @@ impl Host {
             output: host_output,
             gas_used,
         } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
-        let elapsed_time = now.elapsed();
 
         let chain_proofs = get_chain_proofs(
             &self.envs,
@@ -166,7 +165,7 @@ impl Host {
             call,
             op_output_cache,
         };
-
+        let elapsed_time = now.elapsed();
         Ok(PreflightResult::new(host_output.into(), input, gas_used, elapsed_time))
     }
 
