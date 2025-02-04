@@ -1,4 +1,6 @@
 #![allow(clippy::disallowed_types)]
+/// Helper trait to be used in bounds instead of revm::DatabaseRef
+/// Requires Database and it's errors to be Debug, anyhow wrappable and safe in async contexts
 use std::fmt;
 
 use revm::DatabaseRef;
