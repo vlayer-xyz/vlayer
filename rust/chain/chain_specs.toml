@@ -208,6 +208,7 @@ forks = [
 
 [[chains]]
 name = "local-testnet"
+is_local_testnet = true
 id = 31337
 forks = [
     { spec = "CANCUN", activation = { Block = 0 } }
@@ -215,6 +216,7 @@ forks = [
 
 [[chains]]
 name = "local-testnet-op_spec"
+is_local_testnet = true
 id = 31338
 op_spec = { anchor_chain = 31_337, anchor_state_registry = "0x5FbDB2315678afecb367f032d93F642f64180aa3" }
 forks = [
