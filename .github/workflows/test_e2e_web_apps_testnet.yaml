@@ -12,13 +12,11 @@ on:
       - "LICENSE"
       - "book/**"
   pull_request:
-    paths:
-      - ".github/workflows/test_e2e_web_apps_testnet.yaml"
   workflow_dispatch:
 concurrency:
-  # Same group for all jobs using WEB_APPS_TEST_PRIVATE_KEY key.
-  group: web-apps-testnet-e2e
-  cancel-in-progress: false
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   test-e2e-web-apps:
@@ -56,13 +54,16 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      - name: Read testnet private key
+        run: |
+          EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
+          echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
       - name: Run e2e test
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           VLAYER_ENV: testnet
           QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
           QUICKNODE_ENDPOINT: "dry-alpha-tab"
-          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.WEB_APPS_TEST_PRIVATE_KEY }}
           CHAIN_NAME: "optimismSepolia"
           JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
           PROVER_URL: http://127.0.0.1:3000
