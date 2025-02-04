@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
+    "@sentry/react": "^8.54.0",
     "@vercel/analytics": "^1.4.1",
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
