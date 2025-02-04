@@ -17,9 +17,9 @@ on:
   pull_request:
   workflow_dispatch:
 concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+  # Same group for all jobs using EXAMPLES_TEST_PRIVATE_KEY key
+  group: e2e-testnet
+  cancel-in-progress: false
 
 jobs:
   test-e2e-testnet:
