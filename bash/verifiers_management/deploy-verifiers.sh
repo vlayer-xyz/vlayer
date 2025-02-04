@@ -4,8 +4,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 set -ueo pipefail
 
-DEPLOYER_SCRIPT="VerifierDeployer.s.sol"
-DEPLOYER_CONTARCT="VerifierDeployer"
+DEPLOYER_SCRIPT="VlayerDeployer.s.sol"
+DEPLOYER_CONTARCT="VlayerDeployer"
 DEPLOYER_SCRIPT_INVOCATION="${CONTRACTS_DIR}/script/${DEPLOYER_SCRIPT}:${DEPLOYER_CONTARCT}"
 
 function deploy_contracts(){
