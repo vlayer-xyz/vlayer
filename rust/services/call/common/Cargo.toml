@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-revm = { workspace = true }
 anyhow = { workspace = true }
+revm = { workspace = true }
 
 [lints]
 workspace = true
