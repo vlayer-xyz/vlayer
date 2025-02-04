@@ -965,7 +965,6 @@ dependencies = [
  "alloy-rlp",
  "alloy-rlp-derive",
  "block_header",
- "call_common",
  "call_engine",
  "chain_client",
  "chain_common",
@@ -2836,7 +2835,6 @@ dependencies = [
  "derivative",
  "derive-new",
  "lazy_static",
- "revm",
  "serde",
  "thiserror 2.0.11",
 ]

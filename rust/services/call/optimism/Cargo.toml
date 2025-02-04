@@ -16,7 +16,6 @@ derivative = { workspace = true }
 derive-new = { workspace = true }
 jsonrpsee = { workspace = true, optional = true }
 lazy_static = { workspace = true }
-revm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 
