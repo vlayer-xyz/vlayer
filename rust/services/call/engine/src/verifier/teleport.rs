@@ -28,7 +28,9 @@ pub enum Error {
         optimism::anchor_state_registry::Error,
     ),
     #[error(transparent)]
-    Conversion(#[from] chain::optimism::ConversionError),
+    OptimismConversion(#[from] chain::optimism::ConversionError),
+    #[error(transparent)]
+    Conversion(#[from] chain::ConversionError),
     #[error("Commit error: {0}")]
     Commit(#[from] chain::optimism::CommitError),
     #[error("Client factory error: {0}")]
@@ -103,6 +105,10 @@ where
         start_exec_location: ExecutionLocation,
     ) -> Result<()> {
         let source_chain_id = start_exec_location.chain_id;
+        let source_chain_spec = chain::ChainSpec::try_from(source_chain_id)?;
+        if source_chain_spec.name() == "local-testnet" {
+            return Ok(());
+        }
         let source_evm_env = evm_envs.get(start_exec_location)?;
         let blocks_by_chain = evm_envs.blocks_by_chain();
         let destinations = get_destinations(blocks_by_chain, start_exec_location);
