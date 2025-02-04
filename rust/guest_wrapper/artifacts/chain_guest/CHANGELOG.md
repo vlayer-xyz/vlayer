@@ -13,3 +13,4 @@
   * `eba88a4e54977f87fa67d20d8d449623e8eb2d3679a03bb9eabbec1c728cf4b2` – Merge main
   * `6eae3922570cdbb0722963973ed745d92fad119d3f765402163627525153b06f` – Version bumps in Cargo.lock
   * `18eac1fe344b5f8ce19ad5695ea43b5fe85dafb36c6158d51331adb4ea33eb88` – Teleport is a no-op on local-testnet (anvil)
+  * `62294ba7a8f7c2e9b9b09ad0c261b6e68869e932dd9bf2b3f7347cc50f2f0dd9` – Teleport logging
