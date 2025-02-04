@@ -1,5 +1,6 @@
 use alloy_primitives::{Address, ChainId};
 use thiserror::Error;
+use tracing::info;
 
 use crate::{ChainSpec as BaseChainSpec, ConversionError as BaseConversionError};
 
@@ -21,14 +22,15 @@ pub enum CommitError {
 }
 
 impl ChainSpec {
-    pub const fn assert_anchor(&self, chain_id: ChainId) -> Result<(), CommitError> {
+    pub fn assert_anchor(&self, chain_id: ChainId) -> Result<(), CommitError> {
         if self.anchor_chain != chain_id {
             return Err(CommitError::WrongAnchorChain {
                 src: chain_id,
                 dest: self.chain_spec.id(),
                 anchor: self.anchor_chain,
             });
-        }
+        };
+        info!("Chain {} commits into {}", chain_id, self.anchor_chain);
         Ok(())
     }
 }

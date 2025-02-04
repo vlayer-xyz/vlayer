@@ -17,7 +17,7 @@ use call_engine::{
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
-use chain_client::{ChainProofCache, Client as ChainClient};
+use chain_client::Client as ChainClient;
 use common::{verifier::zk_proof, GuestElf};
 pub use config::Config;
 use derive_new::new;
@@ -142,31 +142,36 @@ impl Host {
     #[instrument(skip_all)]
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, PreflightError> {
         let now = Instant::now();
+
         let SuccessfulExecutionResult {
             output: host_output,
             gas_used,
         } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
 
-        let chain_proofs = get_chain_proofs(
-            &self.envs,
-            self.start_execution_location,
-            self.chain_client,
-            self.travel_call_verifier,
-        )
-        .await?;
+        self.travel_call_verifier
+            .verify(&self.envs, self.start_execution_location)
+            .await?;
+        let input = self.prepare_input_data(call)?;
+
+        let elapsed_time = now.elapsed();
+        Ok(PreflightResult::new(host_output.into(), input, gas_used, elapsed_time))
+    }
+
+    #[instrument(skip_all)]
+    fn prepare_input_data(self, call: Call) -> Result<Input, PreflightError> {
+        drop(self.travel_call_verifier); // Drop the verifier so that we can unwrap the Arc's in the clients
+        let chain_proofs = self
+            .chain_client
+            .map_or(HashMap::new(), chain_client::RecordingClient::into_cache);
         let op_output_cache = self.op_client_factory.into_cache();
-
         let multi_evm_input = into_multi_input(self.envs)?;
-
-        let input = Input {
+        Ok(Input {
             multi_evm_input,
             start_execution_location: self.start_execution_location,
             chain_proofs,
             call,
             op_output_cache,
-        };
-        let elapsed_time = now.elapsed();
-        Ok(PreflightResult::new(host_output.into(), input, gas_used, elapsed_time))
+        })
     }
 
     #[instrument(skip_all)]
@@ -232,18 +237,4 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
     let raw_guest_output: Bytes = receipt.journal.bytes.into();
 
     Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats, elapsed_time))
-}
-
-async fn get_chain_proofs(
-    evm_envs: &CachedEvmEnv<HostDb>,
-    start_execution_location: ExecutionLocation,
-    chain_proof_client: Option<chain_client::RecordingClient>,
-    verifier: HostTravelCallVerifier,
-) -> Result<ChainProofCache, PreflightError> {
-    verifier.verify(evm_envs, start_execution_location).await?;
-    drop(verifier); // Drop verifier to be able to get the chain proof cache
-
-    let chain_proofs =
-        chain_proof_client.map_or(HashMap::new(), chain_client::RecordingClient::into_cache);
-    Ok(chain_proofs)
 }

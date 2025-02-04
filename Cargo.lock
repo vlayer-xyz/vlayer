@@ -2361,6 +2361,7 @@ dependencies = [
  "serde",
  "thiserror 2.0.11",
  "toml 0.8.19",
+ "tracing",
 ]
 
 [[package]]

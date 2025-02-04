@@ -3,6 +3,7 @@ use std::marker::PhantomData;
 use async_trait::async_trait;
 use derive_new::new;
 use revm::DatabaseRef;
+use tracing::info;
 
 use super::{teleport, time_travel};
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
@@ -81,6 +82,7 @@ impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: DatabaseRef + Se
         input: &CachedEvmEnv<D>,
         start_execution_location: ExecutionLocation,
     ) -> Result {
+        info!("Verifying travel call");
         self.teleport
             .verify(input, start_execution_location)
             .await?;

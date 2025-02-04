@@ -8,7 +8,7 @@ use revm::{
     primitives::{EVMError, ExecutionResult, ResultAndState},
     DatabaseRef, Evm, Handler,
 };
-use tracing::{debug, error};
+use tracing::{debug, error, info};
 
 use crate::{
     evm::{
@@ -50,6 +50,7 @@ where
     D::Error: std::fmt::Debug,
 {
     pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
+        info!("Executing top-level EVM call");
         let result =
             panic::catch_unwind(|| self.internal_call(tx, location)).map_err(wrap_panic)??;
         Ok(result.try_into()?)
@@ -60,6 +61,7 @@ where
         tx: &Call,
         location: ExecutionLocation,
     ) -> Result<ExecutionResult> {
+        info!("Executing EVM call");
         let env = self.envs.get(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
