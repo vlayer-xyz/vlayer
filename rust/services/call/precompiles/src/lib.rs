@@ -20,6 +20,7 @@ const NUM_PRECOMPILES: usize = 9;
 
 #[rustfmt::skip]
 pub const PRECOMPILES: [PrecompileWithAddress; NUM_PRECOMPILES] = generate_precompiles![
+    // (address, precompile, base_cost, byte_cost)
     (0x100, web_proof,             1000, 10),
     (0x101, email_proof,           1000, 10),
     (0x102, json_get_string,       1000, 10),
