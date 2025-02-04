@@ -5,7 +5,7 @@ import {SimpleTeleportProver} from "./SimpleTeleportProver.sol";
 import {WhaleBadgeNFT} from "./WhaleBadgeNFT.sol";
 
 import {Proof} from "vlayer-0.1.0/Proof.sol";
-import {Verifier, IProofVerifier} from "vlayer-0.1.0/Verifier.sol";
+import {Verifier} from "vlayer-0.1.0/Verifier.sol";
 
 contract SimpleTeleportVerifier is Verifier {
     address public prover;
