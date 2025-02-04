@@ -5,6 +5,7 @@ import {
   type Account,
   type Address,
   type Chain,
+  parseAbi,
   type PublicClient,
   type WalletClient,
 } from "viem";
@@ -117,6 +118,7 @@ export const deployVlayerContracts = async ({
 
   if (env?.isTesting) {
     await swapInternalVerifier(ethClient, chain, account, verifier);
+  } else {
   }
 
   return { prover, verifier };
@@ -150,7 +152,7 @@ const swapInternalVerifier = async (
     address: verifierAddress,
     functionName: "_setTestVerifier",
     args: [newVerifier],
-    abi: ["_setTestVerifier(address)"],
+    abi: parseAbi(["function _setTestVerifier(address)"]),
   });
   await waitForTransactionReceipt({ hash: swapTxHash });
 };
