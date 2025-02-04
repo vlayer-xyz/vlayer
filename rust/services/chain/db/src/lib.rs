@@ -43,7 +43,7 @@ pub struct ChainInfo {
     first_block: BlockNumber,
     last_block: BlockNumber,
     root_hash: B256,
-    #[debug("{zk_proof:#x}")]
+    #[debug(skip)] // These proofs are really big and make logs unreadable
     zk_proof: Bytes,
 }
 

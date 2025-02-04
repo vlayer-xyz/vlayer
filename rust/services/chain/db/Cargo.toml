@@ -3,6 +3,10 @@ name = "chain_db"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "get_elf_id_from_db"
+path = "bin/get_elf_id_from_db.rs"
+
 [dependencies]
 alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
