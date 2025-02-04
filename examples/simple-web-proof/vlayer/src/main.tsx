@@ -4,6 +4,14 @@ import { Analytics } from "@vercel/analytics/react";
 import "./main.css";
 
 import App from "./App.tsx";
+import * as Sentry from "@sentry/react";
+
+if (import.meta.env.VITE_SENTRY_WEB_PROOF) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_WEB_PROOF,
+    integrations: [],
+  });
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
