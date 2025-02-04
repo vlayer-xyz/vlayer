@@ -4,6 +4,7 @@ use alloy_primitives::BlockNumber;
 
 use crate::{types::SequencerOutput, ClientError, IClient};
 
+#[derive(Clone)]
 pub struct Client {
     inner: Arc<dyn IClient>,
     cache: Arc<RwLock<SequencerOutput>>,

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use alloy_primitives::ChainId;
 use auto_impl::auto_impl;
 use thiserror::Error;
@@ -24,5 +22,5 @@ pub enum FactoryError {
 
 #[auto_impl(Box, &, Arc)]
 pub trait IFactory: Send + Sync {
-    fn create(&self, chain_id: ChainId) -> Result<Arc<dyn IClient>, FactoryError>;
+    fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError>;
 }

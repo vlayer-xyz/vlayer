@@ -21,7 +21,7 @@ pub enum Error {
 #[derive(Clone)]
 pub struct Factory {
     inner: Arc<dyn IFactory>,
-    clients: Arc<RwLock<HashMap<ChainId, Arc<client::recording::Client>>>>,
+    clients: Arc<RwLock<HashMap<ChainId, client::recording::Client>>>,
 }
 
 impl Factory {
@@ -40,25 +40,17 @@ impl Factory {
             .expect("poisoned lock");
         clients
             .into_iter()
-            .map(|(k, v)| {
-                (
-                    k,
-                    Arc::try_unwrap(v)
-                        .map_err(|_| ())
-                        .expect("Trying to access client while it's still in use")
-                        .into_cache(),
-                )
-            })
+            .map(|(k, v)| (k, v.into_cache()))
             .collect()
     }
 }
 
 impl IFactory for Factory {
-    fn create(&self, chain_id: ChainId) -> Result<Arc<dyn IClient>, FactoryError> {
-        let client: Arc<dyn IClient> = self.inner.create(chain_id)?;
-        let recording_client = Arc::new(client::recording::Client::new(client));
+    fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError> {
+        let client: Box<dyn IClient> = self.inner.create(chain_id)?;
+        let recording_client = client::recording::Client::new(client);
         let mut clients = self.clients.write().expect("poisoned lock");
-        clients.insert(chain_id, Arc::clone(&recording_client));
-        Ok(recording_client)
+        clients.insert(chain_id, recording_client.clone());
+        Ok(Box::new(recording_client))
     }
 }

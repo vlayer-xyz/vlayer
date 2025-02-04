@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
 use derive_new::new;
@@ -36,13 +36,13 @@ impl Factory {
 }
 
 impl IFactory for Factory {
-    fn create(&self, chain_id: ChainId) -> Result<Arc<dyn IClient>, FactoryError> {
+    fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError> {
         let sequencer_output = self
             .cache
             .get(&chain_id)
             .ok_or(Error::NoDataForChain(chain_id))?;
 
         let client = cached::Client::new(sequencer_output.clone());
-        Ok(Arc::new(client))
+        Ok(Box::new(client))
     }
 }
