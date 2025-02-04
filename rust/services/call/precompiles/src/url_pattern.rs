@@ -14,11 +14,10 @@ pub fn test(input: &Bytes) -> Result<Bytes> {
         .map_err(map_to_fatal)?;
 
     let parsed_url = Url::parse(&url_to_test).map_err(map_to_fatal)?;
-    let result = pattern
+    pattern
         .test(UrlPatternMatchInput::Url(parsed_url))
-        .map_err(map_to_fatal)?;
-
-    Ok(result.abi_encode().into())
+        .map(|x| x.abi_encode().into())
+        .map_err(map_to_fatal)
 }
 
 fn decode_args(input: &Bytes) -> Result<(String, UrlPatternInit)> {

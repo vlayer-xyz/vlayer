@@ -42,8 +42,7 @@ pub(super) fn get_bool(input: &Bytes) -> Result<Bytes> {
 }
 
 pub(super) fn get_array_length(input: &Bytes) -> Result<Bytes> {
-    let len = process_input_arr(input)?;
-    Ok(len.abi_encode().into())
+    process_input_arr(input).map(|len| len.abi_encode().into())
 }
 
 fn process_input(input: &Bytes) -> Result<(Value, String)> {

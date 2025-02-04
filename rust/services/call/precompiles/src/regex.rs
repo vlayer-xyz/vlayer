@@ -11,14 +11,14 @@ type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
 pub(super) fn is_match(input: &Bytes) -> Result<Bytes> {
     let (source, regex) = decode_args(input)?;
-    let is_match = regex.is_match(&source);
-    Ok(is_match.abi_encode().into())
+    Ok(regex.is_match(&source).abi_encode().into())
 }
 
 pub(super) fn capture(input: &Bytes) -> Result<Bytes> {
     let (source, regex) = decode_args(input)?;
-    let captures = do_capture(&source, &regex).map_err(map_to_fatal)?;
-    Ok(captures.abi_encode().into())
+    do_capture(&source, &regex)
+        .map(|x| x.abi_encode().into())
+        .map_err(map_to_fatal)
 }
 
 fn do_capture(source: &str, regex: &Regex) -> std::result::Result<Vec<String>, &'static str> {
