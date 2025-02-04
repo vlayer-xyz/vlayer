@@ -29,7 +29,7 @@ pub(super) fn gas_used(
     }
 }
 
-macro_rules! generate_precompile {
+macro_rules! generate_precompiles {
     ($config:tt) => {{
         use alloy_primitives::Bytes;
         use helpers::gas_used;
@@ -43,13 +43,10 @@ macro_rules! generate_precompile {
         }
         PrecompileWithAddress(u64_to_address($config.0), Precompile::Standard(run))
     }};
-}
-
-macro_rules! generate_precompiles {
     ($($config:tt,)*) => {
         [
             $(
-                generate_precompile!($config),
+                generate_precompiles!($config),
             )*
         ]
     };
