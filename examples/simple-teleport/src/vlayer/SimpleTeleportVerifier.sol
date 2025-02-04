@@ -28,8 +28,4 @@ contract SimpleTeleportVerifier is Verifier {
             reward.mint(claimer);
         }
     }
-
-    function setTestVerifier(IProofVerifier newVerifier) external {
-        _setTestVerifier(newVerifier);
-    }
 }

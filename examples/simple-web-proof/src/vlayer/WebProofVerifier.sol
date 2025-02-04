@@ -31,8 +31,4 @@ contract WebProofVerifier is Verifier, ERC721 {
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         return tokenIdToMetadataUri[tokenId];
     }
-
-    function setTestVerifier(IProofVerifier newVerifier) external {
-        _setTestVerifier(newVerifier);
-    }
 }

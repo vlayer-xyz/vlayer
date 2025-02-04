@@ -57,10 +57,6 @@ contract ExampleVerifier is Verifier {
     {
         return value;
     }
-
-    function setTestVerifier(IProofVerifier newVerifier) external {
-        _setTestVerifier(newVerifier);
-    }
 }
 
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
@@ -142,49 +138,55 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 contract Verifier_SetTestVerifier is Test {
     ExampleVerifier exampleVerifier = new ExampleVerifier();
     TestHelpers helpers = new TestHelpers();
+    Groth16ProofVerifier newVerifier;
 
     CallAssumptions callAssumptions;
 
     function setUp() external {
         vm.roll(100); // have some historical blocks
 
+        newVerifier = new Groth16ProofVerifier(exampleVerifier.verifier().imageIdRepository());
+
         callAssumptions = CallAssumptions(
             exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
     }
 
-    function test_RevertsIf_CalledOnMainChain() external {
-        vm.chainId(1);
-        vm.expectRevert("Changing verifiers is not allowed on mainnet");
-        exampleVerifier.setTestVerifier(IProofVerifier(address(123)));
-
-        vm.chainId(10);
-        vm.expectRevert("Changing verifiers is not allowed on mainnet");
-        exampleVerifier.setTestVerifier(IProofVerifier(address(123)));
+    function test_ReplacesInternalVerifier() external {
+        exampleVerifier._setTestVerifier(newVerifier);
+        assertEq(address(exampleVerifier.verifier()), address(newVerifier));
     }
 
     function test_ChangesVerifierOnTestnets() external {
-        Groth16ProofVerifier newVerifier = new Groth16ProofVerifier(exampleVerifier.verifier().imageIdRepository());
-
         vm.chainId(11155111);
-        exampleVerifier.setTestVerifier(newVerifier);
+        exampleVerifier._setTestVerifier(newVerifier);
 
         vm.chainId(84532);
-        exampleVerifier.setTestVerifier(newVerifier);
+        exampleVerifier._setTestVerifier(newVerifier);
 
         vm.chainId(300);
-        exampleVerifier.setTestVerifier(newVerifier);
+        exampleVerifier._setTestVerifier(newVerifier);
+    }
+
+    function test_RevertsIf_CalledOnMainChain() external {
+        vm.chainId(1);
+        vm.expectRevert("Changing verifiers is not allowed on mainnet");
+        exampleVerifier._setTestVerifier(newVerifier);
+
+        vm.chainId(10);
+        vm.expectRevert("Changing verifiers is not allowed on mainnet");
+        exampleVerifier._setTestVerifier(newVerifier);
+    }
+
+    function test_RevertsIf_NotCalledByDeployer() external {
+        vm.expectRevert("Only deployer can change verifier");
+        vm.prank(address(1));
+        exampleVerifier._setTestVerifier(newVerifier);
     }
 
     function test_RevertsIf_RepositoryIsNotSetForVerifier() external {
-        FakeProofVerifier newVerifier = new FakeProofVerifier(IImageIdRepository(address(0)));
+        FakeProofVerifier invalidVerifier = new FakeProofVerifier(IImageIdRepository(address(0)));
         vm.expectRevert("Verifier's repository address is not set");
-        exampleVerifier.setTestVerifier(newVerifier);
-    }
-
-    function test_ReplacesInternalVerifier() external {
-        Groth16ProofVerifier newVerifier = new Groth16ProofVerifier(exampleVerifier.verifier().imageIdRepository());
-        exampleVerifier.setTestVerifier(newVerifier);
-        assertEq(address(exampleVerifier.verifier()), address(newVerifier));
+        exampleVerifier._setTestVerifier(invalidVerifier);
     }
 }

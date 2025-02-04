@@ -29,8 +29,4 @@ contract SimpleVerifier is Verifier {
             whaleNFT.mint(claimer);
         }
     }
-
-    function setTestVerifier(IProofVerifier newVerifier) external {
-        _setTestVerifier(newVerifier);
-    }
 }

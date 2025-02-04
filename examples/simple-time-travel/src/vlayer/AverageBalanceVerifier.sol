@@ -28,8 +28,4 @@ contract AverageBalanceVerifier is Verifier {
             reward.mint(claimer);
         }
     }
-
-    function setTestVerifier(IProofVerifier newVerifier) external {
-        super._setTestVerifier(newVerifier);
-    }
 }

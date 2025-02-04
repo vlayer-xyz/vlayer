@@ -3,21 +3,25 @@ pragma solidity ^0.8.21;
 
 import {
     ProofVerifierRouter,
-    IImageIdRepository,
     FakeProofVerifier,
     Groth16ProofVerifier,
     IProofVerifier
 } from "../proof_verifier/ProofVerifierRouter.sol";
-
-interface ITestingVerifier {
-    function verifier() external view returns (IProofVerifier);
-    function setTestVerifier(IProofVerifier newVerifier) external;
-}
+import {Repository} from "../Repository.sol";
+import {ImageID} from "../ImageID.sol";
+import {Verifier} from "../Verifier.sol";
 
 contract TestVerifierRouterDeployer {
-    function swapProofVerifier(ITestingVerifier verifier) external {
-        IImageIdRepository repository = verifier.verifier().imageIdRepository();
-        verifier.setTestVerifier(
+    function swapProofVerifier(Verifier verifier) external {
+        Repository currentRepo = Repository(address (verifier.verifier().imageIdRepository()));
+
+        Repository repository = new Repository(
+            currentRepo.getRoleMember(currentRepo.DEFAULT_ADMIN_ROLE(), 0),
+            currentRepo.getRoleMember(currentRepo.OWNER_ROLE(), 0)
+        );
+        repository.addImageIdSupport(ImageID.RISC0_CALL_GUEST_ID);
+
+        verifier._setTestVerifier(
             new ProofVerifierRouter(new FakeProofVerifier(repository), new Groth16ProofVerifier(repository))
         );
     }
