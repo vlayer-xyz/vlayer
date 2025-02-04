@@ -4,8 +4,7 @@ pragma solidity ^0.8.21;
 import {
     ProofVerifierRouter,
     FakeProofVerifier,
-    Groth16ProofVerifier,
-    IProofVerifier
+    Groth16ProofVerifier
 } from "../proof_verifier/ProofVerifierRouter.sol";
 import {Repository} from "../Repository.sol";
 import {ImageID} from "../ImageID.sol";
