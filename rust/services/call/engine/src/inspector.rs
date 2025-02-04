@@ -150,7 +150,7 @@ where
         _context: &mut EvmContext<DB>,
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
-        info!("Address: {:?}, caller:{:?}", inputs.bytecode_address, inputs.caller);
+        info!("Call: {:?} -> {:?}", inputs.caller, inputs.bytecode_address);
         debug!("Input: {:?}", inputs.input);
         match inputs.bytecode_address {
             TRAVEL_CONTRACT_ADDR => self.on_travel_call(inputs),
