@@ -1,20 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import {
-    ProofVerifierRouter,
-    FakeProofVerifier,
-    Groth16ProofVerifier
-} from "../proof_verifier/ProofVerifierRouter.sol";
+import {ProofVerifierRouter, FakeProofVerifier, Groth16ProofVerifier} from "../proof_verifier/ProofVerifierRouter.sol";
 import {Repository} from "../Repository.sol";
 import {ImageID} from "../ImageID.sol";
 import {Verifier} from "../Verifier.sol";
 
 contract TestVerifierRouterDeployer {
-    bool public IS_SCRIPT = true;
+    bool public constant IS_SCRIPT = true;
 
     function swapProofVerifier(Verifier verifier) external {
-        Repository currentRepo = Repository(address (verifier.verifier().imageIdRepository()));
+        Repository currentRepo = Repository(address(verifier.verifier().imageIdRepository()));
 
         Repository repository = new Repository(
             currentRepo.getRoleMember(currentRepo.DEFAULT_ADMIN_ROLE(), 0),
