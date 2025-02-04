@@ -9,6 +9,7 @@ use ethers::types::BlockNumber as BlockTag;
 use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
 use retry::HostErrorFilter;
 use risc0_zkp::core::digest::Digest;
+use strum::{Display, EnumString};
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};
 
@@ -17,6 +18,18 @@ mod retry;
 const DEPOSIT_TIME_TO_LIVE: Duration = Duration::from_secs(60);
 const MIN_RETRIES_PER_SECOND: u32 = 3;
 const RETRY_PERCENT: f32 = 0.01;
+
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, EnumString, Display)]
+#[strum(ascii_case_insensitive, serialize_all = "kebab-case")]
+enum Mode {
+    /// Init database if empty and run append-prepend in a loop
+    #[default]
+    Continuous,
+    /// Init database and exit
+    Init,
+    /// Perform single append-prepend and exit
+    AppendPrepend,
+}
 
 #[derive(Parser)]
 #[command(version)]
@@ -29,6 +42,9 @@ struct Cli {
 
     #[arg(long, env, help = "Proof generation mode", default_value_t = ProofMode::Fake)]
     proof_mode: ProofMode,
+
+    #[arg(long, env, help = "Operation mode", default_value_t = Mode::Continuous)]
+    mode: Mode,
 
     #[arg(
         long,
@@ -96,9 +112,28 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
+    let mode = cli.mode;
     let config = cli.into();
+    let mut host = Host::try_new(config)?;
 
-    let host = Arc::new(Mutex::new(Host::try_new(config)?));
+    match mode {
+        Mode::Init => {
+            let chain_update = host.initialize().await?;
+            host.commit(chain_update)?;
+            return Ok(());
+        }
+        Mode::AppendPrepend => {
+            let chain_update = host
+                .append_prepend()
+                .await?
+                .ok_or(anyhow::anyhow!("No chain update to apply"))?;
+            host.commit(chain_update)?;
+            return Ok(());
+        }
+        Mode::Continuous => {}
+    }
+
+    let host = Arc::new(Mutex::new(host));
     let budget = TpsBudget::new(DEPOSIT_TIME_TO_LIVE, MIN_RETRIES_PER_SECOND, RETRY_PERCENT);
     let mut host_service = ServiceBuilder::new()
         .retry(retry::Policy::<HostErrorFilter>::new(budget))
