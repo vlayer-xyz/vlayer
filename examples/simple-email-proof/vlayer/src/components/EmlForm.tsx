@@ -19,13 +19,6 @@ const EmlForm: FC<EmlFormProps> = ({
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="w-full max-w-md m-6">
         <h1 className="text-center mb-3 text-xl">Claim your Email NFT badge</h1>
-        <button
-          onClick={() => {
-            throw new Error("This is your first error!");
-          }}
-        >
-          Break the world
-        </button>
         <form
           onSubmit={handleSubmit}
           className="rounded-lg px-8 pt-6 pb-8 mb-4 border border-violet-600"
