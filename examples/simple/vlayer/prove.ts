@@ -50,6 +50,7 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
   proverArgs: [tokenAddress],
   verifierArgs: [nftContractAddress],
+  env: config.deployConfig,
 });
 
 console.log("Proving...");
