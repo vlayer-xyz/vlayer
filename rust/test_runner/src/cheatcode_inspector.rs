@@ -1,7 +1,7 @@
 use alloy_primitives::{Bytes, U256};
 use alloy_sol_types::{SolCall, SolType};
 use call_engine::{
-    travel_call_executor,
+    travel_call,
     utils::evm_call::{
         create_encoded_return_outcome, create_raw_revert_outcome, create_return_outcome,
         create_revert_outcome, split_calldata,
@@ -141,7 +141,7 @@ fn revert_outcome(error: &Error, inputs: &CallInputs) -> CallOutcome {
 }
 
 const fn is_custom_error(error: &Error) -> Option<&Bytes> {
-    if let Error::Preflight(PreflightError::Engine(travel_call_executor::Error::TransactError(
+    if let Error::Preflight(PreflightError::Engine(travel_call::Error::TransactError(
         call_engine::evm::execution_result::TransactError::NonUtf8Revert(bytes),
     ))) = error
     {

@@ -10,7 +10,7 @@ use call_engine::{
         env::{cached::CachedEvmEnv, location::ExecutionLocation},
         execution_result::SuccessfulExecutionResult,
     },
-    travel_call_executor::TravelCallExecutor,
+    travel_call::Executor as TravelCallExecutor,
     verifier::{
         teleport, time_travel,
         travel_call::{self, IVerifier},

@@ -1,6 +1,6 @@
 use call_engine::{
     evm::env::cached::CachedEvmEnv,
-    travel_call_executor::TravelCallExecutor,
+    travel_call::Executor as TravelCallExecutor,
     verifier::{
         teleport, time_travel,
         travel_call::{self, IVerifier},

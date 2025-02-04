@@ -1,7 +1,5 @@
 use call_engine::{
-    evm::env::factory::Error as EvmEnvFactoryError,
-    travel_call_executor::Error as TravelCallExecutorError, verifier::travel_call,
-    GuestOutputError,
+    evm::env::factory::Error as EvmEnvFactoryError, travel_call, verifier, GuestOutputError,
 };
 use host_utils::proving;
 use risc0_zkp::verify::VerificationError;
@@ -69,7 +67,7 @@ pub enum PreflightError {
     CalldataTooLargeError(usize),
 
     #[error("TravelCallExecutor error: {0}")]
-    Engine(#[from] TravelCallExecutorError),
+    Engine(#[from] travel_call::Error),
 
     #[error("Verification error: {0}")]
     Verification(#[from] VerificationError),
@@ -78,5 +76,5 @@ pub enum PreflightError {
     CreatingInput(#[from] into_input::Error),
 
     #[error("Travel call verification error: {0}")]
-    TravelCall(#[from] travel_call::Error),
+    TravelCall(#[from] verifier::travel_call::Error),
 }

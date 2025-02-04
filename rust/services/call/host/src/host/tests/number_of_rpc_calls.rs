@@ -4,7 +4,7 @@ use alloy_chains::NamedChain::{Mainnet, OptimismSepolia};
 use alloy_primitives::address;
 use call_engine::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
-    travel_call_executor::TravelCallExecutor,
+    travel_call,
 };
 use provider::{profiling, CachedMultiProvider, CachedProvider};
 
@@ -34,7 +34,7 @@ fn profile(
         CachedMultiProvider::from_provider(location.chain_id, profiling_provider.clone());
     let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(multi_provider));
 
-    let _ = TravelCallExecutor::new(&envs).call(call, location);
+    let _ = travel_call::Executor::new(&envs).call(call, location);
 
     Ok(profiling_provider.state())
 }
