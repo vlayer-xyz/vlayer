@@ -60,8 +60,9 @@ fn validate_regex(pattern: &str) -> std::result::Result<(), &'static str> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use revm::precompile::PrecompileErrors;
+
+    use super::*;
 
     mod match_test {
         use super::*;
