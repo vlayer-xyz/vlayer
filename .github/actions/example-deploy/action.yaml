@@ -25,6 +25,9 @@ inputs:
   VLAYER_API_TOKEN:
     description: 'Vlayer API token'
     required: true
+  VITE_SENTRY_DSN:
+    description: 'Sentry DSN'
+    required: false
 runs:
   using: "composite"
   steps:
@@ -96,6 +99,7 @@ runs:
       run: bun run vite build
       env:
         VITE_FAUCET_URL: https://faucet.vlayer.xyz
+        VITE_SENTRY_DSN: ${{ inputs.VITE_SENTRY_DSN }}
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
 
     - name: Copy vercel.json (if exists)

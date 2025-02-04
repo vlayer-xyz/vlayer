@@ -5,9 +5,9 @@ import "./index.css";
 import App from "./App.tsx";
 import * as Sentry from "@sentry/react";
 
-if (import.meta.env.VITE_SENTRY_EMAIL_PROOF) {
+if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_EMAIL_PROOF,
+    dsn: import.meta.env.VITE_SENTRY_DSN,
     integrations: [],
   });
 }
