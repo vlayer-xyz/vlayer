@@ -1,6 +1,6 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
-use call_precompiles::verify_and_parse_email::verify_and_parse_run as verify;
+use call_precompiles::email_proof::verify;
 use email_proof::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
 
 use crate::{with_fixture, Benchmark};
