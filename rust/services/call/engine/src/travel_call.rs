@@ -1,11 +1,9 @@
 use std::panic;
 
+use call_common::Database;
 use derive_new::new;
 use evm::build_evm;
-use revm::{
-    primitives::{ExecutionResult, ResultAndState},
-    DatabaseRef,
-};
+use revm::primitives::{ExecutionResult, ResultAndState};
 use tracing::{debug, info};
 
 use crate::{
@@ -27,18 +25,11 @@ pub use error::Error;
 pub use inspector::Inspector;
 
 #[derive(new)]
-pub struct Executor<'envs, D>
-where
-    D: DatabaseRef + Send + Sync,
-{
+pub struct Executor<'envs, D: Database> {
     envs: &'envs CachedEvmEnv<D>,
 }
 
-impl<'envs, D> Executor<'envs, D>
-where
-    D: DatabaseRef + Send + Sync,
-    D::Error: std::fmt::Debug,
-{
+impl<'envs, D: Database> Executor<'envs, D> {
     pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
         info!("Executing top-level EVM call");
         let result =

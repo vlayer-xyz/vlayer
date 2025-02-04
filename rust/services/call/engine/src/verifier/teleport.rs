@@ -3,10 +3,10 @@ use std::{fmt::Debug, sync::Arc};
 
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
+use call_common::Database;
 use common::Hashable;
 use derivative::Derivative;
 use optimism::{anchor_state_registry::AnchorStateRegistry, NumHash};
-use revm::DatabaseRef;
 use tracing::{debug, info};
 
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
@@ -48,16 +48,13 @@ mod seal {
 #[cfg(any(test, feature = "testing"))]
 impl<F, D> seal::Sealed<D> for F
 where
-    D: DatabaseRef,
+    D: Database,
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result<()> + Send + Sync,
 {
 }
 
 #[async_trait]
-pub trait IVerifier<D>: seal::Sealed<D> + Send + Sync
-where
-    D: DatabaseRef + Send + Sync,
-{
+pub trait IVerifier<D: Database>: seal::Sealed<D> + Send + Sync {
     async fn verify(
         &self,
         evm_envs: &CachedEvmEnv<D>,
@@ -69,7 +66,7 @@ where
 #[async_trait]
 impl<F, D> IVerifier<D> for F
 where
-    D: DatabaseRef + Send + Sync,
+    D: Database,
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result<()> + Send + Sync,
 {
     async fn verify(
@@ -95,11 +92,7 @@ impl Verifier {
 
 impl<D> seal::Sealed<D> for Verifier {}
 #[async_trait]
-impl<D> IVerifier<D> for Verifier
-where
-    D: DatabaseRef + Send + Sync,
-    D::Error: std::error::Error + Send + Sync + 'static,
-{
+impl<D: Database> IVerifier<D> for Verifier {
     async fn verify(
         &self,
         evm_envs: &CachedEvmEnv<D>,
@@ -140,14 +133,10 @@ where
     }
 }
 
-async fn fetch_latest_confirmed_l2_block<D>(
+async fn fetch_latest_confirmed_l2_block<D: Database>(
     anchor_state_registry: AnchorStateRegistry<D>,
     sequencer_client: &dyn optimism::IClient,
-) -> Result<NumHash>
-where
-    D: DatabaseRef + Send + Sync,
-    D::Error: std::error::Error + Send + Sync + 'static,
-{
+) -> Result<NumHash> {
     let l2_commitment = anchor_state_registry.get_latest_confirmed_l2_commitment()?;
     debug!("L2 commitment: {:?}", l2_commitment);
 

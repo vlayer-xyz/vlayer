@@ -6,6 +6,7 @@ use std::{
 use alloy_primitives::{Address, B256, U256};
 use derive_more::Debug;
 use provider::BlockingProvider;
+#[allow(clippy::disallowed_types)]
 use revm::{
     primitives::{AccountInfo, Bytecode, KECCAK_EMPTY},
     DatabaseRef,

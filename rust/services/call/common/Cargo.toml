@@ -1,0 +1,11 @@
+[package]
+name = "call_common"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+revm = { workspace = true }
+anyhow = { workspace = true }
+
+[lints]
+workspace = true

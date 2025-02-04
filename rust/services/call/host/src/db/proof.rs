@@ -4,6 +4,7 @@ use alloy_primitives::{Address, BlockNumber, Bytes, B256, U256};
 use block_header::EvmBlockHeader;
 use mpt::{KeccakMerkleTrie as MerkleTrie, ParseNodeError};
 use provider::{BlockingProvider, EIP1186Proof};
+#[allow(clippy::disallowed_types)]
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
     DatabaseRef,

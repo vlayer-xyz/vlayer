@@ -19,6 +19,7 @@ bytes = { workspace = true }
 call_precompiles = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
+call_common = { workspace = true }
 chain_common = { workspace = true }
 common = { workspace = true }
 derivative = { workspace = true }

@@ -1,7 +1,8 @@
-use std::{collections::HashMap, fmt::Debug};
+use std::collections::HashMap;
 
 use alloy_primitives::Address;
-use revm::{db::CacheDB, DatabaseRef};
+use call_common::Database;
+use revm::db::CacheDB;
 
 use crate::config::{Storage, ACCOUNT_TO_STORAGE, EMPTY_ACCOUNTS};
 
@@ -13,29 +14,18 @@ use crate::config::{Storage, ACCOUNT_TO_STORAGE, EMPTY_ACCOUNTS};
 /// Some accounts are not that important. For example, the default caller account or miner address. Also precompile accounts.
 /// Therefore - we decided to hardcode their state here. (It's included in guest_id)
 /// The consequences are that if user's code checks the state of those accounts - our simulation will yield different results than the real network.
-pub fn seed_cache_db_with_trusted_data<D>(db: &mut CacheDB<D>)
-where
-    D: DatabaseRef,
-    <D as DatabaseRef>::Error: Debug,
-{
+pub fn seed_cache_db_with_trusted_data<D: Database>(db: &mut CacheDB<D>) {
     seed_accounts_info(db, EMPTY_ACCOUNTS);
     seed_storage(db, &ACCOUNT_TO_STORAGE.clone());
 }
 
-fn seed_accounts_info<D>(db: &mut CacheDB<D>, accounts: &[Address])
-where
-    D: DatabaseRef,
-{
+fn seed_accounts_info<D: Database>(db: &mut CacheDB<D>, accounts: &[Address]) {
     for account in accounts {
         db.insert_account_info(*account, Default::default());
     }
 }
 
-fn seed_storage<D>(db: &mut CacheDB<D>, account_to_storage: &HashMap<Address, Storage>)
-where
-    D: DatabaseRef,
-    <D as DatabaseRef>::Error: Debug,
-{
+fn seed_storage<D: Database>(db: &mut CacheDB<D>, account_to_storage: &HashMap<Address, Storage>) {
     for (&account, storage) in account_to_storage {
         for (&key, &value) in storage {
             db.insert_account_storage(account, key, value)

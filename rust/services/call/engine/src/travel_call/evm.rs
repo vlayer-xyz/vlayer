@@ -1,20 +1,17 @@
 use std::sync::Arc;
 
+use call_common::Database;
 use call_precompiles::PRECOMPILES;
-use revm::{db::WrapDatabaseRef, inspector_handle_register, DatabaseRef, Evm, Handler};
+use revm::{db::WrapDatabaseRef, inspector_handle_register, Evm, Handler};
 
 use super::inspector::Inspector;
 use crate::{evm::env::EvmEnv, Call};
 
-pub fn build_evm<'inspector, 'envs, D>(
+pub fn build_evm<'inspector, 'envs, D: Database>(
     env: &'envs EvmEnv<D>,
     tx: &Call,
     inspector: Inspector<'inspector>,
-) -> Evm<'inspector, Inspector<'inspector>, WrapDatabaseRef<&'envs D>>
-where
-    D: DatabaseRef + Send + Sync,
-    D::Error: std::fmt::Debug,
-{
+) -> Evm<'inspector, Inspector<'inspector>, WrapDatabaseRef<&'envs D>> {
     let precompiles_handle_register = |handler: &mut Handler<_, _, _>| {
         let precompiles = handler.pre_execution.load_precompiles();
         handler.pre_execution.load_precompiles = Arc::new(move || {
@@ -42,11 +39,7 @@ where
 }
 
 // EVM does it on itself in transaction validation, but we use transact_preverified so we need to do it manually.
-fn preload_l1_block_info<D>(evm: &mut Evm<'_, Inspector<'_>, WrapDatabaseRef<&D>>)
-where
-    D: DatabaseRef,
-    D::Error: std::fmt::Debug,
-{
+fn preload_l1_block_info<D: Database>(evm: &mut Evm<'_, Inspector<'_>, WrapDatabaseRef<&D>>) {
     let spec_id = evm.spec_id();
     let l1_block_info = revm::optimism::L1BlockInfo::try_fetch(evm.db_mut(), spec_id).expect(
         "Failed to fetch L1 block info. This should not happen as we preload all necesary data in seed_cache_db_with_trusted_data",

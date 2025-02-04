@@ -5,28 +5,23 @@ use std::{
 
 use alloy_primitives::{BlockHash, BlockNumber, ChainId};
 use block_header::EvmBlockHeader;
+use call_common::Database;
 use chain::{ChainSpec, ForkError};
 use derive_more::{Deref, DerefMut, From, Into, IntoIterator};
-use revm::{
-    primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId},
-    DatabaseRef,
-};
+use revm::primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId};
 
 pub mod cached;
 pub mod factory;
 pub mod location;
 
 /// The environment to execute the contract calls in.
-pub struct EvmEnv<D: DatabaseRef + Send + Sync> {
+pub struct EvmEnv<D: Database> {
     pub db: D,
     pub cfg_env: CfgEnvWithHandlerCfg,
     pub header: Box<dyn EvmBlockHeader>,
 }
 
-impl<D> Debug for EvmEnv<D>
-where
-    D: DatabaseRef + Send + Sync + Debug,
-{
+impl<D: Database> Debug for EvmEnv<D> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("EvmEnv")
             .field("db", &self.db)
@@ -36,10 +31,7 @@ where
     }
 }
 
-impl<D> EvmEnv<D>
-where
-    D: DatabaseRef + Send + Sync,
-{
+impl<D: Database> EvmEnv<D> {
     /// Creates a new environment.
     /// It uses the default configuration for the latest specification.
     pub fn new(db: D, header: Box<dyn EvmBlockHeader>) -> Self {

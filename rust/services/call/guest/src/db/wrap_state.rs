@@ -7,6 +7,7 @@ use std::{
 use alloy_primitives::{keccak256, Address, B256, U256};
 use call_engine::evm::input::EvmInput;
 use mpt::KeccakMerkleTrie as MerkleTrie;
+#[allow(clippy::disallowed_types)]
 use revm::{
     primitives::{AccountInfo, Bytecode},
     DatabaseRef,

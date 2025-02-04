@@ -5,9 +5,9 @@ use std::{
 };
 
 use alloy_primitives::ChainId;
+use call_common::Database;
 use common::InteriorMutabilityCache;
 use itertools::Itertools;
-use revm::DatabaseRef;
 
 use super::{
     factory::{Error, EvmEnvFactory, Result},
@@ -17,10 +17,7 @@ use super::{
 
 pub struct NullEvmEnvFactory;
 
-impl<D> EvmEnvFactory<D> for NullEvmEnvFactory
-where
-    D: DatabaseRef + Send + Sync,
-{
+impl<D: Database> EvmEnvFactory<D> for NullEvmEnvFactory {
     fn create(&self, _location: ExecutionLocation) -> Result<EvmEnv<D>> {
         Err(Error::NullEvmEnvFactory)
     }
@@ -28,19 +25,13 @@ where
 
 pub type MultiEvmEnv<D> = RwLock<HashMap<ExecutionLocation, Arc<EvmEnv<D>>>>;
 
-pub struct CachedEvmEnv<D>
-where
-    D: DatabaseRef + Send + Sync,
-{
+pub struct CachedEvmEnv<D: Database> {
     cache: MultiEvmEnv<D>,
     // Mutex makes it UnwindSafe
     factory: Mutex<Box<dyn EvmEnvFactory<D>>>,
 }
 
-impl<D> Debug for CachedEvmEnv<D>
-where
-    D: DatabaseRef + Send + Sync + Debug,
-{
+impl<D: Database> Debug for CachedEvmEnv<D> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("CachedEvmEnv")
             .field("cache", &self.cache)
@@ -48,10 +39,7 @@ where
     }
 }
 
-impl<D> CachedEvmEnv<D>
-where
-    D: DatabaseRef + Send + Sync,
-{
+impl<D: Database> CachedEvmEnv<D> {
     pub fn from_factory(factory: impl EvmEnvFactory<D> + 'static) -> Self {
         CachedEvmEnv {
             cache: RwLock::new(HashMap::new()),
