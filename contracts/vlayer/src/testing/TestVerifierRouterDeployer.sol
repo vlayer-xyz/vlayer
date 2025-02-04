@@ -4,10 +4,9 @@ pragma solidity ^0.8.21;
 import {ProofVerifierRouter, FakeProofVerifier, Groth16ProofVerifier} from "../proof_verifier/ProofVerifierRouter.sol";
 import {Repository} from "../Repository.sol";
 import {ImageID} from "../ImageID.sol";
-import {Verifier} from "../Verifier.sol";
 
 contract TestVerifierRouterDeployer {
-    ProofVerifierRouter internal immutable VERIFIER_ROUTER;
+    ProofVerifierRouter public immutable VERIFIER_ROUTER;
 
     constructor() {
         Repository repository = new Repository(address(this), address(this));
@@ -17,9 +16,5 @@ contract TestVerifierRouterDeployer {
 
         VERIFIER_ROUTER =
             new ProofVerifierRouter(new FakeProofVerifier(repository), new Groth16ProofVerifier(repository));
-    }
-
-    function swapProofVerifier(Verifier verifier) external {
-        verifier._setTestVerifier(VERIFIER_ROUTER);
     }
 }

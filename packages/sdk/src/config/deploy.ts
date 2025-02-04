@@ -5,6 +5,7 @@ import {
   type Account,
   type Address,
   type Chain,
+  type PublicClient,
   type WalletClient,
 } from "viem";
 import { getChainConfirmations } from "./getChainConfirmations";
@@ -122,13 +123,13 @@ export const deployVlayerContracts = async ({
 };
 
 const swapInternalVerifier = async (
-  ethClient: WalletClient,
+  ethClient: WalletClient & PublicClient,
   chain: Chain,
   account: Account,
   verifierAddress: Address,
 ) => {
   log("Swapping internal verifier");
-  const routedDeployerHash = await ethClient.deployContract({
+  const routerDeployerHash = await ethClient.deployContract({
     chain,
     account,
     args: [],
@@ -136,15 +137,20 @@ const swapInternalVerifier = async (
     bytecode: TestVerifierRouterDeployer.bytecode.object,
   });
   const routerDeployerAddress = await waitForContractDeploy({
-    hash: routedDeployerHash,
+    hash: routerDeployerHash,
+  });
+  const newVerifier = await ethClient.readContract({
+    address: routerDeployerAddress,
+    functionName: "VERIFIER_ROUTER",
+    abi: TestVerifierRouterDeployer.abi,
   });
   const swapTxHash = await ethClient.writeContract({
     chain,
     account,
-    address: routerDeployerAddress,
-    functionName: "swapProofVerifier",
-    args: [verifierAddress],
-    abi: TestVerifierRouterDeployer.abi,
+    address: verifierAddress,
+    functionName: "_setTestVerifier",
+    args: [newVerifier],
+    abi: ["_setTestVerifier(address)"],
   });
   await waitForTransactionReceipt({ hash: swapTxHash });
 };
