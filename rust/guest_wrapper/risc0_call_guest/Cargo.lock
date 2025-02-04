@@ -917,6 +917,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "call_common"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "revm",
+]
+
+[[package]]
 name = "call_engine"
 version = "0.1.0"
 dependencies = [
@@ -927,6 +935,7 @@ dependencies = [
  "async-trait",
  "block_header",
  "bytes",
+ "call_common",
  "call_precompiles",
  "chain",
  "chain_client",
@@ -956,6 +965,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-rlp-derive",
  "block_header",
+ "call_common",
  "call_engine",
  "chain_client",
  "chain_common",
@@ -2821,6 +2831,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "auto_impl",
+ "call_common",
  "common",
  "derivative",
  "derive-new",

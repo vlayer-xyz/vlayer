@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    fmt::{self, Debug, Formatter},
-};
+use std::{collections::HashMap, fmt::Debug};
 
 use alloy_primitives::{BlockHash, BlockNumber, ChainId};
 use block_header::EvmBlockHeader;
@@ -15,20 +12,11 @@ pub mod factory;
 pub mod location;
 
 /// The environment to execute the contract calls in.
+#[derive(Debug)]
 pub struct EvmEnv<D: Database> {
     pub db: D,
     pub cfg_env: CfgEnvWithHandlerCfg,
     pub header: Box<dyn EvmBlockHeader>,
-}
-
-impl<D: Database> Debug for EvmEnv<D> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.debug_struct("EvmEnv")
-            .field("db", &self.db)
-            .field("cfg_env", &self.cfg_env)
-            .field("header", &self.header)
-            .finish()
-    }
 }
 
 impl<D: Database> EvmEnv<D> {
