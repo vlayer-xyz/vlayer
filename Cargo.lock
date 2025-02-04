@@ -2119,6 +2119,7 @@ dependencies = [
  "common",
  "ctor",
  "derive-new",
+ "derive_more",
  "dotenvy",
  "ethers-core",
  "ethers-providers",
