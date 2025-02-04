@@ -7,18 +7,18 @@ import {ImageID} from "../ImageID.sol";
 import {Verifier} from "../Verifier.sol";
 
 contract TestVerifierRouterDeployer {
-    ProofVerifierRouter immutable verifierRouter;
+    ProofVerifierRouter internal immutable VERIFIER_ROUTER;
 
     constructor() {
         Repository repository = new Repository(msg.sender, address(this));
         repository.addImageIdSupport(ImageID.RISC0_CALL_GUEST_ID);
         repository.transferOwnership(msg.sender);
 
-        verifierRouter =
+        VERIFIER_ROUTER =
             new ProofVerifierRouter(new FakeProofVerifier(repository), new Groth16ProofVerifier(repository));
     }
 
     function swapProofVerifier(Verifier verifier) external {
-        verifier._setTestVerifier(verifierRouter);
+        verifier._setTestVerifier(VERIFIER_ROUTER);
     }
 }
