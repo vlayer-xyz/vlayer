@@ -51,5 +51,7 @@ for example in $(get_examples); do
     run_prover_script
     echo '::endgroup::'
 
-    docker compose -f docker-compose.devnet.yaml down
+    pushd vlayer
+        docker compose -f docker-compose.devnet.yaml down
+    popd
 done
