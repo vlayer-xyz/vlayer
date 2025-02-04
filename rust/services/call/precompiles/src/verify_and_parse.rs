@@ -1,7 +1,7 @@
 use std::convert::Into;
 
 use alloy_primitives::Bytes;
-use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
+use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
 use web_proof::verifier::verify_and_parse;
 
 use crate::{gas_used, map_to_fatal};
@@ -22,4 +22,11 @@ fn verify_and_parse_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let web = verify_and_parse(web_proof).map_err(map_to_fatal)?;
 
     Ok(PrecompileOutput::new(gas_used, web.abi_encode().into()))
+}
+
+pub(super) fn verify_and_parse_run_2(input: &Bytes) -> Result<Bytes, PrecompileErrors> {
+    let web_proof_json = std::str::from_utf8(input).map_err(map_to_fatal)?;
+    let web_proof = serde_json::from_str(web_proof_json).map_err(map_to_fatal)?;
+    let web = verify_and_parse(web_proof).map_err(map_to_fatal)?;
+    Ok(web.abi_encode().into())
 }

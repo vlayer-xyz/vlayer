@@ -1,3 +1,4 @@
+mod config;
 mod json;
 mod regex;
 pub mod url_pattern;
@@ -23,6 +24,8 @@ pub const PRECOMPILES: [PrecompileWithAddress; 9] = [
     PrecompileWithAddress(u64_to_address(0x111), regex::CAPTURE),
     PrecompileWithAddress(u64_to_address(0x120), url_pattern::TEST),
 ];
+
+pub const PRECOMPILES_2: [PrecompileWithAddress; 1] = config::PRECOMPILES;
 
 #[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
 fn map_to_fatal<E: ToString>(err: E) -> PrecompileErrors {
