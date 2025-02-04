@@ -51,5 +51,5 @@ for example in $(get_examples); do
     run_prover_script
     echo '::endgroup::'
 
-    docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml down
+    docker compose -f docker-compose.devnet.yaml down
 done
