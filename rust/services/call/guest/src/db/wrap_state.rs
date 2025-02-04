@@ -14,7 +14,7 @@ use revm::{
 
 use super::state::StateDb;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct WrapStateDb {
     inner: StateDb,
     account_storage: RwLock<HashMap<Address, Option<Arc<MerkleTrie>>>>,

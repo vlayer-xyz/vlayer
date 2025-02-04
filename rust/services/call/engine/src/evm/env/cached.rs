@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    fmt::{self, Debug, Formatter},
     sync::{Arc, Mutex, RwLock},
 };
 
@@ -34,6 +35,17 @@ where
     cache: MultiEvmEnv<D>,
     // Mutex makes it UnwindSafe
     factory: Mutex<Box<dyn EvmEnvFactory<D>>>,
+}
+
+impl<D> Debug for CachedEvmEnv<D>
+where
+    D: DatabaseRef + Send + Sync + Debug,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CachedEvmEnv")
+            .field("cache", &self.cache)
+            .finish()
+    }
 }
 
 impl<D> CachedEvmEnv<D>

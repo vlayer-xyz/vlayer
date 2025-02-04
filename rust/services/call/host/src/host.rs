@@ -1,4 +1,7 @@
-use std::time::{Duration, Instant};
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
+};
 
 use alloy_sol_types::SolValue;
 use bytes::Bytes;
@@ -19,9 +22,9 @@ use common::{verifier::zk_proof, GuestElf};
 pub use config::Config;
 use derive_new::new;
 pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
+use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;
-use revm::primitives::HashMap;
 use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
 use seal::EncodableReceipt;
 use tracing::instrument;
@@ -50,6 +53,7 @@ pub struct Host {
     prover: Prover,
     // None means that chain service is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
     chain_client: Option<chain_client::RecordingClient>,
+    op_client_factory: recording::Factory,
     travel_call_verifier: HostTravelCallVerifier,
     guest_elf: GuestElf,
 }
@@ -92,11 +96,12 @@ impl Host {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_client = chain_client.map(chain_client::RecordingClient::new);
+        let recording_op_client_factory = recording::Factory::new(op_client_factory);
 
         let travel_call_verifier = Host::build_travel_call_verifier(
             config.chain_guest_ids,
             &chain_client,
-            op_client_factory,
+            recording_op_client_factory.clone(),
         );
 
         Host {
@@ -104,6 +109,7 @@ impl Host {
             start_execution_location,
             prover,
             chain_client,
+            op_client_factory: recording_op_client_factory,
             travel_call_verifier,
             guest_elf: config.call_guest_elf,
         }
@@ -112,7 +118,7 @@ impl Host {
     fn build_travel_call_verifier(
         chain_guest_ids: impl IntoIterator<Item = Digest>,
         chain_client: &Option<chain_client::RecordingClient>,
-        op_client_factory: impl optimism::client::IFactory + 'static,
+        op_client_factory: optimism::client::factory::recording::Factory,
     ) -> HostTravelCallVerifier {
         let chain_proof_verifier =
             chain_common::verifier::Verifier::new(chain_guest_ids, zk_proof::HostVerifier);
@@ -149,6 +155,7 @@ impl Host {
             self.travel_call_verifier,
         )
         .await?;
+        let op_output_cache = self.op_client_factory.into_cache();
 
         let multi_evm_input = into_multi_input(self.envs)?;
 
@@ -157,6 +164,7 @@ impl Host {
             start_execution_location: self.start_execution_location,
             chain_proofs,
             call,
+            op_output_cache,
         };
 
         Ok(PreflightResult::new(host_output.into(), input, gas_used, elapsed_time))

@@ -123,7 +123,7 @@ where
             if l2_output.hash_slow() != l2_commitment.output_hash {
                 return Err(Error::L2OutputHashMismatch);
             }
-            let l2_block = l2_output.block_ref.l2_block_info;
+            let l2_block = l2_output.l2_block;
 
             let latest_confirmed_location = (chain_id, l2_block.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;

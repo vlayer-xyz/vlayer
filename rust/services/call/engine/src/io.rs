@@ -6,6 +6,7 @@ use alloy_sol_types::{SolCall, SolValue};
 use bytes::Bytes;
 use chain_client::ChainProofCache;
 use derive_new::new;
+use optimism::client::factory::cached::OpOutputCache;
 use revm::{
     interpreter::CallInputs,
     primitives::{OptimismFields, TxEnv},
@@ -26,6 +27,7 @@ pub struct Input {
     pub start_execution_location: ExecutionLocation,
     pub chain_proofs: ChainProofCache,
     pub call: Call,
+    pub op_output_cache: OpOutputCache,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, RlpEncodable)]

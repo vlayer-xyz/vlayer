@@ -4,7 +4,10 @@ use derivative::Derivative;
 use jsonrpsee::{core::RpcResult, http_client::HttpClient, proc_macros::rpc};
 use thiserror::Error;
 
-use crate::{types::OutputResponse, ClientError, IClient};
+use crate::{
+    types::{rpc::OutputResponse, SequencerOutput},
+    ClientError, IClient,
+};
 
 #[rpc(server, client, namespace = "optimism")]
 pub trait RollupNode {
@@ -37,10 +40,10 @@ impl Client {
 
 #[async_trait]
 impl IClient for Client {
-    async fn get_output_at_block(&self, block_number: u64) -> Result<OutputResponse, ClientError> {
+    async fn get_output_at_block(&self, block_number: u64) -> Result<SequencerOutput, ClientError> {
         let output = RollupNodeClient::op_output_at_block(&self.client, block_number.into())
             .await
             .map_err(Error::JsonRPSee)?;
-        Ok(output)
+        Ok(output.into())
     }
 }

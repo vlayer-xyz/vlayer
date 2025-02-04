@@ -118,7 +118,9 @@ pub mod simple {
 }
 
 pub mod teleport {
-    use alloy_primitives::{uint, Uint};
+    use alloy_primitives::{hex, uint, Uint, B256};
+    use lazy_static::lazy_static;
+    use optimism::{types::SequencerOutput, NumHash};
 
     use super::*;
 
@@ -134,6 +136,20 @@ pub mod teleport {
     const OP_BLOCK_NO: Uint<256, 4> = uint!(3_U256);
     const OP_ANVIL_CHAIN_ID: Uint<256, 4> = uint!(31338_U256);
     const TOKEN_ADDR: Address = address!("da52b25ddB0e3B9CC393b0690Ac62245Ac772527");
+
+    lazy_static! {
+        static ref STATE_ROOT: B256 =
+            B256::from(hex!("25d65fff68c2248f9b0c0b04d2ce9749dbdb088bd0fe16962476f18794373e5f"));
+        static ref WITHDRAWAL_STORAGE_ROOT: B256 =
+            B256::from(hex!("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
+        static ref FINALIZED_L2_HASH: B256 =
+            B256::from(hex!("8a3162ac8009f30a115f905e15c1206c89d5bde102e5cf1f72e425d3aec03fbd"));
+        pub static ref OUTPUT: SequencerOutput = SequencerOutput::new(
+            *STATE_ROOT,
+            *WITHDRAWAL_STORAGE_ROOT,
+            NumHash::new(3, *FINALIZED_L2_HASH)
+        );
+    }
 
     sol! {
         #[derive(Debug)]

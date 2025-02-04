@@ -1,10 +1,10 @@
 use std::{
     collections::HashMap,
-    fmt::Debug,
     sync::{Arc, RwLock},
 };
 
 use alloy_primitives::{Address, B256, U256};
+use derive_more::Debug;
 use provider::BlockingProvider;
 use revm::{
     primitives::{AccountInfo, Bytecode, KECCAK_EMPTY},
@@ -23,11 +23,14 @@ pub enum Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// A revm [Database] backed by a [Provider].
+#[derive(Debug)]
 pub(crate) struct ProviderDb {
+    #[debug(skip)]
     pub(crate) provider: Arc<dyn BlockingProvider>,
     pub(crate) block_number: u64,
 
     /// Cache for code hashes to contract addresses.
+    #[debug(skip)]
     code_hashes: RwLock<HashMap<B256, Address>>,
 }
 

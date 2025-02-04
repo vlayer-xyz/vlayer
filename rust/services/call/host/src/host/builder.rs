@@ -242,7 +242,7 @@ mod tests {
         use ethers_core::types::{Bytes, U64};
         use ethers_providers::MockProvider;
         use mock_chain_server::ChainProofServerMock;
-        use optimism::client::factory::mock;
+        use optimism::client::factory::cached;
         use provider::{BlockingProvider, EthersProvider};
 
         use super::*;
@@ -281,7 +281,7 @@ mod tests {
             let start_chain_provider = mock_provider(prover_contract_code_results);
             let chain_client = mock_chain_client().await;
             let providers = CachedMultiProvider::from_provider(CHAIN_ID, start_chain_provider);
-            let op_client_factory = Box::new(mock::Factory::default());
+            let op_client_factory = Box::new(cached::Factory::default());
             WithStartChainId {
                 start_chain_id: CHAIN_ID,
                 chain_client,
