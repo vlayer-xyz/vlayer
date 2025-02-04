@@ -118,7 +118,6 @@ export const deployVlayerContracts = async ({
 
   if (env?.isTesting) {
     await swapInternalVerifier(ethClient, chain, account, verifier);
-  } else {
   }
 
   return { prover, verifier };
@@ -155,4 +154,5 @@ const swapInternalVerifier = async (
     abi: parseAbi(["function _setTestVerifier(address)"]),
   });
   await waitForTransactionReceipt({ hash: swapTxHash });
+  log("Internal verifier swapped successfully");
 };
