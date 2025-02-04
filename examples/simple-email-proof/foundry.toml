@@ -7,9 +7,6 @@ libs = [
     "../../target",
 ]
 
-optimizer = true
-optimizer_runs = 200
-
 fs_permissions = [{ access = "read", path = "./testdata" }]
 
 [dependencies]
