@@ -16,9 +16,9 @@ test.describe("Full flow of webproof using extension", () => {
   }) => {
     await test.step("Web-app should open sidepanel via SDK call", async () => {
       await page.goto("/dapp-prove-web");
-      const requestProofButton = page
-        .locator("body")
-        .getByTestId("zk-prove-button");
+      const requestProofButton = page.locator("body").getByRole("button", {
+        name: "Request prove web",
+      });
 
       await requestProofButton.click();
       const extension = await sidePanel(context);
@@ -54,7 +54,9 @@ test.describe("Full flow of webproof using extension", () => {
       if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = startPage.getByTestId("login-button");
+      const loginButton = startPage.getByRole("button", {
+        name: "Login",
+      });
       await loginButton.click();
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
@@ -70,7 +72,9 @@ test.describe("Full flow of webproof using extension", () => {
       if (!dashboardPage) {
         throw new Error("No dashboard page");
       }
-      const profileButton = dashboardPage.getByTestId("go-to-profile-button");
+      const profileButton = dashboardPage.getByRole("button", {
+        name: /^Go to profile$/,
+      });
       await profileButton.click();
       await dashboardPage.waitForURL(config.profileUrl);
       const extension = await sidePanel(context);
@@ -81,7 +85,9 @@ test.describe("Full flow of webproof using extension", () => {
 
     await test.step("Prove button should appear after request to external api", async () => {
       const extension = await sidePanel(context);
-      const proveButton = extension.getByTestId("prove-button");
+      const proveButton = extension.getByRole("button", {
+        name: "Generate proof",
+      });
       await expect(proveButton).toHaveText("Generate proof");
     });
 
@@ -90,9 +96,11 @@ test.describe("Full flow of webproof using extension", () => {
       page.on("requestfinished", (req) => vlayerResponses.push(req.response()));
 
       const extension = await sidePanel(context);
-      const proveButton = extension.getByTestId("prove-button");
+      const proveButton = extension.getByRole("button", {
+        name: "Generate proof",
+      });
       await proveButton.click();
-      await page.waitForSelector('h1[data-testid="has-zkproof"]');
+      await page.getByText("Has zk proof").waitFor();
 
       expect(vlayerResponses.length).toBeGreaterThan(1);
 
@@ -197,7 +205,9 @@ test.describe("Full flow of webproof using extension", () => {
       if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = startPage.getByTestId("login-button");
+      const loginButton = startPage.getByRole("button", {
+        name: "Login",
+      });
       await loginButton.click();
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
@@ -213,7 +223,9 @@ test.describe("Full flow of webproof using extension", () => {
       if (!dashboardPage) {
         throw new Error("No dashboard page");
       }
-      const profileButton = dashboardPage.getByTestId("go-to-profile-button");
+      const profileButton = dashboardPage.getByRole("button", {
+        name: /^Go to profile$/,
+      });
       await profileButton.click();
       await dashboardPage.waitForURL(config.profileUrl);
       const extension = await sidePanel(context);
@@ -224,20 +236,26 @@ test.describe("Full flow of webproof using extension", () => {
 
     await test.step("Prove button should appear after request to external api", async () => {
       const extension = await sidePanel(context);
-      const proveButton = extension.getByTestId("prove-button");
+      const proveButton = extension.getByRole("button", {
+        name: "Generate proof",
+      });
       await expect(proveButton).toHaveText("Generate proof");
     });
 
     await test.step("Click button should generate webproof", async () => {
       const extension = await sidePanel(context);
-      const proveButton = extension.getByTestId("prove-button");
+      const proveButton = extension.getByRole("button", {
+        name: "Generate proof",
+      });
       await proveButton.click();
       await page.reload();
-      await page.waitForSelector('h1[data-testid="has-webproof"]');
+      await page.getByText("Has web proof").waitFor();
     });
 
     await test.step("Zk prove button should appear after receiving webProof", async () => {
-      const proveButton = page.locator("body").getByTestId("zk-prove-button");
+      const proveButton = page.locator("body").getByRole("button", {
+        name: "Request zk proof",
+      });
       await expect(proveButton).toBeVisible();
     });
 
@@ -270,14 +288,16 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Proving request has succeeded", async () => {
-      const proveButton = page.locator("body").getByTestId("zk-prove-button");
+      const proveButton = page.locator("body").getByRole("button", {
+        name: "Request zk proof",
+      });
 
       const vlayerResponses: Promise<Response | null>[] = [];
       page.on("requestfinished", (req) => vlayerResponses.push(req.response()));
 
       await proveButton.click();
 
-      await page.waitForSelector('h1[data-testid="has-zkproof"]');
+      await page.getByText("Has zk proof").waitFor();
 
       expect(vlayerResponses.length).toBeGreaterThan(1);
 
@@ -322,7 +342,7 @@ test.describe("Full flow of webproof using extension", () => {
       expect(greeting).toEqual("*************");
     });
   });
-  
+
   test("Flow from opening sidepanel until 403 from proven endpoint", async ({
     page,
     context,
@@ -350,7 +370,9 @@ test.describe("Full flow of webproof using extension", () => {
       if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = startPage.getByTestId("login-button");
+      const loginButton = startPage.getByRole("button", {
+        name: "Login",
+      });
       await loginButton.click();
 
       const dashboardPage = context.pages().find((page) => {
@@ -359,18 +381,24 @@ test.describe("Full flow of webproof using extension", () => {
       if (!dashboardPage) {
         throw new Error("No dashboard page");
       }
-      const profileButton = dashboardPage.getByTestId("go-to-profile-failed-auth-button");
+      const profileButton = dashboardPage.getByRole("button", {
+        name: "Go to profile failed auth",
+      });
       await profileButton.click();
       await dashboardPage.waitForURL(config.profileFailedAuthUrl);
 
-      const proveButton = extension.getByTestId("prove-button");
+      const proveButton = extension.getByRole("button", {
+        name: "Generate proof",
+      });
       await expect(proveButton).toHaveText("Generate proof");
 
       await proveButton.click();
 
       await extension.waitForSelector('p[data-testid="error-message"]');
       const errorMessage = extension.getByTestId("error-message");
-      await expect(errorMessage).toHaveText("Authentication failed. Please restart the process.");
+      await expect(errorMessage).toHaveText(
+        "Authentication failed. Please restart the process.",
+      );
     });
   });
 
@@ -418,7 +446,9 @@ test.describe("Full flow of webproof using extension", () => {
       if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = startPage.getByTestId("login-button");
+      const loginButton = startPage.getByRole("button", {
+        name: "Login",
+      });
       await loginButton.click();
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
@@ -434,7 +464,9 @@ test.describe("Full flow of webproof using extension", () => {
       if (!dashboardPage) {
         throw new Error("No dashboard page");
       }
-      const profileButton = dashboardPage.getByTestId("go-to-profile-button");
+      const profileButton = dashboardPage.getByRole("button", {
+        name: /^Go to profile$/,
+      });
       await profileButton.click();
       await dashboardPage.waitForURL(config.profileUrl);
       const extension = await sidePanel(context);
@@ -444,19 +476,25 @@ test.describe("Full flow of webproof using extension", () => {
     });
     await test.step("Prove button should appear after request to external api", async () => {
       const extension = await sidePanel(context);
-      const proveButton = extension.getByTestId("prove-button");
+      const proveButton = extension.getByRole("button", {
+        name: "Generate proof",
+      });
       expect(proveButton).toBeDefined();
     });
 
     await test.step("Click button should generate webproof", async () => {
       const extension = await sidePanel(context);
-      const proveButton = extension.getByTestId("prove-button");
+      const proveButton = extension.getByRole("button", {
+        name: "Generate proof",
+      });
       await proveButton.click();
-      await page.waitForSelector('h1[data-testid="has-webproof"]');
+      await page.getByText("Has web proof").waitFor();
     });
 
     await test.step("Zk prove button should appear after receiving webProof", () => {
-      const proveButton = page.locator("body").getByTestId("zk-prove-button");
+      const proveButton = page.locator("body").getByRole("button", {
+        name: "Request zk proof",
+      });
       void expect(proveButton).toBeVisible();
     });
 
@@ -489,14 +527,16 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Proving request has succeeded", async () => {
-      const proveButton = page.locator("body").getByTestId("zk-prove-button");
+      const proveButton = page
+        .locator("body")
+        .getByRole("button", { name: "Request zk proof" });
 
       const vlayerResponses: Promise<Response | null>[] = [];
       page.on("requestfinished", (req) => vlayerResponses.push(req.response()));
 
       await proveButton.click();
 
-      await page.waitForSelector('h1[data-testid="has-zkproof"]');
+      await page.getByText("Has zk proof").waitFor();
 
       expect(vlayerResponses.length).toBeGreaterThan(1);
 

@@ -159,11 +159,8 @@ function DappNewWay() {
       <div>
         {webProof ? (
           <>
-            <h1 data-testid="has-webproof">Has web proof</h1>
-            <button
-              data-testid="zk-prove-button"
-              onClick={handleZkProofRequestClick}
-            >
+            <h1>Has web proof</h1>
+            <button onClick={handleZkProofRequestClick}>
               Request zk proof
             </button>
           </>
@@ -174,7 +171,7 @@ function DappNewWay() {
       <div>
         {zkProof ? (
           <div>
-            <h1 data-testid="has-zkproof">Has zk proof</h1>
+            <h1>Has zk proof</h1>
             <h2>Name from prover:</h2>
             <pre
               style={{ whiteSpace: "break-spaces" }}
@@ -362,11 +359,8 @@ function DappFailedAuth() {
       <div>
         {webProof ? (
           <>
-            <h1 data-testid="has-webproof">Has web proof</h1>
-            <button
-              data-testid="zk-prove-button"
-              onClick={handleZkProofRequestClick}
-            >
+            <h1>Has web proof</h1>
+            <button onClick={handleZkProofRequestClick}>
               Request zk proof
             </button>
           </>
@@ -377,7 +371,7 @@ function DappFailedAuth() {
       <div>
         {zkProof ? (
           <div>
-            <h1 data-testid="has-zkproof">Has zk proof</h1>
+            <h1>Has zk proof</h1>
             <h2>Name from prover:</h2>
             <pre
               style={{ whiteSpace: "break-spaces" }}
@@ -556,11 +550,8 @@ function Dapp() {
       <div>
         {webProof ? (
           <>
-            <h1 data-testid="has-webproof">Has web proof</h1>
-            <button
-              data-testid="zk-prove-button"
-              onClick={handleZkProofRequestClick}
-            >
+            <h1>Has web proof</h1>
+            <button onClick={handleZkProofRequestClick}>
               Request zk proof
             </button>
           </>
@@ -571,7 +562,7 @@ function Dapp() {
       <div>
         {zkProof ? (
           <div>
-            <h1 data-testid="has-zkproof">Has zk proof</h1>
+            <h1>Has zk proof</h1>
             <h2>Name from prover:</h2>
             <pre
               style={{ whiteSpace: "break-spaces" }}
