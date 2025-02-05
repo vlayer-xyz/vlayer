@@ -1,6 +1,6 @@
 use std::panic;
 
-use call_common::Database;
+use call_common::RevmDB;
 use derive_new::new;
 use evm::build_evm;
 use revm::primitives::{ExecutionResult, ResultAndState};
@@ -25,11 +25,11 @@ pub use error::Error;
 pub use inspector::Inspector;
 
 #[derive(new)]
-pub struct Executor<'envs, D: Database> {
+pub struct Executor<'envs, D: RevmDB> {
     envs: &'envs CachedEvmEnv<D>,
 }
 
-impl<'envs, D: Database> Executor<'envs, D> {
+impl<'envs, D: RevmDB> Executor<'envs, D> {
     pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
         info!("Executing top-level EVM call");
         let result =

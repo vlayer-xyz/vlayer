@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use call_common::Database;
+use call_common::RevmDB;
 use call_precompiles::PRECOMPILES;
 use revm::{db::WrapDatabaseRef, inspector_handle_register, Evm, Handler};
 
 use super::inspector::Inspector;
 use crate::{evm::env::EvmEnv, Call};
 
-pub fn build_evm<'inspector, 'envs, D: Database>(
+pub fn build_evm<'inspector, 'envs, D: RevmDB>(
     env: &'envs EvmEnv<D>,
     tx: &Call,
     inspector: Inspector<'inspector>,
@@ -39,7 +39,7 @@ pub fn build_evm<'inspector, 'envs, D: Database>(
 }
 
 // EVM does it on itself in transaction validation, but we use transact_preverified so we need to do it manually.
-fn preload_l1_block_info<D: Database>(evm: &mut Evm<'_, Inspector<'_>, WrapDatabaseRef<&D>>) {
+fn preload_l1_block_info<D: RevmDB>(evm: &mut Evm<'_, Inspector<'_>, WrapDatabaseRef<&D>>) {
     let spec_id = evm.spec_id();
     let l1_block_info = revm::optimism::L1BlockInfo::try_fetch(evm.db_mut(), spec_id).expect(
         "Failed to fetch L1 block info. This should not happen as we preload all necesary data in seed_cache_db_with_trusted_data",

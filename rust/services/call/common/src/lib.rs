@@ -5,7 +5,7 @@ use std::fmt;
 
 use revm::DatabaseRef;
 
-pub trait Database:
+pub trait RevmDB:
     DatabaseRef<Error: fmt::Debug + Send + Sync + 'static + Into<anyhow::Error>>
     + Send
     + Sync
@@ -14,7 +14,7 @@ pub trait Database:
     type Error: fmt::Debug + Send + Sync + 'static + Into<anyhow::Error>;
 }
 
-impl<T, E> Database for T
+impl<T, E> RevmDB for T
 where
     T: DatabaseRef<Error = E> + Send + Sync + fmt::Debug,
     E: fmt::Debug + Send + Sync + 'static + Into<anyhow::Error>,

@@ -3,7 +3,7 @@ use std::{fmt::Debug, sync::Arc};
 
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
-use call_common::Database;
+use call_common::RevmDB;
 use common::Hashable;
 use derivative::Derivative;
 use optimism::{anchor_state_registry::AnchorStateRegistry, NumHash};
@@ -48,13 +48,13 @@ mod seal {
 #[cfg(any(test, feature = "testing"))]
 impl<F, D> seal::Sealed<D> for F
 where
-    D: Database,
+    D: RevmDB,
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result<()> + Send + Sync,
 {
 }
 
 #[async_trait]
-pub trait IVerifier<D: Database>: seal::Sealed<D> + Send + Sync {
+pub trait IVerifier<D: RevmDB>: seal::Sealed<D> + Send + Sync {
     async fn verify(
         &self,
         evm_envs: &CachedEvmEnv<D>,
@@ -66,7 +66,7 @@ pub trait IVerifier<D: Database>: seal::Sealed<D> + Send + Sync {
 #[async_trait]
 impl<F, D> IVerifier<D> for F
 where
-    D: Database,
+    D: RevmDB,
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result<()> + Send + Sync,
 {
     async fn verify(
@@ -92,7 +92,7 @@ impl Verifier {
 
 impl<D> seal::Sealed<D> for Verifier {}
 #[async_trait]
-impl<D: Database> IVerifier<D> for Verifier {
+impl<D: RevmDB> IVerifier<D> for Verifier {
     async fn verify(
         &self,
         evm_envs: &CachedEvmEnv<D>,
@@ -133,7 +133,7 @@ impl<D: Database> IVerifier<D> for Verifier {
     }
 }
 
-async fn fetch_latest_confirmed_l2_block<D: Database>(
+async fn fetch_latest_confirmed_l2_block<D: RevmDB>(
     anchor_state_registry: AnchorStateRegistry<D>,
     sequencer_client: &dyn optimism::IClient,
 ) -> Result<NumHash> {

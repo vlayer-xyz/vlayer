@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use async_trait::async_trait;
-use call_common::Database;
+use call_common::RevmDB;
 use derive_new::new;
 use tracing::info;
 
@@ -18,21 +18,21 @@ pub enum Error {
 
 pub type Result = std::result::Result<(), Error>;
 mod seal {
-    use call_common::Database;
+    use call_common::RevmDB;
 
-    pub trait Sealed<D: Database> {}
+    pub trait Sealed<D: RevmDB> {}
 }
 
 #[cfg(any(test, feature = "testing"))]
 impl<F, D> seal::Sealed<D> for F
 where
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result + Send + Sync,
-    D: Database,
+    D: RevmDB,
 {
 }
 
 #[async_trait]
-pub trait IVerifier<D: Database>: seal::Sealed<D> + Send + Sync {
+pub trait IVerifier<D: RevmDB>: seal::Sealed<D> + Send + Sync {
     async fn verify(
         &self,
         input: &CachedEvmEnv<D>,
@@ -44,7 +44,7 @@ pub trait IVerifier<D: Database>: seal::Sealed<D> + Send + Sync {
 #[async_trait]
 impl<F, D> IVerifier<D> for F
 where
-    D: Database,
+    D: RevmDB,
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result + Send + Sync,
 {
     async fn verify(
@@ -61,20 +61,20 @@ pub struct Verifier<D, TT, TP>
 where
     TT: time_travel::IVerifier,
     TP: teleport::IVerifier<D>,
-    D: Database,
+    D: RevmDB,
 {
     time_travel: TT,
     teleport: TP,
     _phantom_d: PhantomData<D>,
 }
 
-impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: Database> seal::Sealed<D>
+impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: RevmDB> seal::Sealed<D>
     for Verifier<D, TT, TP>
 {
 }
 
 #[async_trait]
-impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: Database> IVerifier<D>
+impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: RevmDB> IVerifier<D>
     for Verifier<D, TT, TP>
 {
     async fn verify(
