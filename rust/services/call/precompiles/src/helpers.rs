@@ -39,10 +39,12 @@ macro_rules! generate_precompiles {
     };
     (($address:literal, $func:ident, $base_cost:literal, $byte_cost:literal)) => {{
         use alloy_primitives::Bytes;
-        use helpers::gas_used;
         use revm::precompile::{
             u64_to_address, Precompile, PrecompileOutput, PrecompileResult, PrecompileWithAddress,
         };
+
+        use crate::helpers::gas_used;
+
         fn run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
             let gas_used = gas_used(input.len(), gas_limit, $base_cost, $byte_cost)?;
             let bytes = $func(input)?;
@@ -51,3 +53,5 @@ macro_rules! generate_precompiles {
         PrecompileWithAddress(u64_to_address($address), Precompile::Standard(run))
     }};
 }
+
+pub(super) use generate_precompiles;

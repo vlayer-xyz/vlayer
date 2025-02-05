@@ -1,12 +1,12 @@
-#[macro_use]
-mod helpers;
 pub mod email_proof;
+mod helpers;
 mod json;
 mod regex;
 pub mod url_pattern;
 mod web_proof;
 
 use email_proof::verify as email_proof;
+use helpers::generate_precompiles;
 use json::{
     get_array_length as json_get_array_length, get_bool as json_get_bool, get_int as json_get_int,
     get_string as json_get_string,
