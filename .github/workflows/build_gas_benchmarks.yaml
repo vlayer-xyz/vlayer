@@ -25,6 +25,10 @@ jobs:
         uses: ./.github/actions/contracts-prerequisites
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
+      - name: Run soldeer install for vlayer contracts
+        working-directory: ./contracts/vlayer
+        run: |
+          forge soldeer install
       - name: Forge build contract fixtures
         working-directory: ./contracts/fixtures
         run: |

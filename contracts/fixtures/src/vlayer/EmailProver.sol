@@ -6,7 +6,8 @@ import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Proof} from "vlayer/Proof.sol";
 import {Prover} from "vlayer/Prover.sol";
 import {RegexLib} from "vlayer/Regex.sol";
-import {VerifiedEmail, UnverifiedEmail, EmailProofLib, IVDnsKeyRepository} from "vlayer/EmailProof.sol";
+import {EmailProofLib, VerifiedEmail, UnverifiedEmail} from "vlayer/EmailProof.sol";
+import {IVDnsKeyRepository} from "vlayer/Repository.sol";
 
 import {AddressParser} from "./utils/AddressParser.sol";
 

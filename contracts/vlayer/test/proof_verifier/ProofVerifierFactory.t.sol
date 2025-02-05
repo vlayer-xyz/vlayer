@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import {Test, console} from "forge-std-1.9.4/src/Test.sol";
+import {Test, console, console2} from "forge-std-1.9.4/src/Test.sol";
 
 import {ImageID} from "../../src/ImageID.sol";
 import {IProofVerifier} from "../../src/proof_verifier/IProofVerifier.sol";
@@ -11,6 +11,7 @@ import {Repository} from "../../src/Repository.sol";
 import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";
 import {Groth16ProofVerifier} from "../../src/proof_verifier/Groth16ProofVerifier.sol";
 import {ProofVerifierRouter} from "../../src/proof_verifier/ProofVerifierRouter.sol";
+import {TestnetStableDeployment} from "../../src/TestnetStableDeployment.sol";
 
 contract VerifierFactory_Tests is Test {
     struct DeployedContract {
@@ -51,12 +52,9 @@ contract VerifierFactory_Tests is Test {
 
         Deployment memory deployment = abi.decode(data, (Deployment));
 
-        (
-            Repository repository,
-            FakeProofVerifier fakeProofVerifier,
-            Groth16ProofVerifier groth16ProofVerifier,
-            ProofVerifierRouter router
-        ) = ProofVerifierFactory.testnetStableDeployment();
+        Repository repository = TestnetStableDeployment.repository();
+        (FakeProofVerifier fakeProofVerifier, Groth16ProofVerifier groth16ProofVerifier, ProofVerifierRouter router) =
+            TestnetStableDeployment.verifiers();
 
         assertEq(address(repository), findAddress(deployment, "Repository"));
         assertEq(address(fakeProofVerifier), findAddress(deployment, "FakeProofVerifier"));
