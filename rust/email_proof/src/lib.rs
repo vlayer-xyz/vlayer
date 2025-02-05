@@ -61,6 +61,7 @@ mod test {
         };
 
     }
+
     #[test]
     fn passes_for_valid_email() -> anyhow::Result<()> {
         let email = signed_email_fixture();
@@ -223,6 +224,24 @@ mod test {
         assert_eq!(
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Error verifying DKIM: signature did not verify".to_string()
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn fails_for_dkim_signature_of_truncated_body() -> anyhow::Result<()> {
+        let email = read_email_from_file("./testdata/signed_email_with_dkim_l_tag.eml");
+        let calldata = UnverifiedEmail {
+            email,
+            dnsRecord: DNS_FIXTURE.clone(),
+            verificationData: VERIFICATION_DATA.clone(),
+        }
+        .abi_encode();
+
+        assert_eq!(
+            parse_and_verify(&calldata).unwrap_err().to_string(),
+            "Error verifying DKIM: signature syntax error: DKIM-Signature header contains body length tag (l=)".to_string()
         );
 
         Ok(())
