@@ -7,6 +7,7 @@ on:
       - "contracts/**"
       - "examples/**"
       - ".github/workflows/foundry.yaml"
+      - ".github/workflows/test_contracts.yaml"
     branches:
       - "**"
   merge_group:

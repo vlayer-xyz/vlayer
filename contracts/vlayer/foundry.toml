@@ -1,7 +1,10 @@
 [profile.default]
 src = "src"
 out = "out"
-fs_permissions = [{ access = "read", path = "./testdata" }]
+fs_permissions = [
+  { access = "read", path = "./testdata" },
+  { access = "read", path = "./deployed_contracts.json" }
+]
 
 libs = ["dependencies"]
 
