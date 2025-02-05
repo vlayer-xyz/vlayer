@@ -3,8 +3,7 @@ import { createRoot } from "react-dom/client";
 import { Dapp, DappNewWay, DappFailedAuth } from "./Dapp";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Profile } from "./Profile";
-import { ProfileFailedAuth } from "./ProfileFailedAuth";
+import { Profile, ProfileFailedAuth } from "./Profile";
 import { Dashboard } from "./Dashboard";
 import { Login } from "./Login";
 import "./main.css";
