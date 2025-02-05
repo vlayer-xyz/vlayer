@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import {Groth16ProofVerifier} from "./Groth16ProofVerifier.sol";
-import {ProofVerifierRouter} from "./ProofVerifierRouter.sol";
 import {ChainIdLibrary, InvalidChainId} from "./ChainId.sol";
 import {FakeProofVerifier} from "./FakeProofVerifier.sol";
 import {IProofVerifier} from "./IProofVerifier.sol";
