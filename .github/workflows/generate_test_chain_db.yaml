@@ -63,3 +63,9 @@ jobs:
 
           LOCAL_FILE: "./chain_db"
           REMOTE_FILE: ""
+
+      # Make sure to clean up the database in case of permissions issue.
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf ./chain_db
