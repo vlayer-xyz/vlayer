@@ -39,6 +39,8 @@ jobs:
           aws_access_key_id: ${{ vars.AWS_DEVELOPMENT_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_DEVELOPMENT_SECRET_ACCESS_KEY }}
           aws_region: eu-north-1
+      - name: Change ownership of the downloaded file
+        run: sudo chown runner:runner ./chain_db/mdbx.dat
 
       - name: Build chain worker
         env:
