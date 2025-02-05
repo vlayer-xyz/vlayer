@@ -12485,6 +12485,7 @@ dependencies = [
  "hex",
  "httparse",
  "k256",
+ "mime",
  "pkcs8",
  "serde",
  "serde_json",
