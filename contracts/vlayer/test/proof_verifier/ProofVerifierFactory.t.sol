@@ -11,6 +11,7 @@ import {Repository} from "../../src/Repository.sol";
 import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";
 import {Groth16ProofVerifier} from "../../src/proof_verifier/Groth16ProofVerifier.sol";
 import {ProofVerifierRouter} from "../../src/proof_verifier/ProofVerifierRouter.sol";
+import {TestnetStableDeployment} from "../../src/TestnetStableDeployment.sol";
 
 contract VerifierFactory_Tests is Test {
     struct DeployedContract {
@@ -51,12 +52,12 @@ contract VerifierFactory_Tests is Test {
 
         Deployment memory deployment = abi.decode(data, (Deployment));
 
+        Repository repository = TestnetStableDeployment.repository();
         (
-            Repository repository,
             FakeProofVerifier fakeProofVerifier,
             Groth16ProofVerifier groth16ProofVerifier,
             ProofVerifierRouter router
-        ) = ProofVerifierFactory.testnetStableDeployment();
+        ) = TestnetStableDeployment.verifiers();
 
         assertEq(address(repository), findAddress(deployment, "Repository"));
         assertEq(address(fakeProofVerifier), findAddress(deployment, "FakeProofVerifier"));
