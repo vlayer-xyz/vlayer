@@ -97,8 +97,7 @@ where
     #[instrument(skip(self))]
     pub async fn poll_commit(&mut self) -> Result<(), HostError> {
         if let Some(chain_update) = self.poll().await? {
-            info!("Chain info: {:?}", chain_update.chain_info);
-            self.db.update_chain(self.chain_id, chain_update)?;
+            self.commit(chain_update)?;
         } else {
             sleep(SLEEP_IF_FULLY_SYNCED).await;
         };
@@ -106,7 +105,14 @@ where
     }
 
     #[instrument(skip(self))]
-    async fn initialize(&self) -> Result<ChainUpdate, HostError> {
+    pub fn commit(&mut self, chain_update: ChainUpdate) -> Result<(), HostError> {
+        info!("Chain info: {:?}", chain_update.chain_info);
+        self.db.update_chain(self.chain_id, chain_update)?;
+        Ok(())
+    }
+
+    #[instrument(skip(self))]
+    pub async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         info!("Initializing chain");
         let start_block = self.fetcher.get_block(self.start_block).await?;
         let start_block_number = start_block.number();
@@ -125,7 +131,7 @@ where
     }
 
     #[instrument(skip(self))]
-    async fn append_prepend(&self) -> Result<Option<ChainUpdate>, HostError> {
+    pub async fn append_prepend(&self) -> Result<Option<ChainUpdate>, HostError> {
         let ChainTrie {
             block_range: old_range,
             trie: old_trie,
