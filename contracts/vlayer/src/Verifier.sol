@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import {Proof, ProofLib} from "./Proof.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
-import {ProofVerifierFactory} from "./proof_verifier/ProofVerifierFactory.sol";
+import {ProofVerifierFactory, ChainIdLibrary} from "./proof_verifier/ProofVerifierFactory.sol";
 import {CallAssumptionsLib} from "./CallAssumptions.sol";
 
 abstract contract Verifier {
@@ -14,10 +14,13 @@ abstract contract Verifier {
     uint256 private constant CALL_ASSUMPTIONS_END =
         CALL_ASSUMPTIONS_BEGIN + CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH;
 
+    address internal immutable __DEPLOYER;
+
     IProofVerifier public verifier;
 
     constructor() {
         verifier = ProofVerifierFactory.produce();
+        __DEPLOYER = msg.sender;
     }
 
     modifier onlyVerified(address prover, bytes4 selector) {
@@ -45,5 +48,13 @@ abstract contract Verifier {
         bytes32 journalHash = sha256(journalWithEmptyProof);
 
         return (proof, journalHash);
+    }
+
+    function _setTestVerifier(IProofVerifier newVerifier) external {
+        require(msg.sender == __DEPLOYER, "Only deployer can change verifier");
+        require(!ChainIdLibrary.isMainnet(), "Changing verifiers is not allowed on mainnet");
+        require(address(newVerifier.imageIdRepository()) != address(0), "Verifier's repository address is not set");
+
+        verifier = newVerifier;
     }
 }

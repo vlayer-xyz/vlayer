@@ -8,6 +8,7 @@ import {
   waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
 import { type Address } from "viem";
+
 const config = getConfig();
 const { ethClient, account, proverUrl } = await createContext(config);
 
@@ -41,6 +42,7 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
   proverArgs: [usdcTokenAddr, startBlock, endBlock, step],
   verifierArgs: [],
+  env: config.deployConfig,
 });
 
 const vlayer = createVlayerClient({

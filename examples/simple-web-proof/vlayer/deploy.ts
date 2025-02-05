@@ -6,12 +6,13 @@ import {
   getConfig,
 } from "@vlayer/sdk/config";
 
+const config = getConfig();
+
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
+  env: config.deployConfig,
 });
-
-const config = getConfig();
 
 writeEnvVariables(".env", {
   VITE_PROVER_ADDRESS: prover,

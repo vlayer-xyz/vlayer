@@ -2,6 +2,10 @@
 // mostly needed by the examples to be able to properly perform
 // pre run deployment
 
+export type DeployConfig = {
+  isTesting: boolean;
+};
+
 export type EnvConfig = {
   chainName: string;
   proverUrl: string;
@@ -9,6 +13,7 @@ export type EnvConfig = {
   l2JsonRpcUrl?: string;
   privateKey: `0x${string}`;
   token?: string;
+  deployConfig?: DeployConfig;
 };
 
 // represents what is needed by client to properly
@@ -23,4 +28,5 @@ export type VlayerContextConfig = {
   wsProxyUrl?: string;
   notaryUrl?: string;
   privateKey?: `0x${string}`;
+  deployConfig?: DeployConfig;
 };
