@@ -4,6 +4,7 @@
 
 export type DeployConfig = {
   isTesting: boolean;
+  imageId?: string;
 };
 
 export type EnvConfig = {
