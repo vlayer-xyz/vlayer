@@ -6,29 +6,33 @@ use revm::precompile::{
 use crate::helpers::Result;
 
 #[derive(Debug, Copy, Clone)]
-pub enum Category {
+pub enum Tag {
     WebProof,
     EmailProof,
-    Json,
-    Regex,
-    Url,
+    JsonGetString,
+    JsonGetInt,
+    JsonGetBool,
+    JsonGetArrayLength,
+    RegexIsMatch,
+    RegexCapture,
+    UrlPatternTest,
 }
 
-#[derive(Deref, Into)]
+#[derive(Deref, Into, Debug, Clone)]
 pub struct Precompile {
     #[deref]
     #[into]
     inner: PrecompileWithAddress,
-    category: Category,
+    tag: Tag,
 }
 
 impl Precompile {
-    pub const fn new(inner: PrecompileWithAddress, category: Category) -> Self {
-        Self { inner, category }
+    pub const fn new(inner: PrecompileWithAddress, tag: Tag) -> Self {
+        Self { inner, tag }
     }
 
-    pub const fn category(&self) -> Category {
-        self.category
+    pub const fn tag(&self) -> Tag {
+        self.tag
     }
 }
 

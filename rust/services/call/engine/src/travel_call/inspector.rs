@@ -1,4 +1,5 @@
 use alloy_primitives::{address, Address, ChainId};
+use call_precompiles::precompile_by_address;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     primitives::ExecutionResult,
@@ -91,6 +92,11 @@ where
     ) -> Option<CallOutcome> {
         info!("Call: {:?} -> {:?}", inputs.caller, inputs.bytecode_address);
         debug!("Input: {:?}", inputs.input);
+
+        if let Some(precompile) = precompile_by_address(&inputs.bytecode_address) {
+            debug!("Calling PRECOMPILE {:?}", precompile.tag());
+        }
+
         match inputs.bytecode_address {
             CONTRACT_ADDR => self.on_travel_call(inputs),
             _ => self.on_call(inputs),
