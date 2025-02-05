@@ -132,17 +132,10 @@ const swapInternalVerifier = async (
 ) => {
   log("Swapping internal verifier");
   const imageId = await getImageId();
-  const args = [
-    [
-      imageId,
-      "0xd428ff94d9ee975e786938325e4d1cbfc05b6a8cb2daf00c17eadf07aba628ed",
-    ],
-  ] as const;
-  console.log(args);
   const routerDeployerHash = await ethClient.deployContract({
     chain,
     account,
-    args,
+    args: [[imageId]],
     abi: TestVerifierRouterDeployer.abi,
     bytecode: TestVerifierRouterDeployer.bytecode.object,
   });
@@ -169,6 +162,5 @@ const swapInternalVerifier = async (
 async function getImageId(): Promise<Hex> {
   const { proverUrl } = getConfig();
   const version = await v_versions(proverUrl);
-  console.log("version", version);
-  return version.result.chain_guest_id as Hex;
+  return version.result.call_guest_id as Hex;
 }
