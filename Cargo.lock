@@ -2325,7 +2325,7 @@ dependencies = [
 [[package]]
 name = "cfdkim"
 version = "0.3.0"
-source = "git+https://github.com/risc0-labs/dkim?rev=3213315e41f426c307b8feb8fb329330a47e326c#3213315e41f426c307b8feb8fb329330a47e326c"
+source = "git+https://github.com/vlayer-xyz/dkim?rev=04668378083e2236489b3749b4112c847972071b#04668378083e2236489b3749b4112c847972071b"
 dependencies = [
  "base64 0.21.7",
  "ed25519-dalek",
