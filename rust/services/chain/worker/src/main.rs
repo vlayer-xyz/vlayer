@@ -12,6 +12,7 @@ use risc0_zkp::core::digest::Digest;
 use strum::{Display, EnumString};
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};
+use version::version;
 
 mod retry;
 
@@ -32,7 +33,7 @@ enum Mode {
 }
 
 #[derive(Parser)]
-#[command(version)]
+#[command(version = version())]
 struct Cli {
     #[arg(long, env, help = "Blockchain RPC URL")]
     rpc_url: String,
