@@ -50,7 +50,7 @@ function computeOutputRoot(
     latestBlock.hash.slice(2),
   ].join("");
 
-  let hash =  keccak256(`0x${payload}`);
+  const hash = keccak256(`0x${payload}`);
   console.log(`Payload hash: ${hash}`);
   return hash;
 }
