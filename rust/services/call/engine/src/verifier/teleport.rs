@@ -138,12 +138,12 @@ async fn fetch_latest_confirmed_l2_block<D: RevmDB>(
     sequencer_client: &dyn optimism::IClient,
 ) -> Result<NumHash> {
     let l2_commitment = anchor_state_registry.get_latest_confirmed_l2_commitment()?;
-    debug!("L2 commitment: {:?}", l2_commitment);
+    debug!("L2 commitment: {l2_commitment:?}");
 
     let sequencer_output = sequencer_client
         .get_output_at_block(l2_commitment.block_number)
         .await?;
-    debug!("Sequencer output: {:?}", sequencer_output);
+    debug!("Sequencer output: {sequencer_output:?}");
 
     if sequencer_output.hash_slow() != l2_commitment.output_hash {
         return Err(Error::L2OutputHashMismatch);
@@ -164,10 +164,7 @@ pub fn ensure_latest_teleport_location_is_confirmed(
     if latest_confirmed_block < latest_destination_block {
         return Err(Error::TeleportOnUnconfirmed);
     }
-    info!(
-        "Teleport onto block {} allowed. Latest confirmed {}",
-        latest_destination_block, latest_confirmed_block
-    );
+    info!("Teleport onto block {latest_destination_block} allowed. Latest confirmed {latest_confirmed_block}");
 
     Ok(())
 }

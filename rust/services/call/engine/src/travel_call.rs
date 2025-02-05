@@ -49,7 +49,7 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         let mut evm = build_evm(&env, tx, inspector);
         // Can panic because EVM is unable to propagate errors on intercepted calls
         let ResultAndState { result, .. } = evm.transact_preverified()?;
-        debug!("EVM call result: {:?}", result);
+        debug!("EVM call result: {result:?}");
 
         Ok(result)
     }
