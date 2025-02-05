@@ -16,10 +16,19 @@ if [[ -f "${ARCHIVE}" ]]; then
 fi
 touch "${ARCHIVE}"
 
+# Temporarily hardcoded until get_examples is fixed
+EXAMPLE_LIST=(
+        "simple"
+        "simple-email-proof"
+        "simple-web-proof"
+        "simple-time-travel"
+        "simple-teleport"
+    )
+
 (
     cd "${VLAYER_HOME}/examples"
 
-    for example in $(get_examples); do
+    for example in "${EXAMPLE_LIST[@]}"; do
         echo "::group::Packing example: ${example}"
 
         scripts="${example}/vlayer"

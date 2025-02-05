@@ -13,7 +13,7 @@ jobs:
     defaults:
       run:
         working-directory: ansible
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,10 +21,18 @@ jobs:
           submodules: recursive
       - name: Install Rust prerequisites
         uses: ./.github/actions/rust-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Install Ansible
+        uses: alex-oleshkevich/setup-ansible@b77f1a5e01dbcf520c28b545fa37c8f022c1803a
+        with:
+          version: "11.2.0"
 
       # Needed until we have those binaries released.
       - name: Build chain service binaries
-        run: cargo build --release -p worker -p chain_server
+        env:
+          VLAYER_RELEASE: "nightly"
+        run: cargo build --release --bin worker --bin chain_server
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

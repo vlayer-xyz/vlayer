@@ -6,7 +6,7 @@ use crate::Benchmark;
 
 fn benchmark(source: &str, pattern: &str) {
     let calldata: Bytes = [source, pattern].abi_encode().into();
-    let _ = test(&calldata, 100_000_000).expect("Test failed");
+    let _ = test(&calldata).expect("Test failed");
 }
 
 fn exact_match() {

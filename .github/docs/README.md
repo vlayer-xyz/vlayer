@@ -40,6 +40,7 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [Deploy book](/.github/workflows/deploy_book.yaml) | Deploys the Book to Vercel. |
 | [Deploy provers](/.github/workflows/deploy_provers.yaml) | Deploys prover servers. |
 | [Deploy chain services](/.github/workflows/deploy_chain_services.yaml) | Deploys chain workers and chain servers. |
+| [Generate test chain DB](./github/workflows/generate_test_chain_db.yaml) | Generates a chain DB which is used by worker migration tests. |
 | [Lint Ansible](/.github/workflows/lint_ansible.yaml) | Lint Ansible code. |
 | [Lint Contracts](/.github/workflows/lint_contracts.yaml) | Lint Smart Contracts. |
 | [Lint Rust](/.github/workflows/lint_rust.yaml) | Lint Rust code. |
@@ -50,6 +51,7 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [PR team labeler](/.github/workflows/pr_team_labeler.yaml) | Adds team labels to PRs. |
 | [Release vlayer artifacts](/.github/workflows/release.yaml) | Release artifacts to npm, GitHub Releases, S3. |
 | [Test contracts](/.github/workflows/test_contracts.yaml) | Test and lint contracts. |
+| [Test chain worker migration](./github/workflows/test_chain_worker_migration.yaml) | Verifies that a new version of chain worker can generate new ZK proofs based on existing proofs. |
 | [Test E2E devnet](/.github/workflows/test_e2e_devnet.yaml) | E2E test against devnet (Anvil). |
 | [Test E2E testnet](/.github/workflows/test_e2e_testnet.yaml) | E2E test against testnet (Sepolia). |
 | [Test E2E web flow](/.github/workflows/test_e2e_web_flow.yaml) | E2E test of the web flow. |
