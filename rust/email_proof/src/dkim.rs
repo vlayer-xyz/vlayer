@@ -1,8 +1,9 @@
-use cfdkim::{verify_email_with_key, DKIMError, DkimPublicKey};
+use cfdkim::{validate_header, verify_email_with_key, DKIMError, DkimPublicKey};
 use mailparse::{MailHeaderMap, ParsedMail};
 use slog::{o, Discard, Logger};
 
 const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
+
 pub fn verify_email<'a>(
     email: ParsedMail<'a>,
     from_domain: &str,
@@ -19,8 +20,10 @@ pub fn verify_email<'a>(
         _ => Err(DKIMError::SignatureDidNotVerify),
     }
 }
+
 fn verify_dkim_headers(email: &ParsedMail) -> Result<(), DKIMError> {
     verify_email_contains_dkim_headers(email)?;
+    verify_dkim_body_length_tag(email)?;
 
     Ok(())
 }
@@ -30,6 +33,23 @@ fn verify_email_contains_dkim_headers(email: &ParsedMail) -> Result<(), DKIMErro
     if dkim_headers.is_empty() {
         return Err(DKIMError::SignatureSyntaxError("No DKIM-Signature header".into()));
     }
+    Ok(())
+}
+
+fn verify_dkim_body_length_tag(email: &ParsedMail) -> Result<(), DKIMError> {
+    let headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
+
+    for h in headers {
+        let value = String::from_utf8_lossy(h.get_value_raw());
+        let dkim_header = validate_header(&value)?;
+
+        if dkim_header.get_tag("l").is_some() {
+            return Err(DKIMError::SignatureSyntaxError(
+                "DKIM-Signature header contains body length tag (l=)".into(),
+            ));
+        }
+    }
+
     Ok(())
 }
 
@@ -78,6 +98,37 @@ mod tests {
             assert_eq!(
                 verify_dkim_headers(&email).unwrap_err(),
                 DKIMError::SignatureSyntaxError("No DKIM-Signature header".into())
+            );
+        }
+
+        #[test]
+        fn fails_for_header_with_l_tag() {
+            let dkim_header = ("DKIM-Signature", "v=1; a=; c=; d=; s=; t=; h=From; bh=; b=; l=100");
+            let mime_email = email_with_headers(&[dkim_header]).into_bytes();
+            let email = mailparse::parse_mail(&mime_email).unwrap();
+
+            assert_eq!(
+                verify_dkim_headers(&email).unwrap_err(),
+                DKIMError::SignatureSyntaxError(
+                    "DKIM-Signature header contains body length tag (l=)".into()
+                )
+            );
+        }
+
+        #[test]
+        fn fails_for_headers_with_one_of_them_having_l_tag() {
+            let dkim_headers = [
+                ("DKIM-Signature", "v=1; a=; c=; d=; s=; t=; h=From; bh=; b=;"),
+                ("DKIM-Signature", "v=1; a=; c=; d=; s=; t=; h=From; bh=; b=; l=100"),
+            ];
+            let mime_email = email_with_headers(&dkim_headers).into_bytes();
+            let email = mailparse::parse_mail(&mime_email).unwrap();
+
+            assert_eq!(
+                verify_dkim_headers(&email).unwrap_err(),
+                DKIMError::SignatureSyntaxError(
+                    "DKIM-Signature header contains body length tag (l=)".into()
+                )
             );
         }
     }
