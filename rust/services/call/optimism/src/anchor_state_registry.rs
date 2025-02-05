@@ -1,7 +1,7 @@
 use alloy_primitives::{Address, BlockNumber, B256};
 use anyhow::anyhow;
+use call_common::RevmDB;
 use derive_new::new;
-use revm::DatabaseRef;
 
 #[derive(thiserror::Error, Debug)]
 #[error(transparent)]
@@ -32,16 +32,12 @@ pub struct L2Commitment {
 }
 
 #[derive(Clone, Debug, new)]
-pub struct AnchorStateRegistry<D> {
+pub struct AnchorStateRegistry<D: RevmDB> {
     address: Address,
     db: D,
 }
 
-impl<D> AnchorStateRegistry<D>
-where
-    D: DatabaseRef + Send + Sync,
-    D::Error: std::fmt::Debug + std::error::Error + Send + Sync + 'static,
-{
+impl<D: RevmDB> AnchorStateRegistry<D> {
     pub fn get_latest_confirmed_l2_commitment(&self) -> Result<L2Commitment> {
         // `WrapStateDB` relies on the guarantee that EVM always asks for account state before storage and caches some things
         // Therefore - without this step - we can't access storage

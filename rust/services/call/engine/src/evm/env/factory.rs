@@ -1,5 +1,5 @@
+use call_common::RevmDB;
 use derivative::Derivative;
-use revm::DatabaseRef;
 use thiserror::Error;
 
 use super::{location::ExecutionLocation, EvmEnv};
@@ -18,9 +18,6 @@ pub enum Error {
 }
 pub type Result<T> = std::result::Result<T, Error>;
 
-pub trait EvmEnvFactory<D>: Send + Sync
-where
-    D: DatabaseRef + Send + Sync,
-{
+pub trait EvmEnvFactory<D: RevmDB>: Send + Sync {
     fn create(&self, location: ExecutionLocation) -> Result<EvmEnv<D>>;
 }

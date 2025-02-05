@@ -3,10 +3,11 @@ use std::{fmt::Debug, sync::Arc};
 
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
+use call_common::RevmDB;
 use common::Hashable;
 use derivative::Derivative;
 use optimism::{anchor_state_registry::AnchorStateRegistry, NumHash};
-use revm::DatabaseRef;
+use tracing::{debug, info};
 
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
 
@@ -47,16 +48,13 @@ mod seal {
 #[cfg(any(test, feature = "testing"))]
 impl<F, D> seal::Sealed<D> for F
 where
-    D: DatabaseRef,
+    D: RevmDB,
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result<()> + Send + Sync,
 {
 }
 
 #[async_trait]
-pub trait IVerifier<D>: seal::Sealed<D> + Send + Sync
-where
-    D: DatabaseRef + Send + Sync,
-{
+pub trait IVerifier<D: RevmDB>: seal::Sealed<D> + Send + Sync {
     async fn verify(
         &self,
         evm_envs: &CachedEvmEnv<D>,
@@ -68,7 +66,7 @@ where
 #[async_trait]
 impl<F, D> IVerifier<D> for F
 where
-    D: DatabaseRef + Send + Sync,
+    D: RevmDB,
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result<()> + Send + Sync,
 {
     async fn verify(
@@ -94,25 +92,24 @@ impl Verifier {
 
 impl<D> seal::Sealed<D> for Verifier {}
 #[async_trait]
-impl<D> IVerifier<D> for Verifier
-where
-    D: DatabaseRef + Send + Sync,
-    D::Error: std::error::Error + Send + Sync + 'static,
-{
+impl<D: RevmDB> IVerifier<D> for Verifier {
     async fn verify(
         &self,
         evm_envs: &CachedEvmEnv<D>,
         start_exec_location: ExecutionLocation,
     ) -> Result<()> {
+        info!("Verifying teleport");
         let source_chain_id = start_exec_location.chain_id;
         let source_chain_spec = chain::ChainSpec::try_from(source_chain_id)?;
         if source_chain_spec.is_local_testnet() {
+            info!("Skipping teleport verification for local testnet");
             return Ok(());
         }
         let source_evm_env = evm_envs.get(start_exec_location)?;
         let blocks_by_chain = evm_envs.blocks_by_chain();
         let destinations = get_destinations(blocks_by_chain, start_exec_location);
         for (chain_id, blocks) in destinations {
+            info!("Verifying teleport to chain: {chain_id} blocks: {blocks:?}");
             let dest_chain_spec = chain::optimism::ChainSpec::try_from(chain_id)?;
             dest_chain_spec.assert_anchor(source_chain_id)?;
 
@@ -121,6 +118,7 @@ where
             let sequencer_client = self.sequencer_client_factory.create(chain_id)?;
             let l2_block =
                 fetch_latest_confirmed_l2_block(anchor_state_registry, &sequencer_client).await?;
+            info!("Latest confirmed L2 block: {l2_block:?}");
 
             let latest_confirmed_location = (chain_id, l2_block.number).into();
             let latest_confirmed_evm_env = evm_envs.get(latest_confirmed_location)?;
@@ -129,24 +127,23 @@ where
                 return Err(Error::HeaderHashMismatch);
             }
             ensure_latest_teleport_location_is_confirmed(&blocks, l2_block.number)?;
+            info!("Teleport to chain {chain_id} verified");
         }
         Ok(())
     }
 }
 
-async fn fetch_latest_confirmed_l2_block<D>(
+async fn fetch_latest_confirmed_l2_block<D: RevmDB>(
     anchor_state_registry: AnchorStateRegistry<D>,
     sequencer_client: &dyn optimism::IClient,
-) -> Result<NumHash>
-where
-    D: DatabaseRef + Send + Sync,
-    D::Error: std::error::Error + Send + Sync + 'static,
-{
+) -> Result<NumHash> {
     let l2_commitment = anchor_state_registry.get_latest_confirmed_l2_commitment()?;
+    debug!("L2 commitment: {l2_commitment:?}");
 
     let sequencer_output = sequencer_client
         .get_output_at_block(l2_commitment.block_number)
         .await?;
+    debug!("Sequencer output: {sequencer_output:?}");
 
     if sequencer_output.hash_slow() != l2_commitment.output_hash {
         return Err(Error::L2OutputHashMismatch);
@@ -167,6 +164,7 @@ pub fn ensure_latest_teleport_location_is_confirmed(
     if latest_confirmed_block < latest_destination_block {
         return Err(Error::TeleportOnUnconfirmed);
     }
+    info!("Teleport onto block {latest_destination_block} allowed. Latest confirmed {latest_confirmed_block}");
 
     Ok(())
 }

@@ -2,6 +2,7 @@ use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
 use common::sealed_with_test_mock;
 use derive_new::new;
+use tracing::info;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -37,8 +38,10 @@ impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> seal::Sealed
 #[async_trait]
 impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> IVerifier for Verifier<C, V> {
     async fn verify(&self, chain_id: ChainId, blocks: Vec<(BlockNumber, BlockHash)>) -> Result {
+        info!("Verifying time-travel for chain_id: {chain_id}, blocks: {blocks:?}");
         if blocks.len() == 1 {
-            return Ok(()); // No need to verify chain proofs for a single location
+            info!("Single block, no need to verify chain proof");
+            return Ok(());
         }
         let Some(ref client) = self.chain_client else {
             return Err(Error::ChainServiceNotAvailable);

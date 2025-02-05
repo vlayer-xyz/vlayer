@@ -1,8 +1,9 @@
 use std::marker::PhantomData;
 
 use async_trait::async_trait;
+use call_common::RevmDB;
 use derive_new::new;
-use revm::DatabaseRef;
+use tracing::info;
 
 use super::{teleport, time_travel};
 use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
@@ -17,21 +18,21 @@ pub enum Error {
 
 pub type Result = std::result::Result<(), Error>;
 mod seal {
-    use revm::DatabaseRef;
+    use call_common::RevmDB;
 
-    pub trait Sealed<D: DatabaseRef> {}
+    pub trait Sealed<D: RevmDB> {}
 }
 
 #[cfg(any(test, feature = "testing"))]
 impl<F, D> seal::Sealed<D> for F
 where
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result + Send + Sync,
-    D: DatabaseRef,
+    D: RevmDB,
 {
 }
 
 #[async_trait]
-pub trait IVerifier<D: DatabaseRef + Send + Sync>: seal::Sealed<D> + Send + Sync {
+pub trait IVerifier<D: RevmDB>: seal::Sealed<D> + Send + Sync {
     async fn verify(
         &self,
         input: &CachedEvmEnv<D>,
@@ -43,7 +44,7 @@ pub trait IVerifier<D: DatabaseRef + Send + Sync>: seal::Sealed<D> + Send + Sync
 #[async_trait]
 impl<F, D> IVerifier<D> for F
 where
-    D: DatabaseRef + Send + Sync,
+    D: RevmDB,
     F: Fn(&CachedEvmEnv<D>, ExecutionLocation) -> Result + Send + Sync,
 {
     async fn verify(
@@ -60,27 +61,28 @@ pub struct Verifier<D, TT, TP>
 where
     TT: time_travel::IVerifier,
     TP: teleport::IVerifier<D>,
-    D: DatabaseRef + Send + Sync,
+    D: RevmDB,
 {
     time_travel: TT,
     teleport: TP,
     _phantom_d: PhantomData<D>,
 }
 
-impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: DatabaseRef + Send + Sync>
-    seal::Sealed<D> for Verifier<D, TT, TP>
+impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: RevmDB> seal::Sealed<D>
+    for Verifier<D, TT, TP>
 {
 }
 
 #[async_trait]
-impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: DatabaseRef + Send + Sync>
-    IVerifier<D> for Verifier<D, TT, TP>
+impl<TT: time_travel::IVerifier, TP: teleport::IVerifier<D>, D: RevmDB> IVerifier<D>
+    for Verifier<D, TT, TP>
 {
     async fn verify(
         &self,
         input: &CachedEvmEnv<D>,
         start_execution_location: ExecutionLocation,
     ) -> Result {
+        info!("Verifying travel call");
         self.teleport
             .verify(input, start_execution_location)
             .await?;

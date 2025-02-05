@@ -1,90 +1,35 @@
-use alloy_primitives::{address, b256, hex::decode, Address, ChainId, B256};
-use once_cell::sync::Lazy;
+use alloy_primitives::{address, Address, ChainId};
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     primitives::ExecutionResult,
-    Database, EvmContext, Inspector,
+    Database, EvmContext, Inspector as IInspector,
 };
 use tracing::{debug, info};
 
 use crate::{
     evm::env::location::ExecutionLocation,
     io::Call,
-    travel_call_executor::Error as TravelCallExecutorError,
-    utils::evm_call::{
-        create_encoded_return_outcome, execution_result_to_call_outcome, split_calldata,
-    },
+    travel_call::{self, args::Args},
+    utils::evm_call::{create_encoded_return_outcome, execution_result_to_call_outcome},
 };
 
-// The length of an argument in call data is 32 bytes.
-const ARG_LEN: usize = 32;
 /// This is calculated as:
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
-pub const TRAVEL_CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
-
-/// `keccak256(abi.encodePacked(TRAVEL_CONTRACT_ADDR))`
-pub const TRAVEL_CONTRACT_HASH: B256 =
-    b256!("262498cb66e1ee19d92574a1083e664489e446c94e8cfeb3eefe00a30be92891");
-
-static SET_BLOCK_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
-    decode("87cea3ae")
-        .expect("Error decoding set_block function call")
-        .into_boxed_slice()
-});
-static SET_CHAIN_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
-    decode("ffbc5638")
-        .expect("Error decoding set_chain function call")
-        .into_boxed_slice()
-});
+pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
 
 type TransactionCallback<'a> =
-    dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, TravelCallExecutorError> + 'a;
+    dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, travel_call::error::Error> + 'a;
 
-enum TravelCall {
-    SetBlock { block_number: u64 },
-    SetChain { chain_id: u64, block_number: u64 },
-}
-
-impl TravelCall {
-    pub fn from_inputs(inputs: &CallInputs) -> Self {
-        let (selector, arguments_bytes) = split_calldata(inputs);
-        let arguments = arguments_bytes
-            .chunks_exact(ARG_LEN)
-            .map(u64_from_be_slice)
-            .collect::<Vec<_>>();
-        if selector == SET_BLOCK_SELECTOR.as_ref() {
-            let [block_number] = arguments.try_into().expect("Invalid args for set_block");
-            TravelCall::SetBlock { block_number }
-        } else if selector == SET_CHAIN_SELECTOR.as_ref() {
-            let [chain_id, block_number] =
-                arguments.try_into().expect("Invalid args for set_chain");
-            TravelCall::SetChain {
-                chain_id,
-                block_number,
-            }
-        } else {
-            panic!("Invalid travel call selector: {selector:?}")
-        }
-    }
-}
-
-/// Take last 8 bytes from slice and interpret as big-endian encoded u64.
-/// Will trim larger numbers to u64 range, and panic if slice is smaller than 8 bytes.
-#[allow(clippy::missing_const_for_fn)] // Remove and add const when const Option::expect is stabilized
-fn u64_from_be_slice(slice: &[u8]) -> u64 {
-    u64::from_be_bytes(*slice.last_chunk().expect("invalid u64 slice"))
-}
-
-pub struct TravelInspector<'a> {
+pub struct Inspector<'a> {
     start_chain_id: ChainId,
     pub location: Option<ExecutionLocation>,
     transaction_callback: Box<TransactionCallback<'a>>,
 }
 
-impl<'a> TravelInspector<'a> {
+impl<'a> Inspector<'a> {
     pub fn new(
         start_chain_id: ChainId,
-        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, TravelCallExecutorError>
+        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, travel_call::error::Error>
             + 'a,
     ) -> Self {
         Self {
@@ -98,18 +43,12 @@ impl<'a> TravelInspector<'a> {
         let chain_id = self
             .location
             .map_or(self.start_chain_id, |loc| loc.chain_id);
-        info!(
-            "Travel contract called with function: setBlock and block number: {:?}! Chain id remains {:?}.",
-            block_number, chain_id
-        );
+        info!("setBlock({block_number}). Chain id remains {chain_id}.");
         self.location = Some((chain_id, block_number).into());
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
-        info!(
-            "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
-            chain_id, block_number
-        );
+        info!("setChain({chain_id}, {block_number})",);
         self.location = Some((chain_id, block_number).into());
     }
 
@@ -123,15 +62,15 @@ impl<'a> TravelInspector<'a> {
         );
         let result =
             (self.transaction_callback)(&inputs.into(), location).expect("Intercepted call failed");
-        info!("Intercepted call returned: {:?}", result);
+        info!("Intercepted call returned: {result:?}");
         let outcome = execution_result_to_call_outcome(&result, inputs);
         Some(outcome)
     }
 
     fn on_travel_call(&mut self, inputs: &CallInputs) -> Option<CallOutcome> {
-        match TravelCall::from_inputs(inputs) {
-            TravelCall::SetBlock { block_number } => self.set_block(block_number),
-            TravelCall::SetChain {
+        match Args::from_inputs(inputs) {
+            Args::SetBlock { block_number } => self.set_block(block_number),
+            Args::SetChain {
                 chain_id,
                 block_number,
             } => self.set_chain(chain_id, block_number),
@@ -141,7 +80,7 @@ impl<'a> TravelInspector<'a> {
     }
 }
 
-impl<DB> Inspector<DB> for TravelInspector<'_>
+impl<DB> IInspector<DB> for Inspector<'_>
 where
     DB: Database,
 {
@@ -150,10 +89,10 @@ where
         _context: &mut EvmContext<DB>,
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
-        info!("Address: {:?}, caller:{:?}", inputs.bytecode_address, inputs.caller);
+        info!("Call: {:?} -> {:?}", inputs.caller, inputs.bytecode_address);
         debug!("Input: {:?}", inputs.input);
         match inputs.bytecode_address {
-            TRAVEL_CONTRACT_ADDR => self.on_travel_call(inputs),
+            CONTRACT_ADDR => self.on_travel_call(inputs),
             _ => self.on_call(inputs),
         }
     }
@@ -166,8 +105,9 @@ mod test {
         db::{CacheDB, EmptyDB},
         interpreter::{CallInputs, CallScheme, CallValue},
         primitives::{AccountInfo, Output, SuccessReason},
-        EvmContext, Inspector,
+        EvmContext, Inspector as IInspector,
     };
+    use travel_call::args::{SET_BLOCK_SELECTOR, SET_CHAIN_SELECTOR};
 
     use super::*;
 
@@ -177,7 +117,7 @@ mod test {
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
-    type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, TravelCallExecutorError>
+    type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, travel_call::error::Error>
         + Send
         + Sync;
 
@@ -206,7 +146,7 @@ mod test {
         }
     }
 
-    fn inspector_call(addr: Address, selector: &[u8], args: &[u8]) -> TravelInspector<'static> {
+    fn inspector_call(addr: Address, selector: &[u8], args: &[u8]) -> Inspector<'static> {
         let mut mock_db = CacheDB::new(EmptyDB::default());
         mock_db.insert_account_info(addr, AccountInfo::default());
 
@@ -215,7 +155,7 @@ mod test {
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
         let mut set_block_inspector =
-            TravelInspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location));
+            Inspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location));
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
@@ -229,7 +169,7 @@ mod test {
             (SEPOLIA_ID, SEPOLIA_BLOCK - 1).into(),
         ];
 
-        let mut inspector = TravelInspector::new(locations[0].chain_id, |call, location| {
+        let mut inspector = Inspector::new(locations[0].chain_id, |call, location| {
             (TRANSACTION_CALLBACK)(call, location)
         });
 
@@ -244,7 +184,7 @@ mod test {
     fn call_set_block() {
         let block_num = 1;
         let inspector = inspector_call(
-            TRAVEL_CONTRACT_ADDR,
+            CONTRACT_ADDR,
             &SET_BLOCK_SELECTOR,
             &U256::from(block_num).to_be_bytes::<32>(),
         );
@@ -262,7 +202,7 @@ mod test {
             U256::from(block_num).to_be_bytes::<32>(),
         ]
         .concat();
-        let inspector = inspector_call(TRAVEL_CONTRACT_ADDR, &SET_CHAIN_SELECTOR, &args);
+        let inspector = inspector_call(CONTRACT_ADDR, &SET_CHAIN_SELECTOR, &args);
         assert!(inspector
             .location
             .is_some_and(|loc| loc.block_number == block_num && loc.chain_id == chain_id));
@@ -271,13 +211,13 @@ mod test {
     #[test]
     #[should_panic(expected = "Invalid travel call selector")]
     fn call_invalid_selector() {
-        inspector_call(TRAVEL_CONTRACT_ADDR, &[0; 4], &[]);
+        inspector_call(CONTRACT_ADDR, &[0; 4], &[]);
     }
 
     #[test]
     #[should_panic(expected = "Invalid args for set_block")]
     fn call_missing_args() {
-        inspector_call(TRAVEL_CONTRACT_ADDR, &SET_BLOCK_SELECTOR, &[]);
+        inspector_call(CONTRACT_ADDR, &SET_BLOCK_SELECTOR, &[]);
     }
 
     #[test]
@@ -285,20 +225,5 @@ mod test {
         let other_contract = address!("0000000000000000000000000000000000000000");
         let inspector = inspector_call(other_contract, &[], &[]);
         assert!(inspector.location.is_none());
-    }
-
-    #[test]
-    fn u64_from_u256_be_slice() {
-        let x = u64::MAX; // To use all 8 bytes
-        let slice: [u8; 32] = U256::from(x).to_be_bytes();
-        let y = u64_from_be_slice(&slice);
-        assert_eq!(x, y)
-    }
-
-    #[test]
-    #[should_panic(expected = "invalid u64 slice")]
-    fn u64_from_invalid_slice() {
-        let slice = [0];
-        _ = u64_from_be_slice(&slice);
     }
 }

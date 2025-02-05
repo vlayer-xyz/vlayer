@@ -2045,6 +2045,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "call_common"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "revm",
+]
+
+[[package]]
 name = "call_engine"
 version = "0.1.0"
 dependencies = [
@@ -2059,6 +2067,7 @@ dependencies = [
  "block_trie",
  "bytemuck",
  "bytes",
+ "call_common",
  "call_precompiles",
  "chain",
  "chain_client",
@@ -2361,6 +2370,7 @@ dependencies = [
  "serde",
  "thiserror 2.0.11",
  "toml 0.8.19",
+ "tracing",
 ]
 
 [[package]]
@@ -8022,12 +8032,12 @@ dependencies = [
  "anyhow",
  "async-trait",
  "auto_impl",
+ "call_common",
  "common",
  "derivative",
  "derive-new",
  "jsonrpsee",
  "lazy_static",
- "revm",
  "serde",
  "thiserror 2.0.11",
 ]
