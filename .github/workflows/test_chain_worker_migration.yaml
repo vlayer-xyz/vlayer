@@ -31,10 +31,14 @@ jobs:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check-llvm-clang.sh
 
-      - name: Download chain database
-        run: |
-          mkdir ./chain_db
-          wget -O ./chain_db/mdbx.dat https://vlayer-development.s3.eu-north-1.amazonaws.com/chain_db/mdbx.dat
+      - uses: keithweaver/aws-s3-github-action@v1.0.0
+        with:
+          command: cp
+          source: "s3://${{ vars.AWS_DEVELOPMENT_BUCKET }}/chain_db/mdbx.dat"
+          destination: ./chain_db/mdbx.dat
+          aws_access_key_id: ${{ vars.AWS_DEVELOPMENT_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_DEVELOPMENT_SECRET_ACCESS_KEY }}
+          aws_region: eu-north-1
 
       - name: Build chain worker
         env:
