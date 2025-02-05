@@ -53,11 +53,8 @@ contract VerifierFactory_Tests is Test {
         Deployment memory deployment = abi.decode(data, (Deployment));
 
         Repository repository = TestnetStableDeployment.repository();
-        (
-            FakeProofVerifier fakeProofVerifier,
-            Groth16ProofVerifier groth16ProofVerifier,
-            ProofVerifierRouter router
-        ) = TestnetStableDeployment.verifiers();
+        (FakeProofVerifier fakeProofVerifier, Groth16ProofVerifier groth16ProofVerifier, ProofVerifierRouter router) =
+            TestnetStableDeployment.verifiers();
 
         assertEq(address(repository), findAddress(deployment, "Repository"));
         assertEq(address(fakeProofVerifier), findAddress(deployment, "FakeProofVerifier"));
