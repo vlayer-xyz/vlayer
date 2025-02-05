@@ -59,3 +59,9 @@ jobs:
           MAX_HEAD_BLOCKS: 1
           CONFIRMATIONS: 2
         run: ./target/debug/worker
+
+      # Make sure to clean up the database in case of permissions issue.
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf ./chain_db
