@@ -2,6 +2,14 @@ use mailparse::MailParseError;
 
 use crate::Email;
 
+pub fn signed_email_fixture() -> String {
+    read_email_from_file("./testdata/signed_email.eml")
+}
+
+pub fn unsigned_email_fixture() -> String {
+    read_email_from_file("./testdata/email.txt")
+}
+
 pub fn build_mime_email(headers: Vec<(&str, &str)>, body: &str) -> String {
     let mut email = String::new();
     for (key, value) in headers {
@@ -14,19 +22,17 @@ pub fn build_mime_email(headers: Vec<(&str, &str)>, body: &str) -> String {
     email
 }
 
+pub fn read_email_from_file(path: &str) -> String {
+    let contents = read_file(path);
+    add_crlf(&String::from_utf8(contents).unwrap())
+}
+
 pub fn read_file(file: &str) -> Vec<u8> {
     std::fs::read(file).unwrap()
 }
 
 fn add_crlf(s: &str) -> String {
     s.replace("\r\n", "\n").replace("\n", "\r\n")
-}
-pub fn signed_email_fixture() -> Vec<u8> {
-    add_crlf(&String::from_utf8(read_file("./testdata/signed_email.eml")).unwrap()).into_bytes()
-}
-
-pub fn unsigned_email_fixture() -> Vec<u8> {
-    read_file("./testdata/email.txt")
 }
 
 pub fn parsed_email(headers: Vec<(&str, &str)>, body: &str) -> Result<Email, MailParseError> {

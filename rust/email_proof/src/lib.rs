@@ -30,13 +30,14 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
 mod test {
     use alloy_sol_types::{private::bytes, SolValue};
     use lazy_static::lazy_static;
+    use test_utils::read_email_from_file;
     use verifiable_dns::{
         verifiable_dns::{sign_record::sign_record, signer::Signer},
         DNSRecord, RecordType, VerificationData,
     };
 
     use super::*;
-    use crate::test_utils::{read_file, signed_email_fixture, unsigned_email_fixture};
+    use crate::test_utils::{signed_email_fixture, unsigned_email_fixture};
 
     lazy_static! {
         static ref DNS_FIXTURE: SolDnsRecord = SolDnsRecord {
@@ -62,7 +63,7 @@ mod test {
     }
     #[test]
     fn passes_for_valid_email() -> anyhow::Result<()> {
-        let email = String::from_utf8(signed_email_fixture())?;
+        let email = signed_email_fixture();
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: DNS_FIXTURE.clone(),
@@ -84,7 +85,7 @@ mod test {
 
     #[test]
     fn fails_for_missing_signature() -> anyhow::Result<()> {
-        let email = String::from_utf8(unsigned_email_fixture())?;
+        let email = unsigned_email_fixture();
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: DNS_FIXTURE.clone(),
@@ -100,7 +101,7 @@ mod test {
 
     #[test]
     fn fails_for_mismatching_body() -> anyhow::Result<()> {
-        let email = String::from_utf8(read_file("./testdata/signed_email_modified_body.txt"))?;
+        let email = read_email_from_file("./testdata/signed_email_modified_body.txt");
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: DNS_FIXTURE.clone(),
@@ -116,7 +117,7 @@ mod test {
 
     #[test]
     fn fails_for_missing_dns_record() -> anyhow::Result<()> {
-        let email = String::from_utf8(signed_email_fixture())?;
+        let email = signed_email_fixture();
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: SolDnsRecord {
@@ -137,7 +138,7 @@ mod test {
 
     #[test]
     fn fails_for_invalid_vdns_signature() -> anyhow::Result<()> {
-        let email = String::from_utf8(signed_email_fixture())?;
+        let email = signed_email_fixture();
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: DNS_FIXTURE.clone(),
@@ -156,7 +157,7 @@ mod test {
 
     #[test]
     fn fails_for_missing_vdns_signature() -> anyhow::Result<()> {
-        let email = String::from_utf8(signed_email_fixture())?;
+        let email = signed_email_fixture();
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: DNS_FIXTURE.clone(),
@@ -176,7 +177,7 @@ mod test {
 
     #[test]
     fn fails_for_mismatching_signer_and_sender_domain() -> anyhow::Result<()> {
-        let email = String::from_utf8(read_file("./testdata/signed_email_different_domains.txt"))?;
+        let email = read_email_from_file("./testdata/signed_email_different_domains.txt");
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: DNS_FIXTURE.clone(),
@@ -193,7 +194,7 @@ mod test {
 
     #[test]
     fn fails_when_from_address_is_from_subdomain() -> anyhow::Result<()> {
-        let email = String::from_utf8(read_file("./testdata/signed_email_from_subdomain.txt"))?;
+        let email = read_email_from_file("./testdata/signed_email_from_subdomain.txt");
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: DNS_FIXTURE.clone(),
@@ -211,7 +212,7 @@ mod test {
 
     #[test]
     fn fails_when_dkim_signer_address_is_from_subdomain() -> anyhow::Result<()> {
-        let email = String::from_utf8(read_file("./testdata/signed_email_from_subdomain.txt"))?;
+        let email = read_email_from_file("./testdata/signed_email_from_subdomain.txt");
         let calldata = UnverifiedEmail {
             email,
             dnsRecord: DNS_FIXTURE.clone(),
