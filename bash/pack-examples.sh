@@ -28,7 +28,7 @@ EXAMPLE_LIST=(
 (
     cd "${VLAYER_HOME}/examples"
 
-    for example in $EXAMPLE_LIST; do
+    for example in "${EXAMPLE_LIST[@]}"; do
         echo "::group::Packing example: ${example}"
 
         scripts="${example}/vlayer"
