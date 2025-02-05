@@ -44,16 +44,22 @@ jobs:
           PROOF_MODE: fake
           RISC0_DEV_MODE: 1
           MODE: init
-          DB_PATH: "/tmp/chain_db"
+          DB_PATH: "./chain_db"
           START_BLOCK: 20000000
           MAX_BACK_PROPAGATION_BLOCKS: 1
           MAX_HEAD_BLOCKS: 1
           CONFIRMATIONS: 2
         run: cargo run --bin worker
 
-      - name: Export chain database
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+      - name: Push db to AWS S3
+        uses: mostlytyped/s3-put-action@v1.0.0
         with:
-          name: test-chain-db
-          path: /tmp/chain_db
-          if-no-files-found: error
+          args: --recursive
+        env:
+          AWS_ENDPOINT: ${{ vars.AWS_DEVELOPMENT_ENDPOINT }}
+          AWS_BUCKET: ${{ vars.AWS_DEVELOPMENT_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_DEVELOPMENT_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_DEVELOPMENT_SECRET_ACCESS_KEY }}
+
+          LOCAL_FILE: "./chain_db"
+          REMOTE_FILE: ""

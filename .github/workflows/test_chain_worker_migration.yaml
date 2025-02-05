@@ -31,26 +31,25 @@ jobs:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check-llvm-clang.sh
 
+      - name: Download chain database
+        run: |
+          mkdir ./chain_db
+          wget -O ./chain_db/mdbx.dat https://vlayer-development.s3.eu-north-1.amazonaws.com/chain_db/mdbx.dat
+
       - name: Build chain worker
         env:
           RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo build --bin worker
 
-      - name: Download chain database
-        uses: actions/download-artifact@v4
-        with:
-          name: test-chain-db
-          path: /tmp/chain_db
-
-      - name: Run chain worker (init DB)
+      - name: Run chain worker (append-prepend)
         env:
           RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
           CHAIN_ID: 11155420
           PROOF_MODE: fake
           RISC0_DEV_MODE: 1
           MODE: append-prepend
-          DB_PATH: "/tmp/chain_db"
+          DB_PATH: "./chain_db"
           START_BLOCK: 20000000
           MAX_BACK_PROPAGATION_BLOCKS: 1
           MAX_HEAD_BLOCKS: 1
