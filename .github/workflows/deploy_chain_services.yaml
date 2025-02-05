@@ -32,6 +32,7 @@ jobs:
       - name: Build chain service binaries
         env:
           VLAYER_RELEASE: "nightly"
+          RISC0_USE_DOCKER: 1
         run: cargo build --release --bin worker --bin chain_server
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
