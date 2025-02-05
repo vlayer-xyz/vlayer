@@ -54,4 +54,4 @@ jobs:
           MAX_BACK_PROPAGATION_BLOCKS: 1
           MAX_HEAD_BLOCKS: 1
           CONFIRMATIONS: 2
-        run: cargo run --bin worker
+        run: ./target/debug/worker
