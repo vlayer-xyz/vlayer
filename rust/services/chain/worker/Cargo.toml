@@ -18,6 +18,7 @@ strum = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, features = ["retry", "timeout"] }
 tracing = { workspace = true }
+version = { workspace = true }
 
 [dev-dependencies]
 bincode = { workspace = true }
