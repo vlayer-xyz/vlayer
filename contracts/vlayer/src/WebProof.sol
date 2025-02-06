@@ -60,13 +60,17 @@ library WebProofLib {
 }
 
 library WebLib {
+    error EmptyBody();
+
     address private constant JSON_GET_STRING = address(0x102);
     address private constant JSON_GET_INT = address(0x103);
     address private constant JSON_GET_BOOL = address(0x104);
     address private constant JSON_GET_ARRAY_LENGTH = address(0x105);
 
     function jsonGetString(Web memory web, string memory jsonPath) internal view returns (string memory) {
-        require(bytes(web.body).length > 0, "Body is empty");
+        if (bytes(web.body).length == 0) {
+            revert EmptyBody();
+        }
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_STRING.staticcall(encodedParams);
@@ -76,7 +80,9 @@ library WebLib {
     }
 
     function jsonGetInt(Web memory web, string memory jsonPath) internal view returns (int256) {
-        require(bytes(web.body).length > 0, "Body is empty");
+        if (bytes(web.body).length == 0) {
+            revert EmptyBody();
+        }
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_INT.staticcall(encodedParams);
@@ -86,7 +92,9 @@ library WebLib {
     }
 
     function jsonGetBool(Web memory web, string memory jsonPath) internal view returns (bool) {
-        require(bytes(web.body).length > 0, "Body is empty");
+        if (bytes(web.body).length == 0) {
+            revert EmptyBody();
+        }
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_BOOL.staticcall(encodedParams);
@@ -96,7 +104,9 @@ library WebLib {
     }
 
     function jsonGetArrayLength(Web memory web, string memory jsonPath) internal view returns (uint256) {
-        require(bytes(web.body).length > 0, "Body is empty");
+        if (bytes(web.body).length == 0) {
+            revert EmptyBody();
+        }
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_ARRAY_LENGTH.staticcall(encodedParams);

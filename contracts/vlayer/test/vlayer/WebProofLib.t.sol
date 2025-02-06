@@ -54,9 +54,9 @@ contract WebProverTest is VTest {
     function test_missingPresentationJson() public {
         WebProof memory webProof = WebProof("{}");
 
-        callProver();
-
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
+
+        callProver();
 
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
@@ -71,9 +71,9 @@ contract WebProverTest is VTest {
     function test_missingPartInSerializedWebProof() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_part.json"));
 
-        callProver();
-
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
+
+        callProver();
 
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
