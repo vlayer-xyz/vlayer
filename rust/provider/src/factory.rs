@@ -56,12 +56,12 @@ impl ProviderFactory for EthersProviderFactory {
     }
 }
 
-fn get_path(rpc_file_cache: &HashMap<ChainId, String>, chain_id: ChainId) -> Result<PathBuf> {
-    let file_path_str = rpc_file_cache
+fn get_path(rpc_cache_paths: &HashMap<ChainId, String>, chain_id: ChainId) -> Result<PathBuf> {
+    let path = rpc_cache_paths
         .get(&chain_id)
         .ok_or(Error::NoRpcCache(chain_id))?;
 
-    Ok(PathBuf::from(file_path_str))
+    Ok(PathBuf::from(path))
 }
 
 #[derive(new)]
