@@ -56,23 +56,23 @@ impl ProviderFactory for EthersProviderFactory {
     }
 }
 
-fn get_path(rpc_file_cache: &HashMap<ChainId, String>, chain_id: ChainId) -> Result<PathBuf> {
-    let file_path_str = rpc_file_cache
+fn get_path(rpc_cache_paths: &HashMap<ChainId, String>, chain_id: ChainId) -> Result<PathBuf> {
+    let path = rpc_cache_paths
         .get(&chain_id)
         .ok_or(Error::NoRpcCache(chain_id))?;
 
-    Ok(PathBuf::from(file_path_str))
+    Ok(PathBuf::from(path))
 }
 
 #[derive(new)]
 pub struct CachedProviderFactory {
-    rpc_file_cache: HashMap<ChainId, String>,
+    rpc_cache_paths: HashMap<ChainId, String>,
     ethers_provider_factory: Option<EthersProviderFactory>,
 }
 
 impl ProviderFactory for CachedProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>> {
-        let file_path = get_path(&self.rpc_file_cache, chain_id)?;
+        let file_path = get_path(&self.rpc_cache_paths, chain_id)?;
 
         let cached_provider = match &self.ethers_provider_factory {
             Some(ethers_factory) => {

@@ -5,9 +5,8 @@ use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use mock_chain_server::ChainProofServerMock;
 use optimism::client::factory::cached;
 use provider::CachedMultiProvider;
-pub use rpc::{
-    block_tag_to_block_number, create_multi_provider, rpc_snapshot_file, rpc_snapshot_files,
-};
+use rpc::create_multi_provider;
+pub use rpc::{block_tag_to_block_number, rpc_cache_path, rpc_cache_paths};
 pub use types::ExecutionLocation;
 
 use crate::{BuilderError, Call, Config, Error, Host, PreflightResult};

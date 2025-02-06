@@ -16,7 +16,7 @@ use crate::{
             time_travel::{self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
             usdt::{self, IERC20::balanceOfCall, USDT},
         },
-        rpc_snapshot_file,
+        rpc_cache_path,
     },
     Call,
 };
@@ -27,8 +27,8 @@ fn profile(
     location: ExecutionLocation,
     call: &Call,
 ) -> anyhow::Result<profiling::State> {
-    let rpc_file = PathBuf::from(rpc_snapshot_file(chain, test_name));
-    let provider = CachedProvider::from_file(&rpc_file)?;
+    let file_path = PathBuf::from(rpc_cache_path(chain, test_name));
+    let provider = CachedProvider::from_file(&file_path)?;
     let profiling_provider = Arc::new(profiling::Provider::new(provider));
     let multi_provider =
         CachedMultiProvider::from_provider(location.chain_id, profiling_provider.clone());
