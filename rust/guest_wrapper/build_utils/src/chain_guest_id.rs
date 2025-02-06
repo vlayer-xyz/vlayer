@@ -26,7 +26,13 @@ lazy_static! {
 fn current_id_hex() -> anyhow::Result<String> {
     let path = LAYOUT.chain_guest_id();
     println!("cargo::rerun-if-changed={}", path.display());
-    Ok(fs::read_to_string(path)?)
+    let file = File::open(path)?;
+    let reader = BufReader::new(&file);
+    reader
+        .lines()
+        .next()
+        .transpose()?
+        .ok_or(anyhow::anyhow!("ID file is empty"))
 }
 
 fn id_history_hex() -> anyhow::Result<Vec<String>> {
@@ -34,7 +40,7 @@ fn id_history_hex() -> anyhow::Result<Vec<String>> {
     println!("cargo::rerun-if-changed={}", path.display());
     let file = File::open(path)?;
     let reader = BufReader::new(&file);
-    Ok(reader.lines().collect::<io::Result<Vec<String>>>()?)
+    Ok(reader.lines().collect::<io::Result<_>>()?)
 }
 
 /// Assert that `generated_id` is identical to the chain guest ID stored in repo.
