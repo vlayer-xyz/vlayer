@@ -6,7 +6,6 @@ import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 import {ChainIdLibrary} from "./proof_verifier/ChainId.sol";
 import {URLPatternLib} from "./URLPattern.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
-import {INotaryKeyRepository} from "./Repository.sol";
 import {TestnetStableDeployment} from "./TestnetStableDeployment.sol";
 
 struct WebProof {
@@ -18,10 +17,6 @@ struct Web {
     string notaryPubKey;
     string url;
 }
-
-//address of the repository contract deployed by our multi-sig using ../script/VlayerDeployer.s.sol
-INotaryKeyRepository constant NOTARY_REPOSITORY =
-    INotaryKeyRepository(address(0x916B850652b5B03Aa21709321c5f80A9E306BEcd));
 
 library WebProofLib {
     using Strings for string;
