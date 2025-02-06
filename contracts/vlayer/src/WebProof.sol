@@ -7,6 +7,7 @@ import {ChainIdLibrary} from "./proof_verifier/ChainId.sol";
 import {URLPatternLib} from "./URLPattern.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
 import {INotaryKeyRepository} from "./Repository.sol";
+import {TestnetStableDeployment} from "./TestnetStableDeployment.sol";
 
 struct WebProof {
     string webProofJson;
@@ -33,7 +34,10 @@ library WebProofLib {
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         Web memory web = recover(webProof);
         if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
-            require(NOTARY_REPOSITORY.isNotaryKeyValid(web.notaryPubKey), "Invalid notary public key");
+            require(
+                TestnetStableDeployment.repository().isNotaryKeyValid(web.notaryPubKey),
+                "Invalid notary public key"
+            );
         } else {
             require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
         }
