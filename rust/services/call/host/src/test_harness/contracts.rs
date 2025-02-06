@@ -77,6 +77,27 @@ pub mod view {
     );
 }
 
+sol! {
+    #[derive(Debug)]
+    enum ProofMode {
+        GROTH16,
+        FAKE
+    }
+    #[derive(Debug)]
+    struct Seal {
+        bytes4 verifierSelector;
+        bytes32[8] seal;
+        ProofMode mode;
+    }
+    #[derive(Debug)]
+    struct CallAssumptions {
+        address proverContractAddress;
+        bytes4 functionSelector;
+        uint256 settleBlockNumber; // Block number for which assumptions was made.
+        bytes32 settleBlockHash; // Hash of the block at the specified block number.
+    }
+}
+
 pub mod simple {
     use super::*;
 
@@ -84,25 +105,8 @@ pub mod simple {
     pub const SIMPLE: Address = address!("6050ea72b58525d3d470c96604bcd62b7f464e17");
     // Block where verifier was deployed: https://sepolia-optimism.etherscan.io/tx/0x461050173aadd23142df65edcef1e847706795750398a01ed548c37bf6f58087
     pub const BLOCK_NO: u64 = 22_616_952;
+
     sol! {
-        #[derive(Debug)]
-        enum ProofMode {
-            GROTH16,
-            FAKE
-        }
-        #[derive(Debug)]
-        struct Seal {
-            bytes4 verifierSelector;
-            bytes32[8] seal;
-            ProofMode mode;
-        }
-        #[derive(Debug)]
-        struct CallAssumptions {
-            address proverContractAddress;
-            bytes4 functionSelector;
-            uint256 settleBlockNumber; // Block number for which assumptions was made.
-            bytes32 settleBlockHash; // Hash of the block at the specified block number.
-        }
         #[derive(Debug)]
         struct Proof {
             Seal seal;
@@ -153,24 +157,6 @@ pub mod teleport {
 
     sol! {
         #[derive(Debug)]
-        enum ProofMode {
-            GROTH16,
-            FAKE
-        }
-        #[derive(Debug)]
-        struct Seal {
-            bytes4 verifierSelector;
-            bytes32[8] seal;
-            ProofMode mode;
-        }
-        #[derive(Debug)]
-        struct CallAssumptions {
-            address proverContractAddress;
-            bytes4 functionSelector;
-            uint256 settleBlockNumber; // Block number for which assumptions was made.
-            bytes32 settleBlockHash; // Hash of the block at the specified block number.
-        }
-        #[derive(Debug)]
         struct Proof {
             Seal seal;
             bytes32 callGuestId;
@@ -198,18 +184,6 @@ pub mod time_travel {
     pub const BLOCK_NO: u64 = 20_064_547_u64;
     const TOKEN_OWNER: Address = address!("E6b08c02Dbf3a0a4D3763136285B85A9B492E391");
     sol!(
-        #[sol(all_derives = true)]
-        struct Seal {
-            bytes18 lhv;
-            bytes19 rhv;
-        }
-        #[sol(all_derives = true)]
-        struct CallAssumptions {
-            address proverContractAddress;
-            bytes4 functionSelector;
-            uint256 settleBlockNumber; // Block number for which the assumptions was made.
-            bytes32 settleBlockHash; // Hash of the block at the specified block number.
-        }
         #[sol(all_derives = true)]
         struct Proof {
             uint256 length;
