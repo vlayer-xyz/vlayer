@@ -1884,9 +1884,9 @@ dependencies = [
 
 [[package]]
 name = "bonsai-sdk"
-version = "1.2.0"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce58205497760ded0e4c743bc7a7aee28da5ca29b4adb7a635bf3bee2d118ebc"
+checksum = "32a6c42e9ac4df9f62aade6f4a7fab56db33d4518d1cac37434f040f610f6d40"
 dependencies = [
  "duplicate",
  "maybe-async",
@@ -2082,7 +2082,7 @@ dependencies = [
  "once_cell",
  "optimism",
  "revm",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "risc0-zkvm",
  "serde",
  "serde_json",
@@ -2142,7 +2142,7 @@ dependencies = [
  "optimism",
  "provider",
  "revm",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "risc0-zkvm",
  "seal",
  "test-log",
@@ -2215,7 +2215,7 @@ dependencies = [
  "mock_chain_server",
  "provider",
  "reqwest 0.12.12",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "seal",
  "serde",
  "serde_json",
@@ -2385,7 +2385,7 @@ dependencies = [
  "derive-new",
  "parking_lot 0.12.3",
  "provider",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "serde_json",
  "server_utils",
  "thiserror 2.0.11",
@@ -2408,7 +2408,7 @@ dependencies = [
  "derive-new",
  "derive_more",
  "mpt",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "risc0-zkvm",
  "serde",
  "serde_with",
@@ -2450,7 +2450,7 @@ dependencies = [
  "block_trie",
  "chain_common",
  "common",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "risc0-zkvm",
  "serde",
 ]
@@ -2497,7 +2497,7 @@ dependencies = [
  "common",
  "dotenvy",
  "guest_wrapper",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "tokio",
  "version",
 ]
@@ -2520,7 +2520,7 @@ dependencies = [
  "mime",
  "mpt",
  "parking_lot 0.12.3",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "risc0-zkvm",
  "serde",
  "serde_json",
@@ -2951,7 +2951,7 @@ dependencies = [
  "bytes",
  "clap",
  "derive_more",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "risc0-zkvm",
  "serde",
  "serde_json",
@@ -5752,9 +5752,9 @@ dependencies = [
  "anyhow",
  "hex",
  "lazy_static",
- "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-build 1.2.0",
  "risc0-build-ethereum",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
 ]
 
 [[package]]
@@ -9375,28 +9375,28 @@ dependencies = [
 [[package]]
 name = "risc0-binfmt"
 version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "901fb75d62d70320adc7adae2abad354a3b7565603115dfb3134465227846475"
+source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "anyhow",
  "borsh",
  "elf",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkvm-platform 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.0",
+ "risc0-zkvm-platform 1.2.0",
  "serde",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-binfmt"
-version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fac7b3a4d7f6e86b2be2daf0ec53b9b8740895ff8279011cee24e4bae72cd77e"
 dependencies = [
  "anyhow",
  "borsh",
  "elf",
- "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
- "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-zkp 1.2.2",
+ "risc0-zkvm-platform 1.2.2",
  "serde",
  "tracing",
 ]
@@ -9404,17 +9404,16 @@ dependencies = [
 [[package]]
 name = "risc0-build"
 version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f99fb40aeeaf59dddd6b6c3a177c95e8b3c7f0fb6de7d25a0687d12398323292"
+source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.18.1",
  "dirs 5.0.1",
  "docker-generate",
  "hex",
- "risc0-binfmt 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkvm-platform 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-binfmt 1.2.0",
+ "risc0-zkp 1.2.0",
+ "risc0-zkvm-platform 1.2.0",
  "serde",
  "serde_json",
  "tempfile",
@@ -9422,17 +9421,18 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4481ff9a05c3d96c0df2278a4681172fb40291253049a3ab57ffa2c46c24a0ba"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.18.1",
  "dirs 5.0.1",
  "docker-generate",
  "hex",
- "risc0-binfmt 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
- "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
- "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-binfmt 1.2.2",
+ "risc0-zkp 1.2.2",
+ "risc0-zkvm-platform 1.2.2",
  "serde",
  "serde_json",
  "tempfile",
@@ -9445,49 +9445,55 @@ source = "git+https://github.com/Wiezzel/risc0-ethereum.git?rev=4d3cc153a3e36ccb
 dependencies = [
  "anyhow",
  "hex",
- "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
- "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-build 1.2.0",
+ "risc0-zkp 1.2.0",
+]
+
+[[package]]
+name = "risc0-circuit-keccak"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25beb2e593a72e4baa3ed9a18a2ee4148f629bfa9dcdac5cbe84faa12d2590d1"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "paste",
+ "risc0-binfmt 1.2.2",
+ "risc0-circuit-recursion",
+ "risc0-core 1.2.2",
+ "risc0-zkp 1.2.2",
+ "tracing",
 ]
 
 [[package]]
 name = "risc0-circuit-recursion"
-version = "1.2.0"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8b0736401dd72a60a775e675bd0adba2e0e0e2ce2b73b63fda2899d9d7889b0"
+checksum = "e02357d6333355b2f9f3903149757fec59c59ef7cefd7494738446f33148cd00"
 dependencies = [
  "anyhow",
  "bytemuck",
  "hex",
  "metal",
- "risc0-core 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-core 1.2.2",
+ "risc0-zkp 1.2.2",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "1.2.0"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b6d7eb9ae600c2df004bf8849db2df870fd56bd5911a2ad756fb8701350b3c6"
+checksum = "d062e3ee0a8a788cfeff90777e95792d58520fb71b40c28a04000277a3f0054d"
 dependencies = [
  "anyhow",
  "metal",
- "risc0-binfmt 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-core 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkvm-platform 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-binfmt 1.2.2",
+ "risc0-core 1.2.2",
+ "risc0-zkp 1.2.2",
+ "risc0-zkvm-platform 1.2.2",
  "serde",
  "tracing",
-]
-
-[[package]]
-name = "risc0-core"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "733491635d50b742d1f30a923aa3b83d62f35cef724bbf402dfc02e6f10f587a"
-dependencies = [
- "bytemuck",
- "rand_core",
 ]
 
 [[package]]
@@ -9500,10 +9506,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-groth16"
-version = "1.2.0"
+name = "risc0-core"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5babc69b0db6906a6ff4011641109ca2ba06636096356b32208b0dfb26b3809"
+checksum = "da950fcd306644dc5c2c0a09ad288901450eb5f41c42f4f2120be2949f63cd2e"
+dependencies = [
+ "bytemuck",
+ "rand_core",
+]
+
+[[package]]
+name = "risc0-groth16"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "414481d8f3f8c666a7f45b03dd9c5e32cc6dadb2abd0f55b9460386f731eeb4a"
 dependencies = [
  "anyhow",
  "ark-bn254",
@@ -9514,34 +9530,10 @@ dependencies = [
  "hex",
  "num-bigint",
  "num-traits",
- "risc0-binfmt 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-binfmt 1.2.2",
+ "risc0-zkp 1.2.2",
  "serde",
  "stability",
-]
-
-[[package]]
-name = "risc0-zkp"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21eadc5099bf0d8ecaed718810dc5deaf237ae39a2fcb66e542e8f9660132617"
-dependencies = [
- "anyhow",
- "blake2",
- "borsh",
- "bytemuck",
- "cfg-if",
- "digest 0.10.7",
- "hex",
- "hex-literal",
- "metal",
- "paste",
- "rand_core",
- "risc0-core 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkvm-platform 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde",
- "sha2",
- "tracing",
 ]
 
 [[package]]
@@ -9560,8 +9552,32 @@ dependencies = [
  "metal",
  "paste",
  "rand_core",
- "risc0-core 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
- "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-core 1.2.0",
+ "risc0-zkvm-platform 1.2.0",
+ "serde",
+ "sha2",
+ "tracing",
+]
+
+[[package]]
+name = "risc0-zkp"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ddf3776370f26ea04e50f7e6f9d2468807aa1049063ca1b9000e1974d092ddc5"
+dependencies = [
+ "anyhow",
+ "blake2",
+ "borsh",
+ "bytemuck",
+ "cfg-if",
+ "digest 0.10.7",
+ "hex",
+ "hex-literal",
+ "metal",
+ "paste",
+ "rand_core",
+ "risc0-core 1.2.2",
+ "risc0-zkvm-platform 1.2.2",
  "serde",
  "sha2",
  "tracing",
@@ -9569,9 +9585,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "1.2.0"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b619085d02d57dcafc41eb74714682797ed666621ced1814c55bbe7ae7762ba"
+checksum = "6700c4875b90726b7bf9e981fccbde4ea11b3593d3b2ac6fa09c96f6de166152"
 dependencies = [
  "anyhow",
  "bincode",
@@ -9583,19 +9599,19 @@ dependencies = [
  "hex",
  "lazy-regex",
  "prost",
- "risc0-binfmt 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-build 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-binfmt 1.2.2",
+ "risc0-build 1.2.2",
+ "risc0-circuit-keccak",
  "risc0-circuit-recursion",
  "risc0-circuit-rv32im",
- "risc0-core 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-core 1.2.2",
  "risc0-groth16",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "risc0-zkvm-platform 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
+ "risc0-zkvm-platform 1.2.2",
  "rrs-lib",
  "semver 1.0.24",
  "serde",
  "sha2",
- "sha3",
  "stability",
  "tempfile",
  "tracing",
@@ -9604,20 +9620,21 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26bbcc486222a0086d36244ae1f388cac1318270bca2dd23d77af2005d679edf"
+source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
- "bytemuck",
- "getrandom",
- "libm",
  "stability",
 ]
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6b5ac61f6d36b02655a415a8a2afd021aa260402d45deff5524c80dbc521f29"
 dependencies = [
+ "bytemuck",
+ "cfg-if",
+ "getrandom",
+ "libm",
  "stability",
 ]
 
@@ -12902,7 +12919,7 @@ dependencies = [
  "dotenvy",
  "ethers",
  "guest_wrapper",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "risc0-zkp 1.2.2",
  "strum",
  "tokio",
  "tower 0.5.2",
@@ -13163,7 +13180,7 @@ dependencies = [
  "derive_more",
  "host_utils",
  "insta",
- "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-build 1.2.0",
  "risc0-zkvm",
  "tabled",
  "thiserror 2.0.11",
