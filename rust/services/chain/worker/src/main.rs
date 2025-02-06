@@ -5,13 +5,14 @@ use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
-use ethers::types::BlockNumber as BlockTag;
+use ethers::{providers::Http, types::BlockNumber as BlockTag};
 use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
 use retry::HostErrorFilter;
 use risc0_zkp::core::digest::Digest;
 use strum::{Display, EnumString};
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};
+use tracing::error;
 use version::version;
 
 mod retry;
@@ -107,33 +108,7 @@ impl From<Cli> for HostConfig {
     }
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    dotenv().ok();
-    let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
-
-    let mode = cli.mode;
-    let config = cli.into();
-    let mut host = Host::try_new(config)?;
-
-    match mode {
-        Mode::Init => {
-            let chain_update = host.initialize().await?;
-            host.commit(chain_update)?;
-            return Ok(());
-        }
-        Mode::AppendPrepend => {
-            let chain_update = host
-                .append_prepend()
-                .await?
-                .ok_or(anyhow::anyhow!("No chain update to apply"))?;
-            host.commit(chain_update)?;
-            return Ok(());
-        }
-        Mode::Continuous => {}
-    }
-
+async fn run_continuous(host: Host<Http>) -> anyhow::Result<()> {
     let host = Arc::new(Mutex::new(host));
     let budget = TpsBudget::new(DEPOSIT_TIME_TO_LIVE, MIN_RETRIES_PER_SECOND, RETRY_PERCENT);
     let mut host_service = ServiceBuilder::new()
@@ -148,5 +123,38 @@ async fn main() -> anyhow::Result<()> {
             .call(())
             .await
             .map_err(|e| anyhow::anyhow!(e))?;
+    }
+}
+
+async fn run(mode: Mode, config: HostConfig) -> anyhow::Result<()> {
+    let mut host = Host::try_new(config)?;
+
+    match mode {
+        Mode::Init => {
+            let chain_update = host.initialize().await?;
+            host.commit(chain_update)?;
+            Ok(())
+        }
+        Mode::AppendPrepend => {
+            let chain_update = host
+                .append_prepend()
+                .await?
+                .ok_or(anyhow::anyhow!("No chain update to apply"))?;
+            host.commit(chain_update)?;
+            Ok(())
+        }
+        Mode::Continuous => run_continuous(host).await,
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    dotenv().ok();
+    let cli = Cli::parse();
+    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+
+    if let Err(e) = run(cli.mode, cli.into()).await {
+        error!("{}", e.to_string());
+        std::process::exit(1)
     }
 }
