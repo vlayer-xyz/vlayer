@@ -4,10 +4,9 @@ use chain_client::RpcClient as RpcChainProofClient;
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use mock_chain_server::ChainProofServerMock;
 use optimism::client::factory::cached;
-use provider::CachedMultiProvider;
-pub use rpc::{
-    block_tag_to_block_number, create_multi_provider, rpc_snapshot_file, rpc_snapshot_files,
-};
+use provider::{CachedMultiProvider, CachedProviderFactory};
+use rpc::rpc_urls;
+pub use rpc::{block_tag_to_block_number, rpc_snapshot_path, rpc_snapshot_paths};
 pub use types::ExecutionLocation;
 
 use crate::{BuilderError, Call, Config, Error, Host, PreflightResult};
@@ -15,6 +14,10 @@ use crate::{BuilderError, Call, Config, Error, Host, PreflightResult};
 pub mod contracts;
 pub mod rpc;
 mod types;
+
+// To activate recording, set UPDATE_SNAPSHOTS to true.
+// Recording creates new test data directory and writes return data from Alchemy into files in that directory.
+const UPDATE_SNAPSHOTS: bool = true;
 
 pub async fn preflight<C>(
     test_name: &str,
@@ -109,4 +112,13 @@ fn create_host(
         op_client_factory,
         config,
     ))
+}
+
+fn create_multi_provider(test_name: &str) -> CachedMultiProvider {
+    let rpc_snapshot_paths = rpc_snapshot_paths(test_name);
+    let maybe_ethers_provider_factory =
+        UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
+    let provider_factory =
+        CachedProviderFactory::new(rpc_snapshot_paths, maybe_ethers_provider_factory);
+    CachedMultiProvider::from_factory(provider_factory)
 }
