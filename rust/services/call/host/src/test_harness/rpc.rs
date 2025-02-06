@@ -5,9 +5,13 @@ use alloy_primitives::ChainId;
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
-use provider::{BlockNumber, CachedMultiProvider};
+use provider::{BlockNumber, CachedMultiProvider, CachedProviderFactory};
 
 use crate::BuilderError;
+
+// To activate recording, set UPDATE_SNAPSHOTS to true.
+// Recording creates new test data directory and writes return data from Alchemy into files in that directory.
+const UPDATE_SNAPSHOTS: bool = false;
 
 fn get_alchemy_key() -> String {
     dotenv().ok();
@@ -47,7 +51,7 @@ pub fn rpc_cache_paths(test_name: &str) -> HashMap<ChainId, String> {
     ])
 }
 
-pub fn rpc_urls() -> HashMap<ChainId, String> {
+fn rpc_urls() -> HashMap<ChainId, String> {
     HashMap::from([
         (Chain::mainnet().id(), mainnet_url.clone()),
         (Chain::sepolia().id(), sepolia_url.clone()),
@@ -70,4 +74,13 @@ pub fn block_tag_to_block_number(
         BlockTag::Number(block_no) => Ok(block_no.as_u64()),
         _ => panic!("Only Latest and specific block numbers are supported, got {block_tag:?}"),
     }
+}
+
+pub fn create_multi_provider(test_name: &str) -> CachedMultiProvider {
+    let rpc_cache_paths = rpc_cache_paths(test_name);
+    let maybe_ethers_provider_factory =
+        UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
+    let provider_factory =
+        CachedProviderFactory::new(rpc_cache_paths, maybe_ethers_provider_factory);
+    CachedMultiProvider::from_factory(provider_factory)
 }
