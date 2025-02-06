@@ -17,7 +17,7 @@ mod types;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new test data directory and writes return data from Alchemy into files in that directory.
-const UPDATE_SNAPSHOTS: bool = true;
+const UPDATE_SNAPSHOTS: bool = false;
 
 pub async fn preflight<C>(
     test_name: &str,
