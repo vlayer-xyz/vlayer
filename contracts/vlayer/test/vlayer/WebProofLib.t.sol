@@ -46,10 +46,7 @@ contract WebProverTest is VTest {
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                WebProofLib.IncorrectUrl.selector,
-                "https://bad_api.x.com/1.1/account/settings.json"
-            )
+            abi.encodeWithSelector(WebProofLib.IncorrectUrl.selector, "https://bad_api.x.com/1.1/account/settings.json")
         );
         wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json");
     }
