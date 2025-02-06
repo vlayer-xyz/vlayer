@@ -56,7 +56,7 @@ What happens in the above code?
 
 1. **Setup the `Prover` contract**:
     - `WebProofProver` inherits from the `Prover` contract, enabling off-chain proving of web data.
-    - The `main` function receives a `WebProof`, which contains a signed transcript of an HTTPS session (see the chapter from JS section on how to obtain `WebProof` [Security Considerations](#security-considerations) section for details about the TLS *Notary*).
+    - The `main` function receives a `WebProof`, which contains a signed transcript of an HTTPS session (see the chapter from [JS section](../javascript/web-proofs.md) on how to obtain `WebProof`). The transcript is signed by a *Notary* (see [Security Considerations](#security-considerations) section for details about the TLS *Notary*).
 
 2. **Verify the Web Proof**:
     
@@ -65,7 +65,7 @@ What happens in the above code?
     - Verifies the *Notary*'s signature on the transcript.
     - Ensures the *Notary* is on the list of trusted notaries (via their signing key).
     - Confirms the data comes from the expected domain (`api.x.com` in this case).
-    - Check whether the HTTPS data comes from the expected `dataUrl`.
+    - Check whether the HTTPS data comes from the expected `dataUrl`. `dataUrl` is a [URL Pattern](https://urlpattern.spec.whatwg.org/) against which the actual URL is checked.
     - Ensures that the server's SSL certificate and its chain of authority are verified.
     - Retrieves the plain text transcript for further processing.
 
