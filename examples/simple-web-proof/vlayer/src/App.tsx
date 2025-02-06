@@ -42,6 +42,8 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <ProofProvider
             config={{
+              notaryUrl: "http://localhost:7047",
+              wsProxyUrl: "ws://localhost:55688",
               proverUrl: import.meta.env.VITE_PROVER_URL,
             }}
           >

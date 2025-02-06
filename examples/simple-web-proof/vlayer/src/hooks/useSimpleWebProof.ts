@@ -34,12 +34,12 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
   },
   logoUrl: "http://twitterswap.com/logo.png",
   steps: [
-    startPage("https://x.com", "Go to x.com login page"),
-    expectUrl("https://x.com/home", "Log in"),
+    startPage("https://github.com/vlayer-xyz/vlayer", "Go to Github page"),
+    expectUrl("https://github.com/vlayer-xyz/vlayer", "Log in"),
     notarize(
-      "https://api.x.com/1.1/account/settings.json",
-      "GET",
-      "Generate Proof of Twitter profile",
+      "https://github.com/vlayer-xyz/vlayer/star",
+      "POST",
+      "Generate Proof of Github Star",
       [
         {
           request: {

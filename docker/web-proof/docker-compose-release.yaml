@@ -4,7 +4,7 @@ services:
     platform: linux/amd64
     ports:
       - "55688:80" 
-    command: "80 lotr-api.online:3011"
+    command: "80 github.com:443"
       
   notary-server:
     image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
