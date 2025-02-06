@@ -7,7 +7,6 @@ import {
   type Chain,
   type Hex,
   parseAbi,
-  parseAbiItem,
   type PublicClient,
   type WalletClient,
 } from "viem";
@@ -15,6 +14,7 @@ import { getChainConfirmations } from "./getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
 import type { DeployConfig } from "./types";
+import { v_versions } from "../api/v_versions";
 
 const log = debug("vlayer:prover");
 
@@ -131,11 +131,11 @@ const swapInternalVerifier = async (
   verifierAddress: Address,
 ) => {
   log("Swapping internal verifier");
-  const imageIds = await getImageId(ethClient, verifierAddress);
+  const imageId = await getImageId();
   const routerDeployerHash = await ethClient.deployContract({
     chain,
     account,
-    args: [imageIds],
+    args: [[imageId]],
     abi: TestVerifierRouterDeployer.abi,
     bytecode: TestVerifierRouterDeployer.bytecode.object,
   });
@@ -159,27 +159,8 @@ const swapInternalVerifier = async (
   log("Internal verifier swapped successfully");
 };
 
-async function getImageId(
-  ethClient: WalletClient & PublicClient,
-  verifierAddress: Address,
-): Promise<Hex[]> {
-  const internalVerifier = await ethClient.readContract({
-    address: verifierAddress,
-    functionName: "verifier",
-    abi: parseAbi(["function verifier() external view returns (address)"]),
-  });
-  const repository = await ethClient.readContract({
-    address: internalVerifier,
-    functionName: "imageIdRepository",
-    abi: parseAbi([
-      "function imageIdRepository() external view returns (address)",
-    ]),
-  });
-  const blockNumber = await ethClient.getBlockNumber();
-  const logs = await ethClient.getLogs({
-    address: repository,
-    fromBlock: blockNumber - 100n > 0 ? blockNumber - 100n : 1n,
-    event: parseAbiItem(["event ImageIDAdded(bytes32)"]),
-  });
-  return logs.map((log) => log.args[0] as Hex);
+async function getImageId(): Promise<Hex> {
+  const { proverUrl } = getConfig();
+  const version = await v_versions(proverUrl);
+  return version.result.call_guest_id as Hex;
 }
