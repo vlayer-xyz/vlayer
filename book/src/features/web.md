@@ -150,7 +150,7 @@ From privacy perspective, it is important to note that the *Notary* server never
 
 ### Redaction
 
-The TLSN protocols allows for redacting (hiding) parts of the HTTPS transcript from `Prover`, i.e. not including certain sensitive parts (e.g. cookies, authorization headers, API tokens) of the transcript in the generated Web Proof, while still being able to cryptographically prove that the rest of the transcript (the parts which are revealed) is valid.
+The TLSN protocol allows for redacting (hiding) parts of the HTTPS transcript from `Prover`, i.e. not including certain sensitive parts (e.g. cookies, authorization headers, API tokens) of the transcript in the generated Web Proof, while still being able to cryptographically prove that the rest of the transcript (the parts which are revealed) is valid.
 
 vlayer allows for the following parts of the HTTPS transcript to be redacted:
 * HTTP request:
