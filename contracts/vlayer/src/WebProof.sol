@@ -35,8 +35,7 @@ library WebProofLib {
         Web memory web = recover(webProof);
         if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
             require(
-                TestnetStableDeployment.repository().isNotaryKeyValid(web.notaryPubKey),
-                "Invalid notary public key"
+                TestnetStableDeployment.repository().isNotaryKeyValid(web.notaryPubKey), "Invalid notary public key"
             );
         } else {
             require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
