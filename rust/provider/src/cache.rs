@@ -1,7 +1,12 @@
-use std::{collections::hash_map::Entry, marker::PhantomData, path::PathBuf, sync::RwLock};
+use std::{
+    collections::hash_map::Entry,
+    fs::{create_dir_all, remove_file},
+    marker::PhantomData,
+    path::{Path, PathBuf},
+    sync::RwLock,
+};
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::anyhow;
 use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
@@ -21,27 +26,30 @@ pub struct CachedProvider {
     pub(super) cache: RwLock<JsonCache>,
 }
 
+fn ensure_parent_directory_exists(cache_path: &Path) -> anyhow::Result<()> {
+    if let Some(parent) = cache_path.parent() {
+        if !parent.exists() {
+            println!("Parent directory '{}' does not exist. Creating it...", parent.display());
+            create_dir_all(parent)?;
+        }
+    }
+    Ok(())
+}
+
+fn remove_existing_cache_file(cache_path: &Path) -> anyhow::Result<()> {
+    if cache_path.exists() {
+        println!("Cache file '{}' already exists. Removing it...", cache_path.display());
+        remove_file(cache_path)?;
+    }
+    Ok(())
+}
+
 impl CachedProvider {
-    /// Creates a new [CachedProvider]. At this point, the cache files
-    /// directory should exist and the cache file itself should not.
+    /// Creates a new [CachedProvider]
     /// A new cache file will be created when dropped.
     pub fn new(cache_path: PathBuf, provider: impl BlockingProvider + 'static) -> Result<Self> {
-        // Sanity checks.
-        if let Some(parent) = cache_path.parent() {
-            if !parent.exists() {
-                return Err(anyhow!(
-                    "Cache files directory '{}' does not exist.",
-                    parent.display()
-                )
-                .into());
-            }
-        }
-        if cache_path.exists() {
-            return Err(anyhow!(
-                "Cache file {} already exists. Are you trying to create two test files with the same name?",
-                cache_path.display()
-            ).into());
-        }
+        ensure_parent_directory_exists(&cache_path)?;
+        remove_existing_cache_file(&cache_path)?;
 
         let cache = JsonCache::empty(cache_path);
         Ok(Self::from_components(cache, provider))
