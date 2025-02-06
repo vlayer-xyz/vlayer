@@ -139,7 +139,6 @@ async function testFailedProving() {
       "Preflight failed with error: Preflight error: TravelCallExecutor error: EVM transact error: Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature",
       `Error with wrong message returned: ${error.message}`,
     );
-    console.log("Proving failed as expected with message:", error.message);
   }
 }
 
