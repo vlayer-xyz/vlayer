@@ -56,6 +56,25 @@ mod test {
     }
 
     #[test]
+    fn parses_dns_record_with_missing_v_and_k_tags() {
+        let record = concat!(
+            " p=MIIBIjANBgkqhkiG9w0BAQEFAAOC",
+            "AQ8AMIIBCgKCAQEAvzwKQIIWzQXv0nihasFTT3+JO23hXCg",
+            "e+ESWNxCJdVLxKL5edxrumEU3DnrPeGD6q6E/vjoXwBabpm",
+            "8F5o96MEPm7v12O5IIK7wx7gIJiQWvexwh+GJvW4aFFa0g1",
+            "3Ai75UdZjGFNKHAEGeLmkQYybK/EHW5ymRlSg3g8zydJGEc",
+            "I/melLCiBoShHjfZFJEThxLmPHNSi+KOUMypxqYHd7hzg6W",
+            "7qnq6t9puZYXMWj6tEaf6ORWgb7DOXZSTJJjAJPBWa2+Urx",
+            "XX6Ro7L7Xy1zzeYFCk8W5vmn0wMgGpjkWw0ljJWNwIpxZAj9",
+            "p5wMedWasaPS74TZ1b7tI39ncp6QIDAQAB ; t= y : s :yy:x;",
+            "s=*:email;; h= sha1:sha 256:other;; n=ignore these notes "
+        );
+        let result = parse_dns_record(record);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().key_type(), "rsa");
+    }
+
+    #[test]
     fn only_rsa_is_supported() {
         let record = concat!(
             "v=DKIM1; k=ecdsa ; p=MIIBIjANBgkqhkiG9w0BAQEFAAOC",
