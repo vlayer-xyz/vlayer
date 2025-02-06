@@ -4,8 +4,8 @@ pragma solidity ^0.8.21;
 import {AccessControlEnumerable} from "@openzeppelin-contracts-5.0.1/access/extensions/AccessControlEnumerable.sol";
 
 interface IImageIdRepository {
-    event ImageIDAdded(bytes32 imageID);
-    event ImageIDRevoked(bytes32 imageID);
+    event ImageIDAdded(address indexed who, bytes32 imageID);
+    event ImageIDRevoked(address indexed who, bytes32 imageID);
 
     function addImageIdSupport(bytes32 imageId) external;
     function revokeImageIdSupport(bytes32 imageId) external;
@@ -55,14 +55,14 @@ contract Repository is AccessControlEnumerable, IImageIdRepository, IVDnsKeyRepo
         require(!isImageSupported(imageId), "ImageID is already supported");
 
         imageIds[imageId] = true;
-        emit ImageIDAdded(imageId);
+        emit ImageIDAdded(msg.sender, imageId);
     }
 
     function revokeImageIdSupport(bytes32 imageId) external onlyRole(OWNER_ROLE) {
         require(isImageSupported(imageId), "Cannot revoke unsupported ImageID");
 
         imageIds[imageId] = false;
-        emit ImageIDRevoked(imageId);
+        emit ImageIDRevoked(msg.sender, imageId);
     }
 
     function isImageSupported(bytes32 imageId) public view returns (bool) {

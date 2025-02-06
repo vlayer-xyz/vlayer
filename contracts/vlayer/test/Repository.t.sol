@@ -52,7 +52,7 @@ contract Repository_addImageIdSupport_Tests is Test {
 
     function test_emitsNewImageIdEvent() public {
         vm.expectEmit();
-        emit IImageIdRepository.ImageIDAdded(MOCK_IMAGE_ID);
+        emit IImageIdRepository.ImageIDAdded(address(this), MOCK_IMAGE_ID);
         repository.addImageIdSupport(MOCK_IMAGE_ID);
     }
 }
@@ -80,7 +80,7 @@ contract Repository_revokeImageIdSupport_Tests is Test {
         repository.addImageIdSupport(MOCK_IMAGE_ID);
 
         vm.expectEmit();
-        emit IImageIdRepository.ImageIDRevoked(MOCK_IMAGE_ID);
+        emit IImageIdRepository.ImageIDRevoked(address(this), MOCK_IMAGE_ID);
         repository.revokeImageIdSupport(MOCK_IMAGE_ID);
     }
 
