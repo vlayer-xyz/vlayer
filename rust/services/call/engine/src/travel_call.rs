@@ -1,6 +1,6 @@
 use std::panic;
 
-use call_common::RevmDB;
+use call_common::{Metadata, RevmDB};
 use derive_new::new;
 use evm::build_evm;
 use revm::primitives::{ExecutionResult, ResultAndState};
@@ -30,18 +30,22 @@ pub struct Executor<'envs, D: RevmDB> {
 }
 
 impl<'envs, D: RevmDB> Executor<'envs, D> {
-    pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
+    pub fn call(
+        self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<(SuccessfulExecutionResult, Vec<Metadata>)> {
         info!("Executing top-level EVM call");
-        let result =
+        let (result, metadata) =
             panic::catch_unwind(|| self.internal_call(tx, location)).map_err(wrap_panic)??;
-        Ok(result.try_into()?)
+        Ok((result.try_into()?, metadata))
     }
 
-    pub fn internal_call(
+    fn internal_call(
         &'envs self,
         tx: &Call,
         location: ExecutionLocation,
-    ) -> Result<ExecutionResult> {
+    ) -> Result<(ExecutionResult, Vec<Metadata>)> {
         info!("Executing EVM call");
         let env = self.envs.get(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
@@ -51,6 +55,6 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         let ResultAndState { result, .. } = evm.transact_preverified()?;
         debug!("EVM call result: {result:?}");
 
-        Ok(result)
+        Ok((result, evm.context.external.metadata()))
     }
 }

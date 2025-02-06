@@ -27,7 +27,7 @@ pub use prover::Prover;
 use provider::CachedMultiProvider;
 use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
 use seal::EncodableReceipt;
-use tracing::instrument;
+use tracing::{info, instrument};
 
 use crate::{db::HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
 
@@ -143,10 +143,15 @@ impl Host {
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, PreflightError> {
         let now = Instant::now();
 
-        let SuccessfulExecutionResult {
-            output: host_output,
-            gas_used,
-        } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
+        let (
+            SuccessfulExecutionResult {
+                output: host_output,
+                gas_used,
+            },
+            metadata,
+        ) = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
+
+        info!("Gathered metadata: {:#?}", metadata);
 
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
