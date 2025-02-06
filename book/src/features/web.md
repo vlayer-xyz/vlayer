@@ -160,7 +160,7 @@ vlayer allows for the following parts of the HTTPS transcript to be redacted:
   * header values.
   * string values in JSON body.
 
-Each value must be redacted fully or not at all. No other part of HTTP request or response can be redacted. The Solidity method `webProof.verify()` validates that these conditions are met. This way we ensure that the structure of the transcript cannot be altered by a malicious client. After redacting JSON string values, `web.jsonGetString()` returns a string with each byte replaced by `*` character.
+Each value must be redacted fully or not at all. No other part of HTTP request or response can be redacted. The Solidity method `webProof.verify()` validates that these conditions are met. This way we ensure that the structure of the transcript cannot be altered by a malicious client. After redacting JSON string value for a given `"key"`, `web.jsonGetString("key")` returns a string with each byte replaced by `*` character.
 
 In order to learn how to enable and configure redaction using vlayer SDK, see [Redaction](../javascript/web-proofs.md#redaction) section in our Javascript documentation.
 
