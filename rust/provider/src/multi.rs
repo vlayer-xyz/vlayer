@@ -118,10 +118,10 @@ mod get {
 
     #[test]
     fn gets_created_provider() -> anyhow::Result<()> {
-        let rpc_cache_paths =
+        let rpc_cache_path =
             HashMap::from([(Chain::mainnet().id(), "testdata/cache.json".to_string())]);
 
-        let provider_factory = CachedProviderFactory::new(rpc_cache_paths, None);
+        let provider_factory = CachedProviderFactory::new(rpc_cache_path, None);
         let cached_multi_provider = CachedMultiProvider::from_factory(provider_factory);
         cached_multi_provider.get(Chain::mainnet().id())?;
 
