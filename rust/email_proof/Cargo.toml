@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 alloy-sol-types = { workspace = true }
 base64 = "0.21.7"
-cfdkim = { git = "https://github.com/risc0-labs/dkim", rev = "3213315e41f426c307b8feb8fb329330a47e326c", default-features = false }
+cfdkim = { git = "https://github.com/vlayer-xyz/dkim", rev = "04668378083e2236489b3749b4112c847972071b", default-features = false }
 mailparse = "0.14.1"
 rsa = { workspace = true }
 slog = "2.7.0"
