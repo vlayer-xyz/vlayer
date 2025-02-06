@@ -155,6 +155,41 @@ const hash = await vlayer.prove({
 })
 ```
 
+### Redaction
+
+vlayer browser extension supports redaction, i.e. hiding certain parts of the HTTPS transcript in the generated Web Proof (see section [Redaction](../features/web.md#redaction) for protocol details). In order to configure how the extension redacts the transcript, we can pass the following additional configuration to `notarize` step:
+
+```ts
+  notarize(
+    'https://api.x.com/1.1/account/settings.json', 
+    'GET', 
+    'Generate Proof of Twitter profile',
+    [
+      {
+        request: {
+          headers: ["cookie"],
+        },
+      }, {
+        request: {
+          url_query_except: [],
+        },
+      }, {
+        response: {
+          json_body_except: ["screen_name"],
+        },
+      }, {
+        response: {
+          headers: ["x-example-header"],
+        },
+      },
+    ],
+  )
+```
+
+In the above snippet, the last argument to `notarize` is a list of items, where a single item defines a single part of HTTP request/response that can be redacted. Each item comes in two flavours - the basic one which defines the items that will be redacted and the `*_except` one, which defines the items that *will not* be redacted. For example, `request: { headers: ["cookie"] }` will redact a single request header with name `cookie` and `request: { headers_except: ["cookie"] }` will redact all the other headers *except* `cookie` (we could pass an empty array `request: { headers_except: [] }` to redact all request headers).
+
+By default, the transcript is not redacted at all and redaction of each HTTP request/response part needs to be configured to enable redaction.
+
 ### WebSocket proxy
 
 The WebSocket proxy is required in the Web Proofs setup to allow the vlayer extension to access the low-level TLS connection of the HTTPS request for which we are generating a Web Proof (browsers do not provide this access by default). The default WebSocket proxy, `wss://notary.pse.dev/proxy`, used in our SDK and hosted by the TLSN team, supports a limited number of domains (you can view the list [here](https://docs.tlsnotary.org/developers/notary_server.html#websocket-proxy-server)). 
