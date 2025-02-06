@@ -2048,7 +2048,10 @@ dependencies = [
 name = "call_common"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "anyhow",
+ "call_precompiles",
+ "derive-new",
  "revm",
 ]
 
