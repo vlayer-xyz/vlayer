@@ -148,6 +148,22 @@ The Web Proof feature is based on the [TLSNotary](https://tlsnotary.org/) protoc
 
 From privacy perspective, it is important to note that the *Notary* server never has access to the plaintext transcript of the connection and therefore, *Notary* can never steal client data and pretend to be client. Furthermore, the transcript can be redacted (i.e. certain parts can be removed) by the client, making these parts of the communication not accessible by `Prover` and vlayer infrastructure running the `Prover`.
 
+### Redaction
+
+The TLSN protocols allows for redacting (hiding) parts of the HTTPS transcript from `Prover`, i.e. not including certain sensitive parts (e.g. cookies, authorization headers, API tokens) of the transcript in the generated Web Proof, while still being able to cryptographically prove that the rest of the transcript (the parts which are revealed) is valid.
+
+vlayer allows for the following parts of the HTTPS transcript to be redacted:
+* HTTP request:
+  * URL query param values.
+  * header values.
+* HTTP response:
+  * header values.
+  * string values in JSON body.
+
+Each value must be redacted fully or not at all. No other part of HTTP request or response can be redacted. The Solidity method `webProof.verify()` validates that these conditions are met. This way we ensure that the structure of the transcript cannot be altered by a malicious client. After redacting JSON string values, `web.jsonGetString()` returns a string with each byte replaced by `*` character.
+
+In order to learn how to enable and configure redaction using vlayer SDK, see [Redaction](../javascript/web-proofs.md#redaction) section in our Javascript documentation.
+
 ### Trust Assumptions
 
 It is important to understand that the *Notary* is a trusted party in the above setup. Since the *Notary* certifies the data, a malicious *Notary* could collude with a malicious client to create fake proofs that would still be successfully verified by `Prover`. Currently vlayer runs it's own *Notary* server, which means that vlayer needs to be trusted to certify HTTPS sessions.
