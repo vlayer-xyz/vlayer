@@ -17,6 +17,6 @@ library ProofVerifierFactory {
             return new FakeProofVerifier(repository);
         }
 
-        revert InvalidChainId();
+        revert InvalidChainId(block.chainid);
     }
 }

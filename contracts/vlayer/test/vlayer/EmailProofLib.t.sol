@@ -23,7 +23,19 @@ contract EmailProofTest is VTest {
         EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
         UnverifiedEmail memory email = getTestEmail("testdata/verify_vlayer.eml");
         email.verificationData.validUntil = uint64(block.timestamp - 1);
-        vm.expectRevert("EmailProof: expired DNS verification");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                EmailProofLib.ExpiredDnsVerification.selector, block.timestamp, uint64(block.timestamp - 1)
+            )
+        );
+        wrapper.verify(email);
+    }
+
+    function test_revertsIf_InvalidDnsKeyInTests() public {
+        EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
+        UnverifiedEmail memory email = getTestEmail("testdata/verify_vlayer.eml");
+        email.verificationData.pubKey = "InvalidDnsKey";
+        vm.expectRevert(abi.encodeWithSelector(EmailProofLib.InvalidHardcodedDnsKey.selector, "InvalidDnsKey"));
         wrapper.verify(email);
     }
 }

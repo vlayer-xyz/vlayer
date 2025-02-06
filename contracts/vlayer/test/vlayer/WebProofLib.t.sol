@@ -20,11 +20,13 @@ contract WebProverTest is VTest {
     function test_revertsIf_notaryKeyIsInvalid() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
-        try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
-            revert("Expected error");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Invalid notary public key");
-        }
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WebProofLib.InvalidHardcodedNotaryPubKey.selector,
+                "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n-----END PUBLIC KEY-----\n"
+            )
+        );
+        wrapper.verify(webProof, DATA_URL);
     }
 
     function test_verifiesWebProof() public {
@@ -41,15 +43,15 @@ contract WebProverTest is VTest {
     function test_incorrectUrl() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
 
-        callProver();
-
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
-        try wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json") returns (Web memory) {
-            revert("Expected error");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Preflight(Engine(TransactError(Revert(\"revert: Incorrect URL\"))))");
-        }
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WebProofLib.IncorrectUrl.selector,
+                "https://bad_api.x.com/1.1/account/settings.json"
+            )
+        );
+        wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json");
     }
 
     function test_missingPresentationJson() public {

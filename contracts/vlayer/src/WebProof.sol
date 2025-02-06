@@ -22,6 +22,10 @@ library WebProofLib {
     using Strings for string;
     using URLPatternLib for string;
 
+    error InvalidNotaryPubKey(string pubKey, address repository);
+    error InvalidHardcodedNotaryPubKey(string pubKey);
+    error IncorrectUrl(string dataUrl);
+
     // Generated using command `curl -s https://notary.pse.dev/v0.1.0-alpha.7/info | jq -r '.publicKey' | openssl ec -pubin -inform PEM -pubout -conv_form uncompressed`
     string private constant NOTARY_PUB_KEY =
         "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
@@ -29,14 +33,18 @@ library WebProofLib {
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         Web memory web = recover(webProof);
         if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
-            require(
-                TestnetStableDeployment.repository().isNotaryKeyValid(web.notaryPubKey), "Invalid notary public key"
-            );
+            if (!TestnetStableDeployment.repository().isNotaryKeyValid(web.notaryPubKey)) {
+                revert InvalidNotaryPubKey(web.notaryPubKey, address(TestnetStableDeployment.repository()));
+            }
         } else {
-            require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
+            if (!NOTARY_PUB_KEY.equal(web.notaryPubKey)) {
+                revert InvalidHardcodedNotaryPubKey(web.notaryPubKey);
+            }
         }
 
-        require(web.url.test(dataUrl), "Incorrect URL");
+        if (!web.url.test(dataUrl)) {
+            revert IncorrectUrl(dataUrl);
+        }
         return web;
     }
 

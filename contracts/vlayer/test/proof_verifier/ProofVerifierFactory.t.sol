@@ -65,7 +65,7 @@ contract VerifierFactory_Tests is Test {
     function test_failsForOtherNetworks() public {
         vm.chainId(11155111 + 1);
 
-        vm.expectRevert(InvalidChainId.selector);
+        vm.expectRevert(abi.encodeWithSelector(InvalidChainId.selector, 11155111 + 1));
         ProofVerifierFactory.produce();
     }
 

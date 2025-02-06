@@ -36,18 +36,25 @@ struct VerifiedEmail {
 bytes32 constant TEST_DNS_PUBLIC_KEY_HASH = 0xc16646301c7615357b8f8ee125956b0e5fbf972fa2a0c26feb1f1ae75d04103f; // keccak256(TEST_DNS_PUBLIC_KEY)
 
 library EmailProofLib {
+    error ExpiredDnsVerification(uint256 currentTimestamp, uint64 validUntil);
+    error InvalidDnsKey(bytes pubKey, address repository);
+    error InvalidHardcodedDnsKey(bytes pubKey);
+
     function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory) {
-        require(unverifiedEmail.verificationData.validUntil > block.timestamp, "EmailProof: expired DNS verification");
+        if (unverifiedEmail.verificationData.validUntil <= block.timestamp) {
+            revert ExpiredDnsVerification(block.timestamp, unverifiedEmail.verificationData.validUntil);
+        }
+
         if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
-            require(
-                TestnetStableDeployment.repository().isDnsKeyValid(unverifiedEmail.verificationData.pubKey),
-                "Not a valid VDNS public key"
-            );
+            if (!TestnetStableDeployment.repository().isDnsKeyValid(unverifiedEmail.verificationData.pubKey)) {
+                revert InvalidDnsKey(
+                    unverifiedEmail.verificationData.pubKey, address(TestnetStableDeployment.repository())
+                );
+            }
         } else {
-            require(
-                keccak256(unverifiedEmail.verificationData.pubKey) == TEST_DNS_PUBLIC_KEY_HASH,
-                "Not a valid VDNS hardcoded key"
-            );
+            if (keccak256(unverifiedEmail.verificationData.pubKey) != TEST_DNS_PUBLIC_KEY_HASH) {
+                revert InvalidHardcodedDnsKey(unverifiedEmail.verificationData.pubKey);
+            }
         }
 
         (bool success, bytes memory returnData) = Precompiles.VERIFY_EMAIL.staticcall(abi.encode(unverifiedEmail));

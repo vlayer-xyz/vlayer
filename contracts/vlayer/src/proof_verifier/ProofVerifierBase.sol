@@ -12,6 +12,14 @@ import {IImageIdRepository} from "../Repository.sol";
 abstract contract ProofVerifierBase is IProofVerifier {
     using SealLib for Seal;
 
+    error InvalidProofMode(ProofMode expected, ProofMode actual);
+    error InvalidProverAddress(address expected, address actual);
+    error InvalidFunctionSelector(bytes4 expected, bytes4 actual);
+    error SettlementBlockFromTheFuture(uint256 currentBlockNumber, uint256 settlementBlockNumber);
+    error SettlementBlockFromTooOld(uint256 latestPossbileBlock, uint256 settlementBlockNumber);
+    error InvalidBlockHash(uint256 blockNumber, bytes32 expectedBlockHash, bytes32 actualBlockHash);
+    error UnsupportedCallGuestId(bytes32 callGuestId);
+
     uint256 private constant AVAILABLE_HISTORICAL_BLOCKS = 256;
 
     ProofMode public immutable PROOF_MODE;
@@ -36,26 +44,39 @@ abstract contract ProofVerifierBase is IProofVerifier {
     }
 
     function _verifyProofMode(Proof memory proof) private view {
-        require(proof.seal.proofMode() == PROOF_MODE, "Invalid proof mode");
+        if (proof.seal.proofMode() != PROOF_MODE) {
+            revert InvalidProofMode(PROOF_MODE, proof.seal.proofMode());
+        }
     }
 
     function _verifyExecutionEnv(Proof memory proof, address prover, bytes4 selector) private view {
-        require(proof.callAssumptions.proverContractAddress == prover, "Invalid prover");
-        require(proof.callAssumptions.functionSelector == selector, "Invalid selector");
+        if (proof.callAssumptions.proverContractAddress != prover) {
+            revert InvalidProverAddress(prover, proof.callAssumptions.proverContractAddress);
+        }
+        if (proof.callAssumptions.functionSelector != selector) {
+            revert InvalidFunctionSelector(selector, proof.callAssumptions.functionSelector);
+        }
 
-        require(proof.callAssumptions.settleBlockNumber < block.number, "Invalid block number: block from future");
-        require(
-            proof.callAssumptions.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS >= block.number,
-            "Invalid block number: block too old"
-        );
+        if (proof.callAssumptions.settleBlockNumber >= block.number) {
+            revert SettlementBlockFromTheFuture(block.number, proof.callAssumptions.settleBlockNumber);
+        }
+        if (proof.callAssumptions.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS < block.number) {
+            revert SettlementBlockFromTooOld(
+                block.number >= AVAILABLE_HISTORICAL_BLOCKS ? block.number - AVAILABLE_HISTORICAL_BLOCKS : 0,
+                proof.callAssumptions.settleBlockNumber
+            );
+        }
 
-        require(
-            proof.callAssumptions.settleBlockHash == blockhash(proof.callAssumptions.settleBlockNumber),
-            "Invalid block hash"
-        );
+        if (proof.callAssumptions.settleBlockHash != blockhash(proof.callAssumptions.settleBlockNumber)) {
+            revert InvalidBlockHash(
+                proof.callAssumptions.settleBlockNumber,
+                blockhash(proof.callAssumptions.settleBlockNumber),
+                proof.callAssumptions.settleBlockHash
+            );
+        }
 
-        // CALL_GUEST_ID is not a part of the verified arguments
-        // and the following require is just to enable better error handling.
-        require(IMAGE_ID_REPOSITORY.isImageSupported(proof.callGuestId), "Unsupported CallGuestId");
+        if (!IMAGE_ID_REPOSITORY.isImageSupported(proof.callGuestId)) {
+            revert UnsupportedCallGuestId(proof.callGuestId);
+        }
     }
 }

@@ -36,7 +36,7 @@ contract FakeProofVerifier_Tests is Test {
         vm.chainId(1);
         Repository repository = testDeployer.repository();
 
-        vm.expectRevert(InvalidChainId.selector);
+        vm.expectRevert(abi.encodeWithSelector(InvalidChainId.selector, 1));
         new FakeProofVerifier(repository);
     }
 }

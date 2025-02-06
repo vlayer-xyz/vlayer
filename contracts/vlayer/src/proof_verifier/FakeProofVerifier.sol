@@ -15,7 +15,7 @@ contract FakeProofVerifier is ProofVerifierBase {
 
     constructor(IImageIdRepository _repository) ProofVerifierBase(_repository) {
         if (ChainIdLibrary.isMainnet()) {
-            revert InvalidChainId();
+            revert InvalidChainId(block.chainid);
         }
 
         VERIFIER = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);

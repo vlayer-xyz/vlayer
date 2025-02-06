@@ -49,15 +49,22 @@ contract ProofVerifier_Verify_Tests is Test {
         // Use Groth16 proof for Fake proof verifier
         proof.seal.mode = ProofMode.GROTH16;
 
-        vm.expectRevert("Invalid proof mode");
+        vm.expectRevert(
+            abi.encodeWithSelector(ProofVerifierBase.InvalidProofMode.selector, ProofMode.FAKE, ProofMode.GROTH16)
+        );
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 
     function test_invalidProver() public {
+        address expectedProver = assumptions.proverContractAddress;
         assumptions.proverContractAddress = address(0x0000000000000000000000000000000000deadbeef);
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
 
-        vm.expectRevert("Invalid prover");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ProofVerifierBase.InvalidProverAddress.selector, expectedProver, assumptions.proverContractAddress
+            )
+        );
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 
@@ -65,7 +72,11 @@ contract ProofVerifier_Verify_Tests is Test {
         assumptions.functionSelector = 0xdeadbeef;
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
 
-        vm.expectRevert("Invalid selector");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ProofVerifierBase.InvalidFunctionSelector.selector, SELECTOR, assumptions.functionSelector
+            )
+        );
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 
@@ -73,7 +84,11 @@ contract ProofVerifier_Verify_Tests is Test {
         assumptions.settleBlockNumber = block.number;
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
 
-        vm.expectRevert("Invalid block number: block from future");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ProofVerifierBase.SettlementBlockFromTheFuture.selector, block.number, assumptions.settleBlockNumber
+            )
+        );
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 
@@ -81,7 +96,11 @@ contract ProofVerifier_Verify_Tests is Test {
         vm.roll(block.number + 256); // forward block number
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
 
-        vm.expectRevert("Invalid block number: block too old");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ProofVerifierBase.SettlementBlockFromTooOld.selector, block.number - 256, assumptions.settleBlockNumber
+            )
+        );
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 
@@ -89,7 +108,14 @@ contract ProofVerifier_Verify_Tests is Test {
         assumptions.settleBlockHash = blockhash(assumptions.settleBlockNumber - 1);
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
 
-        vm.expectRevert("Invalid block hash");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ProofVerifierBase.InvalidBlockHash.selector,
+                assumptions.settleBlockNumber,
+                blockhash(assumptions.settleBlockNumber),
+                assumptions.settleBlockHash
+            )
+        );
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 
@@ -99,7 +125,7 @@ contract ProofVerifier_Verify_Tests is Test {
         uint256 fakeGuestId = uint256(proof.callGuestId) + 1;
         proof.callGuestId = bytes32(fakeGuestId);
 
-        vm.expectRevert("Unsupported CallGuestId");
+        vm.expectRevert(abi.encodeWithSelector(ProofVerifierBase.UnsupportedCallGuestId.selector, proof.callGuestId));
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 }
