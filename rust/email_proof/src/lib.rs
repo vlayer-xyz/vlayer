@@ -53,7 +53,7 @@ mod test {
         SolVerificationData {
             validUntil: verification_data_signed.valid_until,
             signature: verification_data_signed.signature.0.clone().into(),
-            pubKey: verification_data_signed.pub_key.0.clone().into(),
+            pubKey: verification_data_signed.pub_key.0.into(),
         }
     }
 
