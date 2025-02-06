@@ -136,10 +136,8 @@ where
             block_range: old_range,
             trie: old_trie,
             zk_proof: old_zk_proof,
-        } = self
-            .db
-            .get_chain_trie(self.chain_id)?
-            .expect("chain trie not found");
+        } = self.db.get_chain_trie(self.chain_id)?;
+
         let mut trie = old_trie.clone();
 
         let latest_block_number = self.fetcher.get_latest_block_number().await?;
@@ -239,7 +237,7 @@ mod tests {
         let Host { mut db, .. } = host;
         db.update_chain(1, chain_update)?;
 
-        let chain_trie = db.get_chain_trie(1)?.unwrap();
+        let chain_trie = db.get_chain_trie(1)?;
         assert_eq!(chain_trie.block_range, LATEST..=LATEST);
 
         Ok(())
@@ -265,7 +263,7 @@ mod tests {
             host.poll_commit().await?;
             let Host { db, .. } = host;
 
-            let chain_trie = db.get_chain_trie(1)?.unwrap();
+            let chain_trie = db.get_chain_trie(1)?;
             assert_eq!(chain_trie.block_range, GENESIS..=GENESIS);
 
             Ok(())
@@ -283,7 +281,7 @@ mod tests {
             host.poll_commit().await?;
             let Host { db, .. } = host;
 
-            let chain_trie = db.get_chain_trie(1)?.unwrap();
+            let chain_trie = db.get_chain_trie(1)?;
             assert_eq!(chain_trie.block_range, GENESIS..=new_confirmed_block);
 
             Ok(())

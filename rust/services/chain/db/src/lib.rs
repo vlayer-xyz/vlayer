@@ -238,11 +238,11 @@ impl ChainDb {
         Ok(Some(UnverifiedChainTrie::new(range, trie, chain_proof)))
     }
 
-    pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
-        Ok(self
-            .get_chain_trie_inner(chain_id)?
+    pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<ChainTrie> {
+        self.get_chain_trie_inner(chain_id)?
             .map(|unverified| verify_chain_trie(unverified, self.chain_guest_ids.clone())) // Verifies ZK proof
-            .transpose()?)
+            .transpose()?
+            .ok_or(ChainDbError::ChainNotFound(chain_id))
     }
 
     pub fn update_chain(
