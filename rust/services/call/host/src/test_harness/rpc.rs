@@ -32,18 +32,18 @@ lazy_static! {
 
 pub const OP_ANVIL: ChainId = 31_338;
 
-pub fn rpc_snapshot_path(chain: &str, test_name: &str) -> String {
+pub fn rpc_cache_path(chain: &str, test_name: &str) -> String {
     format!("test_data/{test_name}/{chain}.json")
 }
 
-pub fn rpc_snapshot_paths(test_name: &str) -> HashMap<ChainId, String> {
+pub fn rpc_cache_paths(test_name: &str) -> HashMap<ChainId, String> {
     HashMap::from([
-        (Chain::mainnet().id(), rpc_snapshot_path("mainnet", test_name)),
-        (Chain::sepolia().id(), rpc_snapshot_path("sepolia", test_name)),
-        (Chain::optimism_mainnet().id(), rpc_snapshot_path("op_mainnet", test_name)),
-        (Chain::optimism_sepolia().id(), rpc_snapshot_path("op_sepolia", test_name)),
-        (NamedChain::AnvilHardhat.into(), rpc_snapshot_path("anvil", test_name)),
-        (OP_ANVIL, rpc_snapshot_path("op_anvil", test_name)),
+        (Chain::mainnet().id(), rpc_cache_path("mainnet", test_name)),
+        (Chain::sepolia().id(), rpc_cache_path("sepolia", test_name)),
+        (Chain::optimism_mainnet().id(), rpc_cache_path("op_mainnet", test_name)),
+        (Chain::optimism_sepolia().id(), rpc_cache_path("op_sepolia", test_name)),
+        (NamedChain::AnvilHardhat.into(), rpc_cache_path("anvil", test_name)),
+        (OP_ANVIL, rpc_cache_path("op_anvil", test_name)),
     ])
 }
 

@@ -102,8 +102,8 @@ mod get {
     #[test]
     fn gets_cached_provider() -> anyhow::Result<()> {
         let chain_id = Chain::mainnet().id();
-        let path_buf = PathBuf::from("testdata/cache.json");
-        let provider = Arc::new(CachedProvider::from_file(&path_buf)?) as Arc<dyn BlockingProvider>;
+        let file_path = PathBuf::from("testdata/cache.json");
+        let provider = Arc::new(CachedProvider::from_file(&file_path)?) as Arc<dyn BlockingProvider>;
 
         // NullProviderFactory returns an error when it tries to create a provider.
         // If no error was returned, it means the factory did not try to create a provider and used cached provider.

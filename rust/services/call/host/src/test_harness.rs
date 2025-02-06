@@ -6,7 +6,7 @@ use mock_chain_server::ChainProofServerMock;
 use optimism::client::factory::cached;
 use provider::{CachedMultiProvider, CachedProviderFactory};
 use rpc::rpc_urls;
-pub use rpc::{block_tag_to_block_number, rpc_snapshot_path, rpc_snapshot_paths};
+pub use rpc::{block_tag_to_block_number, rpc_cache_path, rpc_cache_paths};
 pub use types::ExecutionLocation;
 
 use crate::{BuilderError, Call, Config, Error, Host, PreflightResult};
@@ -115,10 +115,10 @@ fn create_host(
 }
 
 fn create_multi_provider(test_name: &str) -> CachedMultiProvider {
-    let rpc_snapshot_paths = rpc_snapshot_paths(test_name);
+    let rpc_cache_paths = rpc_cache_paths(test_name);
     let maybe_ethers_provider_factory =
         UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
     let provider_factory =
-        CachedProviderFactory::new(rpc_snapshot_paths, maybe_ethers_provider_factory);
+        CachedProviderFactory::new(rpc_cache_paths, maybe_ethers_provider_factory);
     CachedMultiProvider::from_factory(provider_factory)
 }

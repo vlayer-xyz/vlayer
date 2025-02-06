@@ -66,13 +66,13 @@ fn get_path(rpc_cache_paths: &HashMap<ChainId, String>, chain_id: ChainId) -> Re
 
 #[derive(new)]
 pub struct CachedProviderFactory {
-    rpc_snapshot_paths: HashMap<ChainId, String>,
+    rpc_cache_paths: HashMap<ChainId, String>,
     ethers_provider_factory: Option<EthersProviderFactory>,
 }
 
 impl ProviderFactory for CachedProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>> {
-        let file_path = get_path(&self.rpc_snapshot_paths, chain_id)?;
+        let file_path = get_path(&self.rpc_cache_paths, chain_id)?;
 
         let cached_provider = match &self.ethers_provider_factory {
             Some(ethers_factory) => {
