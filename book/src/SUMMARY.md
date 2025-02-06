@@ -40,5 +40,6 @@
       - [Canonicity](./appendix/architecture/block_proof/canonicity.md)
     - [Solidity](./appendix/architecture/solidity.md)
     - [Releasing](./appendix/architecture/releasing.md)
+    - [Web Proofs](./appendix/architecture/web_proof.md)
   - [JSON-RPC API](./appendix/api.md)
   - [Proof composition](./appendix/proof_composition.md)
