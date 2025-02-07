@@ -16,6 +16,12 @@ pub enum Error {
     ExecutorEnvBuilder(String),
 }
 
+impl From<host_utils::ProverError> for Error {
+    fn from(err: host_utils::ProverError) -> Self {
+        Self::Prover(err.to_string())
+    }
+}
+
 type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug, Clone, Default)]
@@ -25,11 +31,11 @@ pub struct Prover {
 }
 
 impl Prover {
-    pub const fn new(proof_mode: ProofMode, elf: GuestElf) -> Self {
-        Self {
-            inner: Risc0Prover::new(proof_mode),
+    pub fn try_new(proof_mode: ProofMode, elf: GuestElf) -> Result<Self> {
+        Ok(Self {
+            inner: Risc0Prover::try_new(proof_mode)?,
             elf,
-        }
+        })
     }
 
     /// Wrapper around Risc0Prover which specifies the chain guest ELF and accepts the previous proof
@@ -42,10 +48,7 @@ impl Prover {
         let executor_env = build_executor_env(input, previous_proof)
             .map_err(|err| Error::ExecutorEnvBuilder(err.to_string()))?;
 
-        let ProveInfo { receipt, .. } = self
-            .inner
-            .prove(executor_env, &self.elf.elf)
-            .map_err(|err| Error::Prover(err.to_string()))?;
+        let ProveInfo { receipt, .. } = self.inner.prove(executor_env, &self.elf.elf)?;
         Ok(receipt.into())
     }
 }

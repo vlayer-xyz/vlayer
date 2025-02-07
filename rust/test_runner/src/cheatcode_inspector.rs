@@ -184,11 +184,12 @@ fn create_host<DB: Database>(
     let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_url));
     let op_client_factory = cached::Factory::default();
 
-    Host::new(
+    Host::try_new(
         providers,
         start_exec_location,
         Some(chain_proof_client),
         op_client_factory,
         config,
     )
+    .unwrap()
 }

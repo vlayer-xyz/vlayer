@@ -1,7 +1,7 @@
 use call_engine::{
     evm::env::factory::Error as EvmEnvFactoryError, travel_call, verifier, GuestOutputError,
 };
-use host_utils::proving;
+use host_utils::{proving, ProverError};
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
 
@@ -38,6 +38,9 @@ pub enum BuilderError {
 
     #[error("Prover contract not deployed")]
     ProverContractNotDeployed,
+
+    #[error("Prover: {0}")]
+    Prover(#[from] ProverError),
 }
 
 #[derive(Error, Debug)]

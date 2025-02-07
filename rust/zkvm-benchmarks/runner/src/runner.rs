@@ -36,7 +36,7 @@ fn run_guest() -> Result<Vec<BenchmarkResult>, Error> {
 }
 
 fn prove() -> proving::Result<ProveInfo> {
-    let prover = Prover::new(ProofMode::Fake);
+    let prover = Prover::try_new(ProofMode::Fake)?;
     let env = ExecutorEnv::builder().build()?;
     Ok(prover.prove(env, &GUEST_ELF.elf.clone())?)
 }

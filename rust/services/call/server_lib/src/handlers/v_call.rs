@@ -66,6 +66,6 @@ async fn build_host(
         .with_prover_contract_addr(prover_contract_addr)
         .await
         .map_err(HostError::Builder)?
-        .build(config.into());
+        .build(config.into())?;
     Ok(host)
 }

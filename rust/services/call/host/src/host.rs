@@ -86,15 +86,15 @@ pub struct PreflightResult {
 }
 
 impl Host {
-    pub fn new(
+    pub fn try_new(
         providers: CachedMultiProvider,
         start_execution_location: ExecutionLocation,
         chain_client: Option<Box<dyn chain_client::Client>>,
         op_client_factory: impl optimism::client::IFactory + 'static,
         config: Config,
-    ) -> Self {
+    ) -> Result<Self, crate::BuilderError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
-        let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
+        let prover = Prover::try_new(config.proof_mode, &config.call_guest_elf)?;
         let chain_client = chain_client.map(chain_client::RecordingClient::new);
         let recording_op_client_factory = recording::Factory::new(op_client_factory);
 
@@ -104,7 +104,7 @@ impl Host {
             recording_op_client_factory.clone(),
         );
 
-        Host {
+        Ok(Host {
             envs,
             start_execution_location,
             prover,
@@ -112,7 +112,7 @@ impl Host {
             op_client_factory: recording_op_client_factory,
             travel_call_verifier,
             guest_elf: config.call_guest_elf,
-        }
+        })
     }
 
     fn build_travel_call_verifier(
