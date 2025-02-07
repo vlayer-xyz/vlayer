@@ -45,9 +45,7 @@ pub(super) fn gas_used(
     const EVM_WORD_SIZE_BYTES: u64 = 32;
     let word_cost = byte_cost * EVM_WORD_SIZE_BYTES;
     let gas_used = calc_linear_cost_u32(bytes, base_cost, word_cost);
-    if gas_used > gas_limit {
-        Err(Error(OutOfGas))
-    } else {
-        Ok(gas_used)
-    }
+    (gas_used <= gas_limit)
+        .then_some(gas_used)
+        .ok_or(Error(OutOfGas))
 }
