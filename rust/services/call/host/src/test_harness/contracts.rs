@@ -184,6 +184,11 @@ pub mod time_travel {
     pub const BLOCK_NO: u64 = 20_064_547_u64;
     const TOKEN_OWNER: Address = address!("E6b08c02Dbf3a0a4D3763136285B85A9B492E391");
     sol!(
+        #[derive(Debug)]
+        struct Seal {
+            bytes18 lhv;
+            bytes19 rhv;
+        }
         #[sol(all_derives = true)]
         struct Proof {
             uint256 length;
