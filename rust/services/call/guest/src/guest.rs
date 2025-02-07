@@ -50,7 +50,6 @@ pub async fn main(
     let evm_call_result = TravelCallExecutor::new(&cached_envs)
         .call(&call, start_execution_location)
         .expect("travel call execution failed")
-        .0
         .output;
 
     let start_env = cached_envs

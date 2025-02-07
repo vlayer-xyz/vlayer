@@ -18,7 +18,7 @@ use crate::{
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
 
-type TravelCallResult = travel_call::error::Result<(ExecutionResult, Box<[Metadata]>)>;
+pub type TravelCallResult = travel_call::error::Result<(ExecutionResult, Box<[Metadata]>)>;
 type TransactionCallback<'a> = dyn Fn(&Call, ExecutionLocation) -> TravelCallResult + 'a;
 
 pub struct Inspector<'a> {

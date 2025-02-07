@@ -141,13 +141,11 @@ impl Host {
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, PreflightError> {
         let now = Instant::now();
 
-        let (
-            SuccessfulExecutionResult {
-                output: host_output,
-                gas_used,
-            },
+        let SuccessfulExecutionResult {
+            output: host_output,
+            gas_used,
             metadata,
-        ) = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
+        } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
 
         info!("Gathered metadata: {:#?}", metadata);
 
