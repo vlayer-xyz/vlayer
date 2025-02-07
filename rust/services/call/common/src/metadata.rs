@@ -4,7 +4,7 @@ use derive_new::new;
 
 use super::ExecutionLocation;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Metadata {
     Precompile(Precompile),
     StartChain(ChainId),
@@ -12,7 +12,7 @@ pub enum Metadata {
     SetBlock(ExecutionLocation),
 }
 
-#[derive(new, Debug, Copy, Clone)]
+#[derive(new, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Precompile {
     pub tag: Tag,
     pub calldata_length: usize,

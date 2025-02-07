@@ -21,11 +21,8 @@ use crate::{
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
 
-type TransactionCallback<'a> = dyn Fn(
-        &Call,
-        ExecutionLocation,
-    ) -> Result<(ExecutionResult, Vec<Metadata>), travel_call::error::Error>
-    + 'a;
+type TravelCallResult = travel_call::error::Result<(ExecutionResult, Box<[Metadata]>)>;
+type TransactionCallback<'a> = dyn Fn(&Call, ExecutionLocation) -> TravelCallResult + 'a;
 
 pub struct Inspector<'a> {
     start_chain_id: ChainId,
@@ -37,11 +34,7 @@ pub struct Inspector<'a> {
 impl<'a> Inspector<'a> {
     pub fn new(
         start_chain_id: ChainId,
-        transaction_callback: impl Fn(
-                &Call,
-                ExecutionLocation,
-            ) -> Result<(ExecutionResult, Vec<Metadata>), travel_call::error::Error>
-            + 'a,
+        transaction_callback: impl Fn(&Call, ExecutionLocation) -> TravelCallResult + 'a,
     ) -> Self {
         Self {
             start_chain_id,
@@ -51,8 +44,8 @@ impl<'a> Inspector<'a> {
         }
     }
 
-    pub fn metadata(self) -> Vec<Metadata> {
-        self.metadata
+    pub fn into_metadata(self) -> Box<[Metadata]> {
+        self.metadata.into_boxed_slice()
     }
 
     fn chain_id(&self) -> ChainId {
@@ -151,12 +144,8 @@ mod test {
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
-    type StaticTransactionCallback = dyn Fn(
-            &Call,
-            ExecutionLocation,
-        ) -> Result<(ExecutionResult, Vec<Metadata>), travel_call::error::Error>
-        + Send
-        + Sync;
+    type StaticTransactionCallback =
+        dyn Fn(&Call, ExecutionLocation) -> TravelCallResult + Send + Sync;
 
     static TRANSACTION_CALLBACK: &StaticTransactionCallback = &|_, _| {
         Ok((
@@ -167,7 +156,7 @@ mod test {
                 logs: vec![],
                 output: Output::Call(Bytes::from(vec![])),
             },
-            vec![],
+            Box::new([]),
         ))
     };
 

@@ -31,7 +31,7 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         self,
         tx: &Call,
         location: ExecutionLocation,
-    ) -> Result<(SuccessfulExecutionResult, Vec<Metadata>)> {
+    ) -> Result<(SuccessfulExecutionResult, Box<[Metadata]>)> {
         info!("Executing top-level EVM call");
         let (result, metadata) =
             panic::catch_unwind(|| self.internal_call(tx, location)).map_err(wrap_panic)??;
@@ -42,7 +42,7 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         &'envs self,
         tx: &Call,
         location: ExecutionLocation,
-    ) -> Result<(ExecutionResult, Vec<Metadata>)> {
+    ) -> Result<(ExecutionResult, Box<[Metadata]>)> {
         info!("Executing EVM call");
         let env = self.envs.get(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
@@ -52,6 +52,6 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         let ResultAndState { result, .. } = evm.transact_preverified()?;
         debug!("EVM call result: {result:?}");
 
-        Ok((result, evm.context.external.metadata()))
+        Ok((result, evm.context.external.into_metadata()))
     }
 }
