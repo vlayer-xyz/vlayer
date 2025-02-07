@@ -25,10 +25,7 @@
 │       ├── foundry.toml
 │       ├── **package.json [OUT OF SCOPE]**
 │       ├── **remappings.txt [OUT OF SCOPE]**
-│       ├── script
-│       │   ├── ImageIdAdministration.s.sol
-│       │   ├── PushImageId.s.sol
-│       │   └── VlayerDeployer.s.sol
+│       ├── **script [OUT OF SCOPE]**
 │       ├── **soldeer.lock [OUT OF SCOPE]**
 │       ├── src
 │       │   ├── CallAssumptions.sol
