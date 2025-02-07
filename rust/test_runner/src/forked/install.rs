@@ -1,5 +1,5 @@
 /**
- * This file was copied from https://github.com/foundry-rs/foundry/blob/6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04/crates/forge/bin/cmd/install.rs
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/1d5fa644df2dd6b141db15bed37d42f8fb7600b3/crates/forge/bin/cmd/install.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * It wasn't modified, but it wasn't exported from foundry lib
  */
@@ -31,6 +31,7 @@ static DEPENDENCY_VERSION_TAG_REGEX: LazyLock<Regex> =
 #[command(override_usage = "forge install [OPTIONS] [DEPENDENCIES]...
     forge install [OPTIONS] <github username>/<github project>@<tag>...
     forge install [OPTIONS] <alias>=<github username>/<github project>@<tag>...
+    forge install [OPTIONS] <https://<github token>@git url>...)]
     forge install [OPTIONS] <https:// git url>...")]
 pub struct InstallArgs {
     /// The dependencies to install.
@@ -65,7 +66,7 @@ impl_figment_convert_basic!(InstallArgs);
 
 impl InstallArgs {
     pub fn run(self) -> Result<()> {
-        let mut config = self.try_load_config_emit_warnings()?;
+        let mut config = self.load_config()?;
         self.opts.install(&mut config, self.dependencies)
     }
 }

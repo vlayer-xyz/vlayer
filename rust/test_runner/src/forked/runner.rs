@@ -1,7 +1,7 @@
 //! The Forge test runner.
 
 /**
- * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04/crates/forge/src/runner.rs
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/1d5fa644df2dd6b141db15bed37d42f8fb7600b3/crates/forge/src/runner.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * The original file was modified for the purpose of this project.
  * All relevant modifications are commented with "MODIFICATION" comments.
@@ -440,6 +440,7 @@ impl<'a> ContractRunner<'a> {
 struct FunctionRunner<'a> {
     /// The function-level configuration.
     tcfg: Cow<'a, TestRunnerConfig>,
+    // MODIFICATION: swapped Executor to TestExecutor
     /// The EVM executor.
     executor: Cow<'a, TestExecutor<'a>>,
     /// The parent runner.
@@ -761,7 +762,6 @@ impl<'a> FunctionRunner<'a> {
 
         // Run fuzz test.
         let fuzzed_executor =
-            // MODIFICATION: use inner executor
             FuzzedExecutor::new(self.executor.into_owned().inner, runner, self.tcfg.sender, fuzz_config);
         let result = fuzzed_executor.fuzz(
             func,
@@ -852,9 +852,7 @@ impl<'a> FunctionRunner<'a> {
         fuzzer_with_cases(self.config.fuzz.seed, config.runs, config.max_assume_rejects, None)
     }
 
-    fn clone_executor(&self) -> Executor {
-        self.executor.inner.clone()
-    }
+    fn clone_executor(&self) -> Executor { self.executor.clone().into_owned().inner }
 }
 
 fn fuzzer_with_cases(

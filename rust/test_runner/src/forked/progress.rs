@@ -1,5 +1,5 @@
 /**
- * This file was copied from https://github.com/foundry-rs/foundry/blob/6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04/crates/forge/src/progress.rs
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/1d5fa644df2dd6b141db15bed37d42f8fb7600b3/crates/forge/src/progress.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * It wasn't modified, but it wasn't exported from foundry lib
  */
@@ -9,6 +9,7 @@ use alloy_primitives::map::HashMap;
 use foundry_common::sh_println;
 use indicatif::{MultiProgress, ProgressBar};
 use parking_lot::Mutex;
+
 /// State of [ProgressBar]s displayed for the given test run.
 /// Shows progress of all test suites matching filter.
 /// For each test within the test suite an individual progress bar is displayed.

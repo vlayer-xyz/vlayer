@@ -1,5 +1,5 @@
 /**
- * This file was copied from https://github.com/foundry-rs/foundry/blob/6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04/crates/forge/bin/cmd/test/summary.rs
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/1d5fa644df2dd6b141db15bed37d42f8fb7600b3/crates/forge/bin/cmd/test/summary.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * It wasn't modified, but it wasn't exported from foundry lib
  */
@@ -11,7 +11,6 @@ use comfy_table::{
 };
 use forge::result::TestOutcome;
 use foundry_common::reports::{report_kind, ReportKind};
-use foundry_common::sh_println;
 use foundry_evm::executors::invariant::InvariantMetrics;
 use itertools::Itertools;
 use serde_json::json;
@@ -134,7 +133,7 @@ impl TestSummaryReport {
     }
 }
 
-/// Helper function to print the invariant metrics.
+/// Helper function to create the invariant metrics table.
 ///
 /// ╭-----------------------+----------------+-------+---------+----------╮
 /// | Contract              | Selector       | Calls | Reverts | Discards |
@@ -147,55 +146,90 @@ impl TestSummaryReport {
 /// |-----------------------+----------------+-------+---------+----------|
 /// | CounterHandler        | doSomething    | 7382  | 160     |4794      |
 /// ╰-----------------------+----------------+-------+---------+----------╯
-pub(crate) fn print_invariant_metrics(test_metrics: &HashMap<String, InvariantMetrics>) {
-    if !test_metrics.is_empty() {
-        let mut table = Table::new();
-        table.apply_modifier(UTF8_ROUND_CORNERS);
+pub(crate) fn format_invariant_metrics_table(
+    test_metrics: &HashMap<String, InvariantMetrics>,
+) -> Table {
+    let mut table = Table::new();
+    table.apply_modifier(UTF8_ROUND_CORNERS);
 
-        table.set_header(vec![
-            Cell::new("Contract"),
-            Cell::new("Selector"),
-            Cell::new("Calls").fg(Color::Green),
-            Cell::new("Reverts").fg(Color::Red),
-            Cell::new("Discards").fg(Color::Yellow),
-        ]);
+    table.set_header(vec![
+        Cell::new("Contract"),
+        Cell::new("Selector"),
+        Cell::new("Calls").fg(Color::Green),
+        Cell::new("Reverts").fg(Color::Red),
+        Cell::new("Discards").fg(Color::Yellow),
+    ]);
 
-        for name in test_metrics.keys().sorted() {
-            if let Some((contract, selector)) =
-                name.split_once(':').and_then(|(_, contract)| contract.split_once('.'))
-            {
-                let mut row = Row::new();
-                row.add_cell(Cell::new(contract));
-                row.add_cell(Cell::new(selector));
+    for name in test_metrics.keys().sorted() {
+        if let Some((contract, selector)) =
+            name.split_once(':').map_or(name.as_str(), |(_, contract)| contract).split_once('.')
+        {
+            let mut row = Row::new();
+            row.add_cell(Cell::new(contract));
+            row.add_cell(Cell::new(selector));
 
-                if let Some(metrics) = test_metrics.get(name) {
-                    let calls_cell = Cell::new(metrics.calls).fg(if metrics.calls > 0 {
-                        Color::Green
-                    } else {
-                        Color::White
-                    });
+            if let Some(metrics) = test_metrics.get(name) {
+                let calls_cell = Cell::new(metrics.calls).fg(if metrics.calls > 0 {
+                    Color::Green
+                } else {
+                    Color::White
+                });
 
-                    let reverts_cell = Cell::new(metrics.reverts).fg(if metrics.reverts > 0 {
-                        Color::Red
-                    } else {
-                        Color::White
-                    });
+                let reverts_cell = Cell::new(metrics.reverts).fg(if metrics.reverts > 0 {
+                    Color::Red
+                } else {
+                    Color::White
+                });
 
-                    let discards_cell = Cell::new(metrics.discards).fg(if metrics.discards > 0 {
-                        Color::Yellow
-                    } else {
-                        Color::White
-                    });
+                let discards_cell = Cell::new(metrics.discards).fg(if metrics.discards > 0 {
+                    Color::Yellow
+                } else {
+                    Color::White
+                });
 
-                    row.add_cell(calls_cell);
-                    row.add_cell(reverts_cell);
-                    row.add_cell(discards_cell);
-                }
-
-                table.add_row(row);
+                row.add_cell(calls_cell);
+                row.add_cell(reverts_cell);
+                row.add_cell(discards_cell);
             }
-        }
 
-        let _ = sh_println!("\n{table}\n");
+            table.add_row(row);
+        }
+    }
+    table
+}
+
+#[cfg(test)]
+mod tests {
+    use foundry_evm::executors::invariant::InvariantMetrics;
+    use std::collections::HashMap;
+    use crate::forked::summary::format_invariant_metrics_table;
+
+    #[test]
+    fn test_invariant_metrics_table() {
+        let mut test_metrics = HashMap::new();
+        test_metrics.insert(
+            "SystemConfig.setGasLimit".to_string(),
+            InvariantMetrics { calls: 10, reverts: 1, discards: 1 },
+        );
+        test_metrics.insert(
+            "src/universal/Proxy.sol:Proxy.changeAdmin".to_string(),
+            InvariantMetrics { calls: 20, reverts: 2, discards: 2 },
+        );
+        let table = format_invariant_metrics_table(&test_metrics);
+        assert_eq!(table.row_count(), 2);
+
+        let mut first_row_content = table.row(0).unwrap().cell_iter();
+        assert_eq!(first_row_content.next().unwrap().content(), "SystemConfig");
+        assert_eq!(first_row_content.next().unwrap().content(), "setGasLimit");
+        assert_eq!(first_row_content.next().unwrap().content(), "10");
+        assert_eq!(first_row_content.next().unwrap().content(), "1");
+        assert_eq!(first_row_content.next().unwrap().content(), "1");
+
+        let mut second_row_content = table.row(1).unwrap().cell_iter();
+        assert_eq!(second_row_content.next().unwrap().content(), "Proxy");
+        assert_eq!(second_row_content.next().unwrap().content(), "changeAdmin");
+        assert_eq!(second_row_content.next().unwrap().content(), "20");
+        assert_eq!(second_row_content.next().unwrap().content(), "2");
+        assert_eq!(second_row_content.next().unwrap().content(), "2");
     }
 }
