@@ -990,6 +990,7 @@ dependencies = [
  "email_proof",
  "regex",
  "revm",
+ "serde",
  "serde_json",
  "url",
  "urlpattern",

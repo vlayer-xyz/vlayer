@@ -5,7 +5,7 @@ use std::{
 
 use alloy_sol_types::SolValue;
 use bytes::Bytes;
-use call_common::ExecutionLocation;
+use call_common::{ExecutionLocation, Metadata};
 use call_engine::{
     evm::{env::cached::CachedEvmEnv, execution_result::SuccessfulExecutionResult},
     travel_call::Executor as TravelCallExecutor,
@@ -25,7 +25,7 @@ pub use prover::Prover;
 use provider::CachedMultiProvider;
 use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
 use seal::EncodableReceipt;
-use tracing::{info, instrument};
+use tracing::instrument;
 
 use crate::{db::HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
 
@@ -81,6 +81,13 @@ pub struct PreflightResult {
     pub input: Input,
     pub gas_used: u64,
     pub elapsed_time: Duration,
+    pub metadata: Box<[Metadata]>,
+}
+
+#[derive(new, Debug, Clone)]
+pub struct ProvingInput {
+    pub host_output: Bytes,
+    pub input: Input,
 }
 
 impl Host {
@@ -147,15 +154,19 @@ impl Host {
             metadata,
         } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
 
-        info!("Gathered metadata: {:#?}", metadata);
-
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
             .await?;
         let input = self.prepare_input_data(call)?;
 
         let elapsed_time = now.elapsed();
-        Ok(PreflightResult::new(host_output.into(), input, gas_used, elapsed_time))
+        Ok(PreflightResult::new(
+            host_output.into(),
+            input,
+            gas_used,
+            elapsed_time,
+            metadata,
+        ))
     }
 
     #[instrument(skip_all)]
@@ -179,9 +190,7 @@ impl Host {
     pub fn prove(
         prover: &Prover,
         call_guest_id: CallGuestId,
-        PreflightResult {
-            host_output, input, ..
-        }: PreflightResult,
+        ProvingInput { host_output, input }: ProvingInput,
     ) -> Result<HostOutput, ProvingError> {
         let EncodedProofWithStats {
             seal,
@@ -214,8 +223,10 @@ impl Host {
     pub async fn main(self, call: Call) -> Result<HostOutput, Error> {
         let prover = self.prover();
         let call_guest_id = self.call_guest_id();
-        let preflight_result = self.preflight(call).await?;
-        Ok(Host::prove(&prover, call_guest_id, preflight_result)?)
+        let PreflightResult {
+            host_output, input, ..
+        } = self.preflight(call).await?;
+        Ok(Host::prove(&prover, call_guest_id, ProvingInput::new(host_output, input))?)
     }
 }
 

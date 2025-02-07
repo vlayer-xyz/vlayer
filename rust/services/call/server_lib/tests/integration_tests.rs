@@ -492,6 +492,18 @@ mod server_tests {
                 .with_result(json!({}))
                 .add()
                 .await;
+            gas_meter_server
+                .mock_method("v_sendMetadata")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "metadata": [{"start_chain": ETHEREUM_SEPOLIA_ID}]
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
 
             let mut ctx = Context::default()
                 .await
