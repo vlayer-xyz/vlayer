@@ -2,14 +2,13 @@ use std::{collections::HashMap, iter::once};
 
 use alloy_primitives::{Bytes, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader, Hashable};
+use call_common::ExecutionLocation;
 use derivative::Derivative;
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
 use mpt::KeccakMerkleTrie as MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
-
-use super::env::location::ExecutionLocation;
 
 /// The serializable input to derive and validate a [EvmEnv].
 #[derive(Debug, Serialize, Derivative, Deserialize, Clone)]

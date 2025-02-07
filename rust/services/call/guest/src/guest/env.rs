@@ -1,8 +1,9 @@
 use std::sync::{Arc, RwLock};
 
+use call_common::ExecutionLocation;
 use call_engine::{
     evm::{
-        env::{cached::MultiEvmEnv, location::ExecutionLocation, EvmEnv},
+        env::{cached::MultiEvmEnv, EvmEnv},
         input::{EvmInput, MultiEvmInput},
     },
     seed_cache_db_with_trusted_data,

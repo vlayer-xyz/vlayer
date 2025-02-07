@@ -5,13 +5,12 @@ use std::{
 };
 
 use alloy_primitives::ChainId;
-use call_common::RevmDB;
+use call_common::{ExecutionLocation, RevmDB};
 use common::InteriorMutabilityCache;
 use itertools::Itertools;
 
 use super::{
     factory::{Error, EvmEnvFactory, Result},
-    location::ExecutionLocation,
     BlocksByChain, EvmEnv,
 };
 

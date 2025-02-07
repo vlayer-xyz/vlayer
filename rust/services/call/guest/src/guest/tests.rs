@@ -1,10 +1,8 @@
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
+use call_common::ExecutionLocation;
 use call_engine::{
-    evm::{
-        env::location::ExecutionLocation,
-        input::{EvmInput, MultiEvmInput},
-    },
+    evm::input::{EvmInput, MultiEvmInput},
     verifier::{time_travel, travel_call},
 };
 use mpt::KeccakMerkleTrie as MerkleTrie;

@@ -5,11 +5,9 @@ use std::{
 
 use alloy_sol_types::SolValue;
 use bytes::Bytes;
+use call_common::ExecutionLocation;
 use call_engine::{
-    evm::{
-        env::{cached::CachedEvmEnv, location::ExecutionLocation},
-        execution_result::SuccessfulExecutionResult,
-    },
+    evm::{env::cached::CachedEvmEnv, execution_result::SuccessfulExecutionResult},
     travel_call::Executor as TravelCallExecutor,
     verifier::{
         teleport, time_travel,

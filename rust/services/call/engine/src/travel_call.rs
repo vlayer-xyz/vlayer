@@ -1,16 +1,13 @@
 use std::panic;
 
-use call_common::{Metadata, RevmDB};
+use call_common::{ExecutionLocation, Metadata, RevmDB};
 use derive_new::new;
 use evm::build_evm;
 use revm::primitives::{ExecutionResult, ResultAndState};
 use tracing::{debug, info};
 
 use crate::{
-    evm::{
-        env::{cached::CachedEvmEnv, location::ExecutionLocation},
-        execution_result::SuccessfulExecutionResult,
-    },
+    evm::{env::cached::CachedEvmEnv, execution_result::SuccessfulExecutionResult},
     io::Call,
     travel_call::error::{wrap_panic, Result},
 };

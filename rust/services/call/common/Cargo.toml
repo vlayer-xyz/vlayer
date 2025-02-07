@@ -5,10 +5,12 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
+alloy-rlp = { workspace = true }
 anyhow = { workspace = true }
 call_precompiles = { workspace = true }
 derive-new = { workspace = true }
 revm = { workspace = true }
+serde = { workspace = true }
 
 [lints]
 workspace = true

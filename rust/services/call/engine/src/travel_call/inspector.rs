@@ -1,5 +1,8 @@
 use alloy_primitives::{address, Address, ChainId};
-use call_common::metadata::{self, Metadata};
+use call_common::{
+    metadata::{self, Metadata},
+    ExecutionLocation,
+};
 use call_precompiles::precompile_by_address;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
@@ -9,7 +12,6 @@ use revm::{
 use tracing::{debug, info};
 
 use crate::{
-    evm::env::location::ExecutionLocation,
     io::Call,
     travel_call::{self, args::Args},
     utils::evm_call::{create_encoded_return_outcome, execution_result_to_call_outcome},
@@ -62,14 +64,14 @@ impl<'a> Inspector<'a> {
         let chain_id = self.chain_id();
         info!("setBlock({block_number}). Chain id remains {chain_id}.");
         self.metadata
-            .push(Metadata::SetBlock(metadata::ExecutionLocation::new(chain_id, block_number)));
+            .push(Metadata::SetBlock(ExecutionLocation::new(chain_id, block_number)));
         self.location = Some((chain_id, block_number).into());
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
         info!("setChain({chain_id}, {block_number})",);
         self.metadata
-            .push(Metadata::SetChain(metadata::ExecutionLocation::new(chain_id, block_number)));
+            .push(Metadata::SetChain(ExecutionLocation::new(chain_id, block_number)));
         self.location = Some((chain_id, block_number).into());
     }
 

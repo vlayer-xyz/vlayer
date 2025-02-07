@@ -1,12 +1,12 @@
 use std::marker::PhantomData;
 
 use async_trait::async_trait;
-use call_common::RevmDB;
+use call_common::{ExecutionLocation, RevmDB};
 use derive_new::new;
 use tracing::info;
 
 use super::{teleport, time_travel};
-use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
+use crate::evm::env::cached::CachedEvmEnv;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {

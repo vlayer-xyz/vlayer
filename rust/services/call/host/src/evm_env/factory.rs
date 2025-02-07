@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use anyhow::anyhow;
+use call_common::ExecutionLocation;
 use call_engine::{
     evm::env::{
         factory::{EvmEnvFactory, Result},
-        location::ExecutionLocation,
         EvmEnv,
     },
     seed_cache_db_with_trusted_data,
