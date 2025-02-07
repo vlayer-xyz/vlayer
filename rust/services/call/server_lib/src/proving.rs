@@ -1,7 +1,7 @@
 use alloy_primitives::{hex::ToHexExt, U256};
 use alloy_sol_types::SolValue;
 use call_engine::{CallGuestId, HostOutput, Proof, Seal};
-use call_host::{Host, PreflightResult, Prover, ProvingError};
+use call_host::{Host, Prover, ProvingError, ProvingInput};
 use serde::{Serialize, Serializer};
 use tracing::info;
 
@@ -27,11 +27,11 @@ pub enum Error {
 pub async fn await_proving(
     prover: &Prover,
     call_guest_id: CallGuestId,
-    preflight_result: PreflightResult,
+    prover_input: ProvingInput,
     gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
 ) -> Result<RawData, Error> {
-    let host_output = Host::prove(prover, call_guest_id, preflight_result)?;
+    let host_output = Host::prove(prover, call_guest_id, prover_input)?;
     let cycles_used = host_output.cycles_used;
     let elapsed_time = host_output.elapsed_time;
 

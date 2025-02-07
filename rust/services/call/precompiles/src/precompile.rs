@@ -2,10 +2,12 @@ use derive_more::{Deref, Into};
 use revm::precompile::{
     calc_linear_cost_u32, Error::OutOfGas, PrecompileErrors::Error, PrecompileWithAddress,
 };
+use serde::Serialize;
 
 use crate::helpers::Result;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Tag {
     WebProof,
     EmailProof,

@@ -1,9 +1,11 @@
 use alloy_primitives::{BlockNumber, ChainId};
 use call_precompiles::precompile::Tag;
+use serde::Serialize;
 
 use super::ExecutionLocation;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Metadata {
     Precompile(Precompile),
     StartChain(ChainId),
@@ -33,7 +35,7 @@ impl Metadata {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize)]
 pub struct Precompile {
     pub tag: Tag,
     pub calldata_length: usize,

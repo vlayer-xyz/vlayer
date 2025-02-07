@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use auto_impl::auto_impl;
+use call_common::Metadata;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::rpc::{Client as RawRpcClient, Error as RpcError, Method};
@@ -48,6 +49,17 @@ impl Method for RefundUnusedGas {
     const METHOD_NAME: &str = "v_refundUnusedGas";
 }
 
+#[derive(new, Serialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct SendMetadata {
+    hash: CallHash,
+    metadata: Box<[Metadata]>,
+}
+
+impl Method for SendMetadata {
+    const METHOD_NAME: &str = "v_sendMetadata";
+}
+
 #[derive(new, Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub url: String,
@@ -60,6 +72,7 @@ pub struct Config {
 pub trait Client: Send + Sync {
     async fn allocate(&self, gas_limit: u64) -> Result<()>;
     async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()>;
+    async fn send_metadata(&self, metadata: Box<[Metadata]>) -> Result<()>;
 }
 
 pub struct RpcClient {
@@ -126,6 +139,16 @@ impl Client for RpcClient {
         }
         Ok(())
     }
+
+    async fn send_metadata(&self, metadata: Box<[Metadata]>) -> Result<()> {
+        let req = SendMetadata::new(self.hash, metadata);
+        info!("v_sendMetadata => {req:#?}");
+        if let Err(err) = self.call(req).await {
+            error!("v_sendMetadata failed with error: {err}");
+            return Err(err);
+        }
+        Ok(())
+    }
 }
 
 pub struct NoOpClient;
@@ -137,6 +160,10 @@ impl Client for NoOpClient {
     }
 
     async fn refund(&self, _stage: ComputationStage, _gas_used: u64) -> Result<()> {
+        Ok(())
+    }
+
+    async fn send_metadata(&self, _metadata: Box<[Metadata]>) -> Result<()> {
         Ok(())
     }
 }
