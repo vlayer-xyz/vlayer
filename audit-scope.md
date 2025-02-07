@@ -109,11 +109,7 @@
 │   │   └── **testdata [OUT OF SCOPE]**
 │   ├── guest_wrapper
 │   │   ├── Cargo.toml
-│   │   ├── artifacts
-│   │   │   └── chain_guest
-│   │   │       ├── CHANGELOG.md
-│   │   │       ├── elf_id
-│   │   │       └── elf_id_history
+│   │   ├── **artifacts [OUT OF SCOPE]**
 │   │   ├── build.rs
 │   │   ├── build_utils
 │   │   │   ├── Cargo.toml
