@@ -1,11 +1,7 @@
 {
   "lockfileVersion": 1,
   "workspaces": {
-    "": {
-      "dependencies": {
-        "@heroicons/react": "^2.2.0",
-      },
-    },
+    "": {},
     "examples/simple-email-proof/vlayer": {
       "name": "simple-email-proof",
       "dependencies": {
@@ -95,6 +91,7 @@
     "examples/simple-web-proof/vlayer": {
       "name": "simple-web-proof",
       "dependencies": {
+        "@heroicons/react": "^2.2.0",
         "@noble/hashes": "^1.4.0",
         "@reown/appkit": "^1.6.4",
         "@reown/appkit-adapter-wagmi": "^1.6.4",

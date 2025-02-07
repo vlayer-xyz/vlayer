@@ -19,6 +19,7 @@
     "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@noble/hashes": "^1.4.0",
     "@reown/appkit": "^1.6.4",
     "@reown/appkit-adapter-wagmi": "^1.6.4",
