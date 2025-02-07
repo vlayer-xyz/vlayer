@@ -1,6 +1,7 @@
 use alloy_primitives::Bytes;
 use alloy_rlp::Buf;
 use alloy_sol_types::decode_revert_reason;
+use call_common::Metadata;
 use revm::primitives::{ExecutionResult, HaltReason, SuccessReason};
 use thiserror::Error;
 
@@ -8,6 +9,7 @@ use thiserror::Error;
 pub struct SuccessfulExecutionResult {
     pub output: Vec<u8>,
     pub gas_used: u64,
+    pub metadata: Box<[Metadata]>,
 }
 
 #[derive(Debug, Error, PartialEq)]
@@ -22,10 +24,11 @@ pub enum TransactError {
     Halt(HaltReason),
 }
 
-impl TryFrom<ExecutionResult> for SuccessfulExecutionResult {
-    type Error = TransactError;
-
-    fn try_from(execution_result: ExecutionResult) -> Result<Self, TransactError> {
+impl SuccessfulExecutionResult {
+    pub fn from_execution_result(
+        execution_result: ExecutionResult,
+        metadata: Box<[Metadata]>,
+    ) -> Result<Self, TransactError> {
         match execution_result {
             ExecutionResult::Success {
                 reason: SuccessReason::Return,
@@ -35,6 +38,7 @@ impl TryFrom<ExecutionResult> for SuccessfulExecutionResult {
             } => Ok(Self {
                 output: output.into_data().into(),
                 gas_used,
+                metadata,
             }),
             ExecutionResult::Success {
                 reason:
@@ -61,6 +65,12 @@ mod successful_execution_result_try_from {
 
     use super::*;
 
+    fn from_execution_result(
+        execution_result: ExecutionResult,
+    ) -> Result<SuccessfulExecutionResult, TransactError> {
+        SuccessfulExecutionResult::from_execution_result(execution_result, Box::new([]))
+    }
+
     mod success {
         use revm::primitives::{Output, SuccessReason};
 
@@ -79,7 +89,7 @@ mod successful_execution_result_try_from {
         #[test]
         fn return_() -> Result<(), TransactError> {
             let result = success_result(SuccessReason::Return, [1]);
-            let successful_result = SuccessfulExecutionResult::try_from(result)?;
+            let successful_result = from_execution_result(result)?;
 
             assert_eq!(successful_result.output, &[1]);
 
@@ -89,9 +99,7 @@ mod successful_execution_result_try_from {
         #[test]
         fn stop() {
             let result = success_result(SuccessReason::Stop, []);
-            let error = SuccessfulExecutionResult::try_from(result)
-                .unwrap_err()
-                .to_string();
+            let error = from_execution_result(result).unwrap_err().to_string();
 
             assert_eq!(
                 error,
@@ -116,9 +124,7 @@ mod successful_execution_result_try_from {
         fn revert_reason() {
             let revert = Revert::from("reason").abi_encode();
             let result = revert_result(revert);
-            let error = SuccessfulExecutionResult::try_from(result)
-                .unwrap_err()
-                .to_string();
+            let error = from_execution_result(result).unwrap_err().to_string();
 
             assert_eq!(error, "revert: reason");
         }
@@ -127,9 +133,7 @@ mod successful_execution_result_try_from {
         fn non_utf8_reason() {
             let non_utf8_revert = Bytes::from_static(&[0xFF]);
             let result = revert_result(non_utf8_revert);
-            let error = SuccessfulExecutionResult::try_from(result)
-                .unwrap_err()
-                .to_string();
+            let error = from_execution_result(result).unwrap_err().to_string();
 
             assert_eq!(error, "0xff");
         }
@@ -151,9 +155,7 @@ mod successful_execution_result_try_from {
         fn basic_out_of_gas() {
             let halt = HaltReason::OutOfGas(OutOfGasError::Basic);
             let result = halt_result(halt);
-            let error = SuccessfulExecutionResult::try_from(result)
-                .unwrap_err()
-                .to_string();
+            let error = from_execution_result(result).unwrap_err().to_string();
 
             assert_eq!(error, "contract execution halted: OutOfGas(Basic)");
         }

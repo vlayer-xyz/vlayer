@@ -9,7 +9,6 @@ use revm::primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId};
 
 pub mod cached;
 pub mod factory;
-pub mod location;
 
 /// The environment to execute the contract calls in.
 #[derive(Debug)]

@@ -3,13 +3,13 @@ use std::{fmt::Debug, sync::Arc};
 
 use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
 use async_trait::async_trait;
-use call_common::RevmDB;
+use call_common::{ExecutionLocation, RevmDB};
 use common::Hashable;
 use derivative::Derivative;
 use optimism::{anchor_state_registry::AnchorStateRegistry, NumHash};
 use tracing::{debug, info};
 
-use crate::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, BlocksByChain};
+use crate::evm::env::{cached::CachedEvmEnv, BlocksByChain};
 
 #[derive(thiserror::Error, Debug, Derivative)]
 #[derivative(PartialEq, Eq)]

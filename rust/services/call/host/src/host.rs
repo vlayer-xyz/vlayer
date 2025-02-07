@@ -5,11 +5,9 @@ use std::{
 
 use alloy_sol_types::SolValue;
 use bytes::Bytes;
+use call_common::ExecutionLocation;
 use call_engine::{
-    evm::{
-        env::{cached::CachedEvmEnv, location::ExecutionLocation},
-        execution_result::SuccessfulExecutionResult,
-    },
+    evm::{env::cached::CachedEvmEnv, execution_result::SuccessfulExecutionResult},
     travel_call::Executor as TravelCallExecutor,
     verifier::{
         teleport, time_travel,
@@ -27,7 +25,7 @@ pub use prover::Prover;
 use provider::CachedMultiProvider;
 use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
 use seal::EncodableReceipt;
-use tracing::instrument;
+use tracing::{info, instrument};
 
 use crate::{db::HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
 
@@ -146,7 +144,10 @@ impl Host {
         let SuccessfulExecutionResult {
             output: host_output,
             gas_used,
+            metadata,
         } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
+
+        info!("Gathered metadata: {:#?}", metadata);
 
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)

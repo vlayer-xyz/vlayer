@@ -1,7 +1,8 @@
 use alloy_chains::Chain;
 use alloy_primitives::{hex::ToHexExt, keccak256, ChainId, B256};
 use alloy_rlp::RlpEncodable;
-use call_engine::{evm::env::location::ExecutionLocation, Call as EngineCall};
+use call_common::ExecutionLocation;
+use call_engine::Call as EngineCall;
 use call_host::{Call as HostCall, Error as HostError};
 use common::Hashable;
 use derive_more::From;

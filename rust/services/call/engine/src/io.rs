@@ -4,6 +4,7 @@ use alloy_primitives::{Address, Bytes as RlpBytes, FixedBytes, TxKind};
 use alloy_rlp::RlpEncodable;
 use alloy_sol_types::{SolCall, SolValue};
 use bytes::Bytes;
+use call_common::ExecutionLocation;
 use chain_client::ChainProofCache;
 use derive_new::new;
 use optimism::client::factory::cached::OpOutputCache;
@@ -15,11 +16,7 @@ use risc0_zkvm::sha::Digest;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{
-    config::DEFAULT_CALLER,
-    evm::{env::location::ExecutionLocation, input::MultiEvmInput},
-    CallAssumptions,
-};
+use crate::{config::DEFAULT_CALLER, evm::input::MultiEvmInput, CallAssumptions};
 
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Input {

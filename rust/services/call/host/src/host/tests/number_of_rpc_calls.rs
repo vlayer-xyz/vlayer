@@ -2,10 +2,8 @@ use std::{path::PathBuf, sync::Arc};
 
 use alloy_chains::NamedChain::{Mainnet, OptimismSepolia};
 use alloy_primitives::address;
-use call_engine::{
-    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
-    travel_call,
-};
+use call_common::ExecutionLocation;
+use call_engine::{evm::env::cached::CachedEvmEnv, travel_call};
 use provider::{profiling, CachedMultiProvider, CachedProvider};
 
 use crate::{

@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use call_common::RevmDB;
 use call_precompiles::PRECOMPILES;
-use revm::{db::WrapDatabaseRef, inspector_handle_register, Evm, Handler};
+use revm::{
+    db::WrapDatabaseRef, inspector_handle_register, precompile::PrecompileWithAddress, Evm, Handler,
+};
 
 use super::inspector::Inspector;
 use crate::{evm::env::EvmEnv, Call};
@@ -13,12 +15,9 @@ pub fn build_evm<'inspector, 'envs, D: RevmDB>(
     inspector: Inspector<'inspector>,
 ) -> Evm<'inspector, Inspector<'inspector>, WrapDatabaseRef<&'envs D>> {
     let precompiles_handle_register = |handler: &mut Handler<_, _, _>| {
-        let precompiles = handler.pre_execution.load_precompiles();
-        handler.pre_execution.load_precompiles = Arc::new(move || {
-            let mut precompiles = precompiles.clone();
-            precompiles.extend(PRECOMPILES);
-            precompiles
-        });
+        let mut precompiles = handler.pre_execution.load_precompiles();
+        precompiles.extend(PRECOMPILES.map(PrecompileWithAddress::from));
+        handler.pre_execution.load_precompiles = Arc::new(move || precompiles.clone());
     };
 
     let mut evm = Evm::builder()

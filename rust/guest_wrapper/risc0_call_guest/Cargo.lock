@@ -920,8 +920,12 @@ dependencies = [
 name = "call_common"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
  "anyhow",
+ "call_precompiles",
  "revm",
+ "serde",
 ]
 
 [[package]]
@@ -965,6 +969,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-rlp-derive",
  "block_header",
+ "call_common",
  "call_engine",
  "chain_client",
  "chain_common",
@@ -981,6 +986,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
+ "derive_more",
  "email_proof",
  "regex",
  "revm",

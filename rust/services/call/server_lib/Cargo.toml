@@ -13,6 +13,7 @@ async-trait = { workspace = true }
 auto_impl = { workspace = true }
 axum = { workspace = true }
 axum-extra = { workspace = true, features = ["typed-header"] }
+call_common = { workspace = true }
 call_engine = { workspace = true }
 call_host = { workspace = true }
 chain = { workspace = true }

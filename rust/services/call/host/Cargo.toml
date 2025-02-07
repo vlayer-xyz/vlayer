@@ -10,6 +10,7 @@ alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 block_header = { workspace = true }
 bytes = { workspace = true }
+call_common = { workspace = true }
 call_engine = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true, features = ["fake", "rpc"] }

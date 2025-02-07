@@ -2048,8 +2048,12 @@ dependencies = [
 name = "call_common"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
  "anyhow",
+ "call_precompiles",
  "revm",
+ "serde",
 ]
 
 [[package]]
@@ -2100,6 +2104,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-rlp-derive",
  "block_header",
+ "call_common",
  "call_engine",
  "chain_client",
  "chain_common",
@@ -2121,6 +2126,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "bytes",
+ "call_common",
  "call_engine",
  "chain",
  "chain_client",
@@ -2157,6 +2163,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
+ "derive_more",
  "email_proof",
  "regex",
  "revm",
@@ -2199,6 +2206,7 @@ dependencies = [
  "axum 0.8.1",
  "axum-extra",
  "block_header",
+ "call_common",
  "call_engine",
  "call_host",
  "chain",

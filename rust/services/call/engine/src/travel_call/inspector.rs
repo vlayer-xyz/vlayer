@@ -1,4 +1,6 @@
 use alloy_primitives::{address, Address, ChainId};
+use call_common::{metadata::Metadata, ExecutionLocation};
+use call_precompiles::precompile_by_address;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     primitives::ExecutionResult,
@@ -7,7 +9,6 @@ use revm::{
 use tracing::{debug, info};
 
 use crate::{
-    evm::env::location::ExecutionLocation,
     io::Call,
     travel_call::{self, args::Args},
     utils::evm_call::{create_encoded_return_outcome, execution_result_to_call_outcome},
@@ -17,42 +18,54 @@ use crate::{
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
 
-type TransactionCallback<'a> =
-    dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, travel_call::error::Error> + 'a;
+pub type TravelCallResult = travel_call::error::Result<(ExecutionResult, Box<[Metadata]>)>;
+type TransactionCallback<'a> = dyn Fn(&Call, ExecutionLocation) -> TravelCallResult + 'a;
 
 pub struct Inspector<'a> {
     start_chain_id: ChainId,
     pub location: Option<ExecutionLocation>,
     transaction_callback: Box<TransactionCallback<'a>>,
+    metadata: Vec<Metadata>,
 }
 
 impl<'a> Inspector<'a> {
     pub fn new(
         start_chain_id: ChainId,
-        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, travel_call::error::Error>
-            + 'a,
+        transaction_callback: impl Fn(&Call, ExecutionLocation) -> TravelCallResult + 'a,
     ) -> Self {
         Self {
             start_chain_id,
             location: None,
             transaction_callback: Box::new(transaction_callback),
+            metadata: vec![Metadata::start_chain(start_chain_id)],
         }
     }
 
+    pub fn into_metadata(self) -> Box<[Metadata]> {
+        self.metadata.into_boxed_slice()
+    }
+
+    fn chain_id(&self) -> ChainId {
+        self.location
+            .map_or(self.start_chain_id, |loc| loc.chain_id)
+    }
+
     fn set_block(&mut self, block_number: u64) {
-        let chain_id = self
-            .location
-            .map_or(self.start_chain_id, |loc| loc.chain_id);
+        let chain_id = self.chain_id();
         info!("setBlock({block_number}). Chain id remains {chain_id}.");
+        self.metadata
+            .push(Metadata::set_block(chain_id, block_number));
         self.location = Some((chain_id, block_number).into());
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
         info!("setChain({chain_id}, {block_number})",);
+        self.metadata
+            .push(Metadata::set_chain(chain_id, block_number));
         self.location = Some((chain_id, block_number).into());
     }
 
-    fn on_call(&self, inputs: &CallInputs) -> Option<CallOutcome> {
+    fn on_call(&mut self, inputs: &CallInputs) -> Option<CallOutcome> {
         let Some(location) = self.location else {
             return None; // If no setChain/setBlock happened, we don't need to teleport to a new VM, but can continue with the current one.
         };
@@ -60,9 +73,10 @@ impl<'a> Inspector<'a> {
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
         );
-        let result =
+        let (result, metadata) =
             (self.transaction_callback)(&inputs.into(), location).expect("Intercepted call failed");
         info!("Intercepted call returned: {result:?}");
+        self.metadata.extend(metadata);
         let outcome = execution_result_to_call_outcome(&result, inputs);
         Some(outcome)
     }
@@ -91,6 +105,13 @@ where
     ) -> Option<CallOutcome> {
         info!("Call: {:?} -> {:?}", inputs.caller, inputs.bytecode_address);
         debug!("Input: {:?}", inputs.input);
+
+        if let Some(precompile) = precompile_by_address(&inputs.bytecode_address) {
+            debug!("Calling PRECOMPILE {:?}", precompile.tag());
+            self.metadata
+                .push(Metadata::precompile(precompile.tag(), inputs.input.len()));
+        }
+
         match inputs.bytecode_address {
             CONTRACT_ADDR => self.on_travel_call(inputs),
             _ => self.on_call(inputs),
@@ -117,18 +138,20 @@ mod test {
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
-    type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, travel_call::error::Error>
-        + Send
-        + Sync;
+    type StaticTransactionCallback =
+        dyn Fn(&Call, ExecutionLocation) -> TravelCallResult + Send + Sync;
 
     static TRANSACTION_CALLBACK: &StaticTransactionCallback = &|_, _| {
-        Ok(ExecutionResult::Success {
-            reason: SuccessReason::Return,
-            gas_used: 0,
-            gas_refunded: 0,
-            logs: vec![],
-            output: Output::Call(Bytes::from(vec![])),
-        })
+        Ok((
+            ExecutionResult::Success {
+                reason: SuccessReason::Return,
+                gas_used: 0,
+                gas_refunded: 0,
+                logs: vec![],
+                output: Output::Call(Bytes::from(vec![])),
+            },
+            Box::new([]),
+        ))
     };
 
     fn create_mock_call_inputs(to: Address, input: impl Into<Bytes>) -> CallInputs {
