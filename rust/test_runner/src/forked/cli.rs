@@ -66,6 +66,7 @@ use crate::forked::{
     summary,
     summary::TestSummaryReport,
 };
+use crate::forked::watch::WatchArgs;
 use crate::init_global::init_global;
 
 // Loads project's figment and merges the build cli arguments into it
@@ -193,9 +194,8 @@ pub struct TestArgs {
     #[command(flatten)]
     pub build: BuildOpts,
 
-    // MODIFICATION: Disable watch
-    // #[command(flatten)]
-    // pub watch: WatchArgs,
+    #[command(flatten)]
+    pub watch: WatchArgs,
 }
 
 
@@ -835,9 +835,8 @@ impl TestArgs {
     }
 
     /// Returns whether `BuildArgs` was configured with `--watch`
-    /// MODIFICATION: Disable watch
     pub fn is_watch(&self) -> bool {
-        false
+        self.watch.watch.is_some()
     }
 }
 

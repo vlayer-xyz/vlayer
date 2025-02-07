@@ -2763,10 +2763,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2f8c93eb5f77c9050c7750e14f13ef1033a40a0aac70c6371535b6763a01438c"
 dependencies = [
  "nix 0.28.0",
- "terminfo",
+ "terminfo 0.8.0",
  "thiserror 1.0.69",
- "which",
+ "which 6.0.3",
  "winapi",
+]
+
+[[package]]
+name = "clearscreen"
+version = "4.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c41dc435a7b98e4608224bbf65282309f5403719df9113621b30f8b6f74e2f4"
+dependencies = [
+ "nix 0.29.0",
+ "terminfo 0.9.0",
+ "thiserror 2.0.11",
+ "which 7.0.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -4031,6 +4044,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "env_home"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7f84e12ccf0a7ddc17a6c41c93326024c42920d7ee630d04950e6926645c0fe"
+
+[[package]]
 name = "env_logger"
 version = "0.11.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4576,7 +4595,7 @@ dependencies = [
  "clap",
  "clap_complete",
  "clap_complete_fig",
- "clearscreen",
+ "clearscreen 3.0.0",
  "comfy-table",
  "dialoguer",
  "dunce",
@@ -11276,6 +11295,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "terminfo"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4ea810f0692f9f51b382fff5893887bb4580f5fa246fde546e0b13e7fcee662"
+dependencies = [
+ "fnv",
+ "nom",
+ "phf",
+ "phf_codegen",
+]
+
+[[package]]
 name = "test-log"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11315,6 +11346,7 @@ dependencies = [
  "chain_client",
  "chrono",
  "clap",
+ "clearscreen 4.0.1",
  "color-eyre",
  "comfy-table",
  "delegate",
@@ -11353,6 +11385,9 @@ dependencies = [
  "tokio",
  "tracing",
  "verifiable_dns",
+ "watchexec",
+ "watchexec-events",
+ "watchexec-signals",
  "yansi 1.0.1",
 ]
 
@@ -12672,6 +12707,18 @@ checksum = "b4ee928febd44d98f2f459a4a79bd4d928591333a494a10a868418ac1b39cf1f"
 dependencies = [
  "either",
  "home",
+ "rustix",
+ "winsafe",
+]
+
+[[package]]
+name = "which"
+version = "7.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2774c861e1f072b3aadc02f8ba886c26ad6321567ecc294c935434cad06f1283"
+dependencies = [
+ "either",
+ "env_home",
  "rustix",
  "winsafe",
 ]
