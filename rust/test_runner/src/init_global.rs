@@ -1,7 +1,7 @@
 use eyre::Result;
-use foundry_cli::{handler, opts::GlobalOpts, utils};
+use foundry_cli::{handler, opts::GlobalArgs, utils};
 
-pub fn init_global(global: &GlobalOpts) -> Result<()> {
+pub fn init_global(global: &GlobalArgs) -> Result<()> {
     handler::install();
     utils::load_dotenv();
     utils::enable_paint();

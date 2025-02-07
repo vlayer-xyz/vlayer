@@ -49,15 +49,15 @@ lto = false # debug + LTO leads to ICE in 1.84: https://github.com/rust-lang/rus
 
 [workspace.dependencies]
 alloy-chains = "0.1.42"
-alloy-dyn-abi = "=0.8.16"
-alloy-eips = { version = "0.9.2", features = ["serde"] }
-alloy-consensus = { version = "0.9.2", features = ["serde"] }
-alloy-json-abi = "=0.8.16"
-alloy-primitives = { version = "=0.8.16", default-features = false, features = ["serde"] }
-alloy-rlp = { version = "0.3.9", default-features = false }
-alloy-rlp-derive = { version = "0.3.9", default-features = false }
-alloy-serde = "0.9.2"
-alloy-sol-types = "=0.8.16"
+alloy-dyn-abi = "=0.8.20"
+alloy-eips = { version = "0.11.0", features = ["serde"] }
+alloy-consensus = { version = "0.11.0", features = ["serde"] }
+alloy-json-abi = "=0.8.20"
+alloy-primitives = { version = "=0.8.20", default-features = false, features = ["serde"] }
+alloy-rlp = { version = "=0.3.11", default-features = false }
+alloy-rlp-derive = { version = "=0.3.11", default-features = false }
+alloy-serde = "0.11.0"
+alloy-sol-types = "=0.8.20"
 alloy-trie = "=0.7.8"
 anyhow = "1.0.91"
 as-any = "0.3.1"
@@ -93,15 +93,15 @@ ethers-providers = "2.0"
 eyre = "0.6.12"
 sha2 = "0.10.8"
 flate2 = "1.0.34"
-forge = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04", default-features = false }
-foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04", default-features = false }
-foundry-common = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
-foundry-compilers = { version = "0.12.8", default-features = false }
-foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04", default-features = false }
-foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
-foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
-foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
-foundry-test-utils = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
+forge = { git = "https://github.com/foundry-rs/foundry", rev = "1d5fa644df2dd6b141db15bed37d42f8fb7600b3", default-features = false }
+foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "1d5fa644df2dd6b141db15bed37d42f8fb7600b3", default-features = false }
+foundry-common = { git = "https://github.com/foundry-rs/foundry", rev = "1d5fa644df2dd6b141db15bed37d42f8fb7600b3" }
+foundry-compilers = { version = "0.13.2", default-features = false }
+foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "1d5fa644df2dd6b141db15bed37d42f8fb7600b3", default-features = false }
+foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "1d5fa644df2dd6b141db15bed37d42f8fb7600b3" }
+foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "1d5fa644df2dd6b141db15bed37d42f8fb7600b3" }
+foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "1d5fa644df2dd6b141db15bed37d42f8fb7600b3" }
+foundry-test-utils = { git = "https://github.com/foundry-rs/foundry", rev = "1d5fa644df2dd6b141db15bed37d42f8fb7600b3" }
 futures = { version = "0.3.31", default-features = false }
 hex = "0.4.3"
 hickory-resolver = "0.24.2"
@@ -131,7 +131,7 @@ rand = "0.8.5"
 rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
-revm = { version = "=19.0.0", default-features = false, features = ["optimism"] }
+revm = { version = "=19.4.0", default-features = false, features = ["optimism"] }
 risc0-build = { git = "https://github.com/Wiezzel/risc0.git", rev = "45465177d126f38ccb0096682de164af8520951a" }
 risc0-build-ethereum = { git = "https://github.com/Wiezzel/risc0-ethereum.git", rev = "4d3cc153a3e36ccb657edf1575986b26e9c754c6" }
 risc0-zkp = { version = "=1.2.0", default-features = false }
