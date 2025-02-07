@@ -18,6 +18,7 @@ chain_workers:
     chain_worker_max_back_propagation_blocks: 10
     chain_worker_max_head_blocks: 10
     chain_worker_confirmations: 8
+    chain_worker_risc0_dev_mode: 1
   - chain_worker_identifier: base-sepolia
     chain_worker_rpc_url: https://omniscient-flashy-frog.base-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
     chain_worker_chain_id: 84532
@@ -25,6 +26,7 @@ chain_workers:
     chain_worker_max_back_propagation_blocks: 10
     chain_worker_max_head_blocks: 10
     chain_worker_confirmations: 8
+    chain_worker_risc0_dev_mode: 1
   - chain_worker_identifier: optimism-sepolia
     chain_worker_rpc_url: https://omniscient-flashy-frog.optimism-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
     chain_worker_chain_id: 11155420
@@ -32,3 +34,4 @@ chain_workers:
     chain_worker_max_back_propagation_blocks: 10
     chain_worker_max_head_blocks: 10
     chain_worker_confirmations: 8
+    chain_worker_risc0_dev_mode: 1
