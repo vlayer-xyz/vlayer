@@ -46,6 +46,7 @@ export default defineConfig({
         url: "http://localhost:5173",
         stdout: "pipe",
         stderr: "pipe",
+        timeout: 120_000,
       },
-  timeout: 120_000,
+  timeout: 20_000,
 });
