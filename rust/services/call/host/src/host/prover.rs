@@ -11,11 +11,14 @@ pub struct Prover {
 }
 
 impl Prover {
-    pub fn new(proof_mode: ProofMode, guest_elf: impl AsRef<Bytes>) -> Self {
-        Self {
-            prover: Risc0Prover::new(proof_mode),
+    pub fn try_new(
+        proof_mode: ProofMode,
+        guest_elf: impl AsRef<Bytes>,
+    ) -> Result<Self, crate::BuilderError> {
+        Ok(Self {
+            prover: Risc0Prover::try_new(proof_mode)?,
             guest_elf: guest_elf.as_ref().clone(), // Bytes is cheap to clone
-        }
+        })
     }
 
     /// Wrapper around Risc0Prover which specifies the call guest ELF
@@ -46,7 +49,9 @@ mod tests {
 
     #[test]
     fn invalid_input() {
-        let res = Prover::new(ProofMode::Fake, &CALL_GUEST_ELF).prove(&Input::default());
+        let res = Prover::try_new(ProofMode::Fake, &CALL_GUEST_ELF)
+            .unwrap()
+            .prove(&Input::default());
 
         assert_eq!(
             res.map(|_| ()).unwrap_err().to_string(),

@@ -211,15 +211,14 @@ fn compute_start_block_number(
 }
 
 impl WithStartExecLocation {
-    #[must_use]
-    pub fn build(self, config: Config) -> Host {
+    pub fn build(self, config: Config) -> Result<Host, Error> {
         let WithStartExecLocation {
             chain_client,
             start_exec_location,
             providers,
             op_client_factory,
         } = self;
-        Host::new(providers, start_exec_location, chain_client, op_client_factory, config)
+        Host::try_new(providers, start_exec_location, chain_client, op_client_factory, config)
     }
 }
 
