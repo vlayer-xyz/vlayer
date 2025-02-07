@@ -161,7 +161,7 @@ mod test {
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
-                    msg: "buffer overrun while deserializing".into()
+                    msg: "ABI decoding failed: buffer overrun while deserializing".into()
                 })
             );
         }
@@ -240,7 +240,7 @@ mod test {
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
-                    msg: "buffer overrun while deserializing".into()
+                    msg: "ABI decoding failed: buffer overrun while deserializing".into()
                 })
             );
         }
