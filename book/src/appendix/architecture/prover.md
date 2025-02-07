@@ -29,7 +29,7 @@ Hence, all the state and storage needs to be passed via input.
 
 However, all input should be considered insecure. Therefore, validity of all the state and storage needs to be proven.
 
-> **Note:** In off-chain execution, the notion of the current block doesn't exist, hence we always access Ethereum at a specific historical block. The block number can be the latest mined block available on the network. This is different than the current block inside on-chain execution, which can access the state at the moment of execution of the given transaction.
+> **Note:** In off-chain execution, the notion of the current block doesn't exist, hence we always access Ethereum at a specific historical block. The block number doesn't have to be the latest mined block available on the network. This is different than the current block inside on-chain execution, which can access the state at the moment of execution of the given transaction.
 
 To deliver all necessary proofs, the following steps are performed:
 
