@@ -700,18 +700,9 @@ impl TestArgs {
 
             // Write gas snapshots to disk if any were collected.
             if !gas_snapshots.is_empty() {
-                // By default `gas_snapshot_check` is set to `false` in the config.
-                //
-                // The user can either:
-                // - Set `FORGE_SNAPSHOT_CHECK=true` in the environment.
-                // - Pass `--gas-snapshot-check=true` as a CLI argument.
-                // - Set `gas_snapshot_check = true` in the config.
-                //
-                // If the user passes `--gas-snapshot-check=<bool>` then it will override the config
-                // and the environment variable, disabling the check if `false` is passed.
-                //
+                // Check for differences in gas snapshots if `FORGE_SNAPSHOT_CHECK` is set.
                 // Exiting early with code 1 if differences are found.
-                if self.gas_snapshot_check.unwrap_or(config.gas_snapshot_check) {
+                if std::env::var("FORGE_SNAPSHOT_CHECK").is_ok() {
                     let differences_found = gas_snapshots.clone().into_iter().fold(
                         false,
                         |mut found, (group, snapshots)| {
