@@ -1,6 +1,5 @@
-use alloy_primitives::ChainId;
+use alloy_primitives::{BlockNumber, ChainId};
 use call_precompiles::precompile::Tag;
-use derive_new::new;
 
 use super::ExecutionLocation;
 
@@ -12,8 +11,40 @@ pub enum Metadata {
     SetBlock(ExecutionLocation),
 }
 
-#[derive(new, Debug, Copy, Clone, PartialEq, Eq)]
+impl Metadata {
+    #[must_use]
+    pub const fn precompile(tag: Tag, calldata_length: usize) -> Self {
+        Self::Precompile(Precompile::new(tag, calldata_length))
+    }
+
+    #[must_use]
+    pub const fn start_chain(chain_id: ChainId) -> Self {
+        Self::StartChain(chain_id)
+    }
+
+    #[must_use]
+    pub const fn set_chain(chain_id: ChainId, block_number: BlockNumber) -> Self {
+        Self::SetChain(ExecutionLocation::new(chain_id, block_number))
+    }
+
+    #[must_use]
+    pub const fn set_block(chain_id: ChainId, block_number: BlockNumber) -> Self {
+        Self::SetBlock(ExecutionLocation::new(chain_id, block_number))
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Precompile {
     pub tag: Tag,
     pub calldata_length: usize,
+}
+
+impl Precompile {
+    #[must_use]
+    pub const fn new(tag: Tag, calldata_length: usize) -> Self {
+        Self {
+            tag,
+            calldata_length,
+        }
+    }
 }

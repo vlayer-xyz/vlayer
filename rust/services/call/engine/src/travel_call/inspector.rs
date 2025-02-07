@@ -1,8 +1,5 @@
 use alloy_primitives::{address, Address, ChainId};
-use call_common::{
-    metadata::{self, Metadata},
-    ExecutionLocation,
-};
+use call_common::{metadata::Metadata, ExecutionLocation};
 use call_precompiles::precompile_by_address;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
@@ -40,7 +37,7 @@ impl<'a> Inspector<'a> {
             start_chain_id,
             location: None,
             transaction_callback: Box::new(transaction_callback),
-            metadata: vec![Metadata::StartChain(start_chain_id)],
+            metadata: vec![Metadata::start_chain(start_chain_id)],
         }
     }
 
@@ -57,14 +54,14 @@ impl<'a> Inspector<'a> {
         let chain_id = self.chain_id();
         info!("setBlock({block_number}). Chain id remains {chain_id}.");
         self.metadata
-            .push(Metadata::SetBlock(ExecutionLocation::new(chain_id, block_number)));
+            .push(Metadata::set_block(chain_id, block_number));
         self.location = Some((chain_id, block_number).into());
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
         info!("setChain({chain_id}, {block_number})",);
         self.metadata
-            .push(Metadata::SetChain(ExecutionLocation::new(chain_id, block_number)));
+            .push(Metadata::set_chain(chain_id, block_number));
         self.location = Some((chain_id, block_number).into());
     }
 
@@ -112,10 +109,7 @@ where
         if let Some(precompile) = precompile_by_address(&inputs.bytecode_address) {
             debug!("Calling PRECOMPILE {:?}", precompile.tag());
             self.metadata
-                .push(Metadata::Precompile(metadata::Precompile::new(
-                    precompile.tag(),
-                    inputs.input.len(),
-                )));
+                .push(Metadata::precompile(precompile.tag(), inputs.input.len()));
         }
 
         match inputs.bytecode_address {

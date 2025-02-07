@@ -924,7 +924,6 @@ dependencies = [
  "alloy-rlp",
  "anyhow",
  "call_precompiles",
- "derive-new",
  "revm",
  "serde",
 ]
