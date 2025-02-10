@@ -26,8 +26,11 @@ pub struct Error(
 pub type Result<T> = std::result::Result<T, Error>;
 
 impl Prover {
-    pub const fn new(mode: ProofMode) -> Self {
-        Prover { mode }
+    pub fn try_new(mode: ProofMode) -> Result<Self> {
+        if mode == ProofMode::Fake && !risc0_dev_mode_on() {
+            Err(anyhow::anyhow!("fake proofs require `RISC0_DEV_MODE=1`"))?
+        }
+        Ok(Self { mode })
     }
 
     pub fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
@@ -39,6 +42,16 @@ impl Prover {
         log_stats(&prove_info.stats, &elapsed);
         Ok(prove_info)
     }
+}
+
+fn risc0_dev_mode_on() -> bool {
+    matches!(
+        std::env::var("RISC0_DEV_MODE")
+            .unwrap_or_default()
+            .to_ascii_lowercase()
+            .as_str(),
+        "1" | "true" | "yes"
+    )
 }
 
 fn log_stats(stats: &SessionStats, elapsed: &Duration) {
