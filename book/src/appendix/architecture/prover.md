@@ -114,3 +114,10 @@ todo
 `EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie. The sparse tree is very similar to the standard MPT in that it includes four standard node types. However, it only keeps data necessary to execution and in place of unused nodes it uses a special node called `Digest`.	
 
 The data is serialized by host with the `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots. -->
+
+### Error handling	
+
+Error handling is done via `HostError` enum type, which is converted into http code and a human-readable string by the server.	todo
+
+
+Instead of returning a result, to handle errors, `Guest` panics. It does need to panic with a human-readable error, which should be converted on `Host` to a semantic `HostError` type. As execution on `Guest` is deterministic and should never fail after a successful preflight, the panic message should be informative for developers.
