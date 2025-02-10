@@ -8,5 +8,4 @@ mod proof;
 mod providers;
 
 pub use color_eyre::Report;
-pub use forked::cli;
-pub use forked::watch::watch_test;
+pub use forked::{cli, watch::watch_test};

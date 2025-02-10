@@ -1,6 +1,6 @@
-use test_runner::cli::TestArgs;
+use test_runner::{cli::TestArgs, watch_test};
 use tracing::info;
-use test_runner::watch_test;
+
 use crate::errors::CLIError;
 
 pub async fn run_test(cmd: Box<TestArgs>) -> Result<(), CLIError> {
