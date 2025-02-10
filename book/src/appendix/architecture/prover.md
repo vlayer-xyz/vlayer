@@ -1,7 +1,6 @@
-# Vlayer Architecture
+# Call Prover architecture
 
-
-Vlayer infrastructure enables three key functionalities: **_accessing_** different sources of verifiable data, **_aggregating_** this data in a verifiable way to obtain verifiable result and **_using the verifiable result on-chain_**.
+Vlayer enables three key functionalities: **_accessing_** different sources of verifiable data, **_aggregating_** this data in a verifiable way to obtain verifiable result and **_using the verifiable result on-chain_**.
 
 It supports accessing verifiable data from three distinct sources:: HTTP requests, emails and EVM state and storage. For each source, a proof of validity can be generated:
 - HTTP requests can be proven via *TLS Notary* by verifying TLS signatures and checking the domain is valid
