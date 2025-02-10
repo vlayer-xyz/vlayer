@@ -30,3 +30,5 @@ mod progress;
 mod summary;
 #[rustfmt::skip]
 mod test_executor;
+#[rustfmt::skip]
+pub(crate)mod watch;

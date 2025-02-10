@@ -18,6 +18,7 @@ chain = { workspace = true }
 chain_client = { workspace = true }
 chrono = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
+clearscreen = "4.0"
 color-eyre = { workspace = true }
 comfy-table = { workspace = true }
 delegate = { workspace = true }
@@ -54,6 +55,9 @@ thiserror = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 verifiable_dns = { workspace = true, features = ["signer"] }
+watchexec = "5.0"
+watchexec-events = "4.0"
+watchexec-signals = "4.0"
 yansi = { workspace = true }
 
 [dev-dependencies]
