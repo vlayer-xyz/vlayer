@@ -26,11 +26,11 @@ But how is Call Proof obtained?
 
 To obtain Call Proofs, we use **Call Prover**. Its two most important elements are **Guest** and **Host**. The Guest is responsible for executing the code inside *zkEVM* to prove its execution. The Host prepares the data required by the Guest and sends it to the Guest.
 
-These components can be found in the `rust/services/call` directory. Their structure and responsibilities are as follows:
+Their structure and responsibilities are as follows:
 
 - **Guest**: Performs execution of the code inside zkEVM. Consists of three crates:
-    - `guest` (in `guest`): Library that contains code for EVM execution and input validation.
-    - `risc0_guest` (in `guest_wrapper/risc0_guest`): Thin wrapper that uses RISC0 ZKVM I/O and delegates work to `guest`.
+    - `guest` (in `services/call/guest`): Library that contains code for EVM execution and input validation.
+    - `risc0_guest` (in `guest_wrapper/risc0_call_guest`): Thin wrapper that uses RISC0 ZKVM I/O and delegates work to `guest`.
     - `guest_wrapper` (in `guest_wrapper`): Compiles `risc0_guest` (using cargo build scripts) to a binary format (ELF) using [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target.
 - **Host** (in `host`): Runs a **_preflight_**, during which it collects all the data required by the guest. It retrieves data from online sources (RPC clients) and then triggers guest execution (which is done offline).
 
