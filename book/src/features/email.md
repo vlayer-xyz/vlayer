@@ -12,12 +12,12 @@
 </div>
 
 ## Email Significance
-Many online services, from social media platforms to e-commerce sites, require an email address to create an account. According to recent surveys, more than 80% of businesses consider email to be their primary communication channel, both internally and with customers. 
+Many online services, from social media platforms to e-commerce sites, require an email address to create an account. According to recent surveys, more than 80% of businesses consider email to be their primary communication channel, both internally and with customers.
 
 All of this means that our inboxes are full of data that can be leveraged.
 
 ## Proof of Email
-With vlayer, you can access email content from smart contracts and use it on-chain. 
+With vlayer, you can access email content from smart contracts and use it on-chain.
 
 You do this by writing a Solidity smart contract (`Prover`) that has access to the parsed email and returns data to be used on-chain. This allows you to create claims without exposing the full content of an email.
 
@@ -37,23 +37,41 @@ When creating an Email Proof, only DKIM (DomainKeys Identified Mail) signatures 
 If the email doesn't have a DKIM signature with matching signer and sender domains, it may indicate that the sender's email server is misconfigured.
 Emails from domains hosted on providers like Google Workspaces or Outlook often have a DKIM signature resembling the following:
 ```
+From: Alice <alice.xyz.com>
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=***.gappssmtp.com; s=20230601; dara=google.com;
-        h=...;
-        bh=...;
-        b=...
+   d=xyz-com.***.gappssmtp.com; s=20230601; dara=google.com;
+   h=...;
+   bh=...;
+   b=...
 ```
+Note that the `d` tag domain in this example is `gappssmtp.com`, which is a Google Workspaces domain. The `From` header domain is `xyz.com`. This email will not pass the DKIM validation and fail with the `Error verifying DKIM: signature did not verify` error.
 
-Another potential issue is the use of subdomains. 
+Another potential issue is the use of subdomains.
 For example, if the email is sent from `alice@subdomain.example.com` and the `d` tag in the DKIM signature is `example.com`, the email will not be considered valid.
 Similarly, if the email is sent from `alice@example.com` and the `d` tag is `subdomain.example.com`, the email will also be invalid.
 
 DKIM validation will fail if the email body has been modified by a proxy server. The body hash included in the DKIM signature ensures the integrity of the email’s content. Any alteration to the body will invalidate the signature.
 
-## Example
-Let's say someone wants to prove they are part of company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
+## DKIM and Verifiable DNS
 
-A better option is to prove that one can send email from it's organization domain. Below is a sample `Prover` contract that verifies from which domain an email has been sent.
+The simplified flow of the DKIM signature is:
+1. The sender server has a private and public key pair.
+2. The public key is published as in DNS as a TXT record under `selector._domainkey.domain.com` where:
+   - `selector` is a unique identifier under `s=` tag in the DKIM-Signature header
+   - `_domainkey` is a fixed string
+   - `domain.com` is the sender's domain, stored in the `d=` tag in the DKIM-Signature header
+3. The email server adds a DKIM-Signature header to the email and sends it.
+4. The recipient server fetches the public key from DNS and verifies the signature.
+
+The last step becomes tricky: we don't have the access to DNS from the Solidity level.
+Instead, we'll have to prove that the DNS record is indeed valid and pass it together with the email to the prover contract.
+
+The `VDNS` (aka. Verifiable DNS) service exists for this reason: it uses the [DNS Queries over HTTPS (DoH)](https://datatracker.ietf.org/doc/html/rfc8484) protocol to fetch DNS records from several providers, signs them if they are valid and secure, and returns the signature together with the record.
+
+## Example
+Let's say someone wants to prove they are part of a company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain.
+
+A better option is to prove that one can send email from their organization domain. Below is a sample `Prover` contract that verifies from which domain an email has been sent.
 
 Below is an example of such proof generation:
 
@@ -91,7 +109,7 @@ It can be convenient to use [Regular Expressions](/features/json-and-regex.md) t
 Email is passed to the Solidity contract as an `UnverifiedEmail` structure that can be created using the `preverifyEmail` function in the [SDK](../javascript/javascript.md).
 `preverifyEmail` should be called with the raw `.eml` file content as an argument ([learn how to get this file](/features/email.html#getting-eml-files)). The email is also required to have [`From` and `DKIM-Signature`](https://datatracker.ietf.org/doc/html/rfc6376) headers.
 
-You can also use `preverifyEmail` function inside the [Solidity tests](../advanced/tests.md)
+You can also use the `preverifyEmail` function inside the [Solidity tests](../advanced/tests.md).
 
 ```solidity
 struct UnverifiedEmail {
@@ -100,23 +118,23 @@ struct UnverifiedEmail {
 }
 ```
 
-First, we verify the integrity of the email with the `verify()` function. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
+First, we verify the integrity of the email with the `verify()` function. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details.
 
-> If one of the string comparisons fails, require will revert the execution, and as a result, proof generation will fail.
+> If one of the string comparisons fails, `require` will revert the execution, and as a result, proof generation will fail.
 
 > 💡 **Try it Now**
-> 
+>
 > To run the above example on your computer, type the following command in your terminal:
-> 
+>
 > ```bash
 > vlayer init --template simple-email-proof
 > ```
-> 
-> This command will download create and initialise a new project with sample email proof contracts.
+>
+> This command will download, create, and initialize a new project with sample email proof contracts.
 
 ## Email structure
 The `email` structure of type `VerifiedEmail` is a result of the `UnverifiedEmail.verify()` function.
-Since the `verify` function actually verifies the passed email, `VerifiedEmail`'s fields can be trusted from this point.    
+Since the `verify` function actually verifies the passed email, `VerifiedEmail`'s fields can be trusted from this point.
 
 ```solidity
 struct VerifiedEmail {
@@ -126,7 +144,7 @@ struct VerifiedEmail {
   string body;
 }
 ```
-An `VerifiedEmail` consists of the following fields:
+A `VerifiedEmail` consists of the following fields:
 - `from` - a string consisting of the sender's email address (*no name is available*);
 - `to` - a string consisting of the intended recipient's email address (*no name is available*);
 - `subject` - a string with the subject of the email;
@@ -135,7 +153,7 @@ An `VerifiedEmail` consists of the following fields:
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
 ## Getting `.eml` Files
-Obtaining an `.eml` file can be helpful for development purposes, such as testing own email proofs. Below are instructions for retrieving `.eml` files from common email clients.
+Obtaining an `.eml` file can be helpful for development purposes, such as testing your own email proofs. Below are instructions for retrieving `.eml` files from common email clients.
 
 ### Gmail
 1. Open the email you want to save.
@@ -153,7 +171,7 @@ Obtaining an `.eml` file can be helpful for development purposes, such as testin
 Billions of users trust providers to deliver and store their emails. Inboxes often contain critical information, including work-related data, personal files, password recovery links, and more. Email providers also access customer emails for purposes like serving ads. Email proofs can only be as secure as the email itself, and the protocol relies on the trustworthiness of both sending and receiving servers.
 
 ### Outgoing Server
-The vlayer prover verifies that the message signature matches the public key listed in the DNS records. However, a dishonest outgoing server can forge emails and deceive the prover into generating valid proofs for them. To mitigate this risk, vlayers support only a limited number of the world's most trusted email providers.
+The vlayer prover verifies that the message signature matches the public key listed in the DNS records. However, a dishonest outgoing server can forge emails and deceive the prover into generating valid proofs for them. To mitigate this risk, vlayer supports only a limited number of the world's most trusted email providers.
 
 ### Preventing Unauthorized Actions
 Both outgoing and incoming servers can read emails and use them to create proofs without the permission of the actual mail sender or receiver. This risk also extends to the prover, which accesses the email to generate claims. It is crucial for protocols to utilize email proofs in a manner that prevents the manipulation of smart contracts into performing unauthorized actions, such as sending funds to unintended recipients.
