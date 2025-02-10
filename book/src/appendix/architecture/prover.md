@@ -81,7 +81,31 @@ We have **Host** and **Guest** databases
 
 todo
 
+<!-- ```mermaid	
+%%{init: {'theme':'dark'}}%%	
+classDiagram	
+class EvmEnv {	
+    db: D	
+    cfg_env: CfgEnvWithHandlerCfg	
+    header: dyn EvmBlockHeader	
+}	
+class EvmBlockHeader {	
+    parent_hash(&self) B256	
+    number(&self) BlockNumber	
+    timestamp(&self) u64	
+    state_root(&self) &B256	
+    fill_block_env(&self, blk_env: &mut BlockEnv)	
+}	
+<<Trait>> EvmBlockHeader	
+```	
+
+The block header type varies between sidechains and L2s. `EvmBlockHeader` trait allows us to access header data in a homogenous way and use dynamic dispatch.	
+
+`cgf_env` is revm type that contains EVM configuration (chain_id, hard fork). -->
+
 ### Lifecycle	
+
+The environment in which the execution will take place is stored in the generic type `EvmEnv<D>`, where `D` is a database type.	
 
 todo
 
