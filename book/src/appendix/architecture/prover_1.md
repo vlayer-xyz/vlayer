@@ -1,16 +1,14 @@
 # Vlayer Architecture
 
 
-Vlayer infrastructure allows you to do three things: **_access_** different sources of verifiable data, **_aggregate_** this data in a verifiable way to obtain verifiable result and **_use the verifiable result on-chain_**.
+Vlayer infrastructure enables three key functionalities: **_accessing_** different sources of verifiable data, **_aggregating_** this data in a verifiable way to obtain verifiable result and **_using the verifiable result on-chain_**.
 
-Vlayer enables you to **access** data from three possible origins: HTTP requests, emails and EVM state and storage. For each origin we can produce proof of validity for the obtained data:
+It supports accessing verifiable data from three distinct sources:: HTTP requests, emails and EVM state and storage. For each source, a proof of validity can be generated:
 - HTTP requests can be proven via *TLS Notary* by verifying TLS signatures and checking the domain is valid
 - Email contents can be proven by verifying DKIM signatures and checking the sender domain
 - EVM state and storage proofs can be verified against the block hash via Merkle Proofs
 
-Before Vlayer, ZK programs were application-specific and proved a single source of data. Vlayer allows you to write a Solidity smart contract (called **Prover**) that acts as a glue between all three possible data sources and enables you to **aggregate** this data in a verifiable way.
-
-We not only prove that the data we use is valid, but we can also process it and prove it was processed correctly by the **Prover**.
+Before Vlayer, ZK programs were application-specific and proved a single source of data. Vlayer allows you to write a Solidity smart contract (called **Prover**) that acts as a glue between all three possible data sources and enables you to **aggregate** this data in a verifiable way. We not only prove that the data we use is valid, but we can also process it and prove it was processed correctly by the **Prover**.
 
 ### Aggregation examples
 
@@ -61,22 +59,137 @@ To deliver all necessary proofs, the following steps are performed:
 
 Since that Solidity execution is deterministic, database in the guest has exactly the data it requires.
 
-<!-- Besides host and guest, there are also several other crates in the `rust/services/call` directory:
+![Schema](/images/architecture/prover.png)
 
-- **engine**: EVM Call execution shared by Guest and Host, used in both Host's preflight and Guest's zk proving;
-- **optimism**: Communication with optimism sequencer to obtain data needed for teleport onto optimistic chain;
-- **precompiles**: Vlayer precompiles that extend the EVM capabilities with Email and Web Proof utils;
-- **seal**: Utils for encoding Risc0 receipt into a Seal. Seal can be read and verified by the Verifier smart contract;
-- **server**: Server routines accepting vlayer JSON RPC calls.
+### Databases
+
+`revm` requires us to provide a DB which implements `DatabaseRef` trait (i.e. can be asked about accounts, storage, block hashes).
+
+It's a common pattern to compose databases to orthogonalize the implementation.
+
+We have **Host** and **Guest** databases
+
+- **Host** - runs `CacheDB<ProofDb<ProviderDb>>`:
+    * `ProviderDb`- queries Ethereum RPC Provider (i.e. Alchemy, Infura, Anvil);
+    * `ProofDb` - records all queries aggregates them and collects EIP1186 (`eth_getProof`) proofs;
+    * `CacheDB` - stores trusted seed data to minimize the amount of RPC requests. We seed caller account and some Optimism system accounts.
+- **Guest** - runs `CacheDB<WrapStateDb<StateDb>>`:
+    * `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs;
+    * `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries;
+    * `CacheDB` - has the same seed data as it's Host version.
 
 
+#### DatabaseRef trait
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
 
-* Server returning a proof
-* It verifies all the data and speaks with the source of verified data (chain client providing it with chain proofs)
-* How does it obtain the data?:
-1. rpc clients - unverified, has to be verified
-1.1. normal rpc clients
-1.2. optimism rpc clients
-2. chain proof client
-* how does it verify blockchain data? -->
+class AccountInfo {
+    balance: U256
+    nonce: u64
+    code_hash: B256
+    code: Bytecode?
+}
 
+class DatabaseRef {
+    basic(address) AccountInfo?
+    code_by_hash(code_hash) Bytecode?
+    storage(address, index) U256?
+    block_hash(number) B256?
+}
+<<Trait>> DatabaseRef
+
+DatabaseRef..AccountInfo
+```
+
+#### Host
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class DatabaseRef
+<<Trait>> DatabaseRef
+
+class ProviderDb {
+    provider
+}
+
+class ProofDb {
+    accounts: HashMap
+    contracts: HashMap
+    block_hash_numbers: HashSet
+    providerDb
+}
+
+DatabaseRef <|-- ProviderDb
+DatabaseRef <|-- ProofDb
+DatabaseRef <|-- CacheDB
+ProviderDb *-- Provider
+ProofDb *-- ProviderDb
+CacheDB *-- ProofDb
+```
+
+#### Guest
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class StateAccount {
+    balance: U256
+    nonce: TxNumber
+    code_hash: B256
+    storage_root: B256
+}
+
+class DatabaseRef
+<<Trait>> DatabaseRef
+
+class StateDb {
+    state_trie: MerkleTrie
+    storage_tries: HashMap
+    contracts: HashMap
+    block_hashes: HashMap
+    account(address: Address) StateAccount?
+    code_by_hash(hash: B256) Bytes?
+    block_hash(number: U256) B256
+    storage_trie(root: &B256) MerkleTrie?
+}
+
+class WrapStateDb {
+    stateDb
+}
+
+DatabaseRef <|-- WrapStateDb
+DatabaseRef <|-- CacheDB
+CacheDB *-- WrapStateDb
+WrapStateDb *-- StateDb
+StateDb..StateAccount
+```
+
+### Environments
+
+The environment in which the execution will take place is stored in the generic type `EvmEnv<D>`, where `D` is a database type.
+
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class EvmEnv {
+    db: D
+    cfg_env: CfgEnvWithHandlerCfg
+    header: dyn EvmBlockHeader
+}
+
+class EvmBlockHeader {
+    parent_hash(&self) B256
+    number(&self) BlockNumber
+    timestamp(&self) u64
+    state_root(&self) &B256
+    fill_block_env(&self, blk_env: &mut BlockEnv)
+}
+<<Trait>> EvmBlockHeader
+```
+
+The block header type varies between sidechains and L2s. `EvmBlockHeader` trait allows us to access header data in a homogenous way and use dynamic dispatch.
+
+`cgf_env` is revm type that contains EVM configuration (chain_id, hard fork).
