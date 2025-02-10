@@ -73,7 +73,7 @@ rust/mpt/src/node/constructors.rs @marekkirejczyk
 rust/mpt/src/node/insert/entry.rs @marekkirejczyk
 rust/mpt/src/node/insert/from_two_entries.rs @marekkirejczyk
 rust/mpt/src/node/insert/insert_entry_into_branch.rs @marekkirejczyk
-rust/mpt/src/node/insert/insert_entry_into_extension/ @marekkirejczykfrom_extension_and_entry_empty_common_prefix.rs @marekkirejczyk
+rust/mpt/src/node/insert/insert_entry_into_extension/from_extension_and_entry_empty_common_prefix.rs @marekkirejczyk
 rust/mpt/src/node/insert/insert_entry_into_extension.rs @marekkirejczyk
 rust/mpt/src/node/insert/utils.rs @marekkirejczyk
 rust/mpt/src/node/insert.rs @marekkirejczyk
