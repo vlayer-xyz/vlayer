@@ -41,5 +41,6 @@
     - [Solidity](./appendix/architecture/solidity.md)
     - [Releasing](./appendix/architecture/releasing.md)
     - [Web Proofs](./appendix/architecture/web_proof.md)
+    - [Email Proofs](./appendix/architecture/email_proof.md)
   - [JSON-RPC API](./appendix/api.md)
   - [Proof composition](./appendix/proof_composition.md)
