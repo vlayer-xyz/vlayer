@@ -4,7 +4,7 @@ On the high level, vlayer runs zkEVM that produces a proof of proper execution o
 
 Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with two main components that can be found in `rust/services/call` directory:
 
-- **Host** - (in `host`) - runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
+- **Host** - (in `host`) - runs a preflight, during which it collects all the data required by the guest. It retrieves data from online sources (RPC clients) and then triggers guest proving (which is done offline).
 - **Guest** - performs execution of the code inside zkEVM. Consists of three crates:
     * guest - (in `guest`) - Library that contains code for EVM execution and input validation
     * risc0_guest - (in `guest_wrapper/risc0_guest`) - Thin wrapper that uses RISC Zero ZKVM IO and delegates work to `guest`
@@ -12,6 +12,7 @@ Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0
 
 there are several other crates in the `rust/services/call` directory:
 - **engine**: EVM Call execution shared by Guest and Host, used in both Host's preflight and Guest's zk proving;
+- **optimism**: Communication with optimism sequencer to obtain data needed for teleport onto optimistic chain;
 - **precompiles**: Vlayer precompiles that extend the EVM capabilities with Email and Web Proof utils;
 - **seal**: Utils for encoding Risc0 receipt into a Seal. Seal can be read and verified by the Verifier smart contract;
 - **server**: Server routines accepting vlayer JSON RPC calls.
@@ -28,7 +29,7 @@ Hence, all the state and storage needs to be passed via input.
 
 However, all input should be considered insecure. Therefore, validity of all the state and storage needs to be proven.
 
-> **Note:** In off-chain execution, the notion of the current block doesn't exist, hence we always access Ethereum at a specific historical block. The block number can be the latest mined block available on the network. This is different than the current block inside on-chain execution, which can access the state at the moment of execution of the given transaction.
+> **Note:** In off-chain execution, the notion of the current block doesn't exist, hence we always access Ethereum at a specific historical block. The block number doesn't have to be the latest mined block available on the network. This is different than the current block inside on-chain execution, which can access the state at the moment of execution of the given transaction.
 
 To deliver all necessary proofs, the following steps are performed:
 
