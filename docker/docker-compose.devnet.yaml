@@ -11,6 +11,7 @@ services:
     container_name: vlayer-call-server
     pull_policy: always
     environment:
+      RISC0_DEV_MODE: 1
       RUST_LOG: "info,call_engine=debug"
     command: "--proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-l1:8545 --rpc-url 31338:http://anvil-l2-op:8545"
     ports:

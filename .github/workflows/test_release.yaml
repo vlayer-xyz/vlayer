@@ -26,11 +26,6 @@ jobs:
           submodules: recursive
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - uses: hoverkraft-tech/compose-action@v2.0.2
-        with:
-          compose-file: docker/docker-compose.devnet.yaml
-          services: |
-            vlayer-call-server
       - name: Test local prover
         run: bash/test-release-local-prover.sh
   test-release-sepolia:
