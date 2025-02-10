@@ -43,9 +43,12 @@ jobs:
         working-directory: ./contracts/vlayer
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          RISC0_DEV_MODE: 1
         run: |
           # vlayer test
           cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
 
       - name: Run vlayer tests for examples
+        env:
+          RISC0_DEV_MODE: 1
         run: bash/vlayer-test-examples.sh
