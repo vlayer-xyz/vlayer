@@ -81,12 +81,6 @@ fn prove_bonsai(
 }
 
 fn prove_fake(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<(ProveInfo, Duration)> {
-    // Fake proof mode cannot be forced in any other way, since all risc0-zkvm modules, that could be reused here, are only crate-public.
-    // Following is a temporary solution, that sets RISC0_DEV_MODE always to the same value, so race conditions are not a risk here.
-    // Setting this env variable will be moved directly to ExternalProver, once it supports injection of config.
-    unsafe {
-        std::env::set_var("RISC0_DEV_MODE", "1");
-    }
     let start = tokio::time::Instant::now();
     let prove_info = ExternalProver::new("vlayer: ipc", "r0vm").prove(env, elf)?;
     Ok((prove_info, start.elapsed()))
