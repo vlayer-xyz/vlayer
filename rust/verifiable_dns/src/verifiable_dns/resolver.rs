@@ -90,7 +90,7 @@ impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resol
         let mut response = Response {
             status: 0,
             question: vec![query.clone()],
-            answer: keep_only_txt_records(provider_response.answer),
+            answer: keep_only_txt_and_cname_records(provider_response.answer),
             comment: provider_response.comment,
             ..Response::with_flags(false, true, true, false, false)
         };
@@ -108,10 +108,10 @@ impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resol
     }
 }
 
-fn keep_only_txt_records(records: Option<Vec<Record>>) -> Option<Vec<DNSRecord>> {
+fn keep_only_txt_and_cname_records(records: Option<Vec<Record>>) -> Option<Vec<DNSRecord>> {
     records.map(|r| {
         r.into_iter()
-            .filter(|r| r.record_type == RecordType::TXT)
+            .filter(|r| r.record_type != RecordType::OTHER)
             .collect()
     })
 }
@@ -217,19 +217,29 @@ mod tests {
             #[tokio::test]
             async fn passes_when_one_of_providers_has_additional_dns_records() {
                 let mut responses = [response(), response(), response()];
-                responses[0].answer.as_mut().unwrap().push(DNSRecord {
-                    name: "vlayer.xyz".into(),
-                    record_type: RecordType::OTHER,
-                    data: "some data".into(),
-                    ttl: 300,
-                });
+                responses[0].answer.as_mut().unwrap().extend_from_slice(&[
+                    DNSRecord {
+                        name: "vlayer.xyz".into(),
+                        record_type: RecordType::OTHER,
+                        data: "some data".into(),
+                        ttl: 300,
+                    },
+                    DNSRecord {
+                        name: "vlayer.xyz".into(),
+                        record_type: RecordType::CNAME,
+                        data: "some data".into(),
+                        ttl: 300,
+                    },
+                ]);
                 type R = Resolver<MockClock<64>, MockProvider, 3>;
                 let resolver = R::new(responses.map(MockProvider::new));
 
                 let query = "google._domainkey.vlayer.xyz".into();
                 let result = resolver.resolve(&query).await.unwrap();
-                assert_eq!(result.answer.clone().unwrap().len(), 1);
-                assert_eq!(result.answer.unwrap()[0].record_type, RecordType::TXT);
+                let answer = result.answer.unwrap();
+                assert_eq!(answer.len(), 2);
+                assert_eq!(answer[0].record_type, RecordType::TXT);
+                assert_eq!(answer[1].record_type, RecordType::CNAME);
             }
 
             #[tokio::test]
