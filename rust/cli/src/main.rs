@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use commands::{args::InitArgs, init::run_init};
+use commands::init::{run_init, Args as InitArgs};
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
 use tracing::error;
 use tracing_subscriber::EnvFilter;
