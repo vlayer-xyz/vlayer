@@ -137,6 +137,64 @@ struct CallAssumptions {
 
 > Note that `Proof`, `Seal` and `CallAssumptions` structures are generated based on Solidity code from  with `sol!` macro.
 
+### Feature-specific
+
+### Libraries
+
+```solidity
+library EmailProofLib {
+    function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory);
+}
+
+library WebProofLib {
+    function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory);
+    function recover(WebProof memory webProof) internal view returns (Web memory);
+}
+```
+
+<div class="warning">
+Note that `EmailProofLib.verify()` and `WebProofLib.verify()` functions are intended to be called during the proving process, unlike the `Verifier.verify()`  
+</div>
+
+### Structures
+
+#### Unverified Email
+
+The `UnverifiedEmail` is passed into the `EmailProofLib.verify()` function. It returns the `VerifiedEmail` struct, described below.
+
+```solidity
+struct UnverifiedEmail {
+    string email; // Raw MIME-encoded email
+    DnsRecord dnsRecord;
+    VerificationData verificationData;
+}
+
+// Describes DNS record, according to DoH spec
+struct DnsRecord {
+    string name;
+    uint8 recordType;
+    string data;
+    uint64 ttl;
+}
+
+// Signature data of the DNS record
+struct VerificationData {
+    uint64 validUntil; // Signature expiration date
+    bytes signature; // Signed hash of the serialized DNS record
+    bytes pubKey; // Public key used for signature
+}
+```
+
+#### Verified Email
+
+```solidity
+struct VerifiedEmail {
+    string from; // Sender email address
+    string to; // Recipient email address
+    string subject; // Email subject
+    string body; // Email body
+}
+```
 
 ## Two Proving Modes
 
