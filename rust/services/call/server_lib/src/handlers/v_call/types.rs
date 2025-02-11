@@ -107,7 +107,7 @@ impl From<(&ExecutionLocation, &EngineCall)> for CallHash {
     }
 }
 
-#[derive(new, RlpEncodable)]
+#[derive(new, RlpEncodable, Debug)]
 pub struct CallHashData<'a> {
     execution_location: &'a ExecutionLocation,
     call: &'a EngineCall,
