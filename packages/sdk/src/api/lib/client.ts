@@ -176,7 +176,9 @@ export const createVlayerClient = (
         token,
         args: [
           {
-            webProofJson: JSON.stringify(webProof),
+            webProofJson: JSON.stringify({
+              presentationJson: webProof.presentationJson,
+            }),
           },
           ...commitmentArgs,
         ] as ContractFunctionArgs<
