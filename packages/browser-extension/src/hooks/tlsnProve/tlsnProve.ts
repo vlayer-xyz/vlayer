@@ -45,7 +45,7 @@ export async function tlsnProve(
   },
   redactionConfig: RedactionConfig,
 ): Promise<{
-  presentationJSON: PresentationJSON;
+  presentationJson: PresentationJSON;
   decodedTranscript: {
     sent: string;
     recv: string;
@@ -94,7 +94,7 @@ export async function tlsnProve(
     reveal: commit,
   });
 
-  const presentationJSON = await presentation.json();
+  const presentationJson = await presentation.json();
   const decodedProof = await presentation.verify();
   console.log("Decoded proof", decodedProof);
 
@@ -104,7 +104,7 @@ export async function tlsnProve(
   });
   console.log("Decoded transcript", decodedTranscript);
   return {
-    presentationJSON,
+    presentationJson,
     decodedTranscript: {
       sent: decodedTranscript.sent(),
       recv: decodedTranscript.recv(),
