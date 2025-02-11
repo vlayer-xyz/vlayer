@@ -1,17 +1,6 @@
-# Teleport and time-travel
+# Time Travel and Teleport
 
-To support execution on multiple blocks and multiple chains, we span multiple revms' instances during Engine execution.
-
-## Generic parameter DB
-Note that Engine is parametrized with generic type DB, as it needs to run in revm with different Database in two different contexts: Guest and Host.
-
-```rust
-struct Engine<DB: DatabaseRef> {
-  ...
-}
-```
-
-This parametrization will bubble to several related traits and structs: `EvmEnv`, `EnvFactory`, `HostEnvFactory`, `GuestEnvFactory`.
+Vlayer enables aggregating data from multiple blocks and multiple chains. We call this features Time Travel and Teleport. To achieve that, we span multiple revms' instances during Engine execution. Each revm instance corresponds to certain block number on the certain chain.
 
 ## EvmEnv
 `EvmEnv` represents a configuration required to create a revm instance. Depending on the context, it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
@@ -29,8 +18,8 @@ pub struct EvmEnv<DB> {
 ```
 
 ## EvmEnvFactory
-
-`EnvFactory` is a type, responsible for creation of `EvmEnv` and, in consequence, revm instances. There are two variants of `EnvFactory`:
+<!-- still needs corrections -->
+`EvmEnvFactory` is a type, responsible for creation of `EvmEnv` and, in consequence, revm instances. There are two variants of `EnvFactory`:
 - `HostEnvFactory` creates `Databases` and `Headers` dynamically, utilizing Providers created from `MultiProvider`, by fetching data from Ethereum Nodes. Then, the data is serialized to be sent to Guest.
 - `GuestEnvFactory` provides all required data returned from a cached copy deserialized at the beginning of Guest execution.
 

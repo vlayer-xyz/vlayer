@@ -1,30 +1,30 @@
 # Proving Coherence
 
-## Naive Block Proof Cache
+## Naive Chain Proof Cache
 
 We need a way to prove that a set of hashes belongs to the same chain. A naive way to do this is to hash all of the subsequent blocks, from the oldest to the most recent, and then verify that each block hash is equal to the **parentHash** value of the following block. If all the hashes from our set appear along the way, then they all belong to the same chain.
 
 See the diagram below for a visual representation.
 
-![Naive chain proof](/images/architecture/block_proof/naive_chain_proof.png)
+![Naive chain proof](/images/architecture/chain_proof/naive_chain_proof.png)
 
-Unfortunately, this is a slow process, especially if the blocks are far apart on the time scale. Fortunately, with the help of Block Proof Cache, this process can be sped up to logarithmic time.
+Unfortunately, this is a slow process, especially if the blocks are far apart on the time scale. Fortunately, with the help of Chain Proof Cache, this process can be sped up to logarithmic time.
 
-## Block Proof Cache
+## Chain Proof Cache
 
-The Block Proof Cache service maintains two things:
-- a Block Proof Cache structure (a Merkle Patricia Trie) that stores block hashes,
+The Chain Proof Cache service maintains two things:
+- a Chain Proof Cache structure (a Merkle Patricia Trie) that stores block hashes,
 - a zk-proof 𝜋 that all these hashes belong to the same chain.
 
 Given these two elements, it is easy to prove that a set of hashes belongs to the same chain.
-1. It needs to be verified that all the hashes are part of the Block Proof Cache structure.
+1. It needs to be verified that all the hashes are part of the Chain Proof Cache structure.
 2. 𝜋 needs to be verified.
 
-### Block Proof Cache (BPC) structure
+### Chain Proof Cache (BPC) structure
 
-The Block Proof Cache structure is a dictionary that stores a `<block_number, block_hash>` mapping. It is implemented using a Merkle Patricia Trie. This enables us to prove that a set of hashes is part of the structure (point 1 from the previous paragraph) by supplying their corresponding Merkle proofs.
+The Chain Proof Cache structure is a dictionary that stores a `<block_number, block_hash>` mapping. It is implemented using a Merkle Patricia Trie. This enables us to prove that a set of hashes is part of the structure (point 1 from the previous paragraph) by supplying their corresponding Merkle proofs.
 
-![Chain proof elements](/images/architecture/block_proof/chain_proof.png)
+![Chain proof elements](/images/architecture/chain_proof/chain_proof.png)
 
 #### Adding hashes to the BPC structure and maintaining 𝜋
 
@@ -57,7 +57,7 @@ Guest code exposes two functions:
 
 #### Initialize
 
-The `initialize()` function is used to create Block Proof Cache structure as a Merkle Patricia Trie (MPT) and insert the initial block hash into it. It takes the following arguments:
+The `initialize()` function is used to create Chain Proof Cache structure as a Merkle Patricia Trie (MPT) and insert the initial block hash into it. It takes the following arguments:
 
 - **elf_id**: a hash of the guest binary.
 - **block**: the block header of the block to be added.
@@ -157,7 +157,7 @@ fn append_prepend(
 
 ### Prove Chain server
 
-Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_getChainProof(chain_id: number, block_numbers: number[])`. 
+Chain Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_getChainProof(chain_id: number, block_numbers: number[])`. 
 
 
 [Detailed JSON-RPC API docs](../../api.md)

@@ -14,13 +14,13 @@ Before Vlayer, ZK programs were application-specific and proved a single source 
 - **Prover** computing average *ERC20* balance of addresses
 - **Prover** returning *true* if someone starred a *GitHub Org* by verifying a Web Proof
 
-> **_Note_** Despite being named "Prover", the **Prover** contract does not compute the proof itself. Instead, it is executed inside the *zkEVM*, which produces the proof of the correctness of its execution.
+> **_Note:_** Despite being named "Prover", the **Prover** contract does not compute the proof itself. Instead, it is executed inside the *zkEVM*, which produces the proof of the correctness of its execution.
 
 **_Call Proof_** is a proof that we correctly executed the **Prover** smart contract and got the given result.
 
 It can be later verified by a deployed **Verifier** contract to **use the verifiable result on-chain**.
 
-But how is Call Proof obtained?
+But how are Call Proofs obtained?
 
 ## Call Prover
 
@@ -54,7 +54,8 @@ To deliver all necessary proofs, the following steps are performed:
 1. In preflight, we execute Solidity code on the host. Each time the database is called, the value is fetched via Ethereum JSON RPC and the proof is stored in it. This database is called `ProofDb`
 2. Serialized content of `ProofDb` is passed via stdin to the `guest`
 3. `guest` deserializes content into a `StateDb`
-4. Solidity code is executed inside `revm` using `StateDb`
+4. Validity of the data gathered during the preflight is verified in `guest`
+5. Solidity code is executed inside revm using `StateDb`
 
 Since that Solidity execution is deterministic, database in the guest has exactly the data it requires.
 
@@ -62,7 +63,7 @@ Since that Solidity execution is deterministic, database in the guest has exactl
 
 ### Databases
 
-`revm` requires us to provide a DB which implements `DatabaseRef` trait (i.e. can be asked about accounts, storage, block hashes).
+revm requires us to provide a DB which implements `DatabaseRef` trait (i.e. can be asked about accounts, storage, block hashes).
 
 It's a common pattern to compose databases to orthogonalize the implementation.
 
@@ -73,51 +74,61 @@ We have **Host** and **Guest** databases
     * `ProofDb` - records all queries aggregates them and collects EIP1186 (`eth_getProof`) proofs;
     * `CacheDB` - stores trusted seed data to minimize the amount of RPC requests. We seed caller account and some Optimism system accounts.
 - **Guest** - runs `CacheDB<WrapStateDb<StateDb>>`:
-    * `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs;
+    * `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as [sparse Merkle Patricia Tries](https://github.com/vlayer-xyz/vlayer/tree/main/rust/mpt), hence access to accounts and storage serves as verification of state and storage proofs;
     * `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries;
     * `CacheDB` - has the same seed data as it's Host version.
 
-### Environments	
+### EvmEnv and EvmInput
 
-todo
+Vlayer enables aggregating data from multiple blocks and multiple chains. We call these features **Time Travel** and **Teleport**. To achieve that, we span multiple revm instances during Engine execution. Each revm instance corresponds to a certain block number on a certain chain.
 
-<!-- ```mermaid	
-%%{init: {'theme':'dark'}}%%	
-classDiagram	
-class EvmEnv {	
-    db: D	
-    cfg_env: CfgEnvWithHandlerCfg	
-    header: dyn EvmBlockHeader	
-}	
-class EvmBlockHeader {	
-    parent_hash(&self) B256	
-    number(&self) BlockNumber	
-    timestamp(&self) u64	
-    state_root(&self) &B256	
-    fill_block_env(&self, blk_env: &mut BlockEnv)	
-}	
-<<Trait>> EvmBlockHeader	
-```	
+`EvmEnv` struct represents a configuration required to create a revm instance. Depending on the context, it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
 
-The block header type varies between sidechains and L2s. `EvmBlockHeader` trait allows us to access header data in a homogenous way and use dynamic dispatch.	
+It is also implicitly parameterized via dynamic dispatch by the `Header` type, which may differ for various hard forks or networks.
 
-`cgf_env` is revm type that contains EVM configuration (chain_id, hard fork). -->
+```rust
+pub struct EvmEnv<DB> {
+    pub db: DB,
+    pub header: Box<dyn EvmBlockHeader>,
+    ...
+}
+```
 
-### Lifecycle	
+The serializable input we pass between host and guest is called `EvmInput`. `EvmEnv` can be obtained from it.
 
-The environment in which the execution will take place is stored in the generic type `EvmEnv<D>`, where `D` is a database type.	
+```rust
+pub struct EvmInput {
+    pub header: Box<dyn EvmBlockHeader>,
+    pub state_trie: MerkleTrie,
+    pub storage_tries: Vec<MerkleTrie>,
+    pub contracts: Vec<Bytes>,
+    pub ancestors: Vec<Box<dyn EvmBlockHeader>>,
+}
+```
 
-todo
+Because we may have multiple blocks and chains, we also have structs `MultiEvmInput` and `MultiEvmEnv`, mapping `ExecutionLocation`s to `EvmInput`s or `EvmEnv`s equivalently.
 
-<!-- The environment is created in the Host and converted into `EvmInput` and serialized. The data is then sent over standard input to the guest and deserialized in the guest.	
+```rust
+pub struct ExecutionLocation {
+    pub chain_id: ChainId,
+    pub block_tag: BlockTag,
+}
+```
 
-`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie. The sparse tree is very similar to the standard MPT in that it includes four standard node types. However, it only keeps data necessary to execution and in place of unused nodes it uses a special node called `Digest`.	
+### Verifying data
 
-The data is serialized by host with the `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots. -->
+Guest is required to verify all data provided by the Host. Initial validation of its coherence is done in two places:
+
+* [`multi_evm_input.assert_coherency`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/input.rs#L46) verifies:
+  * Equality of subsequent `ancestor` block hashes
+  * Equality of `header.state_root` and actual `state_root`
+
+* When we create `StateDb` in Guest with [`StateDb::new`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/state.rs#L51), we compute hashes for `storage_tries` roots and `contracts` code. When we later try to access storage (using the [`WrapStateDb::basic_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L39) function) or contract code (using the [`WrapStateDb::code_by_hash_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L70) function), we know this data is valid because the hashes were computed properly. If they weren't, we wouldn't be able to access the given storage or code. Thus, storage verification is done indirectly.
+
+Above verifications are not enough to ensure validity of Time Travel (achieved by [Chain Proofs](./chain_proof.md)) and Teleport.
 
 ### Error handling	
 
-Error handling is done via `HostError` enum type, which is converted into http code and a human-readable string by the server.	todo
-
+Error handling is done via `HostError` enum type, which is converted into http code and a human-readable string by the server.
 
 Instead of returning a result, to handle errors, `Guest` panics. It does need to panic with a human-readable error, which should be converted on `Host` to a semantic `HostError` type. As execution on `Guest` is deterministic and should never fail after a successful preflight, the panic message should be informative for developers.
