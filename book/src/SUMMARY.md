@@ -34,7 +34,7 @@
     - [Extension](./appendix/contributing/extension.md)
   - [Architecture](./appendix/architecture/overview.md)
     - [Prover](./appendix/architecture/prover.md)
-    - [Teleport & Time Travel](./appendix/architecture/teleport_time_travel.md)
+    - [Time Travel & Teleport](./appendix/architecture/time_travel_teleport.md)
     - [Block proofs](./appendix/architecture/block_proof.md)
       - [Coherence](./appendix/architecture/block_proof/coherence.md)
       - [Canonicity](./appendix/architecture/block_proof/canonicity.md)
