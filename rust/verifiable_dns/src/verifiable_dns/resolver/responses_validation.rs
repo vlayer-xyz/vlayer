@@ -37,8 +37,8 @@ fn compare_answers(l: &Option<Vec<Record>>, r: &Option<Vec<Record>>) -> bool {
         return l.is_none() && r.is_none();
     }
 
-    let l = l.as_ref().unwrap().iter();
-    let r = r.as_ref().unwrap().iter();
+    let l = l.as_ref().unwrap().iter().filter(|r| is_txt(r));
+    let r = r.as_ref().unwrap().iter().filter(|r| is_txt(r));
 
     compare_unordered(l.map(canonized), r.map(canonized))
 }
@@ -48,6 +48,10 @@ fn compare_unordered<T: Eq + Hash>(
     r: impl IntoIterator<Item = T>,
 ) -> bool {
     HashSet::<T>::from_iter(l) == HashSet::<T>::from_iter(r)
+}
+
+fn is_txt(r: &Record) -> bool {
+    r.record_type == crate::dns_over_https::types::RecordType::TXT
 }
 
 fn canonized(r: &Record) -> String {
