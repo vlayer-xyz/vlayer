@@ -36,13 +36,11 @@ use super::{BuilderError as Error, Config, Host};
 pub struct New;
 
 pub struct WithProviders {
-    rpc_urls: HashMap<ChainId, String>,
     providers: CachedMultiProvider,
     op_client_factory: Box<dyn optimism::client::IFactory>,
 }
 
 pub struct WithChainGuestId {
-    rpc_urls: HashMap<ChainId, String>,
     providers: CachedMultiProvider,
     op_client_factory: Box<dyn optimism::client::IFactory>,
     chain_guest_id: Digest,
@@ -74,10 +72,8 @@ impl New {
     pub fn with_rpc_urls(self, rpc_urls: HashMap<ChainId, String>) -> WithProviders {
         let provider_factory = EthersProviderFactory::new(rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
-        let op_client_factory =
-            Box::new(optimism::client::factory::http::Factory::new(rpc_urls.clone()));
+        let op_client_factory = Box::new(optimism::client::factory::http::Factory::new(rpc_urls));
         WithProviders {
-            rpc_urls,
             providers,
             op_client_factory,
         }
@@ -87,7 +83,6 @@ impl New {
 impl WithProviders {
     pub fn with_chain_guest_id(self, chain_guest_id: Digest) -> WithChainGuestId {
         WithChainGuestId {
-            rpc_urls: self.rpc_urls,
             providers: self.providers,
             op_client_factory: self.op_client_factory,
             chain_guest_id,
@@ -101,7 +96,6 @@ impl WithChainGuestId {
         chain_proof_url: Option<&str>,
     ) -> Result<WithChainClient, Error> {
         let WithChainGuestId {
-            rpc_urls,
             providers,
             chain_guest_id,
             op_client_factory,
@@ -110,9 +104,7 @@ impl WithChainGuestId {
             Some(url) => Box::new(chain_client::RpcClient::new(url)),
             None => {
                 warn!("Chain proof sever URL not provided. Running with mock server");
-                let provider_factory = EthersProviderFactory::new(rpc_urls);
-                let providers = CachedMultiProvider::from_factory(provider_factory);
-                Box::new(chain_client::FakeClient::new(providers, chain_guest_id))
+                Box::new(chain_client::FakeClient::new(providers.clone(), chain_guest_id))
             }
         };
         Ok(WithChainClient {

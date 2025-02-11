@@ -13,9 +13,10 @@ use crate::{factory, BlockingProvider, NullProviderFactory, ProviderFactory};
 
 type MultiProvider = HashMap<ChainId, Arc<dyn BlockingProvider>>;
 
+#[derive(Clone)]
 pub struct CachedMultiProvider {
-    cache: RwLock<MultiProvider>,
-    factory: Box<dyn ProviderFactory>,
+    cache: Arc<RwLock<MultiProvider>>,
+    factory: Arc<dyn ProviderFactory>,
 }
 
 #[derive(Debug, Error)]
@@ -35,8 +36,8 @@ impl CachedMultiProvider {
         providers: impl IntoIterator<Item = (ChainId, Arc<dyn BlockingProvider>)>,
     ) -> Self {
         CachedMultiProvider {
-            cache: RwLock::new(HashMap::from_iter(providers)),
-            factory: Box::new(factory),
+            cache: Arc::new(RwLock::new(HashMap::from_iter(providers))),
+            factory: Arc::new(factory),
         }
     }
 
