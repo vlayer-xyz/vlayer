@@ -139,13 +139,10 @@ mod server_tests {
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
 
-            let call_data = contract
-                .web_proof(WebProof {
-                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture()))
-                        .unwrap(),
-                })
-                .calldata()
-                .unwrap();
+            // We use serde_json "preserve_order" feature to ensure that the expected hash is deterministic
+            let web_proof_json = serde_json::to_string(&json!(load_web_proof_fixture())).unwrap();
+            let web_proof = WebProof { web_proof_json };
+            let call_data = contract.web_proof(web_proof).calldata().unwrap();
 
             let req = v_call_body(contract.address(), &call_data);
 

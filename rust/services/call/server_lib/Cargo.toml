@@ -46,7 +46,7 @@ lazy_static = { workspace = true }
 mock_chain_server = { workspace = true }
 provider = { workspace = true }
 reqwest = { workspace = true }
-serde_json = { workspace = true }
+serde_json = { workspace = true, features = ["preserve_order"] }
 tower = { workspace = true, features = ["retry", "timeout", "util"] }
 web_proof = { workspace = true, features = ["fixtures"] }
 
