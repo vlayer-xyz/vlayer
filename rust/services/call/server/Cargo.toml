@@ -12,6 +12,7 @@ common = { workspace = true }
 guest_wrapper = { workspace = true }
 hex = { workspace = true }
 humantime = { workspace = true }
+server_utils = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 version = { workspace = true }

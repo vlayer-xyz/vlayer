@@ -40,10 +40,6 @@ impl Config {
         self.chain_proof_config.as_ref().map(|x| x.url.as_str())
     }
 
-    pub const fn fake_proofs(&self) -> bool {
-        matches!(self.proof_mode, ProofMode::Fake)
-    }
-
     pub fn call_guest_id_hex(&self) -> String {
         self.call_guest_elf.id.encode_hex_with_prefix()
     }
@@ -69,6 +65,10 @@ impl Config {
 
     pub const fn max_calldata_size(&self) -> usize {
         self.max_calldata_size
+    }
+
+    pub const fn proof_mode(&self) -> ProofMode {
+        self.proof_mode
     }
 }
 
