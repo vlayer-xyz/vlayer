@@ -54,7 +54,8 @@ To deliver all necessary proofs, the following steps are performed:
 1. In preflight, we execute Solidity code on the host. Each time the database is called, the value is fetched via Ethereum JSON RPC and the proof is stored in it. This database is called `ProofDb`
 2. Serialized content of `ProofDb` is passed via stdin to the `guest`
 3. `guest` deserializes content into a `StateDb`
-4. Solidity code is executed inside `revm` using `StateDb`
+4. Validity of the data gathered during the preflight is verified in `guest`
+5. Solidity code is executed inside `revm` using `StateDb`
 
 Since that Solidity execution is deterministic, database in the guest has exactly the data it requires.
 
@@ -77,47 +78,8 @@ We have **Host** and **Guest** databases
     * `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries;
     * `CacheDB` - has the same seed data as it's Host version.
 
-### Environments	
-
-todo
-
-<!-- ```mermaid	
-%%{init: {'theme':'dark'}}%%	
-classDiagram	
-class EvmEnv {	
-    db: D	
-    cfg_env: CfgEnvWithHandlerCfg	
-    header: dyn EvmBlockHeader	
-}	
-class EvmBlockHeader {	
-    parent_hash(&self) B256	
-    number(&self) BlockNumber	
-    timestamp(&self) u64	
-    state_root(&self) &B256	
-    fill_block_env(&self, blk_env: &mut BlockEnv)	
-}	
-<<Trait>> EvmBlockHeader	
-```	
-
-The block header type varies between sidechains and L2s. `EvmBlockHeader` trait allows us to access header data in a homogenous way and use dynamic dispatch.	
-
-`cgf_env` is revm type that contains EVM configuration (chain_id, hard fork). -->
-
-### Lifecycle	
-
-The environment in which the execution will take place is stored in the generic type `EvmEnv<D>`, where `D` is a database type.	
-
-todo
-
-<!-- The environment is created in the Host and converted into `EvmInput` and serialized. The data is then sent over standard input to the guest and deserialized in the guest.	
-
-`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie. The sparse tree is very similar to the standard MPT in that it includes four standard node types. However, it only keeps data necessary to execution and in place of unused nodes it uses a special node called `Digest`.	
-
-The data is serialized by host with the `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots. -->
-
 ### Error handling	
 
-Error handling is done via `HostError` enum type, which is converted into http code and a human-readable string by the server.	todo
-
+Error handling is done via `HostError` enum type, which is converted into http code and a human-readable string by the server.
 
 Instead of returning a result, to handle errors, `Guest` panics. It does need to panic with a human-readable error, which should be converted on `Host` to a semantic `HostError` type. As execution on `Guest` is deterministic and should never fail after a successful preflight, the panic message should be informative for developers.
