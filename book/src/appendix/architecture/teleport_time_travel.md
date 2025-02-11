@@ -1,6 +1,6 @@
-# Teleport and time-travel
+# Teleport and Time Travel
 
-To support execution on multiple blocks and multiple chains, we span multiple revms' instances during Engine execution.
+Vlayer enables aggregating data from multiple blocks and multiple chains. To achieve that, we span multiple revms' instances during Engine execution.
 
 ## Generic parameter DB
 Note that Engine is parametrized with generic type DB, as it needs to run in revm with different Database in two different contexts: Guest and Host.
