@@ -8,7 +8,7 @@ use responses_validation::{responses_match, validate_response};
 use super::{sign_record, signer::Signer, time::Now};
 use crate::{
     dns_over_https::{
-        types::{Record as DNSRecord, RecordType},
+        types::{Record as DNSRecord, Record, RecordType},
         Provider as DoHProvider, Query, Response,
     },
     VerificationData,
@@ -90,23 +90,30 @@ impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resol
         let mut response = Response {
             status: 0,
             question: vec![query.clone()],
-            answer: provider_response.answer,
+            answer: keep_only_txt_and_cname_records(provider_response.answer),
             comment: provider_response.comment,
             ..Response::with_flags(false, true, true, false, false)
         };
 
-        response.verification_data = if let Some(ref answer) = response.answer {
-            answer
-                .iter()
-                .filter(|r| r.record_type == RecordType::TXT)
-                .last()
+        response.verification_data = Some(
+            response
+                .answer
+                .as_ref()
+                .and_then(|answer| answer.iter().rfind(|r| r.record_type == RecordType::TXT))
                 .map(|record| self.sign_record(record))
-        } else {
-            return Err(ResolverError::MissingResponses);
-        };
+                .ok_or(ResolverError::MissingResponses)?,
+        );
 
         Ok(response)
     }
+}
+
+fn keep_only_txt_and_cname_records(records: Option<Vec<Record>>) -> Option<Vec<DNSRecord>> {
+    records.map(|r| {
+        r.into_iter()
+            .filter(|r| r.record_type != RecordType::OTHER)
+            .collect()
+    })
 }
 
 #[cfg(test)]
@@ -196,6 +203,7 @@ mod tests {
 
         mod resolve {
             use super::*;
+            use crate::common::test_utils::{MockClock, MockProvider};
 
             #[tokio::test]
             async fn resolves_vlayer_default_dkim_selector() {
@@ -204,6 +212,34 @@ mod tests {
                     .resolve(&"google._domainkey.vlayer.xyz".into())
                     .await;
                 assert!(result.is_ok());
+            }
+
+            #[tokio::test]
+            async fn passes_when_one_of_providers_has_additional_dns_records() {
+                let mut responses = [response(), response(), response()];
+                responses[0].answer.as_mut().unwrap().extend_from_slice(&[
+                    DNSRecord {
+                        name: "vlayer.xyz".into(),
+                        record_type: RecordType::OTHER,
+                        data: "some data".into(),
+                        ttl: 300,
+                    },
+                    DNSRecord {
+                        name: "vlayer.xyz".into(),
+                        record_type: RecordType::CNAME,
+                        data: "some data".into(),
+                        ttl: 300,
+                    },
+                ]);
+                type R = Resolver<MockClock<64>, MockProvider, 3>;
+                let resolver = R::new(responses.map(MockProvider::new));
+
+                let query = "google._domainkey.vlayer.xyz".into();
+                let result = resolver.resolve(&query).await.unwrap();
+                let answer = result.answer.unwrap();
+                assert_eq!(answer.len(), 2);
+                assert_eq!(answer[0].record_type, RecordType::TXT);
+                assert_eq!(answer[1].record_type, RecordType::CNAME);
             }
 
             #[tokio::test]
