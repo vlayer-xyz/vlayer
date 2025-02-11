@@ -20,7 +20,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn http_not_found() {
-        let ctx = Context::default().await;
+        let ctx = Context::default();
         let app = ctx.server(call_guest_elf(), chain_guest_elf());
         let response = app.post("/non_existent_http_path", &()).await;
 
@@ -30,7 +30,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() {
-        let ctx = Context::default().await;
+        let ctx = Context::default();
         let app = ctx.server(call_guest_elf(), chain_guest_elf());
 
         let req = rpc_body("non_existent_method", &json!([]));
@@ -49,7 +49,7 @@ mod server_tests {
         async fn success() {
             let call_elf = GuestElf::new([0; 8], &[]);
             let chain_elf = GuestElf::new([1; 8], &[]);
-            let ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_elf, &chain_elf);
 
             let req = rpc_body("v_versions", &json!([]));
@@ -76,7 +76,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() {
-            let mut ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract
@@ -115,7 +115,7 @@ mod server_tests {
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
 
-            let mut ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract
@@ -135,7 +135,7 @@ mod server_tests {
             const EXPECTED_HASH: &str =
                 "0x1a1fac6c674fd5a09b9a1c3df14eb6ea34786f0707eee014e1f9200dec9f380e";
 
-            let mut ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
 
@@ -169,9 +169,7 @@ mod server_tests {
                 .add()
                 .await;
 
-            let mut ctx = Context::default()
-                .await
-                .with_gas_meter_server(gas_meter_server);
+            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract
@@ -204,9 +202,7 @@ mod server_tests {
                 .add()
                 .await;
 
-            let mut ctx = Context::default()
-                .await
-                .with_gas_meter_server(gas_meter_server);
+            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract
@@ -355,7 +351,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn nonexistent_hash_failure() {
-            let ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let fake_hash = CallHash::from(B256::repeat_byte(0xaa));
             let response = app.post("/", v_get_proof_receipt_body(fake_hash)).await;
@@ -364,7 +360,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn invalid_contract_preflight_error() {
-            let mut ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = Bytes::from_static(b"Hello world");
@@ -382,7 +378,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn two_subsequent_calls_when_ready_success() {
-            let mut ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract
@@ -415,7 +411,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
-            let mut ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract
@@ -435,7 +431,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn web_proof_success() {
-            let mut ctx = Context::default().await;
+            let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract
@@ -508,9 +504,7 @@ mod server_tests {
                 .add()
                 .await;
 
-            let mut ctx = Context::default()
-                .await
-                .with_gas_meter_server(gas_meter_server);
+            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract

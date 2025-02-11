@@ -47,3 +47,20 @@ impl Client for FakeClient {
         })
     }
 }
+
+/// `Client` which returns a const sync status
+#[derive(new)]
+pub struct PartiallySyncedClient {
+    status: SyncStatus,
+}
+
+#[async_trait]
+impl Client for PartiallySyncedClient {
+    async fn get_chain_proof(&self, _: ChainId, _: Vec<BlockNumber>) -> Result<ChainProof, Error> {
+        unimplemented!()
+    }
+
+    async fn get_sync_status(&self, _: ChainId) -> Result<SyncStatus, Error> {
+        Ok(self.status.clone())
+    }
+}

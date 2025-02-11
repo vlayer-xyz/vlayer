@@ -2208,7 +2208,6 @@ dependencies = [
  "insta",
  "lazy_static",
  "maplit",
- "mock_chain_server",
  "mpt",
  "optimism",
  "provider",
@@ -2288,7 +2287,6 @@ dependencies = [
  "jsonrpsee",
  "lazy_static",
  "mime",
- "mock_chain_server",
  "provider",
  "reqwest 0.12.12",
  "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -7607,23 +7605,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mock_chain_server"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "async-trait",
- "axum-jrpc",
- "block_header",
- "chain_client",
- "chain_common",
- "common",
- "lazy_static",
- "serde_json",
- "server_utils",
- "tokio",
-]
-
-[[package]]
 name = "mockito"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11373,7 +11354,6 @@ dependencies = [
  "inferno",
  "itertools 0.14.0",
  "mailparse 0.15.0",
- "mock_chain_server",
  "mpt",
  "opener",
  "optimism",

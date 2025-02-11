@@ -10,14 +10,12 @@ use call_engine::{
 };
 use call_host::{Config as HostConfig, Error, Host, PreflightError};
 use chain::TEST_CHAIN_ID;
-use chain_client::RpcClient as RpcChainProofClient;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
-use guest_wrapper::CALL_GUEST_ELF;
-use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
+use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use optimism::client::factory::cached;
 use provider::CachedMultiProvider;
 
@@ -96,8 +94,7 @@ impl CheatcodeInspector {
         context: &&mut EvmContext<DB>,
         inputs: &CallInputs,
     ) -> CallOutcome {
-        let chain_proof_server = start_chain_proof_server().await;
-        let host = create_host(context, &self.rpc_endpoints, chain_proof_server.url());
+        let host = create_host(context, &self.rpc_endpoints);
         let call_result = host
             .main(Call {
                 to: inputs.target_address,
@@ -151,21 +148,7 @@ const fn is_custom_error(error: &Error) -> Option<&Bytes> {
     }
 }
 
-async fn start_chain_proof_server() -> ChainProofServerMock {
-    let mut chain_proof_server = ChainProofServerMock::start().await;
-    chain_proof_server
-        .mock_chain_proof()
-        .with_result(EMPTY_PROOF_RESPONSE.clone())
-        .add()
-        .await;
-    chain_proof_server
-}
-
-fn create_host<DB: Database>(
-    ctx: &EvmContext<DB>,
-    rpc_endpoints: &RpcEndpoints,
-    chain_proof_url: String,
-) -> Host {
+fn create_host<DB: Database>(ctx: &EvmContext<DB>, rpc_endpoints: &RpcEndpoints) -> Host {
     let pending_state_provider_factory = PendingStateProviderFactory {
         block_number: ctx.env.block.number.try_into().unwrap(),
         state: ctx.journaled_state.state.clone(),
@@ -181,7 +164,8 @@ fn create_host<DB: Database>(
         .get_latest_block_number(TEST_CHAIN_ID)
         .expect("failed to get block number");
     let start_exec_location = (TEST_CHAIN_ID, block_number).into();
-    let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_url));
+    let chain_proof_client =
+        Box::new(chain_client::FakeClient::new(providers.clone(), CHAIN_GUEST_ELF.id));
     let op_client_factory = cached::Factory::default();
 
     Host::try_new(

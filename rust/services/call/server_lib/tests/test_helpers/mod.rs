@@ -4,14 +4,12 @@ use call_server_lib::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
 use ethers::types::{Bytes, H160};
-use mock::{Anvil, ChainProofServer, Client, Contract, GasMeterServer, Server};
+use mock::{Anvil, Client, Contract, GasMeterServer, Server};
 use serde_json::{json, Value};
 
 pub const GAS_LIMIT: u64 = 1_000_000;
 pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;
 pub const GAS_METER_TTL: Duration = Duration::from_secs(3600);
-pub const CHAIN_PROOF_POLL_INTERVAL: Duration = Duration::from_secs(5);
-pub const CHAIN_PROOF_TIMEOUT: Duration = Duration::from_secs(120);
 
 pub fn allocate_gas_body(expected_hash: &str) -> Value {
     json!({
@@ -59,19 +57,14 @@ pub(crate) const API_VERSION: &str = "1.2.3";
 pub(crate) struct Context {
     client: Client,
     anvil: Anvil,
-    chain_proof_server: ChainProofServer,
     gas_meter_server: Option<GasMeterServer>,
 }
 
 impl Context {
-    pub(crate) async fn default() -> Self {
+    pub(crate) fn default() -> Self {
         let anvil = Anvil::start();
         let client = anvil.setup_client();
-        let chain_proof_server =
-            ChainProofServer::start(CHAIN_PROOF_POLL_INTERVAL, CHAIN_PROOF_TIMEOUT).await;
-        let mut ctx = Self::new(client, anvil, chain_proof_server, None);
-        ctx.mock_latest_block().await;
-        ctx
+        Self::new(client, anvil, None)
     }
 
     pub(crate) fn with_gas_meter_server(mut self, gas_meter_server: GasMeterServer) -> Self {
@@ -86,19 +79,8 @@ impl Context {
             .assert();
     }
 
-    async fn mock_latest_block(&mut self) {
-        let block_header = self.client.get_latest_block_header().await;
-        self.chain_proof_server
-            .mock_single_block(self.anvil.chain_id(), block_header)
-            .await;
-    }
-
-    pub(crate) async fn deploy_contract(&mut self) -> Contract {
-        let contract = self.client.deploy_contract().await;
-        // Latest block must be updated in chain proof server, because otherwise host
-        // would get a start execution location on block 0 without contract deployed
-        self.mock_latest_block().await;
-        contract
+    pub(crate) async fn deploy_contract(&self) -> Contract {
+        self.client.deploy_contract().await
     }
 
     pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: &GuestElf) -> Server {
@@ -106,10 +88,8 @@ impl Context {
             .gas_meter_server
             .as_ref()
             .map(GasMeterServer::as_gas_meter_config);
-        let chain_proof_config = self.chain_proof_server.as_chain_proof_config();
         let chain_guest_ids = vec![chain_guest_elf.id].into_boxed_slice();
         let config = ConfigBuilder::new(call_guest_elf, chain_guest_ids, API_VERSION.into())
-            .with_chain_proof_config(chain_proof_config)
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
             .with_proof_mode(ProofMode::Fake)
             .with_gas_meter_config(gas_meter_config)
@@ -122,11 +102,7 @@ pub(crate) mod mock {
     use std::{sync::Arc, time::Duration};
 
     use axum::{body::Body, http::Response, Router};
-    use block_header::EvmBlockHeader;
-    use call_server_lib::{
-        chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, server,
-        Config,
-    };
+    use call_server_lib::{gas_meter::Config as GasMeterConfig, server, Config};
     use derive_more::{Deref, DerefMut};
     use ethers::{
         contract::abigen,
@@ -134,13 +110,10 @@ pub(crate) mod mock {
             k256::ecdsa,
             utils::{self, AnvilInstance},
         },
-        middleware::{Middleware, SignerMiddleware},
+        middleware::SignerMiddleware,
         providers::{Http, Provider},
         signers::{LocalWallet, Signer, Wallet},
-        types::BlockNumber as BlockTag,
     };
-    use mock_chain_server::ChainProofServerMock;
-    use provider::to_eth_block_header;
     use serde::Serialize;
     use server_utils::{post, post_with_bearer_auth, rpc::mock::Server as RpcServerMock};
 
@@ -202,17 +175,6 @@ pub(crate) mod mock {
                 .await
                 .unwrap()
         }
-
-        pub(crate) async fn get_latest_block_header(&self) -> Box<dyn EvmBlockHeader> {
-            let latest_block = self
-                .as_ref()
-                .get_block(BlockTag::Latest)
-                .await
-                .unwrap()
-                .unwrap();
-            let block_header = to_eth_block_header(latest_block).unwrap();
-            Box::new(block_header)
-        }
     }
 
     #[derive(Deref, DerefMut)]
@@ -236,30 +198,6 @@ pub(crate) mod mock {
 
         pub(crate) fn as_gas_meter_config(&self) -> GasMeterConfig {
             GasMeterConfig::new(self.url(), self.time_to_live, self.api_key.clone())
-        }
-    }
-
-    #[derive(Deref, DerefMut)]
-    pub(crate) struct ChainProofServer {
-        #[deref]
-        #[deref_mut]
-        mock: ChainProofServerMock,
-        poll_interval: Duration,
-        timeout: Duration,
-    }
-
-    impl ChainProofServer {
-        pub(crate) async fn start(poll_interval: Duration, timeout: Duration) -> Self {
-            let mock = ChainProofServerMock::start().await;
-            Self {
-                mock,
-                poll_interval,
-                timeout,
-            }
-        }
-
-        pub(crate) fn as_chain_proof_config(&self) -> ChainProofConfig {
-            ChainProofConfig::new(self.url(), self.poll_interval, self.timeout)
         }
     }
 }
