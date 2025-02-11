@@ -7,9 +7,10 @@ use call_server_lib::{
     chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
     ConfigBuilder, ProofMode,
 };
-use clap::{ArgAction, Parser, ValueEnum};
+use clap::{ArgAction, Parser};
 use common::{init_tracing, GlobalArgs, LogFormat};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
+use server_utils::set_risc0_dev_mode;
 use tracing::{info, warn};
 
 #[derive(Parser)]
@@ -19,7 +20,7 @@ struct Cli {
     rpc_url: Vec<(ChainId, String)>,
 
     #[arg(long, value_enum)]
-    proof: Option<ProofModeArg>,
+    proof: Option<ProofMode>,
 
     #[arg(long, default_value = "127.0.0.1")]
     host: Option<String>,
@@ -51,7 +52,7 @@ struct Cli {
 
 impl Cli {
     fn into_config(self, api_version: String) -> Config {
-        let proof_mode = self.proof.unwrap_or_default().map();
+        let proof_mode = self.proof.unwrap_or_default();
         let gas_meter_config = self
             .gas_meter_url
             .zip(Some(self.gas_meter_ttl.unwrap_or_default()))
@@ -77,22 +78,6 @@ impl Cli {
     }
 }
 
-#[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
-enum ProofModeArg {
-    #[default]
-    Fake,
-    Groth16,
-}
-
-impl ProofModeArg {
-    const fn map(self) -> ProofMode {
-        match self {
-            ProofModeArg::Groth16 => ProofMode::Groth16,
-            ProofModeArg::Fake => ProofMode::Fake,
-        }
-    }
-}
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let api_version = version::version();
@@ -103,8 +88,9 @@ async fn main() -> anyhow::Result<()> {
     let config = cli.into_config(api_version);
 
     info!("Running vlayer serve...");
-    if config.fake_proofs() {
+    if config.proof_mode() == ProofMode::Fake {
         warn!("Running in fake mode. Server will not generate real proofs.");
+        set_risc0_dev_mode();
     }
 
     serve(config).await?;

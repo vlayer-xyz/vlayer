@@ -9,3 +9,4 @@ mod providers;
 
 pub use color_eyre::Report;
 pub use forked::{cli, watch::watch_test};
+pub use host_utils::set_risc0_dev_mode;

@@ -35,6 +35,7 @@ foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
 guest_wrapper = { workspace = true }
 hickory-resolver = { workspace = true }
+host_utils = { workspace = true }
 indicatif = { workspace = true }
 inferno = { workspace = true }
 itertools = { workspace = true }

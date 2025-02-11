@@ -1,10 +1,15 @@
 use host_utils::ProofMode as HostProofMode;
 use serde::{Deserialize, Serialize};
+use strum::{Display, EnumString};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Copy)]
+#[derive(
+    Debug, Clone, Deserialize, Serialize, Copy, PartialEq, Eq, Display, EnumString, Default,
+)]
+#[strum(ascii_case_insensitive)]
 pub enum ProofMode {
-    Groth16,
+    #[default]
     Fake,
+    Groth16,
 }
 
 impl From<ProofMode> for HostProofMode {
