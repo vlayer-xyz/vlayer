@@ -17,7 +17,6 @@ trap cleanup EXIT ERR INT
 VLAYER_ENV=${VLAYER_ENV:-dev}
 BUILD_BINARIES=${BUILD_BINARIES:-1}
 set_proving_mode
-RISC0_DEV_MODE=""
 BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
 SERVER_PROOF_ARG="fake"
