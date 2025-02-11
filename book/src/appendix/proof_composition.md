@@ -9,7 +9,7 @@ This page aims to describe it from a practical perspective focusing on our use-c
 
 ## Usage
 
-We use proof composition in Chain Proofs. [The trie is correct if](./architecture/block_proof/coherence.md#adding-hashes-to-the-bpc-structure-and-maintaining-𝜋):
+We use proof composition in Chain Proofs. [The trie is correct if](./architecture/chain_proof/coherence.md#adding-hashes-to-the-bpc-structure-and-maintaining-𝜋):
 * the previous trie was correct;
 * the operation executed is correct.
 

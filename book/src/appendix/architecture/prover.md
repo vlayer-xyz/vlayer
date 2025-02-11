@@ -14,13 +14,13 @@ Before Vlayer, ZK programs were application-specific and proved a single source 
 - **Prover** computing average *ERC20* balance of addresses
 - **Prover** returning *true* if someone starred a *GitHub Org* by verifying a Web Proof
 
-> **_Note_** Despite being named "Prover", the **Prover** contract does not compute the proof itself. Instead, it is executed inside the *zkEVM*, which produces the proof of the correctness of its execution.
+> **_Note:_** Despite being named "Prover", the **Prover** contract does not compute the proof itself. Instead, it is executed inside the *zkEVM*, which produces the proof of the correctness of its execution.
 
 **_Call Proof_** is a proof that we correctly executed the **Prover** smart contract and got the given result.
 
 It can be later verified by a deployed **Verifier** contract to **use the verifiable result on-chain**.
 
-But how is Call Proof obtained?
+But how are Call Proofs obtained?
 
 ## Call Prover
 
@@ -117,13 +117,15 @@ pub struct ExecutionLocation {
 
 ### Verifying data
 
-Guest is required to verify all data provided by the Host. Validation of data correctness is split between multiple functions:
+Guest is required to verify all data provided by the Host. Initial validation of its coherence is done in two places:
 
 * [`multi_evm_input.assert_coherency`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/input.rs#L46) verifies:
   * Equality of subsequent `ancestor` block hashes
   * Equality of `header.state_root` and actual `state_root`
 
 * When we create `StateDb` in Guest with [`StateDb::new`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/state.rs#L51), we compute hashes for `storage_tries` roots and `contracts` code. When we later try to access storage (using the [`WrapStateDb::basic_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L39) function) or contract code (using the [`WrapStateDb::code_by_hash_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L70) function), we know this data is valid because the hashes were computed properly. If they weren't, we wouldn't be able to access the given storage or code. Thus, storage verification is done indirectly.
+
+Above verifications are not enough to ensure validity of Time Travel (achieved by [Chain Proofs](./chain_proof.md)) and Teleport.
 
 ### Error handling	
 

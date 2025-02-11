@@ -6,7 +6,7 @@ This is the implementation of **sparse** Merkle Patricia Trie (MPT).
 
 We use it in two places:
 * In **EVM execution** - we construct the state and storage tries to provide guest with verifiable source of state and storage data
-* In **Block Proofs** - we store mapping from block number to block hash in a trie. This allows us to generate merkle proofs that blocks belong to the same chain
+* In **Chain Proofs** - we store mapping from block number to block hash in a trie. This allows us to generate merkle proofs that blocks belong to the same chain
 
 You can read about this data structure [here](https://docs.alchemy.com/docs/patricia-merkle-tries) (more general explanation) and [here](https://ethereum.org/pl/developers/docs/data-structures-and-encoding/patricia-merkle-trie/) (technical details and examples).
 
