@@ -91,7 +91,6 @@ function startup_vlayer() {
     fi
 
     RUST_LOG=info \
-    RISC0_DEV_MODE="${RISC0_DEV_MODE}" \
     BONSAI_API_URL="${BONSAI_API_URL}" \
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
     ./target/debug/call_server \
