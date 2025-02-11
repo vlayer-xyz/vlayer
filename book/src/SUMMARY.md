@@ -35,7 +35,7 @@
   - [Architecture](./appendix/architecture/overview.md)
     - [Prover](./appendix/architecture/prover.md)
     - [Time Travel & Teleport](./appendix/architecture/time_travel_teleport.md)
-    - [Chain proofs](./appendix/architecture/chain_proof.md)
+    - [Chain Proofs](./appendix/architecture/chain_proof.md)
       - [Coherence](./appendix/architecture/chain_proof/coherence.md)
       - [Canonicity](./appendix/architecture/chain_proof/canonicity.md)
     - [Solidity](./appendix/architecture/solidity.md)
