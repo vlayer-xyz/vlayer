@@ -99,7 +99,7 @@ impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resol
             response
                 .answer
                 .as_ref()
-                .and_then(|answer| answer.iter().next_back())
+                .and_then(|answer| answer.iter().rfind(|r| r.record_type == RecordType::TXT))
                 .map(|record| self.sign_record(record))
                 .ok_or(ResolverError::MissingResponses)?,
         );
