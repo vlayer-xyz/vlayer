@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use serde_json::json;
-use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
+use test_helpers::{call_guest_elf, chain_guest_elf, Context, API_VERSION};
 
 mod test_helpers;
 
@@ -69,10 +69,11 @@ mod server_tests {
 
     mod v_call {
         use ethers::types::U256;
+        use test_helpers::gas_meter;
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
-        use crate::test_helpers::mock::WebProof;
+        use crate::test_helpers::blockchain::WebProof;
 
         #[tokio::test]
         async fn field_validation_error() {
@@ -163,7 +164,7 @@ mod server_tests {
             const API_KEY: &str = "secret-deadbeef";
 
             let mut gas_meter_server =
-                GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
+                gas_meter::Server::start(GAS_METER_TTL, Some(API_KEY.into())).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_params(allocate_gas_body(EXPECTED_HASH), false)
@@ -196,7 +197,7 @@ mod server_tests {
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
             const USER_TOKEN: &str = "sk_1234567890";
 
-            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            let mut gas_meter_server = gas_meter::Server::start(GAS_METER_TTL, None).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_bearer_auth(USER_TOKEN)
@@ -234,11 +235,14 @@ mod server_tests {
         };
         use serde_json::Value;
         use server_utils::function_selector;
+        use test_helpers::{
+            blockchain::{Contract, WebProof},
+            call, gas_meter,
+        };
         use tower::{ServiceBuilder, ServiceExt};
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
-        use crate::test_helpers::mock::{Contract, Server, WebProof};
 
         const RETRY_SLEEP_DURATION: tokio::time::Duration = tokio::time::Duration::from_millis(100);
         const MAX_POLLING_TIME: std::time::Duration = std::time::Duration::from_secs(60);
@@ -279,7 +283,7 @@ mod server_tests {
         }
 
         async fn get_hash(
-            app: &Server,
+            app: &call::Server,
             contract: &Contract,
             call_data: &Bytes,
         ) -> call_server_lib::v_call::CallHash {
@@ -300,7 +304,10 @@ mod server_tests {
             })
         }
 
-        async fn v_get_proof_receipt_result(app: &Server, request: Req) -> (State, bool, Value) {
+        async fn v_get_proof_receipt_result(
+            app: &call::Server,
+            request: Req,
+        ) -> (State, bool, Value) {
             let response = app.post("/", &request).await;
             assert_eq!(StatusCode::OK, response.status());
             let result = assert_jrpc_ok(response, json!({})).await;
@@ -311,7 +318,7 @@ mod server_tests {
             (state, status == 1, result["result"].clone())
         }
 
-        async fn get_proof_result(app: &Server, hash: CallHash) -> Value {
+        async fn get_proof_result(app: &call::Server, hash: CallHash) -> Value {
             let svc = ServiceBuilder::new()
                 .layer(tower::timeout::TimeoutLayer::new(MAX_POLLING_TIME))
                 .layer(tower::retry::RetryLayer::new(RetryRequest))
@@ -461,7 +468,7 @@ mod server_tests {
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
             const EXPECTED_GAS_USED: u64 = 21_728;
 
-            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            let mut gas_meter_server = gas_meter::Server::start(GAS_METER_TTL, None).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_params(allocate_gas_body(EXPECTED_HASH), false)
