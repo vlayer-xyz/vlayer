@@ -37,8 +37,8 @@ fn compare_answers(l: &Option<Vec<Record>>, r: &Option<Vec<Record>>) -> bool {
         return l.is_none() && r.is_none();
     }
 
-    let l = l.as_ref().unwrap().iter().filter(|r| is_txt(r));
-    let r = r.as_ref().unwrap().iter().filter(|r| is_txt(r));
+    let l = l.as_ref().unwrap().iter().filter(|r| is_txt_or_cname(r));
+    let r = r.as_ref().unwrap().iter().filter(|r| is_txt_or_cname(r));
 
     compare_unordered(l.map(canonized), r.map(canonized))
 }
@@ -50,8 +50,8 @@ fn compare_unordered<T: Eq + Hash>(
     HashSet::<T>::from_iter(l) == HashSet::<T>::from_iter(r)
 }
 
-fn is_txt(r: &Record) -> bool {
-    r.record_type == crate::dns_over_https::types::RecordType::TXT
+fn is_txt_or_cname(r: &Record) -> bool {
+    r.record_type != crate::dns_over_https::types::RecordType::OTHER
 }
 
 fn canonized(r: &Record) -> String {
@@ -64,7 +64,6 @@ fn canonize_data(data: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
     use crate::dns_over_https::types::{Record, RecordType};
 
@@ -72,6 +71,20 @@ mod tests {
         let record = Record {
             name: "hello.vlayer.xyz".into(),
             record_type: RecordType::TXT,
+            ttl: 300,
+            data: "some data".into(),
+        };
+
+        Response {
+            answer: Some(vec![record]),
+            ..Default::default()
+        }
+    }
+
+    fn mock_response_with_type(record_type: RecordType) -> Response {
+        let record = Record {
+            name: "hello.vlayer.xyz".into(),
+            record_type,
             ttl: 300,
             data: "some data".into(),
         };
@@ -135,7 +148,6 @@ mod tests {
     }
 
     mod responses_match {
-
         use super::*;
         use crate::{dns_over_https::Query, PublicKey, Signature, VerificationData};
 
@@ -288,6 +300,20 @@ mod tests {
                     ..records.first().unwrap().clone()
                 }]);
                 assert!(responses_match(&l, &r));
+            }
+
+            #[test]
+            fn fails_for_mismatching_cname_records() {
+                let l = mock_response_with_type(RecordType::CNAME);
+                let mut r = mock_response_with_type(RecordType::CNAME);
+                let records = r.answer.take().unwrap();
+                assert!(!responses_match(&l, &r));
+
+                r.answer = Some(vec![Record {
+                    data: "".to_string(),
+                    ..records.first().unwrap().clone()
+                }]);
+                assert!(!responses_match(&l, &r));
             }
 
             mod canonization {
