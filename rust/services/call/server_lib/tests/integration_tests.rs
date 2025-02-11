@@ -12,6 +12,12 @@ use test_helpers::{
 mod server_tests {
     use super::*;
 
+    #[cfg(test)]
+    #[ctor::ctor]
+    fn before_all() {
+        std::env::set_var("RISC0_DEV_MODE", "1");
+    }
+
     #[tokio::test]
     async fn http_not_found() {
         let ctx = Context::default().await;

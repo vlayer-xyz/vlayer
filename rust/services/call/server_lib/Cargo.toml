@@ -39,6 +39,7 @@ tracing = { workspace = true }
 [dev-dependencies]
 assert-json-diff = { workspace = true }
 block_header = { workspace = true }
+ctor = { workspace = true }
 ethers = { workspace = true }
 guest_wrapper = { workspace = true }
 lazy_static = { workspace = true }

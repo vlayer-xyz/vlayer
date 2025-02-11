@@ -6,10 +6,11 @@ set -ueo pipefail
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib.sh"
 
 # Defaults
-PROVING_MODE=${PROVING_MODE:-dev}
+set_proving_mode
 VLAYER_ENV=${VLAYER_ENV:-dev}
 
 generate_ts_bindings
