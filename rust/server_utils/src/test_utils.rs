@@ -27,9 +27,7 @@ pub async fn body_to_json(body: Body) -> Value {
 }
 
 pub fn function_selector(calldata: &Bytes) -> String {
-    let calldata_bytes = calldata.to_vec();
-    let selector_bytes = &calldata_bytes.as_slice()[..4];
-    selector_bytes.encode_hex_with_prefix()
+    (&calldata.as_ref()[..4]).encode_hex_with_prefix()
 }
 
 pub async fn post<T: Serialize>(app: Router, url: &str, body: &T) -> Response<Body> {
