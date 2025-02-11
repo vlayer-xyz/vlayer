@@ -79,7 +79,7 @@ impl Context {
             .assert();
     }
 
-    pub(crate) async fn deploy_contract(&mut self) -> Contract {
+    pub(crate) async fn deploy_contract(&self) -> Contract {
         self.client.deploy_contract().await
     }
 
