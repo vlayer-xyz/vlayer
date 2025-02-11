@@ -55,7 +55,7 @@ To deliver all necessary proofs, the following steps are performed:
 2. Serialized content of `ProofDb` is passed via stdin to the `guest`
 3. `guest` deserializes content into a `StateDb`
 4. Validity of the data gathered during the preflight is verified in `guest`
-5. Solidity code is executed inside `revm` using `StateDb`
+5. Solidity code is executed inside revm using `StateDb`
 
 Since that Solidity execution is deterministic, database in the guest has exactly the data it requires.
 
@@ -63,7 +63,7 @@ Since that Solidity execution is deterministic, database in the guest has exactl
 
 ### Databases
 
-`revm` requires us to provide a DB which implements `DatabaseRef` trait (i.e. can be asked about accounts, storage, block hashes).
+revm requires us to provide a DB which implements `DatabaseRef` trait (i.e. can be asked about accounts, storage, block hashes).
 
 It's a common pattern to compose databases to orthogonalize the implementation.
 
@@ -74,9 +74,60 @@ We have **Host** and **Guest** databases
     * `ProofDb` - records all queries aggregates them and collects EIP1186 (`eth_getProof`) proofs;
     * `CacheDB` - stores trusted seed data to minimize the amount of RPC requests. We seed caller account and some Optimism system accounts.
 - **Guest** - runs `CacheDB<WrapStateDb<StateDb>>`:
-    * `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs;
+    * `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as [sparse Merkle Patricia Tries](https://github.com/vlayer-xyz/vlayer/tree/main/rust/mpt), hence access to accounts and storage serves as verification of state and storage proofs;
     * `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries;
     * `CacheDB` - has the same seed data as it's Host version.
+
+### EvmEnv and EvmInput
+
+Vlayer enables aggregating data from multiple blocks and multiple chains. We call these features **Time Travel** and **Teleport**. To achieve that, we span multiple revm instances during Engine execution. Each revm instance corresponds to a certain block number on a certain chain.
+
+`EvmEnv` struct represents a configuration required to create a revm instance. Depending on the context, it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
+
+It is also implicitly parameterized via dynamic dispatch by the `Header` type, which may differ for various hard forks or networks.
+
+```rust
+pub struct EvmEnv<DB> {
+    pub db: DB,
+    pub header: Box<dyn EvmBlockHeader>,
+    ...
+}
+```
+
+The serializable input we pass between host and guest is called `EvmInput`. `EvmEnv` can be obtained from it.
+
+```rust
+pub struct EvmInput {
+    pub header: Box<dyn EvmBlockHeader>,
+    pub state_trie: MerkleTrie,
+    pub storage_tries: Vec<MerkleTrie>,
+    pub contracts: Vec<Bytes>,
+    pub ancestors: Vec<Box<dyn EvmBlockHeader>>,
+}
+```
+
+Because we may have multiple blocks and chains, we also have structs `MultiEvmInput` and `MultiEvmEnv`, mapping `ExecutionLocation`s to `EvmInput`s or `EvmEnv`s equivalently.
+
+```rust
+pub struct ExecutionLocation {
+    pub chain_id: ChainId,
+    pub block_tag: BlockTag,
+}
+```
+
+### Verifying data coherence
+
+Guest is required to verify all data provided by the Host. Validation of data correctness is split between multiple functions:
+
+* [`multi_evm_input.assert_coherency`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/input.rs#L46) verifies:
+  * Equality of subsequent `ancestor` block hashes
+  * Equality of `header.state_root` and actual `state_root`
+
+* When we create `StateDb` in Guest with [`StateDb::new`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/state.rs#L51), we compute hashes for `storage_tries` roots and `contracts` code. When we later try to access storage (using the [`WrapStateDb::basic_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L39) function) or code (using the [`WrapStateDb::code_by_hash_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L70) function), we know this data is valid because the hashes are computed properly. If they weren't, we wouldn't be able to access given storage or code.
+
+* `MerkleTrie::from_rlp_nodes` effectively verifies merkle proofs by:
+  * Calculating the hash of each node
+  * Reconstructing the tree in `MerkleTrie::resolve_trie`
 
 ### Error handling	
 
