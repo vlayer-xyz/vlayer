@@ -229,10 +229,10 @@ mod tests {
     mod start_exec_location {
         use std::sync::Arc;
 
-        use chain_common::{GetSyncStatus, SyncStatus};
+        use chain_client::PartiallySyncedClient;
+        use chain_common::SyncStatus;
         use ethers_core::types::{Bytes, U64};
         use ethers_providers::MockProvider;
-        use mock_chain_server::ChainProofServerMock;
         use optimism::client::factory::cached;
         use provider::{BlockingProvider, EthersProvider};
 
@@ -257,21 +257,11 @@ mod tests {
             Arc::new(EthersProvider::new(ethers_providers::Provider::new(provider)))
         }
 
-        async fn mock_chain_client() -> Box<dyn chain_client::Client> {
-            let mut chain_server = ChainProofServerMock::start().await;
-            chain_server
-                .mock_sync_status()
-                .with_params(GetSyncStatus::new(CHAIN_ID), true)
-                .with_result(SyncStatus::new(0, LATEST_INDEXED_BLOCK))
-                .add()
-                .await;
-            Box::new(chain_server.into_client())
-        }
-
-        async fn builder(prover_contract_code_results: &[&'static [u8]]) -> WithStartChainId {
+        fn builder(prover_contract_code_results: &[&'static [u8]]) -> WithStartChainId {
             let start_chain_provider = mock_provider(prover_contract_code_results);
-            let chain_client = mock_chain_client().await;
             let providers = CachedMultiProvider::from_provider(CHAIN_ID, start_chain_provider);
+            let chain_client =
+                Box::new(PartiallySyncedClient::new(SyncStatus::new(0, LATEST_INDEXED_BLOCK)));
             let op_client_factory = Box::new(cached::Factory::default());
             WithStartChainId {
                 start_chain_id: CHAIN_ID,
@@ -283,7 +273,7 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn prover_contract_not_deployed() {
-            let builder = builder(&[b""]).await; // empty contract code at latest RPC block
+            let builder = builder(&[b""]); // empty contract code at latest RPC block
             let res = builder.with_prover_contract_addr(Address::default()).await;
             assert!(matches!(res, Err(Error::ProverContractNotDeployed)));
         }
@@ -292,7 +282,7 @@ mod tests {
         async fn prover_contract_not_indexed() {
             // empty contract code at latest indexed block, some fake code at latest RPC block
             // (mock client is LIFO, hence the order of results)
-            let builder = builder(&[b"", b"01"]).await;
+            let builder = builder(&[b"", b"01"]);
             let res = builder
                 .with_prover_contract_addr(Address::default())
                 .await
@@ -302,7 +292,7 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn prover_contract_indexed() {
-            let builder = builder(&[b"01", b"01"]).await;
+            let builder = builder(&[b"01", b"01"]);
             let res = builder
                 .with_prover_contract_addr(Address::default())
                 .await
