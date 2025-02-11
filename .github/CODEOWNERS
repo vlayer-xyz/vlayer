@@ -1,9 +1,12 @@
 /.github/CODEOWNERS @marekkirejczyk @vlayer-xyz/devops
 
 # Audited files - 07 February 2025 - a76361451c47dbef25db03f61d2b0e26e0c5d940
-# A list of all files, and only those files, that went into the scope of an audit.
+# A list of files that went into the scope of an audit.
+# Listing guest Cargo.lock's instead of root Cargo.toml to prevent unnecessary codeowner triggers.
 
-/Cargo.toml @marekkirejczyk
+/rust/guest_wrapper/risc0_call_guest/Cargo.lock @marekkirejczyk
+/rust/guest_wrapper/risc0_chain_guest/Cargo.lock @marekkirejczyk
+
 /contracts/vlayer/foundry.toml @marekkirejczyk
 /contracts/vlayer/src/CallAssumptions.sol @marekkirejczyk
 /contracts/vlayer/src/EmailProof.sol @marekkirejczyk
