@@ -11368,6 +11368,7 @@ dependencies = [
  "foundry-test-utils",
  "guest_wrapper",
  "hickory-resolver",
+ "host_utils",
  "indicatif",
  "inferno",
  "itertools 0.14.0",
