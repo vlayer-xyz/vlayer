@@ -115,7 +115,7 @@ pub struct ExecutionLocation {
 }
 ```
 
-### Verifying data coherence
+### Verifying data
 
 Guest is required to verify all data provided by the Host. Validation of data correctness is split between multiple functions:
 
@@ -123,11 +123,7 @@ Guest is required to verify all data provided by the Host. Validation of data co
   * Equality of subsequent `ancestor` block hashes
   * Equality of `header.state_root` and actual `state_root`
 
-* When we create `StateDb` in Guest with [`StateDb::new`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/state.rs#L51), we compute hashes for `storage_tries` roots and `contracts` code. When we later try to access storage (using the [`WrapStateDb::basic_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L39) function) or code (using the [`WrapStateDb::code_by_hash_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L70) function), we know this data is valid because the hashes are computed properly. If they weren't, we wouldn't be able to access given storage or code.
-
-* `MerkleTrie::from_rlp_nodes` effectively verifies merkle proofs by:
-  * Calculating the hash of each node
-  * Reconstructing the tree in `MerkleTrie::resolve_trie`
+* When we create `StateDb` in Guest with [`StateDb::new`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/state.rs#L51), we compute hashes for `storage_tries` roots and `contracts` code. When we later try to access storage (using the [`WrapStateDb::basic_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L39) function) or contract code (using the [`WrapStateDb::code_by_hash_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L70) function), we know this data is valid because the hashes were computed properly. If they weren't, we wouldn't be able to access the given storage or code. Thus, storage verification is done indirectly.
 
 ### Error handling	
 
