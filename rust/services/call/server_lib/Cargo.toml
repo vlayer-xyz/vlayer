@@ -43,7 +43,6 @@ ctor = { workspace = true }
 ethers = { workspace = true }
 guest_wrapper = { workspace = true }
 lazy_static = { workspace = true }
-mock_chain_server = { workspace = true }
 provider = { workspace = true }
 reqwest = { workspace = true }
 serde_json = { workspace = true }

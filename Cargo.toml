@@ -29,7 +29,6 @@ members = [
     "rust/services/chain/db",
     "rust/services/chain/guest",
     "rust/services/chain/host",
-    "rust/services/chain/mock_server",
     "rust/services/chain/server",
     "rust/services/chain/server_lib",
     "rust/services/chain/test_utils",
@@ -194,7 +193,6 @@ guest_build_utils = { path = "rust/guest_wrapper/build_utils" }
 guest_wrapper = { path = "rust/guest_wrapper" }
 host_utils = { path = "rust/host_utils" }
 key_value = { path = "rust/key_value" }
-mock_chain_server = { path = "rust/services/chain/mock_server" }
 mpt = { path = "rust/mpt" }
 provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
