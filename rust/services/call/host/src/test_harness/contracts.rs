@@ -185,15 +185,11 @@ pub mod time_travel {
     const TOKEN_OWNER: Address = address!("E6b08c02Dbf3a0a4D3763136285B85A9B492E391");
     sol!(
         #[derive(Debug)]
-        struct Seal {
-            bytes18 lhv;
-            bytes19 rhv;
-        }
-        #[sol(all_derives = true)]
         struct Proof {
-            uint256 length;
             Seal seal;
-            CallAssumptions call_assumptions;
+            bytes32 callGuestId;
+            uint256 length;
+            CallAssumptions callAssumptions;
         }
         #[sol(all_derives = true)]
         contract AverageBalance {
