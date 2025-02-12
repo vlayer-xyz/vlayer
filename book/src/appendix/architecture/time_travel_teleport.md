@@ -19,7 +19,7 @@ Verification steps are as follows:
 1. **Retrieve Blocks:** Extracts the list of blocks to be verified and groups them by chain.
 2. **Iterate Over Chains:** For each chain runs [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks.
 3. **Skip Single-Block Cases:** If only one block exists, no verification is needed.
-4. **Request Chain Proof:** Fetches cryptographic proof of chain validity.
+4. **Request Chain Proof:** Fetches cryptographic proof of chain integrity.
 5. **Verifies Chain Proof:** Runs the [chain proof `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/chain/common/src/verifier.rs#L46) function to check if the Chain Proof is valid.
 6. **Validate Blocks:** Compares each block’s hash with the hash obtained from the validated Chain Proof by block number.
 
