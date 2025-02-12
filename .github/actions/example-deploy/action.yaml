@@ -137,6 +137,7 @@ runs:
         echo $DEPLOYMENT_URL
 
     - name: Echo variable in a new step 2
+      shell: bash
       run: |
         echo "The value of DEPLOYMENT_URL is: ${DEPLOYMENT_URL}"
       env:
