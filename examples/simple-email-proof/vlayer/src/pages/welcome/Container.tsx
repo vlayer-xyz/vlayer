@@ -1,8 +1,8 @@
 import { useState, useEffect, FormEvent } from "react";
-import EmlForm from "../components/EmlForm";
-import { useEmailProofVerification } from "../hooks/useEmailProofVerification";
+import EmlForm from "./Presentational";
+import { useEmailProofVerification } from "../../hooks/useEmailProofVerification";
 
-const EmlUploadForm = () => {
+export const EmlUploadForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -77,5 +77,3 @@ const EmlUploadForm = () => {
     />
   );
 };
-
-export default EmlUploadForm;

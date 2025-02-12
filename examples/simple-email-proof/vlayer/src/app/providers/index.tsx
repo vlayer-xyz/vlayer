@@ -7,7 +7,7 @@ import { wagmiConfig, proverConfig } from "./config";
 
 const queryClient = new QueryClient();
 
-export const Providers = ({ children }: { children: React.ReactNode }) => {
+const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
@@ -16,3 +16,5 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
     </WagmiProvider>
   );
 };
+
+export default Providers;
