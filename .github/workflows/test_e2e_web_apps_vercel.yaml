@@ -5,7 +5,7 @@ on:
     workflows: ["Deploy simple-web-proof example"]
     types: [completed]
     branches:
-      - "*"
+      - "**"
 
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
