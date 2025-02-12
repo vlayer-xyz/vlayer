@@ -20,15 +20,15 @@ Verification steps are as follows:
 2. **Iterate Over Chains:** For each chain runs [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks.
 3. **Skip Single-Block Cases:** If only one block exists, no verification is needed.
 4. **Request Chain Proof:** Fetches cryptographic proof of chain integrity.
-5. **Verifies Chain Proof:** Runs the [chain proof `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/chain/common/src/verifier.rs#L46) function to check if the Chain Proof is valid.
-6. **Validate Blocks:** Compares each block’s hash with the hash obtained from the validated Chain Proof by block number.
+5. **Verifies Chain Proof:** Runs the [chain proof `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/chain/common/src/verifier.rs#L46) function on the obtained Chain Proof to check its validity.
+6. **Validate Blocks:** Compares each block’s hash with the hash obtained by block number from the validated Chain Proof.
 
 ### II. Teleport Verification
 1. **Identify Destination Chains:** Extracts execution locations from `CachedEvmEnv`, filtering for chains different from the starting one.
 2. **Skip Local Testnets:** If the source chain is a local testnet, teleport verification is skipped.
 3. **Validate Chain Anchors:** Ensures the destination chain is properly anchored to the source chain using [`assert_anchor()`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/chain/src/optimism.rs#L25).
 4. **Fetch Latest Confirmed L2 Block:** Uses the [`AnchorStateRegistry`](https://docs.optimism.io/stack/smart-contracts#anchorstateregistry) and `sequencer_client` to get the latest confirmed block on the destination chain.
-5. **Verify Block Hash Consistency:** Compares the latest confirmed block’s hash with the execution environment's expected state.
+5. **Verify Block Hash Consistency:** Compares the latest confirmed block’s hash with the execution environment's state.
 
 ## Inspector
 
