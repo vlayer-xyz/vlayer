@@ -142,6 +142,10 @@ fn change_sdk_dependency_to_npm(
 pub(crate) async fn run_init(args: Args) -> Result<(), CLIError> {
     let mut cwd = std::env::current_dir()?;
 
+    let mut config = Config::default();
+    config.template = args.template.or(config.template);
+    println!("{config:#?}");
+
     if !args.existing {
         let mut command = std::process::Command::new("forge");
         command.arg("init");
@@ -160,13 +164,7 @@ pub(crate) async fn run_init(args: Args) -> Result<(), CLIError> {
         }
     }
 
-    let mut config = Config::default();
-    config.template = args.template.or(config.template);
-
-    println!("{config:#?}");
-
     let work_dir = args.work_dir.try_into()?;
-
     init_existing(cwd, config, work_dir).await
 }
 

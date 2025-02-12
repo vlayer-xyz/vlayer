@@ -4,30 +4,30 @@ use clap::ValueEnum;
 
 use crate::target_version;
 
-pub const VLAYER_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
+const VLAYER_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
     name: "vlayer",
-    version: None,
+    version: "0.1.0",
     url: None,
     remappings: &[("vlayer-0.1.0", "src")],
 };
 
-pub const OPENZEPPELIN_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
+const OPENZEPPELIN_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
     name: "@openzeppelin-contracts",
-    version: Some("5.0.1"),
+    version: "5.0.1",
     url: None,
     remappings: &[("openzeppelin-contracts", "")],
 };
 
-pub const FORGE_STD_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
+const FORGE_STD_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
     name: "forge-std",
-    version: Some("1.9.4"),
+    version: "1.9.4",
     url: None,
     remappings: &[("forge-std", "src"), ("forge-std-1.9.4/src", "src")],
 };
 
-pub const RISC0_ETHEREUM_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency{
+const RISC0_ETHEREUM_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency{
     name: "risc0-ethereum",
-    version: Some("1.2.0"),
+    version: "1.2.0",
     url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip"),
     remappings: &[("risc0-ethereum-1.2.0", "")],
 };
@@ -68,6 +68,15 @@ impl Default for Config {
 
         let mut vlayer_dep: DetailedDependency = VLAYER_FOUNDRY_PKG.into();
         vlayer_dep.version = version.clone().into();
+        vlayer_dep.remappings = Some(
+            VLAYER_FOUNDRY_PKG
+                .remappings
+                .iter()
+                .map(|(source, target)| {
+                    add_remapping(VLAYER_FOUNDRY_PKG.name, &version, source, target)
+                })
+                .collect(),
+        );
         contracts.insert(VLAYER_FOUNDRY_PKG.name.into(), Dependency::Detailed(vlayer_dep));
 
         contracts.insert(OPENZEPPELIN_FOUNDRY_PKG.name.into(), OPENZEPPELIN_FOUNDRY_PKG.into());
@@ -164,19 +173,23 @@ where
     }
 }
 
+pub fn add_remapping(name: &str, version: &str, source: &str, target: &str) -> (String, String) {
+    (source.to_string(), format!("dependencies/{name}-{version}/{target}"))
+}
+
 impl From<SoldeerDependency<'_>> for DetailedDependency<String> {
     fn from(value: SoldeerDependency<'_>) -> Self {
         let path = None;
-        let version = value.version.map(ToString::to_string);
+        let version = value.version.to_string();
         let url = value.url.map(ToString::to_string);
         let remappings: Vec<(String, String)> = value
             .remappings
             .iter()
-            .map(|(x, y)| ((*x).to_string(), (*y).to_string()))
+            .map(|(x, y)| add_remapping(value.name, value.version, x, y))
             .collect();
         Self {
             path,
-            version,
+            version: Some(version),
             url,
             remappings: Some(remappings),
         }
@@ -185,7 +198,7 @@ impl From<SoldeerDependency<'_>> for DetailedDependency<String> {
 
 struct SoldeerDependency<'a> {
     name: &'a str,
-    version: Option<&'a str>,
+    version: &'a str,
     url: Option<&'a str>,
     remappings: &'a [(&'a str, &'a str)],
 }
