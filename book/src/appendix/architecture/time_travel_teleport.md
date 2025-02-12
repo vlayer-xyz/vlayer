@@ -66,7 +66,7 @@ There are two special functions that modify execution context:
 Intercepts every contract call and determines how to handle it:
 * **Precompiled Contracts:** If the call targets a precompiled contract, it logs the call and records relevant metadata.
 * **Travel Call Contract:** If the call is directed to the designated travel call contract (identified by `CONTRACT_ADDR`), the `Inspector` parses the input arguments and triggers a travel call by invoking either `set_block` or `set_chain`.
-* **Standard Calls:** If no travel call is detected, the `Inspector` allows the call to proceed normally. However, if a travel call has already set a new context, it processes the call using the provided `transaction_callback` and applies the updated execution context.
+* **Standard Calls:** If no travel call is detected, the `Inspector` allows the call to proceed normally. However, if a travel call has already set a new context, it processes the call using the provided `transaction_callback` and applies the updated execution context in the [`on_call` function](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L68).
 
 #### 4. Monitors & Logs Precompiled Contracts
 If the call is made to a precompiled contract it logs the call and records metadata.
