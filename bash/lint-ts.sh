@@ -46,7 +46,7 @@ bun install --frozen-lockfile
 bun run build
 echo '::endgroup::'
 
-
+echo "::group::Running eslint for: $VLAYER_HOME/packages"
 cd "${VLAYER_HOME}/packages"
 bun install --frozen-lockfile
 bun run lint
