@@ -26,6 +26,6 @@ popd
 
 echo Run playwright tests
 pushd ${VLAYER_HOME}/packages
-bun run test:headless
+VLAYER_ENV="dev" bun run test:headless
 popd
 
