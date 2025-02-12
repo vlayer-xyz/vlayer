@@ -43,13 +43,13 @@ pub(crate) struct Args {
 
 const VLAYER_DIR_NAME: &str = "vlayer";
 
-pub(crate) enum WorkDir {
+enum WorkDir {
     Temp(tempfile::TempDir),
     Explicit(PathBuf),
 }
 
 impl WorkDir {
-    pub(crate) fn path(&self) -> &Path {
+    fn path(&self) -> &Path {
         match self {
             Self::Temp(dir) => dir.path(),
             Self::Explicit(path) => path,
@@ -149,7 +149,7 @@ pub(crate) async fn run_init(args: Args) -> Result<(), CLIError> {
     init_existing(cwd, args.template.unwrap_or_default(), work_dir).await
 }
 
-pub(crate) async fn init_existing(
+async fn init_existing(
     cwd: PathBuf,
     template: Template,
     work_dir: WorkDir,
