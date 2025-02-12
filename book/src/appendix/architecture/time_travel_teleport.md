@@ -1,6 +1,6 @@
 # Time Travel and Teleport
 
-Vlayer allows seamless aggregation of data different various blocks and chains. We refer to these capabilities as Time Travel and Teleport. How it is done?
+vlayer allows seamless aggregation of data from different blocks and chains. We refer to these capabilities as Time Travel and Teleport. How is it done?
 
 ## Inspector
 
