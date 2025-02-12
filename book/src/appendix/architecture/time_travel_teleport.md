@@ -28,7 +28,8 @@ Verification steps are as follows:
 2. **Skip Local Testnets:** If the source chain is a local testnet, teleport verification is skipped.
 3. **Validate Chain Anchors:** Ensures the destination chain is properly anchored to the source chain using [`assert_anchor()`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/chain/src/optimism.rs#L25).
 4. **Fetch Latest Confirmed L2 Block:** Uses the [`AnchorStateRegistry`](https://docs.optimism.io/stack/smart-contracts#anchorstateregistry) and `sequencer_client` to get the latest confirmed block on the destination chain.
-5. **Verify Block Hash Consistency:** Compares the latest confirmed block’s hash with the execution environment's state.
+5. **Verify Latest Confirmed Block Hash Consistency:** Compares the latest confirmed block’s hashes.
+6. **Verify Latest Teleport Location Is Confirmed:** Using function [`ensure_latest_teleport_location_is_confirmed`]() we check that latest destination block number is not greater than latest confirmed block number.
 
 ## Inspector
 
