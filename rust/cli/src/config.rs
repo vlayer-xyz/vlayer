@@ -174,7 +174,7 @@ where
 }
 
 pub fn add_remapping(name: &str, version: &str, source: &str, target: &str) -> (String, String) {
-    (source.to_string(), format!("dependencies/{name}-{version}/{target}"))
+    (format!("{source}/"), format!("dependencies/{name}-{version}/{target}"))
 }
 
 impl From<SoldeerDependency<'_>> for DetailedDependency<String> {

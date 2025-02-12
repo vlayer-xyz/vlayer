@@ -83,7 +83,7 @@ fn do_update_soldeer(foundry_toml_path: &Path) -> Result<(), CLIError> {
         .map(|dep| dep.install(foundry_toml_path))
         .collect::<Result<Vec<_>, _>>()?;
 
-    add_remappings(foundry_toml_path, &updated_deps)?;
+    // add_remappings(foundry_toml_path, &updated_deps)?;
 
     Ok(())
 }

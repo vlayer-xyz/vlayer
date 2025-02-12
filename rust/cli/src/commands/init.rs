@@ -16,7 +16,7 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::{
-    commands::common::soldeer::{add_remappings, DEPENDENCIES},
+    commands::common::soldeer::{add_remappings, build_new_remappings, DEPENDENCIES},
     config::{Config, Dependency, Template, UnresolvedError, SDK_HOOKS_NPM_NAME, SDK_NPM_NAME},
     errors::CLIError,
     target_version,
@@ -93,7 +93,8 @@ fn install_dependencies(foundry_root: &Path) -> Result<(), CLIError> {
 }
 
 fn add_default_remappings(foundry_root: &Path) -> Result<(), CLIError> {
-    add_remappings(foundry_root, DEPENDENCIES.as_slice())
+    let remappings = build_new_remappings(DEPENDENCIES.as_slice());
+    add_remappings(foundry_root, &remappings)
 }
 
 fn change_sdk_dependency_to_npm(

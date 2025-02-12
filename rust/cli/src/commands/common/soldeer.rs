@@ -40,13 +40,17 @@ lazy_static! {
 
 }
 
-pub(crate) fn add_remappings(foundry_root: &Path, deps: &[SoldeerDep]) -> Result<(), CLIError> {
+pub fn add_remappings(
+    foundry_root: &Path,
+    remappings: &[(String, String)],
+) -> Result<(), CLIError> {
     let remappings_path = foundry_root.join("remappings.txt");
 
-    let (keys, mut new_remappings) = build_new_remappings(deps);
-    let mut remappings = filter_existing_remappings(&remappings_path, &keys)?;
+    let keys: Vec<String> = remappings.iter().map(|(x, _)| x.clone()).collect();
+    let mut all_remappings = filter_existing_remappings(&remappings_path, &keys)?;
 
-    remappings.append(&mut new_remappings);
+    let mut remappings: Vec<String> = remappings.iter().map(|(x, y)| format!("{x}={y}")).collect();
+    all_remappings.append(&mut remappings);
 
     let mut file = OpenOptions::new()
         .create(true)
@@ -57,6 +61,50 @@ pub(crate) fn add_remappings(foundry_root: &Path, deps: &[SoldeerDep]) -> Result
     writeln!(file, "{}", remappings.join("\n"))?;
 
     Ok(())
+}
+
+pub fn install_dep(
+    foundry_root: &Path,
+    name: &String,
+    version: &String,
+) -> Result<Output, CLIError> {
+    let output = std::process::Command::new("forge")
+        .arg("soldeer")
+        .arg("install")
+        .arg(format!("{name}~{version}"))
+        .current_dir(foundry_root)
+        .output()
+        .with_context(|| {
+            format!(
+                "Invoking 'forge soldeer install {name}~{version}' from directory {} failed",
+                foundry_root.display()
+            )
+        })?;
+
+    Ok(output)
+}
+
+pub fn install_url_dep(
+    foundry_root: &Path,
+    name: &String,
+    version: &String,
+    url: &String,
+) -> Result<Output, CLIError> {
+    let output = std::process::Command::new("forge")
+        .arg("soldeer")
+        .arg("install")
+        .arg(format!("{name}~{version}"))
+        .arg(url)
+        .current_dir(foundry_root)
+        .output()
+        .with_context(|| {
+            format!(
+                "Invoking 'forge soldeer install {name}~{version} {url}' from directory {} failed",
+                foundry_root.display()
+            )
+        })?;
+
+    Ok(output)
 }
 
 #[derive(Clone)]
@@ -70,8 +118,8 @@ pub(crate) struct SoldeerDep {
 impl SoldeerDep {
     pub fn install(&self, foundry_root: &Path) -> Result<(), CLIError> {
         let output = match &self.url {
-            Some(url) => Self::install_url_dep(foundry_root, &self.name, &self.version, url)?,
-            None => Self::install_dep(foundry_root, &self.name, &self.version)?,
+            Some(url) => install_url_dep(foundry_root, &self.name, &self.version, url)?,
+            None => install_dep(foundry_root, &self.name, &self.version)?,
         };
 
         if !output.status.success() {
@@ -80,47 +128,6 @@ impl SoldeerDep {
         }
 
         Ok(())
-    }
-
-    fn install_dep(
-        foundry_root: &Path,
-        name: &String,
-        version: &String,
-    ) -> Result<Output, CLIError> {
-        let output = std::process::Command::new("forge")
-            .arg("soldeer")
-            .arg("install")
-            .arg(format!("{name}~{version}"))
-            .current_dir(foundry_root)
-            .output()
-            .with_context(|| {
-                format!(
-                    "Invoking 'forge soldeer install {name}~{version}' from directory {} failed",
-                    foundry_root.display()
-                )
-            })?;
-
-        Ok(output)
-    }
-
-    fn install_url_dep(
-        foundry_root: &Path,
-        name: &String,
-        version: &String,
-        url: &String,
-    ) -> Result<Output, CLIError> {
-        let output = std::process::Command::new("forge")
-            .arg("soldeer")
-            .arg("install")
-            .arg(format!("{name}~{version}"))
-            .arg(url)
-            .current_dir(foundry_root)
-            .output()
-            .with_context(|| {
-                format!("Invoking 'forge soldeer install {name}~{version} {url}' from directory {} failed", foundry_root.display())
-            })?;
-
-        Ok(output)
     }
 
     fn remapping(&self) -> Option<Vec<(String, String)>> {
@@ -134,10 +141,10 @@ impl SoldeerDep {
         let key = remapping.key.clone();
         let dependency = format!("dependencies/{}-{}/{}", self.name, self.version, internal_path);
         let remappings = match key {
-            Key::Single(key) => vec![(key.clone(), format!("{key}/={dependency}"))],
+            Key::Single(key) => vec![(key.clone(), dependency.clone())],
             Key::Multi(keys) => keys
                 .iter()
-                .map(|key| (key.clone(), format!("{key}/={dependency}")))
+                .map(|key| (key.clone(), dependency.clone()))
                 .collect(),
         };
 
@@ -195,11 +202,11 @@ impl From<&str> for Remapping {
     }
 }
 
-fn build_new_remappings(deps: &[SoldeerDep]) -> (Vec<String>, Vec<String>) {
+pub fn build_new_remappings(deps: &[SoldeerDep]) -> Vec<(String, String)> {
     deps.iter()
         .filter_map(SoldeerDep::remapping)
         .flatten()
-        .unzip()
+        .collect()
 }
 
 fn filter_existing_remappings(
