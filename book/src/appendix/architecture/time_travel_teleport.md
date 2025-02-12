@@ -65,7 +65,6 @@ There are two special functions that modify execution context:
 #### 3. Intercepts Contract Calls
 When a call is made, the Inspector determines if it should:
 * Process a travel call (`set_block` or `set_chain`),
-* Forward the call to a custom transaction handler (`transaction_callback`),
 * Continue normal execution 
 
 #### 4. Monitors & Logs Precompiled Contracts
