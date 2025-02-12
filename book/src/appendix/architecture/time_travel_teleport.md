@@ -35,6 +35,8 @@ Verification steps are as follows:
 
 <!-- potentially todo: document how we are using AnchorStateRegistry in more detail -->
 
+<!-- todo: picture -->
+
 ## Inspector
 
 After we check whether execution locations indeed belong to the given chains, we can perform travel calls on them. How is it done? 
