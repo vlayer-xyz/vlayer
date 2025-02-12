@@ -162,6 +162,9 @@ pub(crate) async fn run_init(args: Args) -> Result<(), CLIError> {
 
     let mut config = Config::default();
     config.template = args.template.or(config.template);
+
+    println!("{config:#?}");
+
     let work_dir = args.work_dir.try_into()?;
 
     init_existing(cwd, config, work_dir).await

@@ -41,6 +41,7 @@ pub struct UnresolvedError;
 
 pub type Result<T> = std::result::Result<T, UnresolvedError>;
 
+#[derive(Debug)]
 pub struct Config {
     pub template: Option<Template>,
     pub contracts: HashMap<String, Dependency>,
@@ -64,7 +65,11 @@ impl Default for Config {
         let version = target_version();
 
         let mut contracts = HashMap::new();
-        contracts.insert(VLAYER_FOUNDRY_PKG.name.into(), VLAYER_FOUNDRY_PKG.into());
+
+        let mut vlayer_dep: DetailedDependency = VLAYER_FOUNDRY_PKG.into();
+        vlayer_dep.version = version.clone().into();
+        contracts.insert(VLAYER_FOUNDRY_PKG.name.into(), Dependency::Detailed(vlayer_dep));
+
         contracts.insert(OPENZEPPELIN_FOUNDRY_PKG.name.into(), OPENZEPPELIN_FOUNDRY_PKG.into());
         contracts.insert(FORGE_STD_FOUNDRY_PKG.name.into(), FORGE_STD_FOUNDRY_PKG.into());
         contracts.insert(RISC0_ETHEREUM_FOUNDRY_PKG.name.into(), RISC0_ETHEREUM_FOUNDRY_PKG.into());
@@ -81,6 +86,7 @@ impl Default for Config {
     }
 }
 
+#[derive(Debug)]
 pub enum Dependency<P: Clone = String> {
     Simple(String),
     Detailed(DetailedDependency<P>),
@@ -129,6 +135,7 @@ impl From<SoldeerDependency<'_>> for Dependency<String> {
     }
 }
 
+#[derive(Debug)]
 pub struct DetailedDependency<P: Clone = String> {
     pub path: Option<P>,
     pub version: Option<String>,
