@@ -61,7 +61,7 @@ jobs:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "dev"
           VLAYER_ENV: dev
-          WEB_SERVER_URL: https://simple-web-proof-a7f2ewphua-vlayer.vercel.app
+          WEB_SERVER_URL: https://simple-web-proof-a7f2ewphu-vlayer.vercel.app
           VLAYER_TMP_DIR: ./artifacts
         run: bash/e2e-web-apps-test.sh
 
