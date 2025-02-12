@@ -4,7 +4,34 @@ use clap::ValueEnum;
 
 use crate::target_version;
 
-pub const FOUNDRY_PKG_NAME: &str = "vlayer";
+pub const VLAYER_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
+    name: "vlayer",
+    version: None,
+    url: None,
+    remappings: &[("vlayer-0.1.0", "src")],
+};
+
+pub const OPENZEPPELIN_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
+    name: "@openzeppelin-contracts",
+    version: Some("5.0.1"),
+    url: None,
+    remappings: &[("openzeppelin-contracts", "")],
+};
+
+pub const FORGE_STD_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
+    name: "forge-std",
+    version: Some("1.9.4"),
+    url: None,
+    remappings: &[("forge-std", "src"), ("forge-std-1.9.4/src", "src")],
+};
+
+pub const RISC0_ETHEREUM_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency{
+    name: "risc0-ethereum",
+    version: Some("1.2.0"),
+    url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip"),
+    remappings: &[("risc0-ethereum-1.2.0", "")],
+};
+
 pub const SDK_NPM_NAME: &str = "@vlayer/sdk";
 pub const SDK_HOOKS_NPM_NAME: &str = "@vlayer/react";
 
@@ -33,10 +60,14 @@ impl Config {
 impl Default for Config {
     fn default() -> Self {
         let template = Some(Template::Simple);
+
         let version = target_version();
 
         let mut contracts = HashMap::new();
-        contracts.insert(FOUNDRY_PKG_NAME.into(), Dependency::Simple(version.clone()));
+        contracts.insert(VLAYER_FOUNDRY_PKG.name.into(), VLAYER_FOUNDRY_PKG.into());
+        contracts.insert(OPENZEPPELIN_FOUNDRY_PKG.name.into(), OPENZEPPELIN_FOUNDRY_PKG.into());
+        contracts.insert(FORGE_STD_FOUNDRY_PKG.name.into(), FORGE_STD_FOUNDRY_PKG.into());
+        contracts.insert(RISC0_ETHEREUM_FOUNDRY_PKG.name.into(), RISC0_ETHEREUM_FOUNDRY_PKG.into());
 
         let mut npm = HashMap::new();
         npm.insert(SDK_NPM_NAME.into(), Dependency::Simple(version.clone()));
@@ -59,19 +90,97 @@ impl<P> Dependency<P>
 where
     P: Clone,
 {
+    pub fn path(&self) -> Result<P> {
+        self.as_detailed()
+            .and_then(DetailedDependency::path)
+            .ok_or(UnresolvedError)
+    }
+
     pub fn version(&self) -> Result<String> {
         match self {
             Self::Simple(version) => Ok(version.clone()),
-            Self::Detailed(DetailedDependency { version, .. }) => {
-                version.clone().ok_or(UnresolvedError)
-            }
+            Self::Detailed(detailed) => detailed.version().ok_or(UnresolvedError),
         }
+    }
+
+    pub fn url(&self) -> Result<String> {
+        self.as_detailed()
+            .and_then(DetailedDependency::url)
+            .ok_or(UnresolvedError)
+    }
+
+    pub fn remappings(&self) -> Result<&[(String, P)]> {
+        self.as_detailed()
+            .and_then(DetailedDependency::remappings)
+            .ok_or(UnresolvedError)
+    }
+
+    const fn as_detailed(&self) -> Option<&DetailedDependency<P>> {
+        match self {
+            Self::Simple(..) => None,
+            Self::Detailed(x) => Some(x),
+        }
+    }
+}
+
+impl From<SoldeerDependency<'_>> for Dependency<String> {
+    fn from(value: SoldeerDependency<'_>) -> Self {
+        Self::Detailed(value.into())
     }
 }
 
 pub struct DetailedDependency<P: Clone = String> {
     pub path: Option<P>,
     pub version: Option<String>,
+    pub url: Option<String>,
+    pub remappings: Option<Vec<(String, P)>>,
+}
+
+impl<P> DetailedDependency<P>
+where
+    P: Clone,
+{
+    pub fn path(&self) -> Option<P> {
+        self.path.clone()
+    }
+
+    pub fn version(&self) -> Option<String> {
+        self.version.clone()
+    }
+
+    pub fn url(&self) -> Option<String> {
+        self.url.clone()
+    }
+
+    pub fn remappings(&self) -> Option<&[(String, P)]> {
+        self.remappings.as_deref()
+    }
+}
+
+impl From<SoldeerDependency<'_>> for DetailedDependency<String> {
+    fn from(value: SoldeerDependency<'_>) -> Self {
+        let path = None;
+        let version = value.version.map(ToString::to_string);
+        let url = value.url.map(ToString::to_string);
+        let remappings: Vec<(String, String)> = value
+            .remappings
+            .iter()
+            .map(|(x, y)| ((*x).to_string(), (*y).to_string()))
+            .collect();
+        Self {
+            path,
+            version,
+            url,
+            remappings: Some(remappings),
+        }
+    }
+}
+
+struct SoldeerDependency<'a> {
+    name: &'a str,
+    version: Option<&'a str>,
+    url: Option<&'a str>,
+    remappings: &'a [(&'a str, &'a str)],
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]
