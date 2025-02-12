@@ -16,7 +16,7 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::{
-    commands::common::soldeer::{add_remappings, build_new_remappings, DEPENDENCIES},
+    commands::common::soldeer::{add_remappings, install_dep, install_url_dep},
     config::{Config, Dependency, Template, UnresolvedError, SDK_HOOKS_NPM_NAME, SDK_NPM_NAME},
     errors::CLIError,
     target_version,
@@ -84,16 +84,31 @@ lazy_static! {
     );
 }
 
-fn install_dependencies(foundry_root: &Path) -> Result<(), CLIError> {
-    for dep in DEPENDENCIES.iter() {
-        dep.install(foundry_root)?;
+fn install_dependencies(
+    foundry_root: &Path,
+    contracts: &HashMap<String, Dependency>,
+) -> Result<(), CLIError> {
+    for (name, dep) in contracts {
+        let version = dep.version()?;
+        match dep.url()? {
+            Some(url) => install_url_dep(foundry_root, name, &version, &url)?,
+            None => install_dep(foundry_root, name, &version)?,
+        };
     }
 
     Ok(())
 }
 
-fn add_default_remappings(foundry_root: &Path) -> Result<(), CLIError> {
-    let remappings = build_new_remappings(DEPENDENCIES.as_slice());
+fn add_default_remappings(
+    foundry_root: &Path,
+    contracts: &HashMap<String, Dependency>,
+) -> Result<(), CLIError> {
+    let remappings: Vec<(String, String)> = contracts
+        .values()
+        .flat_map(Dependency::remappings)
+        .flatten()
+        .map(|(x, y)| (x.clone(), y.clone()))
+        .collect();
     add_remappings(foundry_root, &remappings)
 }
 
@@ -166,10 +181,10 @@ pub(crate) async fn run_init(args: Args) -> Result<(), CLIError> {
     }
 
     let work_dir = args.work_dir.try_into()?;
-    init_existing(cwd, config, work_dir).await
+    init_existing(cwd, &config, work_dir).await
 }
 
-async fn init_existing(cwd: PathBuf, config: Config, work_dir: WorkDir) -> Result<(), CLIError> {
+async fn init_existing(cwd: PathBuf, config: &Config, work_dir: WorkDir) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
 
     let root_path = find_foundry_root(&cwd)?;
@@ -211,9 +226,9 @@ async fn init_existing(cwd: PathBuf, config: Config, work_dir: WorkDir) -> Resul
     init_soldeer(&root_path)?;
 
     info!("Installing dependencies");
-    install_dependencies(&root_path)?;
+    install_dependencies(&root_path, config.contracts())?;
     info!("Successfully installed all dependencies");
-    add_default_remappings(&root_path)?;
+    add_default_remappings(&root_path, config.contracts())?;
 
     change_sdk_dependency_to_npm(&root_path, config.npm())?;
 
@@ -415,22 +430,23 @@ mod tests {
 
     #[test]
     fn test_add_remappings() {
+        let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "some initial remappings\n").unwrap();
 
-        add_default_remappings(&root_path).unwrap();
+        add_default_remappings(&root_path, config.contracts()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
 
         let expected_remappings = format!(
-            "some initial remappings\n\
-            openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
+            "forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             forge-std/=dependencies/forge-std-1.9.4/src/\n\
-            forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
+            openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
+            some initial remappings\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             build_version()
         );
@@ -440,20 +456,21 @@ mod tests {
 
     #[test]
     fn test_upsert_remapping() {
+        let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "vlayer-0.1.0/=dependencies/vlayer-0.0.0/src/\n").unwrap();
 
-        add_default_remappings(&root_path).unwrap();
+        add_default_remappings(&root_path, config.contracts()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
 
         let expected_remappings = format!(
-            "openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
+            "forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             forge-std/=dependencies/forge-std-1.9.4/src/\n\
-            forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
+            openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             build_version()

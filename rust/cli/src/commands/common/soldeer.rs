@@ -51,6 +51,7 @@ pub fn add_remappings(
 
     let mut remappings: Vec<String> = remappings.iter().map(|(x, y)| format!("{x}={y}")).collect();
     all_remappings.append(&mut remappings);
+    all_remappings.sort();
 
     let mut file = OpenOptions::new()
         .create(true)
@@ -58,7 +59,7 @@ pub fn add_remappings(
         .write(true)
         .open(&remappings_path)?;
 
-    writeln!(file, "{}", remappings.join("\n"))?;
+    writeln!(file, "{}", all_remappings.join("\n"))?;
 
     Ok(())
 }

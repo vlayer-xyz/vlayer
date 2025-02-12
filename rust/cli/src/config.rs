@@ -56,6 +56,10 @@ impl Config {
     pub const fn npm(&self) -> &HashMap<String, Dependency> {
         &self.npm
     }
+
+    pub const fn contracts(&self) -> &HashMap<String, Dependency> {
+        &self.contracts
+    }
 }
 
 impl Default for Config {
@@ -118,10 +122,10 @@ where
         }
     }
 
-    pub fn url(&self) -> Result<String> {
+    pub fn url(&self) -> Result<Option<String>> {
         self.as_detailed()
-            .and_then(DetailedDependency::url)
             .ok_or(UnresolvedError)
+            .map(DetailedDependency::url)
     }
 
     pub fn remappings(&self) -> Result<&[(String, P)]> {
@@ -174,7 +178,12 @@ where
 }
 
 pub fn add_remapping(name: &str, version: &str, source: &str, target: &str) -> (String, String) {
-    (format!("{source}/"), format!("dependencies/{name}-{version}/{target}"))
+    let from = format!("{source}/");
+    let to = format!("dependencies/{name}-{version}/");
+    match target.len() {
+        0 => (from, to),
+        _ => (from, format!("{to}{target}/")),
+    }
 }
 
 impl From<SoldeerDependency<'_>> for DetailedDependency<String> {
