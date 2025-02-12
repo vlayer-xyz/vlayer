@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use thiserror::Error;
 
+use crate::config::UnresolvedError;
+
 #[derive(Error, Debug)]
 pub enum CLIError {
     #[error("Command execution failed: {0}")]
@@ -30,6 +32,8 @@ pub enum CLIError {
     TestsFailed(usize),
     #[error("{0}")]
     TestsExecutionError(#[from] test_runner::Report),
+    #[error("{0}")]
+    ConfigError(#[from] UnresolvedError),
 }
 
 impl CLIError {

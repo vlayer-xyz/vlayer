@@ -4,14 +4,30 @@ use clap::ValueEnum;
 
 use crate::target_version;
 
-const FOUNDRY_PKG_NAME: &str = "vlayer";
-const SDK_NPM_NAME: &str = "@vlayer/sdk";
-const SDK_HOOKS_NPM_NAME: &str = "@vlayer/react";
+pub const FOUNDRY_PKG_NAME: &str = "vlayer";
+pub const SDK_NPM_NAME: &str = "@vlayer/sdk";
+pub const SDK_HOOKS_NPM_NAME: &str = "@vlayer/react";
+
+#[derive(thiserror::Error, Debug)]
+#[error("Unresolved config field")]
+pub struct UnresolvedError;
+
+pub type Result<T> = std::result::Result<T, UnresolvedError>;
 
 pub struct Config {
     pub template: Option<Template>,
     pub contracts: HashMap<String, Dependency>,
     pub npm: HashMap<String, Dependency>,
+}
+
+impl Config {
+    pub fn template(&self) -> Result<Template> {
+        self.template.clone().ok_or(UnresolvedError)
+    }
+
+    pub const fn npm(&self) -> &HashMap<String, Dependency> {
+        &self.npm
+    }
 }
 
 impl Default for Config {
@@ -39,8 +55,23 @@ pub enum Dependency<P: Clone = String> {
     Detailed(DetailedDependency<P>),
 }
 
+impl<P> Dependency<P>
+where
+    P: Clone,
+{
+    pub fn version(&self) -> Result<String> {
+        match self {
+            Self::Simple(version) => Ok(version.clone()),
+            Self::Detailed(DetailedDependency { version, .. }) => {
+                version.clone().ok_or(UnresolvedError)
+            }
+        }
+    }
+}
+
 pub struct DetailedDependency<P: Clone = String> {
     pub path: Option<P>,
+    pub version: Option<String>,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]

@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     convert::TryFrom,
     fs::{self, OpenOptions},
     io::{Cursor, Read, Write},
@@ -16,7 +17,7 @@ use tracing::{error, info};
 
 use crate::{
     commands::common::soldeer::{add_remappings, DEPENDENCIES},
-    config::Template,
+    config::{Config, Dependency, Template, UnresolvedError, SDK_HOOKS_NPM_NAME, SDK_NPM_NAME},
     errors::CLIError,
     target_version,
     utils::{
@@ -95,27 +96,42 @@ fn add_default_remappings(foundry_root: &Path) -> Result<(), CLIError> {
     add_remappings(foundry_root, DEPENDENCIES.as_slice())
 }
 
-fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
+fn change_sdk_dependency_to_npm(
+    foundry_root: &Path,
+    deps: &HashMap<String, Dependency>,
+) -> Result<(), CLIError> {
     let package_json = foundry_root.join("vlayer").join("package.json");
     let mut file = OpenOptions::new().read(true).open(package_json.clone())?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
     let mut json: Value = serde_json::from_str(&contents)?;
-    let version = target_version();
 
-    if let Some(dependencies) = json.get_mut("dependencies") {
-        if let Some(dependencies_map) = dependencies.as_object_mut() {
-            dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version.clone()));
-            if dependencies_map.contains_key("@vlayer/react") {
-                dependencies_map.insert("@vlayer/react".to_string(), Value::String(version));
-            }
-        }
-    } else {
-        let mut dependencies_map = Map::new();
-        dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version));
-        json["dependencies"] = Value::Object(dependencies_map);
+    let mut dependencies_map = json
+        .get("dependencies")
+        .and_then(serde_json::Value::as_object)
+        .map_or(Map::new(), Clone::clone);
+
+    dependencies_map.insert(
+        SDK_NPM_NAME.into(),
+        Value::String(
+            deps.get(SDK_NPM_NAME)
+                .ok_or(UnresolvedError)
+                .and_then(Dependency::version)?,
+        ),
+    );
+
+    if dependencies_map.contains_key(SDK_HOOKS_NPM_NAME) {
+        dependencies_map.insert(
+            SDK_HOOKS_NPM_NAME.into(),
+            Value::String(
+                deps.get(SDK_HOOKS_NPM_NAME)
+                    .ok_or(UnresolvedError)
+                    .and_then(Dependency::version)?,
+            ),
+        );
     }
+    json["dependencies"] = Value::Object(dependencies_map);
 
     let new_contents = serde_json::to_string_pretty(&json)?;
     fs::write(package_json, new_contents)?;
@@ -144,16 +160,14 @@ pub(crate) async fn run_init(args: Args) -> Result<(), CLIError> {
         }
     }
 
+    let mut config = Config::default();
+    config.template = args.template.or(config.template);
     let work_dir = args.work_dir.try_into()?;
 
-    init_existing(cwd, args.template.unwrap_or_default(), work_dir).await
+    init_existing(cwd, config, work_dir).await
 }
 
-async fn init_existing(
-    cwd: PathBuf,
-    template: Template,
-    work_dir: WorkDir,
-) -> Result<(), CLIError> {
+async fn init_existing(cwd: PathBuf, config: Config, work_dir: WorkDir) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
 
     let root_path = find_foundry_root(&cwd)?;
@@ -172,6 +186,7 @@ async fn init_existing(
         let examples_dst = create_vlayer_dir(&src_path)?;
         let tests_dst = create_vlayer_dir(&root_path.join("test"))?;
         let testdata_dst = root_path.join("testdata");
+        let template = config.template()?;
         fetch_examples(
             &examples_dst,
             &scripts_dst,
@@ -198,7 +213,7 @@ async fn init_existing(
     info!("Successfully installed all dependencies");
     add_default_remappings(&root_path)?;
 
-    change_sdk_dependency_to_npm(&root_path)?;
+    change_sdk_dependency_to_npm(&root_path, config.npm())?;
 
     std::env::set_current_dir(&cwd)?;
 
@@ -444,8 +459,10 @@ mod tests {
 
         assert_eq!(contents, expected_remappings);
     }
+
     #[test]
     fn test_dont_add_react_sdk_dependency_to_package_json_if_not_already_present() {
+        let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
 
@@ -456,14 +473,16 @@ mod tests {
         let contents = r#"{"dependencies": {}}"#;
         std::fs::write(&package_json, contents).unwrap();
 
-        change_sdk_dependency_to_npm(&root_path).unwrap();
+        change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
         assert!(!new_contents.contains(&expected_sdk_dependency));
     }
+
     #[test]
     fn test_change_workspace_react_sdk_dependency_to_npm() {
+        let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
 
@@ -474,14 +493,16 @@ mod tests {
         let contents = r#"{"dependencies": {"@vlayer/react": "workspace:*"}}"#;
         std::fs::write(&package_json, contents).unwrap();
 
-        change_sdk_dependency_to_npm(&root_path).unwrap();
+        change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
+
     #[test]
     fn test_add_sdk_dependency_to_package_json() {
+        let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
 
@@ -492,7 +513,7 @@ mod tests {
         let contents = r#"{"dependencies": {}}"#;
         std::fs::write(&package_json, contents).unwrap();
 
-        change_sdk_dependency_to_npm(&root_path).unwrap();
+        change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
@@ -501,6 +522,7 @@ mod tests {
 
     #[test]
     fn test_change_workspace_sdk_dependency_to_npm() {
+        let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
 
@@ -511,7 +533,7 @@ mod tests {
         let contents = r#"{"dependencies": {"@vlayer/sdk": "workspace:*"}}"#;
         std::fs::write(&package_json, contents).unwrap();
 
-        change_sdk_dependency_to_npm(&root_path).unwrap();
+        change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
