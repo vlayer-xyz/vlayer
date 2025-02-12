@@ -11,6 +11,7 @@ use crate::{
 };
 
 mod commands;
+mod config;
 pub mod errors;
 mod utils;
 

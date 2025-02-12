@@ -17,6 +17,7 @@ use tracing::{error, info};
 
 use crate::{
     commands::common::soldeer::{add_remappings, DEPENDENCIES},
+    config,
     errors::CLIError,
     target_version,
     utils::{
