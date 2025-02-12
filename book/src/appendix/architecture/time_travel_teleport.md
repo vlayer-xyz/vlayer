@@ -1,95 +1,37 @@
 # Time Travel and Teleport
 
-Vlayer enables aggregating data from multiple blocks and multiple chains. We call this features Time Travel and Teleport. To achieve that, we span multiple revms' instances during Engine execution. Each revm instance corresponds to certain block number on the certain chain.
+Vlayer allows seamless aggregation of data different various blocks and chains. We refer to these capabilities as Time Travel and Teleport. How it is done?
 
-## EvmEnv
-`EvmEnv` represents a configuration required to create a revm instance. Depending on the context, it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
+## Inspector
 
-It is also implicitly parametrized via dynamic dispatch by Header type, which may differ for various hard forks or networks.
-
-See the code snippet below.
+Time Travel and Teleport are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to intercept, monitor, and modify EVM calls, particularly handling "travel calls" that alter the execution context by switching the blockchain network or block number.
 
 ```rust
-pub struct EvmEnv<DB> {
-    pub db: DB,
-    pub cfg_env: CfgEnvWithHandlerCfg,
-    pub header: Box<dyn EvmBlockHeader> ,
+pub struct Inspector<'a> {
+    start_chain_id: ChainId,
+    pub location: Option<ExecutionLocation>,
+    transaction_callback: Box<TransactionCallback<'a>>,
+    metadata: Vec<Metadata>,
 }
 ```
 
-## EvmEnvFactory
-<!-- still needs corrections -->
-`EvmEnvFactory` is a type, responsible for creation of `EvmEnv` and, in consequence, revm instances. There are two variants of `EnvFactory`:
-- `HostEnvFactory` creates `Databases` and `Headers` dynamically, utilizing Providers created from `MultiProvider`, by fetching data from Ethereum Nodes. Then, the data is serialized to be sent to Guest.
-- `GuestEnvFactory` provides all required data returned from a cached copy deserialized at the beginning of Guest execution.
+### Key Responsibilities of the Inspector
 
-```mermaid
-%%{init: {'theme':'dark'}}%%
-classDiagram
+#### 1. Tracks Execution Context (Chain & Block Info)
+It maintains the execution location (`ExecutionLocation`), which consists of `chain_id` and `block_number`
 
-class EnvFactory {
-  create(ExecutionLocation)
-}
+#### 2. Handles Travel Calls
+There are two special functions that modify execution context:
+* `set_block(block_number)`: Updates the block number while keeping the same chain.
+* `set_chain(chain_id, block_number)`: Changes both the blockchain network and block number.
 
-class HostEnvFactory {
-  providers: HashMap[chainId, Provider]
-  new(MultiProvider)
-}
+#### 3. Intercepts Contract Calls
+When a call is made, the Inspector determines if it should:
+* Process a travel call (`set_block` or `set_chain`),
+* Forward the call to a custom transaction handler (`transaction_callback`),
+* Continue normal execution 
 
-class GuestEnvFactory {
-  envs: HashMap[[ChainId, BlockNo], Env<WrapStateDB>]
-  from(MultiInput)
-}
+#### 4. Monitors & Logs Precompiled Contracts
 
-class Env {
-  db: DB
-  config: Config
-  header: dyn Header
-}
+If the call is made to a precompiled contract it logs the call and records metadata.
 
-class MultiProvider {
-  providers: HashMap[chainId, EthersProvider]
-}
-
-EnvFactory <|-- GuestEnvFactory
-EnvFactory <|-- HostEnvFactory
-GuestEnvFactory o-- Env
-HostEnvFactory <.. MultiProvider
-```
-
-## Engine
-
-`Engine`'s responsibility is to execute calls. To do so, `Engine` spawns revms instances on demand. 
-Engine calls are intercepted by `TravelInspector`. 
-
-The role of the `TravelInspector` is to intercept calls related to [time travel](/features/time-travel.html) and [teleport](/features/teleport.html) features.
-It stores the destination location (set by `setBlock` and `setChain` calls) and delegates the call back to the `Engine` if needed.
-
-
-```mermaid
-%%{init: {'theme':'dark'}}%%
-classDiagram
-
-class Engine {
-  call(ExecutionLocation, Call)
-}
-
-class TravelInspector {
-  destination: Option[ExecutionLocation]
-  callback: F
-  chainId: ChainId
-  setBlock(uint)
-  setChain(uint, uint)
-  delegateCall(call)
-}
-
-Engine *-- TravelInspector
-```
-
-## Testing
-
-Tests are run in a custom `ContractRunner` forked from [forge](https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/src/runner.rs).
-
-In addition to the usual functionality, tests run by vlayer can use the `execProver` feature. The next call after `execProver` will be executed in the vlayer `Engine`.
-
-Runner is extended with a custom Inspector that delegates certain calls to an instance of `Engine`. The design is similar to `TravelInspector`.

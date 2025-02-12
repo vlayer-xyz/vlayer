@@ -1,3 +1,5 @@
+vlayer provides **time-travel functionality**. It allows changing the block number of the execution and accessing the state of the given block.
+
 # Chain Proof
 
 vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches state and storage data and verifies it with storage proofs.
