@@ -17,7 +17,7 @@ The `verify` function performs above verifications by:
 Is possible thanks to [Chain Proofs](./chain_proof.md).
 Verification steps are as follows:
 1. **Retrieve Blocks:** Extract the list of blocks to be verified and group them by chain.
-2. **Iterate Over Chains:** For each chain run [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks.
+2. **Iterate Over Chains:** For each chain run [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks that does the following:
 3. **Skip Single-Block Cases:** If only one block exists, no verification is needed.
 4. **Request Chain Proof:** Fetch cryptographic proof of chain integrity.
 5. **Verifies Chain Proof:** Run the [chain proof `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/chain/common/src/verifier.rs#L46) function on the obtained Chain Proof to check its validity.
@@ -32,6 +32,8 @@ Verification steps are as follows:
 6. **Verify Latest Teleport Location Is Confirmed:** Using function [`ensure_latest_teleport_location_is_confirmed`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/teleport.rs#L154) we check that latest destination block number is not greater than latest confirmed block number.
 
 ## Inspector
+
+After we check whether execution locations indeed belong to the given chains, we can perform travel calls on them. How is it done? 
 
 Both Time Travel and Teleport are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to intercept, monitor, and modify EVM calls, particularly handling "travel calls" that alter the execution context by switching the blockchain network or block number.
 
