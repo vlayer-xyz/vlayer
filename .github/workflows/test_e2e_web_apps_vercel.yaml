@@ -1,6 +1,9 @@
 name: Vercel E2E test of example web apps on devnet
 
 on:
+  workflow_run:
+    workflows: ["Deploy simple-web-proof example"]
+    types: [completed]
   pull_request:
     paths:
       - "rust-toolchain.toml"
