@@ -40,11 +40,11 @@ jobs:
       - name: Install SDK dependencies
         run: bun install --frozen-lockfile
       - name: Build SDK
-        run: bun run build
         working-directory: ./packages/sdk
-      - name: Install dependencies of gas-benchmarks
-        run: bun install --frozen-lockfile
-        working-directory: ./packages/gas-benchmarks
-      - name: Build gas-benchmarks
         run: bun run build
+      - name: Install dependencies of gas-benchmarks
         working-directory: ./packages/gas-benchmarks
+        run: bun install --frozen-lockfile
+      - name: Build gas-benchmarks
+        working-directory: ./packages/gas-benchmarks
+        run: bun run build
