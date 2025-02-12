@@ -11,7 +11,7 @@ At the [beggining of the `guest::main`](https://github.com/vlayer-xyz/vlayer/blo
 * The blocks associated with a given chain truly belong to that chain (enabling teleportation to the specified chain).
 The points above are verified by the [`Verifier::verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/travel_call.rs#L80) function. The `Verifier` struct is used both during the host preflight and guest execution. Because of that it is parametrized by Recording Clients (in host) and Reading Clients (in guest).
 
-The `verify` function performs this verification by checking:
+The `verify` function performs above verifications by:
 
 ### I. Time Travel Verification
 Is possible thanks to [Chain Proofs](./chain_proof.md).
