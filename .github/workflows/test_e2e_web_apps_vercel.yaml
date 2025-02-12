@@ -1,11 +1,20 @@
 name: Vercel E2E test of example web apps on devnet
 
 on:
-  workflow_run:
-    workflows: ["Deploy simple-web-proof example"]
-    types: [completed]
+  pull_request:
+    paths:
+      - "rust-toolchain.toml"
+      - "rust/**"
+      - "examples/**"
+      - "packages/**"
+      - "bash/run-services.sh"
+      - "bash/e2e-web-apps-test.sh"
+      - ".github/workflows/test_e2e_web_apps_devnet.yaml"
+      - "contracts/**"
+  merge_group:
+  push:
     branches:
-      - "**"
+      - main
 
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
