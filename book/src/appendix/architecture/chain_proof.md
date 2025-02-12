@@ -1,4 +1,4 @@
-vlayer provides **time-travel functionality**. It allows changing the block number of the execution location and accessing the blockchain state at the given block.
+vlayer provides **time-travel functionality**. It allows changing the block number of the execution location and accessing the blockchain state at the given block. It is made possible by Chain Proofs.
 
 # Chain Proof
 
