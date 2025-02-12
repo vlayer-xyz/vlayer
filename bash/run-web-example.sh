@@ -21,7 +21,15 @@ function run_services {
 }
 
 function build_example_contracts {
+    cd ${VLAYER_HOME}/contracts/vlayer
+    forge soldeer install
+    forge clean
+    forge build
+
+    ${VLAYER_HOME}/bash/build-ts-types.sh
+    
     cd ${VLAYER_HOME}/examples/simple-web-proof
+    forge clean
     forge build
 }
 
