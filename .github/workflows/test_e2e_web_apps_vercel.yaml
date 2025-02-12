@@ -46,6 +46,23 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: env-file
+
+      - name: Load ENV variable
+        shell: bash
+        run: |
+          echo "DEPLOYMENT_URL=$(cat env_vars.txt)" >> $GITHUB_ENV
+
+      - name: Use the variable
+        shell: bash
+        run: |
+          echo "Loaded ENV: $DEPLOYMENT_URL"
+        env:
+          DEPLOYMENT_URL: ${{ env.DEPLOYMENT_URL }}
+
       - name: Run e2e test
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
