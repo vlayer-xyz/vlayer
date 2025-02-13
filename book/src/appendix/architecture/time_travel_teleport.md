@@ -90,4 +90,4 @@ Intercepts every contract call and determines how to handle it:
 #### 4. Monitors & Logs Precompiled Contracts
 If the call is made to a precompiled contract it logs the call and records metadata.
 
-<!-- todo: write about precompiles -->
+Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/precompiles/src/lib.rs#L24).
