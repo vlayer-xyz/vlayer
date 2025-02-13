@@ -23,7 +23,6 @@
     ],
     "imports-on-top": "error",
     "modifier-name-mixedcase": "error",
-    "no-console": "warn",
     "no-empty-blocks": "error",
     "no-unused-vars": "error",
     "reason-string": [

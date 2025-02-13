@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
+/* solhint-disable no-console */
 pragma solidity ^0.8.21;
 
 import {ImageID} from "../src/ImageID.sol";
