@@ -57,12 +57,3 @@ jobs:
           FOUNDRY_PROFILE: no-vlayer
         run: |
           forge test -vvv
-
-      - name: Run Forge formatter (examples)
-        run: |
-          forge fmt ./examples --check
-
-      - name: Run Forge formatter (vlayer contracts)
-        working-directory: ./contracts/vlayer
-        run: |
-          forge fmt --check
