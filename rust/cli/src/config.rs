@@ -114,16 +114,14 @@ impl<P> Dependency<P>
 where
     P: Clone,
 {
-    pub fn path(&self) -> Result<P> {
-        self.as_detailed()
-            .and_then(DetailedDependency::path)
-            .ok_or(UnresolvedError("path".into()))
+    pub fn path(&self) -> Option<P> {
+        self.as_detailed().and_then(DetailedDependency::path)
     }
 
-    pub fn version(&self) -> Result<String> {
+    pub fn version(&self) -> Option<String> {
         match self {
-            Self::Simple(version) => Ok(version.clone()),
-            Self::Detailed(detailed) => detailed.version().ok_or(UnresolvedError("version".into())),
+            Self::Simple(version) => Some(version.clone()),
+            Self::Detailed(detailed) => detailed.version(),
         }
     }
 

@@ -88,9 +88,29 @@ fn default_templates_url(version: &str) -> String {
 
 async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> Result<(), CLIError> {
     for (name, dep) in contracts {
-        let version = dep.version()?;
-        let url = dep.url();
-        install(name, &version, url.as_ref()).await?;
+        match dep.path() {
+            Some(path) => {
+                match std::fs::create_dir("dependencies") {
+                    Ok(()) => {}
+                    Err(err) => match err.kind() {
+                        std::io::ErrorKind::AlreadyExists => {}
+                        _ => return Err(CLIError::CommandExecutionError(err)),
+                    },
+                }
+                #[cfg(unix)]
+                std::os::unix::fs::symlink(
+                    format!("../{path}"),
+                    format!("dependencies/vlayer-{}", target_version()),
+                )?;
+                #[cfg(not(unix))]
+                compile_error!("Non-UNIX operating system is currently unsupported.");
+            }
+            None => {
+                let version = dep.version().ok_or(UnresolvedError("version".into()))?;
+                let url = dep.url();
+                install(name, &version, url.as_ref()).await?;
+            }
+        }
     }
 
     Ok(())
@@ -129,8 +149,8 @@ fn change_sdk_dependency_to_npm(
         SDK_NPM_NAME.into(),
         Value::String(
             deps.get(SDK_NPM_NAME)
-                .map(|dep| dep.version().or(dep.path()))
-                .ok_or(UnresolvedError(SDK_NPM_NAME.into()))??,
+                .and_then(|dep| dep.version().or(dep.path()))
+                .ok_or(UnresolvedError("version".into()))?,
         ),
     );
 
@@ -139,8 +159,8 @@ fn change_sdk_dependency_to_npm(
             SDK_HOOKS_NPM_NAME.into(),
             Value::String(
                 deps.get(SDK_HOOKS_NPM_NAME)
-                    .map(|dep| dep.version().or(dep.path()))
-                    .ok_or(UnresolvedError(SDK_HOOKS_NPM_NAME.into()))??,
+                    .and_then(|dep| dep.version().or(dep.path()))
+                    .ok_or(UnresolvedError("version".into()))?,
             ),
         );
     }
