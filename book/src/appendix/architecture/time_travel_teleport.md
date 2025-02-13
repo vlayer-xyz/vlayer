@@ -47,8 +47,8 @@ This design is crucial because verifiers are composable. When testing a `Verifie
 The following macros work together to enforce sealing and enable test mocking:
 * **`sealed_trait!`** - Creates a private module (`seal`) containing a trait `Sealed`. By requiring verifier traits to extend `seal::Sealed`, only types that also implement Sealed (and hence are defined within controlled environment) can implement the verifier traits.
 * **`verifier_trait!`** - Defines the actual verifier trait (e.g., `IVerifier`) with a verify method. The trait extends `seal::Sealed`.
-* **`impl_verifier_for_fn!`** - Allows function pointers (or closures) to be used as verifiers by implementing the verifier trait for them. This is only enabled in testing (or when the `testing` feature is turned on).
-* **`impl_sealed_for_fn!`** - Implements the `Sealed` trait for function pointers (or closures) with the appropriate signature.
+* **`impl_verifier_for_fn!`** - Allows function pointers to be used as verifiers by implementing the verifier trait for them. This is only enabled in testing (or when the `testing` feature is turned on).
+* **`impl_sealed_for_fn!`** - Implements the `Sealed` trait for function pointers with the appropriate signature.
 * **`sealed_with_test_mock!`** - This is a convenience macro that ties everything together. It:
   * Calls `sealed_trait!` to create the `Sealed` trait
   * Calls `impl_sealed_for_fn!` to allow function pointers to be sealed
