@@ -131,7 +131,7 @@ pub struct CachedEvmEnv<D: RevmDB> {
 
 #### On Host
 
-On Host, `CachedEvmEnv` is created with [`from_factory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L41) function. It initializes `CachedEvmEnv` with an empty cache and a factory of type [`HostEvmEnvFactory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/evm_env/factory.rs#L19) that is responsible for creating `EvmEnv` instances.
+On Host, `CachedEvmEnv` is created using [`from_factory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L41) function. It initializes `CachedEvmEnv` with an empty cache and a factory of type [`HostEvmEnvFactory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/evm_env/factory.rs#L19) that is responsible for creating `EvmEnv` instances.
 
 ```rust
 pub(crate) struct HostEvmEnvFactory {
