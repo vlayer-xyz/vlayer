@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::Context;
+use anyhow::{anyhow, Context};
 use clap::Parser;
 use flate2::read::GzDecoder;
 use reqwest::get;
@@ -45,6 +45,9 @@ pub(crate) struct Args {
     /// Directory where the templates will be unpacked into (useful for debugging)
     #[arg(long, env = "VLAYER_WORK_DIR")]
     work_dir: Option<PathBuf>,
+    /// Config file to init from
+    #[arg(long)]
+    config_file: Option<PathBuf>,
 }
 
 const VLAYER_DIR_NAME: &str = "vlayer";
@@ -98,10 +101,13 @@ async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> Result
                     },
                 }
                 #[cfg(unix)]
-                std::os::unix::fs::symlink(
-                    format!("../{path}"),
-                    format!("dependencies/vlayer-{}", target_version()),
-                )?;
+                for (_, target) in dep.remappings()? {
+                    let target = PathBuf::from(target);
+                    std::os::unix::fs::symlink(
+                        format!("../{path}"),
+                        target.parent().ok_or(anyhow!("invalid remapping"))?,
+                    )?;
+                }
                 #[cfg(not(unix))]
                 compile_error!("Non-UNIX operating system is currently unsupported.");
             }
@@ -172,12 +178,150 @@ fn change_sdk_dependency_to_npm(
     Ok(())
 }
 
+fn tweak_config(config: &mut Config) {
+    let override_version = "0.1.0-nightly-20250213-df4a6a3";
+    {
+        // vlayer = { version = "...", remappings = [("vlayer-0.1.0"/, "dependencies/vlayer-0.1.0-nightly-202...")] }
+        let vlayer_pkg = config
+            .contracts
+            .get_mut(config::VLAYER_FOUNDRY_PKG.name)
+            .unwrap()
+            .as_detailed_mut()
+            .unwrap();
+        vlayer_pkg.version = override_version.to_string().into();
+        vlayer_pkg.remappings = Some(
+            config::VLAYER_FOUNDRY_PKG
+                .remappings
+                .iter()
+                .map(|(source, target)| {
+                    (
+                        format!("{source}/"),
+                        config::default_remapping_target(
+                            config::VLAYER_FOUNDRY_PKG.name,
+                            override_version,
+                            target,
+                        ),
+                    )
+                })
+                .collect(),
+        );
+    }
+    {
+        // [npm]
+        // vlayer-sdk = 0.1.0...
+        let sdk_pkg = config
+            .npm
+            .get_mut(config::SDK_NPM_NAME)
+            .unwrap()
+            .as_simple_mut()
+            .unwrap();
+        *sdk_pkg = override_version.into();
+    }
+    {
+        // vlayer-sdk = 0.1.0...
+        let sdk_hooks_pkg = config
+            .npm
+            .get_mut(config::SDK_HOOKS_NPM_NAME)
+            .unwrap()
+            .as_simple_mut()
+            .unwrap();
+        *sdk_hooks_pkg = override_version.into();
+    }
+}
+
+fn tweak_config2(config: &mut Config) {
+    {
+        let vlayer_pkg = config
+            .contracts
+            .get_mut(config::VLAYER_FOUNDRY_PKG.name)
+            .unwrap()
+            .as_detailed_mut()
+            .unwrap();
+        vlayer_pkg.path = Some("../../vlayer/contracts/vlayer/src".into());
+        vlayer_pkg.remappings = Some(
+            config::VLAYER_FOUNDRY_PKG
+                .remappings
+                .iter()
+                .map(|(source, _)| {
+                    (format!("{source}/"), "../../vlayer/contracts/vlayer/src/".into())
+                })
+                .collect(),
+        );
+    }
+    {
+        let sdk_pkg = config.npm.get_mut(config::SDK_NPM_NAME).unwrap();
+        *sdk_pkg = Dependency::Detailed(DetailedDependency {
+            path: Some("../../vlayer/packages/sdk".into()),
+            version: None,
+            url: None,
+            remappings: None,
+        });
+    }
+    {
+        let sdk_pkg = config.npm.get_mut(config::SDK_HOOKS_NPM_NAME).unwrap();
+        *sdk_pkg = Dependency::Detailed(DetailedDependency {
+            path: Some("../../vlayer/packages/sdk-hooks".into()),
+            version: None,
+            url: None,
+            remappings: None,
+        });
+    }
+}
+
+fn tweak_config3(config: &mut Config) {
+    {
+        let version = target_version();
+        let vlayer_pkg = config
+            .contracts
+            .get_mut(config::VLAYER_FOUNDRY_PKG.name)
+            .unwrap()
+            .as_detailed_mut()
+            .unwrap();
+        vlayer_pkg.path = Some("../../vlayer/contracts/vlayer/".into());
+        vlayer_pkg.remappings = Some(
+            config::VLAYER_FOUNDRY_PKG
+                .remappings
+                .iter()
+                .map(|(source, _)| {
+                    (format!("{source}/"), format!("dependencies/vlayer-{version}/src/"))
+                })
+                .collect(),
+        );
+    }
+    {
+        let sdk_pkg = config.npm.get_mut(config::SDK_NPM_NAME).unwrap();
+        *sdk_pkg = Dependency::Detailed(DetailedDependency {
+            path: Some("../../vlayer/packages/sdk".into()),
+            version: None,
+            url: None,
+            remappings: None,
+        });
+    }
+    {
+        let sdk_pkg = config.npm.get_mut(config::SDK_HOOKS_NPM_NAME).unwrap();
+        *sdk_pkg = Dependency::Detailed(DetailedDependency {
+            path: Some("../../vlayer/packages/sdk-hooks".into()),
+            version: None,
+            url: None,
+            remappings: None,
+        });
+    }
+}
+
 pub async fn run_init(args: Args) -> Result<(), CLIError> {
     let mut cwd = std::env::current_dir()?;
 
-    let mut config = Config::default();
+    let mut config: Config = args
+        .config_file
+        .map(std::fs::read_to_string)
+        .transpose()?
+        .map(|x| toml::from_str(&x))
+        .transpose()?
+        .unwrap_or_default();
     config.template = args.template.or(config.template);
-    println!("{config:#?}");
+
+    // tweak_config3(&mut config);
+    // println!("{config:#?}");
 
     if !args.existing {
         let mut command = std::process::Command::new("forge");

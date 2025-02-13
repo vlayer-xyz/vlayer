@@ -2793,6 +2793,7 @@ dependencies = [
  "flate2",
  "lazy_static",
  "reqwest 0.12.12",
+ "serde",
  "serde_json",
  "soldeer-commands",
  "soldeer-core",

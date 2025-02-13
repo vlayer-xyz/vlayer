@@ -37,6 +37,8 @@ pub enum CLIError {
     ConfigError(#[from] UnresolvedError),
     #[error("Soldeer failed: {0}")]
     Soldeer(#[from] SoldeerError),
+    #[error("TOML deserialization failed: {0}")]
+    Toml(#[from] toml::de::Error),
 }
 
 impl CLIError {

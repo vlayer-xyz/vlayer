@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use clap::ValueEnum;
+use serde::Deserialize;
 
 use crate::target_version;
 
@@ -41,7 +42,8 @@ pub struct UnresolvedError(pub String);
 
 pub type Result<T> = std::result::Result<T, UnresolvedError>;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct Config {
     pub template: Option<Template>,
     pub contracts: HashMap<String, Dependency>,
@@ -104,7 +106,8 @@ impl Default for Config {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
 pub enum Dependency<P: Clone = String> {
     Simple(String),
     Detailed(DetailedDependency<P>),
@@ -163,7 +166,8 @@ impl From<SoldeerDependency<'_>> for Dependency<String> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub struct DetailedDependency<P: Clone = String> {
     pub path: Option<P>,
     pub version: Option<String>,
@@ -226,7 +230,7 @@ pub struct SoldeerDependency<'a> {
     pub remappings: &'a [(&'a str, &'a str)],
 }
 
-#[derive(Clone, Debug, ValueEnum, Default)]
+#[derive(Clone, Debug, ValueEnum, Default, Deserialize)]
 pub enum Template {
     #[default]
     Simple,
