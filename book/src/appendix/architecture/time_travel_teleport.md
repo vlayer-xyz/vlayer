@@ -37,6 +37,25 @@ Verification steps are as follows:
 
 <!-- todo: picture -->
 
+## Verifier Safety & Testability
+
+To prevent unauthorized custom verifier implementations, we use them [Sealed trait pattern](https://predr.ag/blog/definitive-guide-to-sealed-traits-in-rust/). This ensures that [`IVerifier`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/common/src/verifier/sealing.rs) trait cannot be implemented outside the file it was defined - except when the `testing` feature is enabled.
+
+This design is crucial because verifiers are composable. When testing a `Verifier` that is composed from other verifiers, we need to mock them with fake implementations. This flexibility is achieved by allowing special implementations under the `testing` feature.
+
+### Macros Overview
+The following macros work together to enforce sealing and enable test mocking:
+* **`sealed_trait!`** - Creates a private module (`seal`) containing a trait `Sealed`. By requiring verifier traits to extend `seal::Sealed`, only types that also implement Sealed (and hence are defined within controlled environment) can implement the verifier traits.
+* **`verifier_trait!`** - Defines the actual verifier trait (e.g., `IVerifier`) with a verify method. The trait extends `seal::Sealed`.
+* **`impl_verifier_for_fn!`** - Allows function pointers (or closures) to be used as verifiers by implementing the verifier trait for them. This is only enabled in testing (or when the `testing` feature is turned on).
+* **`impl_sealed_for_fn!`** - Implements the `Sealed` trait for function pointers (or closures) with the appropriate signature.
+* **`sealed_with_test_mock!`** - This is a convenience macro that ties everything together. It:
+  * Calls `sealed_trait!` to create the `Sealed` trait
+  * Calls `impl_sealed_for_fn!` to allow function pointers to be sealed
+  * Defines verifier trait using `verifier_trait!`
+  * Implements the verifier trait for function pointers with `impl_verifier_for_fn!`
+
+
 ## Inspector
 
 After verifying that execution locations belong to their respective chains, we can perform travel calls on them. How is this achieved?
