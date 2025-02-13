@@ -22,17 +22,28 @@ jobs:
     name: Deploy simple-web-proof example
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Install, build and deploy example
-        uses: ./.github/actions/example-deploy
-        with:
-          EXAMPLE_NAME: simple-web-proof
-          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
-          VLAYER_API_TOKEN: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN }}
-          VITE_SENTRY_DSN: "https://1afb2d9efb40a7ac94d0c8737ab8ffc4@o4508754893012992.ingest.de.sentry.io/4508760191795280"
+    - name: Trigger Another Workflow on Current Branch
+      shell: bash
+      run: |
+        BRANCH_NAME=${{ github.ref_name }}
+        echo "Triggering on branch: $BRANCH_NAME"
+
+        curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+             -H "Accept: application/vnd.github.v3+json" \
+             https://api.github.com/repos/${{ github.repository }}/actions/workflows/YOUR_WORKFLOW.yml/dispatches \
+             -d "{\"ref\":\"$BRANCH_NAME\",\"inputs\":{\"environment\":\"staging\",\"version\":\"2.0\"}}"
+
+      # - name: Checkout repository
+      #   uses: actions/checkout@v4
+      # - name: Install, build and deploy example
+      #   uses: ./.github/actions/example-deploy
+      #   with:
+      #     EXAMPLE_NAME: simple-web-proof
+      #     EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
+      #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
+      #     VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+      #     VLAYER_API_TOKEN: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN }}
+      #     VITE_SENTRY_DSN: "https://1afb2d9efb40a7ac94d0c8737ab8ffc4@o4508754893012992.ingest.de.sentry.io/4508760191795280"

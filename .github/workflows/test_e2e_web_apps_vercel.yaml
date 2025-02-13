@@ -1,0 +1,24 @@
+name: Vercel E2E test of example web apps on devnet
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment Environment"
+        required: true
+        default: "staging"
+        type: string
+      version:
+        description: "Application Version"
+        required: false
+        default: "latest"
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo Parameters
+        run: |
+          echo "Deploying to environment: ${{ github.event.inputs.environment }}"
+          echo "Version: ${{ github.event.inputs.version }}"
