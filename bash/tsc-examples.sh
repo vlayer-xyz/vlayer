@@ -15,6 +15,11 @@ cd "${VLAYER_HOME}/packages/sdk"
 bun run build
 echo '::endgroup::'
 
+echo "::group::Building sdk-hooks"
+cd "${VLAYER_HOME}/packages/sdk-hooks"
+bun run build
+echo '::endgroup::'
+
 for example in $(get_examples); do
   echo ""::group::Running tsc for: ${example}""
   example_path="${VLAYER_HOME}/examples/${example}"
