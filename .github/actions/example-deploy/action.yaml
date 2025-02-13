@@ -122,6 +122,7 @@ runs:
         EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
       run: bash/deploy-to-vercel.sh
     - name: Deploy to Vercel (PR Preview)
+      id: deploy-preview
       if: github.event_name == 'pull_request'
       shell: bash
       env:

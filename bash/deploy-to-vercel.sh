@@ -21,3 +21,4 @@ else
 fi
 
 echo "DEPLOYMENT_URL=${DEPLOYMENT_URL}" >> $GITHUB_ENV
+echo "deployment_url=${DEPLOYMENT_URL}" >> $GITHUB_OUTPUT

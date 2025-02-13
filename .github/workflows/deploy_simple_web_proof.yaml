@@ -21,6 +21,8 @@ jobs:
   deploy-simple-web-proof:
     name: Deploy simple-web-proof example
     runs-on: ubuntu-24.04
+    outputs:
+      deployment_url: ${{ steps.deploy-preview.outputs.deployment_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,7 +50,7 @@ jobs:
         run: |
           echo "The value of DEPLOYMENT_URL is: ${DEPLOYMENT_URL}"
         env:
-          DEPLOYMENT_URL: ${{ env.DEPLOYMENT_URL }}
+          DEPLOYMENT_URL: ${{needs.deploy-simple-web-proof.outputs.deployment_url}}
 
       - name: Checkout repository
         uses: actions/checkout@v4
