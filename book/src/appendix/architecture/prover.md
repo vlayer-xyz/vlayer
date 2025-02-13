@@ -117,7 +117,7 @@ pub struct ExecutionLocation {
 
 ### CachedEvmEnv
 
-`EvmEnv` instances are accessed in both the Host and the Guest using [`CachedEvmEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L27). However, the way `CachedEvmEnv` is constructed differs between these two contexts.
+`EvmEnv` instances are accessed in both the Host and the Guest using [`CachedEvmEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L27) structure. However, the way `CachedEvmEnv` is constructed differs between these two contexts.
 
 #### Structure
 ```rust
