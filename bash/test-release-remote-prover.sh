@@ -57,6 +57,6 @@ for example in $(get_examples); do
     echo '::endgroup::'
 
     echo "::group::vlayer run Playwright test: ${example}"
-    USE_PROD_WEB_SERVER=true run_playwright_tests
+    WEB_SERVER_URL="https://web-proofs-demo.vlayer.xyz/" run_playwright_tests
     echo '::endgroup::'
 done

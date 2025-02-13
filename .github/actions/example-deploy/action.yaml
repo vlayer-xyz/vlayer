@@ -132,4 +132,13 @@ runs:
         GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
         PR_NUMBER: "${{ github.event.number }}"
         EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
-      run: bash/deploy-to-vercel.sh
+      run: |
+        bash/deploy-to-vercel.sh
+        echo ${{ env.DEPLOYMENT_URL }}
+
+    - name: Echo DEPLOYMENT_URL
+      shell: bash
+      run: |
+        echo "The value of DEPLOYMENT_URL is: ${DEPLOYMENT_URL}"
+      env:
+        DEPLOYMENT_URL: ${{ env.DEPLOYMENT_URL }}

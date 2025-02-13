@@ -36,3 +36,66 @@ jobs:
           JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
           VLAYER_API_TOKEN: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN }}
           VITE_SENTRY_DSN: "https://1afb2d9efb40a7ac94d0c8737ab8ffc4@o4508754893012992.ingest.de.sentry.io/4508760191795280"
+
+  test-vercel-e2e-web-apps:
+    name: Vercel E2E web apps test against devnet
+    runs-on: aws-linux-medium
+    needs: [deploy-simple-web-proof]
+
+    steps:
+      - name: Echo DEPLOYMENT_URL
+        shell: bash
+        run: |
+          echo "The value of DEPLOYMENT_URL is: ${DEPLOYMENT_URL}"
+        env:
+          DEPLOYMENT_URL: ${{ env.DEPLOYMENT_URL }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build sdk
+        working-directory: ./packages/sdk
+        run: bun run build
+
+      - name: Install Playwright Browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: bash/check-llvm-clang.sh
+
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
+
+      - name: Run e2e test
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          PROVING_MODE: "dev"
+          VLAYER_ENV: dev
+          WEB_SERVER_URL: https://simple-web-proof-a7f2ewphu-vlayer.vercel.app
+          VLAYER_TMP_DIR: ./artifacts
+        run: bash/e2e-web-apps-test.sh
+
+      # Teardown
+      - name: Display Logs
+        if: always()
+        run: |
+          for log_file in $(find ./artifacts/logs -type f); do
+            echo "=== Contents of $log_file ==="
+            cat "$log_file"
+            echo "============================="
+          done
