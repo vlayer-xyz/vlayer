@@ -1,0 +1,112 @@
+Delivered-To: ivan@vlayer.xyz
+Received: by 2002:a5d:5887:0:b0:382:475b:1b80 with SMTP id n7csp451700wrf;
+        Thu, 13 Feb 2025 05:06:35 -0800 (PST)
+X-Received: by 2002:a05:620a:8081:b0:7b7:12e:48eb with SMTP id af79cd13be357-7c07a9c288cmr462288485a.17.1739451995161;
+        Thu, 13 Feb 2025 05:06:35 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1739451995; cv=none;
+        d=google.com; s=arc-20240605;
+        b=UWkLyo+GkGPN59Y0t6V7pn81YoHe0IstoBG9XSYNLTcsw6rvKCrXb2H3HxpVDdk5wN
+         nuiW/1ks9WQQpm998CqlRIP462FmykpSxLUgybWGmic5Dxu5kZdx6QZTiknrr1kRlIxy
+         0q8Vs2PVrGp7nm263sDN8AMErRKhSQhDp6wX8Fqgjc1OgjmMgVPImlfSQuxWGWoptC82
+         pmWHTiTMqDhiWS56pRX3UV1ZMbMLU2yRZa2d3PeXyHhUtrj7paweK8hhUUEksbgOtORv
+         P5z5jHtgBIsJW8oxVe92l6WrJ92gJwgAjA9EaSRYYZ1xvJtr78NssJlq4+q/PK9wIgXp
+         1Glw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=LEJnuHH4G0aXFyQdEQqvGB7QDhyA+vFBMypzVP3haPY=;
+        fh=mqsKy8SdTFVaXNWtVHNffXQYhhgcmqxfZtzaZ6/ikfU=;
+        b=N6MqtszkLAu6ikNl69UStcsGCT1fxeu2rpvU7ac6RE5ermaXx44RAEAiGzlGbaIMp+
+         x0TxOHxe7mjCIKESIhgTQG1ZURa/6AiMOfvGZ3+sjJh99oCx7gJbnf8L90WpuUvoJtL1
+         4Knl4bJLZSLTmObpT00ogbLAW2SXV+qLjQIQOc+ePzf2D6hi4Ypi7H014Ozomi2cmvYK
+         F08b36jUbVQNHfMTT6wlhVVbdiRL9lRZFv2y1sRW4plimZQhwChq90sO69bKuDRjeqxB
+         ViJka+9SWczTjWsz3k9wVcPQmvIW6djG+IGnWTOJYb4/atniHjfU/D4qOrusnNS3T1E1
+         s5Eg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@vlayer.xyz header.s=google header.b=PGfbnOKt;
+       spf=pass (google.com: domain of piotr@vlayer.xyz designates 209.85.220.41 as permitted sender) smtp.mailfrom=piotr@vlayer.xyz;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=vlayer.xyz;
+       dara=pass header.i=@vlayer.xyz
+Return-Path: <piotr@vlayer.xyz>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id af79cd13be357-7c07ebd37easor50086685a.7.2025.02.13.05.06.34
+        for <ivan@vlayer.xyz>
+        (Google Transport Security);
+        Thu, 13 Feb 2025 05:06:35 -0800 (PST)
+Received-SPF: pass (google.com: domain of piotr@vlayer.xyz designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@vlayer.xyz header.s=google header.b=PGfbnOKt;
+       spf=pass (google.com: domain of piotr@vlayer.xyz designates 209.85.220.41 as permitted sender) smtp.mailfrom=piotr@vlayer.xyz;
+       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=vlayer.xyz;
+       dara=pass header.i=@vlayer.xyz
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=vlayer.xyz; s=google; t=1739451994; x=1740056794; darn=vlayer.xyz;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=LEJnuHH4G0aXFyQdEQqvGB7QDhyA+vFBMypzVP3haPY=;
+        b=PGfbnOKtdLt3xqcit3UjIFl/MMb9L/jR59Bm68VeIWqSEBqXFLZzSgPf5/Sb3MHGhd
+         GrKTByRDryiWxNOXXACZGw/YEmFPBhSR/NtYiOnr2k7l10PQc1rR2jhNegcL0vCFDOYi
+         oh+RRkWtJsmy/9+BITYlDlqc68RxMFZBT9ULmOuNEaqYAGQ8q30gYhJBoRkd+YdinGHr
+         ldkSjUngGbAXUSc4MlKlgJtcH9pKvyBekYxDBhvqNyIPRsZZ8qUMGoT08Ws6cmoK5gS3
+         MAZmdWkvvJbpalGvRaGOqwjJVybBOGKw/iT0B6LocaICJaKB4w9b1swJnrwpyjc6GYrs
+         /nFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1739451994; x=1740056794;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=LEJnuHH4G0aXFyQdEQqvGB7QDhyA+vFBMypzVP3haPY=;
+        b=SjvoMl59iA7WzLs7n+hV2moRlty0U3wwqNLVZ/eLIwtwQvgz+DawticCMTdnO8qToL
+         U/R9f0xr0hYUy4XAYLGqGiRmGdzChm8R2Jm2H+NBiZn5SS7AfqVPRBjXixeDoRC+2xh1
+         xTWlkQJSq6+Nu7e43t1ksNEiYcU33GkBMfjHPhTPvDwGZkumxrlgd4otDIgHWmL43t8j
+         g+3PDcQjpcMSS8EGOdskqqW6XCa3+kT0Bx92ool3WlnKniHUOz71SKfiz85G/k+kP3A2
+         elqxnB5eaiT2+PLfUTzXdpm2OpVBQxfA2iwRKzZNm0JFBpcf2qrNkjn5VYjUDxVEHtOj
+         ApWw==
+X-Gm-Message-State: AOJu0YyHwwdcZ3Z5B2wbarhq3xVcBt70dfWx2LLWAaBbNSG/297egrsU
+	b9R9M6jid2mN4/Kv2JzXwoPGTM0IJ5bxmHHxpaZDc7teSnVAwsNQKiK82k3qgyXJLlOqBq3pYgM
+	cHxs0NFx8dJgulxV9FYs6Gy/OGNTH4MTZU0CUrCTPzv69nnD38Xksag==
+X-Gm-Gg: ASbGncthvrqPBeYZdxVoiBsbAxxWIQ7uBGtqqpmOupAwZSTyg2Dr0+pkeSb84cEsFxk
+	7hyx2tmB1zjKRtvYVmKZa/ZlAojdtxVYZoFoQ0/tX2z6UVFCQL8yT7TtHlAQvZXDeYGoaoHA=
+X-Google-Smtp-Source: AGHT+IE9EQTDoEKVtI+NEZlklKi0WYpkrozvUt7YVoeYfF55B4W96tJ5X2TBxUwuEprJYx5fVLAnJj3dqZPbuzbt8rw=
+X-Received: by 2002:a05:6214:dab:b0:6e4:4f74:f0ba with SMTP id
+ 6a1803df08f44-6e65c8cb74bmr46256616d6.8.1739451994314; Thu, 13 Feb 2025
+ 05:06:34 -0800 (PST)
+MIME-Version: 1.0
+From: =?UTF-8?Q?Piotr_=C5=BBelazko?= <piotr@vlayer.xyz>
+Date: Thu, 13 Feb 2025 14:06:23 +0100
+X-Gm-Features: AWEUYZlppTo4XFDf01za7LOqnBnAPDNU9oN3UIVmR_qqkeY0PPta80NmsRTXz-w
+Message-ID: <CAMnqj52Xgt-3KCbry6GPpz-9ayUwbrY2xuapBFAUB1CO+Qn0VQ@mail.gmail.com>
+Subject: Email with attachment
+To: Ivan Rukhavets <ivan@vlayer.xyz>
+Content-Type: multipart/mixed; boundary="00000000000039e0a3062e05ba79"
+
+--00000000000039e0a3062e05ba79
+Content-Type: multipart/alternative; boundary="00000000000039e0a1062e05ba77"
+
+--00000000000039e0a1062e05ba77
+Content-Type: text/plain; charset="UTF-8"
+
+Hello,
+take a look at the following remappings.
+
+Best Regards,
+Piotr
+
+--00000000000039e0a1062e05ba77
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr">Hello,<div>take a look at the following remappings.</div><div><br></div><div>Best Regards,</div><div>Piotr</div></div>
+
+--00000000000039e0a1062e05ba77--
+--00000000000039e0a3062e05ba79
+Content-Type: text/plain; charset="US-ASCII"; name="remappings.txt"
+Content-Disposition: attachment; filename="remappings.txt"
+Content-Transfer-Encoding: base64
+Content-ID: <f_m73cs6o50>
+X-Attachment-Id: f_m73cs6o50
+
+QG9wZW56ZXBwZWxpbi1jb250cmFjdHMtNS4wLjEvPWRlcGVuZGVuY2llcy9Ab3BlbnplcHBlbGlu
+LWNvbnRyYWN0cy01LjAuMS8Kb3BlbnplcHBlbGluLWNvbnRyYWN0cy89ZGVwZW5kZW5jaWVzL0Bv
+cGVuemVwcGVsaW4tY29udHJhY3RzLTUuMC4xLwpyaXNjMC1ldGhlcmV1bS0xLjIuMC89ZGVwZW5k
+ZW5jaWVzL3Jpc2MwLWV0aGVyZXVtLTEuMi4wLwpmb3JnZS1zdGQtMS45LjQvPWRlcGVuZGVuY2ll
+cy9mb3JnZS1zdGQtMS45LjQvCg==
+--00000000000039e0a3062e05ba79--
