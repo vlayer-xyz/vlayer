@@ -58,9 +58,9 @@ The following macros work together to enforce sealing and enable test mocking:
 
 ## Executor
 
-After verifying that execution locations belong to their respective chains, we can perform travel calls on them. How is this achieved?
+After verifying that execution locations belong to their respective chains, travel calls can be executed on them.
 
-EVM calls are executed using `Executor` struct. The `CachedEvmEnv` is passed to the `Executor`, enabling it to select the appropriate execution context based on the `ExecutionLocation`.
+EVM calls are handled by the [`Executor`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L28) struct. The `CachedEvmEnv` is passed to the `Executor`, allowing it to determine the appropriate execution context based on the `ExecutionLocation`.
 
 ```rust
 pub struct Executor<'envs, D: RevmDB> {
@@ -70,7 +70,7 @@ pub struct Executor<'envs, D: RevmDB> {
 
 ### `call`
 
-The `Executor` provides a public `call` method that wraps the internal execution (`internal_call`) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors, and prevents a full system crash. The method then converts the raw execution result and metadata into a structured `SuccessfulExecutionResult` for external use:
+The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that wraps the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors, and prevents a full system crash. The method then converts the raw execution result and metadata into a structured [`SuccessfulExecutionResult`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/execution_result.rs#L9) for external use:
 
 ```rust
 pub struct SuccessfulExecutionResult {
@@ -92,7 +92,7 @@ The private `internal_call` method performs the core execution of an EVM transac
 * **EVM Execution:** Builds the EVM engine using `build_evm` and runs the transaction with `evm.transact_preverified()`, capturing the result.
 * **Logging and Return:** Logs the result at debug level and returns a tuple containing the execution result and its metadata.
 
-#### Error Handling Summary:
+### Error Handling Summary:
 
 * **call:** Catches panics during execution with `panic::catch_unwind()`, converting them into structured errors.
 * **internal_call:** Relies on natural error propagation (using the `?` operator) during execution, allowing errors to propagate up to `call` for centralized error handling.
