@@ -5,7 +5,7 @@ use host_utils::{proving, ProverError};
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
 
-use crate::into_input;
+use crate::{db::HostDbError, into_input};
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -70,7 +70,7 @@ pub enum PreflightError {
     CalldataTooLargeError(usize),
 
     #[error("TravelCallExecutor error: {0}")]
-    Engine(#[from] travel_call::Error),
+    Engine(#[from] travel_call::Error<HostDbError>),
 
     #[error("Verification error: {0}")]
     Verification(#[from] VerificationError),

@@ -1,6 +1,6 @@
 use std::panic;
 
-use call_common::{ExecutionLocation, RevmDB};
+use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError};
 use derive_new::new;
 use evm::build_evm;
 use revm::primitives::ResultAndState;
@@ -30,7 +30,11 @@ pub struct Executor<'envs, D: RevmDB> {
 }
 
 impl<'envs, D: RevmDB> Executor<'envs, D> {
-    pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
+    pub fn call(
+        self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<SuccessfulExecutionResult, WrappedRevmDBError<D>> {
         info!("Executing top-level EVM call");
         let (execution_result, metadata) =
             panic::catch_unwind(|| self.internal_call(tx, location)).map_err(wrap_panic)??;
@@ -38,7 +42,11 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
             .map_err(Error::from)
     }
 
-    fn internal_call(&'envs self, tx: &Call, location: ExecutionLocation) -> TravelCallResult {
+    fn internal_call(
+        &'envs self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> TravelCallResult<WrappedRevmDBError<D>> {
         info!("Executing EVM call");
         let env = self.envs.get(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
