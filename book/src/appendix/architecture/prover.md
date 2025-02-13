@@ -139,7 +139,7 @@ pub(crate) struct HostEvmEnvFactory {
 }
 ```
 
-HostEvmEnvFactory uses a `CachedMultiProvider` to fetch necessary data (such as block headers) and create new `EvmEnv` instances on demand.
+`HostEvmEnvFactory` uses a `CachedMultiProvider` to fetch necessary data (such as block headers) and create new `EvmEnv` instances on demand.
 
 #### On the Guest
 
