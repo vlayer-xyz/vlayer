@@ -30,7 +30,7 @@ inputs:
     required: false
 outputs:
   deployment_url:
-    description: "URL of the deployed project"
+    description: "Vercel deployment url"
     value: ${{ steps.deploy-preview.outputs.deployment_url }}
 runs:
   using: "composite"
@@ -139,11 +139,3 @@ runs:
         EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
       run: |
         bash/deploy-to-vercel.sh
-        echo ${{ env.DEPLOYMENT_URL }}
-
-    - name: Echo DEPLOYMENT_URL
-      shell: bash
-      run: |
-        echo "The value of DEPLOYMENT_URL is: ${DEPLOYMENT_URL}"
-      env:
-        DEPLOYMENT_URL: ${{ env.DEPLOYMENT_URL }}
