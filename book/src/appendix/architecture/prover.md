@@ -143,7 +143,7 @@ pub(crate) struct HostEvmEnvFactory {
 
 #### On Guest
 
-On Guest, `CachedEvmEnv` is created using [`from_envs`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L49). This function takes a pre-populated cache of `EvmEnv` instances (created on Host) and initializes factory field with [`NullEvmEnvFactory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L17).
+On Guest, `CachedEvmEnv` is created using [`from_envs`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L49). This function takes a pre-populated cache of `EvmEnv` instances (created on Host) and initializes the `factory` field with [`NullEvmEnvFactory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L17).
 
 `NullEvmEnvFactory` is a dummy implementation that returns an error when its `create` method is called. This is acceptable because, in Guest context, there is no need to create new environments — only the cached ones are used.
 
