@@ -39,7 +39,7 @@ Verification steps are as follows:
 
 ## Verifier Safety & Testability
 
-To prevent unauthorized custom verifier implementations, we use them [Sealed trait pattern](https://predr.ag/blog/definitive-guide-to-sealed-traits-in-rust/). This ensures that [`IVerifier`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/common/src/verifier/sealing.rs) trait cannot be implemented outside the file it was defined - except when the `testing` feature is enabled.
+To prevent unauthorized custom verifier implementations, we use [Sealed trait pattern](https://predr.ag/blog/definitive-guide-to-sealed-traits-in-rust/). This ensures that [`IVerifier`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/common/src/verifier/sealing.rs) trait cannot be implemented outside the file it was defined - except when the `testing` feature is enabled.
 
 This design is crucial because verifiers are composable. When testing a `Verifier` that is composed from other verifiers, we need to mock them with fake implementations. This flexibility is achieved by allowing special implementations under the `testing` feature.
 
