@@ -29,7 +29,7 @@ jobs:
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh
       - name: Install solhint
-        working-directory: contracts
+        working-directory: ./contracts/vlayer/
         run: bun install --frozen-lockfile
       - name: Contracts vlayer lint:solidity
         working-directory: ./contracts/vlayer/
