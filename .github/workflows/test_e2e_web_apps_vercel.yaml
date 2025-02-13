@@ -26,10 +26,17 @@ jobs:
     name: E2E web apps test against devnet
     runs-on: aws-linux-medium
     steps:
+      - name: Wait for artifact
+        shell: bash
+        run: |
+          sleep 20
+
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: env_file
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
 
       ###############################################
 
