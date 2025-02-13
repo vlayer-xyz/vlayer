@@ -1,13 +1,14 @@
 use std::any::Any;
 
+use call_common::RevmDBError;
 use revm::primitives::EVMError;
 
 use crate::evm::execution_result::TransactError;
 
 #[derive(thiserror::Error, Debug, PartialEq)]
-pub enum Error {
-    #[error("EVM transact preverified error: {0}")]
-    TransactPreverifiedError(String),
+pub enum Error<D: RevmDBError> {
+    #[error("EVM error: {0}")]
+    EvmError(#[from] EVMError<D>),
 
     #[error("EVM transact error: {0}")]
     TransactError(#[from] TransactError),
@@ -19,18 +20,9 @@ pub enum Error {
     Panic(String),
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T, D> = std::result::Result<T, Error<D>>;
 
-impl<D: std::fmt::Debug> From<EVMError<D>> for Error {
-    fn from(err: EVMError<D>) -> Self {
-        match err {
-            EVMError::Precompile(err) => TransactError::Revert(err).into(),
-            _ => Error::TransactPreverifiedError(format!("{err:?}")),
-        }
-    }
-}
-
-pub fn wrap_panic(err: Box<dyn Any + Send>) -> Error {
+pub fn wrap_panic<D: RevmDBError>(err: Box<dyn Any + Send>) -> Error<D> {
     let panic_msg = err
         .downcast::<String>()
         .map(|x| *x)

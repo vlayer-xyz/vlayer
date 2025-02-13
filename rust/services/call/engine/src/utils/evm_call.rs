@@ -58,7 +58,7 @@ pub fn create_revert_outcome(reason: &str, gas_limit: u64) -> CallOutcome {
     create_raw_revert_outcome(alloy_sol_types::Revert::from(reason).abi_encode().into(), gas_limit)
 }
 
-pub fn create_raw_revert_outcome(return_msg: Bytes, gas_limit: u64) -> CallOutcome {
+fn create_raw_revert_outcome(return_msg: Bytes, gas_limit: u64) -> CallOutcome {
     CallOutcome::new(
         InterpreterResult::new(InstructionResult::Revert, return_msg, Gas::new_spent(gas_limit)),
         usize::MAX..usize::MAX,

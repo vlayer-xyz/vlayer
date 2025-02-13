@@ -1,10 +1,11 @@
 use alloy_primitives::{address, Address, ChainId};
-use call_common::{metadata::Metadata, ExecutionLocation};
+use call_common::{metadata::Metadata, ExecutionLocation, RevmDB, WrappedRevmDBError};
 use call_precompiles::precompile_by_address;
 use revm::{
+    db::WrapDatabaseRef,
     interpreter::{CallInputs, CallOutcome},
     primitives::ExecutionResult,
-    Database, EvmContext, Inspector as IInspector,
+    EvmContext, Inspector as IInspector,
 };
 use tracing::{debug, info};
 
@@ -18,20 +19,21 @@ use crate::{
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
 
-pub type TravelCallResult = travel_call::error::Result<(ExecutionResult, Box<[Metadata]>)>;
-type TransactionCallback<'a> = dyn Fn(&Call, ExecutionLocation) -> TravelCallResult + 'a;
+pub type TravelCallResult<D> = travel_call::error::Result<(ExecutionResult, Box<[Metadata]>), D>;
+type TransactionCallback<'a, D> = dyn Fn(&Call, ExecutionLocation) -> TravelCallResult<D> + 'a;
 
-pub struct Inspector<'a> {
+pub struct Inspector<'a, D: RevmDB> {
     start_chain_id: ChainId,
     pub location: Option<ExecutionLocation>,
-    transaction_callback: Box<TransactionCallback<'a>>,
+    transaction_callback: Box<TransactionCallback<'a, WrappedRevmDBError<D>>>,
     metadata: Vec<Metadata>,
 }
 
-impl<'a> Inspector<'a> {
+impl<'a, D: RevmDB> Inspector<'a, D> {
     pub fn new(
         start_chain_id: ChainId,
-        transaction_callback: impl Fn(&Call, ExecutionLocation) -> TravelCallResult + 'a,
+        transaction_callback: impl Fn(&Call, ExecutionLocation) -> TravelCallResult<WrappedRevmDBError<D>>
+            + 'a,
     ) -> Self {
         Self {
             start_chain_id,
@@ -94,13 +96,13 @@ impl<'a> Inspector<'a> {
     }
 }
 
-impl<DB> IInspector<DB> for Inspector<'_>
+impl<D> IInspector<WrapDatabaseRef<&D>> for Inspector<'_, D>
 where
-    DB: Database,
+    D: RevmDB,
 {
     fn call(
         &mut self,
-        _context: &mut EvmContext<DB>,
+        _context: &mut EvmContext<WrapDatabaseRef<&D>>,
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         info!("Call: {:?} -> {:?}", inputs.caller, inputs.bytecode_address);
@@ -121,12 +123,15 @@ where
 
 #[cfg(test)]
 mod test {
+
+    use std::convert::Infallible;
+
     use alloy_primitives::{address, Address, BlockNumber, Bytes, U256};
     use revm::{
-        db::{CacheDB, EmptyDB},
+        db::{EmptyDB, WrapDatabaseRef},
         interpreter::{CallInputs, CallScheme, CallValue},
         primitives::{AccountInfo, Output, SuccessReason},
-        EvmContext, Inspector as IInspector,
+        EvmContext, InMemoryDB, Inspector as IInspector,
     };
     use travel_call::args::{SET_BLOCK_SELECTOR, SET_CHAIN_SELECTOR};
 
@@ -139,7 +144,7 @@ mod test {
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
     type StaticTransactionCallback =
-        dyn Fn(&Call, ExecutionLocation) -> TravelCallResult + Send + Sync;
+        dyn Fn(&Call, ExecutionLocation) -> TravelCallResult<Infallible> + Send + Sync;
 
     static TRANSACTION_CALLBACK: &StaticTransactionCallback = &|_, _| {
         Ok((
@@ -169,11 +174,15 @@ mod test {
         }
     }
 
-    fn inspector_call(addr: Address, selector: &[u8], args: &[u8]) -> Inspector<'static> {
-        let mut mock_db = CacheDB::new(EmptyDB::default());
+    fn inspector_call(
+        addr: Address,
+        selector: &[u8],
+        args: &[u8],
+    ) -> Inspector<'static, impl RevmDB> {
+        let mut mock_db = InMemoryDB::default();
         mock_db.insert_account_info(addr, AccountInfo::default());
 
-        let mut evm_context = EvmContext::new(mock_db);
+        let mut evm_context = EvmContext::new(WrapDatabaseRef::from(&mock_db));
         let input = [selector, args].concat();
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
@@ -192,9 +201,10 @@ mod test {
             (SEPOLIA_ID, SEPOLIA_BLOCK - 1).into(),
         ];
 
-        let mut inspector = Inspector::new(locations[0].chain_id, |call, location| {
-            (TRANSACTION_CALLBACK)(call, location)
-        });
+        let mut inspector: Inspector<'_, EmptyDB> =
+            Inspector::new(locations[0].chain_id, |call, location| {
+                (TRANSACTION_CALLBACK)(call, location)
+            });
 
         inspector.set_chain(locations[1].chain_id, locations[1].block_number);
         assert_eq!(inspector.location, Some(locations[1]));
