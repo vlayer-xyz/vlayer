@@ -56,11 +56,50 @@ The following macros work together to enforce sealing and enable test mocking:
   * Implements the verifier trait for function pointers with `impl_verifier_for_fn!`
 
 
-## Inspector
+## Executor
 
 After verifying that execution locations belong to their respective chains, we can perform travel calls on them. How is this achieved?
 
-Both **Time Travel** and **Teleport** are enabled by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to **intercept**, **monitor**, and *modify* EVM calls, particularly handling **travel calls** that alter the execution context by switching the blockchain network or block number.
+EVM calls are executed using `Executor` struct. The `CachedEvmEnv` is passed to the `Executor`, enabling it to select the appropriate execution context based on the `ExecutionLocation`.
+
+```rust
+pub struct Executor<'envs, D: RevmDB> {
+    envs: &'envs CachedEvmEnv<D>,
+}
+```
+
+### `call`
+
+The `Executor` provides a public `call` method that wraps the internal execution (`internal_call`) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors, and prevents a full system crash. The method then converts the raw execution result and metadata into a structured `SuccessfulExecutionResult` for external use:
+
+```rust
+pub struct SuccessfulExecutionResult {
+    pub output: Vec<u8>,
+    pub gas_used: u64,
+    pub metadata: Box<[Metadata]>,
+}
+```
+
+### `internal_call`
+
+The private `internal_call` method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another).
+
+#### How It Works:
+
+* **Environment Retrieval:** Obtains the appropriate execution environment (`EvmEnv`) for the given location.
+* **Recursive Callback:** Defines a callback to support nested contract calls by recursively invoking `internal_call`.
+* **Inspector Setup:** Instantiates an `Inspector` with the chain ID and the callback function.
+* **EVM Execution:** Builds the EVM engine using `build_evm` and runs the transaction with `evm.transact_preverified()`, capturing the result.
+* **Logging and Return:** Logs the result at debug level and returns a tuple containing the execution result and its metadata.
+
+#### Error Handling Summary:
+
+* **call:** Catches panics during execution with `panic::catch_unwind()`, converting them into structured errors.
+* **internal_call:** Relies on natural error propagation (using the `?` operator) during execution, allowing errors to propagate up to `call` for centralized error handling.
+
+## Inspector
+
+Both **Time Travel** and **Teleport** features are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to **intercept**, **monitor**, and **modify** EVM calls, particularly handling **travel calls** that alter the execution context by switching the blockchain network or block number.
 
 ```rust
 pub struct Inspector<'a> {
