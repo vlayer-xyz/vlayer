@@ -17,7 +17,8 @@ use tracing::{error, info};
 use crate::{
     commands::common::soldeer::{add_remappings, install},
     config::{
-        self, Config, Dependency, Template, UnresolvedError, SDK_HOOKS_NPM_NAME, SDK_NPM_NAME,
+        self, Config, Dependency, DetailedDependency, Template, UnresolvedError,
+        SDK_HOOKS_NPM_NAME, SDK_NPM_NAME,
     },
     errors::CLIError,
     target_version,
@@ -128,8 +129,8 @@ fn change_sdk_dependency_to_npm(
         SDK_NPM_NAME.into(),
         Value::String(
             deps.get(SDK_NPM_NAME)
-                .ok_or(UnresolvedError)
-                .and_then(Dependency::version)?,
+                .map(|dep| dep.version().or(dep.path()))
+                .ok_or(UnresolvedError(SDK_NPM_NAME.into()))??,
         ),
     );
 
@@ -138,8 +139,8 @@ fn change_sdk_dependency_to_npm(
             SDK_HOOKS_NPM_NAME.into(),
             Value::String(
                 deps.get(SDK_HOOKS_NPM_NAME)
-                    .ok_or(UnresolvedError)
-                    .and_then(Dependency::version)?,
+                    .map(|dep| dep.version().or(dep.path()))
+                    .ok_or(UnresolvedError(SDK_HOOKS_NPM_NAME.into()))??,
             ),
         );
     }

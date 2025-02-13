@@ -36,8 +36,8 @@ pub const SDK_NPM_NAME: &str = "@vlayer/sdk";
 pub const SDK_HOOKS_NPM_NAME: &str = "@vlayer/react";
 
 #[derive(thiserror::Error, Debug)]
-#[error("Unresolved config field")]
-pub struct UnresolvedError;
+#[error("Unresolved config field: {0}")]
+pub struct UnresolvedError(pub String);
 
 pub type Result<T> = std::result::Result<T, UnresolvedError>;
 
@@ -50,7 +50,9 @@ pub struct Config {
 
 impl Config {
     pub fn template(&self) -> Result<Template> {
-        self.template.clone().ok_or(UnresolvedError)
+        self.template
+            .clone()
+            .ok_or(UnresolvedError("template".into()))
     }
 
     pub const fn npm(&self) -> &HashMap<String, Dependency> {
@@ -77,7 +79,10 @@ impl Default for Config {
                 .remappings
                 .iter()
                 .map(|(source, target)| {
-                    add_remapping(VLAYER_FOUNDRY_PKG.name, &version, source, target)
+                    (
+                        format!("{source}/"),
+                        default_remapping_target(VLAYER_FOUNDRY_PKG.name, &version, target),
+                    )
                 })
                 .collect(),
         );
@@ -112,13 +117,13 @@ where
     pub fn path(&self) -> Result<P> {
         self.as_detailed()
             .and_then(DetailedDependency::path)
-            .ok_or(UnresolvedError)
+            .ok_or(UnresolvedError("path".into()))
     }
 
     pub fn version(&self) -> Result<String> {
         match self {
             Self::Simple(version) => Ok(version.clone()),
-            Self::Detailed(detailed) => detailed.version().ok_or(UnresolvedError),
+            Self::Detailed(detailed) => detailed.version().ok_or(UnresolvedError("version".into())),
         }
     }
 
@@ -129,7 +134,7 @@ where
     pub fn remappings(&self) -> Result<&[(String, P)]> {
         self.as_detailed()
             .and_then(DetailedDependency::remappings)
-            .ok_or(UnresolvedError)
+            .ok_or(UnresolvedError("remappings".into()))
     }
 
     pub fn as_simple_mut(&mut self) -> Option<&mut String> {
@@ -189,12 +194,11 @@ where
     }
 }
 
-pub fn add_remapping(name: &str, version: &str, source: &str, target: &str) -> (String, String) {
-    let from = format!("{source}/");
+pub fn default_remapping_target(name: &str, version: &str, path: &str) -> String {
     let to = format!("dependencies/{name}-{version}/");
-    match target.len() {
-        0 => (from, to),
-        _ => (from, format!("{to}{target}/")),
+    match path.len() {
+        0 => to,
+        _ => format!("{to}{path}/"),
     }
 }
 
@@ -206,7 +210,7 @@ impl From<SoldeerDependency<'_>> for DetailedDependency<String> {
         let remappings: Vec<(String, String)> = value
             .remappings
             .iter()
-            .map(|(x, y)| add_remapping(value.name, value.version, x, y))
+            .map(|(x, y)| (format!("{x}/"), default_remapping_target(value.name, value.version, y)))
             .collect();
         Self {
             path,
