@@ -22,11 +22,12 @@ jobs:
     name: Deploy simple-web-proof example
     runs-on: ubuntu-24.04
     outputs:
-      deployment_url: ${{ steps.deploy-preview.outputs.deployment_url }}
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install, build and deploy example
+        id: deploy
         uses: ./.github/actions/example-deploy
         with:
           EXAMPLE_NAME: simple-web-proof

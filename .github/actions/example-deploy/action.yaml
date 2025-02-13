@@ -28,6 +28,10 @@ inputs:
   VITE_SENTRY_DSN:
     description: 'Sentry DSN'
     required: false
+outputs:
+  deployment_url:
+    description: "URL of the deployed project"
+    value: ${{ steps.deploy-preview.outputs.deployment_url }}
 runs:
   using: "composite"
   steps:
