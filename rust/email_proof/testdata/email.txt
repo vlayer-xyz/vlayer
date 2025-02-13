@@ -32,11 +32,8 @@ testtest
 
 
 --------------26A45336F6C6196BD8BBA2A2
-Content-Type: text/plain; charset=UTF-8;
- name="sha1hash.txt"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="sha1hash.txt"
 
 NzRjOGYwOWRmYTMwZWFjY2ZiMzkyYjEzMjMxNGZjNmI5NzhmMzI1YSAqZmxleC1jb25maXJt
 LW1haWwuMS4xMC4wLnhwaQpjY2VlNGI0YWE0N2Y1MTNhYmNlMzQyY2UxZTJlYzJmZDk2MDBl
@@ -46,11 +43,8 @@ YWExNTM0MThlYThmYmM4YmU3YmE2ZjU0Y2U4YTFjYjdlZTQ2OCAqZmxleC1jb25maXJtLW1h
 aWwuMS45LjkueHBpCjgxNjg1NjNjYjI3NmVhNGY5YTJiNjMwYjlhMjA3ZDkwZmIxMTg1NmUg
 KmZsZXgtY29uZmlybS1tYWlsLnhwaQo=
 --------------26A45336F6C6196BD8BBA2A2
-Content-Type: application/json;
- name="manifest.json"
+Content-Type: application/json
 Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename="manifest.json"
 
 ewogICJtYW5pZmVzdF92ZXJzaW9uIjogMiwKICAiYXBwbGljYXRpb25zIjogewogICAgImdl
 Y2tvIjogewogICAgICAiaWQiOiAiZmxleGlibGUtY29uZmlybS1tYWlsQGNsZWFyLWNvZGUu
