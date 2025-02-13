@@ -7,7 +7,7 @@ It supports accessing verifiable data from three distinct sources:: HTTP request
 - Email contents can be proven by verifying DKIM signatures and checking the sender domain
 - EVM state and storage proofs can be verified against the block hash via Merkle Proofs
 
-Before Vlayer, ZK programs were application-specific and proved a single source of data. Vlayer allows you to write a Solidity smart contract (called **Prover**) that acts as a glue between all three possible data sources and enables you to **aggregate** this data in a verifiable way. We not only prove that the data we use is valid, but we can also process it and prove it was processed correctly by the **Prover**.
+Before Vlayer, ZK programs were application-specific and proved a single source of data. Vlayer allows you to write a Solidity smart contract (called **Prover**) that acts as a glue between all three possible data sources and enables you to **aggregate** this data in a verifiable way - we not only prove that the data we use is valid but also that it was processed correctly by the **Prover**.
 
 ### Aggregation examples
 
@@ -32,7 +32,7 @@ Their structure and responsibilities are as follows:
     - `guest` (in `services/call/guest`): Library that contains code for EVM execution and input validation.
     - `risc0_guest` (in `guest_wrapper/risc0_call_guest`): Thin wrapper that uses RISC0 ZKVM I/O and delegates work to `guest`.
     - `guest_wrapper` (in `guest_wrapper`): Compiles `risc0_guest` (using cargo build scripts) to a binary format (ELF) using [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target.
-- **Host** (in `host`): Runs a **_preflight_**, during which it collects all the data required by the guest. It retrieves data from online sources (RPC clients) and then triggers guest execution (which is done offline).
+- **Host** (in `services/call/host`): Runs a **_preflight_**, during which it collects all the data required by the guest. It retrieves data from online sources (RPC clients) and then triggers guest execution (which is done offline).
 
 Our architecture is heavily inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel).
 
@@ -125,7 +125,7 @@ Guest is required to verify all data provided by the Host. Initial validation of
 
 * When we create `StateDb` in Guest with [`StateDb::new`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/state.rs#L51), we compute hashes for `storage_tries` roots and `contracts` code. When we later try to access storage (using the [`WrapStateDb::basic_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L39) function) or contract code (using the [`WrapStateDb::code_by_hash_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L70) function), we know this data is valid because the hashes were computed properly. If they weren't, we wouldn't be able to access the given storage or code. Thus, storage verification is done indirectly.
 
-Above verifications are not enough to ensure validity of Time Travel (achieved by [Chain Proofs](./chain_proof.md)) and Teleport.
+Above verifications are not enough to ensure validity of Time Travel (achieved by [Chain Proofs](./chain_proof.md)) and Teleport. Travel call verification is described in the [next](./time_travel_teleport.md) section.
 
 ### Error handling	
 

@@ -1,95 +1,74 @@
 # Time Travel and Teleport
 
-Vlayer enables aggregating data from multiple blocks and multiple chains. We call this features Time Travel and Teleport. To achieve that, we span multiple revms' instances during Engine execution. Each revm instance corresponds to certain block number on the certain chain.
+vlayer allows seamless aggregation of data from different blocks and chains. We refer to these capabilities as Time Travel and Teleport. How is it done?
 
-## EvmEnv
-`EvmEnv` represents a configuration required to create a revm instance. Depending on the context, it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
+> **Note:** Teleportation is currently possible only from L1 chains to L2 optimistic chains. We plan to support teleportation from L2 to L1 in the future.
 
-It is also implicitly parametrized via dynamic dispatch by Header type, which may differ for various hard forks or networks.
+## Verification
 
-See the code snippet below.
+At the [beggining of the `guest::main`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/guest.rs#L38) we verify whether the data for each execution location is coherent. However, we have not yet checked whether data from multiple execution locations align with each other. Specifically, we need to ensure that:
+* The blocks we claim to be on the same chain are actually there (allowing time travel between blocks on the same chain).
+* The blocks associated with a given chain truly belong to that chain (enabling teleportation to the specified chain).
+The points above are verified by the [`Verifier::verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/travel_call.rs#L80) function. The `Verifier` struct is used both during the host preflight and guest execution. Because of that it is parametrized by Recording Clients (in host) and Reading Clients (in guest).
+
+The `verify` function performs above verifications by:
+
+### I. Time Travel Verification
+Is possible thanks to [Chain Proofs](./chain_proof.md).
+Verification steps are as follows:
+1. **Retrieve Blocks:** Extract the list of blocks to be verified and group them by chain.
+2. **Iterate Over Chains:** For each chain run [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks that does the following:
+3. **Skip Single-Block Cases:** If only one block exists, no verification is needed.
+4. **Request Chain Proof:** Fetch cryptographic proof of chain integrity.
+5. **Verifies Chain Proof:** Run the [chain proof `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/chain/common/src/verifier.rs#L46) function on the obtained Chain Proof to check its validity.
+6. **Validate Blocks:** Compare each block’s hash with the hash obtained by block number from the validated Chain Proof.
+
+<!-- potentially todo: document chain proof `verify` function -->
+
+### II. Teleport Verification
+1. **Identify Destination Chains:** Extract execution locations from `CachedEvmEnv`, filtering for chains different from the starting one.
+2. **Skip Local Testnets:** If the source chain is a local testnet, teleport verification is skipped.
+3. **Validate Chain Anchors:** Ensure the destination chain is properly anchored to the source chain using [`assert_anchor()`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/chain/src/optimism.rs#L25).
+4. **Fetch Latest Confirmed L2 Block:** Use the [`AnchorStateRegistry`](https://docs.optimism.io/stack/smart-contracts#anchorstateregistry) and `sequencer_client` to get the latest confirmed block on the destination chain.
+5. **Verify Latest Confirmed Block Hash Consistency:** Compare the latest confirmed block’s hashes.
+6. **Verify Latest Teleport Location Is Confirmed:** Using function [`ensure_latest_teleport_location_is_confirmed`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/teleport.rs#L154) we check that latest destination block number is not greater than latest confirmed block number.
+
+<!-- potentially todo: document how we are using AnchorStateRegistry in more detail -->
+
+<!-- todo: picture -->
+
+## Inspector
+
+After verifying that execution locations belong to their respective chains, we can perform travel calls on them. How is this achieved?
+
+Both **Time Travel** and **Teleport** are enabled by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to **intercept**, **monitor**, and *modify* EVM calls, particularly handling **travel calls** that alter the execution context by switching the blockchain network or block number.
 
 ```rust
-pub struct EvmEnv<DB> {
-    pub db: DB,
-    pub cfg_env: CfgEnvWithHandlerCfg,
-    pub header: Box<dyn EvmBlockHeader> ,
+pub struct Inspector<'a> {
+    start_chain_id: ChainId,
+    pub location: Option<ExecutionLocation>,
+    transaction_callback: Box<TransactionCallback<'a>>,
+    metadata: Vec<Metadata>,
 }
 ```
 
-## EvmEnvFactory
-<!-- still needs corrections -->
-`EvmEnvFactory` is a type, responsible for creation of `EvmEnv` and, in consequence, revm instances. There are two variants of `EnvFactory`:
-- `HostEnvFactory` creates `Databases` and `Headers` dynamically, utilizing Providers created from `MultiProvider`, by fetching data from Ethereum Nodes. Then, the data is serialized to be sent to Guest.
-- `GuestEnvFactory` provides all required data returned from a cached copy deserialized at the beginning of Guest execution.
+### Key Responsibilities of the Inspector
 
-```mermaid
-%%{init: {'theme':'dark'}}%%
-classDiagram
+#### 1. Tracks Execution Context (Chain & Block Info)
+It maintains the `ExecutionLocation` which consists of `chain_id` and `block_number`
 
-class EnvFactory {
-  create(ExecutionLocation)
-}
+#### 2. Handles Travel Calls
+There are two special functions that modify execution context:
+* `set_block(block_number)`: Updates the block number while keeping the same chain.
+* `set_chain(chain_id, block_number)`: Changes both the blockchain network and block number.
 
-class HostEnvFactory {
-  providers: HashMap[chainId, Provider]
-  new(MultiProvider)
-}
+#### 3. Intercepts Contract Calls
+Intercepts every contract call and determines how to handle it:
+* **Precompiled Contracts:** If the call targets a precompiled contract, it logs the call and records relevant metadata.
+* **Travel Call Contract:** If the call is directed to the designated travel call contract (identified by `CONTRACT_ADDR`), the `Inspector` parses the input arguments and triggers a travel call by invoking either `set_block` or `set_chain`.
+* **Standard Calls:** If no travel call is detected, the `Inspector` allows the call to proceed normally. However, if a travel call has already set a new context, it processes the call using the provided `transaction_callback` and applies the updated execution context in the [`on_call` function](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L68).
 
-class GuestEnvFactory {
-  envs: HashMap[[ChainId, BlockNo], Env<WrapStateDB>]
-  from(MultiInput)
-}
+#### 4. Monitors & Logs Precompiled Contracts
+If the call is made to a precompiled contract it logs the call and records metadata.
 
-class Env {
-  db: DB
-  config: Config
-  header: dyn Header
-}
-
-class MultiProvider {
-  providers: HashMap[chainId, EthersProvider]
-}
-
-EnvFactory <|-- GuestEnvFactory
-EnvFactory <|-- HostEnvFactory
-GuestEnvFactory o-- Env
-HostEnvFactory <.. MultiProvider
-```
-
-## Engine
-
-`Engine`'s responsibility is to execute calls. To do so, `Engine` spawns revms instances on demand. 
-Engine calls are intercepted by `TravelInspector`. 
-
-The role of the `TravelInspector` is to intercept calls related to [time travel](/features/time-travel.html) and [teleport](/features/teleport.html) features.
-It stores the destination location (set by `setBlock` and `setChain` calls) and delegates the call back to the `Engine` if needed.
-
-
-```mermaid
-%%{init: {'theme':'dark'}}%%
-classDiagram
-
-class Engine {
-  call(ExecutionLocation, Call)
-}
-
-class TravelInspector {
-  destination: Option[ExecutionLocation]
-  callback: F
-  chainId: ChainId
-  setBlock(uint)
-  setChain(uint, uint)
-  delegateCall(call)
-}
-
-Engine *-- TravelInspector
-```
-
-## Testing
-
-Tests are run in a custom `ContractRunner` forked from [forge](https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/src/runner.rs).
-
-In addition to the usual functionality, tests run by vlayer can use the `execProver` feature. The next call after `execProver` will be executed in the vlayer `Engine`.
-
-Runner is extended with a custom Inspector that delegates certain calls to an instance of `Engine`. The design is similar to `TravelInspector`.
+<!-- todo: write about precompiles -->
