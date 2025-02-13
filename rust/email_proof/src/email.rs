@@ -1,5 +1,5 @@
 use alloy_sol_types::SolValue;
-use mailparse::{headers::Headers, MailHeaderMap, MailParseError, ParsedMail};
+use mailparse::{headers::Headers, DispositionType, MailHeaderMap, MailParseError, ParsedMail};
 
 use crate::email_address::EmailAddress;
 
@@ -45,6 +45,7 @@ impl TryFrom<ParsedMail<'_>> for Email {
 fn get_body(mail: &ParsedMail) -> Result<String, MailParseError> {
     mail.parts()
         .filter(|part| is_plain_text_mimetype(part))
+        .filter(|part| is_inlined_body_content(part))
         .map(ParsedMail::get_body)
         .collect::<Result<_, _>>()
         .and_then(validate_body_parts)
@@ -61,6 +62,10 @@ fn validate_body_parts(parts: Vec<String>) -> Result<Vec<String>, MailParseError
 
 fn is_plain_text_mimetype(part: &ParsedMail) -> bool {
     part.ctype.mimetype == "text/plain"
+}
+
+fn is_inlined_body_content(part: &ParsedMail) -> bool {
+    part.get_content_disposition().disposition == DispositionType::Inline
 }
 
 impl Email {
