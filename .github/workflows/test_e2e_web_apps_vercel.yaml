@@ -26,74 +26,81 @@ jobs:
     name: E2E web apps test against devnet
     runs-on: aws-linux-medium
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
         with:
-          submodules: recursive
-      - name: Install Rust prerequisites
-        id: rust_pre
-        uses: ./.github/actions/rust-prerequisites
-      - name: Install contracts prerequisites
-        uses: ./.github/actions/contracts-prerequisites
-      - name: Install TypeScript prerequisites
-        uses: ./.github/actions/ts-prerequisites
+          name: env_file
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
+      ###############################################
 
-      - name: Build sdk
-        working-directory: ./packages/sdk
-        run: bun run build
-
-      - name: Install Playwright Browsers
-        run: bunx playwright install --with-deps chromium
-
-      - name: Check clang and LLVM version
-        env:
-          EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check-llvm-clang.sh
-
-      - name: Install contracts' dependencies
-        working-directory: ./contracts/vlayer
-        run: forge soldeer install
-
-      # - name: Wait for artifact
-      #   shell: bash
-      #   run: |
-      #     sleep 200
-
-      # - name: Download artifact
-      #   uses: actions/download-artifact@v4
+      # - name: Checkout repository
+      #   uses: actions/checkout@v4
       #   with:
-      #     name: env-file
+      #     submodules: recursive
+      # - name: Install Rust prerequisites
+      #   id: rust_pre
+      #   uses: ./.github/actions/rust-prerequisites
+      # - name: Install contracts prerequisites
+      #   uses: ./.github/actions/contracts-prerequisites
+      # - name: Install TypeScript prerequisites
+      #   uses: ./.github/actions/ts-prerequisites
 
-      # - name: Load ENV variable
-      #   shell: bash
-      #   run: |
-      #     echo "DEPLOYMENT_URL=$(cat env_vars.txt)" >> $GITHUB_ENV
+      # - name: Install dependencies
+      #   run: bun install --frozen-lockfile
 
-      # - name: Use the variable
-      #   shell: bash
-      #   run: |
-      #     echo "Loaded ENV: $DEPLOYMENT_URL"
+      # - name: Build sdk
+      #   working-directory: ./packages/sdk
+      #   run: bun run build
+
+      # - name: Install Playwright Browsers
+      #   run: bunx playwright install --with-deps chromium
+
+      # - name: Check clang and LLVM version
       #   env:
-      #     DEPLOYMENT_URL: ${{ env.DEPLOYMENT_URL }}
+      #     EXPECTED_LLVM_VERSION: "18.1"
+      #   run: bash/check-llvm-clang.sh
 
-      - name: Run e2e test
-        env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          PROVING_MODE: "dev"
-          VLAYER_ENV: dev
-          WEB_SERVER_URL: https://simple-web-proof-a7f2ewphu-vlayer.vercel.app
-          VLAYER_TMP_DIR: ./artifacts
-        run: bash/e2e-web-apps-test.sh
+      # - name: Install contracts' dependencies
+      #   working-directory: ./contracts/vlayer
+      #   run: forge soldeer install
 
-      # Teardown
-      - name: Display Logs
-        if: always()
-        run: |
-          for log_file in $(find ./artifacts/logs -type f); do
-            echo "=== Contents of $log_file ==="
-            cat "$log_file"
-            echo "============================="
-          done
+      # # - name: Wait for artifact
+      # #   shell: bash
+      # #   run: |
+      # #     sleep 200
+
+      # # - name: Download artifact
+      # #   uses: actions/download-artifact@v4
+      # #   with:
+      # #     name: env-file
+
+      # # - name: Load ENV variable
+      # #   shell: bash
+      # #   run: |
+      # #     echo "DEPLOYMENT_URL=$(cat env_vars.txt)" >> $GITHUB_ENV
+
+      # # - name: Use the variable
+      # #   shell: bash
+      # #   run: |
+      # #     echo "Loaded ENV: $DEPLOYMENT_URL"
+      # #   env:
+      # #     DEPLOYMENT_URL: ${{ env.DEPLOYMENT_URL }}
+
+      # - name: Run e2e test
+      #   env:
+      #     RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+      #     PROVING_MODE: "dev"
+      #     VLAYER_ENV: dev
+      #     WEB_SERVER_URL: https://simple-web-proof-a7f2ewphu-vlayer.vercel.app
+      #     VLAYER_TMP_DIR: ./artifacts
+      #   run: bash/e2e-web-apps-test.sh
+
+      # # Teardown
+      # - name: Display Logs
+      #   if: always()
+      #   run: |
+      #     for log_file in $(find ./artifacts/logs -type f); do
+      #       echo "=== Contents of $log_file ==="
+      #       cat "$log_file"
+      #       echo "============================="
+      #     done
