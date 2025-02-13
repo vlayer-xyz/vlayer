@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import * as Sentry from "@sentry/react";
 
 import Providers from "./providers";
-import { EmlUploadForm } from "../pages/welcome/index";
+import Router from "./router";
 import "./index.css";
 
 if (import.meta.env.VITE_SENTRY_DSN) {
@@ -17,7 +17,7 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Providers>
-      <EmlUploadForm />
+      <Router />
     </Providers>
     <Analytics />
   </StrictMode>,
