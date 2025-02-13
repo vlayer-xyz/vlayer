@@ -15,6 +15,7 @@ on:
       - "LICENSE"
       - "book/**"
   pull_request:
+  merge_group:
   workflow_dispatch:
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
