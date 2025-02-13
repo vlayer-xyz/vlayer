@@ -117,7 +117,7 @@ pub struct ExecutionLocation {
 
 ### CachedEvmEnv
 
-`EvmEnv` instances are accessed in both the Host and the Guest using [`CachedEvmEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L27) structure. However, the way `CachedEvmEnv` is constructed differs between these two contexts.
+`EvmEnv` instances are accessed in both Host and Guest using [`CachedEvmEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L27) structure. However, the way `CachedEvmEnv` is constructed differs between these two contexts.
 
 #### Structure
 ```rust
@@ -129,9 +129,9 @@ pub struct CachedEvmEnv<D: RevmDB> {
 * **cache**: `HashMap` (aliased as `MultiEvmEnv<D>`) that stores `EvmEnv` instances, keyed by their `ExecutionLocation`
 * **factory**: used to create new `EvmEnv` instances
 
-#### On the Host
+#### On Host
 
-On the Host, `CachedEvmEnv` is created with [`from_factory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L41) function. It initializes `CachedEvmEnv` with an empty cache and a factory of type [`HostEvmEnvFactory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/evm_env/factory.rs#L19) that is responsible for writing to cache.
+On Host, `CachedEvmEnv` is created with [`from_factory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L41) function. It initializes `CachedEvmEnv` with an empty cache and a factory of type [`HostEvmEnvFactory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/evm_env/factory.rs#L19) that is responsible for creating `EvmEnv` instances.
 
 ```rust
 pub(crate) struct HostEvmEnvFactory {
@@ -141,11 +141,11 @@ pub(crate) struct HostEvmEnvFactory {
 
 `HostEvmEnvFactory` uses a `CachedMultiProvider` to fetch necessary data (such as block headers) and create new `EvmEnv` instances on demand.
 
-#### On the Guest
+#### On Guest
 
-On the Guest, `CachedEvmEnv` is created using [`from_envs`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L49). This function takes a pre-populated cache of `EvmInstances` (created on the Host) and initializes factory field with [`NullEvmEnvFactory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L17).
+On Guest, `CachedEvmEnv` is created using [`from_envs`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L49). This function takes a pre-populated cache of `EvmEnv` instances (created on Host) and initializes factory field with [`NullEvmEnvFactory`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L17).
 
-`NullEvmEnvFactory` is a dummy implementation that returns an error when its `create` method is called. This is acceptable because, in the Guest context, there is no need to create new environments, we are only using cached ones.
+`NullEvmEnvFactory` is a dummy implementation that returns an error when its `create` method is called. This is acceptable because, in Guest context, there is no need to create new environments — only the cached ones are used.
 
 ### Verifying data
 
