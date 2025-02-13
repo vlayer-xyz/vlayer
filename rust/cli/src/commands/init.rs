@@ -9,7 +9,6 @@ use std::{
 use anyhow::Context;
 use clap::Parser;
 use flate2::read::GzDecoder;
-use lazy_static::lazy_static;
 use reqwest::get;
 use serde_json::{Map, Value};
 use tar::Archive;
@@ -30,16 +29,19 @@ use crate::{
 pub(crate) struct Args {
     /// Template to use for the project
     #[arg(long, value_enum)]
-    pub(crate) template: Option<Template>,
+    template: Option<Template>,
+    /// Url to the templates
+    #[arg(long)]
+    url: Option<String>,
     /// Force init in existing project location
     #[arg(long)]
-    pub(crate) existing: bool,
+    existing: bool,
     /// Name of the project
     #[arg()]
-    pub(crate) project_name: Option<String>,
+    project_name: Option<String>,
     /// Directory where the templates will be unpacked into (useful for debugging)
     #[arg(long, env = "VLAYER_WORK_DIR")]
-    pub(crate) work_dir: Option<PathBuf>,
+    work_dir: Option<PathBuf>,
 }
 
 const VLAYER_DIR_NAME: &str = "vlayer";
@@ -77,11 +79,8 @@ impl TryFrom<Option<PathBuf>> for WorkDir {
     }
 }
 
-lazy_static! {
-    static ref EXAMPLES_URL: String = format!(
-        "https://vlayer-releases.s3.eu-north-1.amazonaws.com/{}/examples.tar.gz",
-        target_version()
-    );
+fn default_templates_url(version: &str) -> String {
+    format!("https://vlayer-releases.s3.eu-north-1.amazonaws.com/{version}/examples.tar.gz")
 }
 
 fn install_dependencies(
@@ -155,7 +154,7 @@ fn change_sdk_dependency_to_npm(
     Ok(())
 }
 
-pub(crate) async fn run_init(args: Args) -> Result<(), CLIError> {
+pub async fn run_init(args: Args) -> Result<(), CLIError> {
     let mut cwd = std::env::current_dir()?;
 
     let mut config = Config::default();
@@ -180,11 +179,19 @@ pub(crate) async fn run_init(args: Args) -> Result<(), CLIError> {
         }
     }
 
+    let templates_url = args
+        .url
+        .unwrap_or_else(|| default_templates_url(&target_version()));
     let work_dir = args.work_dir.try_into()?;
-    init_existing(cwd, &config, work_dir).await
+    init_existing(cwd, &config, templates_url, work_dir).await
 }
 
-async fn init_existing(cwd: PathBuf, config: &Config, work_dir: WorkDir) -> Result<(), CLIError> {
+async fn init_existing(
+    cwd: PathBuf,
+    config: &Config,
+    templates_url: String,
+    work_dir: WorkDir,
+) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
 
     let root_path = find_foundry_root(&cwd)?;
@@ -210,6 +217,7 @@ async fn init_existing(cwd: PathBuf, config: &Config, work_dir: WorkDir) -> Resu
             &tests_dst,
             &testdata_dst,
             template.to_string(),
+            templates_url,
             work_dir,
         )
         .await?;
@@ -306,9 +314,12 @@ async fn fetch_examples(
     tests_dst: &Path,
     testdata_dst: &Path,
     template: String,
+    templates_url: String,
     work_dir: WorkDir,
 ) -> Result<(), CLIError> {
-    let response = get(EXAMPLES_URL.as_str())
+    info!("Fetching examples from url: {templates_url}");
+
+    let response = get(templates_url)
         .await
         .map_err(map_reqwest_error)?
         .bytes()
