@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use soldeer_core::errors::SoldeerError;
 use thiserror::Error;
 
 use crate::config::UnresolvedError;
@@ -34,6 +35,8 @@ pub enum CLIError {
     TestsExecutionError(#[from] test_runner::Report),
     #[error("{0}")]
     ConfigError(#[from] UnresolvedError),
+    #[error("Soldeer failed: {0}")]
+    Soldeer(#[from] SoldeerError),
 }
 
 impl CLIError {

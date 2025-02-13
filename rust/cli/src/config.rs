@@ -4,7 +4,7 @@ use clap::ValueEnum;
 
 use crate::target_version;
 
-const VLAYER_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
+pub const VLAYER_FOUNDRY_PKG: SoldeerDependency<'static> = SoldeerDependency {
     name: "vlayer",
     version: "0.1.0",
     url: None,
@@ -122,10 +122,8 @@ where
         }
     }
 
-    pub fn url(&self) -> Result<Option<String>> {
-        self.as_detailed()
-            .ok_or(UnresolvedError)
-            .map(DetailedDependency::url)
+    pub fn url(&self) -> Option<String> {
+        self.as_detailed().and_then(DetailedDependency::url)
     }
 
     pub fn remappings(&self) -> Result<&[(String, P)]> {
@@ -134,7 +132,21 @@ where
             .ok_or(UnresolvedError)
     }
 
-    const fn as_detailed(&self) -> Option<&DetailedDependency<P>> {
+    pub fn as_simple_mut(&mut self) -> Option<&mut String> {
+        match self {
+            Self::Simple(x) => Some(x),
+            Self::Detailed(..) => None,
+        }
+    }
+
+    pub const fn as_detailed(&self) -> Option<&DetailedDependency<P>> {
+        match self {
+            Self::Simple(..) => None,
+            Self::Detailed(x) => Some(x),
+        }
+    }
+
+    pub fn as_detailed_mut(&mut self) -> Option<&mut DetailedDependency<P>> {
         match self {
             Self::Simple(..) => None,
             Self::Detailed(x) => Some(x),
@@ -205,11 +217,11 @@ impl From<SoldeerDependency<'_>> for DetailedDependency<String> {
     }
 }
 
-struct SoldeerDependency<'a> {
-    name: &'a str,
-    version: &'a str,
-    url: Option<&'a str>,
-    remappings: &'a [(&'a str, &'a str)],
+pub struct SoldeerDependency<'a> {
+    pub name: &'a str,
+    pub version: &'a str,
+    pub url: Option<&'a str>,
+    pub remappings: &'a [(&'a str, &'a str)],
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]

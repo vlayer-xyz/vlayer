@@ -6,10 +6,7 @@ use std::{
 use colored::Colorize;
 use serde_json::Value;
 
-use crate::{
-    commands::common::soldeer::{add_remappings, SoldeerDep, DEPENDENCIES},
-    errors::CLIError,
-};
+use crate::errors::CLIError;
 
 pub fn run_update() -> Result<(), CLIError> {
     check_if_vlayerup_exists()?;
@@ -76,36 +73,36 @@ fn do_update_soldeer(foundry_toml_path: &Path) -> Result<(), CLIError> {
 
     print_update_intention(&format!("vlayer contracts into {}", &version));
 
-    let updated_deps = updated_deps(version);
+    // let updated_deps = updated_deps(version);
 
-    updated_deps
-        .iter()
-        .map(|dep| dep.install(foundry_toml_path))
-        .collect::<Result<Vec<_>, _>>()?;
+    // updated_deps
+    //     .iter()
+    //     .map(|dep| dep.install(foundry_toml_path))
+    //     .collect::<Result<Vec<_>, _>>()?;
 
     // add_remappings(foundry_toml_path, &updated_deps)?;
 
     Ok(())
 }
 
-fn updated_deps(version: String) -> Vec<SoldeerDep> {
-    let vlayer_dep = SoldeerDep {
-        name: String::from("vlayer"),
-        version,
-        url: None,
-        remapping: Some(("vlayer-0.1.0", "src").into()),
-    };
+// fn updated_deps(version: String) -> Vec<SoldeerDep> {
+//     let vlayer_dep = SoldeerDep {
+//         name: String::from("vlayer"),
+//         version,
+//         url: None,
+//         remapping: Some(("vlayer-0.1.0", "src").into()),
+//     };
 
-    let mut deps = DEPENDENCIES
-        .clone()
-        .into_iter()
-        .filter(|dep| dep.name != "vlayer")
-        .collect::<Vec<_>>();
+//     let mut deps = DEPENDENCIES
+//         .clone()
+//         .into_iter()
+//         .filter(|dep| dep.name != "vlayer")
+//         .collect::<Vec<_>>();
 
-    deps.push(vlayer_dep);
+//     deps.push(vlayer_dep);
 
-    deps
-}
+//     deps
+// }
 
 fn newest_vlayer_version() -> Result<String, CLIError> {
     let output = std::process::Command::new("vlayer")

@@ -15,8 +15,10 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::{
-    commands::common::soldeer::{add_remappings, install_dep, install_url_dep},
-    config::{Config, Dependency, Template, UnresolvedError, SDK_HOOKS_NPM_NAME, SDK_NPM_NAME},
+    commands::common::soldeer::{add_remappings, install},
+    config::{
+        self, Config, Dependency, Template, UnresolvedError, SDK_HOOKS_NPM_NAME, SDK_NPM_NAME,
+    },
     errors::CLIError,
     target_version,
     utils::{
@@ -83,16 +85,11 @@ fn default_templates_url(version: &str) -> String {
     format!("https://vlayer-releases.s3.eu-north-1.amazonaws.com/{version}/examples.tar.gz")
 }
 
-fn install_dependencies(
-    foundry_root: &Path,
-    contracts: &HashMap<String, Dependency>,
-) -> Result<(), CLIError> {
+async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> Result<(), CLIError> {
     for (name, dep) in contracts {
         let version = dep.version()?;
-        match dep.url()? {
-            Some(url) => install_url_dep(foundry_root, name, &version, &url)?,
-            None => install_dep(foundry_root, name, &version)?,
-        };
+        let url = dep.url();
+        install(name, &version, url.as_ref()).await?;
     }
 
     Ok(())
@@ -234,7 +231,7 @@ async fn init_existing(
     init_soldeer(&root_path)?;
 
     info!("Installing dependencies");
-    install_dependencies(&root_path, config.contracts())?;
+    install_dependencies(config.contracts()).await?;
     info!("Successfully installed all dependencies");
     add_default_remappings(&root_path, config.contracts())?;
 
