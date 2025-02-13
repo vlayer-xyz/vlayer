@@ -29,14 +29,10 @@ jobs:
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh
       - name: Install solhint
-        working-directory: ./contracts/vlayer/
+        working-directory: contracts
         run: bun install --frozen-lockfile
-      - name: Contracts vlayer lint:solidity
-        working-directory: ./contracts/vlayer/
-        run: |
-          bun run lint:solidity
-      - name: Contracts fixtures lint:solidity
-        working-directory: ./contracts/fixtures/
+      - name: Contracts lint:solidity
+        working-directory: contracts
         run: |
           bun run lint:solidity
       - name: lint Solidity examples
