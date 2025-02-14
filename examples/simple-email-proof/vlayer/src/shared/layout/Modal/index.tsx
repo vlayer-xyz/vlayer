@@ -11,7 +11,6 @@ import { STEP_KIND } from "../../../app/router/steps";
 import { ProgressBar } from "../ProgressBar";
 import { Navigation } from "../Navigation";
 import { motionConfig } from "./Modal.animations";
-import styles from "./Modal.module.css";
 
 export const modalContext = createContext({
   showModal: () => {},
@@ -54,7 +53,10 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
   return (
     <dialog className="modal" ref={modalRef}>
       <div className="modal-box bg-white rounded-2xl">
-        <motion.div className={styles.innerModal} {...motionConfig}>
+        <motion.div
+          className="h-[490px] flex flex-col items-center justify-between"
+          {...motionConfig}
+        >
           <Navigation />
           <AnimatePresence>
             {!isWelcome && !isSuccessStep && <ProgressBar />}
@@ -64,12 +66,12 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
               <motion.img
                 src={currentStep?.headerIcon}
                 alt="Success Icon"
-                className={styles.headerIcon}
+                className="w-[282px] h-[150px]"
                 {...motionConfig}
               />
             )}
           </AnimatePresence>
-          <div className={styles.content}>
+          <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
             {currentStep?.title && (
               <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
             )}

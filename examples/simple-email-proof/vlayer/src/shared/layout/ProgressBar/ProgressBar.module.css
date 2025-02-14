@@ -1,7 +1,0 @@
-.progressBar {
-  @apply steps w-full;
-}
-
-.progressBar li {
-  @apply step text-black text-xs;
-}

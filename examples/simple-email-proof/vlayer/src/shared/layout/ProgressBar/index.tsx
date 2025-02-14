@@ -1,6 +1,5 @@
 import { useCurrentStep } from "../../hooks/useCurentStep";
 import { motion } from "motion/react";
-import styles from "./ProgressBar.module.css";
 import motionConfig from "./ProgressBar.animations";
 
 export const ProgressBar = () => {
@@ -12,10 +11,16 @@ export const ProgressBar = () => {
       : "";
 
   return (
-    <motion.ul className={styles.progressBar} {...motionConfig}>
-      <li className={activeStepClass(1)}>Connect Wallet</li>
-      <li className={activeStepClass(2)}>Get data from X</li>
-      <li className={activeStepClass(3)}>Mint NFT</li>
+    <motion.ul className="steps w-full" {...motionConfig}>
+      <li className={`step text-black text-xs ${activeStepClass(1)}`}>
+        Connect Wallet
+      </li>
+      <li className={`step text-black text-xs ${activeStepClass(2)}`}>
+        Get data from X
+      </li>
+      <li className={`step text-black text-xs ${activeStepClass(3)}`}>
+        Mint NFT
+      </li>
     </motion.ul>
   );
 };
