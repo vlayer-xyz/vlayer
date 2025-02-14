@@ -33,7 +33,7 @@ contract UrlPatternTest is VTest {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
             assertEq(
-                reason, "Preflight(Engine(TransactError(Revert(\"a relative input without a base URL is not valid\"))))"
+                reason, "Preflight: TravelCallExecutor error: EVM error: a relative input without a base URL is not valid"
             );
         }
     }
@@ -44,7 +44,7 @@ contract UrlPatternTest is VTest {
         try urlPattern.do_test("invalid url", "https://example.com/") {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
-            assertEq(reason, "Preflight(Engine(TransactError(Revert(\"relative URL without a base\"))))");
+            assertEq(reason, "Preflight: TravelCallExecutor error: EVM error: relative URL without a base");
         }
     }
 }
