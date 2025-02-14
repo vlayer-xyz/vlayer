@@ -124,9 +124,6 @@ jobs:
 
           cd ${{ matrix.template }}
 
-          cat remappings.txt
-          ls -latr dependencies
-
           forge build
 
           cd vlayer
