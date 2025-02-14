@@ -99,7 +99,7 @@ Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlaye
 
 When `Inspector::call` is executed, it must return a [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16). However, the `transaction_callback` run inside `Inspector::call` executes the full EVM and returns an [`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40). Hence, the conversion between this two is needed.
 
-The conversion from `ExecutionResult` to `CallOutcome` is performed using the [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [within `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80). It loses some data: `logs` and `gas_refunded` fields from `ExecutionResult::Success` are not converted, but they are not necessary in `CallOutcome`. Other than that, all the fields are matched.
+It is performed using the [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [within `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80). We lose some data during the conversion: `logs` and `gas_refunded` fields from `ExecutionResult::Success` are not converted, but they are not necessary in `CallOutcome`. Other than that, all the fields are matched.
 
 ## Executor
 
