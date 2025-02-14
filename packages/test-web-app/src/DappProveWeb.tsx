@@ -104,12 +104,17 @@ function DappProveWeb() {
   return (
     <div className="container">
       <div>
-        <button onClick={handleZkProofRequestClick}>Request prove web</button>
+        <button
+          data-testid="zk-prove-button"
+          onClick={handleZkProofRequestClick}
+        >
+          Request proof web
+        </button>
       </div>
       <div>
         {zkProof ? (
           <div>
-            <h1>Has zk proof</h1>
+            <h1 data-testid="has-zkproof">Has zk proof</h1>
             <h2>Name from prover:</h2>
             <pre
               style={{ whiteSpace: "break-spaces" }}

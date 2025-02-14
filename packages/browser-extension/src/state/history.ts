@@ -1,6 +1,7 @@
 import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { webProverSessionContextManager } from "./webProverSessionContext";
+import { HTTPMethod } from "lib/HttpMethods";
 
 export type BrowsingHistoryItem = {
   url: string;
@@ -8,6 +9,8 @@ export type BrowsingHistoryItem = {
   cookies?: browser.Cookies.Cookie[];
   ready?: boolean;
   tabId?: number;
+  method: HTTPMethod;
+  body?: string;
 };
 
 export type History = {
@@ -33,7 +36,9 @@ export class HistoryContextManager {
   async getUrls(): Promise<string[]> {
     const config =
       await webProverSessionContextManager.getWebProverSessionConfig();
-    return config?.steps.map((step: { url: string }) => step.url) || [];
+    const urls = config?.steps.map((step: { url: string }) => step.url) || [];
+    console.log("urls", urls);
+    return urls;
   }
 
   async updateHistory(item: BrowsingHistoryItem): Promise<void> {

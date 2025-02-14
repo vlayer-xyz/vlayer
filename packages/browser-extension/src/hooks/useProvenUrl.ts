@@ -10,6 +10,7 @@ export function useProvenUrl(): BrowsingHistoryItem | null {
 
   const steps = config !== LOADING ? config.steps : [];
   const provenUrlAddress = steps.find(({ step }) => step === "notarize")?.url;
+  console.log("provenUrlAddress", provenUrlAddress);
   return (
     browsingHistory.find((item: BrowsingHistoryItem) => {
       return new URLPattern(provenUrlAddress as string).test(item.url);

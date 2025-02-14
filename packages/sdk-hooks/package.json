@@ -2,7 +2,7 @@
   "name": "@vlayer/react",
   "version": "0.1.0",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./src/index.ts"
   },
   "type": "module",
   "devDependencies": {
@@ -21,9 +21,6 @@
     "viem": "2.x",
     "@vlayer/sdk": "^0.1.0"
   },
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "bun tsc --project tsconfig.build.json && bun tsc-alias",
     "test:unit": "vitest --run"

@@ -102,7 +102,7 @@ describe("NotarizeStepActions", () => {
     act(() => {
       vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
     });
-    const button = screen.getByRole("button", { name: "Generate proof" });
+    const button = screen.getByTestId("prove-button");
     expect(button).toBeInTheDocument();
   });
 

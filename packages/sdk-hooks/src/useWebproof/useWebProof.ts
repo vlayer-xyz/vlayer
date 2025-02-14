@@ -19,9 +19,9 @@ export const useWebProof = (
   useEffect(() => {
     webProofProvider.addEventListeners(
       ExtensionMessageType.ProofDone,
-      ({ payload: { presentationJson } }) => {
+      ({ payload: { presentationJSON } }) => {
         setWebProof({
-          webProofJson: JSON.stringify({ presentationJson: presentationJson }),
+          webProofJson: JSON.stringify({ presentationJson: presentationJSON }),
         });
         setStatus(WebProofRequestStatus.success);
       },

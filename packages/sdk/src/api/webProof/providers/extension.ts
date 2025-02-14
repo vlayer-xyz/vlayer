@@ -129,14 +129,14 @@ class ExtensionWebProofProvider implements WebProofProvider {
   }
 
   public async getWebProof(webProofRequest: WebProofRequestInput): Promise<{
-    presentationJson: PresentationJSON;
+    presentationJSON: PresentationJSON;
     decodedTranscript: {
       sent: string;
       recv: string;
     };
   }> {
     return new Promise<{
-      presentationJson: PresentationJSON;
+      presentationJSON: PresentationJSON;
       decodedTranscript: {
         sent: string;
         recv: string;

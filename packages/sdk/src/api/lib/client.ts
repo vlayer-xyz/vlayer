@@ -132,7 +132,7 @@ export const createVlayerClient = (
       >;
 
       const webProofPromise: Promise<{
-        presentationJson: PresentationJSON;
+        presentationJSON: PresentationJSON;
         decodedTranscript: {
           sent: string;
           recv: string;
@@ -140,8 +140,8 @@ export const createVlayerClient = (
       }> = new Promise((resolve, reject) => {
         webProofProvider.addEventListeners(
           ExtensionMessageType.ProofDone,
-          ({ payload: { presentationJson, decodedTranscript } }) => {
-            resolve({ presentationJson, decodedTranscript });
+          ({ payload: { presentationJSON, decodedTranscript } }) => {
+            resolve({ presentationJSON, decodedTranscript });
           },
         );
 
@@ -177,7 +177,7 @@ export const createVlayerClient = (
         args: [
           {
             webProofJson: JSON.stringify({
-              presentationJson: webProof.presentationJson,
+              presentationJson: webProof.presentationJSON,
             }),
           },
           ...commitmentArgs,

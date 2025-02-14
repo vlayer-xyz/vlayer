@@ -2,10 +2,10 @@ import { NotaryServer, Transcript } from "tlsn-js";
 import { wrap } from "comlink";
 import { Prover as TProver, Presentation as TPresentation } from "tlsn-js";
 import type { PresentationJSON } from "tlsn-js/src/types";
-import { Reveal } from "tlsn-wasm";
+import { Reveal, Method } from "tlsn-wasm";
 import { type RedactionConfig } from "../../web-proof-commons";
 import { redact } from "./redaction/redact";
-
+import { HTTPMethod } from "lib/HttpMethods";
 type ProverConfig = {
   serverDns: string;
   maxSentData?: number;
@@ -39,13 +39,15 @@ export async function tlsnProve(
   hostname: string,
   wsProxyUrl: string,
   notarizeRequestUrl: string,
+  method: HTTPMethod = HTTPMethod.GET,
   formattedHeaders: {
     headers: Record<string, string>;
     secretHeaders: string[];
   },
   redactionConfig: RedactionConfig,
+  requestBody?: string,
 ): Promise<{
-  presentationJson: PresentationJSON;
+  presentationJSON: PresentationJSON;
   decodedTranscript: {
     sent: string;
     recv: string;
@@ -53,24 +55,33 @@ export async function tlsnProve(
 }> {
   await init({ loggingLevel: "Debug" });
   const notary = NotaryServer.from(notaryUrl);
+  console.log("notary", notary);
   const prover = await new Prover({
     serverDns: hostname,
     maxSentData: 4096,
     maxRecvData: 16384,
   });
+  console.log("prover", prover);
 
   const sessionUrl = await notary.sessionUrl();
+  console.log("sessionUrl", sessionUrl);
   await prover.setup(sessionUrl);
-
-  const res = await prover.sendRequest(wsProxyUrl, {
+  console.log("prover setup");
+  console.log("requestBody", requestBody);
+  const request = {
     url: notarizeRequestUrl,
-    method: "GET",
+    method: method as Method,
     headers: {
-      "Content-Type": "application/json",
       ...formattedHeaders?.headers,
+      "Content-Type": "application/json",
     },
-  });
+    body: JSON.stringify({ name: "John Doe" }),
+  };
 
+  console.log("Sending request", request);
+  const res = await prover.sendRequest(wsProxyUrl, request);
+
+  console.log("Received response", res);
   if (res.status < 200 || res.status >= 300) {
     throw new Error("Authentication failed. Please restart the process.");
   }
@@ -94,7 +105,7 @@ export async function tlsnProve(
     reveal: commit,
   });
 
-  const presentationJson = await presentation.json();
+  const presentationJSON = await presentation.json();
   const decodedProof = await presentation.verify();
   console.log("Decoded proof", decodedProof);
 
@@ -104,7 +115,7 @@ export async function tlsnProve(
   });
   console.log("Decoded transcript", decodedTranscript);
   return {
-    presentationJson,
+    presentationJSON,
     decodedTranscript: {
       sent: decodedTranscript.sent(),
       recv: decodedTranscript.recv(),
