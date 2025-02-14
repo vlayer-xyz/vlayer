@@ -179,7 +179,7 @@ struct DnsRecord {
 
 // Signature data of the DNS record
 struct VerificationData {
-    uint64 validUntil; // Signature expiration date
+    uint64 validUntil; // Signature expiration timestamp
     bytes signature; // Signed hash of the serialized DNS record
     bytes pubKey; // Public key used for signature
 }
