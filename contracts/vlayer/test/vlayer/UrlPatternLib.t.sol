@@ -33,7 +33,8 @@ contract UrlPatternTest is VTest {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
             assertEq(
-                reason, "Preflight: TravelCallExecutor error: EVM error: a relative input without a base URL is not valid"
+                reason,
+                "Preflight: TravelCallExecutor error: EVM error: a relative input without a base URL is not valid"
             );
         }
     }
