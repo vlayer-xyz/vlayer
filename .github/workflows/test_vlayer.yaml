@@ -105,7 +105,7 @@ jobs:
 
           cd $(mktemp -d)
 
-          cargo run --locked --manifest-file $HOME/Cargo.toml --binary cli -- init ${{ matrix.template }} --templates-dir /examples --config-file config.toml
+          cargo run --locked --manifest-path $HOME/Cargo.toml --bin cli -- init ${{ matrix.template }} --templates-dir /examples --config-file config.toml
 
           cd ${{ matrix.template }}
 
