@@ -16,7 +16,7 @@ on:
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   test-vlayer:
@@ -54,6 +54,7 @@ jobs:
     name: Test vlayer-init
     runs-on: aws-linux-medium
     strategy:
+      fail-fast: false
       matrix:
         template: ["simple", "simple-web-proof", "simple-email-proof", "simple-teleport", "simple-time-travel"]
 
@@ -77,6 +78,13 @@ jobs:
         env:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check-llvm-clang.sh
+
+      - name: Build CLI
+        env:
+          RISC0_USE_DOCKER: 1
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          cargo build --bin vlayer
 
       - name: Run vlayer-init tests
         env:
@@ -112,7 +120,7 @@ jobs:
 
           cd $(mktemp -d)
 
-          cargo run --locked --manifest-path ${{ github.workspace }}/Cargo.toml --bin vlayer -- init ${{ matrix.template }} --templates-dir ${{ github.workspace }}/examples --config-file config.toml
+          ${{ github.workspace }}/target/debug/vlayer init ${{ matrix.template }} --templates-dir ${{ github.workspace }}/examples --config-file config.toml
 
           cd ${{ matrix.template }}
 
