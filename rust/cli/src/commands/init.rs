@@ -16,10 +16,7 @@ use tracing::{error, info};
 
 use crate::{
     commands::common::soldeer::{add_remappings, install},
-    config::{
-        self, Config, Dependency, DetailedDependency, Template, UnresolvedError,
-        SDK_HOOKS_NPM_NAME, SDK_NPM_NAME,
-    },
+    config::{Config, Dependency, Template, UnresolvedError},
     errors::CLIError,
     target_version,
     utils::{
@@ -151,161 +148,25 @@ fn change_sdk_dependency_to_npm(
         .and_then(serde_json::Value::as_object)
         .map_or(Map::new(), Clone::clone);
 
-    dependencies_map.insert(
-        SDK_NPM_NAME.into(),
-        Value::String(
-            deps.get(SDK_NPM_NAME)
-                .and_then(|dep| dep.version().or(dep.path()))
-                .ok_or(UnresolvedError("version".into()))?,
-        ),
-    );
-
-    if dependencies_map.contains_key(SDK_HOOKS_NPM_NAME) {
-        dependencies_map.insert(
-            SDK_HOOKS_NPM_NAME.into(),
-            Value::String(
-                deps.get(SDK_HOOKS_NPM_NAME)
-                    .and_then(|dep| dep.version().or(dep.path()))
-                    .ok_or(UnresolvedError("version".into()))?,
-            ),
-        );
+    for (name, dep) in deps {
+        if dependencies_map.contains_key(name) {
+            dependencies_map.insert(
+                name.into(),
+                Value::String(
+                    dep.version()
+                        .or(dep.path())
+                        .ok_or(UnresolvedError("version".into()))?,
+                ),
+            );
+        }
     }
+
     json["dependencies"] = Value::Object(dependencies_map);
 
     let new_contents = serde_json::to_string_pretty(&json)?;
     fs::write(package_json, new_contents)?;
 
     Ok(())
-}
-
-fn tweak_config(config: &mut Config) {
-    let override_version = "0.1.0-nightly-20250213-df4a6a3";
-    {
-        // vlayer = { version = "...", remappings = [("vlayer-0.1.0"/, "dependencies/vlayer-0.1.0-nightly-202...")] }
-        let vlayer_pkg = config
-            .contracts
-            .get_mut(config::VLAYER_FOUNDRY_PKG.name)
-            .unwrap()
-            .as_detailed_mut()
-            .unwrap();
-        vlayer_pkg.version = override_version.to_string().into();
-        vlayer_pkg.remappings = Some(
-            config::VLAYER_FOUNDRY_PKG
-                .remappings
-                .iter()
-                .map(|(source, target)| {
-                    (
-                        format!("{source}/"),
-                        config::default_remapping_target(
-                            config::VLAYER_FOUNDRY_PKG.name,
-                            override_version,
-                            target,
-                        ),
-                    )
-                })
-                .collect(),
-        );
-    }
-    {
-        // [npm]
-        // vlayer-sdk = 0.1.0...
-        let sdk_pkg = config
-            .npm
-            .get_mut(config::SDK_NPM_NAME)
-            .unwrap()
-            .as_simple_mut()
-            .unwrap();
-        *sdk_pkg = override_version.into();
-    }
-    {
-        // vlayer-sdk = 0.1.0...
-        let sdk_hooks_pkg = config
-            .npm
-            .get_mut(config::SDK_HOOKS_NPM_NAME)
-            .unwrap()
-            .as_simple_mut()
-            .unwrap();
-        *sdk_hooks_pkg = override_version.into();
-    }
-}
-
-fn tweak_config2(config: &mut Config) {
-    {
-        let vlayer_pkg = config
-            .contracts
-            .get_mut(config::VLAYER_FOUNDRY_PKG.name)
-            .unwrap()
-            .as_detailed_mut()
-            .unwrap();
-        vlayer_pkg.path = Some("../../vlayer/contracts/vlayer/src".into());
-        vlayer_pkg.remappings = Some(
-            config::VLAYER_FOUNDRY_PKG
-                .remappings
-                .iter()
-                .map(|(source, _)| {
-                    (format!("{source}/"), "../../vlayer/contracts/vlayer/src/".into())
-                })
-                .collect(),
-        );
-    }
-    {
-        let sdk_pkg = config.npm.get_mut(config::SDK_NPM_NAME).unwrap();
-        *sdk_pkg = Dependency::Detailed(DetailedDependency {
-            path: Some("../../vlayer/packages/sdk".into()),
-            version: None,
-            url: None,
-            remappings: None,
-        });
-    }
-    {
-        let sdk_pkg = config.npm.get_mut(config::SDK_HOOKS_NPM_NAME).unwrap();
-        *sdk_pkg = Dependency::Detailed(DetailedDependency {
-            path: Some("../../vlayer/packages/sdk-hooks".into()),
-            version: None,
-            url: None,
-            remappings: None,
-        });
-    }
-}
-
-fn tweak_config3(config: &mut Config) {
-    {
-        let version = target_version();
-        let vlayer_pkg = config
-            .contracts
-            .get_mut(config::VLAYER_FOUNDRY_PKG.name)
-            .unwrap()
-            .as_detailed_mut()
-            .unwrap();
-        vlayer_pkg.path = Some("../../vlayer/contracts/vlayer/".into());
-        vlayer_pkg.remappings = Some(
-            config::VLAYER_FOUNDRY_PKG
-                .remappings
-                .iter()
-                .map(|(source, _)| {
-                    (format!("{source}/"), format!("dependencies/vlayer-{version}/src/"))
-                })
-                .collect(),
-        );
-    }
-    {
-        let sdk_pkg = config.npm.get_mut(config::SDK_NPM_NAME).unwrap();
-        *sdk_pkg = Dependency::Detailed(DetailedDependency {
-            path: Some("../../vlayer/packages/sdk".into()),
-            version: None,
-            url: None,
-            remappings: None,
-        });
-    }
-    {
-        let sdk_pkg = config.npm.get_mut(config::SDK_HOOKS_NPM_NAME).unwrap();
-        *sdk_pkg = Dependency::Detailed(DetailedDependency {
-            path: Some("../../vlayer/packages/sdk-hooks".into()),
-            version: None,
-            url: None,
-            remappings: None,
-        });
-    }
 }
 
 pub async fn run_init(args: Args) -> Result<(), CLIError> {
@@ -319,9 +180,6 @@ pub async fn run_init(args: Args) -> Result<(), CLIError> {
         .transpose()?
         .unwrap_or_default();
     config.template = args.template.or(config.template);
-
-    // tweak_config3(&mut config);
-    // println!("{config:#?}");
 
     if !args.existing {
         let mut command = std::process::Command::new("forge");
@@ -454,10 +312,6 @@ fn append_file(file: &Path, suffix: &str) -> Result<(), std::io::Error> {
     Ok(())
 }
 
-const fn map_reqwest_error(e: reqwest::Error) -> CLIError {
-    CLIError::DownloadExamplesError(e)
-}
-
 fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
     let toml_path = root_path.join("foundry.toml");
     let contents = fs::read_to_string(toml_path)?;
@@ -483,10 +337,10 @@ async fn fetch_examples(
 
     let response = get(templates_url)
         .await
-        .map_err(map_reqwest_error)?
+        .map_err(CLIError::DownloadExamplesError)?
         .bytes()
         .await
-        .map_err(map_reqwest_error)?;
+        .map_err(CLIError::DownloadExamplesError)?;
 
     let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
 
