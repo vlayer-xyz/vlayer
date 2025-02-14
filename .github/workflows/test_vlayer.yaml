@@ -16,7 +16,7 @@ on:
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test-vlayer:
@@ -62,7 +62,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          
+
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
@@ -79,7 +79,7 @@ jobs:
       - name: Run vlayer-init tests
         working-directory: ./vlayer-init-tests
         run: |
-          CONFIG=$(cat << EOF
+          cat <<EOF > config.toml
           template = "${{ matrix.template }}"
 
           [contracts.vlayer]
@@ -106,8 +106,8 @@ jobs:
           "@vlayer/sdk" = { path = "../../packages/sdk" }
           "@vlayer/react" = { path = "../../packages/sdk-hooks" }
           EOF
-          )
-          cargo run --locked --manifest-path ../Cargo.toml --package cli -- init ${{ matrix.template }} --templates-dir ../examples --config-file $CONFIG
+
+          cargo run --locked --manifest-path ../Cargo.toml --package cli -- init ${{ matrix.template }} --templates-dir ../examples --config-file config.toml
           cd ${{ matrix.template }}
           forge build
           cd vlayer
