@@ -73,7 +73,14 @@ jobs:
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
 
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: bash/check-llvm-clang.sh
+
       - name: Run vlayer-init tests
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           cat <<EOF > config.toml
           template = "${{ matrix.template }}"
