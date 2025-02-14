@@ -154,7 +154,7 @@ fn change_sdk_dependency_to_npm(
                 name.into(),
                 Value::String(
                     dep.version()
-                        .or(dep.path())
+                        .or(dep.path().map(|p| format!("file:../{p}")))
                         .ok_or(UnresolvedError("version".into()))?,
                 ),
             );
