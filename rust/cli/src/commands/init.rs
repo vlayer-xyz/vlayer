@@ -18,11 +18,11 @@ use crate::{
     config::{Config, Dependency, Template, UnresolvedError},
     errors::{Error as CLIError, Result as CLIResult},
     soldeer::{add_remappings, install},
-    target_version,
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
         path::{copy_dir_to, find_foundry_root, prefix_one_level_up},
     },
+    version,
 };
 
 #[derive(Clone, Debug, Parser)]
@@ -195,7 +195,7 @@ pub async fn run_init(args: Args) -> CLIResult<()> {
 
     let templates_url = args
         .url
-        .unwrap_or_else(|| default_templates_url(&target_version()));
+        .unwrap_or_else(|| default_templates_url(&version()));
     let work_dir = args.work_dir.try_into()?;
     init_existing(cwd, &config, templates_url, work_dir).await
 }
@@ -372,7 +372,7 @@ mod tests {
     use tempfile::TempDir;
 
     use super::*;
-    use crate::{build_version, test_utils::create_temp_git_repo};
+    use crate::{test_utils::create_temp_git_repo, version};
 
     fn prepare_empty_foundry_dir(src_name: &str) -> TempDir {
         // creates a temporary directory with a foundry.toml file
@@ -464,7 +464,7 @@ mod tests {
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             some initial remappings\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
-            build_version()
+            version()
         );
 
         assert_eq!(contents, expected_remappings);
@@ -489,7 +489,7 @@ mod tests {
             openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
-            build_version()
+            version()
         );
 
         assert_eq!(contents, expected_remappings);
@@ -511,7 +511,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
         assert!(!new_contents.contains(&expected_sdk_dependency));
     }
 
@@ -531,7 +531,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
 
@@ -551,7 +551,7 @@ mod tests {
         change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
 
         assert!(!new_contents.contains("file:../../../packages/sdk"));
         assert!(new_contents.contains(&expected_sdk_dependency));

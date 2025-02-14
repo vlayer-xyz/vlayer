@@ -3,7 +3,7 @@ use commands::init::{run_init, Args as InitArgs};
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
 use tracing::error;
 use tracing_subscriber::EnvFilter;
-pub use version::version as build_version;
+pub use version::version;
 
 use crate::{
     commands::{test::run_test, update::run_update},
@@ -20,7 +20,7 @@ mod utils;
 mod test_utils;
 
 #[derive(Parser)]
-#[command(name = "vlayer", version = build_version(), about, long_about = None)]
+#[command(name = "vlayer", version = version(), about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
@@ -55,15 +55,4 @@ async fn run() -> Result<()> {
         }
         Commands::Update => run_update().await,
     }
-}
-
-pub(crate) fn target_version() -> String {
-    if let Ok(version) = std::env::var("VLAYER_DEBUG_VERSION_OVERRIDE") {
-        // When building CLI from source and trying to target released templates and contracts,
-        // we cannot rely on the baked-in version, but instead we need to explicitly pass version of
-        // some already published artifacts.
-        // This is a temporary measure used only for internal debugging.
-        return version;
-    }
-    build_version()
 }

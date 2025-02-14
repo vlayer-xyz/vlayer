@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use clap::ValueEnum;
 use serde::Deserialize;
 
-use crate::target_version;
+use crate::version;
 
 pub const DEFAULT_CONFIG: &str = "
 template = 'simple'
@@ -65,7 +65,7 @@ impl Config {
 
 impl Default for Config {
     fn default() -> Self {
-        let version = target_version();
+        let version = version();
         toml::from_str(&DEFAULT_CONFIG.replace("VERSION", &version))
             .expect("default config cannot be malformed")
     }
