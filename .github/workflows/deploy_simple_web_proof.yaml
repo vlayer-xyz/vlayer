@@ -40,19 +40,12 @@ jobs:
           VLAYER_API_TOKEN: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN }}
           VITE_SENTRY_DSN: "https://1afb2d9efb40a7ac94d0c8737ab8ffc4@o4508754893012992.ingest.de.sentry.io/4508760191795280"
 
-  test-vercel-e2e-web-apps:
-    name: Vercel E2E web apps test against devnet
+  e2e-test-web-apps-vercel:
+    name: E2E web apps test against devnet and vercel deployment
     runs-on: aws-linux-medium
     needs: [deploy-simple-web-proof]
 
     steps:
-      - name: Echo DEPLOYMENT_URL
-        shell: bash
-        run: |
-          echo "The value of DEPLOYMENT_URL is: ${DEPLOYMENT_URL}"
-        env:
-          DEPLOYMENT_URL: ${{needs.deploy-simple-web-proof.outputs.deployment_url}}
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
