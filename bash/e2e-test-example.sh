@@ -17,11 +17,14 @@ generate_ts_bindings
 build_sdk
 
 export EXAMPLE_NAME=$EXAMPLE
-echo Running services...
+
+echo "::group::Running services"
 source ${VLAYER_HOME}/bash/run-services.sh
+echo "::endgroup::Running services"
 
 pushd $(mktemp -d)
 
+echo "::group::Initializing from template $EXAMPLE"
 cat <<EOF > config.toml
 template = "$EXAMPLE"
 
@@ -51,20 +54,19 @@ remappings = [["risc0-ethereum-1.2.0/", "dependencies/risc0-ethereum-1.2.0/"]]
 EOF
 
 $VLAYER_HOME/target/debug/vlayer init $EXAMPLE --templates-dir $VLAYER_HOME/examples --config-file config.toml
+echo "::endgroup::Initializing from template $EXAMPLE"
 
 pushd $EXAMPLE
-cat remappings.txt
+
+echo "::group::Building contracts"
 forge build
+echo "::endgroup::Building contracts"
 
 pushd vlayer
-cat package.json
-bun install --no-cache
-bun run prove:dev
-# run_prover_script
+run_prover_script
 popd
 
 popd
-
 popd
 
 cleanup
