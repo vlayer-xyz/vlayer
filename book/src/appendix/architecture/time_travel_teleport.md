@@ -18,7 +18,7 @@ The `verify` function performs above verifications by:
 Is possible thanks to [Chain Proofs](./chain_proof.md).
 Verification steps are as follows:
 1. **Retrieve Blocks:** Extract the list of blocks to be verified and group them by chain.
-2. **Iterate Over Chains:** For each chain run [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks that does the following:
+2. **Iterate Over Chains:** For each chain run [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks.
 3. **Skip Single-Block Cases:** If only one block exists, no verification is needed.
 4. **Request Chain Proof:** Fetch cryptographic proof of chain integrity.
 5. **Verifies Chain Proof:** Run the [chain proof `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/chain/common/src/verifier.rs#L46) function on the obtained Chain Proof to check its validity.
