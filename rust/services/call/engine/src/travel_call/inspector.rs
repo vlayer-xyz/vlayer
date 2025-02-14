@@ -11,7 +11,7 @@ use tracing::{debug, info};
 
 use crate::{
     io::Call,
-    travel_call::{self, args::Args},
+    travel_call::{args::Args, error::Error},
     utils::evm_call::{create_encoded_return_outcome, execution_result_to_call_outcome},
 };
 
@@ -19,8 +19,9 @@ use crate::{
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
 
-pub type TravelCallResult<D> = travel_call::error::Result<(ExecutionResult, Box<[Metadata]>), D>;
-type TransactionCallback<'a, D> = dyn Fn(&Call, ExecutionLocation) -> TravelCallResult<D> + 'a;
+pub type TxResultWithMetadata = (ExecutionResult, Box<[Metadata]>);
+type TransactionCallback<'a, D> =
+    dyn Fn(&Call, ExecutionLocation) -> Result<TxResultWithMetadata, Error<D>> + 'a;
 
 pub struct Inspector<'a, D: RevmDB> {
     start_chain_id: ChainId,
@@ -32,7 +33,10 @@ pub struct Inspector<'a, D: RevmDB> {
 impl<'a, D: RevmDB> Inspector<'a, D> {
     pub fn new(
         start_chain_id: ChainId,
-        transaction_callback: impl Fn(&Call, ExecutionLocation) -> TravelCallResult<WrappedRevmDBError<D>>
+        transaction_callback: impl Fn(
+                &Call,
+                ExecutionLocation,
+            ) -> Result<TxResultWithMetadata, Error<WrappedRevmDBError<D>>>
             + 'a,
     ) -> Self {
         Self {
@@ -133,9 +137,9 @@ mod test {
         primitives::{AccountInfo, Output, SuccessReason},
         EvmContext, InMemoryDB, Inspector as IInspector,
     };
-    use travel_call::args::{SET_BLOCK_SELECTOR, SET_CHAIN_SELECTOR};
 
     use super::*;
+    use crate::travel_call::args::{SET_BLOCK_SELECTOR, SET_CHAIN_SELECTOR};
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
     const MAINNET_ID: ChainId = 1;
@@ -143,8 +147,9 @@ mod test {
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
-    type StaticTransactionCallback =
-        dyn Fn(&Call, ExecutionLocation) -> TravelCallResult<Infallible> + Send + Sync;
+    type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<TxResultWithMetadata, Error<Infallible>>
+        + Send
+        + Sync;
 
     static TRANSACTION_CALLBACK: &StaticTransactionCallback = &|_, _| {
         Ok((
