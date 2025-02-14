@@ -48,7 +48,10 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json") returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(reason, "Preflight: TravelCallExecutor error: EVM transact error: 0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d496e636f72726563742055524c00000000000000000000000000000000000000");
+            assertEq(
+                reason,
+                "Preflight: TravelCallExecutor error: EVM transact error: 0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d496e636f72726563742055524c00000000000000000000000000000000000000"
+            );
         }
     }
 
