@@ -153,7 +153,7 @@ library WebProofLib {
 ```
 
 <div class="warning">
-Note that `EmailProofLib.verify()` and `WebProofLib.verify()` functions are intended to be called during the proving process, unlike the `Verifier.verify()`  
+Note that `EmailProofLib.verify()` and `WebProofLib.verify()` functions are intended to be called during the proving process, unlike the `Verifier.verify()`.
 </div>
 
 ### Structures
