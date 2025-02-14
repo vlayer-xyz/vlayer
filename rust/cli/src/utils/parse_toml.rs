@@ -60,9 +60,8 @@ fn add_deps_to_toml_table(foundry_toml: &mut toml::Table) -> Option<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::errors::Error;
-
     use super::*;
+    use crate::errors::Error;
 
     #[test]
     fn test_add_deps_to_foundry_toml() {
