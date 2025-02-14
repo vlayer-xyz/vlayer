@@ -13,6 +13,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib.sh"
 set_proving_mode
 VLAYER_ENV=${VLAYER_ENV:-dev}
 
+generate_ts_bindings
+build_sdk
+
 export EXAMPLE_NAME=$EXAMPLE
 echo Running services...
 source ${VLAYER_HOME}/bash/run-services.sh
