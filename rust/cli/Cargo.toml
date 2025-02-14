@@ -13,8 +13,10 @@ clap = { workspace = true, features = ["derive", "env", "string"] }
 colored = { workspace = true }
 flate2 = { workspace = true }
 lazy_static = { workspace = true }
+regex = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
 serde_json = { workspace = true }
+serde_yml = { workspace = true }
 tar = { workspace = true }
 tempfile = { workspace = true }
 test_runner = { workspace = true }
