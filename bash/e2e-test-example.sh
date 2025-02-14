@@ -50,8 +50,16 @@ EOF
 $VLAYER_HOME/target/debug/vlayer init $EXAMPLE --templates-dir $VLAYER_HOME/examples --config-file config.toml
 
 pushd $EXAMPLE
+cat remappings.txt
 forge build
-run_prover_script
+
+pushd vlayer
+cat package.json
+bun install --no-cache
+bun run prove:dev
+# run_prover_script
+popd
+
 popd
 
 popd
