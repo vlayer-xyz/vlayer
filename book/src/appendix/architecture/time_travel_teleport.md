@@ -113,15 +113,7 @@ pub struct Executor<'envs, D: RevmDB> {
 
 ### `call`
 
-The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that wraps the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors. The method then converts the raw execution result and metadata into a structured [`SuccessfulExecutionResult`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/execution_result.rs#L9) for external use:
-
-```rust
-pub struct SuccessfulExecutionResult {
-    pub output: Vec<u8>,
-    pub gas_used: u64,
-    pub metadata: Box<[Metadata]>,
-}
-```
+The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that wraps the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors. The method then converts the raw execution result and metadata into a structured [`SuccessfulExecutionResult`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/execution_result.rs#L9) for external use.
 
 #### Error handling
 
