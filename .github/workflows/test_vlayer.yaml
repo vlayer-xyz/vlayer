@@ -83,7 +83,7 @@ jobs:
           template = "${{ matrix.template }}"
 
           [contracts.vlayer]
-          path = "/contracts/vlayer"
+          path = "$HOME/contracts/vlayer"
           remappings = [["vlayer-0.1.0/", "dependencies/vlayer-0.1.0/src/"]]
 
           [contracts."@openzeppelin-contracts"]
@@ -103,13 +103,13 @@ jobs:
           remappings = [["risc0-ethereum-1.2.0/", "dependencies/risc0-ethereum-1.2.0/"]]
 
           [npm]
-          "@vlayer/sdk" = { path = "/packages/sdk" }
-          "@vlayer/react" = { path = "/packages/sdk-hooks" }
+          "@vlayer/sdk" = { path = "$HOME/packages/sdk" }
+          "@vlayer/react" = { path = "$HOME/packages/sdk-hooks" }
           EOF
 
           cd $(mktemp -d)
 
-          /target/debug/vlayer init ${{ matrix.template }} --templates-dir /examples --config-file config.toml
+          $HOME/target/debug/vlayer init ${{ matrix.template }} --templates-dir /examples --config-file config.toml
 
           cd ${{ matrix.template }}
 
