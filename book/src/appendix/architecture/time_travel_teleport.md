@@ -103,9 +103,7 @@ It is performed using the [`execution_result_to_call_outcome`](https://github.co
 
 ## Executor
 
-`Inspector` is created and run inside the [`Executor`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L28) struct.
-
-`Executor` struct handles running EVM transactions. The `CachedEvmEnv` is passed to the `Executor`, allowing it to determine the appropriate execution context based on the `ExecutionLocation`.
+[`Executor`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L28) struct handles running EVM transactions. `Inspector` is created by the `Executor` struct and used while [building EVM](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/evm.rs#L12).
 
 ```rust
 pub struct Executor<'envs, D: RevmDB> {
