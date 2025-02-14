@@ -9,12 +9,14 @@
   pre_tasks:
     - name: Ensure .ssh exists
       delegate_to: 127.0.0.1
+      run_once: true # noqa: run-once[task]
       ansible.builtin.file:
         path: ~/.ssh
         state: directory
         mode: '700'
     - name: Save host public key to ssh known hosts
       delegate_to: 127.0.0.1
+      throttle: 1
       ansible.builtin.known_hosts:
         path: ~/.ssh/known_hosts
         name: "{{ inventory_hostname }}"
