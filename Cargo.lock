@@ -2791,7 +2791,6 @@ dependencies = [
  "clap",
  "colored 3.0.0",
  "flate2",
- "lazy_static",
  "reqwest 0.12.12",
  "serde",
  "serde_json",

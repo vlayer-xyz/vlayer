@@ -12,7 +12,6 @@ anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive", "env", "string"] }
 colored = { workspace = true }
 flate2 = { workspace = true }
-lazy_static = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
