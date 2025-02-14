@@ -9,7 +9,7 @@ use soldeer_commands::{
     run as run_cmd, ConfigLocation,
 };
 
-use crate::errors::Result;
+use crate::{config::Dependency, errors::Result};
 
 pub async fn install(name: &String, version: &String, url: Option<&String>) -> Result<()> {
     let cmd = Install::builder()
@@ -21,7 +21,19 @@ pub async fn install(name: &String, version: &String, url: Option<&String>) -> R
     Ok(())
 }
 
-pub fn add_remappings(foundry_root: &Path, remappings: &[(String, String)]) -> Result<()> {
+pub fn add_remappings<'a>(
+    foundry_root: &Path,
+    iter: impl Iterator<Item = &'a Dependency>,
+) -> Result<()> {
+    let remappings: Vec<(String, String)> = iter
+        .flat_map(Dependency::remappings)
+        .flatten()
+        .map(|(x, y)| (x.clone(), y.clone()))
+        .collect();
+    do_add_remappings(foundry_root, &remappings)
+}
+
+fn do_add_remappings(foundry_root: &Path, remappings: &[(String, String)]) -> Result<()> {
     let remappings_path = foundry_root.join("remappings.txt");
 
     let keys: Vec<String> = remappings.iter().map(|(x, _)| x.clone()).collect();

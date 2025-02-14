@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     path::{Path, PathBuf},
     process::ExitStatus,
 };
@@ -6,13 +7,17 @@ use std::{
 use colored::Colorize;
 use serde_json::Value;
 
-use crate::errors::{Error, Result};
+use crate::{
+    config::{Config, Dependency, UnresolvedError},
+    errors::{Error, Result},
+    soldeer::{add_remappings, install},
+};
 
-pub fn run_update() -> Result<()> {
+pub async fn run_update() -> Result<()> {
     check_if_vlayerup_exists()?;
     update_cli()?;
     update_sdk()?;
-    update_soldeer()?;
+    update_soldeer().await?;
 
     println!("🎉 Update complete.");
     println!("{}", "Build your contracts now and have fun!".bold());
@@ -58,51 +63,40 @@ fn do_update_sdk(path: &Path, package_json: &Value) -> Result<()> {
     package_manager(path).update_vlayer()
 }
 
-fn update_soldeer() -> Result<()> {
+async fn update_soldeer() -> Result<()> {
     let foundry_toml = find_file_up_tree("foundry.toml")?;
     if let Some(mut foundry_toml_path) = foundry_toml {
         foundry_toml_path.pop();
-        do_update_soldeer(&foundry_toml_path)
+        do_update_soldeer(&foundry_toml_path).await
     } else {
         warn(&format!("{} not found. Skipping Soldeer update.", "foundry.toml".bold()))
     }
 }
 
-fn do_update_soldeer(foundry_toml_path: &Path) -> Result<()> {
+async fn do_update_soldeer(foundry_toml_path: &Path) -> Result<()> {
     let version = newest_vlayer_version()?;
 
     print_update_intention(&format!("vlayer contracts into {}", &version));
 
-    // let updated_deps = updated_deps(version);
+    let config = Config::default();
+    install_dependencies(config.contracts()).await?;
 
-    // updated_deps
-    //     .iter()
-    //     .map(|dep| dep.install(foundry_toml_path))
-    //     .collect::<Result<Vec<_>, _>>()?;
-
-    // add_remappings(foundry_toml_path, &updated_deps)?;
+    add_remappings(foundry_toml_path, config.contracts().values())?;
 
     Ok(())
 }
 
-// fn updated_deps(version: String) -> Vec<SoldeerDep> {
-//     let vlayer_dep = SoldeerDep {
-//         name: String::from("vlayer"),
-//         version,
-//         url: None,
-//         remapping: Some(("vlayer-0.1.0", "src").into()),
-//     };
-
-//     let mut deps = DEPENDENCIES
-//         .clone()
-//         .into_iter()
-//         .filter(|dep| dep.name != "vlayer")
-//         .collect::<Vec<_>>();
-
-//     deps.push(vlayer_dep);
-
-//     deps
-// }
+async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> Result<()> {
+    for (name, dep) in contracts {
+        if dep.path().is_some() {
+            continue;
+        }
+        let version = dep.version().ok_or(UnresolvedError("version".into()))?;
+        let url = dep.url();
+        install(name, &version, url.as_ref()).await?;
+    }
+    Ok(())
+}
 
 fn newest_vlayer_version() -> Result<String> {
     let output = std::process::Command::new("vlayer")

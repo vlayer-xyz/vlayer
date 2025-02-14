@@ -119,19 +119,6 @@ async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> CLIRes
     Ok(())
 }
 
-fn add_default_remappings(
-    foundry_root: &Path,
-    contracts: &HashMap<String, Dependency>,
-) -> CLIResult<()> {
-    let remappings: Vec<(String, String)> = contracts
-        .values()
-        .flat_map(Dependency::remappings)
-        .flatten()
-        .map(|(x, y)| (x.clone(), y.clone()))
-        .collect();
-    add_remappings(foundry_root, &remappings)
-}
-
 fn change_sdk_dependency_to_npm(
     foundry_root: &Path,
     deps: &HashMap<String, Dependency>,
@@ -256,7 +243,7 @@ async fn init_existing(
     info!("Installing dependencies");
     install_dependencies(config.contracts()).await?;
     info!("Successfully installed all dependencies");
-    add_default_remappings(&root_path, config.contracts())?;
+    add_remappings(&root_path, config.contracts().values())?;
 
     change_sdk_dependency_to_npm(&root_path, config.npm())?;
 
@@ -458,7 +445,7 @@ mod tests {
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "some initial remappings\n").unwrap();
 
-        add_default_remappings(&root_path, config.contracts()).unwrap();
+        add_remappings(&root_path, config.contracts().values()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
@@ -484,7 +471,7 @@ mod tests {
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "vlayer-0.1.0/=dependencies/vlayer-0.0.0/src/\n").unwrap();
 
-        add_default_remappings(&root_path, config.contracts()).unwrap();
+        add_remappings(&root_path, config.contracts().values()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
