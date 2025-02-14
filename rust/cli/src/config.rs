@@ -111,7 +111,7 @@ where
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 #[serde(rename_all = "kebab-case")]
 pub struct DetailedDependency<P: Clone = String> {
     pub path: Option<P>,

@@ -372,7 +372,7 @@ mod tests {
     use tempfile::TempDir;
 
     use super::*;
-    use crate::{test_utils::create_temp_git_repo, version};
+    use crate::{config::DetailedDependency, test_utils::create_temp_git_repo, version};
 
     fn prepare_empty_foundry_dir(src_name: &str) -> TempDir {
         // creates a temporary directory with a foundry.toml file
@@ -535,9 +535,12 @@ mod tests {
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
 
-    #[test]
-    fn test_change_workspace_sdk_dependency_to_npm() {
-        let config = Config::default();
+    struct TestPackageJson {
+        temp_dir: tempfile::TempDir,
+        package_json: PathBuf,
+    }
+
+    fn write_test_npm_package_json() -> TestPackageJson {
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
 
@@ -548,12 +551,79 @@ mod tests {
         let contents = r#"{"dependencies": {"@vlayer/sdk": "workspace:*"}}"#;
         std::fs::write(&package_json, contents).unwrap();
 
-        change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
+        TestPackageJson {
+            temp_dir,
+            package_json,
+        }
+    }
+
+    #[test]
+    fn test_change_workspace_sdk_dependency_to_npm() {
+        let TestPackageJson {
+            temp_dir,
+            package_json,
+        } = write_test_npm_package_json();
+
+        let config = Config::default();
+
+        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
 
         assert!(!new_contents.contains("file:../../../packages/sdk"));
+        assert!(new_contents.contains(&expected_sdk_dependency));
+    }
+
+    #[test]
+    fn test_change_workspace_sdk_dependency_to_npm_with_relative_paths() {
+        let TestPackageJson {
+            temp_dir,
+            package_json,
+        } = write_test_npm_package_json();
+
+        const SDK_PATH: &str = "../projects/packages/sdk";
+
+        let mut config = Config::default();
+        {
+            let dep = config.npm.get_mut("@vlayer/sdk").unwrap();
+            *dep = Dependency::Detailed(DetailedDependency {
+                path: Some(SDK_PATH.into()),
+                ..Default::default()
+            });
+        }
+
+        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+
+        let new_contents = fs::read_to_string(package_json).unwrap();
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"file:../{SDK_PATH}\"");
+
+        assert!(new_contents.contains(&expected_sdk_dependency));
+    }
+
+    #[test]
+    fn test_change_workspace_sdk_dependency_to_npm_with_abs_paths() {
+        let TestPackageJson {
+            temp_dir,
+            package_json,
+        } = write_test_npm_package_json();
+
+        const SDK_PATH: &str = "/home/vlayer/projects/packages/sdk";
+
+        let mut config = Config::default();
+        {
+            let dep = config.npm.get_mut("@vlayer/sdk").unwrap();
+            *dep = Dependency::Detailed(DetailedDependency {
+                path: Some(SDK_PATH.into()),
+                ..Default::default()
+            });
+        }
+
+        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+
+        let new_contents = fs::read_to_string(package_json).unwrap();
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"file:{SDK_PATH}\"");
+
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
 
