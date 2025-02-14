@@ -95,7 +95,7 @@ Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlaye
 
 ## Executor
 
-`Inspector` is created and run inside the [`Executor`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L28)  struct.
+`Inspector` is created and run inside the [`Executor`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L28) struct.
 
 `Executor` struct handles running EVM transactions. The `CachedEvmEnv` is passed to the `Executor`, allowing it to determine the appropriate execution context based on the `ExecutionLocation`.
 
@@ -107,7 +107,7 @@ pub struct Executor<'envs, D: RevmDB> {
 
 ### `call`
 
-The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that wraps the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors, and prevents a full system crash. The method then converts the raw execution result and metadata into a structured [`SuccessfulExecutionResult`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/execution_result.rs#L9) for external use:
+The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that wraps the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors. The method then converts the raw execution result and metadata into a structured [`SuccessfulExecutionResult`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/execution_result.rs#L9) for external use:
 
 ```rust
 pub struct SuccessfulExecutionResult {
@@ -117,17 +117,17 @@ pub struct SuccessfulExecutionResult {
 }
 ```
 
+#### Error handling
+
+Due to the design of revm's `Inspector` trait, the `Inspector::call` method must return an `Option<CallOutcome>` rather than a `Result`. This limitation means that errors occurring during intercepted calls cannot be directly propagated via the return type.
+
+To work around this constraint, our `Inspector` implementation [uses panics to signal errors](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L77). The panic is then caught in the `Executor::call` method using `panic::catch_unwind`. This mechanism allows us to convert panics into proper error results, ensuring that errors are not lost, even though the `Inspector::call` function itself cannot return an error.
+
 ### `internal_call`
 
 The private [`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41) method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another). In this implementation, the same environment (`envs`) is shared across recursive calls, meaning that any modification performed by one call is visible to others.
 
 But updates to the database `state` (contained in the [`ProofDb`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/db/proof.rs#L26) structure, being a part of `env`) are safe because the `state` is modified only by inserting new entries. New keys are added to the `accounts`, `contracts`, and `block_hash_numbers` collections, while existing entries remain unchanged. This approach prevents scenarios where a value that will be read in one part of the code is inadvertently changed by another.
-
-### Error handling in `Executor::call`
-
-Due to the design of revm's `Inspector` trait, the `Inspector::call` method must return an `Option<CallOutcome>` rather than a `Result`. This limitation means that errors occurring during intercepted calls cannot be directly propagated via the return type.
-
-To work around this constraint, our implementation uses panics to signal errors. Specifically, if an intercepted call encounters an error, it panics. The panic is then caught in the `Executor::call` method using `panic::catch_unwind`. This mechanism allows us to convert panics into proper error results, ensuring that errors are not lost, even though the `Inspector::call` function itself cannot return an error.
 
 ### `CallOutcome` vs `ExecutionResult`
 
