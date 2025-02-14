@@ -26,7 +26,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: ["simple", "simple-web-proof", "simple-email-proof", "simple-teleport", "simple-time-travel"]
+        example:
+          [
+            "simple",
+            "simple-web-proof",
+            "simple-email-proof",
+            "simple-teleport",
+            "simple-time-travel",
+          ]
 
     steps:
       - name: Checkout repository
