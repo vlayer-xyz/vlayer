@@ -23,6 +23,11 @@ jobs:
   test-e2e-devnet:
     name: E2E test against devnet
     runs-on: aws-linux-medium
+    strategy:
+      fail-fast: false
+      matrix:
+        example: ["simple", "simple-web-proof", "simple-email-proof", "simple-teleport", "simple-time-travel"]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -54,7 +59,8 @@ jobs:
         env:
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
-        run: bash/e2e-test.sh
+          EXAMPLE: ${{ matrix.example }}
+        run: bash/e2e-test-example.sh
 
       # Teardown
       - name: Display Logs
