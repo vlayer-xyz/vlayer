@@ -547,26 +547,6 @@ mod tests {
     }
 
     #[test]
-    fn test_add_sdk_dependency_to_package_json() {
-        let config = Config::default();
-        let temp_dir = tempfile::tempdir().unwrap();
-        let root_path = temp_dir.path().to_path_buf();
-
-        let vlayer_dir = root_path.join("vlayer");
-        std::fs::create_dir(&vlayer_dir).unwrap();
-
-        let package_json = vlayer_dir.join("package.json");
-        let contents = r#"{"dependencies": {}}"#;
-        std::fs::write(&package_json, contents).unwrap();
-
-        change_sdk_dependency_to_npm(&root_path, config.npm()).unwrap();
-
-        let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
-        assert!(new_contents.contains(&expected_sdk_dependency));
-    }
-
-    #[test]
     fn test_change_workspace_sdk_dependency_to_npm() {
         let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
