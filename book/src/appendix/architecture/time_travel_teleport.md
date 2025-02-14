@@ -85,7 +85,7 @@ There are two special functions that modify execution context:
 Intercepts every contract call and determines how to handle it:
 * **Precompiled Contracts:** If the call targets a precompiled contract, it logs the call and records relevant metadata.
 * **Travel Call Contract:** If the call is directed to the designated travel call contract (identified by `CONTRACT_ADDR`), the `Inspector` parses the input arguments and triggers a travel call by invoking either `set_block` or `set_chain`.
-* **Standard Calls:** If no travel call is detected, the `Inspector` allows the call to proceed normally. However, if a travel call has already set a new context, it processes the call using the provided `transaction_callback` and applies the updated execution context in the [`on_call` function](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L68).
+* **Standard Calls:** If no travel call is detected, the `Inspector` allows the call to proceed normally. However, if a travel call has already set a new context, it processes the call using the provided `transaction_callback` and applies the updated execution context in the [`on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L68) function.
 
 #### 4. Monitors & Logs Precompiled Contracts
 If the call is made to a precompiled contract it logs the call and records metadata.
@@ -131,4 +131,4 @@ But updates to the database `state` (contained in the [`ProofDb`](https://github
 
 ### `CallOutcome` vs `ExecutionResult`
 
-When we run `Inspector::call` function, expected type returned from this function is [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16). But when we run `transaction_callback` it executes the whole EVM and returns [`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40). Hence, we need to convert one type into another. It is done using `execution_result_to_call_outcome` function inside `Inspector::on_call` method.
+When we run `Inspector::call` function, expected type returned from this function is [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16). But when we run `transaction_callback` it executes the whole EVM and returns [`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40). Hence, we need to convert one type into another. It is done using [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [inside `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80) method.
