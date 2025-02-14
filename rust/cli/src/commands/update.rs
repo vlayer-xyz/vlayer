@@ -6,9 +6,9 @@ use std::{
 use colored::Colorize;
 use serde_json::Value;
 
-use crate::errors::CLIError;
+use crate::errors::{Error, Result};
 
-pub fn run_update() -> Result<(), CLIError> {
+pub fn run_update() -> Result<()> {
     check_if_vlayerup_exists()?;
     update_cli()?;
     update_sdk()?;
@@ -20,7 +20,7 @@ pub fn run_update() -> Result<(), CLIError> {
     Ok(())
 }
 
-fn check_if_vlayerup_exists() -> Result<(), CLIError> {
+fn check_if_vlayerup_exists() -> Result<()> {
     let output = std::process::Command::new("which")
         .arg("vlayerup")
         .output()
@@ -29,20 +29,20 @@ fn check_if_vlayerup_exists() -> Result<(), CLIError> {
     if output.status.success() {
         Ok(())
     } else {
-        Err(CLIError::UpgradeError(format!(
+        Err(Error::UpgradeError(format!(
             "{} not found. Visit https://book.vlayer.xyz/getting-started/installation.html#get-vlayerup for installation instructions.",
             "vlayerup".italic().bold()
         )))
     }
 }
 
-fn update_cli() -> Result<(), CLIError> {
+fn update_cli() -> Result<()> {
     print_update_intention("vlayer CLI");
     let status = spawn("vlayerup", &["update"])?;
     ensure_success(status, "vlayer CLI")
 }
 
-fn update_sdk() -> Result<(), CLIError> {
+fn update_sdk() -> Result<()> {
     if let Some((path, json)) = find_package_json()? {
         do_update_sdk(&path, &json)
     } else {
@@ -50,7 +50,7 @@ fn update_sdk() -> Result<(), CLIError> {
     }
 }
 
-fn do_update_sdk(path: &Path, package_json: &Value) -> Result<(), CLIError> {
+fn do_update_sdk(path: &Path, package_json: &Value) -> Result<()> {
     if package_json["dependencies"]["@vlayer/sdk"].is_null() {
         return warn(&format!("{} not found in {}", "@vlayer/sdk".bold(), "package.json".bold()));
     }
@@ -58,7 +58,7 @@ fn do_update_sdk(path: &Path, package_json: &Value) -> Result<(), CLIError> {
     package_manager(path).update_vlayer()
 }
 
-fn update_soldeer() -> Result<(), CLIError> {
+fn update_soldeer() -> Result<()> {
     let foundry_toml = find_file_up_tree("foundry.toml")?;
     if let Some(mut foundry_toml_path) = foundry_toml {
         foundry_toml_path.pop();
@@ -68,7 +68,7 @@ fn update_soldeer() -> Result<(), CLIError> {
     }
 }
 
-fn do_update_soldeer(foundry_toml_path: &Path) -> Result<(), CLIError> {
+fn do_update_soldeer(foundry_toml_path: &Path) -> Result<()> {
     let version = newest_vlayer_version()?;
 
     print_update_intention(&format!("vlayer contracts into {}", &version));
@@ -104,14 +104,14 @@ fn do_update_soldeer(foundry_toml_path: &Path) -> Result<(), CLIError> {
 //     deps
 // }
 
-fn newest_vlayer_version() -> Result<String, CLIError> {
+fn newest_vlayer_version() -> Result<String> {
     let output = std::process::Command::new("vlayer")
         .arg("--version")
         .output()
         .map_err(into_update_err)?;
 
     if !output.status.success() {
-        return Err(CLIError::UpgradeError(format!(
+        return Err(Error::UpgradeError(format!(
             "Failed to run newest vlayer: {}",
             String::from_utf8_lossy(&output.stderr)
         )));
@@ -121,7 +121,7 @@ fn newest_vlayer_version() -> Result<String, CLIError> {
         .split_ascii_whitespace()
         .nth(1)
         .map(String::from)
-        .ok_or(CLIError::UpgradeError("Corrupted vlayer binary".to_string()))
+        .ok_or(Error::UpgradeError("Corrupted vlayer binary".to_string()))
 }
 
 enum PackageManager {
@@ -141,12 +141,12 @@ impl PackageManager {
         }
     }
 
-    fn install_package(pm_name: &str, install_command: &str) -> Result<(), CLIError> {
+    fn install_package(pm_name: &str, install_command: &str) -> Result<()> {
         let exit_status = spawn(pm_name, &[install_command, "@vlayer/sdk"])?;
         ensure_success(exit_status, "@vlayer/sdk")
     }
 
-    pub fn update_vlayer(&self) -> Result<(), CLIError> {
+    pub fn update_vlayer(&self) -> Result<()> {
         let (pm_name, install_command) = self.command_args();
         Self::install_package(pm_name, install_command)
     }
@@ -164,8 +164,8 @@ fn package_manager(package_path: &Path) -> PackageManager {
     }
 }
 
-fn find_file_up_tree(name: &str) -> Result<Option<PathBuf>, CLIError> {
-    let mut path = std::env::current_dir().map_err(|e| CLIError::UpgradeError(e.to_string()))?;
+fn find_file_up_tree(name: &str) -> Result<Option<PathBuf>> {
+    let mut path = std::env::current_dir().map_err(|e| Error::UpgradeError(e.to_string()))?;
     loop {
         path.push(name);
         if path.exists() {
@@ -178,7 +178,7 @@ fn find_file_up_tree(name: &str) -> Result<Option<PathBuf>, CLIError> {
     }
 }
 
-fn find_package_json() -> Result<Option<(PathBuf, Value)>, CLIError> {
+fn find_package_json() -> Result<Option<(PathBuf, Value)>> {
     if let Some(mut path) = find_file_up_tree("package.json")? {
         let value =
             serde_json::from_str(&std::fs::read_to_string(&path).map_err(into_update_err)?)?;
@@ -189,7 +189,7 @@ fn find_package_json() -> Result<Option<(PathBuf, Value)>, CLIError> {
     }
 }
 
-fn spawn(command: &str, args: &[&str]) -> Result<ExitStatus, CLIError> {
+fn spawn(command: &str, args: &[&str]) -> Result<ExitStatus> {
     std::process::Command::new(command)
         .args(args)
         .spawn()
@@ -197,15 +197,15 @@ fn spawn(command: &str, args: &[&str]) -> Result<ExitStatus, CLIError> {
         .map_err(into_update_err)
 }
 
-fn ensure_success(exist_status: ExitStatus, package_name: &str) -> Result<(), CLIError> {
+fn ensure_success(exist_status: ExitStatus, package_name: &str) -> Result<()> {
     if exist_status.success() {
         print_successful_update(package_name)
     } else {
-        Err(CLIError::UpgradeError(format!("Failed to update {package_name}")))
+        Err(Error::UpgradeError(format!("Failed to update {package_name}")))
     }
 }
 
-fn warn(message: &str) -> Result<(), CLIError> {
+fn warn(message: &str) -> Result<()> {
     println!("{} {}\n", "⚠".yellow().bold(), message);
     Ok(())
 }
@@ -214,7 +214,7 @@ fn print_update_intention(package_name: &str) {
     println!("📦 Updating {}\n", package_name.bold());
 }
 
-fn print_successful_update(package_name: &str) -> Result<(), CLIError> {
+fn print_successful_update(package_name: &str) -> Result<()> {
     println!(
         "{} {} updated {}\n",
         "✔".green().bold(),
@@ -225,6 +225,6 @@ fn print_successful_update(package_name: &str) -> Result<(), CLIError> {
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn into_update_err(e: std::io::Error) -> CLIError {
-    CLIError::UpgradeError(e.to_string())
+fn into_update_err(e: std::io::Error) -> Error {
+    Error::UpgradeError(e.to_string())
 }

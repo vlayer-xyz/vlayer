@@ -9,12 +9,19 @@ use soldeer_commands::{
     run as run_cmd, ConfigLocation,
 };
 
-use crate::errors::CLIError;
+use crate::errors::Result;
 
-pub fn add_remappings(
-    foundry_root: &Path,
-    remappings: &[(String, String)],
-) -> Result<(), CLIError> {
+pub async fn install(name: &String, version: &String, url: Option<&String>) -> Result<()> {
+    let cmd = Install::builder()
+        .dependency(format!("{name}~{version}"))
+        .maybe_remote_url(url)
+        .config_location(ConfigLocation::Foundry)
+        .build();
+    run_cmd(Command::Install(cmd)).await?;
+    Ok(())
+}
+
+pub fn add_remappings(foundry_root: &Path, remappings: &[(String, String)]) -> Result<()> {
     let remappings_path = foundry_root.join("remappings.txt");
 
     let keys: Vec<String> = remappings.iter().map(|(x, _)| x.clone()).collect();
@@ -35,25 +42,7 @@ pub fn add_remappings(
     Ok(())
 }
 
-pub async fn install(
-    name: &String,
-    version: &String,
-    url: Option<&String>,
-) -> Result<(), CLIError> {
-    let cmd = Install::builder()
-        .dependency(format!("{name}~{version}"))
-        .maybe_remote_url(url)
-        .config_location(ConfigLocation::Foundry)
-        .build();
-    run_cmd(Command::Install(cmd))
-        .await
-        .map_err(CLIError::Soldeer)
-}
-
-fn filter_existing_remappings(
-    remappings_path: &PathBuf,
-    keys: &[String],
-) -> Result<Vec<String>, CLIError> {
+fn filter_existing_remappings(remappings_path: &PathBuf, keys: &[String]) -> Result<Vec<String>> {
     let remappings = OpenOptions::new()
         .create(true)
         .append(true)
@@ -62,7 +51,7 @@ fn filter_existing_remappings(
     let curr_remappings = BufReader::new(remappings).lines();
     let matches_no_key = |line: &String| keys.iter().all(|key| !line.starts_with(key));
     let filtered_remappings = curr_remappings
-        .map_while(Result::ok)
+        .map_while(std::result::Result::ok)
         .filter(matches_no_key)
         .collect();
     Ok(filtered_remappings)

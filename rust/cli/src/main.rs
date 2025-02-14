@@ -7,12 +7,13 @@ pub use version::version as build_version;
 
 use crate::{
     commands::{test::run_test, update::run_update},
-    errors::CLIError,
+    errors::Result,
 };
 
 mod commands;
 mod config;
 pub mod errors;
+mod soldeer;
 mod utils;
 
 #[cfg(test)]
@@ -45,7 +46,7 @@ async fn main() {
     }
 }
 
-async fn run() -> Result<(), CLIError> {
+async fn run() -> Result<()> {
     match Cli::parse().command {
         Commands::Init(args) => run_init(args).await,
         Commands::Test(args) => {

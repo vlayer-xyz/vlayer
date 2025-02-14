@@ -1,15 +1,16 @@
 use std::path::Path;
 
-use crate::errors::CLIError;
+use anyhow::anyhow;
 
-pub(crate) fn get_src_from_str(contents: impl AsRef<str>) -> Result<String, CLIError> {
-    let config =
-        toml::from_str(contents.as_ref()).map_err(|e| CLIError::TomlError(e.to_string()))?;
+use crate::errors::Result;
+
+pub(crate) fn get_src_from_str(contents: impl AsRef<str>) -> Result<String> {
+    let config = toml::from_str(contents.as_ref())?;
 
     let result = get_src_from_toml(&config);
     match result {
         Some(src) => Ok(src),
-        None => Err(CLIError::TomlError("No source found in foundry.toml".to_string())),
+        None => Err(anyhow!("No source found in foundry.toml").into()),
     }
 }
 
@@ -22,13 +23,12 @@ fn get_src_from_toml(config: &toml::Table) -> Option<String> {
     Some(default_src.to_string())
 }
 
-pub(crate) fn add_deps_to_foundry_toml(foundry_root: &Path) -> Result<(), CLIError> {
+pub(crate) fn add_deps_to_foundry_toml(foundry_root: &Path) -> Result<()> {
     do_add_deps_to_foundry_toml(&foundry_root.join("foundry.toml"))
 }
 
-fn do_add_deps_to_foundry_toml(file_path: &Path) -> Result<(), CLIError> {
-    let mut foundry_toml = toml::from_str(&std::fs::read_to_string(file_path)?)
-        .map_err(|e| CLIError::TomlError(e.to_string()))?;
+fn do_add_deps_to_foundry_toml(file_path: &Path) -> Result<()> {
+    let mut foundry_toml = toml::from_str(&std::fs::read_to_string(file_path)?)?;
 
     add_deps_to_toml_table(&mut foundry_toml);
     let new_contents = foundry_toml.to_string();
@@ -60,6 +60,8 @@ fn add_deps_to_toml_table(foundry_toml: &mut toml::Table) -> Option<()> {
 
 #[cfg(test)]
 mod tests {
+    use crate::errors::Error;
+
     use super::*;
 
     #[test]
@@ -164,7 +166,7 @@ mod tests {
         "#;
         let result = get_src_from_str(contents);
         assert!(
-            matches!(result.unwrap_err(), CLIError::TomlError(errormsg) if errormsg == "No source found in foundry.toml")
+            matches!(result.unwrap_err(), Error::AnyhowError(errormsg) if errormsg.to_string() == "No source found in foundry.toml")
         );
     }
 
@@ -175,8 +177,6 @@ mod tests {
             src = "src"aaa
         "#;
         let result = get_src_from_str(invalid_toml);
-        assert!(
-            matches!(result.unwrap_err(), CLIError::TomlError(errormsg) if errormsg != "No source found in foundry.toml")
-        ); // A long error message is returned, specifying the error in the TOML
+        assert!(matches!(result.unwrap_err(), Error::Toml(..)));
     }
 }
