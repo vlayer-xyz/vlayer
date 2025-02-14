@@ -82,20 +82,26 @@ pub struct SuccessfulExecutionResult {
 
 ### `internal_call`
 
-The private `internal_call` method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another).
+The private `internal_call` method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another). In this implementation, the same environment (`env`) is shared across recursive calls, meaning that any modification performed by one call is visible to others.
 
-#### How It Works:
+Below is the `internal_call` implementation:
 
-* **Environment Retrieval:** Obtains the appropriate execution environment (`EvmEnv`) for the given location.
-* **Recursive Callback:** Defines a callback to support nested contract calls by recursively invoking `internal_call`.
-* **Inspector Setup:** Instantiates an `Inspector` with the chain ID and the callback function.
-* **EVM Execution:** Builds the EVM engine using `build_evm` and runs the transaction with `evm.transact_preverified()`, capturing the result.
-* **Logging and Return:** Logs the result at debug level and returns a tuple containing the execution result and its metadata.
+```rust
+fn internal_call(&'envs self, tx: &Call, location: ExecutionLocation) -> TravelCallResult {
+    info!("Executing EVM call");
+    let env = self.envs.get(location)?;
+    let transaction_callback = |call: &_, location| self.internal_call(call, location);
+    let inspector = Inspector::new(env.cfg_env.chain_id, transaction_callback);
+    let mut evm = build_evm(&env, tx, inspector);
+    // Can panic because EVM is unable to propagate errors on intercepted calls
+    let ResultAndState { result, .. } = evm.transact_preverified()?;
+    debug!("EVM call result: {result:?}");
 
-### Error Handling Summary:
+    Ok((result, evm.context.external.into_metadata()))
+}
+```
 
-* **call:** Catches panics during execution with `panic::catch_unwind()`, converting them into structured errors.
-* **internal_call:** Relies on natural error propagation (using the `?` operator) during execution, allowing errors to propagate up to `call` for centralized error handling.
+But updates to the database `state` (contained in the [`ProofDb`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/db/proof.rs#L26) structure) are safe because the `state` is modified only by inserting new entries. New keys are added to the `accounts`, `contracts`, and `block_hash_numbers` collections, while existing entries remain unchanged. This approach prevents scenarios where a value that will be read in one part of the code is inadvertently changed by another.
 
 ## Inspector
 
