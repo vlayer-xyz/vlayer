@@ -92,6 +92,14 @@ If the call is made to a precompiled contract it logs the call and records metad
 
 Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/precompiles/src/lib.rs#L24).
 
+### `ExecutionResult` to `CallOutcome` conversion
+
+* `ExecutionResult` is an enum representing the complete outcome of a transaction. It has three variants—`Success`, `Revert`, and `Halt`—and includes detailed information such as gas usage, gas refunds, logs, and output data.
+* `CallOutcome` is a struct used to represent the result of a single call within the EVM interpreter. It encapsulates an `InterpreterResult` (which contains output data and gas usage) along with a `memory_offset` indicating where the output is stored.
+
+When `Inspector::call` is executed, it must return a [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16). However, the `transaction_callback` run inside `Inspector::call` executes the full EVM and returns an [`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40). Hence, the conversion between this two is needed.
+
+The conversion from `ExecutionResult` to `CallOutcome` is performed using the [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [within `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80). It loses some data: `logs` and `gas_refunded` fields from `ExecutionResult::Success` are not converted, but they are not necessary in `CallOutcome`. Other than that, all the fields are matched.
 
 ## Executor
 
@@ -127,8 +135,4 @@ To work around this constraint, our `Inspector` implementation [uses panics to s
 
 The private [`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41) method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another). In this implementation, the `envs` are shared across recursive calls, meaning that any modification performed by one call is visible to others.
 
-But updates to the database `state` (contained in the [`ProofDb`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/db/proof.rs#L26) structure, being a part of `env`) are safe because the `state` is modified only by inserting new entries. New keys are added to the `accounts`, `contracts`, and `block_hash_numbers` collections, while existing entries remain unchanged. This approach prevents scenarios where a value that will be read in one part of the code is inadvertently changed by another.
-
-### `CallOutcome` vs `ExecutionResult`
-
-When we run `Inspector::call` function, expected type returned from this function is [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16). But when we run `transaction_callback` it executes the whole EVM and returns [`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40). Hence, we need to convert one type into another. It is done using [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [inside `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80) method.
+But updates to the database `state` (contained in the [`ProofDb`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/db/proof.rs#L26) structure, being a part of `env`) are safe because the `state` is modified only by inserting new entries. New keys are added to the `accounts`, `contracts`, and `block_hash_numbers` collections, while existing entries remain unchanged.
