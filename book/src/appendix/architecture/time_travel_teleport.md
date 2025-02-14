@@ -9,6 +9,7 @@ vlayer allows seamless aggregation of data from different blocks and chains. We 
 At the [beggining of the `guest::main`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/guest.rs#L38) we verify whether the data for each execution location is coherent. However, we have not yet checked whether data from multiple execution locations align with each other. Specifically, we need to ensure that:
 * The blocks we claim to be on the same chain are actually there (allowing time travel between blocks on the same chain).
 * The blocks associated with a given chain truly belong to that chain (enabling teleportation to the specified chain).
+
 The points above are verified by the [`Verifier::verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/travel_call.rs#L80) function. The `Verifier` struct is used both during the host preflight and guest execution. Because of that it is parametrized by Recording Clients (in host) and Reading Clients (in guest).
 
 The `verify` function performs above verifications by:
