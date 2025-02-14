@@ -6,10 +6,12 @@ import React, {
   useState,
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCurrentStep } from "../hooks/useCurentStep";
-import { STEP_KIND } from "../../app/router/steps";
-import { ProgressBar } from "./ProgressBar";
-import { Navigation } from "./Navigation";
+import { useCurrentStep } from "../../hooks/useCurentStep";
+import { STEP_KIND } from "../../../app/router/steps";
+import { ProgressBar } from "../ProgressBar";
+import { Navigation } from "../Navigation";
+import { motionConfig } from "./Modal.animations";
+import styles from "./Modal.module.css";
 
 export const modalContext = createContext({
   showModal: () => {},
@@ -52,41 +54,26 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
   return (
     <dialog className="modal" ref={modalRef}>
       <div className="modal-box bg-white rounded-2xl">
-        <motion.div
-          className="h-[490px] flex flex-col items-center justify-between"
-          initial={{ opacity: 0, scale: 0.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.1 }}
-          transition={{ ease: "easeOut", duration: 0.3 }}
-        >
-          {/* Navigation */}
+        <motion.div className={styles.innerModal} {...motionConfig}>
           <Navigation />
-          {/* Progress Bar */}
           <AnimatePresence>
             {!isWelcome && !isSuccessStep && <ProgressBar />}
           </AnimatePresence>
-          {/* Header Icon */}
           <AnimatePresence>
             {currentStep?.headerIcon && (
               <motion.img
-                initial={{ opacity: 0, scale: 0.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.1 }}
-                transition={{ ease: "easeOut", duration: 0.3 }}
                 src={currentStep?.headerIcon}
                 alt="Success Icon"
-                className="w-[282px] h-[150px]"
+                className={styles.headerIcon}
+                {...motionConfig}
               />
             )}
           </AnimatePresence>
-          <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
-            {/* Title */}
+          <div className={styles.content}>
             {currentStep?.title && (
               <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
             )}
-            {/* Description */}
             <p className={`h-[116px] desc ${descClass}`}>{description}</p>
-            {/* Content */}
             <modalContext.Provider value={{ showModal, closeModal }}>
               {children}
             </modalContext.Provider>

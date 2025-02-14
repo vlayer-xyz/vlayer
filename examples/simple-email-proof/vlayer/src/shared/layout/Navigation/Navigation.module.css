@@ -1,0 +1,15 @@
+.navbar {
+  @apply flex gap-10 justify-between max-w-[480px] w-full
+}
+
+.backButton {
+  @apply flex gap-1.5 justify-center items-center px-2 py-0 my-auto h-8 text-xs leading-3 text-center text-gray-800 whitespace-nowrap rounded-lg shadow-sm min-h-[32px]
+}
+
+.backButton span {
+  @apply self-stretch my-auto
+}
+
+.backButton svg {
+  @apply w-3.5 h-3.5
+}

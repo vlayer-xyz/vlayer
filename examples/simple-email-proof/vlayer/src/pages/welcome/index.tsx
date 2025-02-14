@@ -1,8 +1,9 @@
 import { Link } from "react-router";
+import styles from "./welcome.module.css";
 
 export const WelcomeScreen = () => {
   return (
-    <div className="mt-5 flex justify-center">
+    <div className={styles.startButton}>
       <Link to="connect-wallet" id="nextButton" data-testid="start-page-button">
         Start
       </Link>
