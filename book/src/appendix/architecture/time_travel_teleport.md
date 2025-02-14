@@ -56,56 +56,11 @@ The following macros work together to enforce sealing and enable test mocking:
   * Implements the verifier trait for function pointers with `impl_verifier_for_fn!`
 
 
-## Executor
-
-After verifying that execution locations belong to their respective chains, travel calls can be executed on them.
-
-EVM calls are handled by the [`Executor`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L28) struct. The `CachedEvmEnv` is passed to the `Executor`, allowing it to determine the appropriate execution context based on the `ExecutionLocation`.
-
-```rust
-pub struct Executor<'envs, D: RevmDB> {
-    envs: &'envs CachedEvmEnv<D>,
-}
-```
-
-### `call`
-
-The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that wraps the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors, and prevents a full system crash. The method then converts the raw execution result and metadata into a structured [`SuccessfulExecutionResult`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/execution_result.rs#L9) for external use:
-
-```rust
-pub struct SuccessfulExecutionResult {
-    pub output: Vec<u8>,
-    pub gas_used: u64,
-    pub metadata: Box<[Metadata]>,
-}
-```
-
-### `internal_call`
-
-The private `internal_call` method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another). In this implementation, the same environment (`env`) is shared across recursive calls, meaning that any modification performed by one call is visible to others.
-
-Below is the `internal_call` implementation:
-
-```rust
-fn internal_call(&'envs self, tx: &Call, location: ExecutionLocation) -> TravelCallResult {
-    info!("Executing EVM call");
-    let env = self.envs.get(location)?;
-    let transaction_callback = |call: &_, location| self.internal_call(call, location);
-    let inspector = Inspector::new(env.cfg_env.chain_id, transaction_callback);
-    let mut evm = build_evm(&env, tx, inspector);
-    // Can panic because EVM is unable to propagate errors on intercepted calls
-    let ResultAndState { result, .. } = evm.transact_preverified()?;
-    debug!("EVM call result: {result:?}");
-
-    Ok((result, evm.context.external.into_metadata()))
-}
-```
-
-But updates to the database `state` (contained in the [`ProofDb`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/db/proof.rs#L26) structure) are safe because the `state` is modified only by inserting new entries. New keys are added to the `accounts`, `contracts`, and `block_hash_numbers` collections, while existing entries remain unchanged. This approach prevents scenarios where a value that will be read in one part of the code is inadvertently changed by another.
-
 ## Inspector
 
 Both **Time Travel** and **Teleport** features are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to **intercept**, **monitor**, and **modify** EVM calls, particularly handling **travel calls** that alter the execution context by switching the blockchain network or block number.
+
+How does it work? When `ExecutionLocation` is updated, `Inspector` creates a separate EVM with new `ExecutionLocation` context (using `transaction_callback` passed), pauses the current one and executes the subcall on a separate inner EVM.
 
 ```rust
 pub struct Inspector<'a> {
@@ -136,3 +91,34 @@ Intercepts every contract call and determines how to handle it:
 If the call is made to a precompiled contract it logs the call and records metadata.
 
 Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/precompiles/src/lib.rs#L24).
+
+
+## Executor
+
+`Inspector` is created and run inside the `Executor` struct.
+
+[`Executor`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L28) struct handles running EVM transactions. The `CachedEvmEnv` is passed to the `Executor`, allowing it to determine the appropriate execution context based on the `ExecutionLocation`.
+
+```rust
+pub struct Executor<'envs, D: RevmDB> {
+    envs: &'envs CachedEvmEnv<D>,
+}
+```
+
+### `call`
+
+The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that wraps the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors, and prevents a full system crash. The method then converts the raw execution result and metadata into a structured [`SuccessfulExecutionResult`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/execution_result.rs#L9) for external use:
+
+```rust
+pub struct SuccessfulExecutionResult {
+    pub output: Vec<u8>,
+    pub gas_used: u64,
+    pub metadata: Box<[Metadata]>,
+}
+```
+
+### `internal_call`
+
+The private `internal_call` method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another). In this implementation, the same environment (`envs`) is shared across recursive calls, meaning that any modification performed by one call is visible to others.
+
+But updates to the database `state` (contained in the [`ProofDb`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/db/proof.rs#L26) structure, being a part of `env`) are safe because the `state` is modified only by inserting new entries. New keys are added to the `accounts`, `contracts`, and `block_hash_numbers` collections, while existing entries remain unchanged. This approach prevents scenarios where a value that will be read in one part of the code is inadvertently changed by another.
