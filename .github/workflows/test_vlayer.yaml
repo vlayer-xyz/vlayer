@@ -53,8 +53,9 @@ jobs:
   test-vlayer-init:
     name: Test vlayer-init
     runs-on: aws-linux-medium
-    matrix:
-      template: ["simple", "simple-web-proof", "simple-email-proof", "simple-teleport", "simple-time-travel"]
+    strategy:
+      matrix:
+        template: ["simple", "simple-web-proof", "simple-email-proof", "simple-teleport", "simple-time-travel"]
 
     steps:
       - name: Checkout repository
