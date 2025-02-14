@@ -79,7 +79,7 @@ jobs:
           template = "${{ matrix.template }}"
 
           [contracts.vlayer]
-          path = "$HOME/vlayer/contracts/vlayer"
+          path = "$GITHUB_WORKSPACE/contracts/vlayer"
           remappings = [["vlayer-0.1.0/", "dependencies/vlayer-0.1.0/src/"]]
 
           [contracts."@openzeppelin-contracts"]
@@ -99,13 +99,13 @@ jobs:
           remappings = [["risc0-ethereum-1.2.0/", "dependencies/risc0-ethereum-1.2.0/"]]
 
           [npm]
-          "@vlayer/sdk" = { path = "$HOME/vlayer/packages/sdk" }
-          "@vlayer/react" = { path = "$HOME/vlayer/packages/sdk-hooks" }
+          "@vlayer/sdk" = { path = "$GITHUB_WORKSPACE/packages/sdk" }
+          "@vlayer/react" = { path = "$GITHUB_WORKSPACE/packages/sdk-hooks" }
           EOF
 
           cd $(mktemp -d)
 
-          cargo run --locked --manifest-path $HOME/vlayer/Cargo.toml --bin cli -- init ${{ matrix.template }} --templates-dir $HOME/vlayer/examples --config-file config.toml
+          cargo run --locked --manifest-path $GITHUB_WORKSPACE/Cargo.toml --bin cli -- init ${{ matrix.template }} --templates-dir $GITHUB_WORKSPACE/examples --config-file config.toml
 
           cd ${{ matrix.template }}
 
