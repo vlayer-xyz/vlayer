@@ -231,6 +231,7 @@ pub struct SoldeerDependency<'a> {
 }
 
 #[derive(Clone, Debug, ValueEnum, Default, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Template {
     #[default]
     Simple,
