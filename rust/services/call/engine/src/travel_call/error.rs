@@ -20,8 +20,6 @@ pub enum Error<D: RevmDBError> {
     Panic(String),
 }
 
-pub type Result<T, D> = std::result::Result<T, Error<D>>;
-
 pub fn wrap_panic<D: RevmDBError>(err: Box<dyn Any + Send>) -> Error<D> {
     let panic_msg = err
         .downcast::<String>()

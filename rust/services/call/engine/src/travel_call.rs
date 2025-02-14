@@ -3,16 +3,14 @@ use std::panic;
 use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError};
 use derive_new::new;
 use evm::build_evm;
+use inspector::TxResultWithMetadata;
 use revm::primitives::ResultAndState;
 use tracing::{debug, info};
 
 use crate::{
     evm::{env::cached::CachedEvmEnv, execution_result::SuccessfulExecutionResult},
     io::Call,
-    travel_call::{
-        error::{wrap_panic, Result},
-        inspector::TravelCallResult,
-    },
+    travel_call::error::wrap_panic,
 };
 
 mod args;
@@ -34,7 +32,7 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         self,
         tx: &Call,
         location: ExecutionLocation,
-    ) -> Result<SuccessfulExecutionResult, WrappedRevmDBError<D>> {
+    ) -> Result<SuccessfulExecutionResult, Error<WrappedRevmDBError<D>>> {
         info!("Executing top-level EVM call");
         let (execution_result, metadata) =
             panic::catch_unwind(|| self.internal_call(tx, location)).map_err(wrap_panic)??;
@@ -46,7 +44,7 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         &'envs self,
         tx: &Call,
         location: ExecutionLocation,
-    ) -> TravelCallResult<WrappedRevmDBError<D>> {
+    ) -> Result<TxResultWithMetadata, Error<WrappedRevmDBError<D>>> {
         info!("Executing EVM call");
         let env = self.envs.get(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
