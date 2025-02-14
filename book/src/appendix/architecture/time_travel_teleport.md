@@ -125,7 +125,7 @@ To work around this constraint, our `Inspector` implementation [uses panics to s
 
 ### `internal_call`
 
-The private [`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41) method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another). In this implementation, the same environment (`envs`) is shared across recursive calls, meaning that any modification performed by one call is visible to others.
+The private [`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41) method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another). In this implementation, the `envs` are shared across recursive calls, meaning that any modification performed by one call is visible to others.
 
 But updates to the database `state` (contained in the [`ProofDb`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/db/proof.rs#L26) structure, being a part of `env`) are safe because the `state` is modified only by inserting new entries. New keys are added to the `accounts`, `contracts`, and `block_hash_numbers` collections, while existing entries remain unchanged. This approach prevents scenarios where a value that will be read in one part of the code is inadvertently changed by another.
 
