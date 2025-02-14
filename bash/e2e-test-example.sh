@@ -62,9 +62,7 @@ echo "::group::Building contracts"
 forge build
 echo "::endgroup::Building contracts"
 
-pushd vlayer
 run_prover_script
-popd
 
 popd
 popd
