@@ -101,7 +101,7 @@ jobs:
 
           [contracts."@openzeppelin-contracts"]
           version = "5.0.1"
-          remappings = [["openzeppelin-contracts", "dependencies/@openzeppelin-contracts-5.0.1/"]]
+          remappings = [["openzeppelin-contracts/", "dependencies/@openzeppelin-contracts-5.0.1/"]]
 
           [contracts.forge-std]
           version = "1.9.4"
