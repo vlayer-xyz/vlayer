@@ -88,7 +88,7 @@ jobs:
           VLAYER_ENV: dev
           WEB_SERVER_URL: ${{needs.deploy-simple-web-proof.outputs.deployment_url}}
           VLAYER_TMP_DIR: ./artifacts
-        run: bash/e2e-web-apps-test.sh
+        run: bash/e2e-web-proof-example-test.sh
 
       # Teardown
       - name: Display Logs
