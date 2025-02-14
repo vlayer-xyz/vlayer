@@ -1,6 +1,5 @@
 use std::{
     fs,
-    os::unix::fs as unix_fs,
     path::{Path, PathBuf},
     process::Command,
     str::from_utf8,
@@ -26,11 +25,10 @@ pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf> {
     do_find_foundry_root_from(&start, &git_root)
 }
 
-pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> {
-    if !dst_dir.is_dir() {
-        fs::create_dir_all(dst_dir)
-            .with_context(|| format!("Failed to create path '{}'", dst_dir.display()))?;
-    }
+/// This function will ignore symlinks.
+pub(crate) fn copy_dir_all(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> {
+    fs::create_dir_all(dst_dir)
+        .with_context(|| format!("Failed to create path '{}'", dst_dir.display()))?;
 
     for entry_result in src_dir
         .read_dir()
@@ -40,19 +38,14 @@ pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> 
         let file_type = entry.file_type()?;
         let file_name = entry.file_name();
         let dst = dst_dir.join(file_name);
+        let src = entry.path();
+
         if file_type.is_dir() {
-            copy_dir_to(&entry.path(), &dst).with_context(|| {
-                format!(
-                    "Failed to copy directory from '{}' to '{}'",
-                    entry.path().display(),
-                    dst.display()
-                )
+            copy_dir_all(&src, &dst).with_context(|| {
+                format!("Failed to copy directory from '{}' to '{}'", src.display(), dst.display())
             })?;
         } else if file_type.is_symlink() {
-            let link = fs::read_link(entry.path())?;
-            unix_fs::symlink(&link, &dst).with_context(|| {
-                format!("Failed to symlink '{}' as '{}'", link.display(), dst.display())
-            })?;
+            continue;
         } else {
             fs::copy(entry.path(), &dst).with_context(|| {
                 format!(
@@ -224,7 +217,8 @@ mod tests {
         ));
     }
 
-    mod copy_dir_to {
+    mod copy_dir_all {
+        use std::os::unix::fs::symlink;
 
         use super::*;
 
@@ -235,7 +229,7 @@ mod tests {
             std::fs::write(src_dir.join("file1"), "file1").unwrap();
             std::fs::write(src_dir.join("file2"), "file2").unwrap();
 
-            copy_dir_to(&src_dir, &dst_dir).unwrap();
+            copy_dir_all(&src_dir, &dst_dir).unwrap();
 
             assert!(dst_dir.exists());
             assert!(dst_dir.join("file1").exists());
@@ -245,23 +239,21 @@ mod tests {
         }
 
         #[test]
-        fn handles_tangling_symlinks() -> anyhow::Result<()> {
+        fn ignores_symlinks() -> anyhow::Result<()> {
             create_temp_dirs!(src_dir, dst_dir);
 
             let non_existent_file_path = PathBuf::from("/non/existent/file");
-            let dst_tangling_symlink_path = dst_dir.join("tangling-symlink");
-            let tangling_symlink_path = src_dir.join("tangling-symlink");
+            let dst_dangling_symlink_path = dst_dir.join("dangling-symlink");
+            let dangling_symlink_path = src_dir.join("dangling-symlink");
 
-            unix_fs::symlink(non_existent_file_path.clone(), tangling_symlink_path)?;
+            symlink(non_existent_file_path.clone(), dangling_symlink_path)?;
 
-            copy_dir_to(&src_dir, &dst_dir)?;
+            copy_dir_all(&src_dir, &dst_dir)?;
 
             assert!(!non_existent_file_path.exists());
             // Path::try_exists returns Ok(false) for broken symlinks
-            assert!(!dst_tangling_symlink_path.try_exists()?);
-            assert!(dst_tangling_symlink_path.is_symlink());
-
-            assert_eq!(std::fs::read_link(dst_tangling_symlink_path)?, non_existent_file_path);
+            assert!(!dst_dangling_symlink_path.try_exists()?);
+            assert!(!dst_dangling_symlink_path.is_symlink());
 
             Ok(())
         }

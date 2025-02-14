@@ -20,11 +20,12 @@ use crate::{
     soldeer::{add_remappings, install},
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
-        path::{copy_dir_to, find_foundry_root, prefix_one_level_up},
+        path::{copy_dir_all, find_foundry_root, prefix_one_level_up},
     },
     version,
 };
 
+/// Initialize new vlayer project from a template
 #[derive(Clone, Debug, Parser)]
 pub(crate) struct Args {
     /// Template to use for the project
@@ -32,7 +33,10 @@ pub(crate) struct Args {
     template: Option<Template>,
     /// Url to the templates
     #[arg(long)]
-    url: Option<String>,
+    templates_url: Option<String>,
+    /// Local path to the templates
+    #[arg(long)]
+    templates_dir: Option<PathBuf>,
     /// Force init in existing project location
     #[arg(long)]
     existing: bool,
@@ -48,6 +52,11 @@ pub(crate) struct Args {
 }
 
 const VLAYER_DIR_NAME: &str = "vlayer";
+
+enum TemplatesLocation {
+    Url(String),
+    Path(PathBuf),
+}
 
 enum WorkDir {
     Temp(tempfile::TempDir),
@@ -194,19 +203,23 @@ pub async fn run_init(args: Args) -> CLIResult<()> {
     }
 
     let templates_url = args
-        .url
+        .templates_url
         .unwrap_or_else(|| default_templates_url(&version()));
+    let templates_location = args
+        .templates_dir
+        .map_or_else(|| TemplatesLocation::Url(templates_url), TemplatesLocation::Path);
     let work_dir = args.work_dir.try_into()?;
-    init_existing(cwd, &config, templates_url, work_dir).await
+
+    init_existing(cwd, &config, templates_location, work_dir).await
 }
 
 async fn init_existing(
     cwd: PathBuf,
     config: &Config,
-    templates_url: String,
+    templates_location: TemplatesLocation,
     work_dir: WorkDir,
 ) -> CLIResult<()> {
-    info!("Running vlayer init from directory {:?}", cwd.display());
+    info!("Running vlayer init from directory {}", cwd.display());
 
     let root_path = find_foundry_root(&cwd)?;
     let src_path = find_src_path(&root_path)?;
@@ -225,17 +238,19 @@ async fn init_existing(
         let tests_dst = create_vlayer_dir(&root_path.join("test"))?;
         let testdata_dst = root_path.join("testdata");
         let template = config.template()?;
+
         fetch_examples(
             &examples_dst,
             &scripts_dst,
             &tests_dst,
             &testdata_dst,
             template.to_string(),
-            templates_url,
+            templates_location,
             work_dir,
         )
         .await?;
-        info!("Successfully downloaded vlayer template \"{}\"", template);
+
+        info!("Successfully unpacked vlayer template \"{}\"", template);
     }
 
     add_deps_to_foundry_toml(&root_path)?;
@@ -324,32 +339,38 @@ async fn fetch_examples(
     tests_dst: &Path,
     testdata_dst: &Path,
     template: String,
-    templates_url: String,
+    templates_location: TemplatesLocation,
     work_dir: WorkDir,
 ) -> CLIResult<()> {
-    info!("Fetching examples from url: {templates_url}");
-
-    let response = get(templates_url).await?.bytes().await?;
-
-    let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
-
     let work_dir_path = work_dir.path();
-    archive.unpack(work_dir_path)?;
+
+    match templates_location {
+        TemplatesLocation::Url(url) => {
+            info!("Fetching examples from url: {url}");
+            let response = get(url).await?.bytes().await?;
+            let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
+            archive.unpack(work_dir_path)?;
+        }
+        TemplatesLocation::Path(path) => {
+            info!("Fetching examples from path: {}", path.display());
+            copy_dir_all(&path, work_dir_path)?;
+        }
+    }
 
     let downloaded_scripts = work_dir_path.join(&template).join("vlayer");
     let downloaded_examples = work_dir_path.join(&template).join("src/vlayer");
     let downloaded_tests = work_dir_path.join(&template).join("test/vlayer");
     let downloaded_testdata = work_dir_path.join(&template).join("testdata");
 
-    copy_dir_to(&downloaded_scripts, scripts_dst)?;
-    copy_dir_to(&downloaded_examples, examples_dst)?;
+    copy_dir_all(&downloaded_scripts, scripts_dst)?;
+    copy_dir_all(&downloaded_examples, examples_dst)?;
 
     // not all examples come with tests and testdata
     if downloaded_tests.exists() {
-        copy_dir_to(&downloaded_tests, tests_dst)?;
+        copy_dir_all(&downloaded_tests, tests_dst)?;
     }
     if downloaded_testdata.exists() {
-        copy_dir_to(&downloaded_testdata, testdata_dst)?;
+        copy_dir_all(&downloaded_testdata, testdata_dst)?;
     }
 
     Ok(())
