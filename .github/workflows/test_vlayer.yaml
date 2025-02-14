@@ -90,6 +90,8 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
+          cd $(mktemp -d)
+
           cat <<EOF > config.toml
           template = "${{ matrix.template }}"
 
@@ -117,8 +119,6 @@ jobs:
           "@vlayer/sdk" = { path = "${{ github.workspace }}/packages/sdk" }
           "@vlayer/react" = { path = "${{ github.workspace }}/packages/sdk-hooks" }
           EOF
-
-          cd $(mktemp -d)
 
           ${{ github.workspace }}/target/debug/vlayer init ${{ matrix.template }} --templates-dir ${{ github.workspace }}/examples --config-file config.toml
 
