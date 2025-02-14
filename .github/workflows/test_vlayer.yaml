@@ -49,3 +49,65 @@ jobs:
 
       - name: Run vlayer tests for examples
         run: bash/vlayer-test-examples.sh
+
+  test-vlayer-init:
+    name: Test vlayer-init
+    runs-on: aws-linux-medium
+    matrix:
+      template: ["simple", "simple-web-proof", "simple-email-proof", "simple-teleport", "simple-time-travel"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+
+      - name: Create temp dir for vlayer-init
+        run: mkdir vlayer-init-tests
+
+      - name: Run vlayer-init tests
+        working-directory: ./vlayer-init-tests
+        run: |
+          CONFIG=$(cat << EOF
+          template = "${{ matrix.template }}"
+
+          [contracts.vlayer]
+          path = "../../contracts/vlayer"
+          remappings = [["vlayer-0.1.0/", "dependencies/vlayer-0.1.0/src/"]]
+
+          [contracts."@openzeppelin-contracts"]
+          version = "5.0.1"
+          remappings = [["openzeppelin-contracts", "dependencies/@openzeppelin-contracts-5.0.1/"]]
+
+          [contracts.forge-std]
+          version = "1.9.4"
+          remappings = [
+            ["forge-std/", "dependencies/forge-std-1.9.4/src/"],
+            ["forge-std-1.9.4/src/", "dependencies/forge-std-1.9.4/src/"]
+          ]
+
+          [contracts.risc0-ethereum]
+          version = '1.2.0'
+          url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip"
+          remappings = [["risc0-ethereum-1.2.0/", "dependencies/risc0-ethereum-1.2.0/"]]
+
+          [npm]
+          "@vlayer/sdk" = { path = "../../packages/sdk" }
+          "@vlayer/react" = { path = "../../packages/sdk-hooks" }
+          EOF
+          )
+          cargo run --locked --manifest-path ../Cargo.toml --package cli -- init ${{ matrix.template }} --templates-dir ../examples --config-file $CONFIG
+          cd ${{ matrix.template }}
+          forge build
+          cd vlayer
+          bun install
