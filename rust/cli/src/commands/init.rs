@@ -21,7 +21,7 @@ use crate::{
     target_version,
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
-        path::{copy_dir_to, find_foundry_root},
+        path::{copy_dir_to, find_foundry_root, prefix_one_level_up},
     },
 };
 
@@ -98,12 +98,13 @@ async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> CLIRes
                     },
                 }
                 #[cfg(unix)]
-                for (_, target) in dep.remappings()? {
-                    let target = PathBuf::from(target);
-                    std::os::unix::fs::symlink(
-                        format!("../{path}"),
-                        target.parent().ok_or(anyhow!("invalid remapping"))?,
-                    )?;
+                {
+                    let original = prefix_one_level_up(Path::new(&path));
+                    for (_, target) in dep.remappings()? {
+                        let target = PathBuf::from(target);
+                        let link = target.parent().ok_or(anyhow!("invalid remapping"))?;
+                        std::os::unix::fs::symlink(original.clone(), link)?;
+                    }
                 }
                 #[cfg(not(unix))]
                 compile_error!("Non-UNIX operating system is currently unsupported.");
@@ -137,11 +138,17 @@ fn change_sdk_dependency_to_npm(
 
     for (name, dep) in deps {
         if dependencies_map.contains_key(name) {
+            let path = dep
+                .path()
+                .as_ref()
+                .map(Path::new)
+                .map(prefix_one_level_up)
+                .map(|p| format!("file:{}", p.to_string_lossy()));
             dependencies_map.insert(
                 name.into(),
                 Value::String(
                     dep.version()
-                        .or(dep.path().map(|p| format!("file:../{p}")))
+                        .or(path)
                         .ok_or(UnresolvedError("version".into()))?,
                 ),
             );
