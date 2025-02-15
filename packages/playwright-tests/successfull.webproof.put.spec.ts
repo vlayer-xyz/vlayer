@@ -92,13 +92,17 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
       profileButton.click(),
     ]);
     const extension = await sidePanel(context);
-    const proveButton = extension.getByTestId("prove-button");
-    await expect(proveButton).toHaveText("Generate proof");
+    const proveButton = extension.getByRole("button", {
+      name: "Generate proof",
+    });
+    await expect(proveButton).toBeVisible();
   });
 
   await test.step("Click button should generate webproof", async () => {
     const extension = await sidePanel(context);
-    const proveButton = extension.getByTestId("prove-button");
+    const proveButton = extension.getByRole("button", {
+      name: "Generate proof",
+    });
     await proveButton.click();
     await page.reload();
     await page.waitForSelector('h1[data-testid="has-webproof"]');
