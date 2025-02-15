@@ -52,17 +52,27 @@ function DappPutContent() {
     if (webProof) {
       console.log("webProof ready", webProof);
     }
-  }, [JSON.stringify(webProof)]);
+  }, [webProof]);
   return (
-    <div>
-      <button onClick={requestWebProof}>Request Web Proof</button>
+    <div
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
+      <button onClick={requestWebProof} data-testid="request-webproof-button">
+        Request Web Proof
+      </button>
+      {webProof && <h1 data-testid="has-webproof">Web Proof is ready</h1>}
     </div>
   );
 }
 
 function DappPut() {
   return (
-    <ProofProvider>
+    <ProofProvider
+      config={{
+        notaryUrl: "http://localhost:7047",
+        wsProxyUrl: "ws://localhost:55688",
+      }}
+    >
       <DappPutContent />
     </ProofProvider>
   );
