@@ -37,7 +37,6 @@ export class HistoryContextManager {
     const config =
       await webProverSessionContextManager.getWebProverSessionConfig();
     const urls = config?.steps.map((step: { url: string }) => step.url) || [];
-    console.log("urls", urls);
     return urls;
   }
 

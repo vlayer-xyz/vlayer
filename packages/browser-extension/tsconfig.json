@@ -16,7 +16,7 @@
       "lib/*" : ["./src/lib/*"],
       "src/*" : ["./src/*"]
     },
-    "downlevelIteration": true,    
+    "downlevelIteration": true    
   },
   "include": ["vitest.d.ts", "**/*.ts", "**/*.tsx"]
 }

@@ -63,7 +63,9 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
     if (!startPage) {
       throw new Error("No login page");
     }
-    const loginButton = startPage.getByTestId("login-button");
+    const loginButton = startPage.getByRole("button", {
+      name: "Login",
+    });
     await loginButton.click();
     const extension = await sidePanel(context);
     const startPageStep = extension.getByTestId("step-expectUrl").nth(0);

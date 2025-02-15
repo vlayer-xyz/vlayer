@@ -48,7 +48,7 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
         const mockProofDoneMessage: ExtensionMessage = {
           type: ExtensionMessageType.ProofDone,
           payload: {
-            presentationJSON:
+            presentationJson:
               this.mockBehavior.mockProof ||
               ({ mock: "proof" } as unknown as PresentationJSON),
             decodedTranscript: {
@@ -76,7 +76,7 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
   }
 
   public async getWebProof(): Promise<{
-    presentationJSON: PresentationJSON;
+    presentationJson: PresentationJSON;
     decodedTranscript: {
       sent: string;
       recv: string;
@@ -88,7 +88,7 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
 
     if (this.mockBehavior.shouldSucceed) {
       return {
-        presentationJSON:
+        presentationJson:
           this.mockBehavior.mockProof ||
           ({ mock: "proof" } as unknown as PresentationJSON),
         decodedTranscript: {
