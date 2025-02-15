@@ -12,5 +12,5 @@ Generating and ZK-proving an Email Proof consists of the following steps:
     - Note that all these steps can be performed without the vlayerSDK.
 3. Do a `v_call` to the vlayer prover server with the UnverifiedEmail struct as calldata. Prover contract address and chain ID
 4. Prover contract must use the EmailProofLib, where the VDNS public key is verified via the `Repository` contract, preverification ttl is verified against block number and email verification precompiled is triggered
-5. The EmailProofLib contract calls the `email_proof.verify()` custom precompile, which validates the Email Proof, parses the email MIME file and returns `VerifiedEmail`.
+5. The EmailProofLib contract calls the `email_proof.verify()` custom precompile (see [Precompiles](./prover.md#precompiles)), which validates the Email Proof, parses the email MIME file and returns `VerifiedEmail`.
 6. If the verification is successful, the EmailProofLib contract returns the ZK Proof and the public returned values.
