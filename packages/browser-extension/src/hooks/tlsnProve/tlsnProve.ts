@@ -60,7 +60,6 @@ export async function tlsnProve(
     maxSentData: 4096,
     maxRecvData: 16384,
   });
-  console.log("prover", prover);
 
   const sessionUrl = await notary.sessionUrl();
   await prover.setup(sessionUrl);

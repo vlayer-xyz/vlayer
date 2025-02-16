@@ -41,6 +41,7 @@ export class HistoryContextManager {
   }
 
   async updateHistory(item: BrowsingHistoryItem): Promise<void> {
+    // Prevent concurrent updates to the history
     this.updateLock = this.updateLock.then(async () => {
       let newItem = item;
       let history =

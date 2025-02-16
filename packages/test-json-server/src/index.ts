@@ -32,9 +32,6 @@ new Elysia({
   .get("/json_three_bytes_char", () => {
     return { success: true, name: "عبد الله" };
   })
-  .get("/update_resource", () => {
-    return { success: true, name: "John Doe" };
-  })
   .put("/update_resource", ({ request }) => {
     const { name } = request.body;
     console.log("Update resource request", request);
