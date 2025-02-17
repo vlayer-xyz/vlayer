@@ -91,7 +91,7 @@ Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlaye
 
 ### `ExecutionResult` to `CallOutcome` conversion
 
-[`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40) and [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16) are revm structs  used in `Inspector` code necessary to make travel calls work.
+[`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40) and [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16) are revm structs used in the `Inspector` code. They are necessary to make travel calls work.
 
 * `ExecutionResult` is an enum representing the complete outcome of a **transaction**. It has three variants—`Success`, `Revert`, and `Halt`—and includes transaction information such as gas usage, gas refunds, logs, and output data.
 * `CallOutcome` is a struct representing the result of a single **call** within the EVM interpreter. It encapsulates an [`InterpreterResult`](https://github.com/bluealloy/revm/blob/25d9726522f8f88373ba2105a97adbd509e81683/crates/interpreter/src/interpreter.rs#L170) (which contains output data and gas usage) along with a `memory_offset` (the range in memory where the output data is located).
