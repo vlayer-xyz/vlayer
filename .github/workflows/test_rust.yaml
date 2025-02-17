@@ -42,8 +42,9 @@ jobs:
 
       - name: Run workspace rust tests
         run: |
+          mkdir -p /tmp/vlayer_targets/test-rust
           cargo test --workspace --locked
         env:
-          CARGO_TARGET_DIR: /tmp/vlayer_target
-          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          CARGO_TARGET_DIR: /tmp/vlayer_targets/test-rust
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUST_LOG: info
