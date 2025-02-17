@@ -53,7 +53,7 @@ The following macros work together to enforce sealing and enable test mocking:
 
 ## Inspector
 
-Both **Time Travel** and **Teleport** features are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to **intercept**, **monitor**, and **modify** EVM calls, particularly handling **travel calls** that alter the execution context by switching the blockchain network or block number.
+Both **Time Travel** and **Teleport** features are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to handle **travel calls** that alter the execution context by switching the blockchain network or block number.
 
 How does it work? When `ExecutionLocation` is updated, `Inspector`:
 1. Creates a separate EVM with new `ExecutionLocation` context (using `transaction_callback` function passed as argument).
