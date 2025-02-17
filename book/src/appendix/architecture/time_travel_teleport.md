@@ -95,12 +95,16 @@ Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlaye
 
 ### `ExecutionResult` to `CallOutcome` conversion
 
-* `ExecutionResult` is an enum representing the complete outcome of a transaction. It has three variants—`Success`, `Revert`, and `Halt`—and includes detailed information such as gas usage, gas refunds, logs, and output data.
-* `CallOutcome` is a struct used to represent the result of a single call within the EVM interpreter. It encapsulates an `InterpreterResult` (which contains output data and gas usage) along with a `memory_offset` indicating where the output is stored.
+[`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40) and [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16) are revm structs  used in `Inspector` code necessary to make travel calls work.
 
-When `Inspector::call` is executed, it must return a [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16). However, the `transaction_callback` run inside `Inspector::call` executes the full EVM and returns an [`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40). Hence, the conversion between this two is needed.
+* `ExecutionResult` is an enum representing the complete outcome of a **transaction**. It has three variants—`Success`, `Revert`, and `Halt`—and includes detailed information such as gas usage, gas refunds, logs, and output data.
+* `CallOutcome` is a struct representing the result of a single **call** within the EVM interpreter. It encapsulates an `InterpreterResult` (which contains output data and gas usage) along with a `memory_offset` indicating where the output is stored.
 
-It is performed using the [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [within `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80). We lose some data during the conversion: `logs` and `gas_refunded` fields from `ExecutionResult::Success` are not converted, but they are not necessary in `CallOutcome`. Other than that, all the fields are matched.
+Most fields stored in `ExecutionResult` have equivalents in `CallOutcome`. The only exceptions are`logs` and `gas_refunded` fields from `ExecutionResult::Success`, which do not exist in `CallOutcome`. Conversely, CallOutcome includes `memory_offset`, which has no direct counterpart in `ExecutionResult`.
+
+When `Inspector::call` is executed, it must return a `CallOutcome`. However, the `transaction_callback` run inside `Inspector::call` executes the full EVM and returns an `ExecutionResult`. Hence, the conversion between this two is needed.
+
+This conversion is performed using the [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [within `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80). During this process `logs` and `gas_refunded` fields from `ExecutionResult::Success` are discarded, as they are not required in `CallOutcome`. `memory_offset` is obtained from `CallInputs`, which is also passed to `execution_result_to_call_outcome` as an argument.
 
 ## Executor
 
