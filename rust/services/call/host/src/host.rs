@@ -19,7 +19,8 @@ use chain_client::Client as ChainClient;
 use common::{verifier::zk_proof, GuestElf};
 pub use config::Config;
 use derive_new::new;
-pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
+use error::preflight;
+pub use error::{AwaitingChainProofError, BuilderError, Error, ProvingError};
 use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;
@@ -31,7 +32,7 @@ use crate::{db::HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_mu
 
 mod builder;
 mod config;
-mod error;
+pub(crate) mod error;
 mod prover;
 #[cfg(test)]
 mod tests;
@@ -145,7 +146,7 @@ impl Host {
     }
 
     #[instrument(skip_all)]
-    pub async fn preflight(self, call: Call) -> Result<PreflightResult, PreflightError> {
+    pub async fn preflight(self, call: Call) -> Result<PreflightResult, preflight::Error> {
         let now = Instant::now();
 
         let SuccessfulExecutionResult {
@@ -170,7 +171,7 @@ impl Host {
     }
 
     #[instrument(skip_all)]
-    fn prepare_input_data(self, call: Call) -> Result<Input, PreflightError> {
+    fn prepare_input_data(self, call: Call) -> Result<Input, preflight::Error> {
         drop(self.travel_call_verifier); // Drop the verifier so that we can unwrap the Arc's in the clients
         let chain_proofs = self
             .chain_client

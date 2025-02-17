@@ -25,7 +25,6 @@ mpt = { workspace = true }
 optimism = { workspace = true, features = ["http", "testing"] }
 provider = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
-risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 seal = { workspace = true }
 thiserror = { workspace = true }

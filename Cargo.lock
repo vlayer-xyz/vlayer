@@ -2212,7 +2212,6 @@ dependencies = [
  "optimism",
  "provider",
  "revm",
- "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "risc0-zkvm",
  "seal",
  "test-log",

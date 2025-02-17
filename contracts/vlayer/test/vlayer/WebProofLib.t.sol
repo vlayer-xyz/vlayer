@@ -50,7 +50,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight: TravelCallExecutor error: EVM transact error: 0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d496e636f72726563742055524c00000000000000000000000000000000000000"
+                "Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert(\"Incorrect URL\")))"
             );
         }
     }
@@ -66,8 +66,7 @@ contract WebProverTest is VTest {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(
-                reason,
-                "Preflight: TravelCallExecutor error: EVM error: missing field `presentationJson` at line 1 column 2"
+                reason, "Preflight: Execution error: EVM error: missing field `presentationJson` at line 1 column 2"
             );
         }
     }
@@ -84,7 +83,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight: TravelCallExecutor error: EVM error: Verification error: Deserialization error: Bincode deserialize error: invalid length 64, expected an array at most 64 bytes long"
+                "Preflight: Execution error: EVM error: Verification error: Deserialization error: Bincode deserialize error: invalid length 64, expected an array at most 64 bytes long"
             );
         }
     }
