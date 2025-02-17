@@ -23,6 +23,18 @@ jobs:
   test-e2e-devnet:
     name: E2E test against devnet
     runs-on: aws-linux-medium
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          [
+            "simple",
+            "simple-web-proof",
+            "simple-email-proof",
+            "simple-teleport",
+            "simple-time-travel",
+          ]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -54,14 +66,15 @@ jobs:
         env:
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
+          EXAMPLE: ${{ matrix.example }}
         run: bash/e2e-test.sh
 
       # Teardown
-      - name: Display Logs
+      - name: Upload logs for previewing
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         if: always()
-        run: |
-          for log_file in $(find ./artifacts/logs -type f); do
-            echo "=== Contents of $log_file ==="
-            cat "$log_file"
-            echo "============================="
-          done
+        with:
+          name: logs-devnet-${{ matrix.example }}
+          path: ./artifacts/logs/
+          if-no-files-found: error
+          retention-days: 1

@@ -26,6 +26,18 @@ jobs:
   test-e2e-testnet:
     name: E2E test against testnet
     runs-on: aws-linux-medium
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          [
+            "simple",
+            "simple-web-proof",
+            "simple-email-proof",
+            "simple-teleport",
+            "simple-time-travel",
+          ]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -78,6 +90,7 @@ jobs:
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
           CONFIRMATIONS: 2
+          EXAMPLE: ${{ matrix.example }}
         run: bash/e2e-test.sh
 
       # Teardown
@@ -85,7 +98,7 @@ jobs:
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         if: always()
         with:
-          name: logs
+          name: logs-testnet-${{ matrix.example }}
           path: ./artifacts/logs/
           if-no-files-found: error
           retention-days: 1
