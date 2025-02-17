@@ -16,6 +16,8 @@ pub enum Error {
     GitError(String),
     #[error("No foundry.toml file found")]
     NoFoundryError,
+    #[error("No src field found in foundry.toml")]
+    NoSrcInFoundryToml,
     #[error(transparent)]
     AnyhowError(#[from] anyhow::Error),
     #[error("Project directory not found: {0}")]

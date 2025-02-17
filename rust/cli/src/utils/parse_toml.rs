@@ -1,8 +1,6 @@
 use std::path::Path;
 
-use anyhow::anyhow;
-
-use crate::errors::Result;
+use crate::errors::{Error, Result};
 
 pub(crate) fn get_src_from_str(contents: impl AsRef<str>) -> Result<String> {
     let config = toml::from_str(contents.as_ref())?;
@@ -10,7 +8,7 @@ pub(crate) fn get_src_from_str(contents: impl AsRef<str>) -> Result<String> {
     let result = get_src_from_toml(&config);
     match result {
         Some(src) => Ok(src),
-        None => Err(anyhow!("No source found in foundry.toml").into()),
+        None => Err(Error::NoSrcInFoundryToml),
     }
 }
 
@@ -164,9 +162,7 @@ mod tests {
             src = "src"
         "#;
         let result = get_src_from_str(contents);
-        assert!(
-            matches!(result.unwrap_err(), Error::AnyhowError(errormsg) if errormsg.to_string() == "No source found in foundry.toml")
-        );
+        assert!(matches!(result.unwrap_err(), Error::NoSrcInFoundryToml));
     }
 
     #[test]
