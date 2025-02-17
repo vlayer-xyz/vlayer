@@ -5,4 +5,4 @@
   * `e1afa09f684c5a099b78b0a1425a7d9bec3ec8bd4d7a121f29a62f3bb0172573` – Teleport logging
   * `137a372bb2a4d011d502454e6f3ea45fc65094e8dd5ec9f3071d46281738f086` – Pin the versions of major dependencies
   * `eb712fcffa08e1b7777a74dae4634b91acdba28605655acf931144171e9a2b36` – Revm 19.0.0 -> 19.4.0
-  * `039d5e8c26ca0ec2367cdd3f1ebf583ee6b8e9d2a5136b7ef4b31b4776786e23` – Update Risc0 to v1.2.3
+  * `240500bf5db1b7906ad49f26e0357645f45493d6373514657442bf6ca55e09ab` – Update Risc0 to v1.2.3

@@ -3768,8 +3768,8 @@ dependencies = [
 
 [[package]]
 name = "rsa"
-version = "0.9.6"
-source = "git+https://github.com/risc0/RustCrypto-RSA?tag=v0.9.6-risczero.0#cb42fd295c096c6dddd8386cd57b122add8d0cbc"
+version = "0.9.7"
+source = "git+https://github.com/risc0/RustCrypto-RSA?tag=v0.9.7-risczero.0#6d722ba4fadbdb65a4a023e226db995fae3d1665"
 dependencies = [
  "const-oid",
  "digest 0.10.7",
