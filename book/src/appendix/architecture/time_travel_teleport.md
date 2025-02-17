@@ -58,7 +58,7 @@ The following macros work together to enforce sealing and enable test mocking:
 
 ## Inspector
 
-Both **Time Travel** and **Teleport** features are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to handle **travel calls** that alter the execution context by switching the blockchain network or block number.
+Both **Time Travel** and **Teleport** features are made possible by the [`Inspector`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L26) struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to handle **travel calls** that alter the execution context by switching the blockchain network or block number.
 
 How does it work? When `ExecutionLocation` is updated, `Inspector`:
 
