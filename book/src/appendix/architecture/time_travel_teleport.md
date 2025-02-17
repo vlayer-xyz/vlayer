@@ -24,8 +24,6 @@ Verification steps are as follows:
 5. **Verifies Chain Proof:** Run the [chain proof `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/chain/common/src/verifier.rs#L46) function on the obtained Chain Proof to check its validity.
 6. **Validate Blocks:** Compare each block’s hash with the hash obtained by block number from the validated Chain Proof.
 
-<!-- potentially todo: document chain proof `verify` function -->
-
 ### II. Teleport Verification
 1. **Identify Destination Chains:** Extract execution locations from `CachedEvmEnv`, filtering for chains different from the starting one.
 2. **Skip Local Testnets:** If the source chain is a local testnet, teleport verification is skipped.
@@ -33,10 +31,6 @@ Verification steps are as follows:
 4. **Fetch Latest Confirmed L2 Block:** Use the [`AnchorStateRegistry`](https://docs.optimism.io/stack/smart-contracts#anchorstateregistry) and `sequencer_client` to get the latest confirmed block on the destination chain.
 5. **Verify Latest Confirmed Block Hash Consistency:** Compare the latest confirmed block’s hashes.
 6. **Verify Latest Teleport Location Is Confirmed:** Using function [`ensure_latest_teleport_location_is_confirmed`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/teleport.rs#L154) we check that latest destination block number is not greater than latest confirmed block number.
-
-<!-- potentially todo: document how we are using AnchorStateRegistry in more detail -->
-
-<!-- todo: picture -->
 
 ## Verifier Safety & Testability
 
