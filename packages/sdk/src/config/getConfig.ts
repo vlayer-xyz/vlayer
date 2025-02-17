@@ -43,7 +43,7 @@ const envSchema = z.object({
     .startsWith("0x")
     .length(66)
     .regex(/^0x[0-9a-fA-F]{64}$/),
-  VLAYER_API_TOKEN: z.string().startsWith("sk_").optional(),
+  VLAYER_API_TOKEN: z.string().optional(),
   SHOULD_DEPLOY_FAKE_VERIFIER: z.boolean().optional(),
 });
 
