@@ -29,22 +29,28 @@ jobs:
         working-directory: ./contracts/vlayer
         run: |
           forge soldeer install
+
       - name: Forge build contract fixtures
         working-directory: ./contracts/fixtures
         run: |
           forge soldeer install
           forge build
+
       - name: Generate TS types for fixtures
         run: bash/build-ts-types.sh
         shell: bash
+
       - name: Install SDK dependencies
         run: bun install --frozen-lockfile
+
       - name: Build SDK
-        run: bun run build
         working-directory: ./packages/sdk
-      - name: Install dependencies of gas-benchmarks
-        run: bun install --frozen-lockfile
-        working-directory: ./packages/gas-benchmarks
-      - name: Build gas-benchmarks
         run: bun run build
+
+      - name: Install dependencies of gas-benchmarks
         working-directory: ./packages/gas-benchmarks
+        run: bun install --frozen-lockfile
+
+      - name: Build gas-benchmarks
+        working-directory: ./packages/gas-benchmarks
+        run: bun run build

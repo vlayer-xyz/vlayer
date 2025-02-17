@@ -46,7 +46,6 @@ bun install --frozen-lockfile
 bun run build
 echo '::endgroup::'
 
-
 cd "${VLAYER_HOME}/packages"
 bun install --frozen-lockfile
 bun run lint

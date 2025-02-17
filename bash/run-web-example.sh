@@ -40,7 +40,7 @@ function run_web_app {
 
 function run_browser_extension {
     cd ${VLAYER_HOME}/packages/browser-extension
-    bun run dev 
+    bun run dev
 }
 
 install_deps

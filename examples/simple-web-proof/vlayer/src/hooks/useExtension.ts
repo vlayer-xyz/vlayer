@@ -21,7 +21,6 @@ export const useExtension = () => {
     }
 
     const isInstalled = await checkExtensionInstalled();
-    console.log("is", isInstalled);
     if (!isInstalled) {
       setError("Please install vlayer extension and try again");
       setHasExtensionInstalled(false);
