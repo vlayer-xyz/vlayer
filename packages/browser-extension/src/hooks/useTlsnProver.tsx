@@ -50,7 +50,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
   const prove = useCallback(async () => {
     setIsProving(true);
-
     const progressInterval = setInterval(() => {
       void sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofProcessing,
@@ -61,7 +60,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     try {
       isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
-
       const hostname = new URL(provenUrl.url).hostname;
       const notaryUrl =
         provingSessionConfig !== LOADING
@@ -82,8 +80,10 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         hostname,
         wsProxyUrl,
         provenUrl.url,
+        provenUrl.method,
         formattedHeaders,
         redactionConfig,
+        provenUrl.body,
       );
 
       void sendMessageToServiceWorker({

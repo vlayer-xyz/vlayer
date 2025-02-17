@@ -13,7 +13,8 @@
   },
   "include": [
     "src/**/*",
-    "../../contracts/fixtures/out/**/*.ts"
+    "../../contracts/fixtures/out/**/*.ts",
+    "deploy.ts"
   ],
   "exclude": ["node_modules/**/*"]
 }

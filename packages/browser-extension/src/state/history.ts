@@ -1,6 +1,7 @@
 import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { webProverSessionContextManager } from "./webProverSessionContext";
+import { HTTPMethod } from "lib/HttpMethods";
 
 export type BrowsingHistoryItem = {
   url: string;
@@ -8,6 +9,8 @@ export type BrowsingHistoryItem = {
   cookies?: browser.Cookies.Cookie[];
   ready?: boolean;
   tabId?: number;
+  method: HTTPMethod;
+  body?: string;
 };
 
 export type History = {
@@ -18,6 +21,7 @@ export type History = {
 export class HistoryContextManager {
   static #instance: HistoryContextManager;
   store: Store<History>;
+  private updateLock: Promise<void> = Promise.resolve();
 
   constructor() {
     this.store = new Store<History>(browser.storage.session);
@@ -37,27 +41,30 @@ export class HistoryContextManager {
   }
 
   async updateHistory(item: BrowsingHistoryItem): Promise<void> {
-    let newItem = item;
-    let history =
-      (await historyContextManager.store.get("browsingHistory")) || [];
-    const existingItemIndex = history.findIndex((i) => i.url === item.url);
-
-    // Add cookies and headers and mark eventually as ready
-    if (existingItemIndex !== -1) {
-      const existingItem = history[existingItemIndex];
-      newItem = {
-        ...existingItem,
-        ...item,
-        // the item becomes ready once it's updated twice (with headers and cookies)
-        ready: true,
-      };
-      history = history.map((historyItem, index) => {
-        return index === existingItemIndex ? newItem : historyItem;
-      });
-    } else {
-      history = [...history, newItem];
-    }
-    return historyContextManager.store.set("browsingHistory", history);
+    // Prevent concurrent updates to the history
+    this.updateLock = this.updateLock.then(async () => {
+      let newItem = item;
+      let history =
+        (await historyContextManager.store.get("browsingHistory")) || [];
+      const existingItemIndex = history.findIndex((i) => i.url === item.url);
+      // Add cookies and headers and mark eventually as ready
+      if (existingItemIndex !== -1) {
+        const existingItem = history[existingItemIndex];
+        newItem = {
+          ...existingItem,
+          ...item,
+          // the item becomes ready once it's updated twice (with headers and cookies)
+          ready: true,
+        };
+        history = history.map((historyItem, index) => {
+          return index === existingItemIndex ? newItem : historyItem;
+        });
+      } else {
+        history = [...history, newItem];
+      }
+      await historyContextManager.store.set("browsingHistory", history);
+    });
+    return this.updateLock;
   }
 }
 

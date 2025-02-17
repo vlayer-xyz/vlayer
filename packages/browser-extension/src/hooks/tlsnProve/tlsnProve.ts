@@ -2,10 +2,10 @@ import { NotaryServer, Transcript } from "tlsn-js";
 import { wrap } from "comlink";
 import { Prover as TProver, Presentation as TPresentation } from "tlsn-js";
 import type { PresentationJSON } from "tlsn-js/src/types";
-import { Reveal } from "tlsn-wasm";
+import { Reveal, Method } from "tlsn-wasm";
 import { type RedactionConfig } from "../../web-proof-commons";
 import { redact } from "./redaction/redact";
-
+import { HTTPMethod } from "lib/HttpMethods";
 type ProverConfig = {
   serverDns: string;
   maxSentData?: number;
@@ -39,11 +39,13 @@ export async function tlsnProve(
   hostname: string,
   wsProxyUrl: string,
   notarizeRequestUrl: string,
+  method: HTTPMethod = HTTPMethod.GET,
   formattedHeaders: {
     headers: Record<string, string>;
     secretHeaders: string[];
   },
   redactionConfig: RedactionConfig,
+  requestBody?: string,
 ): Promise<{
   presentationJson: PresentationJSON;
   decodedTranscript: {
@@ -61,15 +63,17 @@ export async function tlsnProve(
 
   const sessionUrl = await notary.sessionUrl();
   await prover.setup(sessionUrl);
-
-  const res = await prover.sendRequest(wsProxyUrl, {
+  const request = {
     url: notarizeRequestUrl,
-    method: "GET",
+    method: method as Method,
     headers: {
-      "Content-Type": "application/json",
       ...formattedHeaders?.headers,
+      "Content-Type": "application/json",
     },
-  });
+    body: requestBody,
+  };
+
+  const res = await prover.sendRequest(wsProxyUrl, request);
 
   if (res.status < 200 || res.status >= 300) {
     throw new Error("Authentication failed. Please restart the process.");
