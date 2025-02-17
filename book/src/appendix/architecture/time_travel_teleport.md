@@ -165,5 +165,5 @@ The `_verifyExecutionEnv` function checks the following:
 
 1. **Prover Contract Validation**: Ensures that the proof comes from the correct `proverContractAddress`.
 2. **Function Selector Validation**: Verifies that the function being executed matches the expected function selector.
-3. **Block Number Validation**: Ensures that the proof is based on a past block (not from the future).
+3. **Block Number Validation**: Ensures that the proof is based on a **past block** (not from the future) and that the block falls within the **last 256 blocks**—the maximum number of historical blocks accessible during EVM execution.
 4. **Block Hash Validation**: Confirms that the `settleBlockHash` matches the actual on-chain block hash at the `settleBlockNumber`.
