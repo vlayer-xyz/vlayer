@@ -6,6 +6,8 @@ services:
     ports:
       - "127.0.0.1:55688:80" 
     command: "80 api.x.com:443"
+    healthcheck:
+      test: ["CMD-SHELL", "true"]
   notary-server:
     image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
     container_name: notary-server
@@ -14,3 +16,10 @@ services:
     volumes:
       - ./notary-config:/root/.notary-server/config
     
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7047"]
+      interval: 5s
+      timeout: 60s
+      retries: 10
+      start_period: 5s
+

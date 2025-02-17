@@ -8,3 +8,5 @@ services:
     command: ["-l", "0.0.0.0:3002"]
     ports:
       - "127.0.0.1:3002:3002"
+    healthcheck:
+      test: ["CMD-SHELL", "true"]
