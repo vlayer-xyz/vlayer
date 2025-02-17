@@ -1,4 +1,4 @@
-//#etry point to flow where we use post request
+//#entry point to flow where we use PUT request
 import {
   useWebProof,
   expectUrl,
