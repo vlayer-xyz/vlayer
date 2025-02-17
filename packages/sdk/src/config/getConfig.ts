@@ -27,7 +27,7 @@ const renameConfigKeys = (config: z.infer<typeof envSchema>) => {
     privateKey: examplesTestPrivateKey as Hex,
     token: vlayerApiToken,
     deployConfig: {
-      isTesting: shouldDeployFakeVerifier ?? false,
+      isTesting: shouldDeployFakeVerifier ?? true,
     },
   };
 };
