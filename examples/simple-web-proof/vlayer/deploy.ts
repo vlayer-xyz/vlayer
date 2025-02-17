@@ -11,7 +11,6 @@ const config = getConfig();
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  env: config.deployConfig,
 });
 
 writeEnvVariables(".env", {

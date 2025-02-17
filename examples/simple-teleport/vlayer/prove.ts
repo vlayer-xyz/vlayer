@@ -39,7 +39,6 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
   proverArgs: [],
   verifierArgs: [whaleBadgeNFTAddress],
-  env: config.deployConfig,
 });
 
 console.log("Proving...");
