@@ -21,6 +21,7 @@
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
     "react": "^18.3.1",
+    "react-daisyui": "^5.0.5",
     "react-dom": "^18.3.1",
     "wagmi": "^2.14.6"
   },

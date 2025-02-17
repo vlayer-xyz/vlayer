@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use commands::{args::InitArgs, init::run_init};
-use test_runner::cli::TestArgs;
+use test_runner::{cli::TestArgs, set_risc0_dev_mode};
 use tracing::error;
 use tracing_subscriber::EnvFilter;
 pub use version::version as build_version;
@@ -47,7 +47,10 @@ async fn main() {
 async fn run() -> Result<(), CLIError> {
     match Cli::parse().command {
         Commands::Init(args) => run_init(args).await,
-        Commands::Test(args) => Box::pin(run_test(args)).await,
+        Commands::Test(args) => {
+            set_risc0_dev_mode();
+            Box::pin(run_test(args)).await
+        }
         Commands::Update => run_update(),
     }
 }

@@ -12,6 +12,7 @@ on:
       - "LICENSE"
       - "book/**"
   pull_request:
+  merge_group:
   workflow_dispatch:
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
@@ -40,6 +41,10 @@ jobs:
 
       - name: Build sdk
         working-directory: ./packages/sdk
+        run: bun run build
+
+      - name: Build sdk-hooks
+        working-directory: ./packages/sdk-hooks
         run: bun run build
 
       - name: Install Playwright Browsers

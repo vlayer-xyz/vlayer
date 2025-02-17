@@ -35,11 +35,11 @@ foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
 guest_wrapper = { workspace = true }
 hickory-resolver = { workspace = true }
+host_utils = { workspace = true }
 indicatif = { workspace = true }
 inferno = { workspace = true }
 itertools = { workspace = true }
 mailparse = { workspace = true }
-mock_chain_server = { workspace = true }
 mpt = { workspace = true }
 opener = { workspace = true }
 optimism = { workspace = true }

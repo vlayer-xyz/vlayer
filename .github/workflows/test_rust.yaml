@@ -42,4 +42,3 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUST_LOG: info
-          RISC0_DEV_MODE: 1

@@ -15,7 +15,7 @@
   ansible.builtin.import_tasks: logs.yml
 
 # We're installing a most-recent nightly version every time.
-- name: Install vlayer
+- name: Install vlayer # noqa: no-changed-when
   ansible.builtin.shell: |
     export PATH="$PATH:~/.foundry/bin"
     ~/.vlayer/bin/vlayerup

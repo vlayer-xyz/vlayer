@@ -43,7 +43,7 @@ where
 impl Host<Http> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let block_fetcher = BlockFetcher::<Http>::new(config.rpc_url)?;
-        let prover = Prover::new(config.proof_mode, config.elf.clone());
+        let prover = Prover::try_new(config.proof_mode, config.elf.clone())?;
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite, config.chain_guest_ids.clone())?;
 
         Ok(Host::from_parts(
@@ -205,6 +205,12 @@ mod tests {
             AppendStrategy::new(MAX_HEAD_BLOCKS, CONFIRMATIONS);
     }
 
+    #[cfg(test)]
+    #[ctor::ctor]
+    fn before_all() {
+        std::env::set_var("RISC0_DEV_MODE", "1");
+    }
+
     fn test_db() -> ChainDb {
         ChainDb::in_memory(
             // Current chain guest ELF ID is **not** included in `CHAIN_GUEST_IDS` when running without
@@ -218,7 +224,7 @@ mod tests {
 
     fn create_host(db: ChainDb, provider: Provider<MockProvider>) -> Host<MockProvider> {
         Host::from_parts(
-            Prover::new(ProofMode::Fake, CHAIN_GUEST_ELF.clone()),
+            Prover::try_new(ProofMode::Fake, CHAIN_GUEST_ELF.clone()).unwrap(),
             BlockFetcher::from_provider(provider),
             db,
             1,

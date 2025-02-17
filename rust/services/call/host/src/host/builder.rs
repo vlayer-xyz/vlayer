@@ -36,13 +36,11 @@ use super::{BuilderError as Error, Config, Host};
 pub struct New;
 
 pub struct WithProviders {
-    rpc_urls: HashMap<ChainId, String>,
     providers: CachedMultiProvider,
     op_client_factory: Box<dyn optimism::client::IFactory>,
 }
 
 pub struct WithChainGuestId {
-    rpc_urls: HashMap<ChainId, String>,
     providers: CachedMultiProvider,
     op_client_factory: Box<dyn optimism::client::IFactory>,
     chain_guest_id: Digest,
@@ -74,10 +72,8 @@ impl New {
     pub fn with_rpc_urls(self, rpc_urls: HashMap<ChainId, String>) -> WithProviders {
         let provider_factory = EthersProviderFactory::new(rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
-        let op_client_factory =
-            Box::new(optimism::client::factory::http::Factory::new(rpc_urls.clone()));
+        let op_client_factory = Box::new(optimism::client::factory::http::Factory::new(rpc_urls));
         WithProviders {
-            rpc_urls,
             providers,
             op_client_factory,
         }
@@ -87,7 +83,6 @@ impl New {
 impl WithProviders {
     pub fn with_chain_guest_id(self, chain_guest_id: Digest) -> WithChainGuestId {
         WithChainGuestId {
-            rpc_urls: self.rpc_urls,
             providers: self.providers,
             op_client_factory: self.op_client_factory,
             chain_guest_id,
@@ -101,7 +96,6 @@ impl WithChainGuestId {
         chain_proof_url: Option<&str>,
     ) -> Result<WithChainClient, Error> {
         let WithChainGuestId {
-            rpc_urls,
             providers,
             chain_guest_id,
             op_client_factory,
@@ -110,9 +104,7 @@ impl WithChainGuestId {
             Some(url) => Box::new(chain_client::RpcClient::new(url)),
             None => {
                 warn!("Chain proof sever URL not provided. Running with mock server");
-                let provider_factory = EthersProviderFactory::new(rpc_urls);
-                let providers = CachedMultiProvider::from_factory(provider_factory);
-                Box::new(chain_client::FakeClient::new(providers, chain_guest_id))
+                Box::new(chain_client::FakeClient::new(providers.clone(), chain_guest_id))
             }
         };
         Ok(WithChainClient {
@@ -211,15 +203,14 @@ fn compute_start_block_number(
 }
 
 impl WithStartExecLocation {
-    #[must_use]
-    pub fn build(self, config: Config) -> Host {
+    pub fn build(self, config: Config) -> Result<Host, Error> {
         let WithStartExecLocation {
             chain_client,
             start_exec_location,
             providers,
             op_client_factory,
         } = self;
-        Host::new(providers, start_exec_location, chain_client, op_client_factory, config)
+        Host::try_new(providers, start_exec_location, chain_client, op_client_factory, config)
     }
 }
 
@@ -238,10 +229,10 @@ mod tests {
     mod start_exec_location {
         use std::sync::Arc;
 
-        use chain_common::{GetSyncStatus, SyncStatus};
+        use chain_client::PartiallySyncedClient;
+        use chain_common::SyncStatus;
         use ethers_core::types::{Bytes, U64};
         use ethers_providers::MockProvider;
-        use mock_chain_server::ChainProofServerMock;
         use optimism::client::factory::cached;
         use provider::{BlockingProvider, EthersProvider};
 
@@ -266,21 +257,11 @@ mod tests {
             Arc::new(EthersProvider::new(ethers_providers::Provider::new(provider)))
         }
 
-        async fn mock_chain_client() -> Box<dyn chain_client::Client> {
-            let mut chain_server = ChainProofServerMock::start().await;
-            chain_server
-                .mock_sync_status()
-                .with_params(GetSyncStatus::new(CHAIN_ID), true)
-                .with_result(SyncStatus::new(0, LATEST_INDEXED_BLOCK))
-                .add()
-                .await;
-            Box::new(chain_server.into_client())
-        }
-
-        async fn builder(prover_contract_code_results: &[&'static [u8]]) -> WithStartChainId {
+        fn builder(prover_contract_code_results: &[&'static [u8]]) -> WithStartChainId {
             let start_chain_provider = mock_provider(prover_contract_code_results);
-            let chain_client = mock_chain_client().await;
             let providers = CachedMultiProvider::from_provider(CHAIN_ID, start_chain_provider);
+            let chain_client =
+                Box::new(PartiallySyncedClient::new(SyncStatus::new(0, LATEST_INDEXED_BLOCK)));
             let op_client_factory = Box::new(cached::Factory::default());
             WithStartChainId {
                 start_chain_id: CHAIN_ID,
@@ -292,7 +273,7 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn prover_contract_not_deployed() {
-            let builder = builder(&[b""]).await; // empty contract code at latest RPC block
+            let builder = builder(&[b""]); // empty contract code at latest RPC block
             let res = builder.with_prover_contract_addr(Address::default()).await;
             assert!(matches!(res, Err(Error::ProverContractNotDeployed)));
         }
@@ -301,7 +282,7 @@ mod tests {
         async fn prover_contract_not_indexed() {
             // empty contract code at latest indexed block, some fake code at latest RPC block
             // (mock client is LIFO, hence the order of results)
-            let builder = builder(&[b"", b"01"]).await;
+            let builder = builder(&[b"", b"01"]);
             let res = builder
                 .with_prover_contract_addr(Address::default())
                 .await
@@ -311,7 +292,7 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn prover_contract_indexed() {
-            let builder = builder(&[b"01", b"01"]).await;
+            let builder = builder(&[b"01", b"01"]);
             let res = builder
                 .with_prover_contract_addr(Address::default())
                 .await

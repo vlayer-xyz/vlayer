@@ -1,7 +1,9 @@
 use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use alloy_primitives::ChainId;
-use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
+use chain_host::{
+    set_risc0_dev_mode, AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode,
+};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
@@ -153,7 +155,14 @@ async fn main() {
     let cli = Cli::parse();
     init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
-    if let Err(e) = run(cli.mode, cli.into()).await {
+    let mode = cli.mode;
+    let config: HostConfig = cli.into();
+
+    if config.proof_mode == ProofMode::Fake {
+        set_risc0_dev_mode();
+    }
+
+    if let Err(e) = run(mode, config).await {
         error!("{}", e.to_string());
         std::process::exit(1)
     }

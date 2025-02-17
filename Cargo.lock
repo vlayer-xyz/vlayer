@@ -2208,7 +2208,6 @@ dependencies = [
  "insta",
  "lazy_static",
  "maplit",
- "mock_chain_server",
  "mpt",
  "optimism",
  "provider",
@@ -2252,6 +2251,7 @@ dependencies = [
  "hex",
  "humantime",
  "regex",
+ "server_utils",
  "tokio",
  "tracing",
  "version",
@@ -2277,6 +2277,7 @@ dependencies = [
  "call_host",
  "chain",
  "common",
+ "ctor",
  "dashmap",
  "derive-new",
  "derive_more",
@@ -2286,7 +2287,6 @@ dependencies = [
  "jsonrpsee",
  "lazy_static",
  "mime",
- "mock_chain_server",
  "provider",
  "reqwest 0.12.12",
  "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2543,6 +2543,7 @@ dependencies = [
  "chain_guest",
  "chain_test_utils",
  "common",
+ "ctor",
  "derivative",
  "derive-new",
  "ethers",
@@ -7604,23 +7605,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mock_chain_server"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "async-trait",
- "axum-jrpc",
- "block_header",
- "chain_client",
- "chain_common",
- "common",
- "lazy_static",
- "serde_json",
- "server_utils",
- "tokio",
-]
-
-[[package]]
 name = "mockito"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10522,6 +10506,7 @@ dependencies = [
  "reqwest 0.12.12",
  "serde",
  "serde_json",
+ "strum",
  "thiserror 2.0.11",
  "tokio",
  "tower 0.5.2",
@@ -11364,11 +11349,11 @@ dependencies = [
  "foundry-test-utils",
  "guest_wrapper",
  "hickory-resolver",
+ "host_utils",
  "indicatif",
  "inferno",
  "itertools 0.14.0",
  "mailparse 0.15.0",
- "mock_chain_server",
  "mpt",
  "opener",
  "optimism",

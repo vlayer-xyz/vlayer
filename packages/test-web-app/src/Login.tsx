@@ -6,7 +6,6 @@ export const Login = () => {
   return (
     <div className="container">
       <button
-        data-testid="login-button"
         onClick={() => {
           navigate("/dashboard");
         }}

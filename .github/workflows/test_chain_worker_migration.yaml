@@ -53,7 +53,6 @@ jobs:
           RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
           CHAIN_ID: 11155420
           PROOF_MODE: fake
-          RISC0_DEV_MODE: 1
           MODE: append-prepend
           DB_PATH: "./chain_db"
           START_BLOCK: 20000000

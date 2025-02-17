@@ -3,9 +3,10 @@
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-PROVING_MODE=${PROVING_MODE:-dev}
+set_proving_mode
 
 echo Generating typescript bidings ...
 ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null

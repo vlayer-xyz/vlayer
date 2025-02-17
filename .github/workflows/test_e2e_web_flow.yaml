@@ -27,6 +27,9 @@ jobs:
       - name: Build sdk
         run: bun run build
         working-directory: ./packages/sdk
+      - name: Build sdk-hooks
+        run: bun run build
+        working-directory: ./packages/sdk-hooks
       - name: Install dependencies of test-web-app
         run: bun install --frozen-lockfile
         working-directory: ./packages/test-web-app
@@ -52,6 +55,7 @@ jobs:
       - name: Run playwright tests
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          VLAYER_ENV: dev
         run: bash/playwright-test.sh
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

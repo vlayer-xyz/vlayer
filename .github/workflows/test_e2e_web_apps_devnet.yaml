@@ -44,6 +44,10 @@ jobs:
         working-directory: ./packages/sdk
         run: bun run build
 
+      - name: Build sdk-hooks
+        working-directory: ./packages/sdk-hooks
+        run: bun run build
+
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
 

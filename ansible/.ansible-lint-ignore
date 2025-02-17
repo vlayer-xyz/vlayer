@@ -1,3 +1,0 @@
-# Because we're always installing a latest nightly version of vlayer.
-roles/prover/tasks/main.yml no-changed-when
-roles/verifiable_dns/tasks/main.yml no-changed-when

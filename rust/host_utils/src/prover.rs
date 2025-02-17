@@ -26,8 +26,11 @@ pub struct Error(
 pub type Result<T> = std::result::Result<T, Error>;
 
 impl Prover {
-    pub const fn new(mode: ProofMode) -> Self {
-        Prover { mode }
+    pub fn try_new(mode: ProofMode) -> Result<Self> {
+        if mode == ProofMode::Fake && !risc0_dev_mode_on() {
+            Err(anyhow::anyhow!("fake proofs require `RISC0_DEV_MODE=1`"))?
+        }
+        Ok(Self { mode })
     }
 
     pub fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
@@ -38,6 +41,27 @@ impl Prover {
         }?;
         log_stats(&prove_info.stats, &elapsed);
         Ok(prove_info)
+    }
+}
+
+fn risc0_dev_mode_on() -> bool {
+    matches!(
+        std::env::var("RISC0_DEV_MODE")
+            .unwrap_or_default()
+            .to_ascii_lowercase()
+            .as_str(),
+        "1" | "true" | "yes"
+    )
+}
+
+pub fn set_risc0_dev_mode() {
+    // Fake proof mode cannot be forced in any other way, since all risc0-zkvm modules, that could be reused here, are only crate-public.
+    // Following is a temporary solution, that sets RISC0_DEV_MODE always to the same value, so race conditions are not a risk here.
+    // Setting this env variable will be moved directly to ExternalProver, once it supports injection of config.
+    // Note that setting this env var is required to correctly instrument fake proving *and* verifying.
+    // https://github.com/risc0/risc0/issues/2814
+    unsafe {
+        std::env::set_var("RISC0_DEV_MODE", "1");
     }
 }
 
@@ -68,12 +92,6 @@ fn prove_bonsai(
 }
 
 fn prove_fake(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<(ProveInfo, Duration)> {
-    // Fake proof mode cannot be forced in any other way, since all risc0-zkvm modules, that could be reused here, are only crate-public.
-    // Following is a temporary solution, that sets RISC0_DEV_MODE always to the same value, so race conditions are not a risk here.
-    // Setting this env variable will be moved directly to ExternalProver, once it supports injection of config.
-    unsafe {
-        std::env::set_var("RISC0_DEV_MODE", "1");
-    }
     let start = tokio::time::Instant::now();
     let prove_info = ExternalProver::new("vlayer: ipc", "r0vm").prove(env, elf)?;
     Ok((prove_info, start.elapsed()))

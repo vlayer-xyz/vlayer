@@ -5,6 +5,7 @@ set -ueo pipefail
 # Imports
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/run_services/lib.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/run_services/config.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/run_services/cleanup.sh"
@@ -15,8 +16,7 @@ trap cleanup EXIT ERR INT
 # Default values
 VLAYER_ENV=${VLAYER_ENV:-dev}
 BUILD_BINARIES=${BUILD_BINARIES:-1}
-PROVING_MODE=${PROVING_MODE:-dev}
-RISC0_DEV_MODE=""
+set_proving_mode
 BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
 SERVER_PROOF_ARG="fake"

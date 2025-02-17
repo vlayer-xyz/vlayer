@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
+use serde::{Deserialize, Deserializer, Serialize};
+use serde_repr::Serialize_repr;
 
 use crate::VerificationData;
 
@@ -10,7 +10,7 @@ pub struct Query {
     record_type: RecordType,
 }
 
-#[derive(Serialize_repr, Deserialize_repr, Clone, Default, PartialEq, Debug)]
+#[derive(Serialize_repr, Clone, Default, PartialEq, Debug)]
 #[repr(u8)]
 pub enum RecordType {
     #[allow(clippy::upper_case_acronyms)]
@@ -18,6 +18,21 @@ pub enum RecordType {
     #[default]
     #[allow(clippy::upper_case_acronyms)]
     TXT = 16,
+    OTHER = 0,
+}
+
+impl<'de> Deserialize<'de> for RecordType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let value = u32::deserialize(deserializer)?;
+        Ok(match value {
+            5 => RecordType::CNAME,
+            16 => RecordType::TXT,
+            _ => RecordType::OTHER,
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -234,6 +249,13 @@ mod tests {
         fn decodes_from_int() {
             let decoded: RecordType = serde_json::from_str("16").unwrap();
             assert_eq!(decoded, RecordType::TXT);
+        }
+
+        #[test]
+        fn decodes_from_unknown_int() {
+            let dnssec_type = "46";
+            let decoded: RecordType = serde_json::from_str(dnssec_type).unwrap();
+            assert_eq!(decoded, RecordType::OTHER);
         }
     }
 }

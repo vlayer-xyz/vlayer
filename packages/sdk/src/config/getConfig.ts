@@ -28,7 +28,6 @@ const ensureVlayerEnv = (): VlayerEnv => {
         `Invalid VLAYER_ENV: ${process.env.VLAYER_ENV}. Available options: ${POSSIBLE_VLAYER_ENVS.join(", ")}`,
       );
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     console.error(e);
     return "dev";

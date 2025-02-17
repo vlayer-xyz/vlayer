@@ -12,7 +12,7 @@ new Elysia({
     const url = request.url;
     const queryParams = new URLSearchParams(url.split("?")[1]);
     if (queryParams.get("auth") !== "s3cret_t0ken") {
-      set.status(403);
+      set.status = 403;
       return {
         success: false,
         error_message: "Missing or wrong authentication",
@@ -31,6 +31,11 @@ new Elysia({
   })
   .get("/json_three_bytes_char", () => {
     return { success: true, name: "عبد الله" };
+  })
+  .put("/update_resource", ({ request }) => {
+    const { name } = request.body;
+    console.log("Update resource request", request);
+    return { success: true, updatedName: name };
   })
   .use(cors())
   .listen(3011);

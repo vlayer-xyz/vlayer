@@ -5,7 +5,6 @@ function set_proof_mode() {
     if [[ "${PROVING_MODE}" == "dev" ]]; then
         SERVER_PROOF_ARG="fake"
         WORKER_PROOF_ARG="fake"
-        RISC0_DEV_MODE=1
     elif [[ "${PROVING_MODE}" == "prod" ]]; then
         SERVER_PROOF_ARG="groth16"
         WORKER_PROOF_ARG="succinct"

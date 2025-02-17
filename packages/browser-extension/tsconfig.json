@@ -4,7 +4,7 @@
     "composite": true,
     "jsx": "react",
     "useDefineForClassFields": true,
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext", "DOM", "dom.iterable"],
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -15,7 +15,8 @@
       "hooks/*" : ["./src/hooks/*"],
       "lib/*" : ["./src/lib/*"],
       "src/*" : ["./src/*"]
-    }
+    },
+    "downlevelIteration": true    
   },
   "include": ["vitest.d.ts", "**/*.ts", "**/*.tsx"]
 }
