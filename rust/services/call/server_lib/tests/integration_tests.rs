@@ -370,7 +370,7 @@ mod server_tests {
 
             assert_json_include!(actual: result, expected: json!({
                 "state": "preflight",
-                "error": "Preflight error: TravelCallExecutor error: EVM transact error: ",
+                "error": "Preflight error: TravelCallExecutor error: EVM transact error: 0x",
                 "status": 0,
                 "metrics": {},
             }));

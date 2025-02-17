@@ -1,6 +1,4 @@
 use alloy_primitives::Bytes;
-use alloy_rlp::Buf;
-use alloy_sol_types::decode_revert_reason;
 use call_common::Metadata;
 use revm::primitives::{ExecutionResult, HaltReason, SuccessReason};
 use thiserror::Error;
@@ -17,9 +15,7 @@ pub enum TransactError {
     #[error("contract execution stopped ({0:?}): No data was returned. Please check that your prover contract address is correct and the prover contract method is returning data")]
     Stop(SuccessReason),
     #[error("{0}")]
-    Revert(String),
-    #[error("{0}")]
-    NonUtf8Revert(Bytes),
+    Revert(Bytes),
     #[error("contract execution halted: {0:?}")]
     Halt(HaltReason),
 }
@@ -47,13 +43,7 @@ impl SuccessfulExecutionResult {
                     | SuccessReason::EofReturnContract),
                 ..
             } => Err(TransactError::Stop(reason)),
-            ExecutionResult::Revert { output, .. } => {
-                if let Some(reason) = decode_revert_reason(output.chunk()) {
-                    Err(TransactError::Revert(reason))
-                } else {
-                    Err(TransactError::NonUtf8Revert(output))
-                }
-            }
+            ExecutionResult::Revert { output, .. } => Err(TransactError::Revert(output)),
             ExecutionResult::Halt { reason, .. } => Err(TransactError::Halt(reason)),
         }
     }
@@ -109,33 +99,17 @@ mod successful_execution_result_try_from {
     }
 
     mod revert {
-        use alloy_sol_types::{Revert, SolError};
-
         use super::*;
-
-        fn revert_result(reason: impl Into<Bytes>) -> ExecutionResult {
-            ExecutionResult::Revert {
-                output: reason.into(),
-                gas_used: 0,
-            }
-        }
-
-        #[test]
-        fn revert_reason() {
-            let revert = Revert::from("reason").abi_encode();
-            let result = revert_result(revert);
-            let error = from_execution_result(result).unwrap_err().to_string();
-
-            assert_eq!(error, "revert: reason");
-        }
 
         #[test]
         fn non_utf8_reason() {
-            let non_utf8_revert = Bytes::from_static(&[0xFF]);
-            let result = revert_result(non_utf8_revert);
-            let error = from_execution_result(result).unwrap_err().to_string();
+            let result = ExecutionResult::Revert {
+                output: [0xff].into(),
+                gas_used: 0,
+            };
+            let error = from_execution_result(result).unwrap_err();
 
-            assert_eq!(error, "0xff");
+            assert_eq!(error, TransactError::Revert([0xff].into()));
         }
     }
 
