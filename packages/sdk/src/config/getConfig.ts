@@ -5,6 +5,19 @@ import { z } from "zod";
 import { type EnvConfig } from "./types";
 import { keysToCamelCase } from "../utils/camelCase";
 
+export class EnvValidationError extends Error {
+  constructor(validationResult: z.SafeParseError<unknown>) {
+    super(
+      "Some environment variables are misconfigured:\n" +
+        validationResult.error.errors
+          .map((err) => `  - ${err.path.join(".")}: ${err.message}`)
+          .join("\n"),
+    );
+    this.name = "EnvValidationError";
+    Object.setPrototypeOf(this, EnvValidationError.prototype);
+  }
+}
+
 const POSSIBLE_VLAYER_ENVS = ["testnet", "dev"] as const;
 
 const dotEnvFlowConfig = () => {
@@ -50,11 +63,13 @@ const envSchema = z.object({
 export const getConfig = (): EnvConfig => {
   dotEnvFlowConfig();
 
-  const parsed = envSchema.transform(renameConfigKeys).safeParse(process.env);
+  const validationResult = envSchema
+    .transform(renameConfigKeys)
+    .safeParse(process.env);
 
-  if (!parsed.success) {
-    throw new Error(`Invalid environment variables: ${parsed.error.message}`);
+  if (!validationResult.success) {
+    throw new EnvValidationError(validationResult);
   }
 
-  return parsed.data;
+  return validationResult.data;
 };
