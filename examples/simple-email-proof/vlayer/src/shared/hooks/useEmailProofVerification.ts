@@ -13,7 +13,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
 import { useNavigate } from "react-router";
 
-export const useEmailProofVerification = (emlFile?: File) => {
+export const useEmailProofVerification = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState("");
   const { address: connectedAddr } = useAccount();
@@ -22,7 +22,7 @@ export const useEmailProofVerification = (emlFile?: File) => {
     writeContract,
     data: txHash,
     error: verificationError,
-    status
+    status,
   } = useWriteContract();
 
   const { status: onChainVerificationStatus } = useWaitForTransactionReceipt({
@@ -95,7 +95,7 @@ export const useEmailProofVerification = (emlFile?: File) => {
   useEffect(() => {
     if (status === "success") {
       setCurrentStep("Done!");
-      navigate("/success");
+      navigate(`/success?txHash=${txHash}`);
     }
   }, [status]);
 

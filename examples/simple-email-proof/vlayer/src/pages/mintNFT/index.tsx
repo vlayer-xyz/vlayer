@@ -6,8 +6,7 @@ export const MintNFT = () => {
   const [copyCode, setCopyCode] = useState(false);
   const [emlFile, setEmlFile] = useState<File | undefined>(undefined);
 
-  const { currentStep, txHash, startProving } =
-    useEmailProofVerification();
+  const { currentStep, startProving } = useEmailProofVerification();
 
   return (
     <>
@@ -53,7 +52,7 @@ export const MintNFT = () => {
               <input
                 type="file"
                 className="w-full"
-                onChange={(e) => setEmlFile(e.target.files?.[0] || null)}
+                onChange={(e) => setEmlFile(e.target.files?.[0] || undefined)}
               />
             </label>
           </div>
