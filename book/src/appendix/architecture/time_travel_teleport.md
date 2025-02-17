@@ -9,6 +9,7 @@ vlayer allows seamless aggregation of data from different blocks and chains. We 
 At the [beggining of the `guest::main`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/guest.rs#L38) we verify whether the data for each execution location is coherent. However, we have not yet checked whether data from multiple execution locations align with each other. Specifically, we need to ensure that:
 * The blocks we claim to be on the same chain are actually there (allowing time travel between blocks on the same chain).
 * The blocks associated with a given chain truly belong to that chain (enabling teleportation to the specified chain).
+
 The points above are verified by the [`Verifier::verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/travel_call.rs#L80) function. The `Verifier` struct is used both during the host preflight and guest execution. Because of that it is parametrized by Recording Clients (in host) and Reading Clients (in guest).
 
 The `verify` function performs above verifications by:
@@ -17,13 +18,11 @@ The `verify` function performs above verifications by:
 Is possible thanks to [Chain Proofs](./chain_proof.md).
 Verification steps are as follows:
 1. **Retrieve Blocks:** Extract the list of blocks to be verified and group them by chain.
-2. **Iterate Over Chains:** For each chain run [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks that does the following:
+2. **Iterate Over Chains:** For each chain run [time travel `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/time_travel.rs#L40) function on its blocks.
 3. **Skip Single-Block Cases:** If only one block exists, no verification is needed.
 4. **Request Chain Proof:** Fetch cryptographic proof of chain integrity.
 5. **Verifies Chain Proof:** Run the [chain proof `verify`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/chain/common/src/verifier.rs#L46) function on the obtained Chain Proof to check its validity.
 6. **Validate Blocks:** Compare each block’s hash with the hash obtained by block number from the validated Chain Proof.
-
-<!-- potentially todo: document chain proof `verify` function -->
 
 ### II. Teleport Verification
 1. **Identify Destination Chains:** Extract execution locations from `CachedEvmEnv`, filtering for chains different from the starting one.
@@ -32,10 +31,6 @@ Verification steps are as follows:
 4. **Fetch Latest Confirmed L2 Block:** Use the [`AnchorStateRegistry`](https://docs.optimism.io/stack/smart-contracts#anchorstateregistry) and `sequencer_client` to get the latest confirmed block on the destination chain.
 5. **Verify Latest Confirmed Block Hash Consistency:** Compare the latest confirmed block’s hashes.
 6. **Verify Latest Teleport Location Is Confirmed:** Using function [`ensure_latest_teleport_location_is_confirmed`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/verifier/teleport.rs#L154) we check that latest destination block number is not greater than latest confirmed block number.
-
-<!-- potentially todo: document how we are using AnchorStateRegistry in more detail -->
-
-<!-- todo: picture -->
 
 ## Verifier Safety & Testability
 
@@ -58,9 +53,11 @@ The following macros work together to enforce sealing and enable test mocking:
 
 ## Inspector
 
-After verifying that execution locations belong to their respective chains, we can perform travel calls on them. How is this achieved?
+Both **Time Travel** and **Teleport** features are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to handle **travel calls** that alter the execution context by switching the blockchain network or block number.
 
-Both **Time Travel** and **Teleport** are enabled by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to **intercept**, **monitor**, and *modify* EVM calls, particularly handling **travel calls** that alter the execution context by switching the blockchain network or block number.
+How does it work? When `ExecutionLocation` is updated, `Inspector`:
+1. Creates a separate EVM with new `ExecutionLocation` context (using `transaction_callback` function passed as argument).
+2. Executes the subcall on a separate inner EVM with updated location.
 
 ```rust
 pub struct Inspector<'a> {
@@ -85,9 +82,48 @@ There are two special functions that modify execution context:
 Intercepts every contract call and determines how to handle it:
 * **Precompiled Contracts:** If the call targets a precompiled contract, it logs the call and records relevant metadata.
 * **Travel Call Contract:** If the call is directed to the designated travel call contract (identified by `CONTRACT_ADDR`), the `Inspector` parses the input arguments and triggers a travel call by invoking either `set_block` or `set_chain`.
-* **Standard Calls:** If no travel call is detected, the `Inspector` allows the call to proceed normally. However, if a travel call has already set a new context, it processes the call using the provided `transaction_callback` and applies the updated execution context in the [`on_call` function](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L68).
+* **Standard Calls:** If no travel call is detected, the `Inspector` allows the call to proceed normally. However, if a travel call has already set a new context, it is processed using the provided `transaction_callback` and applies the updated execution context in the [`on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L68) function.
 
 #### 4. Monitors & Logs Precompiled Contracts
 If the call is made to a precompiled contract it logs the call and records metadata.
 
 Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/precompiles/src/lib.rs#L24).
+
+### `ExecutionResult` to `CallOutcome` conversion
+
+[`ExecutionResult`](https://github.com/bluealloy/revm/blob/dd63090f2a8663714778e0224df3602cb0f8928f/crates/context/interface/src/result.rs#L40) and [`CallOutcome`](https://github.com/bluealloy/revm/blob/main/crates/interpreter/src/interpreter_action/call_outcome.rs#L16) are revm structs used in the `Inspector` code. They are necessary to make travel calls work.
+
+* `ExecutionResult` is an enum representing the complete outcome of a **transaction**. It has three variants—`Success`, `Revert`, and `Halt`—and includes transaction information such as gas usage, gas refunds, logs, and output data.
+* `CallOutcome` is a struct representing the result of a single **call** within the EVM interpreter. It encapsulates an [`InterpreterResult`](https://github.com/bluealloy/revm/blob/25d9726522f8f88373ba2105a97adbd509e81683/crates/interpreter/src/interpreter.rs#L170) (which contains output data and gas usage) along with a `memory_offset` (the range in memory where the output data is located).
+
+Most fields stored in `ExecutionResult` have equivalents in `CallOutcome`. The only exceptions are`logs` and `gas_refunded` fields from `ExecutionResult::Success`, which do not exist in `CallOutcome`. Conversely, `CallOutcome` includes `memory_offset`, which has no direct counterpart in `ExecutionResult`.
+
+When `Inspector::call` is executed, it must return a `CallOutcome`. However, the `transaction_callback` run inside `Inspector::call` executes the full EVM and returns an `ExecutionResult`. Hence, the conversion between this two is needed.
+
+This conversion is performed using the [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [within `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80). During this process `logs` and `gas_refunded` fields from `ExecutionResult::Success` are discarded, as they are not required in `CallOutcome`. `memory_offset` is obtained from `CallInputs`, which is also passed to `execution_result_to_call_outcome` as an argument.
+
+## Executor
+
+[`Executor`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L28) struct handles running EVM transactions. `Inspector` is created by the `Executor` struct and used while [building EVM](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/evm.rs#L12).
+
+```rust
+pub struct Executor<'envs, D: RevmDB> {
+    envs: &'envs CachedEvmEnv<D>,
+}
+```
+
+### `call`
+
+The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that runs the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)).
+
+### `internal_call`
+
+The private [`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41) method performs the core execution of an EVM transaction, including support for recursive internal calls (when one smart contract calls another). In this implementation, the `envs` are shared across recursive calls, meaning that any modification performed by one call is visible to others.
+
+But updates to the database `state` (contained in the [`ProofDb`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/host/src/db/proof.rs#L26) structure, being a part of `env`) are safe because the `state` is modified only by inserting new entries. New keys are added to the `accounts`, `contracts`, and `block_hash_numbers` collections, while existing entries remain unchanged.
+
+#### Error handling
+
+Due to the design of revm's `Inspector` trait, the `Inspector::call` (run inside EVM build in `Executor::internal_call`)  method must return an `Option<CallOutcome>` rather than a `Result`. This limitation means that errors occurring during intercepted calls cannot be directly propagated via the return type.
+
+To work around this constraint, our `Inspector` implementation [uses panics to signal errors](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L77). The panic is then [caught in the `Executor::call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L36) method using `panic::catch_unwind`. This mechanism allows us to convert panics into proper error results, ensuring that errors are not lost, even though the `Inspector::call` function itself cannot return an error.
