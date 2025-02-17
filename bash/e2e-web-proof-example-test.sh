@@ -24,4 +24,6 @@ bun install --frozen-lockfile
 bun run test:"${VLAYER_ENV}"
 echo '::endgroup::'
 
+echo '::group::Cleanup'
 cleanup
+echo '::endgroup::'
