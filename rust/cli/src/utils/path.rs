@@ -25,7 +25,7 @@ pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf> {
     do_find_foundry_root_from(&start, &git_root)
 }
 
-/// This function will ignore symlinks.
+/// This function will error out on symlinks.
 pub(crate) fn copy_dir_all(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> {
     fs::create_dir_all(dst_dir)
         .with_context(|| format!("Failed to create path '{}'", dst_dir.display()))?;
@@ -44,8 +44,6 @@ pub(crate) fn copy_dir_all(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()>
             copy_dir_all(&src, &dst).with_context(|| {
                 format!("Failed to copy directory from '{}' to '{}'", src.display(), dst.display())
             })?;
-        } else if file_type.is_symlink() {
-            continue;
         } else {
             fs::copy(entry.path(), &dst).with_context(|| {
                 format!(
@@ -239,7 +237,7 @@ mod tests {
         }
 
         #[test]
-        fn ignores_symlinks() -> anyhow::Result<()> {
+        fn errors_out_on_symlinks() -> anyhow::Result<()> {
             create_temp_dirs!(src_dir, dst_dir);
 
             let non_existent_file_path = PathBuf::from("/non/existent/file");
@@ -248,12 +246,13 @@ mod tests {
 
             symlink(non_existent_file_path.clone(), dangling_symlink_path)?;
 
-            copy_dir_all(&src_dir, &dst_dir)?;
-
             assert!(!non_existent_file_path.exists());
             // Path::try_exists returns Ok(false) for broken symlinks
             assert!(!dst_dangling_symlink_path.try_exists()?);
             assert!(!dst_dangling_symlink_path.is_symlink());
+
+            let result = copy_dir_all(&src_dir, &dst_dir);
+            assert!(result.is_err());
 
             Ok(())
         }
