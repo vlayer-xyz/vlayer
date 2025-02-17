@@ -99,6 +99,23 @@ mod test {
     }
 
     #[test]
+    fn passes_for_valid_email_with_attachment() -> anyhow::Result<()> {
+        let email = read_email_from_file("./testdata/email_with_attachment.eml");
+        let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
+
+        assert_eq!(
+            parse_and_verify(&calldata)?,
+            Email {
+                from: "piotr@vlayer.xyz".into(),
+                to: "Ivan Rukhavets <ivan@vlayer.xyz>".into(),
+                subject: Some("Email with attachment".into(),),
+                body: "Hello,\r\ntake a look at the following remappings.\r\n\r\nBest Regards,\r\nPiotr\r\n\r\n".into(),
+            }
+        );
+        Ok(())
+    }
+
+    #[test]
     fn passes_for_dns_record_with_missing_v_and_k_tags() -> anyhow::Result<()> {
         let dns_record = SolDnsRecord {
             data: "  p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".into(),
