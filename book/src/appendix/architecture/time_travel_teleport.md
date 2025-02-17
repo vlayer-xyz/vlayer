@@ -110,7 +110,7 @@ Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlaye
 
 Most fields stored in `ExecutionResult` have equivalents in `CallOutcome`. The only exceptions are`logs` and `gas_refunded` fields from `ExecutionResult::Success`, which do not exist in `CallOutcome`. Conversely, `CallOutcome` includes `memory_offset`, which has no direct counterpart in `ExecutionResult`.
 
-When `Inspector::call` is executed, it must return a `CallOutcome`. However, the `transaction_callback` run inside `Inspector::call` executes the full EVM and returns an `ExecutionResult`. Hence, the conversion between this two is needed.
+When `Inspector::call` is executed, it must return a `CallOutcome`. However, the `transaction_callback` run inside `Inspector::call` executes the full EVM and returns an `ExecutionResult`. Hence, the conversion between the two is needed.
 
 This conversion is performed using the [`execution_result_to_call_outcome`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/utils/evm_call.rs#L21) function [within `Inspector::on_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L80). During this process `logs` and `gas_refunded` fields from `ExecutionResult::Success` are discarded, as they are not required in `CallOutcome`. `memory_offset` is obtained from `CallInputs`, which is also passed to `execution_result_to_call_outcome` as an argument.
 
@@ -142,9 +142,9 @@ To work around this constraint, our `Inspector` implementation [uses panics to s
 
 ## On-chain Verification
 
-When we begin the proving process, we select a specific block as the **settlement block**—the block we commit to—and execute a call to the `Prover` contract method within the zkEVM environment. The guest proof is valid **providing** the block and contract assumptions used during its generation are accurate.
+When the proving process begins, a specific block is selected as the **settlement block**—the block we commit to. Then, a call to the `Prover` contract is executed within zkEVM environment. The guest proof is valid **providing** the block and contract assumptions used during its generation are accurate.
 
-These assumptions are encapsulated in a single struct used within the guest code:
+These assumptions are encapsulated in a dedicated struct used within the guest code:
 
 ```solidity
 struct CallAssumptions {
@@ -155,7 +155,11 @@ struct CallAssumptions {
 }
 ```
 
-Above struct is [created](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/guest.rs#L59) within the `guest::main` function. Since the guest itself cannot independently prove the validity of these assumptions, they must be verified externally. Because of that, `CallAssumptions` is returned in the guest output and is verified on-chain using the `Verifier` contract, specifically through the [`_verifyExecutionEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/contracts/vlayer/src/proof_verifier/ProofVerifierBase.sol#L42). It ensures that the proof aligns with a valid blockchain state.
+The struct is [created](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/guest.rs#L59) within the `guest::main` function. Since the guest itself **cannot independently prove the validity of these assumptions**, they must be verified externally.
+
+To achieve this, `CallAssumptions` is s included in the [`GuestOutput`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/io.rs#L107) and subsequently verified **on-chain** using the `Verifier` contract, specifically through the [`_verifyExecutionEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/contracts/vlayer/src/proof_verifier/ProofVerifierBase.sol#L42). This verification step ensures that the proof aligns with a valid blockchain state.
+
+### Validation Steps in `_verifyExecutionEnv`
 
 The `_verifyExecutionEnv` function checks the following:
 
