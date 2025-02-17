@@ -19,7 +19,8 @@ concurrency:
 jobs:
   test-rust:
     strategy:
-      matrix: 
+      fail-fast: false
+      matrix:
         a: [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
     name: Test Rust
     runs-on: aws-linux-medium
@@ -44,5 +45,5 @@ jobs:
           cargo test --workspace --locked
         env:
           CARGO_TARGET_DIR: /tmp/vlayer_target
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUST_LOG: info

@@ -18,7 +18,8 @@ concurrency:
 jobs:
   lint-rust:
     strategy:
-      matrix: 
+      fail-fast: false
+      matrix:
         a: [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
     name: Lint Rust
     runs-on: aws-linux-medium
@@ -38,7 +39,7 @@ jobs:
       - name: Run Host lints
         env:
           CARGO_TARGET_DIR: /tmp/vlayer_target
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
@@ -49,7 +50,7 @@ jobs:
         working-directory: rust/guest_wrapper/risc0_call_guest
         env:
           CARGO_TARGET_DIR: /tmp/vlayer_target
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
@@ -60,7 +61,7 @@ jobs:
         working-directory: rust/guest_wrapper/risc0_chain_guest
         env:
           CARGO_TARGET_DIR: /tmp/vlayer_target
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
@@ -71,13 +72,13 @@ jobs:
         working-directory: rust/cli
         env:
           CARGO_TARGET_DIR: /tmp/vlayer_target
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo deny check bans
 
       - name: Detect unused dependencies
         env:
           CARGO_TARGET_DIR: /tmp/vlayer_target
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          # RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo machete
 
       - name: Check chain guest ELF ID
