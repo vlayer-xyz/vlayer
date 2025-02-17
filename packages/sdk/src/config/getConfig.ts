@@ -8,7 +8,10 @@ import { keysToCamelCase } from "../utils/camelCase";
 const POSSIBLE_VLAYER_ENVS = ["testnet", "dev"] as const;
 
 const dotEnvFlowConfig = () => {
-  dotenvflow.config();
+  dotenvflow.config({
+    node_env: process.env.VLAYER_ENV,
+    default_node_env: "dev",
+  });
 };
 
 const renameConfigKeys = (config: z.infer<typeof envSchema>) => {
@@ -47,5 +50,11 @@ const envSchema = z.object({
 export const getConfig = (): EnvConfig => {
   dotEnvFlowConfig();
 
-  return envSchema.transform(renameConfigKeys).parse(process.env);
+  const parsed = envSchema.transform(renameConfigKeys).safeParse(process.env);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid environment variables: ${parsed.error.message}`);
+  }
+
+  return parsed.data;
 };

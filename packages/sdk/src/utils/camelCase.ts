@@ -2,11 +2,11 @@ type CamelCase<T extends string> = T extends `${infer F}_${infer R}`
   ? `${Lowercase<F>}${Capitalize<CamelCase<R>>}`
   : Lowercase<T>;
 
-type CamelCasedKeys<T extends Record<string, any>> = {
+type CamelCasedKeys<T extends Record<string, unknown>> = {
   [K in keyof T as CamelCase<K extends string ? K : never>]: T[K];
 };
 
-export const keysToCamelCase = <T extends Record<string, any>>(
+export const keysToCamelCase = <T extends Record<string, unknown>>(
   obj: T,
 ): CamelCasedKeys<T> => {
   return Object.fromEntries(
