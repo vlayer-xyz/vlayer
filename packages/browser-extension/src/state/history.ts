@@ -37,8 +37,7 @@ export class HistoryContextManager {
   async getUrls(): Promise<string[]> {
     const config =
       await webProverSessionContextManager.getWebProverSessionConfig();
-    const urls = config?.steps.map((step: { url: string }) => step.url) || [];
-    return urls;
+    return config?.steps.map((step: { url: string }) => step.url) || [];
   }
 
   async updateHistory(item: BrowsingHistoryItem): Promise<void> {
