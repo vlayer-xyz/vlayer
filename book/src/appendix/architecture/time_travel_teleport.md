@@ -100,7 +100,7 @@ Precompiles used by vlayer are listed [here](https://github.com/vlayer-xyz/vlaye
 * `ExecutionResult` is an enum representing the complete outcome of a **transaction**. It has three variants—`Success`, `Revert`, and `Halt`—and includes transaction information such as gas usage, gas refunds, logs, and output data.
 * `CallOutcome` is a struct representing the result of a single **call** within the EVM interpreter. It encapsulates an [`InterpreterResult`](https://github.com/bluealloy/revm/blob/25d9726522f8f88373ba2105a97adbd509e81683/crates/interpreter/src/interpreter.rs#L170) (which contains output data and gas usage) along with a `memory_offset` (the range in memory where the output data is located).
 
-Most fields stored in `ExecutionResult` have equivalents in `CallOutcome`. The only exceptions are`logs` and `gas_refunded` fields from `ExecutionResult::Success`, which do not exist in `CallOutcome`. Conversely, CallOutcome includes `memory_offset`, which has no direct counterpart in `ExecutionResult`.
+Most fields stored in `ExecutionResult` have equivalents in `CallOutcome`. The only exceptions are`logs` and `gas_refunded` fields from `ExecutionResult::Success`, which do not exist in `CallOutcome`. Conversely, `CallOutcome` includes `memory_offset`, which has no direct counterpart in `ExecutionResult`.
 
 When `Inspector::call` is executed, it must return a `CallOutcome`. However, the `transaction_callback` run inside `Inspector::call` executes the full EVM and returns an `ExecutionResult`. Hence, the conversion between this two is needed.
 
@@ -118,11 +118,11 @@ pub struct Executor<'envs, D: RevmDB> {
 
 ### `call`
 
-The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that wraps the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)) in `panic::catch_unwind()`. This catches unexpected panics, converts them into structured errors. The method then converts the raw execution result and metadata into a structured [`SuccessfulExecutionResult`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/execution_result.rs#L9) for external use.
+The `Executor` provides a public [`call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L33) method that runs the internal execution ([`internal_call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L41)).
 
 #### Error handling
 
-Due to the design of revm's `Inspector` trait, the `Inspector::call` method must return an `Option<CallOutcome>` rather than a `Result`. This limitation means that errors occurring during intercepted calls cannot be directly propagated via the return type.
+Due to the design of revm's `Inspector` trait, the `Inspector::call` (run inside evm build in `Executor::internal_call`)  method must return an `Option<CallOutcome>` rather than a `Result`. This limitation means that errors occurring during intercepted calls cannot be directly propagated via the return type.
 
 To work around this constraint, our `Inspector` implementation [uses panics to signal errors](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L77). The panic is then caught in the `Executor::call` method using `panic::catch_unwind`. This mechanism allows us to convert panics into proper error results, ensuring that errors are not lost, even though the `Inspector::call` function itself cannot return an error.
 
