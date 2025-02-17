@@ -28,7 +28,7 @@ contract LotrApiProver is Prover {
         require(web.jsonGetBool("success"), "Got unsuccessful response in WebProof");
 
         require(web.url.matches("^.*are_you_sure=yes\\&really=\\*+$"), "Incorrect redaction of URL");
-        
+
         string memory name = web.jsonGetString("name");
         string memory greeting = web.jsonGetString("greeting");
 
