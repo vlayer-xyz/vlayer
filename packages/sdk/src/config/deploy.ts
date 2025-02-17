@@ -13,7 +13,6 @@ import {
 import { getChainConfirmations } from "./getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
-import type { DeployConfig } from "./types";
 import { v_versions } from "../api/v_versions";
 
 const log = debug("vlayer:prover");
@@ -81,17 +80,15 @@ export const deployVlayerContracts = async ({
   verifierSpec,
   proverArgs,
   verifierArgs,
-  env,
 }: {
   proverSpec: ContractSpec;
   verifierSpec: ContractSpec;
   proverArgs?: ContractArg[];
   verifierArgs?: ContractArg[];
-  env?: DeployConfig;
 }) => {
   log("Starting contract deployment process...");
   const config = getConfig();
-  const { chain, ethClient, account } = createContext(config);
+  const { chain, ethClient, account, deployConfig } = createContext(config);
 
   log("Deploying prover contract...");
   const proverHash = await ethClient.deployContract({
@@ -117,7 +114,7 @@ export const deployVlayerContracts = async ({
   log(`Verifier contract deployed at: ${verifier}`);
 
   log("Contract deployment completed successfully");
-  if (env?.isTesting) {
+  if (deployConfig.deployFakeVerifier) {
     await swapInternalVerifier(ethClient, chain, account, verifier);
   }
 
