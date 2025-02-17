@@ -28,7 +28,7 @@ jobs:
       - name: Build sdk
         working-directory: ./packages/sdk
         run: bun run build
-        
+
       - name: Build sdk-hooks
         working-directory: ./packages/sdk-hooks
         run: bun run build
@@ -66,7 +66,7 @@ jobs:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           VLAYER_ENV: dev
         run: bash/playwright-test.sh
-        
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

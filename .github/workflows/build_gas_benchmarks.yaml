@@ -29,7 +29,7 @@ jobs:
         working-directory: ./contracts/vlayer
         run: |
           forge soldeer install
-          
+
       - name: Forge build contract fixtures
         working-directory: ./contracts/fixtures
         run: |
