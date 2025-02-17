@@ -8,8 +8,8 @@ on:
       - ".github/workflows/lint_rust.yaml"
   merge_group:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
@@ -17,6 +17,9 @@ concurrency:
 
 jobs:
   lint-rust:
+    strategy:
+      matrix: 
+        a: [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
     name: Lint Rust
     runs-on: aws-linux-medium
 
@@ -34,6 +37,7 @@ jobs:
 
       - name: Run Host lints
         env:
+          CARGO_TARGET_DIR: /tmp/vlayer_target
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
@@ -44,6 +48,7 @@ jobs:
       - name: Run Risc0 Call Guest lints
         working-directory: rust/guest_wrapper/risc0_call_guest
         env:
+          CARGO_TARGET_DIR: /tmp/vlayer_target
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
@@ -54,6 +59,7 @@ jobs:
       - name: Run Risc0 Chain Guest lints
         working-directory: rust/guest_wrapper/risc0_chain_guest
         env:
+          CARGO_TARGET_DIR: /tmp/vlayer_target
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
@@ -64,11 +70,13 @@ jobs:
       - name: Run cargo deny
         working-directory: rust/cli
         env:
+          CARGO_TARGET_DIR: /tmp/vlayer_target
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo deny check bans
 
       - name: Detect unused dependencies
         env:
+          CARGO_TARGET_DIR: /tmp/vlayer_target
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo machete
 
