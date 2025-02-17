@@ -11,8 +11,10 @@ import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver"
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
+import { useNavigate } from "react-router";
 
-export const useEmailProofVerification = () => {
+export const useEmailProofVerification = (emlFile?: File) => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState("");
   const { address: connectedAddr } = useAccount();
 
@@ -20,6 +22,7 @@ export const useEmailProofVerification = () => {
     writeContract,
     data: txHash,
     error: verificationError,
+    status
   } = useWriteContract();
 
   const { status: onChainVerificationStatus } = useWaitForTransactionReceipt({
@@ -89,14 +92,19 @@ export const useEmailProofVerification = () => {
     }
   }, [proof]);
 
+  useEffect(() => {
+    if (status === "success") {
+      setCurrentStep("Done!");
+      navigate("/success");
+    }
+  }, [status]);
+
   return {
     currentStep,
     txHash,
-    proof,
     onChainVerificationStatus,
     verificationError,
     provingError,
     startProving,
-    verifyProofOnChain,
   };
 };

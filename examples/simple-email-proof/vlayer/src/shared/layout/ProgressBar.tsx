@@ -17,7 +17,7 @@ export const ProgressBar = () => {
       <li
         className={`step ${currentStep?.index !== undefined && currentStep?.index >= 2 ? "step-primary" : ""} text-black text-xs`}
       >
-        Get data from X
+        Send Email
       </li>
       <li
         className={`step ${currentStep?.index !== undefined && currentStep?.index >= 3 ? "step-primary" : ""} text-black text-xs`}

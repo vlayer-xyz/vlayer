@@ -53,7 +53,7 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
     <dialog className="modal" ref={modalRef}>
       <div className="modal-box bg-white rounded-2xl">
         <motion.div
-          className="h-[490px] flex flex-col items-center justify-between"
+          className="h-[590px] flex flex-col items-center justify-between"
           initial={{ opacity: 0, scale: 0.1 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.1 }}
@@ -79,7 +79,7 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
               />
             )}
           </AnimatePresence>
-          <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
+          <div className="flex-col flex gap-4 justify-between h-[420px] mb-2">
             {/* Title */}
             {currentStep?.title && (
               <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
