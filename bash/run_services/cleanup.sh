@@ -1,7 +1,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
 
 function cleanup() {
-    echo "::group::Cleaning up"
+    echo "Cleaning up..."
 
     for service in CHAIN_SERVER VLAYER_SERVER DNS_SERVER ; do
         kill_service "${service}"
@@ -18,7 +18,5 @@ function cleanup() {
         docker compose -f $DOCKER_COMPOSE_FILE down anvil-l1 anvil-l2-op
     fi
 
-    echo "Artifacts saved to: ${VLAYER_TMP_DIR}"
-
-    echo "::endgroup::Cleaning up"
+    echo "Cleanup done. Artifacts saved to: ${VLAYER_TMP_DIR}"
 }
