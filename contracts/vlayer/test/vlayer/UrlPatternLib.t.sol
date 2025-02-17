@@ -32,10 +32,7 @@ contract UrlPatternTest is VTest {
         try urlPattern.do_test("https://example.com", "[invalid pattern]") {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
-            assertEq(
-                reason,
-                "Preflight: Execution error: EVM error: a relative input without a base URL is not valid"
-            );
+            assertEq(reason, "Preflight: Execution error: EVM error: a relative input without a base URL is not valid");
         }
     }
 

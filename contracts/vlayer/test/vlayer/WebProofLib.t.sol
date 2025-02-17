@@ -66,8 +66,7 @@ contract WebProverTest is VTest {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(
-                reason,
-                "Preflight: Execution error: EVM error: missing field `presentationJson` at line 1 column 2"
+                reason, "Preflight: Execution error: EVM error: missing field `presentationJson` at line 1 column 2"
             );
         }
     }
