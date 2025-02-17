@@ -34,7 +34,6 @@ jobs:
             "simple",
             "simple-web-proof",
             "simple-email-proof",
-            "simple-teleport",
             "simple-time-travel",
           ]
 
