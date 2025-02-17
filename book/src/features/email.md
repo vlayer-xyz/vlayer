@@ -55,13 +55,16 @@ DKIM validation will fail if the email body has been modified by a proxy server.
 ## DKIM and Verifiable DNS
 
 The simplified flow of the DKIM signature is:
-1. The sender server has a private and public key pair.
-2. The public key is published as in DNS as a TXT record under `selector._domainkey.domain.com` where:
-   - `selector` is a unique identifier under `s=` tag in the DKIM-Signature header
+1. The sender SMTP server has a private and public key pair.
+2. The public key is published in DNS as a TXT record under `<selector>._domainkey.<domain>` where:
+   - `<selector>` is a unique identifier under `s=` tag in the DKIM-Signature header
    - `_domainkey` is a fixed string
-   - `domain.com` is the sender's domain, stored in the `d=` tag in the DKIM-Signature header
+   - `<domain>` is the sender's domain, stored in the `d=` tag in the DKIM-Signature header.
+   
 3. The email server adds a DKIM-Signature header to the email and sends it.
-4. The recipient server fetches the public key from DNS and verifies the signature.
+4. The recipient SMTP server receives the email.
+5. SMTP server checks `DKIM-Signature` header, reads d= tag ... stating its singers domain and selector, which gives him notion where to look for the key.
+5. The recipient server fetches the public key from DNS and verifies the signature.
 
 The last step becomes tricky: we don't have the access to DNS from the Solidity level.
 Instead, we'll have to prove that the DNS record is indeed valid and pass it together with the email to the prover contract.
