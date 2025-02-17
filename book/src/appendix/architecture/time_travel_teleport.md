@@ -61,7 +61,9 @@ The following macros work together to enforce sealing and enable test mocking:
 
 Both **Time Travel** and **Teleport** features are made possible by the `Inspector` struct, a custom implementation of the `Inspector` trait from REVM. Its purpose is to **intercept**, **monitor**, and **modify** EVM calls, particularly handling **travel calls** that alter the execution context by switching the blockchain network or block number.
 
-How does it work? When `ExecutionLocation` is updated, `Inspector` creates a separate EVM with new `ExecutionLocation` context (using `transaction_callback` passed), pauses the current one and executes the subcall on a separate inner EVM.
+How does it work? When `ExecutionLocation` is updated, `Inspector`:
+1. Creates a separate EVM with new `ExecutionLocation` context (using `transaction_callback` function passed as argument).
+2. Executes the subcall on a separate inner EVM with updated location.
 
 ```rust
 pub struct Inspector<'a> {
@@ -128,6 +130,6 @@ But updates to the database `state` (contained in the [`ProofDb`](https://github
 
 #### Error handling
 
-Due to the design of revm's `Inspector` trait, the `Inspector::call` (run inside evm build in `Executor::internal_call`)  method must return an `Option<CallOutcome>` rather than a `Result`. This limitation means that errors occurring during intercepted calls cannot be directly propagated via the return type.
+Due to the design of revm's `Inspector` trait, the `Inspector::call` (run inside EVM build in `Executor::internal_call`)  method must return an `Option<CallOutcome>` rather than a `Result`. This limitation means that errors occurring during intercepted calls cannot be directly propagated via the return type.
 
 To work around this constraint, our `Inspector` implementation [uses panics to signal errors](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call/inspector.rs#L77). The panic is then [caught in the `Executor::call`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/travel_call.rs#L36) method using `panic::catch_unwind`. This mechanism allows us to convert panics into proper error results, ensuring that errors are not lost, even though the `Inspector::call` function itself cannot return an error.
