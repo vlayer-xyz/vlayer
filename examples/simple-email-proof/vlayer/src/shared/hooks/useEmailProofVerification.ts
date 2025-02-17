@@ -7,8 +7,8 @@ import {
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
 import { usePrivateKey, getStrFromFile } from "../lib/utils";
-import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
-import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
+import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
+import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
 
