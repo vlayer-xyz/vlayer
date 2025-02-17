@@ -9,13 +9,18 @@ runs:
     - name: Install Rust prerequisites
       id: rust_pre
       uses: ./.github/actions/rust-prerequisites
+    - name: Reuse cargo target dir
+      id: cargo_target
+      uses: ./.github/actions/reuse-cargo-target
+      with:
+        target_name: build-guest-wrapper
     - name: Install contracts prerequisites
       uses: ./.github/actions/contracts-prerequisites
 
     - name: "Build guest wrapper"
       env:
         RISC0_USE_DOCKER: 1
-        CARGO_TARGET_DIR: ${{ github.workspace }}/target
+        CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
         RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
       run: cargo build --release --target x86_64-unknown-linux-gnu --package guest_wrapper
       shell: bash

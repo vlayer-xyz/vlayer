@@ -32,7 +32,6 @@ runs:
     - name: Configure sccache wrapper
       id: configure_sccache_wrapper
       run: |
-        echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
         echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_OUTPUT
       shell: bash
 
@@ -40,27 +39,37 @@ runs:
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
         tool: cargo-binstall@1.10.8
+      env:
+        RUSTC_WRAPPER: ${{ steps.configure_sccache_wrapper.outputs.RUSTC_WRAPPER }}
           
     - name: Install cargo sort
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
         tool: cargo-sort@1.0.9
+      env:
+        RUSTC_WRAPPER: ${{ steps.configure_sccache_wrapper.outputs.RUSTC_WRAPPER }}
 
     - name: Install cargo deny
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
         tool: cargo-deny@0.16.1
+      env:
+        RUSTC_WRAPPER: ${{ steps.configure_sccache_wrapper.outputs.RUSTC_WRAPPER }}
 
     - name: Install cargo machete
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
         tool: cargo-machete@0.7.0
+      env:
+        RUSTC_WRAPPER: ${{ steps.configure_sccache_wrapper.outputs.RUSTC_WRAPPER }}
 
     - name: Install risc0 toolchain
       if: ${{ inputs.include_risc0 == 'true' }}
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
         tool: cargo-risczero@1.2.0
+      env:
+        RUSTC_WRAPPER: ${{ steps.configure_sccache_wrapper.outputs.RUSTC_WRAPPER }}
 
     - name: Initialize risc0 toolchain
       if: ${{ inputs.include_risc0 == 'true' }}

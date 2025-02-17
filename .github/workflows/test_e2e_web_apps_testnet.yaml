@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-e2e-web-apps:
+  test-e2e-web-apps-testnet:
     name: E2E web apps test against testnet
     runs-on: aws-linux-medium
     steps:
@@ -31,6 +31,11 @@ jobs:
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
+      - name: Reuse cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          target_name: test-e2e-web-apps-testnet
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Install TypeScript prerequisites
@@ -67,9 +72,14 @@ jobs:
           EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
           echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
           echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
+      - name: Build binaries
+        env:
+          RISC0_USE_DOCKER: 1
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
       - name: Run e2e test
         env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           VLAYER_ENV: testnet
           QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
           QUICKNODE_ENDPOINT: "dry-alpha-tab"

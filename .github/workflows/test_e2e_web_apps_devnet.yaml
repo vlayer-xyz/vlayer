@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-e2e-web-apps:
+  test-e2e-web-apps-devnet:
     name: E2E web apps test against devnet
     runs-on: aws-linux-medium
     steps:
@@ -32,6 +32,11 @@ jobs:
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
+      - name: Reuse cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          target_name: test-e2e-web-apps-devnet
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Install TypeScript prerequisites
@@ -60,9 +65,14 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      - name: Build binaries
+        env:
+          RISC0_USE_DOCKER: 1
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
       - name: Run e2e test
         env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "dev"
           VLAYER_ENV: dev
           VLAYER_TMP_DIR: ./artifacts
