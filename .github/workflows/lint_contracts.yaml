@@ -23,22 +23,17 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh
       - name: Install solhint
         working-directory: contracts
         run: bun install --frozen-lockfile
-      - name: Contracts vlayer lint:solidity
-        working-directory: ./contracts/vlayer/
+      - name: Contracts lint:solidity
+        working-directory: contracts
         run: |
-          bun run lint:solidity --max-warnings 0
-      - name: Contracts fixtures lint:solidity
-        working-directory: ./contracts/fixtures/
-        run: |
-          bun run lint:solidity --max-warnings 0
-      - name: Contracts scripts lint:solidity
-        working-directory: ./contracts/vlayer/script/
-        run: |
-          bun run lint:solidity --max-warnings 0
+          bun run lint:solidity
       - name: lint Solidity examples
         run: ./bash/lint-solidity-examples.sh

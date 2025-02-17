@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
+/* solhint-disable no-console */
 pragma solidity ^0.8.21;
 
 import {ImageID} from "../src/ImageID.sol";
-import {Script, console} from "forge-std-1.9.4/src/Script.sol";
+import {Script} from "forge-std-1.9.4/src/Script.sol";
 import {IImageIdRepository} from "../src/Repository.sol";
 
 contract PushImageId is Script {

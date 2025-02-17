@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
+/* solhint-disable no-console */
 pragma solidity ^0.8.21;
 
 import {console, Script} from "forge-std-1.9.4/src/Script.sol";
 
 import {ImageID} from "../src/ImageID.sol";
 import {IImageIdRepository} from "../src/Repository.sol";
-import {ChainIdLibrary} from "../src/proof_verifier/ChainId.sol";
 
 contract AddSupportForCurrentImageId is Script {
     function run() external {
