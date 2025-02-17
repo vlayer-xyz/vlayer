@@ -157,7 +157,7 @@ struct CallAssumptions {
 
 The struct is [created](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/guest.rs#L59) inside the `guest::main` function. Since the guest itself **cannot independently prove the validity of these assumptions**, they must be verified externally.
 
-To achieve this, `CallAssumptions` is included in the [`GuestOutput`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/io.rs#L107) and subsequently verified **on-chain** using the `Verifier` contract, specifically through the [`_verifyExecutionEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/contracts/vlayer/src/proof_verifier/ProofVerifierBase.sol#L42). This verification step ensures that the proof aligns with a valid blockchain state.
+To achieve this, `CallAssumptions` is included in the [`GuestOutput`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/io.rs#L107) and subsequently verified **on-chain** using the `Verifier` contract, specifically through the [`_verifyExecutionEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/contracts/vlayer/src/proof_verifier/ProofVerifierBase.sol#L42). This verification ensures that the proof aligns with a valid blockchain state.
 
 ### Validation Steps in `_verifyExecutionEnv`
 
