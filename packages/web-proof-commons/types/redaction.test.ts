@@ -19,7 +19,6 @@ describe("RedactionConfig", () => {
         },
       },
     ]);
-    console.log(testValid);
     expect(testValid).toBeDefined();
   });
 
