@@ -31,7 +31,6 @@ jobs:
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - run: mkdir -p /tmp/vlayer_targets/{lint-rust-host,lint-rust-call-guest,lint-rust-chain-guest}
 
       - name: Reuse cargo target dir
         id: cargo_target_host
