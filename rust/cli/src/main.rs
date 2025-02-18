@@ -51,7 +51,7 @@ async fn run() -> Result<()> {
             set_risc0_dev_mode();
             Box::pin(run_test(args)).await
         }
-        Commands::Update => run_update(),
+        Commands::Update => run_update().await,
     }
 }
 
