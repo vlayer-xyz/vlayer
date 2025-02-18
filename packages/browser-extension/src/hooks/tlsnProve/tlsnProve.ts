@@ -6,6 +6,7 @@ import { Reveal, Method } from "tlsn-wasm";
 import { type RedactionConfig } from "../../web-proof-commons";
 import { redact } from "./redaction/redact";
 import { HTTPMethod } from "lib/HttpMethods";
+
 type ProverConfig = {
   serverDns: string;
   maxSentData?: number;

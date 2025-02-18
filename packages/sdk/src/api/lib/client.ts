@@ -163,6 +163,7 @@ export const createVlayerClient = (
         },
         logoUrl: webProofPlaceholder.logoUrl,
         steps: webProofPlaceholder.steps,
+        tlsnProverConfig: webProofPlaceholder.tlsnProverConfig,
       });
 
       const webProof = await webProofPromise;

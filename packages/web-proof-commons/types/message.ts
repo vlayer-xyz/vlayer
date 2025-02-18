@@ -74,6 +74,14 @@ export type EmptyWebProverSessionConfig = {
   wsProxyUrl: null;
   logoUrl: null;
   steps: never[];
+  tlsnProverConfig: null;
+};
+
+export type TlsnProverConfig = {
+  maxSentData?: number;
+  maxRecvData?: number;
+  maxRecvDataOnline?: number;
+  deferDecryptionFromStart?: boolean;
 };
 
 export type WebProverSessionConfig =
@@ -82,6 +90,7 @@ export type WebProverSessionConfig =
       wsProxyUrl: string;
       logoUrl: string;
       steps: WebProofStep[];
+      tlsnProverConfig: TlsnProverConfig;
     }
   | EmptyWebProverSessionConfig;
 

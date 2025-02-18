@@ -124,6 +124,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
         wsProxyUrl: this.wsProxyUrl,
         logoUrl: webProofRequest.logoUrl,
         steps: webProofRequest.steps,
+        tlsnProverConfig: webProofRequest.tlsnProverConfig,
       },
     });
   }
@@ -149,6 +150,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
           wsProxyUrl: this.wsProxyUrl,
           logoUrl: webProofRequest.logoUrl,
           steps: webProofRequest.steps,
+          tlsnProverConfig: webProofRequest.tlsnProverConfig,
         },
       });
 

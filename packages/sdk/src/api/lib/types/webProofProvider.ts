@@ -7,11 +7,13 @@ import {
   type PresentationJSON,
   type WebProofStep,
   type ZkProvingStatus,
+  type TlsnProverConfig,
 } from "../../../web-proof-commons";
 
 export type WebProofRequestInput = {
   logoUrl: string;
   steps: WebProofStep[];
+  tlsnProverConfig: TlsnProverConfig;
 };
 
 export type WebProofRequest = Branded<
