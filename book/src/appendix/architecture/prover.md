@@ -162,7 +162,7 @@ Above verifications are not enough to ensure validity of Time Travel (achieved b
 
 ## Precompiles
 
-As depicted on the diagram in section [Execution and Proving](#execution-and-proving) above, the Engine executes the EVM, which in turn executes Solidity `Prover` smart contract. This execution may call custom precompiles made available inside vlayer *zkEVM* which enable various features.
+As shown in the diagram in the [Execution and Proving](#execution-and-proving) section, the **Engine** executes the EVM, which in turn runs the Solidity `Prover` smart contract. During execution, the contract may call custom precompiles available within the vlayer *zkEVM*, enabling various advanced features.
 
 The list, configuration and addresses of the precompiles are defined in `services/call/precompiles`. The precompiles can be easily called in Solidity Prover contracts through libraries available as part of vlayer Solidity smart contracts package.
 
