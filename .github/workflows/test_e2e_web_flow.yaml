@@ -13,6 +13,7 @@ on:
     #   - main
 jobs:
   test-e2e-web-flow:
+    name: E2E Web Flow Test
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
     steps:
@@ -70,7 +71,10 @@ jobs:
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+        run: |
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+          mkdir -p ./target/debug/
+          cp ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}/debug/{vlayer,call_server,chain_server,worker,dns_server} ./target/debug/
       - name: Run playwright tests
         env:
           VLAYER_ENV: dev
