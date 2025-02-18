@@ -13,7 +13,7 @@ server:
 
 notarization:
   max-transcript-size: 20480
-  max-sent-data: 4096
+  max-sent-data: 14096
   max-recv-data: 16384
 
 tls:
