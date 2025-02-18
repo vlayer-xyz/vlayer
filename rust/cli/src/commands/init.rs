@@ -68,9 +68,9 @@ lazy_static! {
     );
 }
 
-fn install_dependencies(foundry_root: &Path) -> CLIResult<()> {
+async fn install_dependencies() -> CLIResult<()> {
     for dep in DEPENDENCIES.iter() {
-        dep.install(foundry_root)?;
+        dep.install().await?;
     }
 
     Ok(())
@@ -179,7 +179,7 @@ pub(crate) async fn init_existing(
     init_soldeer(&root_path)?;
 
     info!("Installing dependencies");
-    install_dependencies(&root_path)?;
+    install_dependencies().await?;
     info!("Successfully installed all dependencies");
     add_default_remappings(&root_path)?;
 

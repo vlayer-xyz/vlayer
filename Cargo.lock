@@ -2795,6 +2795,8 @@ dependencies = [
  "reqwest 0.12.12",
  "serde_json",
  "serde_yml",
+ "soldeer-commands",
+ "soldeer-core",
  "tar",
  "tempfile",
  "test_runner",

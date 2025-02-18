@@ -1,4 +1,5 @@
 import WelcomePage from "../../pages/welcome";
+import React from "react";
 
 export type Step = {
   kind: STEP_KIND;
