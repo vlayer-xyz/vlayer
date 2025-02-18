@@ -167,7 +167,13 @@ As shown in the diagram in the [Execution and Proving](#execution-and-proving) s
 The list, configuration, and addresses of these precompiles are defined in `services/call/precompiles`. These precompiles can be easily accessed within Solidity `Prover` contracts using libraries included in the vlayer Solidity smart contracts package.
 
 The following is a list of available precompiles and their functionality:
-* `WebProof.verify` available through `WebProofLib` - verifies `WebProof` and returns `Web` which consists of `body` (HTTP response body), `notaryPubKey` (public key of TLS Notary who signed the Web Proof) and `url` (URL of the HTTP request), see [Web proof](../../features/web.md)
+- **`WebProof.verify`** (via `WebProofLib`):  
+  Verifies a `WebProof` and returns a `Web` object containing:
+  - `body` (HTTP response body)
+  - `notaryPubKey` (TLS Notary’s public key that signed the Web Proof)
+  - `url` (URL of the HTTP request)  
+  
+  See [Web Proof](../../features/web.md) for details.
 * `Web.jsonGetString`, `Web.jsonGetInt`, `Web.jsonGetBool`, `Web.jsonGetArrayLength` available through `WebLib` - JSON parsing of JSON HTTP response body (`Web.body`), see [JSON Parsing](../../features/json-and-regex.md#json-parsing)
 * `UnverifiedEmail.verify` available through `EmailProofLib` - verifies `UnverifiedEmail` and returns `VerifiedEmail` which consits of `from` (from email address), `to` (to email address), `subject` (email subject), `body` (email body), see [Email proof](../../features/email.md)
 * `string.capture` and `string.match` available through `RegexLib` - REGEX operations on strings, see [Regular Expressions](../../features/json-and-regex.md#regular-expressions)
