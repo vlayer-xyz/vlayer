@@ -59,3 +59,13 @@ export const XAPICallTranscript = {
     defaultEncoding: Encoding.UTF8,
   }),
 };
+
+export const redactAllRequestHeadersCallData =
+  extractHeaders(XAPICallTranscript.sent.message.content.toString()).map((header) =>
+    getHeaderRange(XAPICallTranscript.sent, header)
+  );
+
+export const redactAllResponseHeadersCallData =
+  extractHeaders(XAPICallTranscript.recv.message.content.toString()).map((header) =>
+    getHeaderRange(XAPICallTranscript.recv, header)
+  );
