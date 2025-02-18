@@ -8,7 +8,10 @@ use std::{
 use anyhow::Context;
 use lazy_static::lazy_static;
 
-use crate::{errors::CLIError, target_version};
+use crate::{
+    errors::{Error, Result},
+    target_version,
+};
 
 lazy_static! {
     pub(crate) static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
@@ -40,7 +43,7 @@ lazy_static! {
 
 }
 
-pub(crate) fn add_remappings(foundry_root: &Path, deps: &[SoldeerDep]) -> Result<(), CLIError> {
+pub(crate) fn add_remappings(foundry_root: &Path, deps: &[SoldeerDep]) -> Result<()> {
     let remappings_path = foundry_root.join("remappings.txt");
 
     let (keys, mut new_remappings) = build_new_remappings(deps);
@@ -68,7 +71,7 @@ pub(crate) struct SoldeerDep {
 }
 
 impl SoldeerDep {
-    pub fn install(&self, foundry_root: &Path) -> Result<(), CLIError> {
+    pub fn install(&self, foundry_root: &Path) -> Result<()> {
         let output = match &self.url {
             Some(url) => Self::install_url_dep(foundry_root, &self.name, &self.version, url)?,
             None => Self::install_dep(foundry_root, &self.name, &self.version)?,
@@ -76,17 +79,13 @@ impl SoldeerDep {
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(CLIError::ForgeInitError(stderr.to_string()));
+            return Err(Error::ForgeInit(stderr.to_string()));
         }
 
         Ok(())
     }
 
-    fn install_dep(
-        foundry_root: &Path,
-        name: &String,
-        version: &String,
-    ) -> Result<Output, CLIError> {
+    fn install_dep(foundry_root: &Path, name: &String, version: &String) -> Result<Output> {
         let output = std::process::Command::new("forge")
             .arg("soldeer")
             .arg("install")
@@ -108,7 +107,7 @@ impl SoldeerDep {
         name: &String,
         version: &String,
         url: &String,
-    ) -> Result<Output, CLIError> {
+    ) -> Result<Output> {
         let output = std::process::Command::new("forge")
             .arg("soldeer")
             .arg("install")
@@ -202,10 +201,7 @@ fn build_new_remappings(deps: &[SoldeerDep]) -> (Vec<String>, Vec<String>) {
         .unzip()
 }
 
-fn filter_existing_remappings(
-    remappings_path: &PathBuf,
-    keys: &[String],
-) -> Result<Vec<String>, CLIError> {
+fn filter_existing_remappings(remappings_path: &PathBuf, keys: &[String]) -> Result<Vec<String>> {
     let remappings = OpenOptions::new()
         .create(true)
         .append(true)
@@ -214,7 +210,7 @@ fn filter_existing_remappings(
     let curr_remappings = BufReader::new(remappings).lines();
     let matches_no_key = |line: &String| keys.iter().all(|key| !line.starts_with(key));
     let filtered_remappings = curr_remappings
-        .map_while(Result::ok)
+        .map_while(std::result::Result::ok)
         .filter(matches_no_key)
         .collect();
     Ok(filtered_remappings)

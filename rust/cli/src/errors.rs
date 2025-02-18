@@ -1,41 +1,43 @@
 use std::path::PathBuf;
 
-use thiserror::Error;
+pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Error, Debug)]
-pub enum CLIError {
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
     #[error("Command execution failed: {0}")]
-    CommandExecutionError(#[from] std::io::Error),
+    CommandExecution(#[from] std::io::Error),
     #[error("Invalid UTF-8 sequence: {0}")]
-    Utf8Error(#[from] std::str::Utf8Error),
+    Utf8(#[from] std::str::Utf8Error),
     #[error("Git command failed: {0}")]
-    GitError(String),
+    Git(String),
     #[error("No foundry.toml file found")]
-    NoFoundryError,
+    NoFoundry,
+    #[error("No src field found in foundry.toml")]
+    NoSrcInFoundryToml,
     #[error(transparent)]
-    AnyhowError(#[from] anyhow::Error),
-    #[error("Error parsing TOML:\n {0}")]
-    TomlError(String),
+    Anyhow(#[from] anyhow::Error),
     #[error("Project directory not found: {0}")]
     SrcDirNotFound(PathBuf),
     #[error("Error downloading vlayer examples: {0}")]
-    DownloadExamplesError(reqwest::Error),
+    DownloadExamples(#[from] reqwest::Error),
     #[error("Failed initializing Forge: {0}")]
-    ForgeInitError(String),
+    ForgeInit(String),
     #[error("{0}")]
-    UpgradeError(String),
+    Upgrade(String),
     #[error("Error parsing package.json: {0}")]
-    PackageJsonError(#[from] serde_json::Error),
+    PackageJson(#[from] serde_json::Error),
     #[error("{0} tests failed")]
     TestsFailed(usize),
     #[error("{0}")]
-    TestsExecutionError(#[from] test_runner::Report),
+    TestsExecution(#[from] test_runner::Report),
+    #[error("TOML deserialization failed: {0}")]
+    Toml(#[from] toml::de::Error),
 }
 
-impl CLIError {
+impl Error {
     pub fn error_code(&self) -> i32 {
         match self {
-            CLIError::TestsFailed(failed) => {
+            Error::TestsFailed(failed) => {
                 i32::try_from(*failed).expect("Failed tests count is too large")
             }
             _ => 1,
