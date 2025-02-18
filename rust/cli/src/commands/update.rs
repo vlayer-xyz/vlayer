@@ -11,11 +11,11 @@ use crate::{
     errors::{Error, Result},
 };
 
-pub fn run_update() -> Result<()> {
+pub async fn run_update() -> Result<()> {
     check_if_vlayerup_exists()?;
     update_cli()?;
     update_sdk()?;
-    update_soldeer()?;
+    update_soldeer().await?;
 
     println!("🎉 Update complete.");
     println!("{}", "Build your contracts now and have fun!".bold());
@@ -61,27 +61,26 @@ fn do_update_sdk(path: &Path, package_json: &Value) -> Result<()> {
     package_manager(path).update_vlayer()
 }
 
-fn update_soldeer() -> Result<()> {
+async fn update_soldeer() -> Result<()> {
     let foundry_toml = find_file_up_tree("foundry.toml")?;
     if let Some(mut foundry_toml_path) = foundry_toml {
         foundry_toml_path.pop();
-        do_update_soldeer(&foundry_toml_path)
+        do_update_soldeer(&foundry_toml_path).await
     } else {
         warn(&format!("{} not found. Skipping Soldeer update.", "foundry.toml".bold()))
     }
 }
 
-fn do_update_soldeer(foundry_toml_path: &Path) -> Result<()> {
+async fn do_update_soldeer(foundry_toml_path: &Path) -> Result<()> {
     let version = newest_vlayer_version()?;
 
     print_update_intention(&format!("vlayer contracts into {}", &version));
 
     let updated_deps = updated_deps(version);
 
-    updated_deps
-        .iter()
-        .map(|dep| dep.install(foundry_toml_path))
-        .collect::<Result<Vec<_>>>()?;
+    for dep in &updated_deps {
+        dep.install().await?;
+    }
 
     add_remappings(foundry_toml_path, &updated_deps)?;
 

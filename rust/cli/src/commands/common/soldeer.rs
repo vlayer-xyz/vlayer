@@ -2,16 +2,15 @@ use std::{
     fs::OpenOptions,
     io::{BufRead, BufReader, Write},
     path::{Path, PathBuf},
-    process::Output,
 };
 
-use anyhow::Context;
 use lazy_static::lazy_static;
-
-use crate::{
-    errors::{Error, Result},
-    target_version,
+use soldeer_commands::{
+    commands::{install::Install, Command},
+    run as run_cmd, ConfigLocation,
 };
+
+use crate::{errors::Result, target_version};
 
 lazy_static! {
     pub(crate) static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
@@ -71,55 +70,14 @@ pub(crate) struct SoldeerDep {
 }
 
 impl SoldeerDep {
-    pub fn install(&self, foundry_root: &Path) -> Result<()> {
-        let output = match &self.url {
-            Some(url) => Self::install_url_dep(foundry_root, &self.name, &self.version, url)?,
-            None => Self::install_dep(foundry_root, &self.name, &self.version)?,
-        };
-
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(Error::ForgeInit(stderr.to_string()));
-        }
-
+    pub async fn install(&self) -> Result<()> {
+        let cmd = Install::builder()
+            .dependency(format!("{}~{}", self.name, self.version))
+            .maybe_remote_url(self.url.as_ref())
+            .config_location(ConfigLocation::Foundry)
+            .build();
+        run_cmd(Command::Install(cmd)).await?;
         Ok(())
-    }
-
-    fn install_dep(foundry_root: &Path, name: &String, version: &String) -> Result<Output> {
-        let output = std::process::Command::new("forge")
-            .arg("soldeer")
-            .arg("install")
-            .arg(format!("{name}~{version}"))
-            .current_dir(foundry_root)
-            .output()
-            .with_context(|| {
-                format!(
-                    "Invoking 'forge soldeer install {name}~{version}' from directory {} failed",
-                    foundry_root.display()
-                )
-            })?;
-
-        Ok(output)
-    }
-
-    fn install_url_dep(
-        foundry_root: &Path,
-        name: &String,
-        version: &String,
-        url: &String,
-    ) -> Result<Output> {
-        let output = std::process::Command::new("forge")
-            .arg("soldeer")
-            .arg("install")
-            .arg(format!("{name}~{version}"))
-            .arg(url)
-            .current_dir(foundry_root)
-            .output()
-            .with_context(|| {
-                format!("Invoking 'forge soldeer install {name}~{version} {url}' from directory {} failed", foundry_root.display())
-            })?;
-
-        Ok(output)
     }
 
     fn remapping(&self) -> Option<Vec<(String, String)>> {

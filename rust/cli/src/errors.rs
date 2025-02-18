@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use soldeer_core::errors::SoldeerError;
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(thiserror::Error, Debug)]
@@ -32,6 +34,8 @@ pub enum Error {
     TestsExecution(#[from] test_runner::Report),
     #[error("TOML deserialization failed: {0}")]
     Toml(#[from] toml::de::Error),
+    #[error("Soldeer failed: {0}")]
+    Soldeer(#[from] SoldeerError),
 }
 
 impl Error {
