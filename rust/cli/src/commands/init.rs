@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use anyhow::{anyhow, Context};
+use anyhow::Context;
 use clap::Parser;
 use flate2::read::GzDecoder;
 use reqwest::get;
@@ -110,7 +110,7 @@ async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> CLIRes
                     let original = prepend_relative_parent(&path);
                     for (_, target) in dep.remappings()? {
                         let target = PathBuf::from(target);
-                        let link = target.parent().ok_or(anyhow!("invalid remapping"))?;
+                        let link = target.parent().ok_or(ConfigError::InvalidRemappingTarget)?;
                         std::os::unix::fs::symlink(original.clone(), link)?;
                     }
                 }

@@ -34,6 +34,8 @@ pub enum Error {
     RequiredField(String),
     #[error("Failed loading from TOML: {0}")]
     Toml(#[from] toml::de::Error),
+    #[error("Invalid path as remapping target: '/'")]
+    InvalidRemappingTarget,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
