@@ -9,8 +9,8 @@ on:
       - "bash/run-services.sh"
   merge_group:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
 jobs:
   test-e2e-web-flow:
     timeout-minutes: 60
