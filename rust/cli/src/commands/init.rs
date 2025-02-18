@@ -20,7 +20,7 @@ use crate::{
     soldeer::{add_remappings, install as soldeer_install},
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
-        path::{copy_dir_to, find_foundry_root, prepend_relative_parent},
+        path::{copy_dir_to, find_foundry_root},
     },
     version,
 };
@@ -109,11 +109,10 @@ async fn install_soldeer_dependencies<P: AsRef<Path> + Clone>(
                 }
                 #[cfg(unix)]
                 {
-                    let original = prepend_relative_parent(&path);
                     for (_, target) in dep.remappings()? {
                         let target = PathBuf::from(target.as_ref());
                         let link = target.parent().ok_or(ConfigError::InvalidRemappingTarget)?;
-                        std::os::unix::fs::symlink(original.clone(), link)?;
+                        std::os::unix::fs::symlink(path.clone(), link)?;
                     }
                 }
                 #[cfg(not(unix))]
@@ -149,11 +148,7 @@ fn change_sdk_dependency_to_npm(
         .map_or(Map::new(), Clone::clone);
 
     for (name, dep) in deps {
-        let path = dep
-            .path()
-            .as_ref()
-            .map(prepend_relative_parent)
-            .map(|p| format!("file:{}", p.to_string_lossy()));
+        let path = dep.path().map(|p| format!("file:{p}"));
         dependencies_map.insert(
             name.into(),
             Value::String(
@@ -592,7 +587,7 @@ mod tests {
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
 
-        assert!(!new_contents.contains("file:../../../packages/sdk"));
+        assert!(!new_contents.contains("file:"));
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
 
@@ -615,33 +610,7 @@ mod tests {
     }
 
     #[test]
-    fn test_change_workspace_sdk_dependency_to_npm_with_relative_paths() {
-        let TestPackageJson {
-            temp_dir,
-            package_json,
-        } = TestPackageJson::with_sdk();
-
-        const SDK_PATH: &str = "../projects/packages/sdk";
-
-        let mut config = Config::default();
-        {
-            let dep = config.npm.get_mut("@vlayer/sdk").unwrap();
-            *dep = Dependency::Detailed(DetailedDependency {
-                path: Some(SDK_PATH.into()),
-                ..Default::default()
-            });
-        }
-
-        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
-
-        let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"file:../{SDK_PATH}\"");
-
-        assert!(new_contents.contains(&expected_sdk_dependency));
-    }
-
-    #[test]
-    fn test_change_workspace_sdk_dependency_to_npm_with_abs_paths() {
+    fn test_change_workspace_sdk_dependency_to_npm_with_path() {
         let TestPackageJson {
             temp_dir,
             package_json,

@@ -41,7 +41,7 @@ async fn main() {
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
     if let Err(e) = Box::pin(run()).await {
-        error!("Error: {}", e);
+        error!("Error: {:#}", e);
         std::process::exit(e.error_code());
     }
 }

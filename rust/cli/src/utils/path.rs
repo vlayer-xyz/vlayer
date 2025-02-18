@@ -10,16 +10,6 @@ use anyhow::Context;
 
 use crate::errors::{Error, Result};
 
-pub(crate) fn prepend_relative_parent(path: impl AsRef<Path>) -> PathBuf {
-    if path.as_ref().is_absolute() {
-        path.as_ref().into()
-    } else {
-        let mut new_path = PathBuf::from("..");
-        new_path.push(path);
-        new_path
-    }
-}
-
 pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf> {
     let start = start.canonicalize()?;
     let git_root = find_git_root(&start)?;
@@ -50,8 +40,14 @@ pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> 
             })?;
         } else if file_type.is_symlink() {
             let link = fs::read_link(entry.path())?;
-            unix_fs::symlink(&link, &dst).with_context(|| {
-                format!("Failed to symlink '{}' as '{}'", link.display(), dst.display())
+            let mut full_link_path = entry.path().parent().map_or("/".into(), PathBuf::from);
+            full_link_path.push(&link);
+            let orig = fs::canonicalize(&full_link_path).with_context(|| {
+                format!("Failed to canonicalize path '{}'", full_link_path.display())
+            })?;
+            tracing::info!("Symlinking {} -> {}", dst.display(), orig.display());
+            unix_fs::symlink(&orig, &dst).with_context(|| {
+                format!("Failed to symlink '{}' as '{}'", orig.display(), dst.display())
             })?;
         } else {
             fs::copy(entry.path(), &dst).with_context(|| {
@@ -117,7 +113,7 @@ mod tests {
 
     macro_rules! create_temp_dirs {
         ($src_dir:ident, $dst_dir:ident) => {
-            let temp_dir = tempdir()?.into_path();
+            let temp_dir = tempdir().unwrap().into_path();
             let $src_dir = temp_dir.join("src");
             let $dst_dir = temp_dir.join("dst");
 
@@ -223,57 +219,52 @@ mod tests {
         ));
     }
 
-    #[test]
-    fn test_prepend_relative_parent() {
-        assert_eq!(prepend_relative_parent("./").to_string_lossy(), ".././");
-        assert_eq!(prepend_relative_parent("../../").to_string_lossy(), "../../../");
-        assert_eq!(prepend_relative_parent("packages/sdk").to_string_lossy(), "../packages/sdk");
-        assert_eq!(
-            prepend_relative_parent("/home/vlayer/packages/sdk").to_string_lossy(),
-            "/home/vlayer/packages/sdk"
-        );
-    }
-
     mod copy_dir_to {
 
         use super::*;
 
         #[test]
-        fn copies_all_files_from_src_to_dest() -> anyhow::Result<()> {
+        fn copies_all_files_from_src_to_dest() {
             create_temp_dirs!(src_dir, dst_dir);
 
-            std::fs::write(src_dir.join("file1"), "file1").unwrap();
-            std::fs::write(src_dir.join("file2"), "file2").unwrap();
+            fs::write(src_dir.join("file1"), "file1").unwrap();
+            fs::write(src_dir.join("file2"), "file2").unwrap();
 
             copy_dir_to(&src_dir, &dst_dir).unwrap();
 
             assert!(dst_dir.exists());
             assert!(dst_dir.join("file1").exists());
             assert!(dst_dir.join("file2").exists());
-
-            Ok(())
         }
 
         #[test]
-        fn handles_tangling_symlinks() -> anyhow::Result<()> {
+        fn dangling_symlinks_should_fail() {
             create_temp_dirs!(src_dir, dst_dir);
 
-            let non_existent_file_path = PathBuf::from("/non/existent/file");
-            let dst_tangling_symlink_path = dst_dir.join("tangling-symlink");
-            let tangling_symlink_path = src_dir.join("tangling-symlink");
+            let non_existent_file_path = src_dir.join("non/existent/file");
+            let dangling_symlink_path = src_dir.join("dangling-symlink");
 
-            unix_fs::symlink(non_existent_file_path.clone(), tangling_symlink_path)?;
-
-            copy_dir_to(&src_dir, &dst_dir)?;
+            unix_fs::symlink(non_existent_file_path.clone(), dangling_symlink_path).unwrap();
 
             assert!(!non_existent_file_path.exists());
-            // Path::try_exists returns Ok(false) for broken symlinks
-            assert!(!dst_tangling_symlink_path.try_exists()?);
-            assert!(dst_tangling_symlink_path.is_symlink());
+            assert!(copy_dir_to(&src_dir, &dst_dir).is_err());
+        }
 
-            assert_eq!(std::fs::read_link(dst_tangling_symlink_path)?, non_existent_file_path);
+        #[test]
+        fn correctly_resolve_symlinks() {
+            create_temp_dirs!(src_dir, dst_dir);
 
-            Ok(())
+            let target = src_dir.join("target");
+            fs::write(&target, "dummy").unwrap();
+            let link = src_dir.join("link");
+            unix_fs::symlink(&target, link).unwrap();
+
+            copy_dir_to(&src_dir, &dst_dir).unwrap();
+
+            let dst_link = dst_dir.join("link");
+            assert!(dst_link.is_symlink());
+            assert_eq!(target, fs::read_link(&dst_link).unwrap());
+            assert_eq!("dummy", fs::read_to_string(dst_link).unwrap());
         }
     }
 }
