@@ -166,7 +166,7 @@ As shown in the diagram in the [Execution and Proving](#execution-and-proving) s
 
 The list, configuration, and addresses of these precompiles are defined in `services/call/precompiles`. These precompiles can be easily accessed within Solidity `Prover` contracts using libraries included in the vlayer Solidity smart contracts package.
 
-The following is a list of available precompiles and their functionality:
+### Available precompiles and their functionality
 - **`WebProof.verify`** (via `WebProofLib`):  
   Verifies a `WebProof` and returns a `Web` object containing:
   - `body` (HTTP response body)
