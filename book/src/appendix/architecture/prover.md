@@ -164,7 +164,7 @@ Above verifications are not enough to ensure validity of Time Travel (achieved b
 
 As shown in the diagram in the [Execution and Proving](#execution-and-proving) section, the **Engine** executes the EVM, which in turn runs the Solidity `Prover` smart contract. During execution, the contract may call custom precompiles available within the vlayer *zkEVM*, enabling various advanced features.
 
-The list, configuration and addresses of the precompiles are defined in `services/call/precompiles`. The precompiles can be easily called in Solidity Prover contracts through libraries available as part of vlayer Solidity smart contracts package.
+The list, configuration, and addresses of these precompiles are defined in `services/call/precompiles`. These precompiles can be easily accessed within Solidity `Prover` contracts using libraries included in the vlayer Solidity smart contracts package.
 
 The following is a list of available precompiles and their functionality:
 * `WebProof.verify` available through `WebProofLib` - verifies `WebProof` and returns `Web` which consists of `body` (HTTP response body), `notaryPubKey` (public key of TLS Notary who signed the Web Proof) and `url` (URL of the HTTP request), see [Web proof](../../features/web.md)
