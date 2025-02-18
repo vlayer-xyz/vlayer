@@ -23,6 +23,8 @@ for example in $(get_examples); do
   echo Running services...
   source ${VLAYER_HOME}/bash/run-services.sh
 
+  ./target/debug/call_server --version
+
   pushd "$VLAYER_HOME/examples/$example"
   echo "::group::Running tests of: ${example}"
   silent_unless_fails build_contracts
