@@ -20,7 +20,7 @@ use crate::{
     soldeer::{add_remappings, install},
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
-        path::{copy_dir_to, find_foundry_root, prefix_one_level_up},
+        path::{copy_dir_to, find_foundry_root, prepend_relative_parent},
     },
     version,
 };
@@ -107,7 +107,7 @@ async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> CLIRes
                 }
                 #[cfg(unix)]
                 {
-                    let original = prefix_one_level_up(Path::new(&path));
+                    let original = prepend_relative_parent(&path);
                     for (_, target) in dep.remappings()? {
                         let target = PathBuf::from(target);
                         let link = target.parent().ok_or(anyhow!("invalid remapping"))?;
@@ -148,8 +148,7 @@ fn change_sdk_dependency_to_npm(
         let path = dep
             .path()
             .as_ref()
-            .map(Path::new)
-            .map(prefix_one_level_up)
+            .map(prepend_relative_parent)
             .map(|p| format!("file:{}", p.to_string_lossy()));
         dependencies_map.insert(
             name.into(),

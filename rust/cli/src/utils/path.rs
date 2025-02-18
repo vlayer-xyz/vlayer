@@ -10,9 +10,9 @@ use anyhow::Context;
 
 use crate::errors::{Error, Result};
 
-pub(crate) fn prefix_one_level_up(path: &Path) -> PathBuf {
-    if path.is_absolute() {
-        path.into()
+pub(crate) fn prepend_relative_parent(path: impl AsRef<Path>) -> PathBuf {
+    if path.as_ref().is_absolute() {
+        path.as_ref().into()
     } else {
         let mut new_path = PathBuf::from("..");
         new_path.push(path);
@@ -221,6 +221,17 @@ mod tests {
             result.unwrap_err(),
             Error::CommandExecution(err) if err.kind() == std::io::ErrorKind::NotFound
         ));
+    }
+
+    #[test]
+    fn test_prepend_relative_parent() {
+        assert_eq!(prepend_relative_parent("./").to_string_lossy(), ".././");
+        assert_eq!(prepend_relative_parent("../../").to_string_lossy(), "../../../");
+        assert_eq!(prepend_relative_parent("packages/sdk").to_string_lossy(), "../packages/sdk");
+        assert_eq!(
+            prepend_relative_parent("/home/vlayer/packages/sdk").to_string_lossy(),
+            "/home/vlayer/packages/sdk"
+        );
     }
 
     mod copy_dir_to {
