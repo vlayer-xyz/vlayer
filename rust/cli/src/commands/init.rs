@@ -94,7 +94,9 @@ fn default_templates_url(version: &str) -> String {
     format!("https://vlayer-releases.s3.eu-north-1.amazonaws.com/{version}/examples.tar.gz")
 }
 
-async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> CLIResult<()> {
+async fn install_dependencies<P: AsRef<Path> + Clone>(
+    contracts: &HashMap<String, Dependency<P>>,
+) -> CLIResult<()> {
     for (name, dep) in contracts {
         match dep.path() {
             Some(path) => {
@@ -109,7 +111,7 @@ async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> CLIRes
                 {
                     let original = prepend_relative_parent(&path);
                     for (_, target) in dep.remappings()? {
-                        let target = PathBuf::from(target);
+                        let target = PathBuf::from(target.as_ref());
                         let link = target.parent().ok_or(ConfigError::InvalidRemappingTarget)?;
                         std::os::unix::fs::symlink(original.clone(), link)?;
                     }
@@ -711,5 +713,31 @@ mod tests {
             assert!(foundry_toml.contains("remappings_generate = false"));
             assert!(foundry_toml.contains("remappings_regenerate = false"));
         }
+    }
+
+    #[tokio::test]
+    async fn test_install_dependencies_from_local_path() {
+        let source = tempfile::tempdir().unwrap();
+        let dest = tempfile::tempdir().unwrap();
+
+        std::env::set_current_dir(dest.path()).unwrap();
+
+        let mut contracts = HashMap::new();
+        contracts.insert(
+            "vlayer".to_string(),
+            Dependency::Detailed(DetailedDependency {
+                path: Some(source.path().to_owned()),
+                remappings: Some(vec![("vlayer/".into(), "dependencies/vlayer/src/".into())]),
+                ..Default::default()
+            }),
+        );
+
+        install_dependencies(&contracts).await.unwrap();
+
+        let dep_path: PathBuf = [dest.path().to_str().unwrap(), "dependencies", "vlayer"]
+            .iter()
+            .collect();
+        assert!(dep_path.exists());
+        assert_eq!(std::fs::read_link(dep_path).unwrap(), source.path());
     }
 }
