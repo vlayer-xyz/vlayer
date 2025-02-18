@@ -1,9 +1,6 @@
 name: Lint Bash
 on:
   pull_request:
-    paths:
-      - "bash/**"
-      - ".shellcheckrc"
   merge_group:
   push:
     branches:

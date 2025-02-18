@@ -1,12 +1,6 @@
 name: Build examples
 on:
   pull_request:
-    paths:
-      - "examples/**"
-      - "packages/**"
-      - ".github/workflows/build_examples.yaml"
-      - "bash/tsc-examples.sh"
-      - "bash/pack-examples.sh"
   merge_group:
   push:
     branches:
