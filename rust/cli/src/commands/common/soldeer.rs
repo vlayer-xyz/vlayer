@@ -70,13 +70,19 @@ pub(crate) struct SoldeerDep {
 }
 
 impl SoldeerDep {
+    fn build_install_cmd(&self) -> Command {
+        Command::Install(
+            Install::builder()
+                .dependency(format!("{}~{}", self.name, self.version))
+                .maybe_remote_url(self.url.as_ref())
+                .config_location(ConfigLocation::Foundry)
+                .build(),
+        )
+    }
+
     pub async fn install(&self) -> Result<()> {
-        let cmd = Install::builder()
-            .dependency(format!("{}~{}", self.name, self.version))
-            .maybe_remote_url(self.url.as_ref())
-            .config_location(ConfigLocation::Foundry)
-            .build();
-        run_cmd(Command::Install(cmd)).await?;
+        let cmd = self.build_install_cmd();
+        run_cmd(cmd).await?;
         Ok(())
     }
 
