@@ -31,6 +31,7 @@ touch "${ARCHIVE}"
         cp "${VLAYER_HOME}/docker/anvil.yaml" "${scripts}/"
         cp "${VLAYER_HOME}/docker/vdns.yaml" "${scripts}/"
         cp "${VLAYER_HOME}/docker/web.yaml" "${scripts}/"
+        cp -a "${VLAYER_HOME}/docker/notary-config" "${scripts}/"
 
         tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${contracts}"
         tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${scripts}"
@@ -46,7 +47,7 @@ touch "${ARCHIVE}"
         else
             echo "No testdata found for ${example}"
         fi
-        
+
         echo '::endgroup::'
     done
 )
