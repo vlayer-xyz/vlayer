@@ -1,14 +1,12 @@
-use alloy_primitives::{Bytes, U256};
+use alloy_primitives::U256;
 use alloy_sol_types::{SolCall, SolType};
 use call_engine::{
-    travel_call,
     utils::evm_call::{
-        create_encoded_return_outcome, create_raw_revert_outcome, create_return_outcome,
-        create_revert_outcome, split_calldata,
+        create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
     },
     Call, HostOutput, Proof, Seal,
 };
-use call_host::{Config as HostConfig, Error, Host, PreflightError};
+use call_host::{Config as HostConfig, Host};
 use chain::TEST_CHAIN_ID;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
@@ -108,7 +106,7 @@ impl CheatcodeInspector {
                 self.previous_proof = Some(Self::host_output_into_proof(&host_output));
                 create_return_outcome(host_output.guest_output.evm_call_result, inputs)
             }
-            Err(error) => revert_outcome(&error, inputs),
+            Err(error) => create_revert_outcome(&error.to_string(), inputs.gas_limit),
         }
     }
 
@@ -126,25 +124,6 @@ impl CheatcodeInspector {
             callAssumptions: call_assumptions,
             callGuestId: call_guest_id,
         }
-    }
-}
-
-fn revert_outcome(error: &Error, inputs: &CallInputs) -> CallOutcome {
-    if let Some(bytes) = is_custom_error(error) {
-        create_raw_revert_outcome(bytes.clone(), inputs.gas_limit)
-    } else {
-        create_revert_outcome(&format!("{error:?}"), inputs.gas_limit)
-    }
-}
-
-const fn is_custom_error(error: &Error) -> Option<&Bytes> {
-    if let Error::Preflight(PreflightError::Engine(travel_call::Error::TransactError(
-        call_engine::evm::execution_result::TransactError::NonUtf8Revert(bytes),
-    ))) = error
-    {
-        Some(bytes)
-    } else {
-        None
     }
 }
 

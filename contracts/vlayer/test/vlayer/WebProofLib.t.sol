@@ -48,7 +48,10 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json") returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(reason, "Preflight(Engine(TransactError(Revert(\"revert: Incorrect URL\"))))");
+            assertEq(
+                reason,
+                "Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert(\"Incorrect URL\")))"
+            );
         }
     }
 
@@ -63,8 +66,7 @@ contract WebProverTest is VTest {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(
-                reason,
-                "Preflight(Engine(TransactError(Revert(\"missing field `presentationJson` at line 1 column 2\"))))"
+                reason, "Preflight: Execution error: EVM error: missing field `presentationJson` at line 1 column 2"
             );
         }
     }
@@ -81,7 +83,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight(Engine(TransactError(Revert(\"Verification error: Deserialization error: Bincode deserialize error: invalid length 64, expected an array at most 64 bytes long\"))))"
+                "Preflight: Execution error: EVM error: Verification error: Deserialization error: Bincode deserialize error: invalid length 64, expected an array at most 64 bytes long"
             );
         }
     }

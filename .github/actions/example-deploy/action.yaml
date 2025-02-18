@@ -28,6 +28,10 @@ inputs:
   VITE_SENTRY_DSN:
     description: 'Sentry DSN'
     required: false
+outputs:
+  deployment_url:
+    description: "Vercel deployment url"
+    value: ${{ steps.deploy-vercel-preview.outputs.deployment_url }}
 runs:
   using: "composite"
   steps:
@@ -122,6 +126,7 @@ runs:
         EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
       run: bash/deploy-to-vercel.sh
     - name: Deploy to Vercel (PR Preview)
+      id: deploy-vercel-preview
       if: github.event_name == 'pull_request'
       shell: bash
       env:

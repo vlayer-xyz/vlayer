@@ -16,11 +16,11 @@ contract Prover {
     ITraveler private constant TRAVELER = ITraveler(address(uint160(uint256(keccak256("vlayer.traveler")))));
 
     function setBlock(uint256 blockNo) public {
-        TRAVELER.setBlock(blockNo);
+        require(TRAVELER.setBlock(blockNo), "Failed cheatcode invocation");
     }
 
     function setChain(uint256 chainId, uint256 blockNo) public {
-        TRAVELER.setChain(chainId, blockNo);
+        require(TRAVELER.setChain(chainId, blockNo), "Failed cheatcode invocation");
     }
 
     function proof() public pure returns (Proof memory) {

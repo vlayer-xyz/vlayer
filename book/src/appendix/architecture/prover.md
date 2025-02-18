@@ -2,6 +2,7 @@
 
 Vlayer enables three key functionalities: **_accessing_** different sources of verifiable data, **_aggregating_** this data in a verifiable way to obtain verifiable result and **_using the verifiable result on-chain_**.
 
+
 It supports accessing verifiable data from three distinct sources: HTTP requests, emails and EVM state and storage. For each source, a proof of validity can be generated:
 - HTTP requests can be verified using a Web Proof, which includes information about the TLS session, a transcript of the HTTP request and response signed by a *TLS Notary*
 - Email contents can be proven by verifying DKIM signatures and checking the sender domain
@@ -11,10 +12,10 @@ Before Vlayer, ZK programs were application-specific and proved a single source 
 
 ### Aggregation examples
 
-- **Prover** computing average *ERC20* balance of addresses
-- **Prover** returning *true* if someone starred a *GitHub Org* by verifying a Web Proof
+- **Prover** computing average _ERC20_ balance of addresses
+- **Prover** returning _true_ if someone starred a _GitHub Org_ by verifying a Web Proof
 
-> **_Note:_** Despite being named "Prover", the **Prover** contract does not compute the proof itself. Instead, it is executed inside the *zkEVM*, which produces the proof of the correctness of its execution.
+> **_Note:_** Despite being named "Prover", the **Prover** contract does not compute the proof itself. Instead, it is executed inside the _zkEVM_, which produces the proof of the correctness of its execution.
 
 **_Call Proof_** is a proof that we correctly executed the **Prover** smart contract and got the given result.
 
@@ -29,16 +30,15 @@ To obtain Call Proofs, the **Call Prover** is used. It is a Rust server that exp
 Their structure and responsibilities are as follows:
 
 - **Guest**: Performs execution of the code inside zkEVM. Consists of three crates:
-    - `guest` (in `services/call/guest`): Library that contains code for EVM execution and input validation.
-    - `risc0_guest` (in `guest_wrapper/risc0_call_guest`): Thin wrapper that uses RISC0 ZKVM I/O and delegates work to `guest`.
-    - `guest_wrapper` (in `guest_wrapper`): Compiles `risc0_guest` (using cargo build scripts) to a binary format (ELF) using [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target.
+  - `guest` (in `services/call/guest`): Library that contains code for EVM execution and input validation.
+  - `risc0_guest` (in `guest_wrapper/risc0_call_guest`): Thin wrapper that uses RISC0 ZKVM I/O and delegates work to `guest`.
+  - `guest_wrapper` (in `guest_wrapper`): Compiles `risc0_guest` (using cargo build scripts) to a binary format (ELF) using [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target.
 - **Host** (in `services/call/host`): Runs a **_preflight_**, during which it collects all the data required by the guest. It retrieves data from online sources (RPC clients) and then triggers guest execution (which is done offline).
 - **Engine** (in `services/call/engine`): Sets up and executes the EVM, which executes `Prover` smart contract (including calling custom [Precompiles](#precompiles)). It executes exactly the same code in _preflight_ and Guest execution.
 
 Our architecture is heavily inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel).
 
 Currently, the Guest is compiled with Risc0, but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt).
-
 
 ### Execution and proving
 
@@ -71,13 +71,13 @@ It's a common pattern to compose databases to orthogonalize the implementation.
 We have **Host** and **Guest** databases
 
 - **Host** - runs `CacheDB<ProofDb<ProviderDb>>`:
-    * `ProviderDb`- queries Ethereum RPC Provider (i.e. Alchemy, Infura, Anvil);
-    * `ProofDb` - records all queries aggregates them and collects EIP1186 (`eth_getProof`) proofs;
-    * `CacheDB` - stores trusted seed data to minimize the amount of RPC requests. We seed caller account and some Optimism system accounts.
+  - `ProviderDb`- queries Ethereum RPC Provider (i.e. Alchemy, Infura, Anvil);
+  - `ProofDb` - records all queries aggregates them and collects EIP1186 (`eth_getProof`) proofs;
+  - `CacheDB` - stores trusted seed data to minimize the amount of RPC requests. We seed caller account and some Optimism system accounts.
 - **Guest** - runs `CacheDB<WrapStateDb<StateDb>>`:
-    * `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as [sparse Merkle Patricia Tries](https://github.com/vlayer-xyz/vlayer/tree/main/rust/mpt), hence access to accounts and storage serves as verification of state and storage proofs;
-    * `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries;
-    * `CacheDB` - has the same seed data as it's Host version.
+  - `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as [sparse Merkle Patricia Tries](https://github.com/vlayer-xyz/vlayer/tree/main/rust/mpt), hence access to accounts and storage serves as verification of state and storage proofs;
+  - `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries;
+  - `CacheDB` - has the same seed data as it's Host version.
 
 ### EvmEnv and EvmInput
 
@@ -121,14 +121,16 @@ pub struct ExecutionLocation {
 `EvmEnv` instances are accessed in both Host and Guest using [`CachedEvmEnv`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/env/cached.rs#L27) structure. However, the way `CachedEvmEnv` is constructed differs between these two contexts.
 
 #### Structure
+
 ```rust
 pub struct CachedEvmEnv<D: RevmDB> {
     cache: MultiEvmEnv<D>,
     factory: Mutex<Box<dyn EvmEnvFactory<D>>>,
 }
 ```
-* **cache**: `HashMap` (aliased as `MultiEvmEnv<D>`) that stores `EvmEnv` instances, keyed by their `ExecutionLocation`
-* **factory**: used to create new `EvmEnv` instances
+
+- **cache**: `HashMap` (aliased as `MultiEvmEnv<D>`) that stores `EvmEnv` instances, keyed by their `ExecutionLocation`
+- **factory**: used to create new `EvmEnv` instances
 
 #### On Host
 
@@ -152,11 +154,12 @@ On Guest, `CachedEvmEnv` is created using [`from_envs`](https://github.com/vlaye
 
 Guest is required to verify all data provided by the Host. Initial validation of its coherence is done in two places:
 
-* [`multi_evm_input.assert_coherency`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/input.rs#L46) verifies:
-  * Equality of subsequent `ancestor` block hashes
-  * Equality of `header.state_root` and actual `state_root`
+- [`multi_evm_input.assert_coherency`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/engine/src/evm/input.rs#L46) verifies:
 
-* When we create `StateDb` in Guest with [`StateDb::new`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/state.rs#L51), we compute hashes for `storage_tries` roots and `contracts` code. When we later try to access storage (using the [`WrapStateDb::basic_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L39) function) or contract code (using the [`WrapStateDb::code_by_hash_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L70) function), we know this data is valid because the hashes were computed properly. If they weren't, we wouldn't be able to access the given storage or code. Thus, storage verification is done indirectly.
+  - Equality of subsequent `ancestor` block hashes
+  - Equality of `header.state_root` and actual `state_root`
+
+- When we create `StateDb` in Guest with [`StateDb::new`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/state.rs#L51), we compute hashes for `storage_tries` roots and `contracts` code. When we later try to access storage (using the [`WrapStateDb::basic_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L39) function) or contract code (using the [`WrapStateDb::code_by_hash_ref`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/db/wrap_state.rs#L70) function), we know this data is valid because the hashes were computed properly. If they weren't, we wouldn't be able to access the given storage or code. Thus, storage verification is done indirectly.
 
 Above verifications are not enough to ensure validity of Time Travel (achieved by [Chain Proofs](./chain_proof.md)) and Teleport. Travel call verification is described in the [next](./time_travel_teleport.md) section.
 

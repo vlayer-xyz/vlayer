@@ -19,3 +19,5 @@ else
     -d "{\"body\":\"$COMMENT_BODY\"}" \
     "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments"
 fi
+
+echo "deployment_url=${DEPLOYMENT_URL}" >> $GITHUB_OUTPUT

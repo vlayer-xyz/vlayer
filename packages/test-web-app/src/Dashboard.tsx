@@ -16,6 +16,23 @@ function Dashboard() {
       >
         Go to profile failed auth
       </button>
+      <button
+        data-testid="update-resource-button"
+        onClick={() => {
+          fetch("https://lotr-api.online:3011/update_resource", {
+            method: "PUT",
+            body: JSON.stringify({ name: "John Doe" }),
+          })
+            .then((res) => {
+              console.log("Update resource response", res);
+            })
+            .catch((err) => {
+              console.error("Update resource error", err);
+            });
+        }}
+      >
+        Update resource
+      </button>
     </div>
   );
 }

@@ -12,8 +12,8 @@ use crate::{evm::env::EvmEnv, Call};
 pub fn build_evm<'inspector, 'envs, D: RevmDB>(
     env: &'envs EvmEnv<D>,
     tx: &Call,
-    inspector: Inspector<'inspector>,
-) -> Evm<'inspector, Inspector<'inspector>, WrapDatabaseRef<&'envs D>> {
+    inspector: Inspector<'inspector, D>,
+) -> Evm<'inspector, Inspector<'inspector, D>, WrapDatabaseRef<&'envs D>> {
     let precompiles_handle_register = |handler: &mut Handler<_, _, _>| {
         let mut precompiles = handler.pre_execution.load_precompiles();
         precompiles.extend(PRECOMPILES.map(PrecompileWithAddress::from));
@@ -38,7 +38,7 @@ pub fn build_evm<'inspector, 'envs, D: RevmDB>(
 }
 
 // EVM does it on itself in transaction validation, but we use transact_preverified so we need to do it manually.
-fn preload_l1_block_info<D: RevmDB>(evm: &mut Evm<'_, Inspector<'_>, WrapDatabaseRef<&D>>) {
+fn preload_l1_block_info<D: RevmDB>(evm: &mut Evm<'_, Inspector<'_, D>, WrapDatabaseRef<&D>>) {
     let spec_id = evm.spec_id();
     let l1_block_info = revm::optimism::L1BlockInfo::try_fetch(evm.db_mut(), spec_id).expect(
         "Failed to fetch L1 block info. This should not happen as we preload all necesary data in seed_cache_db_with_trusted_data",

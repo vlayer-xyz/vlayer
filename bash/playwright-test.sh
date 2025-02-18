@@ -3,6 +3,7 @@
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+VLAYER_ENV=${VLAYER_ENV:-dev}
 
 echo Run services
 source ${VLAYER_HOME}/bash/run-services.sh
@@ -26,6 +27,6 @@ popd
 
 echo Run playwright tests
 pushd ${VLAYER_HOME}/packages
-bun run test:headless
+VLAYER_ENV=${VLAYER_ENV} bun run test:headless
 popd
 

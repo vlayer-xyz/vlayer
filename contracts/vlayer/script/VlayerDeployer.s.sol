@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
+/* solhint-disable no-console */
 pragma solidity ^0.8.21;
 
 import {console, Script} from "forge-std-1.9.4/src/Script.sol";

@@ -1,11 +1,8 @@
-use call_engine::{
-    evm::env::factory::Error as EvmEnvFactoryError, travel_call, verifier, GuestOutputError,
-};
+use call_engine::{evm::env::factory::Error as EvmEnvFactoryError, GuestOutputError};
 use host_utils::{proving, ProverError};
-use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
 
-use crate::into_input;
+pub mod preflight;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -16,7 +13,7 @@ pub enum Error {
     AwaitingChainProof(#[from] AwaitingChainProofError),
 
     #[error("Preflight: {0}")]
-    Preflight(#[from] PreflightError),
+    Preflight(#[from] preflight::Error),
 
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
@@ -62,22 +59,4 @@ pub enum ProvingError {
 
     #[error("Seal encoding error: {0}")]
     SealEncodingError(#[from] seal::Error),
-}
-
-#[derive(Error, Debug)]
-pub enum PreflightError {
-    #[error("Calldata too large: {0} bytes")]
-    CalldataTooLargeError(usize),
-
-    #[error("TravelCallExecutor error: {0}")]
-    Engine(#[from] travel_call::Error),
-
-    #[error("Verification error: {0}")]
-    Verification(#[from] VerificationError),
-
-    #[error("Creating input: {0}")]
-    CreatingInput(#[from] into_input::Error),
-
-    #[error("Travel call verification error: {0}")]
-    TravelCall(#[from] verifier::travel_call::Error),
 }
