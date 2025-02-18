@@ -9,7 +9,7 @@ use colored::Colorize;
 use serde_json::Value;
 
 use crate::{
-    config::{Config, Dependency, UnresolvedError},
+    config::{Config, Dependency, Error as ConfigError},
     errors::{Error, Result},
     soldeer::{add_remappings, install},
 };
@@ -144,7 +144,9 @@ async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> Result
         if dep.path().is_some() {
             continue;
         }
-        let version = dep.version().ok_or(UnresolvedError("version".into()))?;
+        let version = dep
+            .version()
+            .ok_or(ConfigError::RequiredField("version".into()))?;
         let url = dep.url();
         install(name, &version, url.as_ref()).await?;
     }

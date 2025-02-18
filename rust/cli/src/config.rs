@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 use clap::ValueEnum;
 use serde::Deserialize;
@@ -29,10 +29,14 @@ remappings = [['risc0-ethereum-1.2.0/', 'dependencies/risc0-ethereum-1.2.0/']]
 ";
 
 #[derive(thiserror::Error, Debug)]
-#[error("Unresolved config field: {0}")]
-pub struct UnresolvedError(pub String);
+pub enum Error {
+    #[error("Missing required config field: {0}")]
+    RequiredField(String),
+    #[error("Failed loading from TOML: {0}")]
+    Toml(#[from] toml::de::Error),
+}
 
-pub type Result<T> = std::result::Result<T, UnresolvedError>;
+pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -43,10 +47,14 @@ pub struct Config {
 }
 
 impl Config {
+    pub fn from_str(str: impl AsRef<str>) -> Result<Self> {
+        toml::from_str(str.as_ref()).map_err(Error::Toml)
+    }
+
     pub fn template(&self) -> Result<Template> {
         self.template
             .clone()
-            .ok_or(UnresolvedError("template".into()))
+            .ok_or(Error::RequiredField("template".into()))
     }
 
     pub const fn npm(&self) -> &HashMap<String, Dependency> {
@@ -95,7 +103,7 @@ where
     pub fn remappings(&self) -> Result<&[(String, P)]> {
         self.as_detailed()
             .and_then(DetailedDependency::remappings)
-            .ok_or(UnresolvedError("remappings".into()))
+            .ok_or(Error::RequiredField("remappings".into()))
     }
 
     pub const fn as_detailed(&self) -> Option<&DetailedDependency<P>> {
@@ -136,7 +144,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, ValueEnum, Default, Deserialize)]
+#[derive(Clone, Debug, ValueEnum, Default, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub enum Template {
     #[default]
@@ -147,12 +155,61 @@ pub enum Template {
     SimpleWebProof,
 }
 
-impl std::fmt::Display for Template {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl fmt::Display for Template {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let as_value = self
             .to_possible_value()
             .expect("no Template variant should be skipped");
         let name = as_value.get_name();
         write!(f, "{name}")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_simple_config() {
+        let config = Config::from_str(
+            "
+template = 'simple-web-proof'
+
+[contracts]
+vlayer = { version='0.0.1', remappings = [['abc/', 'dependencies/abc/']] }
+
+[npm]
+'@vlayer/sdk' = '0.0.1'
+            ",
+        )
+        .unwrap();
+
+        assert!(config.template().is_ok());
+        assert_eq!(config.template().unwrap(), Template::SimpleWebProof);
+
+        {
+            assert!(config.contracts.contains_key("vlayer"));
+
+            let dep = config.contracts.get("vlayer").unwrap();
+            assert!(matches!(dep, Dependency::Detailed(..)));
+
+            let Dependency::Detailed(DetailedDependency {
+                path,
+                version,
+                url,
+                remappings,
+            }) = dep
+            else {
+                unreachable!();
+            };
+
+            assert!(path.is_none());
+            assert!(url.is_none());
+            assert_eq!(version.clone().unwrap(), "0.0.1");
+
+            let remappings = remappings.clone().unwrap();
+            assert_eq!(remappings.len(), 1);
+            assert_eq!(remappings[0], ("abc/".into(), "dependencies/abc/".into()));
+        }
     }
 }

@@ -15,7 +15,7 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::{
-    config::{Config, Dependency, Template, UnresolvedError},
+    config::{Config, Dependency, Error as ConfigError, Template},
     errors::{Error as CLIError, Result as CLIResult},
     soldeer::{add_remappings, install},
     utils::{
@@ -118,7 +118,9 @@ async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> CLIRes
                 compile_error!("Non-UNIX operating system is currently unsupported.");
             }
             None => {
-                let version = dep.version().ok_or(UnresolvedError("version".into()))?;
+                let version = dep
+                    .version()
+                    .ok_or(ConfigError::RequiredField("version".into()))?;
                 let url = dep.url();
                 install(name, &version, url.as_ref()).await?;
             }
@@ -155,7 +157,7 @@ fn change_sdk_dependency_to_npm(
             Value::String(
                 dep.version()
                     .or(path)
-                    .ok_or(UnresolvedError("version".into()))?,
+                    .ok_or(ConfigError::RequiredField("version".into()))?,
             ),
         );
     }
@@ -175,7 +177,7 @@ pub(crate) async fn run_init(args: InitArgs) -> CLIResult<()> {
         .config_file
         .map(std::fs::read_to_string)
         .transpose()?
-        .map(|x| toml::from_str(&x))
+        .map(Config::from_str)
         .transpose()?
         .unwrap_or_default();
     config.template = args.template.or(config.template);

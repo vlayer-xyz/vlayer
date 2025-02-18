@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use soldeer_core::errors::SoldeerError;
 
-use crate::config::UnresolvedError;
+use crate::config::Error as ConfigError;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -39,7 +39,7 @@ pub enum Error {
     #[error("Soldeer failed: {0}")]
     Soldeer(#[from] SoldeerError),
     #[error("{0}")]
-    Config(#[from] UnresolvedError),
+    Config(#[from] ConfigError),
 }
 
 impl Error {
