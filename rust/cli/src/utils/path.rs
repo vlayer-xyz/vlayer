@@ -10,6 +10,16 @@ use anyhow::Context;
 
 use crate::errors::{Error, Result};
 
+pub(crate) fn prefix_one_level_up(path: &Path) -> PathBuf {
+    if path.is_absolute() {
+        path.into()
+    } else {
+        let mut new_path = PathBuf::from("..");
+        new_path.push(path);
+        new_path
+    }
+}
+
 pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf> {
     let start = start.canonicalize()?;
     let git_root = find_git_root(&start)?;
