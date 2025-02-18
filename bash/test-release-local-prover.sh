@@ -13,6 +13,7 @@ echo '::group::vlayer installation'
 curl -SL https://install.vlayer.xyz | bash
 export PATH="$PATH:$HOME/.config/.vlayer/bin"
 vlayerup
+vlayer --version
 echo '::endgroup::'
 
 echo '::group::bun installation'
