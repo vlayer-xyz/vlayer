@@ -1,11 +1,6 @@
 name: Lint contracts
 on:
   pull_request:
-    paths:
-      - "examples/**"
-      - "contracts/**"
-      - "bash/lint-solidity-examples.sh"
-      - ".github/workflows/lint_contracts.yaml"
   merge_group:
   push:
     branches:

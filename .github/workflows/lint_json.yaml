@@ -2,11 +2,6 @@ name: Lint JSON
 
 on:
   pull_request:
-    paths:
-      - "examples/**"
-      - "packages/**"
-      - ".github/workflows/lint_json.yaml"
-      - "bash/lint-json.sh"
   merge_group:
   push:
     branches:

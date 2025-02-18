@@ -1,10 +1,6 @@
 name: Build extension
 on:
   pull_request:
-    paths:
-      - "packages/**"
-      - ".github/workflows/build_extension.yaml"
-      - ".github/actions/build-extension/action.yml"
   merge_group:
   push:
     branches:

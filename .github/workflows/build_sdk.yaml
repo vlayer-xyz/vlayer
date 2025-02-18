@@ -1,9 +1,6 @@
 name: Build SDK
 on:
   pull_request:
-    paths:
-      - "examples/**"
-      - "packages/**"
   merge_group:
   push:
     branches:

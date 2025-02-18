@@ -1,8 +1,6 @@
 name: Lint Workflows
 on:
   pull_request:
-    paths:
-      - ".github/workflows/**"
   merge_group:
   push:
     branches:
