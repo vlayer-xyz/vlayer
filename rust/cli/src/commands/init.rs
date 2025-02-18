@@ -16,8 +16,8 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::{
-    commands::common::soldeer::{add_remappings, DEPENDENCIES},
     errors::{Error as CLIError, Result as CLIResult},
+    soldeer::{add_remappings, DEPENDENCIES},
     target_version,
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},

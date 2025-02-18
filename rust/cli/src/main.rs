@@ -12,6 +12,7 @@ use crate::{
 
 mod commands;
 pub mod errors;
+mod soldeer;
 mod utils;
 
 #[cfg(test)]

@@ -8,8 +8,8 @@ use colored::Colorize;
 use serde_json::Value;
 
 use crate::{
-    commands::common::soldeer::{add_remappings, SoldeerDep, DEPENDENCIES},
     errors::{Error, Result},
+    soldeer::{add_remappings, SoldeerDep, DEPENDENCIES},
 };
 
 pub async fn run_update() -> Result<()> {
