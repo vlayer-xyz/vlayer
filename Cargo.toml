@@ -38,6 +38,8 @@ members = [
     "rust/verifiable_dns",
     "rust/version",
     "rust/web_proof",
+    "rust/web_proof/tlsn_test/host",
+    "rust/web_proof/tlsn_test/methods",
     "rust/zkvm-benchmarks/benchmarks",
     "rust/zkvm-benchmarks/runner",
 ]
@@ -152,7 +154,7 @@ maplit = "1.0.2"
 test-log = "0.2.16"
 thiserror = "2.0.11"
 insta = "1.42.0"
-tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.7" }
+tlsn-core = { path = "../tlsn/crates/core" }
 tokio = { version = "1.43.0", default-features = false, features = ["rt-multi-thread"] }
 toml = "0.8.19"
 tower = "0.5.2"
@@ -197,6 +199,8 @@ mpt = { path = "rust/mpt" }
 provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
 test_runner = { path = "rust/test_runner" }
+tlsn_test_host = { path = "rust/web_proof/tlsn_test/host" }
+tlsn_test_methods = { path = "rust/web_proof/tlsn_test/methods" }
 u64_range = { path = "rust/range" }
 verifiable_dns = { path = "rust/verifiable_dns", default-features = false }
 version = { path = "rust/version" }
