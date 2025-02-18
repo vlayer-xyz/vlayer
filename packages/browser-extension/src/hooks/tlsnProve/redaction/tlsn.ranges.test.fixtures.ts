@@ -36,8 +36,8 @@ export const getHeaderRange = (
   header: string,
 ) => {
   const headerStart =
-    transcript.message.content.indexOf(header) +
-    new EncodedString(`${header}: `, transcript.encoding).length;
+    transcript.message.content.indexOf("\r\n" + header + ": ") +
+    new EncodedString(`\r\n${header}: `, transcript.encoding).length;
   const headerEnd = transcript.message.content.indexOf("\r\n", headerStart);
 
   return {
