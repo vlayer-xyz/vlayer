@@ -18,7 +18,7 @@ use crate::{
         args::{InitArgs, TemplateOption},
         common::soldeer::{add_remappings, DEPENDENCIES},
     },
-    errors::CLIError,
+    errors::{Error as CLIError, Result as CLIResult},
     target_version,
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
@@ -68,7 +68,7 @@ lazy_static! {
     );
 }
 
-fn install_dependencies(foundry_root: &Path) -> Result<(), CLIError> {
+fn install_dependencies(foundry_root: &Path) -> CLIResult<()> {
     for dep in DEPENDENCIES.iter() {
         dep.install(foundry_root)?;
     }
@@ -76,11 +76,11 @@ fn install_dependencies(foundry_root: &Path) -> Result<(), CLIError> {
     Ok(())
 }
 
-fn add_default_remappings(foundry_root: &Path) -> Result<(), CLIError> {
+fn add_default_remappings(foundry_root: &Path) -> CLIResult<()> {
     add_remappings(foundry_root, DEPENDENCIES.as_slice())
 }
 
-fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
+fn change_sdk_dependency_to_npm(foundry_root: &Path) -> CLIResult<()> {
     let package_json = foundry_root.join("vlayer").join("package.json");
     let mut file = OpenOptions::new().read(true).open(package_json.clone())?;
     let mut contents = String::new();
@@ -108,7 +108,7 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
     Ok(())
 }
 
-pub(crate) async fn run_init(args: InitArgs) -> Result<(), CLIError> {
+pub(crate) async fn run_init(args: InitArgs) -> CLIResult<()> {
     let mut cwd = std::env::current_dir()?;
 
     if !args.existing {
@@ -138,7 +138,7 @@ pub(crate) async fn init_existing(
     cwd: PathBuf,
     template: TemplateOption,
     work_dir: WorkDir,
-) -> Result<(), CLIError> {
+) -> CLIResult<()> {
     info!("Running vlayer init from directory {:?}", cwd.display());
 
     let root_path = find_foundry_root(&cwd)?;
@@ -198,7 +198,7 @@ fn add_fs_permissions_to_foundry_toml(root_path: &Path) -> Result<(), std::io::E
     )
 }
 
-fn init_soldeer(root_path: &Path) -> Result<(), CLIError> {
+fn init_soldeer(root_path: &Path) -> CLIResult<()> {
     add_deps_to_gitignore(root_path)?;
     add_deps_section_to_foundry_toml(root_path)?;
     add_soldeer_config_to_foundry_toml(root_path)?;
@@ -237,11 +237,7 @@ fn append_file(file: &Path, suffix: &str) -> Result<(), std::io::Error> {
     Ok(())
 }
 
-const fn map_reqwest_error(e: reqwest::Error) -> CLIError {
-    CLIError::DownloadExamplesError(e)
-}
-
-fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
+fn find_src_path(root_path: &Path) -> CLIResult<PathBuf> {
     let toml_path = root_path.join("foundry.toml");
     let contents = fs::read_to_string(toml_path)?;
     let src_dirname = get_src_from_str(contents)?;
@@ -260,13 +256,8 @@ async fn fetch_examples(
     testdata_dst: &Path,
     template: String,
     work_dir: WorkDir,
-) -> Result<(), CLIError> {
-    let response = get(EXAMPLES_URL.as_str())
-        .await
-        .map_err(map_reqwest_error)?
-        .bytes()
-        .await
-        .map_err(map_reqwest_error)?;
+) -> CLIResult<()> {
+    let response = get(EXAMPLES_URL.as_str()).await?.bytes().await?;
 
     let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
 
