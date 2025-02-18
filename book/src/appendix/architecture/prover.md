@@ -3,7 +3,7 @@
 Vlayer enables three key functionalities: **_accessing_** different sources of verifiable data, **_aggregating_** this data in a verifiable way to obtain verifiable result and **_using the verifiable result on-chain_**.
 
 It supports accessing verifiable data from three distinct sources: HTTP requests, emails and EVM state and storage. For each source, a proof of validity can be generated:
-- HTTP requests can be proven via verifying a Web Proof, which contains informataion about the TLS session, transcript of the HTTP request and response signed by a *TLS Notary*
+- HTTP requests can be verified using a Web Proof, which includes information about the TLS session, a transcript of the HTTP request and response signed by a *TLS Notary*
 - Email contents can be proven by verifying DKIM signatures and checking the sender domain
 - EVM state and storage proofs can be verified against the block hash via Merkle Proofs
 
