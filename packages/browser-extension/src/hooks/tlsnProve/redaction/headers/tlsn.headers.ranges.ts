@@ -37,8 +37,8 @@ const calculateHeadersRanges = (
   });
 };
 
-export const getAllHeaders = (transcript: MessagePartTranscript) => {
-  const headers = transcript.content
+export const getAllHeaders = (headersPartTranscript: MessagePartTranscript) => {
+  const headers = headersPartTranscript.content
     .split("\r\n")
     .filter((line) => line.includes(":"))
     .map((line) => line.split(":")[0])
