@@ -52,6 +52,7 @@ jobs:
 
       - name: Build binaries
         env:
+          RISC0_DEV_MODE: true
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |

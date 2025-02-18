@@ -4,7 +4,7 @@ name: E2E test against testnet
 # because it uses external API resources.
 
 on:
-  push:
+  # push:
     # branches:
       # - main
     # If any path names do not match patterns in paths-ignore,

@@ -1,7 +1,7 @@
 name: E2E test of example web apps on testnet
 
 on:
-  push:
+  # push:
     # branches:
     #   - main
     # If any path names do not match patterns in paths-ignore,
@@ -74,6 +74,7 @@ jobs:
           echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
       - name: Build binaries
         env:
+          RISC0_DEV_MODE: true
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
