@@ -25,7 +25,7 @@ But how are Call Proofs obtained?
 
 ## Call Prover
 
-To obtain Call Proofs, the **Call Prover** is used. It is a Rust server that exposes the `[v_call](../api.md#v_call)` JSON-RPC endpoint. The three key components of the prover are the **Guest**, **Host**, and **Engine**. The **Guest** executes code within the *zkEVM* to generate a proof of execution. The **Host** prepares the necessary data and sends it to the Guest. The **Engine**, responsible for executing the EVM, runs in both the Guest and Host environments. 
+To obtain Call Proofs, the **Call Prover** is used. It is a Rust server that exposes the [`v_call`](../api.md#v_call) JSON-RPC endpoint. The three key components of the prover are the **Guest**, **Host**, and **Engine**. The **Guest** executes code within the *zkEVM* to generate a proof of execution. The **Host** prepares the necessary data and sends it to the Guest. The **Engine**, responsible for executing the EVM, runs in both the Guest and Host environments. 
 
 Their structure and responsibilities are as follows:
 
