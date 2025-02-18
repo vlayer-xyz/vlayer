@@ -68,8 +68,7 @@ impl Config {
 
 impl Default for Config {
     fn default() -> Self {
-        let version = version();
-        toml::from_str(&DEFAULT_CONFIG.replace("VERSION", &version))
+        Self::from_str(DEFAULT_CONFIG.replace("VERSION", &version()))
             .expect("default config cannot be malformed")
     }
 }
@@ -211,5 +210,105 @@ vlayer = { version='0.0.1', remappings = [['abc/', 'dependencies/abc/']] }
             assert_eq!(remappings.len(), 1);
             assert_eq!(remappings[0], ("abc/".into(), "dependencies/abc/".into()));
         }
+    }
+
+    #[test]
+    fn test_missing_template_field() {
+        let config = Config::from_str(
+            "
+[contracts]
+
+[npm]
+            ",
+        )
+        .unwrap();
+
+        assert!(config.template().is_err());
+        assert!(
+            matches!(config.template().err().unwrap(), Error::RequiredField(field) if field == "template")
+        );
+    }
+
+    #[test]
+    fn test_missing_remappings_for_contract_dep() {
+        let config = Config::from_str(
+            "
+[contracts]
+vlayer = '0.0.1'
+
+[npm]
+            ",
+        )
+        .unwrap();
+
+        assert!(config.contracts.contains_key("vlayer"));
+        assert!(
+            matches!(config.contracts.get("vlayer").unwrap().remappings().err().unwrap(), Error::RequiredField(field) if field == "remappings")
+        );
+    }
+
+    #[test]
+    fn test_default_config() {
+        let version = version();
+        let config = Config::default();
+
+        assert_eq!(config.template().unwrap(), Template::Simple);
+
+        let contracts = config.contracts();
+        assert_eq!(contracts.len(), 4);
+
+        assert!(contracts.contains_key("vlayer"));
+        {
+            let dep = contracts.get("vlayer").unwrap();
+            assert_eq!(dep.version().unwrap(), "0.1.0");
+            assert_eq!(
+                dep.remappings().unwrap(),
+                &[("vlayer-0.1.0/".into(), format!("dependencies/vlayer-{version}/src/"))]
+            );
+        }
+
+        assert!(contracts.contains_key("@openzeppelin-contracts"));
+        {
+            let dep = contracts.get("@openzeppelin-contracts").unwrap();
+            assert_eq!(dep.version().unwrap(), "5.0.1");
+            assert_eq!(
+                dep.remappings().unwrap(),
+                &[(
+                    "openzeppelin-contracts/".into(),
+                    "dependencies/@openzeppelin-contracts-5.0.1/".into()
+                )]
+            );
+        }
+
+        assert!(contracts.contains_key("forge-std"));
+        {
+            let dep = contracts.get("forge-std").unwrap();
+            assert_eq!(dep.version().unwrap(), "1.9.4");
+            assert_eq!(
+                dep.remappings().unwrap(),
+                &[
+                    ("forge-std/".into(), "dependencies/forge-std-1.9.4/src/".into()),
+                    ("forge-std-1.9.4/src/".into(), "dependencies/forge-std-1.9.4/src/".into())
+                ]
+            );
+        }
+
+        assert!(contracts.contains_key("risc0-ethereum"));
+        {
+            let dep = contracts.get("risc0-ethereum").unwrap();
+            assert_eq!(dep.version().unwrap(), "1.2.0");
+            assert_eq!(
+                dep.remappings().unwrap(),
+                &[("risc0-ethereum-1.2.0/".into(), "dependencies/risc0-ethereum-1.2.0/".into())]
+            );
+        }
+
+        let npm = config.npm();
+        assert_eq!(npm.len(), 2);
+
+        assert!(npm.contains_key("@vlayer/sdk"));
+        assert_eq!(npm.get("@vlayer/sdk").unwrap().version().unwrap(), version);
+        assert!(npm.contains_key("@vlayer/react"));
+        assert_eq!(npm.get("@vlayer/react").unwrap().version().unwrap(), version);
     }
 }
