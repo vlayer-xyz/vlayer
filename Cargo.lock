@@ -2790,7 +2790,6 @@ dependencies = [
  "clap",
  "colored 3.0.0",
  "flate2",
- "lazy_static",
  "regex",
  "reqwest 0.12.12",
  "serde",
