@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        a: [1,2,3,4]
+        a: [1,2,3]
     name: Lint Rust
     runs-on: aws-linux-medium
 

@@ -15,7 +15,7 @@ pub struct GlobalArgs {
         global = true,
         value_enum,
         env = "VLAYER_LOG_FORMAT",
-        default_value = "plain"
+        default_value = "json"
     )]
     pub log_format: Option<LogFormat>,
 }
