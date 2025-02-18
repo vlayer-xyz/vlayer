@@ -180,7 +180,7 @@ struct DnsRecord {
 // Signature data of the DNS record
 struct VerificationData {
     uint64 validUntil; // Signature expiration timestamp
-    bytes signature; // vdns/DNS Notary signature of the serialized DNS record
+    bytes signature; // Email Notary signature of the serialized DNS record
     bytes pubKey; // Public key used for signature
 }
 ```

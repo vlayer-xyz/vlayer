@@ -1,4 +1,4 @@
-# Verifiable DNS  server
+# Verifiable DNS server
 
 ## Running
 
