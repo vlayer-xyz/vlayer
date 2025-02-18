@@ -189,7 +189,10 @@ The list, configuration, and addresses of these precompiles are defined in `serv
   Performs regex operations on strings.  
   
   See [Regular Expressions](../../features/json-and-regex.md#regular-expressions).
-* `string.test` available through `URLPatternLib` - used inside `WebProof.verify` to test `Web.url` against provided URL Pattern, see [Web proof](../../features/web.md)
+- **`string.test`** (via `URLPatternLib`):  
+  Used within `WebProof.verify` to validate `Web.url` against a given URL pattern.  
+  
+  See [Web Proof](../../features/web.md).
 
 ### Error handling	
 
