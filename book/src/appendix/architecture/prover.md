@@ -174,7 +174,9 @@ The following is a list of available precompiles and their functionality:
   - `url` (URL of the HTTP request)  
   
   See [Web Proof](../../features/web.md) for details.
-* `Web.jsonGetString`, `Web.jsonGetInt`, `Web.jsonGetBool`, `Web.jsonGetArrayLength` available through `WebLib` - JSON parsing of JSON HTTP response body (`Web.body`), see [JSON Parsing](../../features/json-and-regex.md#json-parsing)
+- **`Web.jsonGetString`**, **`Web.jsonGetInt`**, **`Web.jsonGetBool`**, **`Web.jsonGetArrayLength`** (via `WebLib`):  
+  Parses JSON from an HTTP response body (`Web.body`).  
+  See [JSON Parsing](../../features/json-and-regex.md#json-parsing) for more information.
 * `UnverifiedEmail.verify` available through `EmailProofLib` - verifies `UnverifiedEmail` and returns `VerifiedEmail` which consits of `from` (from email address), `to` (to email address), `subject` (email subject), `body` (email body), see [Email proof](../../features/email.md)
 * `string.capture` and `string.match` available through `RegexLib` - REGEX operations on strings, see [Regular Expressions](../../features/json-and-regex.md#regular-expressions)
 * `string.test` available through `URLPatternLib` - used inside `WebProof.verify` to test `Web.url` against provided URL Pattern, see [Web proof](../../features/web.md)
