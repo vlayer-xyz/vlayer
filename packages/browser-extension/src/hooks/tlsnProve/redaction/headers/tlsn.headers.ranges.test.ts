@@ -91,8 +91,7 @@ describe("headers redaction", () => {
       const redactionItem = {
         response: {
           headers_except: fixtureAllResponseHeaders.filter(
-            (header) =>
-              !["date", "content-type"].includes(header),
+            (header) => !["date", "content-type"].includes(header),
           ),
         },
       };

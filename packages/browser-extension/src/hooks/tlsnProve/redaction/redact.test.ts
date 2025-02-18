@@ -255,7 +255,7 @@ describe("redact tests", () => {
           response: {
             headers_except: [],
           },
-        }
+        },
       ];
 
       const result = calcRedactionRanges(mockTranscript, redactionConfig);
