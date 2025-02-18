@@ -73,7 +73,7 @@ fn update_soldeer() -> Result<()> {
     }
 }
 
-fn update_docker() -> Result<(), CLIError> {
+fn update_docker() -> Result<()> {
     let version = newest_vlayer_version()?;
 
     let docker_compose = find_file_up_tree("docker-compose.devnet.yaml")?;
@@ -89,11 +89,11 @@ fn update_docker() -> Result<(), CLIError> {
 }
 
 // Look at the docker-compose file, and recursively update all included files as well.
-fn do_update_docker_images(docker_compose_path: &Path, version: &String) -> Result<(), CLIError> {
-    let yaml_content = fs::read_to_string(docker_compose_path)
-        .map_err(|e| CLIError::UpgradeError(e.to_string()))?;
+fn do_update_docker_images(docker_compose_path: &Path, version: &String) -> Result<()> {
+    let yaml_content =
+        fs::read_to_string(docker_compose_path).map_err(|e| Error::Upgrade(e.to_string()))?;
     let mut compose: serde_yml::Value =
-        serde_yml::from_str(&yaml_content).map_err(|e| CLIError::UpgradeError(e.to_string()))?;
+        serde_yml::from_str(&yaml_content).map_err(|e| Error::Upgrade(e.to_string()))?;
 
     let replaced = replace_vlayer_docker_image_version(&yaml_content, version)?;
     fs::write(docker_compose_path, replaced)?;
@@ -110,10 +110,7 @@ fn do_update_docker_images(docker_compose_path: &Path, version: &String) -> Resu
     Ok(())
 }
 
-fn replace_vlayer_docker_image_version(
-    content: &str,
-    version: &String,
-) -> Result<String, CLIError> {
+fn replace_vlayer_docker_image_version(content: &str, version: &String) -> Result<String> {
     regex::Regex::new(r"(image:\s*ghcr\.io/vlayer-xyz/[^:\s]+:)[^\s]+")
         .map(|regex| {
             regex
@@ -123,9 +120,7 @@ fn replace_vlayer_docker_image_version(
                 .to_string()
         })
         .map_err(|_| {
-            CLIError::UpgradeError(
-                "Failed to create vlayer docker image replacement regex".to_string(),
-            )
+            Error::Upgrade("Failed to create vlayer docker image replacement regex".to_string())
         })
 }
 
