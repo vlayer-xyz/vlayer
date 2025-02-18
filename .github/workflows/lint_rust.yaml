@@ -2,10 +2,6 @@ name: Lint Rust
 
 on:
   pull_request:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - ".github/workflows/lint_rust.yaml"
   merge_group:
   push:
     branches:
