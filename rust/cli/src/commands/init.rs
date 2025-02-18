@@ -125,7 +125,7 @@ pub(crate) async fn run_init(args: InitArgs) -> CLIResult<()> {
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(CLIError::ForgeInitError(stderr.to_string()));
+            return Err(CLIError::ForgeInit(stderr.to_string()));
         }
     }
 

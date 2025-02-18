@@ -59,7 +59,7 @@ pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> 
 
 fn do_find_foundry_root_from(current: &Path, git_root: &PathBuf) -> Result<PathBuf> {
     if !current.starts_with(git_root) {
-        return Err(Error::NoFoundryError);
+        return Err(Error::NoFoundry);
     }
 
     let path = current.join("foundry.toml");
@@ -71,7 +71,7 @@ fn do_find_foundry_root_from(current: &Path, git_root: &PathBuf) -> Result<PathB
     if let Some(parent) = current.parent() {
         do_find_foundry_root_from(parent, git_root)
     } else {
-        Err(Error::NoFoundryError)
+        Err(Error::NoFoundry)
     }
 }
 
@@ -91,7 +91,7 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf> {
         })?;
 
     if !output.status.success() {
-        return Err(Error::GitError(String::from_utf8_lossy(&output.stderr).to_string()));
+        return Err(Error::Git(String::from_utf8_lossy(&output.stderr).to_string()));
     }
 
     let path = from_utf8(&output.stdout)?.trim_end_matches('\n');
@@ -148,7 +148,7 @@ mod tests {
             "fatal: not a git repository (or any of the parent directories): .git\n".to_string();
 
         let error = result.unwrap_err();
-        assert!(matches!(error, Error::GitError(msg) if msg == expected_error_msg));
+        assert!(matches!(error, Error::Git(msg) if msg == expected_error_msg));
     }
 
     #[test]
@@ -159,7 +159,7 @@ mod tests {
 
         assert!(matches!(
             result.unwrap_err(),
-            Error::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound
+            Error::CommandExecution(err) if err.kind() == std::io::ErrorKind::NotFound
         ));
     }
 
@@ -172,14 +172,14 @@ mod tests {
             "fatal: not a git repository (or any of the parent directories): .git\n".to_string();
 
         let error = result.unwrap_err();
-        assert!(matches!(error, Error::GitError(msg) if msg == expected_error_msg));
+        assert!(matches!(error, Error::Git(msg) if msg == expected_error_msg));
     }
 
     #[test]
     fn test_find_foundry_root_from_no_foundry() {
         let temp_dir = create_temp_git_repo();
         let result = find_foundry_root(temp_dir.path());
-        assert!(matches!(result.unwrap_err(), Error::NoFoundryError));
+        assert!(matches!(result.unwrap_err(), Error::NoFoundry));
     }
 
     #[test]
@@ -209,7 +209,7 @@ mod tests {
         let result = find_foundry_root(&nonexistent_path);
         assert!(matches!(
             result.unwrap_err(),
-            Error::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound
+            Error::CommandExecution(err) if err.kind() == std::io::ErrorKind::NotFound
         ));
     }
 

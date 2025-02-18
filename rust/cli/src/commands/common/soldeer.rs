@@ -79,7 +79,7 @@ impl SoldeerDep {
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(Error::ForgeInitError(stderr.to_string()));
+            return Err(Error::ForgeInit(stderr.to_string()));
         }
 
         Ok(())

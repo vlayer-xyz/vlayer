@@ -32,7 +32,7 @@ fn check_if_vlayerup_exists() -> Result<()> {
     if output.status.success() {
         Ok(())
     } else {
-        Err(Error::UpgradeError(format!(
+        Err(Error::Upgrade(format!(
             "{} not found. Visit https://book.vlayer.xyz/getting-started/installation.html#get-vlayerup for installation instructions.",
             "vlayerup".italic().bold()
         )))
@@ -114,7 +114,7 @@ fn newest_vlayer_version() -> Result<String> {
         .map_err(into_update_err)?;
 
     if !output.status.success() {
-        return Err(Error::UpgradeError(format!(
+        return Err(Error::Upgrade(format!(
             "Failed to run newest vlayer: {}",
             String::from_utf8_lossy(&output.stderr)
         )));
@@ -124,7 +124,7 @@ fn newest_vlayer_version() -> Result<String> {
         .split_ascii_whitespace()
         .nth(1)
         .map(String::from)
-        .ok_or(Error::UpgradeError("Corrupted vlayer binary".to_string()))
+        .ok_or(Error::Upgrade("Corrupted vlayer binary".to_string()))
 }
 
 enum PackageManager {
@@ -168,7 +168,7 @@ fn package_manager(package_path: &Path) -> PackageManager {
 }
 
 fn find_file_up_tree(name: &str) -> Result<Option<PathBuf>> {
-    let mut path = std::env::current_dir().map_err(|e| Error::UpgradeError(e.to_string()))?;
+    let mut path = std::env::current_dir().map_err(|e| Error::Upgrade(e.to_string()))?;
     loop {
         path.push(name);
         if path.exists() {
@@ -204,7 +204,7 @@ fn ensure_success(exist_status: ExitStatus, package_name: &str) -> Result<()> {
     if exist_status.success() {
         print_successful_update(package_name)
     } else {
-        Err(Error::UpgradeError(format!("Failed to update {package_name}")))
+        Err(Error::Upgrade(format!("Failed to update {package_name}")))
     }
 }
 
@@ -229,5 +229,5 @@ fn print_successful_update(package_name: &str) -> Result<()> {
 
 #[allow(clippy::needless_pass_by_value)]
 fn into_update_err(e: std::io::Error) -> Error {
-    Error::UpgradeError(e.to_string())
+    Error::Upgrade(e.to_string())
 }

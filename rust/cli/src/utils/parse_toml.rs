@@ -171,6 +171,6 @@ mod tests {
             src = "src"aaa
         "#;
         let result = get_src_from_str(invalid_toml);
-        assert!(matches!(result.unwrap_err(), Error::TomlError(..)));
+        assert!(matches!(result.unwrap_err(), Error::Toml(..)));
     }
 }
