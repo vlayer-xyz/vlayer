@@ -33,7 +33,7 @@ jobs:
         id: cargo_target
         uses: ./.github/actions/reuse-cargo-target
         with:
-          target-name: test-rust
+          target_name: test-rust
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Check clang and LLVM version

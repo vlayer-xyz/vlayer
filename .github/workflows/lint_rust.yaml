@@ -37,7 +37,7 @@ jobs:
         id: cargo_target_host
         uses: ./.github/actions/reuse-cargo-target
         with:
-          target-name: lint-rust-host
+          target_name: lint-rust-host
       - name: Run Host lints
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target_host.outputs.CARGO_TARGET_DIR }}
@@ -52,7 +52,7 @@ jobs:
         id: cargo_target_call_guest
         uses: ./.github/actions/reuse-cargo-target
         with:
-          target-name: lint-rust-call-guest
+          target_name: lint-rust-call-guest
       - name: Run Risc0 Call Guest lints
         working-directory: rust/guest_wrapper/risc0_call_guest
         env:
@@ -68,7 +68,7 @@ jobs:
         id: cargo_target_chain_guest
         uses: ./.github/actions/reuse-cargo-target
         with:
-          target-name: lint-rust-chain-guest
+          target_name: lint-rust-chain-guest
       - name: Run Risc0 Chain Guest lints
         working-directory: rust/guest_wrapper/risc0_chain_guest
         env:
