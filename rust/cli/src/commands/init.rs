@@ -17,7 +17,7 @@ use tracing::{error, info};
 use crate::{
     config::{Config, Dependency, Error as ConfigError, Template},
     errors::{Error as CLIError, Result as CLIResult},
-    soldeer::{add_remappings, install},
+    soldeer::{add_remappings, install as soldeer_install},
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
         path::{copy_dir_to, find_foundry_root, prepend_relative_parent},
@@ -94,7 +94,7 @@ fn default_templates_url(version: &str) -> String {
     format!("https://vlayer-releases.s3.eu-north-1.amazonaws.com/{version}/examples.tar.gz")
 }
 
-async fn install_dependencies<P: AsRef<Path> + Clone>(
+async fn install_soldeer_dependencies<P: AsRef<Path> + Clone>(
     contracts: &HashMap<String, Dependency<P>>,
 ) -> CLIResult<()> {
     for (name, dep) in contracts {
@@ -124,7 +124,7 @@ async fn install_dependencies<P: AsRef<Path> + Clone>(
                     .version()
                     .ok_or(ConfigError::RequiredField("version".into()))?;
                 let url = dep.url();
-                install(name, &version, url.as_ref()).await?;
+                soldeer_install(name, &version, url.as_ref()).await?;
             }
         }
     }
@@ -260,9 +260,9 @@ async fn init_existing(
     info!("Initialising soldeer");
     init_soldeer(&root_path)?;
 
-    info!("Installing dependencies");
-    install_dependencies(config.contracts()).await?;
-    info!("Successfully installed all dependencies");
+    info!("Installing soldeer dependencies");
+    install_soldeer_dependencies(config.contracts()).await?;
+    info!("Successfully installed all soldeer dependencies");
     add_remappings(&root_path, config.contracts().values())?;
 
     change_sdk_dependency_to_npm(&root_path, config.npm())?;
@@ -716,7 +716,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_install_dependencies_from_local_path() {
+    async fn test_install_soldeer_dependencies_from_local_path() {
         let source = tempfile::tempdir().unwrap();
         let dest = tempfile::tempdir().unwrap();
 
@@ -732,7 +732,7 @@ mod tests {
             }),
         );
 
-        install_dependencies(&contracts).await.unwrap();
+        install_soldeer_dependencies(&contracts).await.unwrap();
 
         let dep_path: PathBuf = [dest.path().to_str().unwrap(), "dependencies", "vlayer"]
             .iter()
