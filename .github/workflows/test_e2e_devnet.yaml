@@ -52,10 +52,12 @@ jobs:
 
       - name: Build binaries
         env:
-          RISC0_DEV_MODE: true
-          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
+          # Risc0 reads this config, doesn't read CARGO_TARGET_DIR.
+          echo '[build]' >> .cargo/config.toml
+          echo 'target-dir = "${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}"' >> .cargo/config.toml
           cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
           mkdir -p ./target/debug/
           cp ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}/debug/{vlayer,call_server,chain_server,worker,dns_server} ./target/debug/
