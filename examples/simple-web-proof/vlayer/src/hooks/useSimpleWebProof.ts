@@ -47,6 +47,11 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
             headers_except: [],
           },
         },
+        {
+          response: {
+            headers_except: [],
+          },
+        },
       ],
     ),
   ],
