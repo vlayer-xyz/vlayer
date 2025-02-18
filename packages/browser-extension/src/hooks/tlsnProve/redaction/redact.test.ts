@@ -4,6 +4,9 @@ import { describe, expect, test } from "vitest";
 import {
   extractHeaders,
   XAPICallTranscript,
+  redactAllRequestHeadersCallData,
+  redactAllResponseHeadersCallData,
+  getHeaderRange,
 } from "./tlsn.ranges.test.fixtures";
 import { InvalidRangeError } from "./utils";
 import { OutOfBoundsError } from "./utils";
@@ -176,28 +179,11 @@ describe("redact tests", () => {
         },
       ];
 
-      const values = {
-        host: "api.x.com",
-        authorization:
-          "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA",
-      };
       const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
       expect(result.sent).toEqual([
-        {
-          start: mockTranscript.sent.message.content.indexOf(
-            values.authorization,
-          ),
-          end:
-            mockTranscript.sent.message.content.indexOf(values.authorization) +
-            values.authorization.length,
-        },
-        {
-          start: mockTranscript.sent.message.content.nthIndexOf(values.host, 2),
-          end:
-            mockTranscript.sent.message.content.nthIndexOf(values.host, 2) +
-            values.host.length,
-        },
+        getHeaderRange(mockTranscript.sent, "authorization"),
+        getHeaderRange(mockTranscript.sent, "host"),
       ]);
 
       expect(result.recv).toEqual([]);
@@ -233,6 +219,49 @@ describe("redact tests", () => {
             ) + "application/json;charset=utf-8".length,
         },
       ]);
+    });
+
+    test("redacts response headers except specified ones", () => {
+      const redactionConfig: RedactionConfig = [
+        {
+          response: {
+            headers_except: extractHeaders(
+              mockTranscript.recv.message.content.toString(),
+            ).filter(
+              (header) => header !== "date" && header !== "content-type",
+            ),
+          },
+        },
+      ];
+
+      const result = calcRedactionRanges(mockTranscript, redactionConfig);
+
+      expect(result.recv).toEqual([
+        getHeaderRange(mockTranscript.recv, "date"),
+        getHeaderRange(mockTranscript.recv, "content-type"),
+      ]);
+
+      expect(result.sent).toEqual([]);
+    });
+
+    test("redacts all headers", () => {
+      const redactionConfig: RedactionConfig = [
+        {
+          request: {
+            headers_except: [],
+          },
+        },
+        {
+          response: {
+            headers_except: [],
+          },
+        }
+      ];
+
+      const result = calcRedactionRanges(mockTranscript, redactionConfig);
+
+      expect(result.sent).toEqual(redactAllRequestHeadersCallData);
+      expect(result.recv).toEqual(redactAllResponseHeadersCallData);
     });
 
     test("handles multiple redaction items", () => {
