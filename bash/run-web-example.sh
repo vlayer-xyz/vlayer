@@ -10,6 +10,9 @@ function install_deps {
 
     cd ${VLAYER_HOME}/packages/sdk
     bun run build
+
+    cd ${VLAYER_HOME}/packages/sdk-hooks
+    bun run build
     
     cd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
     rm -rf node_modules
