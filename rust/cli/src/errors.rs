@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use soldeer_core::errors::SoldeerError;
 
+use crate::config::Error as ConfigError;
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(thiserror::Error, Debug)]
@@ -36,6 +38,8 @@ pub enum Error {
     Toml(#[from] toml::de::Error),
     #[error("Soldeer failed: {0}")]
     Soldeer(#[from] SoldeerError),
+    #[error("{0}")]
+    Config(#[from] ConfigError),
 }
 
 impl Error {

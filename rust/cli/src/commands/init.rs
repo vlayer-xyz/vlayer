@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     convert::TryFrom,
     fs::{self, OpenOptions},
     io::{Cursor, Read, Write},
@@ -6,35 +7,63 @@ use std::{
 };
 
 use anyhow::Context;
+use clap::Parser;
 use flate2::read::GzDecoder;
-use lazy_static::lazy_static;
 use reqwest::get;
 use serde_json::{Map, Value};
 use tar::Archive;
 use tracing::{error, info};
 
 use crate::{
-    commands::{
-        args::{InitArgs, TemplateOption},
-        common::soldeer::{add_remappings, DEPENDENCIES},
-    },
+    config::{Config, Dependency, Error as ConfigError, Template},
     errors::{Error as CLIError, Result as CLIResult},
-    target_version,
+    soldeer::{add_remappings, install as soldeer_install},
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
         path::{copy_dir_to, find_foundry_root},
     },
+    version,
 };
+
+#[derive(Clone, Debug, Parser)]
+pub(crate) struct InitArgs {
+    /// Template to use for the project
+    #[arg(long, value_enum)]
+    template: Option<Template>,
+    /// Url to the templates
+    #[arg(long)]
+    templates_url: Option<String>,
+    /// Local path to the templates
+    #[arg(long)]
+    templates_dir: Option<PathBuf>,
+    /// Force init in existing project location
+    #[arg(long)]
+    existing: bool,
+    /// Name of the project
+    #[arg()]
+    project_name: Option<String>,
+    /// Directory where the templates will be unpacked into (useful for debugging)
+    #[arg(long, env = "VLAYER_WORK_DIR")]
+    work_dir: Option<PathBuf>,
+    /// Config file to init from
+    #[arg(long)]
+    config_file: Option<PathBuf>,
+}
 
 const VLAYER_DIR_NAME: &str = "vlayer";
 
-pub(crate) enum WorkDir {
+enum TemplatesLocation {
+    Url(String),
+    Path(PathBuf),
+}
+
+enum WorkDir {
     Temp(tempfile::TempDir),
     Explicit(PathBuf),
 }
 
 impl WorkDir {
-    pub(crate) fn path(&self) -> &Path {
+    fn path(&self) -> &Path {
         match self {
             Self::Temp(dir) => dir.path(),
             Self::Explicit(path) => path,
@@ -61,46 +90,76 @@ impl TryFrom<Option<PathBuf>> for WorkDir {
     }
 }
 
-lazy_static! {
-    static ref EXAMPLES_URL: String = format!(
-        "https://vlayer-releases.s3.eu-north-1.amazonaws.com/{}/examples.tar.gz",
-        target_version()
-    );
+fn default_templates_url(version: &str) -> String {
+    format!("https://vlayer-releases.s3.eu-north-1.amazonaws.com/{version}/examples.tar.gz")
 }
 
-async fn install_dependencies() -> CLIResult<()> {
-    for dep in DEPENDENCIES.iter() {
-        dep.install().await?;
+async fn install_soldeer_dependencies<P: AsRef<Path> + Clone>(
+    contracts: &HashMap<String, Dependency<P>>,
+) -> CLIResult<()> {
+    for (name, dep) in contracts {
+        match dep.path() {
+            Some(path) => {
+                match std::fs::create_dir("dependencies") {
+                    Ok(()) => {}
+                    Err(err) => match err.kind() {
+                        std::io::ErrorKind::AlreadyExists => {}
+                        _ => return Err(CLIError::CommandExecution(err)),
+                    },
+                }
+                #[cfg(unix)]
+                {
+                    for (_, target) in dep.remappings()? {
+                        let target = PathBuf::from(target.as_ref());
+                        let link = target.parent().ok_or(ConfigError::InvalidRemappingTarget)?;
+                        std::os::unix::fs::symlink(path.clone(), link)?;
+                    }
+                }
+                #[cfg(not(unix))]
+                compile_error!("Non-UNIX operating system is currently unsupported.");
+            }
+            None => {
+                let version = dep
+                    .version()
+                    .ok_or(ConfigError::RequiredField("version".into()))?;
+                let url = dep.url();
+                soldeer_install(name, &version, url.as_ref()).await?;
+            }
+        }
     }
 
     Ok(())
 }
 
-fn add_default_remappings(foundry_root: &Path) -> CLIResult<()> {
-    add_remappings(foundry_root, DEPENDENCIES.as_slice())
-}
-
-fn change_sdk_dependency_to_npm(foundry_root: &Path) -> CLIResult<()> {
+fn change_sdk_dependency_to_npm(
+    foundry_root: &Path,
+    deps: &HashMap<String, Dependency>,
+) -> CLIResult<()> {
     let package_json = foundry_root.join("vlayer").join("package.json");
     let mut file = OpenOptions::new().read(true).open(package_json.clone())?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
     let mut json: Value = serde_json::from_str(&contents)?;
-    let version = target_version();
 
-    if let Some(dependencies) = json.get_mut("dependencies") {
-        if let Some(dependencies_map) = dependencies.as_object_mut() {
-            dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version.clone()));
-            if dependencies_map.contains_key("@vlayer/react") {
-                dependencies_map.insert("@vlayer/react".to_string(), Value::String(version));
-            }
-        }
-    } else {
-        let mut dependencies_map = Map::new();
-        dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version));
-        json["dependencies"] = Value::Object(dependencies_map);
+    let mut dependencies_map = json
+        .get("dependencies")
+        .and_then(serde_json::Value::as_object)
+        .map_or(Map::new(), Clone::clone);
+
+    for (name, dep) in deps {
+        let path = dep.path().map(|p| format!("file:{p}"));
+        dependencies_map.insert(
+            name.into(),
+            Value::String(
+                dep.version()
+                    .or(path)
+                    .ok_or(ConfigError::RequiredField("version".into()))?,
+            ),
+        );
     }
+
+    json["dependencies"] = Value::Object(dependencies_map);
 
     let new_contents = serde_json::to_string_pretty(&json)?;
     fs::write(package_json, new_contents)?;
@@ -110,6 +169,15 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> CLIResult<()> {
 
 pub(crate) async fn run_init(args: InitArgs) -> CLIResult<()> {
     let mut cwd = std::env::current_dir()?;
+
+    let mut config: Config = args
+        .config_file
+        .map(std::fs::read_to_string)
+        .transpose()?
+        .map(Config::from_str)
+        .transpose()?
+        .unwrap_or_default();
+    config.template = args.template.or(config.template);
 
     if !args.existing {
         let mut command = std::process::Command::new("forge");
@@ -129,14 +197,21 @@ pub(crate) async fn run_init(args: InitArgs) -> CLIResult<()> {
         }
     }
 
+    let templates_url = args
+        .templates_url
+        .unwrap_or_else(|| default_templates_url(&version()));
+    let templates_location = args
+        .templates_dir
+        .map_or_else(|| TemplatesLocation::Url(templates_url), TemplatesLocation::Path);
     let work_dir = args.work_dir.try_into()?;
 
-    init_existing(cwd, args.template.unwrap_or_default(), work_dir).await
+    init_existing(cwd, &config, templates_location, work_dir).await
 }
 
-pub(crate) async fn init_existing(
+async fn init_existing(
     cwd: PathBuf,
-    template: TemplateOption,
+    config: &Config,
+    templates_location: TemplatesLocation,
     work_dir: WorkDir,
 ) -> CLIResult<()> {
     info!("Running vlayer init from directory {:?}", cwd.display());
@@ -157,12 +232,14 @@ pub(crate) async fn init_existing(
         let examples_dst = create_vlayer_dir(&src_path)?;
         let tests_dst = create_vlayer_dir(&root_path.join("test"))?;
         let testdata_dst = root_path.join("testdata");
+        let template = config.template()?;
         fetch_examples(
             &examples_dst,
             &scripts_dst,
             &tests_dst,
             &testdata_dst,
             template.to_string(),
+            templates_location,
             work_dir,
         )
         .await?;
@@ -178,12 +255,12 @@ pub(crate) async fn init_existing(
     info!("Initialising soldeer");
     init_soldeer(&root_path)?;
 
-    info!("Installing dependencies");
-    install_dependencies().await?;
-    info!("Successfully installed all dependencies");
-    add_default_remappings(&root_path)?;
+    info!("Installing soldeer dependencies");
+    install_soldeer_dependencies(config.contracts()).await?;
+    info!("Successfully installed all soldeer dependencies");
+    add_remappings(&root_path, config.contracts().values())?;
 
-    change_sdk_dependency_to_npm(&root_path)?;
+    change_sdk_dependency_to_npm(&root_path, config.npm())?;
 
     std::env::set_current_dir(&cwd)?;
 
@@ -255,14 +332,23 @@ async fn fetch_examples(
     tests_dst: &Path,
     testdata_dst: &Path,
     template: String,
+    templates_location: TemplatesLocation,
     work_dir: WorkDir,
 ) -> CLIResult<()> {
-    let response = get(EXAMPLES_URL.as_str()).await?.bytes().await?;
-
-    let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
-
     let work_dir_path = work_dir.path();
-    archive.unpack(work_dir_path)?;
+
+    match templates_location {
+        TemplatesLocation::Url(url) => {
+            info!("Fetching examples from url: {url}");
+            let response = get(url).await?.bytes().await?;
+            let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
+            archive.unpack(work_dir_path)?;
+        }
+        TemplatesLocation::Path(path) => {
+            info!("Fetching examples from path: {}", path.display());
+            copy_dir_to(&path, work_dir_path)?;
+        }
+    }
 
     let downloaded_scripts = work_dir_path.join(&template).join("vlayer");
     let downloaded_examples = work_dir_path.join(&template).join("src/vlayer");
@@ -300,7 +386,7 @@ mod tests {
     use tempfile::TempDir;
 
     use super::*;
-    use crate::{build_version, test_utils::create_temp_git_repo};
+    use crate::{config::DetailedDependency, test_utils::create_temp_git_repo, version};
 
     fn prepare_empty_foundry_dir(src_name: &str) -> TempDir {
         // creates a temporary directory with a foundry.toml file
@@ -374,24 +460,25 @@ mod tests {
 
     #[test]
     fn test_add_remappings() {
+        let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "some initial remappings\n").unwrap();
 
-        add_default_remappings(&root_path).unwrap();
+        add_remappings(&root_path, config.contracts().values()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
 
         let expected_remappings = format!(
-            "some initial remappings\n\
-            openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
+            "forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             forge-std/=dependencies/forge-std-1.9.4/src/\n\
-            forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
+            openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
+            some initial remappings\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
-            build_version()
+            version()
         );
 
         assert_eq!(contents, expected_remappings);
@@ -399,100 +486,152 @@ mod tests {
 
     #[test]
     fn test_upsert_remapping() {
+        let config = Config::default();
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "vlayer-0.1.0/=dependencies/vlayer-0.0.0/src/\n").unwrap();
 
-        add_default_remappings(&root_path).unwrap();
+        add_remappings(&root_path, config.contracts().values()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
 
         let expected_remappings = format!(
-            "openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
+            "forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             forge-std/=dependencies/forge-std-1.9.4/src/\n\
-            forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
+            openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
-            build_version()
+            version()
         );
 
         assert_eq!(contents, expected_remappings);
     }
+
+    struct TestPackageJson {
+        temp_dir: tempfile::TempDir,
+        package_json: PathBuf,
+    }
+
+    impl TestPackageJson {
+        fn empty() -> Self {
+            Self::new(r#"{"dependencies": {}}"#)
+        }
+
+        fn with_sdk() -> Self {
+            Self::new(r#"{"dependencies": {"@vlayer/sdk": "workspace:*"}}"#)
+        }
+
+        fn new(contents: &str) -> Self {
+            let temp_dir = tempfile::tempdir().unwrap();
+            let root_path = temp_dir.path().to_path_buf();
+
+            let vlayer_dir = root_path.join("vlayer");
+            std::fs::create_dir(&vlayer_dir).unwrap();
+
+            let package_json = vlayer_dir.join("package.json");
+            std::fs::write(&package_json, contents).unwrap();
+
+            TestPackageJson {
+                temp_dir,
+                package_json,
+            }
+        }
+    }
+
     #[test]
-    fn test_dont_add_react_sdk_dependency_to_package_json_if_not_already_present() {
-        let temp_dir = tempfile::tempdir().unwrap();
-        let root_path = temp_dir.path().to_path_buf();
+    fn test_dont_add_react_sdk_dependency_to_package_json_if_not_in_config() {
+        let TestPackageJson {
+            temp_dir,
+            package_json,
+        } = TestPackageJson::empty();
 
-        let vlayer_dir = root_path.join("vlayer");
-        std::fs::create_dir(&vlayer_dir).unwrap();
+        let mut config = Config::default();
+        config.npm.remove("@vlayer/react");
 
-        let package_json = vlayer_dir.join("package.json");
-        let contents = r#"{"dependencies": {}}"#;
-        std::fs::write(&package_json, contents).unwrap();
-
-        change_sdk_dependency_to_npm(&root_path).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
         assert!(!new_contents.contains(&expected_sdk_dependency));
     }
-    #[test]
-    fn test_change_workspace_react_sdk_dependency_to_npm() {
-        let temp_dir = tempfile::tempdir().unwrap();
-        let root_path = temp_dir.path().to_path_buf();
 
-        let vlayer_dir = root_path.join("vlayer");
-        std::fs::create_dir(&vlayer_dir).unwrap();
-
-        let package_json = vlayer_dir.join("package.json");
-        let contents = r#"{"dependencies": {"@vlayer/react": "workspace:*"}}"#;
-        std::fs::write(&package_json, contents).unwrap();
-
-        change_sdk_dependency_to_npm(&root_path).unwrap();
-
-        let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", build_version());
-        assert!(new_contents.contains(&expected_sdk_dependency));
-    }
     #[test]
     fn test_add_sdk_dependency_to_package_json() {
-        let temp_dir = tempfile::tempdir().unwrap();
-        let root_path = temp_dir.path().to_path_buf();
+        let TestPackageJson {
+            temp_dir,
+            package_json,
+        } = TestPackageJson::empty();
 
-        let vlayer_dir = root_path.join("vlayer");
-        std::fs::create_dir(&vlayer_dir).unwrap();
+        let config = Config::default();
 
-        let package_json = vlayer_dir.join("package.json");
-        let contents = r#"{"dependencies": {}}"#;
-        std::fs::write(&package_json, contents).unwrap();
-
-        change_sdk_dependency_to_npm(&root_path).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
 
     #[test]
     fn test_change_workspace_sdk_dependency_to_npm() {
-        let temp_dir = tempfile::tempdir().unwrap();
-        let root_path = temp_dir.path().to_path_buf();
+        let TestPackageJson {
+            temp_dir,
+            package_json,
+        } = TestPackageJson::with_sdk();
 
-        let vlayer_dir = root_path.join("vlayer");
-        std::fs::create_dir(&vlayer_dir).unwrap();
+        let config = Config::default();
 
-        let package_json = vlayer_dir.join("package.json");
-        let contents = r#"{"dependencies": {"@vlayer/sdk": "workspace:*"}}"#;
-        std::fs::write(&package_json, contents).unwrap();
-
-        change_sdk_dependency_to_npm(&root_path).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
-        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", build_version());
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
 
-        assert!(!new_contents.contains("file:../../../packages/sdk"));
+        assert!(!new_contents.contains("file:"));
+        assert!(new_contents.contains(&expected_sdk_dependency));
+    }
+
+    #[test]
+    fn test_change_workspace_react_sdk_dependency_to_npm() {
+        let TestPackageJson {
+            temp_dir,
+            package_json,
+        } = TestPackageJson::new(
+            r#"{"dependencies": {"@vlayer/sdk": "workspace:*", "@vlayer/react": "workspace:*"}}"#,
+        );
+
+        let config = Config::default();
+
+        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+
+        let new_contents = fs::read_to_string(package_json).unwrap();
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
+        assert!(new_contents.contains(&expected_sdk_dependency));
+    }
+
+    #[test]
+    fn test_change_workspace_sdk_dependency_to_npm_with_path() {
+        let TestPackageJson {
+            temp_dir,
+            package_json,
+        } = TestPackageJson::with_sdk();
+
+        const SDK_PATH: &str = "/home/vlayer/projects/packages/sdk";
+
+        let mut config = Config::default();
+        {
+            let dep = config.npm.get_mut("@vlayer/sdk").unwrap();
+            *dep = Dependency::Detailed(DetailedDependency {
+                path: Some(SDK_PATH.into()),
+                ..Default::default()
+            });
+        }
+
+        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+
+        let new_contents = fs::read_to_string(package_json).unwrap();
+        let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"file:{SDK_PATH}\"");
+
         assert!(new_contents.contains(&expected_sdk_dependency));
     }
 
@@ -543,5 +682,31 @@ mod tests {
             assert!(foundry_toml.contains("remappings_generate = false"));
             assert!(foundry_toml.contains("remappings_regenerate = false"));
         }
+    }
+
+    #[tokio::test]
+    async fn test_install_soldeer_dependencies_from_local_path() {
+        let source = tempfile::tempdir().unwrap();
+        let dest = tempfile::tempdir().unwrap();
+
+        std::env::set_current_dir(dest.path()).unwrap();
+
+        let mut contracts = HashMap::new();
+        contracts.insert(
+            "vlayer".to_string(),
+            Dependency::Detailed(DetailedDependency {
+                path: Some(source.path().to_owned()),
+                remappings: Some(vec![("vlayer/".into(), "dependencies/vlayer/src/".into())]),
+                ..Default::default()
+            }),
+        );
+
+        install_soldeer_dependencies(&contracts).await.unwrap();
+
+        let dep_path: PathBuf = [dest.path().to_str().unwrap(), "dependencies", "vlayer"]
+            .iter()
+            .collect();
+        assert!(dep_path.exists());
+        assert_eq!(std::fs::read_link(dep_path).unwrap(), source.path());
     }
 }
