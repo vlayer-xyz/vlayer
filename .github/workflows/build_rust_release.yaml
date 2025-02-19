@@ -10,7 +10,6 @@ on:
       - ".github/actions/build-guest-artifacts/action.yml"
       - ".github/actions/replace-guest-artifacts/action.yml"
       - ".github/workflows/build_rust_release.yaml"
-  merge_group:
   push:
     branches:
       - main
