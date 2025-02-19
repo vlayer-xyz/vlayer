@@ -4,8 +4,8 @@ import { describe, expect, test } from "vitest";
 import {
   extractHeaders,
   XAPICallTranscript,
-  redactAllRequestHeadersCallData,
-  redactAllResponseHeadersCallData,
+  allRequestHeadersRedactedRanges,
+  allResponseHeadersRedactedRanges,
   getHeaderRange,
 } from "./tlsn.ranges.test.fixtures";
 import { InvalidRangeError } from "./utils";
@@ -260,8 +260,8 @@ describe("redact tests", () => {
 
       const result = calcRedactionRanges(mockTranscript, redactionConfig);
 
-      expect(result.sent).toEqual(redactAllRequestHeadersCallData);
-      expect(result.recv).toEqual(redactAllResponseHeadersCallData);
+      expect(result.sent).toEqual(allRequestHeadersRedactedRanges);
+      expect(result.recv).toEqual(allResponseHeadersRedactedRanges);
     });
 
     test("handles multiple redaction items", () => {

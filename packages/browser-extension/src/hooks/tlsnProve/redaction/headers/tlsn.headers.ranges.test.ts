@@ -3,8 +3,8 @@ import { describe, expect, test } from "vitest";
 import {
   getHeaderRange,
   XAPICallTranscript,
-  redactAllRequestHeadersCallData,
-  redactAllResponseHeadersCallData,
+  allRequestHeadersRedactedRanges,
+  allResponseHeadersRedactedRanges,
 } from "../tlsn.ranges.test.fixtures";
 import {
   calculateHeadersRanges,
@@ -69,7 +69,7 @@ describe("headers redaction", () => {
         redactionItem.response.headers,
       );
 
-      expect(result).toEqual(redactAllResponseHeadersCallData);
+      expect(result).toEqual(allResponseHeadersRedactedRanges);
     });
 
     test("no response headers", () => {
@@ -125,7 +125,7 @@ describe("headers redaction", () => {
         redactionItem.response.headers_except,
       );
 
-      expect(result).toEqual(redactAllResponseHeadersCallData);
+      expect(result).toEqual(allResponseHeadersRedactedRanges);
     });
 
     test("non-existent response header", () => {
@@ -200,7 +200,7 @@ describe("headers redaction", () => {
         redactionItem.request.headers,
       );
 
-      expect(result).toEqual(redactAllRequestHeadersCallData);
+      expect(result).toEqual(allRequestHeadersRedactedRanges);
     });
 
     test("no request headers", () => {
@@ -257,7 +257,7 @@ describe("headers redaction", () => {
         redactionItem.request.headers_except,
       );
 
-      expect(result).toEqual(redactAllRequestHeadersCallData);
+      expect(result).toEqual(allRequestHeadersRedactedRanges);
     });
 
     test("request headers case insensitivity", () => {

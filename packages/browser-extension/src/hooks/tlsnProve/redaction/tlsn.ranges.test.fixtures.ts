@@ -60,10 +60,10 @@ export const XAPICallTranscript = {
   }),
 };
 
-export const redactAllRequestHeadersCallData = extractHeaders(
+export const allRequestHeadersRedactedRanges = extractHeaders(
   XAPICallTranscript.sent.message.content.toString(),
 ).map((header) => getHeaderRange(XAPICallTranscript.sent, header));
 
-export const redactAllResponseHeadersCallData = extractHeaders(
+export const allResponseHeadersRedactedRanges = extractHeaders(
   XAPICallTranscript.recv.message.content.toString(),
 ).map((header) => getHeaderRange(XAPICallTranscript.recv, header));
