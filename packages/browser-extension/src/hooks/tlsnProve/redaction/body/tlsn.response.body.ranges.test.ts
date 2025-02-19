@@ -77,7 +77,6 @@ describe("json body redaction", () => {
         transcript,
         redactionItem.response.json_body,
       );
-      console.log("Result", result);
       expect(result).toEqual([valueRange(transcript, name)]);
     });
 

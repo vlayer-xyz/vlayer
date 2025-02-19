@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 import {
   getHeaderRange,
   XAPICallTranscript,
+  allRequestHeadersRedactedRanges,
+  allResponseHeadersRedactedRanges,
 } from "../tlsn.ranges.test.fixtures";
 import {
   calculateHeadersRanges,
@@ -14,6 +16,10 @@ import { extractHeaders } from "../tlsn.ranges.test.fixtures";
 
 const fixtureAllRequestHeaders = extractHeaders(
   XAPICallTranscript.sent.message.content.toString(),
+);
+
+const fixtureAllResponseHeaders = extractHeaders(
+  XAPICallTranscript.recv.message.content.toString(),
 );
 
 describe("headers redaction", () => {
@@ -49,6 +55,77 @@ describe("headers redaction", () => {
         getHeaderRange(XAPICallTranscript.recv, "status"),
         getHeaderRange(XAPICallTranscript.recv, "expires"),
       ]);
+    });
+
+    test("all response headers", () => {
+      const redactionItem = {
+        response: {
+          headers: fixtureAllResponseHeaders,
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        XAPICallTranscript.recv.message,
+        redactionItem.response.headers,
+      );
+
+      expect(result).toEqual(allResponseHeadersRedactedRanges);
+    });
+
+    test("no response headers", () => {
+      const redactionItem = {
+        response: {
+          headers: [],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        XAPICallTranscript.recv.message,
+        redactionItem.response.headers,
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    test("response headers_except", () => {
+      const redactionItem = {
+        response: {
+          headers_except: fixtureAllResponseHeaders.filter(
+            (header) => !["date", "content-type"].includes(header),
+          ),
+        },
+      };
+
+      const result = calculateHeadersRangesExcept(
+        XAPICallTranscript.recv,
+        redactionItem.response.headers_except,
+      );
+
+      expect(result).toEqual([
+        {
+          start: 23,
+          end: 52,
+        },
+        {
+          start: 175,
+          end: 205,
+        },
+      ]);
+    });
+
+    test("all response headers with headers_except", () => {
+      const redactionItem = {
+        response: {
+          headers_except: [],
+        },
+      };
+
+      const result = calculateHeadersRangesExcept(
+        XAPICallTranscript.recv,
+        redactionItem.response.headers_except,
+      );
+
+      expect(result).toEqual(allResponseHeadersRedactedRanges);
     });
 
     test("non-existent response header", () => {
@@ -111,6 +188,36 @@ describe("headers redaction", () => {
       ]);
     });
 
+    test("all request headers", () => {
+      const redactionItem = {
+        request: {
+          headers: fixtureAllRequestHeaders,
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        XAPICallTranscript.sent.message,
+        redactionItem.request.headers,
+      );
+
+      expect(result).toEqual(allRequestHeadersRedactedRanges);
+    });
+
+    test("no request headers", () => {
+      const redactionItem = {
+        request: {
+          headers: [],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        XAPICallTranscript.sent.message,
+        redactionItem.request.headers,
+      );
+
+      expect(result).toEqual([]);
+    });
+
     test("request headers_except", () => {
       const redactionItem = {
         request: {
@@ -136,6 +243,21 @@ describe("headers redaction", () => {
           end: 1705,
         },
       ]);
+    });
+
+    test("all request headers with headers_except", () => {
+      const redactionItem = {
+        request: {
+          headers_except: [],
+        },
+      };
+
+      const result = calculateHeadersRangesExcept(
+        XAPICallTranscript.sent,
+        redactionItem.request.headers_except,
+      );
+
+      expect(result).toEqual(allRequestHeadersRedactedRanges);
     });
 
     test("request headers case insensitivity", () => {

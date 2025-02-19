@@ -36,7 +36,7 @@ export const calculateResponseRanges = (
           // Filter out the headers that are in the headers_except array
           const filteredHeaders = filterExceptHeaders(
             headersToExcludeFromRedaction,
-            getAllHeaders(transcript.message),
+            getAllHeaders(transcript.headers),
           );
           return calculateHeadersRanges(transcript.message, filteredHeaders);
         },
