@@ -51,8 +51,8 @@ function run_playwright_tests() {
   popd
 }
 
-function generate_vlayer_config() {
-  echo "::group::Generating vlayer config.toml"
+function generate_vlayer_init_config() {
+  echo "::group::Generating vlayer init config"
 
   if [[ -z "${EXAMPLE:-}" ]] ; then
     echo "EXAMPLE is unset"
@@ -89,7 +89,7 @@ EOF
 
   cat config.toml
   
-  echo "::endgroup::Generating vlayer config.toml"
+  echo "::endgroup::Generating vlayer init config"
 }
 
 function init_template() {

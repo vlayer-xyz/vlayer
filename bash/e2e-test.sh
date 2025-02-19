@@ -24,7 +24,7 @@ echo "::endgroup::Running services"
 
 cd $(mktemp -d)
 
-generate_vlayer_config
+generate_vlayer_init_config
 init_template
 
 pushd $EXAMPLE
