@@ -20,9 +20,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-e2e-devnet:
-    name: E2E test against devnet
+  build-binaries:
+    name: Build binaries
     runs-on: aws-linux-medium
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,8 +34,6 @@ jobs:
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - name: Install TypeScript prerequisites
-        uses: ./.github/actions/ts-prerequisites
 
       - name: Check clang and LLVM version
         env:
@@ -49,19 +48,73 @@ jobs:
         env:
           RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+        run: |
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+          mkdir target_debug
+          mv target/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
+
+      - name: Push binaries
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: target-debug
+          path: target_debug
+          if-no-files-found: error
+          retention-days: 3
+
+  test-e2e-devnet:
+    name: E2E test against devnet
+    runs-on: aws-linux-medium
+    needs: [build-binaries]
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          [
+            "simple",
+            "simple-web-proof",
+            "simple-email-proof",
+            "simple-teleport",
+            "simple-time-travel",
+          ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: target-debug
+          path: target/debug
+      - name: Make downloaded binaries executable
+        run: sudo chmod +x target/debug/*
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
+
       - name: Run e2e test
         env:
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
+          EXAMPLE: ${{ matrix.example }}
         run: bash/e2e-test.sh
 
       # Teardown
-      - name: Display Logs
+      - name: Upload logs for previewing
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         if: always()
-        run: |
-          for log_file in $(find ./artifacts/logs -type f); do
-            echo "=== Contents of $log_file ==="
-            cat "$log_file"
-            echo "============================="
-          done
+        with:
+          name: logs-devnet-${{ matrix.example }}
+          path: ./artifacts/logs/
+          if-no-files-found: error
+          retention-days: 1

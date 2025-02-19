@@ -23,9 +23,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-e2e-testnet:
-    name: E2E test against testnet
+  build-binaries:
+    name: Build binaries
     runs-on: aws-linux-medium
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,14 +37,69 @@ jobs:
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - name: Install TypeScript prerequisites
-        uses: ./.github/actions/ts-prerequisites
 
       - name: Check clang and LLVM version
         env:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check-llvm-clang.sh
 
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
+
+      - name: Build binaries
+        env:
+          RISC0_USE_DOCKER: 1
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+          mkdir target_debug
+          mv target/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
+
+      - name: Push binaries
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: target-debug
+          path: target_debug
+          if-no-files-found: error
+          retention-days: 3
+
+  test-e2e-testnet:
+    name: E2E test against testnet
+    runs-on: aws-linux-medium
+    needs: [build-binaries]
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          [
+            "simple",
+            "simple-web-proof",
+            "simple-email-proof",
+            "simple-time-travel",
+          ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: target-debug
+          path: target/debug
+      - name: Make downloaded binaries executable
+        run: sudo chmod +x target/debug/*
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
       - name: Install contracts' dependencies
         working-directory: ./contracts/vlayer
         run: forge soldeer install
@@ -56,11 +112,6 @@ jobs:
           EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
           echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
           echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
-      - name: Build binaries
-        env:
-          RISC0_USE_DOCKER: 1
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
       - name: Run e2e test in prod mode
         env:
           PROVING_MODE: "prod"
@@ -78,6 +129,7 @@ jobs:
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
           CONFIRMATIONS: 2
+          EXAMPLE: ${{ matrix.example }}
         run: bash/e2e-test.sh
 
       # Teardown
@@ -85,7 +137,7 @@ jobs:
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         if: always()
         with:
-          name: logs
+          name: logs-testnet-${{ matrix.example }}
           path: ./artifacts/logs/
           if-no-files-found: error
           retention-days: 1

@@ -15,21 +15,24 @@ VLAYER_ENV=${VLAYER_ENV:-dev}
 
 generate_ts_bindings
 build_sdk
-build_vlayer_contracts
 
-echo "::group::Running examples"
-for example in $(get_examples); do
-  export EXAMPLE_NAME=$example
-  echo Running services...
-  source ${VLAYER_HOME}/bash/run-services.sh
+export EXAMPLE_NAME=$EXAMPLE
 
-  pushd "$VLAYER_HOME/examples/$example"
-  echo "::group::Running tests of: ${example}"
-  silent_unless_fails build_contracts
-  run_prover_script
-  popd
+echo "::group::Running services"
+source ${VLAYER_HOME}/bash/run-services.sh
+echo "::endgroup::Running services"
 
-  cleanup
-  rm -rf "${VLAYER_TMP_DIR}/chain_db"
-done
-echo '::endgroup::Running examples'
+cd $(mktemp -d)
+
+generate_vlayer_init_config
+init_template
+
+pushd $EXAMPLE
+
+silent_unless_fails build_contracts
+run_prover_script
+
+popd
+
+cleanup
+rm -rf "${VLAYER_TMP_DIR}/chain_db"
