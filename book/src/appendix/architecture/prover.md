@@ -181,6 +181,7 @@ The list, configuration, and addresses of these precompiles are defined in `serv
 - **`Web.jsonGetString`**, **`Web.jsonGetInt`**, **`Web.jsonGetBool`**, **`Web.jsonGetArrayLength`** (via `WebLib`):  
   Parses JSON from an HTTP response body (`Web.body`).  
   See [JSON Parsing](../../features/json-and-regex.md#json-parsing) for more information.
+  
 - **`UnverifiedEmail.verify`** (via `EmailProofLib`):  
   Verifies an `UnverifiedEmail` and returns a `VerifiedEmail` object containing:
   - `from` (sender's email address)
