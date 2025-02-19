@@ -6,6 +6,9 @@ fs_permissions = [
     { access = "read", path = "./deployed_contracts.json" }
 ]
 
+optimizer = true
+optimizer_runs = 200
+
 libs = ["dependencies"]
 
 [profile.no-vlayer]
