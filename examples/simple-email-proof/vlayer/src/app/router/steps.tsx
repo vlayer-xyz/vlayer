@@ -1,4 +1,9 @@
-import { WelcomePage, ConnectWallet, SendEmail, MintNFT } from "../../pages";
+import {
+  WelcomePage,
+  ConnectWallet,
+  SendEmail,
+  MintNFTContainer,
+} from "../../pages";
 import React from "react";
 
 export type Step = {
@@ -53,7 +58,7 @@ export const steps: Step[] = [
   {
     path: "mint-nft",
     kind: STEP_KIND.MINT_NFT,
-    component: MintNFT,
+    component: MintNFTContainer,
     title: "Mint NFT",
     description: "Copy or upload the sent email here.",
     backUrl: "send-email",
