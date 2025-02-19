@@ -11,3 +11,6 @@ services:
     container_name: notary-server
     ports:
       - "127.0.0.1:7047:7047"
+    volumes:
+      - ./notary-config:/root/.notary-server/config
+    
