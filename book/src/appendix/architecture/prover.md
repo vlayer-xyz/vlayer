@@ -2,9 +2,9 @@
 
 Vlayer enables three key functionalities: **_accessing_** different sources of verifiable data, **_aggregating_** this data in a verifiable way to obtain verifiable result and **_using the verifiable result on-chain_**.
 
-It supports accessing verifiable data from three distinct sources:: HTTP requests, emails and EVM state and storage. For each source, a proof of validity can be generated:
 
-- HTTP requests can be proven via _TLS Notary_ by verifying TLS signatures and checking the domain is valid
+It supports accessing verifiable data from three distinct sources: HTTP requests, emails and EVM state and storage. For each source, a proof of validity can be generated:
+- HTTP requests can be verified using a Web Proof, which includes information about the TLS session, a transcript of the HTTP request and response signed by a *TLS Notary*
 - Email contents can be proven by verifying DKIM signatures and checking the sender domain
 - EVM state and storage proofs can be verified against the block hash via Merkle Proofs
 
@@ -25,7 +25,7 @@ But how are Call Proofs obtained?
 
 ## Call Prover
 
-To obtain Call Proofs, we use **Call Prover**. Its two most important elements are **Guest** and **Host**. The Guest is responsible for executing the code inside _zkEVM_ to prove its execution. The Host prepares the data required by the Guest and sends it to the Guest.
+To obtain Call Proofs, the **Call Prover** is used. It is a Rust server that exposes the [`v_call`](../api.md#v_call) JSON-RPC endpoint. The three key components of the prover are the **Guest**, **Host**, and **Engine**. The **Guest** executes code within the *zkEVM* to generate a proof of execution. The **Host** prepares the necessary data and sends it to the Guest. The **Engine**, responsible for executing the EVM, runs in both the Guest and Host environments. 
 
 Their structure and responsibilities are as follows:
 
@@ -34,6 +34,7 @@ Their structure and responsibilities are as follows:
   - `risc0_guest` (in `guest_wrapper/risc0_call_guest`): Thin wrapper that uses RISC0 ZKVM I/O and delegates work to `guest`.
   - `guest_wrapper` (in `guest_wrapper`): Compiles `risc0_guest` (using cargo build scripts) to a binary format (ELF) using [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target.
 - **Host** (in `services/call/host`): Runs a **_preflight_**, during which it collects all the data required by the guest. It retrieves data from online sources (RPC clients) and then triggers guest execution (which is done offline).
+- **Engine** (in `services/call/engine`): Sets up and executes the EVM, which executes `Prover` smart contract (including calling custom [Precompiles](#precompiles)). It executes exactly the same code in _preflight_ and Guest execution.
 
 Our architecture is heavily inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel).
 
@@ -162,7 +163,45 @@ Guest is required to verify all data provided by the Host. Initial validation of
 
 Above verifications are not enough to ensure validity of Time Travel (achieved by [Chain Proofs](./chain_proof.md)) and Teleport. Travel call verification is described in the [next](./time_travel_teleport.md) section.
 
-### Error handling
+## Precompiles
+
+As shown in the diagram in the [Execution and Proving](#execution-and-proving) section, the **Engine** executes the EVM, which in turn runs the Solidity `Prover` smart contract. During execution, the contract may call custom precompiles available within the vlayer *zkEVM*, enabling various advanced features.
+
+The list, configuration, and addresses of these precompiles are defined in `services/call/precompiles`. These precompiles can be easily accessed within Solidity `Prover` contracts using libraries included in the vlayer Solidity smart contracts package.
+
+### Available precompiles and their functionality
+- **`WebProof.verify`** (via `WebProofLib`):  
+  Verifies a `WebProof` and returns a `Web` object containing:
+  - `body` (HTTP response body)
+  - `notaryPubKey` (TLS Notary’s public key that signed the Web Proof)
+  - `url` (URL of the HTTP request)  
+  
+  See [Web Proof](../../features/web.md) for details.
+  
+- **`Web.jsonGetString`**, **`Web.jsonGetInt`**, **`Web.jsonGetBool`**, **`Web.jsonGetArrayLength`** (via `WebLib`):  
+  Parses JSON from an HTTP response body (`Web.body`).  
+  See [JSON Parsing](../../features/json-and-regex.md#json-parsing) for more information.
+  
+- **`UnverifiedEmail.verify`** (via `EmailProofLib`):  
+  Verifies an `UnverifiedEmail` and returns a `VerifiedEmail` object containing:
+  - `from` (sender's email address)
+  - `to` (recipient's email address)
+  - `subject` (email subject)
+  - `body` (email body)  
+  
+  See [Email Proof](../../features/email.md).
+  
+- **`string.capture`**, **`string.match`** (via `RegexLib`):  
+  Performs regex operations on strings.  
+  
+  See [Regular Expressions](../../features/json-and-regex.md#regular-expressions).
+  
+- **`string.test`** (via `URLPatternLib`):  
+  Used within `WebProof.verify` to validate `Web.url` against a given URL pattern.  
+  
+  See [Web Proof](../../features/web.md).
+
+### Error handling	
 
 Error handling is done via `HostError` enum type, which is converted into http code and a human-readable string by the server.
 
