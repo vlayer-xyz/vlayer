@@ -1,6 +1,6 @@
 # Call Prover architecture
 
-Vlayer enables three key functionalities: **_accessing_** different sources of verifiable data, **_aggregating_** this data in a verifiable way to obtain verifiable result and **_using the verifiable result on-chain_**.
+vlayer enables three key functionalities: **_accessing_** different sources of verifiable data, **_aggregating_** this data in a verifiable way to obtain verifiable result and **_using the verifiable result on-chain_**.
 
 
 It supports accessing verifiable data from three distinct sources: HTTP requests, emails and EVM state and storage. For each source, a proof of validity can be generated:
@@ -8,7 +8,7 @@ It supports accessing verifiable data from three distinct sources: HTTP requests
 - Email contents can be proven by verifying DKIM signatures and checking the sender domain
 - EVM state and storage proofs can be verified against the block hash via Merkle Proofs
 
-Before Vlayer, ZK programs were application-specific and proved a single source of data. Vlayer allows you to write a Solidity smart contract (called **Prover**) that acts as a glue between all three possible data sources and enables you to **aggregate** this data in a verifiable way - we not only prove that the data we use is valid but also that it was processed correctly by the **Prover**.
+Before vlayer, ZK programs were application-specific and proved a single source of data. vlayer allows you to write a Solidity smart contract (called **Prover**) that acts as a glue between all three possible data sources and enables you to **aggregate** this data in a verifiable way - we not only prove that the data we use is valid but also that it was processed correctly by the **Prover**.
 
 ### Aggregation examples
 
@@ -81,7 +81,7 @@ We have **Host** and **Guest** databases
 
 ### EvmEnv and EvmInput
 
-Vlayer enables aggregating data from multiple blocks and multiple chains. We call these features **Time Travel** and **Teleport**. To achieve that, we span multiple revm instances during Engine execution. Each revm instance corresponds to a certain block number on a certain chain.
+vlayer enables aggregating data from multiple blocks and multiple chains. We call these features **Time Travel** and **Teleport**. To achieve that, we span multiple revm instances during Engine execution. Each revm instance corresponds to a certain block number on a certain chain.
 
 `EvmEnv` struct represents a configuration required to create a revm instance. Depending on the context, it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
 
