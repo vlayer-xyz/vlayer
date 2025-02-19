@@ -42,6 +42,14 @@ impl<C: Now, P: DoHProvider, const Q: usize> Resolver<C, P, Q> {
         }
     }
 
+    pub fn with_key(priv_key: &str, providers: [P; Q]) -> Self {
+        Self {
+            providers,
+            signer: Signer::new(priv_key),
+            clock: PhantomData,
+        }
+    }
+
     fn sign_record(&self, record: &DNSRecord) -> VerificationData {
         let now = C::now();
         let valid_until = now + record.ttl;

@@ -3,7 +3,7 @@ mod handlers;
 use axum::Router;
 use server_utils::{cors, init_trace_layer, RequestIdLayer};
 use tokio::net::TcpListener;
-use tracing::info;
+use tracing::{info, warn};
 use verifiable_dns::{ExternalProvider, VerifiableDNSResolver};
 
 use crate::config::Config;
@@ -14,18 +14,24 @@ struct AppState {
 }
 
 impl AppState {
-    fn new() -> Self {
+    fn new(private_key: Option<&str>) -> Self {
         let providers = [ExternalProvider::google_provider(), ExternalProvider::dns_sb_provider()];
-        Self {
-            vdns_resolver: VerifiableDNSResolver::new(providers),
-        }
+        let vdns_resolver = match private_key {
+            Some(key) => VerifiableDNSResolver::with_key(key, providers),
+            None => {
+                warn!("Private key not provided, using default resolver");
+                VerifiableDNSResolver::new(providers)
+            }
+        };
+
+        Self { vdns_resolver }
     }
 }
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
     let listener = TcpListener::bind(config.socket_addr()).await?;
 
-    let state = AppState::new();
+    let state = AppState::new(config.private_key());
 
     info!("Listening on {}", listener.local_addr()?);
     axum::serve(listener, server(state)).await?;
@@ -49,7 +55,7 @@ mod test_helpers {
     use super::*;
 
     pub fn app() -> Router {
-        let state = AppState::new();
+        let state = AppState::new(None);
         server(state)
     }
 }
