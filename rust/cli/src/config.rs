@@ -6,28 +6,7 @@ use serde::Deserialize;
 
 use crate::version;
 
-pub const DEFAULT_CONFIG: &str = "
-template = 'simple'
-[contracts.vlayer]
-version = '0.1.0'
-remappings = [['vlayer-0.1.0/', 'dependencies/vlayer-VERSION/src/']]
-[contracts.'@openzeppelin-contracts']
-version = '5.0.1'
-remappings = [['openzeppelin-contracts/', 'dependencies/@openzeppelin-contracts-5.0.1/']]
-[contracts.forge-std]
-version = '1.9.4'
-remappings = [
-  ['forge-std/', 'dependencies/forge-std-1.9.4/src/'],
-  ['forge-std-1.9.4/src/', 'dependencies/forge-std-1.9.4/src/']
-]
-[contracts.risc0-ethereum]
-version = '1.2.0'
-url = 'https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip'
-remappings = [['risc0-ethereum-1.2.0/', 'dependencies/risc0-ethereum-1.2.0/']]
-[npm]
-'@vlayer/sdk' = 'VERSION'
-'@vlayer/react' = 'VERSION'
-";
+pub const DEFAULT_CONFIG: &str = include_str!("../config.toml");
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -89,7 +68,7 @@ impl Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self::from_str(DEFAULT_CONFIG.replace("VERSION", &version()))
+        Self::from_str(DEFAULT_CONFIG.replace("{{VERSION}}", &version()))
             .expect("default config cannot be malformed")
     }
 }
