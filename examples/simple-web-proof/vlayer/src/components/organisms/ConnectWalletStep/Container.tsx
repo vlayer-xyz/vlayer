@@ -10,7 +10,9 @@ const useConnectWallet = () => {
   const { closeModal, showModal } = useModal();
   const { hasExtensionInstalled } = useExtension();
   const navigate = useNavigate();
-  const { isConnected: isWalletConnected } = useAppKitAccount();
+  const { isConnected } = useAppKitAccount();
+
+  const isWalletConnected = isConnected || !!import.meta.env.VITE_PRIVATE_KEY;
 
   const next = useCallback(() => {
     if (hasExtensionInstalled) {
