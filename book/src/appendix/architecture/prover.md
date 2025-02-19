@@ -193,6 +193,7 @@ The list, configuration, and addresses of these precompiles are defined in `serv
   Performs regex operations on strings.  
   
   See [Regular Expressions](../../features/json-and-regex.md#regular-expressions).
+  
 - **`string.test`** (via `URLPatternLib`):  
   Used within `WebProof.verify` to validate `Web.url` against a given URL pattern.  
   
