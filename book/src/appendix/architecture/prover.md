@@ -189,6 +189,7 @@ The list, configuration, and addresses of these precompiles are defined in `serv
   - `body` (email body)  
   
   See [Email Proof](../../features/email.md).
+  
 - **`string.capture`**, **`string.match`** (via `RegexLib`):  
   Performs regex operations on strings.  
   
