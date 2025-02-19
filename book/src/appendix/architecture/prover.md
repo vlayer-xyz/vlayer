@@ -73,7 +73,7 @@ We have **Host** and **Guest** databases
 - **Host** - runs `CacheDB<ProofDb<ProviderDb>>`:
   - `ProviderDb`- queries Ethereum RPC Provider (i.e. Alchemy, Infura, Anvil);
   - `ProofDb` - records all queries aggregates them and collects EIP1186 (`eth_getProof`) proofs;
-  - `CacheDB` - stores trusted seed data to minimize the amount of RPC requests. We seed caller account and some Optimism system accounts.
+  - `CacheDB` - stores trusted seed data to minimize the number of RPC requests. We seed caller account and some Optimism system accounts.
 - **Guest** - runs `CacheDB<WrapStateDb<StateDb>>`:
   - `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as [sparse Merkle Patricia Tries](https://github.com/vlayer-xyz/vlayer/tree/main/rust/mpt), hence access to accounts and storage serves as verification of state and storage proofs;
   - `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries;
