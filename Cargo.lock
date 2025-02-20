@@ -1185,7 +1185,6 @@ dependencies = [
  "alloy-sol-types",
  "alloy-trie",
  "anyhow",
- "async-trait",
  "auto_impl",
  "block_header",
  "bytemuck",
@@ -1201,9 +1200,7 @@ dependencies = [
  "lazy_static",
  "mpt",
  "once_cell",
- "optimism",
  "revm",
- "risc0-zkp 1.2.4",
  "risc0-zkvm",
  "serde",
  "serde_json",
@@ -1223,11 +1220,8 @@ dependencies = [
  "block_header",
  "call_common",
  "call_engine",
- "common",
  "mpt",
- "optimism",
  "revm",
- "risc0-zkvm",
  "tokio",
 ]
 
@@ -1235,7 +1229,6 @@ dependencies = [
 name = "call_host"
 version = "0.1.0"
 dependencies = [
- "alloy-chains",
  "alloy-primitives",
  "alloy-sol-types",
  "anyhow",
@@ -1249,22 +1242,18 @@ dependencies = [
  "derive-new",
  "derive_more",
  "dotenvy",
- "ethers-core",
  "ethers-providers",
  "guest_wrapper",
  "host_utils",
  "insta",
- "lazy_static",
  "maplit",
  "mpt",
- "optimism",
  "provider",
  "revm",
  "risc0-zkvm",
  "seal",
  "test-log",
  "thiserror 2.0.11",
- "tokio",
  "tracing",
 ]
 
@@ -1336,7 +1325,6 @@ dependencies = [
  "mime",
  "provider",
  "reqwest 0.12.12",
- "risc0-zkp 1.2.4",
  "seal",
  "serde",
  "serde_json",
@@ -3111,7 +3099,6 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "hex",
- "lazy_static",
  "risc0-build 1.2.0",
  "risc0-build-ethereum",
  "risc0-zkp 1.2.4",

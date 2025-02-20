@@ -13,7 +13,6 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
-async-trait = { workspace = true }
 block_header = { workspace = true }
 bytes = { workspace = true }
 call_common = { workspace = true }
@@ -27,9 +26,7 @@ itertools = { workspace = true }
 lazy_static = { workspace = true }
 mpt = { workspace = true }
 once_cell = { workspace = true }
-optimism = { workspace = true }
 revm = { workspace = true, features = ["optimism", "serde", "std"] }
-risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
