@@ -52,7 +52,7 @@ Similarly, if the email is sent from `alice@example.com` and the `d` tag is `sub
 
 DKIM validation will fail if the email body has been modified by a proxy server. The body hash included in the DKIM signature ensures the integrity of the email’s content. Any alteration to the body will invalidate the signature.
 
-## DKIM and Verifiable DNS
+## DKIM and DNS Notary
 
 The simplified flow of the DKIM signature is:
 1. The sender SMTP server has a private and public key pair.
@@ -64,12 +64,12 @@ The simplified flow of the DKIM signature is:
 3. The email server adds a DKIM-Signature header to the email and sends it.
 4. The recipient SMTP server receives the email.
 5. SMTP server checks `DKIM-Signature` header, reads d= tag ... stating its singers domain and selector, which gives him notion where to look for the key.
-5. The recipient server fetches the public key from DNS and verifies the signature.
+6. The recipient server fetches the public key from DNS and verifies the signature.
 
 The last step becomes tricky: we don't have the access to DNS from the Solidity level.
 Instead, we'll have to prove that the DNS record is indeed valid and pass it together with the email to the prover contract.
 
-The `VDNS` (aka. Verifiable DNS) service exists for this reason: it uses the [DNS Queries over HTTPS (DoH)](https://datatracker.ietf.org/doc/html/rfc8484) protocol to fetch DNS records from several providers, signs them if they are valid and secure, and returns the signature together with the record.
+The `DNS Notary` (aka. Verifiable DNS) service exists for this reason: it uses the [DNS Queries over HTTPS (DoH)](https://datatracker.ietf.org/doc/html/rfc8484) protocol to fetch DNS records from several providers, signs them if they are valid and secure, and returns the signature together with the record.
 
 ## Example
 Let's say someone wants to prove they are part of a company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain.
