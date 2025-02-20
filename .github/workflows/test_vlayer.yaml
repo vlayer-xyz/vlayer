@@ -47,5 +47,69 @@ jobs:
           # vlayer test
           cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
 
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+
       - name: Run vlayer tests for examples
         run: bash/vlayer-test-examples.sh
