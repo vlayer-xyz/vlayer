@@ -16,6 +16,7 @@
       "lib/*" : ["./src/lib/*"],
       "src/*" : ["./src/*"]
     },
+    "types": ["@testing-library/jest-dom", "@types/chrome"],
     "downlevelIteration": true    
   },
   "include": ["vitest.d.ts", "**/*.ts", "**/*.tsx"]
