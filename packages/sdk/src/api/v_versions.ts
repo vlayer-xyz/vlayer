@@ -11,7 +11,6 @@ const v_versionsBody = {
 
 interface VVersionsResponseResult {
   call_guest_id: string;
-  chain_guest_id: string;
   api_version: string;
 }
 
@@ -58,7 +57,6 @@ function assertResponseObject(x: unknown): asserts x is VVersionsResponse {
   }
   if (
     !isFieldAString(x.result, "call_guest_id") ||
-    !isFieldAString(x.result, "chain_guest_id") ||
     !isFieldAString(x.result, "api_version")
   ) {
     throw new Error(
