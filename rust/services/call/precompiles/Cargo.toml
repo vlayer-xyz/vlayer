@@ -7,7 +7,6 @@ edition = "2021"
 alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
 derive_more = { workspace = true }
-email_proof = { workspace = true }
 regex = { workspace = true }
 revm = { workspace = true }
 serde = { workspace = true }

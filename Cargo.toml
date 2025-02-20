@@ -4,7 +4,6 @@ members = [
     "rust/block_header",
     "rust/chain",
     "rust/common",
-    "rust/email_proof",
     "rust/guest_wrapper",
     "rust/guest_wrapper/build_utils",
     "rust/host_utils",
@@ -175,7 +174,6 @@ mpt = { path = "rust/mpt" }
 provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
 u64_range = { path = "rust/range" }
-verifiable_dns = { path = "rust/verifiable_dns", default-features = false }
 version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
 zkvm-benchmarks = { path = "rust/zkvm-benchmarks/benchmarks" }
