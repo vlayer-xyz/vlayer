@@ -54,11 +54,6 @@ if [[ $VLAYER_ENV == "dev" ]]; then
     docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op
 fi
 
-if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
-    startup_chain_services "${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"
-fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
-
-startup_vdns_server
 
 echo "Services have been successfully started"
