@@ -1,7 +1,7 @@
 template = 'simple'
 
 [contracts.vlayer]
-version = '0.1.0'
+version = '{{VERSION}}'
 remappings = [['vlayer-0.1.0/', 'dependencies/vlayer-{{VERSION}}/src/']]
 
 [contracts.'@openzeppelin-contracts']

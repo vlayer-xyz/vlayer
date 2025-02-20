@@ -279,7 +279,7 @@ vlayer = '0.0.1'
         assert!(contracts.contains_key("vlayer"));
         {
             let dep = contracts.get("vlayer").unwrap();
-            assert_eq!(dep.version().unwrap(), "0.1.0");
+            assert_eq!(dep.version().unwrap(), version);
             assert_eq!(
                 dep.remappings().unwrap(),
                 &[("vlayer-0.1.0/".into(), format!("dependencies/vlayer-{version}/src/"))]
