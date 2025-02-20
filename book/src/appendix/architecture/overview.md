@@ -8,7 +8,7 @@ vlayer execution spans across three environments, each written in respective tec
     - [**prover server**](./prover.md) - exposing vlayer functionality via vlayer JSON-RPC API
     - [**chain proof cache**](./chain_proof.md) - http server used as a cache for proofs of inclusion of a block in a chain
     - **TLS Notary server** - used to notarize TLS connections
-    - **Email Notary server** - used to notarize DKIM DNS records
+    - **DNS Notary server** - used to notarize DKIM DNS records
     - **workers** - used to perform actual proving
 - blockchain (Solidity)
     - [**on-chain smart contracts**](./solidity.md) - used to verify proofs
