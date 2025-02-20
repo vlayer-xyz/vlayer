@@ -1,4 +1,3 @@
-pub mod email_proof;
 mod helpers;
 mod json;
 pub mod precompile;

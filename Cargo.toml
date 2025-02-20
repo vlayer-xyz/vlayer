@@ -7,16 +7,13 @@ members = [
     "rust/guest_wrapper",
     "rust/guest_wrapper/build_utils",
     "rust/host_utils",
-    "rust/key_value",
     "rust/mpt",
     "rust/provider",
-    "rust/range",
     "rust/server_utils",
     "rust/services/call/common",
     "rust/services/call/engine",
     "rust/services/call/guest",
     "rust/services/call/host",
-    "rust/services/call/optimism",
     "rust/services/call/precompiles",
     "rust/services/call/seal",
     "rust/services/call/server",
@@ -162,21 +159,16 @@ call_guest = { path = "rust/services/call/guest" }
 call_host = { path = "rust/services/call/host" }
 call_server = { path = "rust/services/call/server" }
 call_server_lib = { path = "rust/services/call/server_lib" }
-optimism = { path = "rust/services/call/optimism" }
 chain = { path = "rust/chain" }
 common = { path = "rust/common" }
-email_proof = { path = "rust/email_proof" }
 guest_build_utils = { path = "rust/guest_wrapper/build_utils" }
 guest_wrapper = { path = "rust/guest_wrapper" }
 host_utils = { path = "rust/host_utils" }
-key_value = { path = "rust/key_value" }
 mpt = { path = "rust/mpt" }
 provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
-u64_range = { path = "rust/range" }
 version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
-zkvm-benchmarks = { path = "rust/zkvm-benchmarks/benchmarks" }
 
 [workspace.lints.clippy]
 as_ptr_cast_mut = "warn"
