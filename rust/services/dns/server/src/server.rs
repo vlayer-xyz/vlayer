@@ -17,9 +17,9 @@ impl AppState {
     fn new(private_key: Option<&str>) -> Self {
         let providers = [ExternalProvider::google_provider(), ExternalProvider::dns_sb_provider()];
         let vdns_resolver = match private_key {
-            Some(key) => VerifiableDNSResolver::with_key(key, providers),
+            Some(key) => VerifiableDNSResolver::new(providers).with_key(key),
             None => {
-                warn!("Private key not provided, using default resolver");
+                warn!("Private key not provided, using default resolver key");
                 VerifiableDNSResolver::new(providers)
             }
         };
