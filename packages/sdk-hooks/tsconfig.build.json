@@ -1,7 +1,7 @@
 {
     "extends": "./tsconfig.base.json",
     "exclude": [
-      "./src/**/*.test.ts"
+      "./src/**/*.test.tsx"
     ],
     "compilerOptions": {
       "noEmit": false,

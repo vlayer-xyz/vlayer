@@ -16,6 +16,7 @@ VLAYER_ENV=${VLAYER_ENV:-dev}
 generate_ts_bindings
 build_sdk
 
+BUN_NO_FROZEN_LOCKFILE=1
 export EXAMPLE_NAME=$EXAMPLE
 
 echo "::group::Running services"
