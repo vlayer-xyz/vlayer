@@ -40,7 +40,7 @@ The vlayer directory structure resembles a typical Foundry project but with two 
 
 > ❗️ Make sure that you have [Bun](https://bun.sh/) installed in your system to build and run the examples.
 
-First of, build the contracts by navigating to your project folder and running:
+First off, build the contracts by navigating to your project folder and running:
 ```bash
 cd your-project
 forge build
