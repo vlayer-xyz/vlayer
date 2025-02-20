@@ -30,15 +30,7 @@ impl Prover {
 }
 
 fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
-    input
-        .chain_proofs
-        .values()
-        .try_fold(ExecutorEnv::builder(), |mut builder, (_, proof)| {
-            builder.add_assumption(proof.receipt.clone());
-            Ok::<_, anyhow::Error>(builder)
-        })?
-        .write(&input)?
-        .build()
+    ExecutorEnv::builder().write(&input)?.build()
 }
 
 #[cfg(test)]

@@ -24,7 +24,7 @@ pub async fn v_call(
     info!("v_call => {call:#?} {context:#?}");
     let call = call.parse_and_validate(config.max_calldata_size())?;
 
-    let host = build_host(&config, context.chain_id, call.to).await?;
+    let host = build_host(&config, context.chain_id, call.to)?;
     let call_hash = (&host.start_execution_location(), &call).into();
     info!(
         "Start execution location: {:?} call hash: {call_hash}",
@@ -40,31 +40,23 @@ pub async fn v_call(
     });
 
     if !found_existing {
-        tokio::spawn(proof::generate(
-            call,
-            host,
-            gas_meter_client,
-            state.clone(),
-            call_hash,
-            config.chain_proof_config(),
-        ));
+        tokio::spawn(proof::generate(call, host, gas_meter_client, state.clone(), call_hash));
     }
 
     Ok(call_hash)
 }
 
-async fn build_host(
+fn build_host(
     config: &Config,
     chain_id: ChainId,
     prover_contract_addr: Address,
 ) -> std::result::Result<Host, HostError> {
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls())
-        .with_chain_guest_id(config.chain_guest_id())
-        .with_chain_proof_url(config.chain_proof_url())?
+        .with_nothing()
+        .with_chain_proof_url()?
         .with_start_chain_id(chain_id)?
         .with_prover_contract_addr(prover_contract_addr)
-        .await
         .map_err(HostError::Builder)?
         .build(config.into())?;
     Ok(host)

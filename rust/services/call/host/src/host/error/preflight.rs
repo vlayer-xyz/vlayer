@@ -1,9 +1,6 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::GenericRevertReason;
-use call_engine::{
-    evm::{self},
-    verifier,
-};
+use call_engine::evm::{self};
 use revm::primitives::{EVMError, HaltReason, SuccessReason};
 use thiserror::Error;
 
@@ -19,9 +16,6 @@ pub enum Error {
 
     #[error("Creating input: {0}")]
     CreatingInput(#[from] into_input::Error),
-
-    #[error("Travel Call verifier error: {0}")]
-    Verifier(#[from] verifier::travel_call::Error),
 }
 
 #[derive(Error, Debug)]

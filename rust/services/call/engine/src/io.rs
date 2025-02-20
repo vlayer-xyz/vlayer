@@ -5,9 +5,7 @@ use alloy_rlp::RlpEncodable;
 use alloy_sol_types::{SolCall, SolValue};
 use bytes::Bytes;
 use call_common::ExecutionLocation;
-use chain_client::ChainProofCache;
 use derive_new::new;
-use optimism::client::factory::cached::OpOutputCache;
 use revm::{
     interpreter::CallInputs,
     primitives::{OptimismFields, TxEnv},
@@ -22,9 +20,7 @@ use crate::{config::DEFAULT_CALLER, evm::input::MultiEvmInput, CallAssumptions};
 pub struct Input {
     pub multi_evm_input: MultiEvmInput,
     pub start_execution_location: ExecutionLocation,
-    pub chain_proofs: ChainProofCache,
     pub call: Call,
-    pub op_output_cache: OpOutputCache,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, RlpEncodable)]

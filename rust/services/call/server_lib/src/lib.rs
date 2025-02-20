@@ -1,4 +1,3 @@
-pub mod chain_proof;
 pub mod gas_meter;
 pub mod server;
 

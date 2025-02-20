@@ -73,10 +73,7 @@ jobs:
       matrix:
         example:
           [
-            "simple",
             "simple-web-proof",
-            "simple-email-proof",
-            "simple-time-travel",
           ]
 
     steps:

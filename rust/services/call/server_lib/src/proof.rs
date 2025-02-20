@@ -5,7 +5,6 @@ use tracing::{error, info};
 
 pub use crate::proving::RawData;
 use crate::{
-    chain_proof::{self, Config as ChainProofConfig, Error as ChainProofError},
     gas_meter::Client as GasMeterClient,
     handlers::SharedProofs,
     metrics::Metrics,
@@ -16,8 +15,6 @@ use crate::{
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Chain proof error: {0}")]
-    ChainProof(#[from] ChainProofError),
     #[error("Preflight error: {0}")]
     Preflight(#[from] PreflightError),
     #[error("Proving error: {0}")]
@@ -89,7 +86,6 @@ pub async fn generate(
     gas_meter_client: impl GasMeterClient,
     proofs: SharedProofs,
     call_hash: CallHash,
-    chain_proof_config: Option<ChainProofConfig>,
 ) {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
@@ -97,21 +93,7 @@ pub async fn generate(
 
     info!("Generating proof for {call_hash}");
 
-    set_state(&proofs, call_hash, State::ChainProofPending);
-
-    match chain_proof::await_ready(&host, chain_proof_config)
-        .await
-        .map_err(Error::ChainProof)
-    {
-        Ok(()) => {
-            set_state(&proofs, call_hash, State::PreflightPending);
-        }
-        Err(err) => {
-            error!("Chain proof failed with error: {err}");
-            set_state(&proofs, call_hash, State::ChainProofError(err.into()));
-            return;
-        }
-    }
+    set_state(&proofs, call_hash, State::PreflightPending);
 
     let preflight_result =
         match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics)

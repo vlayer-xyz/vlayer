@@ -4,12 +4,11 @@ use std::time::Duration;
 
 use alloy_primitives::ChainId;
 use call_server_lib::{
-    chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
-    ConfigBuilder, ProofMode,
+    gas_meter::Config as GasMeterConfig, serve, Config, ConfigBuilder, ProofMode,
 };
 use clap::{ArgAction, Parser};
 use common::{init_tracing, GlobalArgs, LogFormat};
-use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
+use guest_wrapper::CALL_GUEST_ELF;
 use server_utils::set_risc0_dev_mode;
 use tracing::{info, warn};
 
@@ -27,15 +26,6 @@ struct Cli {
 
     #[arg(long, short, default_value = "3000")]
     port: Option<u16>,
-
-    #[arg(long, group = "chain_proof")]
-    chain_proof_url: Option<String>,
-
-    #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "5s")]
-    chain_proof_poll_interval: Option<Duration>,
-
-    #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "120s")]
-    chain_proof_timeout: Option<Duration>,
 
     #[arg(long, group = "gas_meter", env)]
     gas_meter_url: Option<String>,
@@ -57,18 +47,7 @@ impl Cli {
             .gas_meter_url
             .zip(Some(self.gas_meter_ttl.unwrap_or_default()))
             .map(|(url, ttl)| GasMeterConfig::new(url, ttl, self.gas_meter_api_key));
-        let chain_proof_config = self
-            .chain_proof_url
-            .zip(Some((
-                self.chain_proof_poll_interval.unwrap_or_default(),
-                self.chain_proof_timeout.unwrap_or_default(),
-            )))
-            .map(|(url, (poll_interval, timeout))| {
-                ChainProofConfig::new(url, poll_interval, timeout)
-            });
-        let chain_guest_ids = CHAIN_GUEST_IDS.into_iter().map(Into::into).collect();
-        ConfigBuilder::new(CALL_GUEST_ELF.clone(), chain_guest_ids, api_version)
-            .with_chain_proof_config(chain_proof_config)
+        ConfigBuilder::new(CALL_GUEST_ELF.clone(), api_version)
             .with_gas_meter_config(gas_meter_config)
             .with_rpc_mappings(self.rpc_url)
             .with_proof_mode(proof_mode)

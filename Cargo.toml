@@ -3,7 +3,6 @@ resolver = "2"
 members = [
     "rust/block_header",
     "rust/chain",
-    "rust/cli",
     "rust/common",
     "rust/email_proof",
     "rust/guest_wrapper",
@@ -23,23 +22,8 @@ members = [
     "rust/services/call/seal",
     "rust/services/call/server",
     "rust/services/call/server_lib",
-    "rust/services/chain/block_trie",
-    "rust/services/chain/client",
-    "rust/services/chain/common",
-    "rust/services/chain/db",
-    "rust/services/chain/guest",
-    "rust/services/chain/host",
-    "rust/services/chain/server",
-    "rust/services/chain/server_lib",
-    "rust/services/chain/test_utils",
-    "rust/services/chain/worker",
-    "rust/services/dns/server",
-    "rust/test_runner",
-    "rust/verifiable_dns",
     "rust/version",
     "rust/web_proof",
-    "rust/zkvm-benchmarks/benchmarks",
-    "rust/zkvm-benchmarks/runner",
 ]
 
 [profile.release]
@@ -171,7 +155,6 @@ vergen-gitcl = { version = "1.0.5", default-features = false }
 yansi = "1.0.1"
 
 block_header = { path = "rust/block_header" }
-block_trie = { path = "rust/services/chain/block_trie" }
 seal = { path = "rust/services/call/seal" }
 call_common = { path = "rust/services/call/common" }
 call_precompiles = { path = "rust/services/call/precompiles" }
@@ -182,15 +165,6 @@ call_server = { path = "rust/services/call/server" }
 call_server_lib = { path = "rust/services/call/server_lib" }
 optimism = { path = "rust/services/call/optimism" }
 chain = { path = "rust/chain" }
-chain_client = { path = "rust/services/chain/client" }
-chain_db = { path = "rust/services/chain/db" }
-chain_guest = { path = "rust/services/chain/guest" }
-chain_host = { path = "rust/services/chain/host" }
-chain_server = { path = "rust/services/chain/server" }
-chain_server_lib = { path = "rust/services/chain/server_lib" }
-chain_common = { path = "rust/services/chain/common" }
-chain_test_utils = { path = "rust/services/chain/test_utils" }
-chain_worker = { path = "rust/services/chain/worker" }
 common = { path = "rust/common" }
 email_proof = { path = "rust/email_proof" }
 guest_build_utils = { path = "rust/guest_wrapper/build_utils" }
@@ -200,7 +174,6 @@ key_value = { path = "rust/key_value" }
 mpt = { path = "rust/mpt" }
 provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
-test_runner = { path = "rust/test_runner" }
 u64_range = { path = "rust/range" }
 verifiable_dns = { path = "rust/verifiable_dns", default-features = false }
 version = { path = "rust/version" }

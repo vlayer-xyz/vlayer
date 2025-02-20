@@ -4,21 +4,18 @@ use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
-use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 
-use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
+use crate::gas_meter::Config as GasMeterConfig;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     socket_addr: SocketAddr,
     rpc_urls: HashMap<ChainId, String>,
     proof_mode: ProofMode,
-    chain_proof_config: Option<ChainProofConfig>,
     max_calldata_size: usize,
     call_guest_elf: GuestElf,
-    chain_guest_ids: Box<[Digest]>,
     api_version: String,
     gas_meter_config: Option<GasMeterConfig>,
 }
@@ -32,27 +29,8 @@ impl Config {
         self.rpc_urls.clone()
     }
 
-    pub fn chain_proof_config(&self) -> Option<ChainProofConfig> {
-        self.chain_proof_config.clone()
-    }
-
-    pub fn chain_proof_url(&self) -> Option<&str> {
-        self.chain_proof_config.as_ref().map(|x| x.url.as_str())
-    }
-
     pub fn call_guest_id_hex(&self) -> String {
         self.call_guest_elf.id.encode_hex_with_prefix()
-    }
-
-    pub const fn chain_guest_id(&self) -> Digest {
-        *self
-            .chain_guest_ids
-            .last()
-            .expect("no chain guest ID provided")
-    }
-
-    pub fn chain_guest_id_hex(&self) -> String {
-        self.chain_guest_id().encode_hex_with_prefix()
     }
 
     pub fn api_version(&self) -> String {
@@ -77,16 +55,10 @@ pub struct ConfigBuilder {
 }
 
 impl ConfigBuilder {
-    pub fn new(
-        call_guest_elf: GuestElf,
-        chain_guest_ids: Box<[Digest]>,
-        api_version: String,
-    ) -> Self {
+    pub fn new(call_guest_elf: GuestElf, api_version: String) -> Self {
         Self {
             config: Config {
-                chain_proof_config: None,
                 call_guest_elf,
-                chain_guest_ids,
                 socket_addr: "127.0.0.1:3000".parse().unwrap(),
                 rpc_urls: HashMap::from([(TEST_CHAIN_ID, "http://localhost:8545".to_string())]),
                 proof_mode: ProofMode::Groth16,
@@ -95,14 +67,6 @@ impl ConfigBuilder {
                 gas_meter_config: None,
             },
         }
-    }
-
-    pub fn with_chain_proof_config(
-        mut self,
-        chain_proof_config: impl Into<Option<ChainProofConfig>>,
-    ) -> Self {
-        self.config.chain_proof_config = chain_proof_config.into();
-        self
     }
 
     pub fn with_rpc_mappings(
@@ -155,47 +119,6 @@ impl From<&Config> for HostConfig {
         HostConfig {
             proof_mode: config.proof_mode.into(),
             call_guest_elf: config.call_guest_elf.clone(),
-            chain_guest_ids: config.chain_guest_ids.clone(),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn local_testnet_rpc_url_always_there() {
-        let config = ConfigBuilder::new(Default::default(), Default::default(), Default::default())
-            .with_rpc_mappings(vec![])
-            .build();
-
-        assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://localhost:8545");
-    }
-
-    #[test]
-    fn local_testnet_rpc_url_can_be_overwritten() {
-        let config = ConfigBuilder::new(Default::default(), Default::default(), Default::default())
-            .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
-            .build();
-
-        assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "NEW");
-    }
-
-    #[test]
-    fn correctly_formats_guest_id() {
-        let call_elf = GuestElf::new([0; 8], &[]);
-        let chain_guest_ids = vec![Digest::new([1; 8])].into_boxed_slice();
-        let config = ConfigBuilder::new(call_elf, chain_guest_ids, "1.2.3".into()).build();
-
-        assert_eq!(
-            config.call_guest_id_hex(),
-            "0x0000000000000000000000000000000000000000000000000000000000000000"
-        );
-        assert_eq!(
-            config.chain_guest_id_hex(),
-            "0x0100000001000000010000000100000001000000010000000100000001000000"
-        );
-        assert_eq!(config.api_version(), "1.2.3".to_string());
     }
 }

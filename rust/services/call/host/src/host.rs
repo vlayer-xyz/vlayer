@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
 use alloy_sol_types::SolValue;
 use bytes::Bytes;
@@ -9,22 +6,16 @@ use call_common::{ExecutionLocation, Metadata};
 use call_engine::{
     evm::{env::cached::CachedEvmEnv, execution_result::SuccessfulExecutionResult},
     travel_call::Executor as TravelCallExecutor,
-    verifier::{
-        teleport, time_travel,
-        travel_call::{self, IVerifier},
-    },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
-use chain_client::Client as ChainClient;
-use common::{verifier::zk_proof, GuestElf};
+use common::GuestElf;
 pub use config::Config;
 use derive_new::new;
 use error::preflight;
-pub use error::{AwaitingChainProofError, BuilderError, Error, ProvingError};
-use optimism::client::factory::recording;
+pub use error::{BuilderError, Error, ProvingError};
 pub use prover::Prover;
 use provider::CachedMultiProvider;
-use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
+use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
 use tracing::instrument;
 
@@ -34,26 +25,11 @@ mod builder;
 mod config;
 pub(crate) mod error;
 mod prover;
-#[cfg(test)]
-mod tests;
-
-type HostTravelCallVerifier = travel_call::Verifier<
-    HostDb,
-    time_travel::Verifier<
-        chain_client::RecordingClient,
-        chain_common::verifier::Verifier<zk_proof::HostVerifier>,
-    >,
-    teleport::Verifier,
->;
 
 pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<HostDb>,
     prover: Prover,
-    // None means that chain service is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
-    chain_client: Option<chain_client::RecordingClient>,
-    op_client_factory: recording::Factory,
-    travel_call_verifier: HostTravelCallVerifier,
     guest_elf: GuestElf,
 }
 
@@ -95,54 +71,17 @@ impl Host {
     pub fn try_new(
         providers: CachedMultiProvider,
         start_execution_location: ExecutionLocation,
-        chain_client: Option<Box<dyn chain_client::Client>>,
-        op_client_factory: impl optimism::client::IFactory + 'static,
         config: Config,
     ) -> Result<Self, crate::BuilderError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::try_new(config.proof_mode, &config.call_guest_elf)?;
-        let chain_client = chain_client.map(chain_client::RecordingClient::new);
-        let recording_op_client_factory = recording::Factory::new(op_client_factory);
-
-        let travel_call_verifier = Host::build_travel_call_verifier(
-            config.chain_guest_ids,
-            &chain_client,
-            recording_op_client_factory.clone(),
-        );
 
         Ok(Host {
             envs,
             start_execution_location,
             prover,
-            chain_client,
-            op_client_factory: recording_op_client_factory,
-            travel_call_verifier,
             guest_elf: config.call_guest_elf,
         })
-    }
-
-    fn build_travel_call_verifier(
-        chain_guest_ids: impl IntoIterator<Item = Digest>,
-        chain_client: &Option<chain_client::RecordingClient>,
-        op_client_factory: optimism::client::factory::recording::Factory,
-    ) -> HostTravelCallVerifier {
-        let chain_proof_verifier =
-            chain_common::verifier::Verifier::new(chain_guest_ids, zk_proof::HostVerifier);
-        let time_travel_verifier =
-            time_travel::Verifier::new(chain_client.clone(), chain_proof_verifier);
-        let teleport_verifier = teleport::Verifier::new(op_client_factory);
-        travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
-    }
-
-    pub async fn chain_proof_ready(&self) -> Result<bool, AwaitingChainProofError> {
-        let Some(ref chain_client) = self.chain_client else {
-            return Ok(true); // No chain service, so no chain proof to wait for
-        };
-        let latest_indexed_block = chain_client
-            .get_sync_status(self.start_execution_location.chain_id)
-            .await?
-            .last_block;
-        Ok(latest_indexed_block >= self.start_execution_location.block_number)
     }
 
     #[instrument(skip_all)]
@@ -154,10 +93,6 @@ impl Host {
             gas_used,
             metadata,
         } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
-
-        self.travel_call_verifier
-            .verify(&self.envs, self.start_execution_location)
-            .await?;
         let input = self.prepare_input_data(call)?;
 
         let elapsed_time = now.elapsed();
@@ -172,18 +107,11 @@ impl Host {
 
     #[instrument(skip_all)]
     fn prepare_input_data(self, call: Call) -> Result<Input, preflight::Error> {
-        drop(self.travel_call_verifier); // Drop the verifier so that we can unwrap the Arc's in the clients
-        let chain_proofs = self
-            .chain_client
-            .map_or(HashMap::new(), chain_client::RecordingClient::into_cache);
-        let op_output_cache = self.op_client_factory.into_cache();
         let multi_evm_input = into_multi_input(self.envs)?;
         Ok(Input {
             multi_evm_input,
             start_execution_location: self.start_execution_location,
-            chain_proofs,
             call,
-            op_output_cache,
         })
     }
 

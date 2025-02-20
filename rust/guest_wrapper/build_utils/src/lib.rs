@@ -1,4 +1,3 @@
-pub mod chain_guest_id;
 mod data_layout;
 
 #[cfg(feature = "risc0")]
@@ -9,8 +8,6 @@ use std::{env, fs, io, path::PathBuf};
 #[cfg(feature = "risc0")]
 pub use risc0_builder::Builder as Risc0Builder;
 use risc0_zkp::core::digest::Digest;
-
-const PROJECT_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../..");
 
 pub fn use_var(key: &str) -> Option<String> {
     println!("cargo:rerun-if-env-changed={key}");

@@ -2,9 +2,9 @@ use std::{collections::HashMap, fs, io};
 
 use risc0_build::{embed_methods_with_options, DockerOptions, GuestListEntry, GuestOptions};
 
-use crate::{
-    chain_guest_id, data_layout, path_from_env, remove_file_if_exists, use_bool_var, PROJECT_ROOT,
-};
+use crate::{data_layout, path_from_env, remove_file_if_exists, use_bool_var};
+
+const PROJECT_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../..");
 
 data_layout!(DataLayout {
     project_root: PROJECT_ROOT.into(),
@@ -28,7 +28,6 @@ pub struct Builder {
     existing_guest: Option<ExistingGuestLayout>,
     skip_build: bool,
     use_docker: bool,
-    update_guest_elf: bool,
 }
 
 impl Builder {
@@ -44,7 +43,6 @@ impl Builder {
             existing_guest: ExistingGuestLayout::new(),
             skip_build: use_bool_var("RISC0_SKIP_BUILD"),
             use_docker,
-            update_guest_elf,
         }
     }
 
@@ -60,15 +58,8 @@ impl Builder {
             return Ok(());
         }
 
-        if self.update_guest_elf {
-            self.update_chain_guest()?;
-        }
-        let (call_guest, chain_guest) = self.build_guests()?;
+        let call_guest = self.build_guests()?;
 
-        if self.use_docker {
-            // Assert that image ID was correctly updated, or guest was unchanged
-            chain_guest_id::assert(chain_guest.image_id.into())?;
-        }
         self.generate_guest_sol_files(call_guest)?;
 
         Ok(())
@@ -117,24 +108,14 @@ impl Builder {
         }
     }
 
-    fn build_guests(&self) -> anyhow::Result<(GuestListEntry, GuestListEntry)> {
+    fn build_guests(&self) -> anyhow::Result<GuestListEntry> {
         let guest_options = self.get_guest_options();
-        let mut guests = embed_methods_with_options(HashMap::from([
-            ("risc0_call_guest", guest_options.clone()),
-            ("risc0_chain_guest", guest_options),
-        ]));
+        let mut guests = embed_methods_with_options(HashMap::from([(
+            "risc0_call_guest",
+            guest_options.clone(),
+        )]));
         let call_guest = remove_guest(&mut guests, "risc0_call_guest")?;
-        let chain_guest = remove_guest(&mut guests, "risc0_chain_guest")?;
-        Ok((call_guest, chain_guest))
-    }
-
-    /// Add current chain guest ID to history and generate a new one
-    fn update_chain_guest(&self) -> anyhow::Result<()> {
-        chain_guest_id::add_current_to_history()?;
-        let (_, chain_guest) = self.build_guests()?;
-        chain_guest_id::update(chain_guest.image_id.into())?;
-
-        Ok(())
+        Ok(call_guest)
     }
 
     /// Generate solidity files with call guest image ID and ELF.

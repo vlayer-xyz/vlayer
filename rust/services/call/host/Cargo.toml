@@ -13,8 +13,6 @@ bytes = { workspace = true }
 call_common = { workspace = true }
 call_engine = { workspace = true }
 chain = { workspace = true }
-chain_client = { workspace = true, features = ["fake", "rpc"] }
-chain_common = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
