@@ -9,8 +9,10 @@ function get_examples() {
     )
 
     # "simple-teleport" is not enabled on testnet as we still need to deploy chain workers
-    if [[ "${VLAYER_ENV:-}" == "testnet" ]]; then
-        EXAMPLE_LIST=("${EXAMPLE_LIST[@]/simple-teleport}")
+    if [[ -v VLAYER_ENV ]]; then
+        if [[ "$VLAYER_ENV" == "testnet" ]]; then
+            EXAMPLE_LIST=("${EXAMPLE_LIST[@]/simple-teleport}")
+        fi
     fi
 
     if [[ -n ${EXAMPLE:-} ]]; then
