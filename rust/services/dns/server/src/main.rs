@@ -1,29 +1,14 @@
+mod cli;
 mod config;
 mod server;
 
-use std::net::SocketAddr;
-
 use clap::Parser;
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{init_tracing, LogFormat};
 use config::Config;
 use dotenvy::dotenv;
 use server::serve;
 
-#[derive(Parser)]
-#[command(version)]
-struct Cli {
-    #[arg(
-        long,
-        short,
-        env,
-        help = "Socket address to listen on",
-        default_value = "127.0.0.1:3002"
-    )]
-    listen_addr: SocketAddr,
-
-    #[clap(flatten)]
-    global_args: GlobalArgs,
-}
+use crate::cli::Cli;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -31,7 +16,7 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
-    let config = Config::new(cli.listen_addr);
+    let config = Config::new(cli.listen_addr, cli.private_key.private_key()?);
 
     serve(config).await?;
 

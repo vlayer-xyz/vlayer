@@ -15,12 +15,18 @@ pub struct Signer {
     key: SigningKey<Sha256>,
 }
 
-impl Default for Signer {
-    fn default() -> Self {
-        let key = RsaPrivateKey::from_pkcs8_pem(PRIV_KEY).expect("Failed to decode private key");
+impl Signer {
+    pub fn new(priv_key: &str) -> Self {
+        let key = RsaPrivateKey::from_pkcs8_pem(priv_key).expect("Failed to decode private key");
         let key = SigningKey::<_>::new(key);
 
         Self { key }
+    }
+}
+
+impl Default for Signer {
+    fn default() -> Self {
+        Self::new(PRIV_KEY)
     }
 }
 
