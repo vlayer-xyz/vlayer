@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "rust/block_header",
     "rust/chain",
+    "rust/cli",
     "rust/common",
     "rust/guest_wrapper",
     "rust/guest_wrapper/build_utils",
@@ -160,6 +161,7 @@ call_host = { path = "rust/services/call/host" }
 call_server = { path = "rust/services/call/server" }
 call_server_lib = { path = "rust/services/call/server_lib" }
 chain = { path = "rust/chain" }
+cli = { path = "rust/cli" }
 common = { path = "rust/common" }
 guest_build_utils = { path = "rust/guest_wrapper/build_utils" }
 guest_wrapper = { path = "rust/guest_wrapper" }
