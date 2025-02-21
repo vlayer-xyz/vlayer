@@ -424,5 +424,24 @@ describe("headers redaction", () => {
         { start: 60, end: 89 },
       ]);
     });
+
+    test("all headers with headers_except", () => {
+      const redactionItem = {
+        response: {
+          headers_except: [],
+        },
+      };
+
+      const result = calculateHeadersRangesExcept(
+        TranscriptWithDoubleHeaders.recv,
+        redactionItem.response.headers_except,
+      );
+
+      expect(result).toEqual([
+        { start: 23, end: 52 },
+        { start: 60, end: 89 },
+        { start: 105, end: 136 },
+      ]);
+    });
   });
 });
