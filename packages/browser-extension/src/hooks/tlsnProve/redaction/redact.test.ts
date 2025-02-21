@@ -7,6 +7,7 @@ import {
   allRequestHeadersRedactedRanges,
   allResponseHeadersRedactedRanges,
   getHeaderRange,
+  TranscriptWithDoubleHeaders
 } from "./tlsn.ranges.test.fixtures";
 import { InvalidRangeError } from "./utils";
 import { OutOfBoundsError } from "./utils";
@@ -328,6 +329,65 @@ describe("redact tests", () => {
       const result = calcRedactionRanges(mockTranscript, []);
 
       expect(result).toEqual({ sent: [], recv: [] });
+    });
+
+    test("handles duplicated headers", () => {
+      const redactionConfig: RedactionConfig = [
+        {
+          response: {
+            headers: ["date"],
+          },
+        },
+        {
+          request: {
+            headers: ["host"],
+          },
+        },
+      ];
+
+      const result = calcRedactionRanges(TranscriptWithDoubleHeaders, redactionConfig);
+
+      expect(result.recv).toEqual([
+        { start: 23, end: 52 },
+        { start: 60, end: 89 },
+      ]);
+      expect(result.sent).toEqual([
+        { start: 31, end: 36 },
+        { start: 44, end: 49 },
+        { start: 57, end: 62 },
+        { start: 70, end: 75 },
+        { start: 83, end: 88 },
+      ]);
+    });
+
+    test("handles duplicated headers with headers_except none", () => {
+      const redactionConfig: RedactionConfig = [
+        {
+          response: {
+            headers_except: [],
+          },
+        },
+        {
+          request: {
+            headers_except: [],
+          },
+        },
+      ];
+
+      const result = calcRedactionRanges(TranscriptWithDoubleHeaders, redactionConfig);
+
+      expect(result.recv).toEqual([
+        { start: 23, end: 52 },
+        { start: 60, end: 89 },
+        { start: 105, end: 136 },
+      ]);
+      expect(result.sent).toEqual([
+        { start: 31, end: 36 },
+        { start: 44, end: 49 },
+        { start: 57, end: 62 },
+        { start: 70, end: 75 },
+        { start: 83, end: 88 },
+      ]);
     });
   });
 });
