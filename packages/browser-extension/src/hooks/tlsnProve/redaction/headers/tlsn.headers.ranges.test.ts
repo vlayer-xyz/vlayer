@@ -338,12 +338,12 @@ describe("headers redaction", () => {
           headers: ["date"],
         },
       };
-  
+
       const result = calculateHeadersRanges(
         TranscriptWithDoubleHeaders.recv.message,
         redactionItem.response.headers,
       );
-  
+
       expect(result).toEqual([
         { start: 23, end: 52 },
         { start: 60, end: 89 },
@@ -402,9 +402,7 @@ describe("headers redaction", () => {
         redactionItem.response.headers_except,
       );
 
-      expect(result).toEqual([
-        { start: 105, end: 136 },
-      ]);
+      expect(result).toEqual([{ start: 105, end: 136 }]);
     });
 
     test("headers_except not duplicated", () => {

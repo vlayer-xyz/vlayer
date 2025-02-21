@@ -6,7 +6,7 @@ const stepAfterColon = 2;
 
 const filterExceptHeaders = (except: string[], headers: string[]) => {
   const filteredHeaders = headers.filter((header) => !except.includes(header));
-  return [...new Set(filteredHeaders)];;
+  return [...new Set(filteredHeaders)];
 };
 
 const findAllHeaders = (transcript: MessagePartTranscript, header: string) => {

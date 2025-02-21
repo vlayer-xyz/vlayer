@@ -7,7 +7,7 @@ import {
   allRequestHeadersRedactedRanges,
   allResponseHeadersRedactedRanges,
   getHeaderRange,
-  TranscriptWithDoubleHeaders
+  TranscriptWithDoubleHeaders,
 } from "./tlsn.ranges.test.fixtures";
 import { InvalidRangeError } from "./utils";
 import { OutOfBoundsError } from "./utils";
@@ -345,7 +345,10 @@ describe("redact tests", () => {
         },
       ];
 
-      const result = calcRedactionRanges(TranscriptWithDoubleHeaders, redactionConfig);
+      const result = calcRedactionRanges(
+        TranscriptWithDoubleHeaders,
+        redactionConfig,
+      );
 
       expect(result.recv).toEqual([
         { start: 23, end: 52 },
@@ -374,7 +377,10 @@ describe("redact tests", () => {
         },
       ];
 
-      const result = calcRedactionRanges(TranscriptWithDoubleHeaders, redactionConfig);
+      const result = calcRedactionRanges(
+        TranscriptWithDoubleHeaders,
+        redactionConfig,
+      );
 
       expect(result.recv).toEqual([
         { start: 23, end: 52 },
