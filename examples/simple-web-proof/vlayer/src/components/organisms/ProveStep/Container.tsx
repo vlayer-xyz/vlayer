@@ -10,7 +10,7 @@ export const ProveStep = () => {
   const [disabled, setDisabled] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { requestWebProof, webProof, callProver, isPending, result } =
+  const { requestWebProof, webProof, callProver, isPending, result, error } =
     useSimpleWebProof();
 
   useEffect(() => {
@@ -35,6 +35,7 @@ export const ProveStep = () => {
       isPending={isPending}
       disabled={disabled}
       setDisabled={setDisabled}
+      errorMsg={error?.message}
     />
   );
 };
