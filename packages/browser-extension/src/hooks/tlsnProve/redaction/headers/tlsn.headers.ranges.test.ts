@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   getHeaderRange,
   XAPICallTranscript,
+  TranscriptWithDoubleHeaders,
   allRequestHeadersRedactedRanges,
   allResponseHeadersRedactedRanges,
 } from "../tlsn.ranges.test.fixtures";
@@ -297,6 +298,38 @@ describe("headers redaction", () => {
           redactionItem.request.headers,
         ),
       ).toThrowError(HeaderNotFoundError);
+    });
+  });
+
+  describe("duplicated headers", () => {
+    test("no headers", () => {
+      const redactionItem = {
+        response: {
+          headers: [],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        TranscriptWithDoubleHeaders.recv.message,
+        redactionItem.response.headers,
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    test("not duplicated header", () => {
+      const redactionItem = {
+        response: {
+          headers: ["content-type"],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        TranscriptWithDoubleHeaders.recv.message,
+        redactionItem.response.headers,
+      );
+
+      expect(result).toEqual([{ start: 105, end: 136 }]);
     });
   });
 });

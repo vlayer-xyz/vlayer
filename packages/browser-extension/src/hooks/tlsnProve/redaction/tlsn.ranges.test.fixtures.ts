@@ -60,6 +60,19 @@ export const XAPICallTranscript = {
   }),
 };
 
+const TlsnTranscriptWithDoubleHeaders = {
+  recv: 'HTTP/1.1 200 OK\r\ndate: Wed, 19 Feb 2025 15:55:59 GMT\r\ndate: Wed, 19 Feb 2025 15:55:59 GMT\r\ncontent-type: application/json; charset=utf-8\r\n\r\n',
+  sent: `GET https://x.com/i/api\r\nhost: x.com\r\nhost: x.com\r\nhost: x.com\r\nhost: x.com\r\nhost: x.com\r\n\r\n`,
+};
+
+export const TranscriptWithDoubleHeaders = {
+  recv: parseHttpMessage(TlsnTranscriptWithDoubleHeaders.recv),
+  sent: parseHttpMessage(TlsnTranscriptWithDoubleHeaders.sent, {
+    enforceContentType: false,
+    defaultEncoding: Encoding.UTF8,
+  }),
+};
+
 export const allRequestHeadersRedactedRanges = extractHeaders(
   XAPICallTranscript.sent.message.content.toString(),
 ).map((header) => getHeaderRange(XAPICallTranscript.sent, header));
