@@ -16,7 +16,21 @@ pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf> {
     do_find_foundry_root_from(&start, &git_root)
 }
 
+const IGNORES: &[&str] = &["node_modules"];
+
 pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> {
+    copy_dir_to_dir_with_ignores(src_dir, dst_dir, IGNORES)
+}
+
+fn is_ignored<P: AsRef<Path>>(path: &Path, ignores: &[P]) -> bool {
+    ignores.iter().any(|x| path.ends_with(x))
+}
+
+pub(crate) fn copy_dir_to_dir_with_ignores<P: AsRef<Path>>(
+    src_dir: &Path,
+    dst_dir: &Path,
+    ignores: &[P],
+) -> anyhow::Result<()> {
     if !dst_dir.is_dir() {
         fs::create_dir_all(dst_dir)
             .with_context(|| format!("Failed to create path '{}'", dst_dir.display()))?;
@@ -30,17 +44,19 @@ pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> 
         let file_type = entry.file_type()?;
         let file_name = entry.file_name();
         let dst = dst_dir.join(file_name);
+        let src = entry.path();
+
+        if is_ignored(&src, ignores) {
+            continue;
+        }
+
         if file_type.is_dir() {
-            copy_dir_to(&entry.path(), &dst).with_context(|| {
-                format!(
-                    "Failed to copy directory from '{}' to '{}'",
-                    entry.path().display(),
-                    dst.display()
-                )
+            copy_dir_to_dir_with_ignores(&src, &dst, ignores).with_context(|| {
+                format!("Failed to copy directory from '{}' to '{}'", src.display(), dst.display())
             })?;
         } else if file_type.is_symlink() {
-            let link = fs::read_link(entry.path())?;
-            let mut full_link_path = entry.path().parent().map_or("/".into(), PathBuf::from);
+            let link = fs::read_link(&src)?;
+            let mut full_link_path = src.parent().map_or("/".into(), PathBuf::from);
             full_link_path.push(&link);
             let orig = fs::canonicalize(&full_link_path).with_context(|| {
                 format!("Failed to canonicalize path '{}'", full_link_path.display())
@@ -50,12 +66,8 @@ pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> 
                 format!("Failed to symlink '{}' as '{}'", orig.display(), dst.display())
             })?;
         } else {
-            fs::copy(entry.path(), &dst).with_context(|| {
-                format!(
-                    "Failed to copy file from '{}' to '{}'",
-                    entry.path().display(),
-                    dst.display()
-                )
+            fs::copy(&src, &dst).with_context(|| {
+                format!("Failed to copy file from '{}' to '{}'", src.display(), dst.display())
             })?;
         }
     }
@@ -270,6 +282,23 @@ mod tests {
                 .unwrap()
                 .contains(target.to_str().unwrap()));
             assert_eq!("dummy", fs::read_to_string(dst_link).unwrap());
+        }
+
+        #[test]
+        fn respect_ignores() {
+            create_temp_dirs!(src_dir, dst_dir);
+
+            fs::create_dir_all(src_dir.join("outer/ignored/inner")).unwrap();
+            fs::create_dir_all(src_dir.join("outer/inner")).unwrap();
+            fs::create_dir_all(src_dir.join("ignored")).unwrap();
+
+            copy_dir_to_dir_with_ignores(&src_dir, &dst_dir, &["ignored"]).unwrap();
+
+            assert!(dst_dir.join("outer").exists());
+            assert!(dst_dir.join("outer/inner").exists());
+            assert!(!dst_dir.join("outer/ignored/inner").exists());
+            assert!(!dst_dir.join("outer/ignored").exists());
+            assert!(!dst_dir.join("ignored").exists());
         }
     }
 }
