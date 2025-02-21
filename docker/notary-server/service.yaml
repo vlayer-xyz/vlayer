@@ -1,0 +1,16 @@
+services:
+  notary-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notary-server
+    ports:
+      - "127.0.0.1:7047:7047"
+    volumes:
+      - ../notary-config:/root/.notary-server/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7047"]
+      interval: 5s
+      timeout: 60s
+      retries: 10
+      start_period: 5s

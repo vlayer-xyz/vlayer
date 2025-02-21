@@ -28,9 +28,9 @@ touch "${ARCHIVE}"
         testdata="${example}/testdata"
 
         cp "${VLAYER_HOME}/docker/docker-compose.devnet.yaml" "${scripts}/"
-        cp "${VLAYER_HOME}/docker/anvil.yaml" "${scripts}/"
-        cp "${VLAYER_HOME}/docker/vdns.yaml" "${scripts}/"
-        cp "${VLAYER_HOME}/docker/web.yaml" "${scripts}/"
+        cp "${VLAYER_HOME}/docker/anvil/service.yaml" "${scripts}/"
+        cp "${VLAYER_HOME}/docker/vdns_server/service.yaml" "${scripts}/"
+        cp "${VLAYER_HOME}/docker/websockify/service.yaml" "${scripts}/"
         cp -a "${VLAYER_HOME}/docker/notary-config" "${scripts}/"
 
         tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${contracts}"

@@ -1,0 +1,19 @@
+services:
+  vlayer-call-server:
+    depends_on:
+      - anvil-l1
+      - anvil-l2-op
+    image: ghcr.io/vlayer-xyz/call_server:latest
+    container_name: vlayer-call-server
+    pull_policy: always
+    environment:
+      RUST_LOG: "info,call_engine=debug"
+    command: "--proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-l1:8545 --rpc-url 31338:http://anvil-l2-op:8545"
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 5s
+      timeout: 60s
+      retries: 10
+      start_period: 5s

@@ -1,0 +1,31 @@
+x-healthcheck: &anvil-healthcheck
+  interval: 5s
+  timeout: 60s
+  retries: 10
+  start_period: 5s
+  test: ["CMD", "curl", "-X", "POST", "http://localhost:8545", "-H", "Content-Type: application/json", "--data", "{\"jsonrpc\":\"2.0\",\"method\":\"web3_clientVersion\",\"params\":[],\"id\":1}"]
+
+services:
+  anvil-l1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: anvil-l1
+    platform: linux/amd64
+    command: ["anvil --host 0.0.0.0 --chain-id 31337"]
+    ports:
+      - "127.0.0.1:8545:8545"
+    healthcheck:
+      <<: *anvil-healthcheck
+
+  anvil-l2-op:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: anvil-l2-op
+    platform: linux/amd64
+    command: ["anvil --host 0.0.0.0 --chain-id 31338 --optimism -m 'indoor dish desk flag debris potato excuse depart ticket judge file exit'"]
+    ports:
+      - "127.0.0.1:8546:8545"
+    healthcheck:
+      <<: *anvil-healthcheck

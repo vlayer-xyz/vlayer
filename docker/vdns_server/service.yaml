@@ -9,4 +9,8 @@ services:
     ports:
       - "127.0.0.1:3002:3002"
     healthcheck:
-      test: ["CMD-SHELL", "true"]
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 5s
+      timeout: 60s
+      retries: 10
+      start_period: 5s

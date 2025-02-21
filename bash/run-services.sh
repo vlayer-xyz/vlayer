@@ -9,7 +9,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/run_services/lib.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/run_services/config.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/run_services/cleanup.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/lib/healthcheck.sh"
+
 # Cleanup setup
 trap cleanup EXIT ERR INT
 
@@ -51,10 +51,7 @@ ensure_binaries_built
 echo "Starting services..."
 
 if [[ $VLAYER_ENV == "dev" ]]; then
-    docker compose -f $DOCKER_COMPOSE_FILE up -d 
-    echo '::group::docker health check containers'
-    check_services_health
-    echo '::endgroup::'
+    docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op 
 fi
 
 if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
