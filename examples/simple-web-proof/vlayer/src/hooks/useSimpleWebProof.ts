@@ -80,8 +80,16 @@ export const useSimpleWebProof = () => {
     console.error("callProverError", callProverError);
   }
 
-  const { isPending: isWaitingForProvingResult, data: result } =
+  const { 
+    isPending: isWaitingForProvingResult, 
+    data: result,
+    error: waitForProvingResultError,
+  } =
     useWaitForProvingResult(hash);
+
+  if (waitForProvingResultError) {
+    console.error("waitForProvingResultError", waitForProvingResultError);
+  }
 
   const [, setWebProof] = useLocalStorage("webProof", "");
   const [, setProverResult] = useLocalStorage("proverResult", "");
@@ -107,6 +115,6 @@ export const useSimpleWebProof = () => {
       isWebProofPending || isCallProverPending || isWaitingForProvingResult,
     callProver,
     result,
-    error: webProofError || callProverError,
+    error: webProofError || callProverError || waitForProvingResultError,
   };
 };
