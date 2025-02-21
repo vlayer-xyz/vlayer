@@ -80,12 +80,11 @@ export const useSimpleWebProof = () => {
     console.error("callProverError", callProverError);
   }
 
-  const { 
-    isPending: isWaitingForProvingResult, 
+  const {
+    isPending: isWaitingForProvingResult,
     data: result,
     error: waitForProvingResultError,
-  } =
-    useWaitForProvingResult(hash);
+  } = useWaitForProvingResult(hash);
 
   if (waitForProvingResultError) {
     console.error("waitForProvingResultError", waitForProvingResultError);
