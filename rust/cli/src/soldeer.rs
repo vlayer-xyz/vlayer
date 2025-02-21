@@ -37,10 +37,12 @@ fn do_add_remappings(foundry_root: &Path, remappings: &[(String, String)]) -> Re
     let remappings_path = foundry_root.join("remappings.txt");
 
     let keys: Vec<String> = remappings.iter().map(|(x, _)| x.clone()).collect();
-    let mut all_remappings = filter_existing_remappings(&remappings_path, &keys)?;
+    let all_remappings = filter_existing_remappings(&remappings_path, &keys)?;
 
-    let mut remappings: Vec<String> = remappings.iter().map(|(x, y)| format!("{x}={y}")).collect();
-    all_remappings.append(&mut remappings);
+    let mut all_remappings: Vec<String> = all_remappings
+        .into_iter()
+        .chain(remappings.iter().map(|(x, y)| format!("{x}={y}")))
+        .collect();
     all_remappings.sort();
 
     let mut file = OpenOptions::new()

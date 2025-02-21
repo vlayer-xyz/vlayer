@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     convert::TryFrom,
     fs::{self, OpenOptions},
     io::{Cursor, Read, Write},
@@ -15,7 +14,7 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::{
-    config::{Config, Dependency, Error as ConfigError, Template},
+    config::{Config, Error as ConfigError, JsDependencies, SolDependencies, Template},
     errors::{Error as CLIError, Result as CLIResult},
     soldeer::{add_remappings, install as soldeer_install},
     utils::{
@@ -94,10 +93,10 @@ fn default_templates_url(version: &str) -> String {
     format!("https://vlayer-releases.s3.eu-north-1.amazonaws.com/{version}/examples.tar.gz")
 }
 
-async fn install_soldeer_dependencies<P: AsRef<Path> + Clone>(
-    contracts: &HashMap<String, Dependency<P>>,
+async fn install_solidity_dependencies<P: AsRef<Path> + Clone>(
+    dependencies: &SolDependencies<P>,
 ) -> CLIResult<()> {
-    for (name, dep) in contracts {
+    for (name, dep) in dependencies.as_ref() {
         match dep.path() {
             Some(path) => {
                 match std::fs::create_dir("dependencies") {
@@ -131,10 +130,7 @@ async fn install_soldeer_dependencies<P: AsRef<Path> + Clone>(
     Ok(())
 }
 
-fn change_sdk_dependency_to_npm(
-    foundry_root: &Path,
-    deps: &HashMap<String, Dependency>,
-) -> CLIResult<()> {
+fn change_sdk_dependency_to_npm(foundry_root: &Path, deps: &JsDependencies) -> CLIResult<()> {
     let package_json = foundry_root.join("vlayer").join("package.json");
     let mut file = OpenOptions::new().read(true).open(package_json.clone())?;
     let mut contents = String::new();
@@ -147,7 +143,7 @@ fn change_sdk_dependency_to_npm(
         .and_then(serde_json::Value::as_object)
         .map_or(Map::new(), Clone::clone);
 
-    for (name, dep) in deps {
+    for (name, dep) in deps.as_ref() {
         let path = dep.path().map(|p| format!("file:{p}"));
         dependencies_map.insert(
             name.into(),
@@ -255,12 +251,12 @@ async fn init_existing(
     info!("Initialising soldeer");
     init_soldeer(&root_path)?;
 
-    info!("Installing soldeer dependencies");
-    install_soldeer_dependencies(config.contracts()).await?;
-    info!("Successfully installed all soldeer dependencies");
-    add_remappings(&root_path, config.contracts().values())?;
+    info!("Installing solidity dependencies");
+    install_solidity_dependencies(&config.sol_dependencies).await?;
+    info!("Successfully installed all solidity dependencies");
+    add_remappings(&root_path, config.sol_dependencies.values())?;
 
-    change_sdk_dependency_to_npm(&root_path, config.npm())?;
+    change_sdk_dependency_to_npm(&root_path, &config.js_dependencies)?;
 
     std::env::set_current_dir(&cwd)?;
 
@@ -383,10 +379,16 @@ pub(crate) fn create_vlayer_dir(src_path: &Path) -> anyhow::Result<PathBuf> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
+
     use tempfile::TempDir;
 
     use super::*;
-    use crate::{config::DetailedDependency, test_utils::create_temp_git_repo, version};
+    use crate::{
+        config::{Dependency, DetailedDependency},
+        test_utils::create_temp_git_repo,
+        version,
+    };
 
     fn prepare_empty_foundry_dir(src_name: &str) -> TempDir {
         // creates a temporary directory with a foundry.toml file
@@ -466,7 +468,7 @@ mod tests {
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "some initial remappings\n").unwrap();
 
-        add_remappings(&root_path, config.contracts().values()).unwrap();
+        add_remappings(&root_path, config.sol_dependencies.values()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
@@ -492,7 +494,7 @@ mod tests {
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "vlayer-0.1.0/=dependencies/vlayer-0.0.0/src/\n").unwrap();
 
-        add_remappings(&root_path, config.contracts().values()).unwrap();
+        add_remappings(&root_path, config.sol_dependencies.values()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
@@ -548,9 +550,9 @@ mod tests {
         } = TestPackageJson::empty();
 
         let mut config = Config::default();
-        config.npm.remove("@vlayer/react");
+        config.js_dependencies.remove("@vlayer/react");
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
@@ -566,7 +568,7 @@ mod tests {
 
         let config = Config::default();
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
@@ -582,7 +584,7 @@ mod tests {
 
         let config = Config::default();
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
@@ -602,7 +604,7 @@ mod tests {
 
         let config = Config::default();
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
@@ -620,14 +622,14 @@ mod tests {
 
         let mut config = Config::default();
         {
-            let dep = config.npm.get_mut("@vlayer/sdk").unwrap();
+            let dep = config.js_dependencies.get_mut("@vlayer/sdk").unwrap();
             *dep = Dependency::Detailed(DetailedDependency {
                 path: Some(SDK_PATH.into()),
                 ..Default::default()
             });
         }
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.npm()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"file:{SDK_PATH}\"");
@@ -685,14 +687,14 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_install_soldeer_dependencies_from_local_path() {
+    async fn test_install_solidity_dependencies_from_local_path() {
         let source = tempfile::tempdir().unwrap();
         let dest = tempfile::tempdir().unwrap();
 
         std::env::set_current_dir(dest.path()).unwrap();
 
-        let mut contracts = HashMap::new();
-        contracts.insert(
+        let mut dependencies = BTreeMap::new();
+        dependencies.insert(
             "vlayer".to_string(),
             Dependency::Detailed(DetailedDependency {
                 path: Some(source.path().to_owned()),
@@ -701,7 +703,9 @@ mod tests {
             }),
         );
 
-        install_soldeer_dependencies(&contracts).await.unwrap();
+        install_solidity_dependencies(&SolDependencies(dependencies))
+            .await
+            .unwrap();
 
         let dep_path: PathBuf = [dest.path().to_str().unwrap(), "dependencies", "vlayer"]
             .iter()

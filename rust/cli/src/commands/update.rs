@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     fs,
     path::{Path, PathBuf},
     process::ExitStatus,
@@ -9,7 +8,7 @@ use colored::Colorize;
 use serde_json::Value;
 
 use crate::{
-    config::{Config, Dependency, Error as ConfigError},
+    config::{Config, Error as ConfigError, SolDependencies},
     errors::{Error, Result},
     soldeer::{add_remappings, install},
 };
@@ -18,7 +17,7 @@ pub async fn run_update() -> Result<()> {
     check_if_vlayerup_exists()?;
     update_cli()?;
     update_sdk()?;
-    update_soldeer().await?;
+    update_contracts().await?;
     update_docker()?;
 
     println!("🎉 Update complete.");
@@ -65,11 +64,11 @@ fn do_update_sdk(path: &Path, package_json: &Value) -> Result<()> {
     package_manager(path).update_vlayer()
 }
 
-async fn update_soldeer() -> Result<()> {
+async fn update_contracts() -> Result<()> {
     let foundry_toml = find_file_up_tree("foundry.toml")?;
     if let Some(mut foundry_toml_path) = foundry_toml {
         foundry_toml_path.pop();
-        do_update_soldeer(&foundry_toml_path).await
+        do_update_contracts(&foundry_toml_path).await
     } else {
         warn(&format!("{} not found. Skipping Soldeer update.", "foundry.toml".bold()))
     }
@@ -126,22 +125,22 @@ fn replace_vlayer_docker_image_version(content: &str, version: &String) -> Resul
         })
 }
 
-async fn do_update_soldeer(foundry_toml_path: &Path) -> Result<()> {
+async fn do_update_contracts(foundry_toml_path: &Path) -> Result<()> {
     let version = newest_vlayer_version()?;
 
     print_update_intention(&format!("vlayer contracts to {}", &version));
 
     let config = Config::default();
-    install_dependencies(config.contracts()).await?;
+    install_solidity_dependencies(&config.sol_dependencies).await?;
 
-    add_remappings(foundry_toml_path, config.contracts().values())?;
+    add_remappings(foundry_toml_path, config.sol_dependencies.values())?;
 
     Ok(())
 }
 
-async fn install_dependencies(contracts: &HashMap<String, Dependency>) -> Result<()> {
-    for (name, dep) in contracts {
-        if dep.path().is_some() {
+async fn install_solidity_dependencies(dependencies: &SolDependencies) -> Result<()> {
+    for (name, dep) in dependencies.as_ref() {
+        if dep.is_local() {
             continue;
         }
         let version = dep
