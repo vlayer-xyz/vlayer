@@ -131,9 +131,9 @@ async fn do_update_contracts(foundry_toml_path: &Path) -> Result<()> {
     print_update_intention(&format!("vlayer contracts to {}", &version));
 
     let config = Config::default();
-    install_solidity_dependencies(config.sol_dependencies()).await?;
+    install_solidity_dependencies(&config.sol_dependencies).await?;
 
-    add_remappings(foundry_toml_path, config.sol_dependencies().values())?;
+    add_remappings(foundry_toml_path, config.sol_dependencies.values())?;
 
     Ok(())
 }

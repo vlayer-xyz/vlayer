@@ -252,11 +252,11 @@ async fn init_existing(
     init_soldeer(&root_path)?;
 
     info!("Installing solidity dependencies");
-    install_solidity_dependencies(config.sol_dependencies()).await?;
+    install_solidity_dependencies(&config.sol_dependencies).await?;
     info!("Successfully installed all solidity dependencies");
-    add_remappings(&root_path, config.sol_dependencies().values())?;
+    add_remappings(&root_path, config.sol_dependencies.values())?;
 
-    change_sdk_dependency_to_npm(&root_path, config.js_dependencies())?;
+    change_sdk_dependency_to_npm(&root_path, &config.js_dependencies)?;
 
     std::env::set_current_dir(&cwd)?;
 
@@ -468,7 +468,7 @@ mod tests {
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "some initial remappings\n").unwrap();
 
-        add_remappings(&root_path, config.sol_dependencies().values()).unwrap();
+        add_remappings(&root_path, config.sol_dependencies.values()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
@@ -494,7 +494,7 @@ mod tests {
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "vlayer-0.1.0/=dependencies/vlayer-0.0.0/src/\n").unwrap();
 
-        add_remappings(&root_path, config.sol_dependencies().values()).unwrap();
+        add_remappings(&root_path, config.sol_dependencies.values()).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
@@ -552,7 +552,7 @@ mod tests {
         let mut config = Config::default();
         config.js_dependencies.remove("@vlayer/react");
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.js_dependencies()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
@@ -568,7 +568,7 @@ mod tests {
 
         let config = Config::default();
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.js_dependencies()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
@@ -584,7 +584,7 @@ mod tests {
 
         let config = Config::default();
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.js_dependencies()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"{}\"", version());
@@ -604,7 +604,7 @@ mod tests {
 
         let config = Config::default();
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.js_dependencies()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
@@ -629,7 +629,7 @@ mod tests {
             });
         }
 
-        change_sdk_dependency_to_npm(temp_dir.path(), config.js_dependencies()).unwrap();
+        change_sdk_dependency_to_npm(temp_dir.path(), &config.js_dependencies).unwrap();
 
         let new_contents = fs::read_to_string(package_json).unwrap();
         let expected_sdk_dependency = format!("\"@vlayer/sdk\": \"file:{SDK_PATH}\"");

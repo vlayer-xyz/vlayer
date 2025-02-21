@@ -30,13 +30,11 @@ pub struct SolDependencies<P: Clone = String>(pub BTreeMap<String, Dependency<P>
 #[derive(AsRef, Deref, DerefMut, Deserialize, Debug)]
 pub struct JsDependencies<P: Clone = String>(pub BTreeMap<String, Dependency<P>>);
 
-#[derive(Debug, Deserialize, AsRef)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub struct Config {
     pub template: Option<Template>,
-    #[as_ref]
     pub sol_dependencies: SolDependencies,
-    #[as_ref]
     pub js_dependencies: JsDependencies,
 }
 
@@ -51,14 +49,6 @@ impl Config {
         self.template
             .clone()
             .ok_or(Error::RequiredField("template".into()))
-    }
-
-    pub fn js_dependencies(&self) -> &JsDependencies {
-        self.as_ref()
-    }
-
-    pub fn sol_dependencies(&self) -> &SolDependencies {
-        self.as_ref()
     }
 
     pub fn canonicalize(&mut self) -> Result<()> {
@@ -273,12 +263,10 @@ vlayer = '0.0.1'
         let config = Config::default();
 
         assert_eq!(config.template().unwrap(), Template::Simple);
-
-        let sol_dependencies = config.sol_dependencies();
-        assert_eq!(sol_dependencies.len(), 4);
+        assert_eq!(config.sol_dependencies.len(), 4);
 
         {
-            let dep = sol_dependencies.get("vlayer").unwrap();
+            let dep = config.sol_dependencies.get("vlayer").unwrap();
             assert_eq!(dep.version().unwrap(), version);
             assert_eq!(
                 dep.remappings().unwrap(),
@@ -287,7 +275,10 @@ vlayer = '0.0.1'
         }
 
         {
-            let dep = sol_dependencies.get("@openzeppelin-contracts").unwrap();
+            let dep = config
+                .sol_dependencies
+                .get("@openzeppelin-contracts")
+                .unwrap();
             assert_eq!(dep.version().unwrap(), "5.0.1");
             assert_eq!(
                 dep.remappings().unwrap(),
@@ -299,7 +290,7 @@ vlayer = '0.0.1'
         }
 
         {
-            let dep = sol_dependencies.get("forge-std").unwrap();
+            let dep = config.sol_dependencies.get("forge-std").unwrap();
             assert_eq!(dep.version().unwrap(), "1.9.4");
             assert_eq!(
                 dep.remappings().unwrap(),
@@ -311,7 +302,7 @@ vlayer = '0.0.1'
         }
 
         {
-            let dep = sol_dependencies.get("risc0-ethereum").unwrap();
+            let dep = config.sol_dependencies.get("risc0-ethereum").unwrap();
             assert_eq!(dep.version().unwrap(), "1.2.0");
             assert_eq!(
                 dep.remappings().unwrap(),
@@ -319,11 +310,11 @@ vlayer = '0.0.1'
             );
         }
 
-        let js_dependencies = config.js_dependencies();
-        assert_eq!(js_dependencies.len(), 2);
+        assert_eq!(config.js_dependencies.len(), 2);
 
         assert_eq!(
-            js_dependencies
+            config
+                .js_dependencies
                 .get("@vlayer/sdk")
                 .unwrap()
                 .version()
@@ -331,7 +322,8 @@ vlayer = '0.0.1'
             version
         );
         assert_eq!(
-            js_dependencies
+            config
+                .js_dependencies
                 .get("@vlayer/react")
                 .unwrap()
                 .version()
@@ -364,16 +356,16 @@ vlayer = { path='../vlayer', remappings = [['abc/', 'dependencies/abc/']] }
 
         let config = Config::from_str(raw_config).unwrap();
 
-        let sol_dependencies = config.sol_dependencies();
-        {
-            let dep = sol_dependencies.get("vlayer").unwrap();
-            assert_eq!(dep.path().unwrap(), vlayer.to_string_lossy());
-        }
+        // On macOS, /var/tmp may be a symlink to /private/var/tmp, so we fuzzy match.
+        let dep = config.sol_dependencies.get("vlayer").unwrap();
+        assert!(dep.path().unwrap().contains(vlayer.to_str().unwrap()));
 
-        let js_dependencies = config.js_dependencies();
-        assert_eq!(
-            js_dependencies.get("@vlayer/sdk").unwrap().path().unwrap(),
-            vlayer.to_string_lossy()
-        );
+        assert!(config
+            .js_dependencies
+            .get("@vlayer/sdk")
+            .unwrap()
+            .path()
+            .unwrap()
+            .contains(vlayer.to_str().unwrap()));
     }
 }
