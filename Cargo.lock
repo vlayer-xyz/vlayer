@@ -1191,6 +1191,7 @@ dependencies = [
 name = "call_host"
 version = "0.1.0"
 dependencies = [
+ "alloy-chains",
  "alloy-primitives",
  "alloy-sol-types",
  "anyhow",
@@ -1204,10 +1205,12 @@ dependencies = [
  "derive-new",
  "derive_more",
  "dotenvy",
+ "ethers-core",
  "ethers-providers",
  "guest_wrapper",
  "host_utils",
  "insta",
+ "lazy_static",
  "maplit",
  "mpt",
  "provider",
@@ -1216,6 +1219,7 @@ dependencies = [
  "seal",
  "test-log",
  "thiserror 2.0.11",
+ "tokio",
  "tracing",
 ]
 

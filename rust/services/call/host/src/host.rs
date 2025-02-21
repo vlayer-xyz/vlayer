@@ -25,6 +25,8 @@ mod builder;
 mod config;
 pub(crate) mod error;
 mod prover;
+#[cfg(test)]
+mod tests;
 
 pub struct Host {
     start_execution_location: ExecutionLocation,

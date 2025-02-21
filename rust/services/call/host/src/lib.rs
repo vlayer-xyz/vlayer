@@ -8,3 +8,5 @@ pub use host::{
     error::preflight::Error as PreflightError, BuilderError, Config, Error, Host, PreflightResult,
     Prover, ProvingError, ProvingInput,
 };
+#[cfg(test)]
+mod test_harness;
