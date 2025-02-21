@@ -17,6 +17,7 @@ SyslogFacility=local0
 Environment=RUST_LOG={{ verifiable_dns_rust_log | join(',') }}
 Environment=VLAYER_LOG_FORMAT=json
 Environment=PATH=/home/ubuntu/.cargo/bin/:$PATH
+Environment=PRIVATE_KEY_PATH=/etc/vdns/private-key.pem
 ExecStart=/home/{{ ansible_user }}/.vlayer/bin/dns_server
 {{- ' --listen-addr ' }}
 {{- verifiable_dns_host if verifiable_dns_host is defined else '127.0.0.1' }}

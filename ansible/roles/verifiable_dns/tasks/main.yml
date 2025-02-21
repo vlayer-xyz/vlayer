@@ -22,6 +22,35 @@
     executable: /bin/bash
   notify: "Restart verifiable dns"
 
+- name: Create configuration directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/vdns
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: directory
+    mode: '755'
+
+- name: Install public key
+  become: true
+  ansible.builtin.copy:
+    src: public-key.pem
+    dest: /etc/vdns/public-key.pem
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '755'
+  notify: "Restart verifiable dns"
+
+- name: Install public key
+  become: true
+  ansible.builtin.copy:
+    src: private-key.pem
+    dest: /etc/vdns/private-key.pem
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '600'
+  notify: "Restart verifiable dns"
+
 - name: Install vlayer service file
   become: true
   ansible.builtin.template:
