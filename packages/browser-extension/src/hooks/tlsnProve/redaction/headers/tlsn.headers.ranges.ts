@@ -9,31 +9,47 @@ const filterExceptHeaders = (except: string[], headers: string[]) => {
   return filteredHeaders;
 };
 
+const findAllHeaders = (transcript: MessagePartTranscript, header: string) => {
+  const headerIndexes = [];
+
+  let headerIndex = transcript.content.caseInsensitiveIndexOf(`\r\n${header}:`);
+  while (headerIndex !== -1) {
+    headerIndexes.push(headerIndex);
+    headerIndex = transcript.content.caseInsensitiveIndexOf(
+      `\r\n${header}:`,
+      headerIndex + 1,
+    );
+  }
+
+  return headerIndexes;
+};
+
 const calculateHeadersRanges = (
   transcript: MessagePartTranscript,
   headers: string[],
 ) => {
-  return headers.map((header) => {
-    const headerStartInRange = transcript.content.caseInsensitiveIndexOf(
-      `\r\n${header}:`,
-    );
+  return headers.flatMap((header) => {
+    const headerStartsInRange = findAllHeaders(transcript, header);
 
-    if (headerStartInRange === -1) {
+    if (headerStartsInRange.length === 0) {
       throw new HeaderNotFoundError(header);
     }
-    const headerStart =
-      headerStartInRange +
-      transcript.range.start +
-      new EncodedString(`\r\n`, transcript.content.encoding).length;
-    const colonIndex = transcript.content.indexOf(":", headerStart);
-    const valueStart = colonIndex + stepAfterColon;
-    const nextNewline = transcript.content.indexOf("\r\n", valueStart);
-    const valueEnd =
-      nextNewline === -1 ? transcript.content.length : nextNewline;
-    return {
-      start: valueStart,
-      end: valueEnd,
-    };
+
+    return headerStartsInRange.map((headerStartInRange) => {
+      const headerStart =
+        headerStartInRange +
+        transcript.range.start +
+        new EncodedString(`\r\n`, transcript.content.encoding).length;
+      const colonIndex = transcript.content.indexOf(":", headerStart);
+      const valueStart = colonIndex + stepAfterColon;
+      const nextNewline = transcript.content.indexOf("\r\n", valueStart);
+      const valueEnd =
+        nextNewline === -1 ? transcript.content.length : nextNewline;
+      return {
+        start: valueStart,
+        end: valueEnd,
+      };
+    });
   });
 };
 

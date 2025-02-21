@@ -98,10 +98,10 @@ export class EncodedString {
     );
   }
 
-  caseInsensitiveIndexOf(needle: string): number {
+  caseInsensitiveIndexOf(needle: string, index: number = 0): number {
     return new EncodedString(
       this.stringRepresentation.toLowerCase(),
       this.encoding,
-    ).indexOf(needle.toLowerCase());
+    ).indexOf(needle.toLowerCase(), index);
   }
 }
