@@ -41,7 +41,7 @@
     mode: '755'
   notify: "Restart verifiable dns"
 
-- name: Install public key
+- name: Install private key
   become: true
   ansible.builtin.copy:
     src: private-key.pem
