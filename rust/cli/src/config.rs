@@ -1,14 +1,16 @@
-use std::{collections::HashMap, fmt, fs};
+use std::{collections::BTreeMap, fmt, fs};
 
 use anyhow::Context;
 use clap::ValueEnum;
+use derive_more::{AsRef, Deref, DerefMut};
 use serde::Deserialize;
+use thiserror::Error;
 
 use crate::version;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../config.toml");
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
     #[error("Missing required config field: {0}")]
     RequiredField(String),
@@ -22,12 +24,20 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, Deserialize)]
+#[derive(AsRef, Deref, DerefMut, Deserialize, Debug)]
+pub struct SolDependencies<P: Clone = String>(pub BTreeMap<String, Dependency<P>>);
+
+#[derive(AsRef, Deref, DerefMut, Deserialize, Debug)]
+pub struct JsDependencies<P: Clone = String>(pub BTreeMap<String, Dependency<P>>);
+
+#[derive(Debug, Deserialize, AsRef)]
 #[serde(rename_all = "kebab-case")]
 pub struct Config {
     pub template: Option<Template>,
-    pub contracts: HashMap<String, Dependency>,
-    pub npm: HashMap<String, Dependency>,
+    #[as_ref]
+    pub sol_dependencies: SolDependencies,
+    #[as_ref]
+    pub js_dependencies: JsDependencies,
 }
 
 impl Config {
@@ -43,21 +53,21 @@ impl Config {
             .ok_or(Error::RequiredField("template".into()))
     }
 
-    pub const fn npm(&self) -> &HashMap<String, Dependency> {
-        &self.npm
+    pub fn js_dependencies(&self) -> &JsDependencies {
+        self.as_ref()
     }
 
-    pub const fn contracts(&self) -> &HashMap<String, Dependency> {
-        &self.contracts
+    pub fn sol_dependencies(&self) -> &SolDependencies {
+        self.as_ref()
     }
 
     pub fn canonicalize(&mut self) -> Result<()> {
-        self.contracts
+        self.sol_dependencies
             .values_mut()
             .filter_map(Dependency::as_detailed_mut)
             .try_for_each(DetailedDependency::canonicalize)?;
 
-        self.npm
+        self.js_dependencies
             .values_mut()
             .filter_map(Dependency::as_detailed_mut)
             .try_for_each(DetailedDependency::canonicalize)?;
@@ -80,10 +90,7 @@ pub enum Dependency<P: Clone = String> {
     Detailed(DetailedDependency<P>),
 }
 
-impl<P> Dependency<P>
-where
-    P: Clone,
-{
+impl<P: Clone> Dependency<P> {
     pub fn path(&self) -> Option<P> {
         self.as_detailed().and_then(DetailedDependency::path)
     }
@@ -103,6 +110,10 @@ where
         self.as_detailed()
             .and_then(DetailedDependency::remappings)
             .ok_or(Error::RequiredField("remappings".into()))
+    }
+
+    pub fn is_local(&self) -> bool {
+        self.path().is_some()
     }
 
     pub const fn as_detailed(&self) -> Option<&DetailedDependency<P>> {
@@ -193,41 +204,33 @@ mod tests {
             "
 template = 'simple-web-proof'
 
-[contracts]
+[sol-dependencies]
 vlayer = { version='0.0.1', remappings = [['abc/', 'dependencies/abc/']] }
 
-[npm]
+[js-dependencies]
 '@vlayer/sdk' = '0.0.1'
             ",
         )
         .unwrap();
 
-        assert!(config.template().is_ok());
         assert_eq!(config.template().unwrap(), Template::SimpleWebProof);
 
         {
-            assert!(config.contracts.contains_key("vlayer"));
+            assert!(config.sol_dependencies.contains_key("vlayer"));
 
-            let dep = config.contracts.get("vlayer").unwrap();
-            assert!(matches!(dep, Dependency::Detailed(..)));
+            let dep = config
+                .sol_dependencies
+                .get("vlayer")
+                .unwrap()
+                .as_detailed()
+                .unwrap();
 
-            let Dependency::Detailed(DetailedDependency {
-                path,
-                version,
-                url,
-                remappings,
-            }) = dep
-            else {
-                unreachable!();
-            };
+            assert!(dep.path.is_none());
+            assert!(dep.url.is_none());
+            assert_eq!(dep.version.clone().unwrap(), "0.0.1");
 
-            assert!(path.is_none());
-            assert!(url.is_none());
-            assert_eq!(version.clone().unwrap(), "0.0.1");
-
-            let remappings = remappings.clone().unwrap();
-            assert_eq!(remappings.len(), 1);
-            assert_eq!(remappings[0], ("abc/".into(), "dependencies/abc/".into()));
+            let remappings = dep.remappings.clone().unwrap();
+            assert_eq!(remappings, &[("abc/".into(), "dependencies/abc/".into())]);
         }
     }
 
@@ -235,34 +238,32 @@ vlayer = { version='0.0.1', remappings = [['abc/', 'dependencies/abc/']] }
     fn test_missing_template_field() {
         let config = Config::from_str(
             "
-[contracts]
+[sol-dependencies]
 
-[npm]
+[js-dependencies]
             ",
         )
         .unwrap();
 
-        assert!(config.template().is_err());
         assert!(
             matches!(config.template().err().unwrap(), Error::RequiredField(field) if field == "template")
         );
     }
 
     #[test]
-    fn test_missing_remappings_for_contract_dep() {
+    fn test_missing_remappings_for_solidity_dep() {
         let config = Config::from_str(
             "
-[contracts]
+[sol-dependencies]
 vlayer = '0.0.1'
 
-[npm]
+[js-dependencies]
             ",
         )
         .unwrap();
 
-        assert!(config.contracts.contains_key("vlayer"));
         assert!(
-            matches!(config.contracts.get("vlayer").unwrap().remappings().err().unwrap(), Error::RequiredField(field) if field == "remappings")
+            matches!(config.sol_dependencies.get("vlayer").unwrap().remappings().err().unwrap(), Error::RequiredField(field) if field == "remappings")
         );
     }
 
@@ -273,12 +274,11 @@ vlayer = '0.0.1'
 
         assert_eq!(config.template().unwrap(), Template::Simple);
 
-        let contracts = config.contracts();
-        assert_eq!(contracts.len(), 4);
+        let sol_dependencies = config.sol_dependencies();
+        assert_eq!(sol_dependencies.len(), 4);
 
-        assert!(contracts.contains_key("vlayer"));
         {
-            let dep = contracts.get("vlayer").unwrap();
+            let dep = sol_dependencies.get("vlayer").unwrap();
             assert_eq!(dep.version().unwrap(), version);
             assert_eq!(
                 dep.remappings().unwrap(),
@@ -286,9 +286,8 @@ vlayer = '0.0.1'
             );
         }
 
-        assert!(contracts.contains_key("@openzeppelin-contracts"));
         {
-            let dep = contracts.get("@openzeppelin-contracts").unwrap();
+            let dep = sol_dependencies.get("@openzeppelin-contracts").unwrap();
             assert_eq!(dep.version().unwrap(), "5.0.1");
             assert_eq!(
                 dep.remappings().unwrap(),
@@ -299,9 +298,8 @@ vlayer = '0.0.1'
             );
         }
 
-        assert!(contracts.contains_key("forge-std"));
         {
-            let dep = contracts.get("forge-std").unwrap();
+            let dep = sol_dependencies.get("forge-std").unwrap();
             assert_eq!(dep.version().unwrap(), "1.9.4");
             assert_eq!(
                 dep.remappings().unwrap(),
@@ -312,9 +310,8 @@ vlayer = '0.0.1'
             );
         }
 
-        assert!(contracts.contains_key("risc0-ethereum"));
         {
-            let dep = contracts.get("risc0-ethereum").unwrap();
+            let dep = sol_dependencies.get("risc0-ethereum").unwrap();
             assert_eq!(dep.version().unwrap(), "1.2.0");
             assert_eq!(
                 dep.remappings().unwrap(),
@@ -322,13 +319,25 @@ vlayer = '0.0.1'
             );
         }
 
-        let npm = config.npm();
-        assert_eq!(npm.len(), 2);
+        let js_dependencies = config.js_dependencies();
+        assert_eq!(js_dependencies.len(), 2);
 
-        assert!(npm.contains_key("@vlayer/sdk"));
-        assert_eq!(npm.get("@vlayer/sdk").unwrap().version().unwrap(), version);
-        assert!(npm.contains_key("@vlayer/react"));
-        assert_eq!(npm.get("@vlayer/react").unwrap().version().unwrap(), version);
+        assert_eq!(
+            js_dependencies
+                .get("@vlayer/sdk")
+                .unwrap()
+                .version()
+                .unwrap(),
+            version
+        );
+        assert_eq!(
+            js_dependencies
+                .get("@vlayer/react")
+                .unwrap()
+                .version()
+                .unwrap(),
+            version
+        );
     }
 
     #[test]
@@ -336,10 +345,10 @@ vlayer = '0.0.1'
         let raw_config = "
 template = 'simple'
 
-[contracts]
+[sol-dependencies]
 vlayer = { path='../vlayer', remappings = [['abc/', 'dependencies/abc/']] }
 
-[npm]
+[js-dependencies]
 '@vlayer/sdk' = { path = '../vlayer' }
             ";
 
@@ -355,15 +364,16 @@ vlayer = { path='../vlayer', remappings = [['abc/', 'dependencies/abc/']] }
 
         let config = Config::from_str(raw_config).unwrap();
 
-        let contracts = config.contracts();
-        assert!(contracts.contains_key("vlayer"));
+        let sol_dependencies = config.sol_dependencies();
         {
-            let dep = contracts.get("vlayer").unwrap();
+            let dep = sol_dependencies.get("vlayer").unwrap();
             assert_eq!(dep.path().unwrap(), vlayer.to_string_lossy());
         }
 
-        let npm = config.npm();
-        assert!(npm.contains_key("@vlayer/sdk"));
-        assert_eq!(npm.get("@vlayer/sdk").unwrap().path().unwrap(), vlayer.to_string_lossy());
+        let js_dependencies = config.js_dependencies();
+        assert_eq!(
+            js_dependencies.get("@vlayer/sdk").unwrap().path().unwrap(),
+            vlayer.to_string_lossy()
+        );
     }
 }

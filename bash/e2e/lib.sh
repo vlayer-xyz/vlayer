@@ -66,23 +66,23 @@ function generate_vlayer_init_config() {
 
   cat <<EOF > config.toml
 template = "$EXAMPLE"
-[contracts.vlayer]
+[sol-dependencies.vlayer]
 path = "$VLAYER_HOME/contracts/vlayer"
 remappings = [["vlayer-0.1.0/", "dependencies/vlayer-0.1.0/src/"]]
-[contracts."@openzeppelin-contracts"]
+[sol-dependencies."@openzeppelin-contracts"]
 version = "5.0.1"
 remappings = [["openzeppelin-contracts/", "dependencies/@openzeppelin-contracts-5.0.1/"]]
-[contracts.forge-std]
+[sol-dependencies.forge-std]
 version = "1.9.4"
 remappings = [
   ["forge-std/", "dependencies/forge-std-1.9.4/src/"],
   ["forge-std-1.9.4/src/", "dependencies/forge-std-1.9.4/src/"]
 ]
-[contracts.risc0-ethereum]
+[sol-dependencies.risc0-ethereum]
 version = '1.2.0'
 url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip"
 remappings = [["risc0-ethereum-1.2.0/", "dependencies/risc0-ethereum-1.2.0/"]]
-[npm]
+[js-dependencies]
 "@vlayer/sdk" = { path = "$VLAYER_HOME/packages/sdk" }
 "@vlayer/react" = { path = "$VLAYER_HOME/packages/sdk-hooks" }
 EOF

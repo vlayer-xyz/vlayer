@@ -38,7 +38,7 @@ pub enum Error {
     Toml(#[from] toml::de::Error),
     #[error("Soldeer failed: {0}")]
     Soldeer(#[from] SoldeerError),
-    #[error("{0}")]
+    #[error(transparent)]
     Config(#[from] ConfigError),
 }
 
