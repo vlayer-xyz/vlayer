@@ -16,17 +16,17 @@ pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf> {
     do_find_foundry_root_from(&start, &git_root)
 }
 
-const DEFAULT_IGNORES: &[&str] = &["node_modules"];
+const IGNORES: &[&str] = &["node_modules"];
 
 pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> anyhow::Result<()> {
-    copy_dir_to_with_ignores(src_dir, dst_dir, DEFAULT_IGNORES)
+    copy_dir_to_dir_with_ignores(src_dir, dst_dir, IGNORES)
 }
 
-fn ignore_path<P: AsRef<Path>>(path: &Path, ignores: &[P]) -> bool {
+fn is_ignored<P: AsRef<Path>>(path: &Path, ignores: &[P]) -> bool {
     ignores.iter().any(|x| path.ends_with(x))
 }
 
-pub(crate) fn copy_dir_to_with_ignores<P: AsRef<Path>>(
+pub(crate) fn copy_dir_to_dir_with_ignores<P: AsRef<Path>>(
     src_dir: &Path,
     dst_dir: &Path,
     ignores: &[P],
@@ -46,12 +46,12 @@ pub(crate) fn copy_dir_to_with_ignores<P: AsRef<Path>>(
         let dst = dst_dir.join(file_name);
         let src = entry.path();
 
-        if ignore_path(&src, ignores) {
+        if is_ignored(&src, ignores) {
             continue;
         }
 
         if file_type.is_dir() {
-            copy_dir_to_with_ignores(&src, &dst, ignores).with_context(|| {
+            copy_dir_to_dir_with_ignores(&src, &dst, ignores).with_context(|| {
                 format!("Failed to copy directory from '{}' to '{}'", src.display(), dst.display())
             })?;
         } else if file_type.is_symlink() {
@@ -292,7 +292,7 @@ mod tests {
             fs::create_dir_all(src_dir.join("outer/inner")).unwrap();
             fs::create_dir_all(src_dir.join("ignored")).unwrap();
 
-            copy_dir_to_with_ignores(&src_dir, &dst_dir, &["ignored"]).unwrap();
+            copy_dir_to_dir_with_ignores(&src_dir, &dst_dir, &["ignored"]).unwrap();
 
             assert!(dst_dir.join("outer").exists());
             assert!(dst_dir.join("outer/inner").exists());
