@@ -1,2 +1,0 @@
-verifiable_dns_nginx_ip_rate_limit_per_minute: 30
-verifiable_dns_nginx_ip_rate_limit_burst: 5

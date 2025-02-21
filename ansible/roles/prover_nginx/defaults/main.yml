@@ -1,2 +1,0 @@
-prover_nginx_ip_rate_limit_per_minute: 30
-prover_nginx_ip_rate_limit_burst: 5

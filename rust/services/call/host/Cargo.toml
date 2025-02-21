@@ -4,27 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
-alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
-block_header = { workspace = true }
 bytes = { workspace = true }
-call_common = { workspace = true }
-call_engine = { workspace = true }
-chain = { workspace = true }
-common = { workspace = true }
-derive-new = { workspace = true }
-derive_more = { workspace = true }
-ethers-core = { workspace = true }
 host_utils = { workspace = true }
 lazy_static = { workspace = true }
-mpt = { workspace = true }
-provider = { workspace = true }
-revm = { workspace = true, features = ["serde", "std"] }
 risc0-zkvm = { workspace = true }
-seal = { workspace = true }
-thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }
 

@@ -1,1 +1,0 @@
-../../../target/assets/ImageID.sol

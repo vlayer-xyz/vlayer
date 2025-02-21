@@ -1,4 +1,0 @@
----
-vlayer_rust_log:
-  - info
-  - call_engine=debug

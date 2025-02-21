@@ -1,25 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
-    "rust/block_header",
-    "rust/chain",
-    "rust/cli",
     "rust/common",
     "rust/guest_wrapper",
     "rust/guest_wrapper/build_utils",
     "rust/host_utils",
-    "rust/mpt",
     "rust/provider",
     "rust/server_utils",
-    "rust/services/call/common",
-    "rust/services/call/engine",
     "rust/services/call/guest",
     "rust/services/call/host",
-    "rust/services/call/precompiles",
-    "rust/services/call/seal",
-    "rust/services/call/server",
-    "rust/services/call/server_lib",
-    "rust/version",
     "rust/web_proof",
 ]
 
@@ -152,16 +141,9 @@ vergen-gitcl = { version = "1.0.5", default-features = false }
 yansi = "1.0.1"
 
 block_header = { path = "rust/block_header" }
-seal = { path = "rust/services/call/seal" }
-call_common = { path = "rust/services/call/common" }
-call_precompiles = { path = "rust/services/call/precompiles" }
-call_engine = { path = "rust/services/call/engine" }
 call_guest = { path = "rust/services/call/guest" }
 call_host = { path = "rust/services/call/host" }
-call_server = { path = "rust/services/call/server" }
-call_server_lib = { path = "rust/services/call/server_lib" }
 chain = { path = "rust/chain" }
-cli = { path = "rust/cli" }
 common = { path = "rust/common" }
 guest_build_utils = { path = "rust/guest_wrapper/build_utils" }
 guest_wrapper = { path = "rust/guest_wrapper" }
@@ -169,7 +151,6 @@ host_utils = { path = "rust/host_utils" }
 mpt = { path = "rust/mpt" }
 provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
-version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
 
 [workspace.lints.clippy]

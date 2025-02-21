@@ -1,2 +1,0 @@
-# Vlayer component library 
-

@@ -5,20 +5,9 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
-alloy-rlp = { workspace = true }
-alloy-rlp-derive = { workspace = true }
-block_header = { workspace = true }
-call_common = { workspace = true }
-call_engine = { workspace = true }
-mpt = { workspace = true }
-revm = { workspace = true }
-
-[dev-dependencies]
-call_engine = { workspace = true, features = ["testing"] }
-tokio = { workspace = true, features = ["rt", "macros"] }
+serde_json = { workspace = true }
+web_proof = { workspace = true }
 
 [lints]
 workspace = true
 
-[package.metadata.cargo-machete]
-ignored = ["alloy-rlp"]
