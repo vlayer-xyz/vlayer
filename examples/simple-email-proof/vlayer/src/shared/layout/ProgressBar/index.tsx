@@ -16,7 +16,7 @@ export const ProgressBar = () => {
         Connect Wallet
       </li>
       <li className={`step text-black text-xs ${activeStepClass(2)}`}>
-        Get data from X
+        Send email
       </li>
       <li className={`step text-black text-xs ${activeStepClass(3)}`}>
         Mint NFT

@@ -23,6 +23,8 @@
     "react": "^18.3.1",
     "react-daisyui": "^5.0.5",
     "react-dom": "^18.3.1",
+    "usehooks-ts": "^3.1.1",
+    "uuid": "^11.0.5",
     "wagmi": "^2.14.6"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@ import {
 } from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
-import { usePrivateKey, getStrFromFile } from "../lib/utils";
+import { usePrivateKey } from "../lib/utils";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import { privateKeyToAccount } from "viem/accounts";
@@ -49,6 +49,7 @@ export const useEmailProofVerification = () => {
     address: import.meta.env.VITE_PROVER_ADDRESS,
     proverAbi: proverSpec.abi,
     functionName: "main",
+    token: import.meta.env.VITE_VLAYER_API_TOKEN,
   });
 
   const { data: proof, error: provingError } =
@@ -84,16 +85,15 @@ export const useEmailProofVerification = () => {
     }
   };
 
-  const startProving = async (uploadedEmlFile: File) => {
+  const startProving = async (emlContent: string) => {
     setCurrentStep(ProofVerificationStep.SENDING_TO_PROVER);
     const claimerAddr = usePrivateKey
       ? privateKeyToAccount(import.meta.env.VITE_PRIVATE_KEY as `0x${string}`)
           .address
       : (connectedAddr as Address);
 
-    const eml = await getStrFromFile(uploadedEmlFile);
     const email = await preverifyEmail(
-      eml,
+      emlContent,
       import.meta.env.VITE_DNS_SERVICE_URL,
     );
     await callProver([email, claimerAddr]);
@@ -102,6 +102,7 @@ export const useEmailProofVerification = () => {
 
   useEffect(() => {
     if (proof) {
+      console.log("proof", proof);
       verifyProofOnChain();
     }
   }, [proof]);
@@ -109,7 +110,9 @@ export const useEmailProofVerification = () => {
   useEffect(() => {
     if (status === "success") {
       setCurrentStep(ProofVerificationStep.DONE);
-      navigate(`/success?txHash=${txHash}`);
+      navigate(
+        `/success?txHash=${txHash}&domain=${proof[3] as string}&recipient=${proof[2] as string}`
+      );
     }
   }, [status]);
 

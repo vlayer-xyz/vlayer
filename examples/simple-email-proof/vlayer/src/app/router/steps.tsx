@@ -1,8 +1,10 @@
 import {
   WelcomePage,
   ConnectWallet,
-  SendEmail,
+  SendEmailContainer,
+  CollectEmailContainer,
   MintNFTContainer,
+  SuccessContainer,
 } from "../../pages";
 import React from "react";
 
@@ -21,6 +23,7 @@ export enum STEP_KIND {
   WELCOME,
   CONNECT_WALLET,
   SEND_EMAIL,
+  COLLECT_EMAIL,
   MINT_NFT,
   SUCCESS,
 }
@@ -48,7 +51,7 @@ export const steps: Step[] = [
   {
     path: "send-email",
     kind: STEP_KIND.SEND_EMAIL,
-    component: SendEmail,
+    component: SendEmailContainer,
     title: "Send Email",
     description:
       "Please copy the details provided below and use them to send the email.",
@@ -56,13 +59,32 @@ export const steps: Step[] = [
     index: 2,
   },
   {
+    path: "collect-email",
+    kind: STEP_KIND.COLLECT_EMAIL,
+    component: CollectEmailContainer,
+    title: "Waiting...",
+    description:
+      "Our mailbox is processing your email. Please wait a few seconds.",
+    backUrl: "send-email",
+    index: 2,
+  },
+  {
     path: "mint-nft",
     kind: STEP_KIND.MINT_NFT,
     component: MintNFTContainer,
     title: "Mint NFT",
-    description: "Copy or upload the sent email here.",
+    description: "Your email is ready for proving and minting.",
     backUrl: "send-email",
     index: 3,
+  },
+  {
+    path: "success",
+    headerIcon: "/img/success-icon.svg",
+    kind: STEP_KIND.SUCCESS,
+    component: SuccessContainer,
+    title: "Success",
+    description: "",
+    index: 4,
   },
 ];
 
