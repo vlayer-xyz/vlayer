@@ -13,4 +13,13 @@ services:
       - "127.0.0.1:7047:7047"
     volumes:
       - ./notary-config:/root/.notary-server/config
-    
+  json-server:
+    build:
+      context: ../
+      dockerfile: ./docker/json-server/Dockerfile
+    ports:
+      - "3011:3011"
+    networks:
+      default:
+        aliases:
+          - lotr-api.online
