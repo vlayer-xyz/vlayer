@@ -2,7 +2,7 @@
 
 ## Overview
 
-`simple-teleport` example tests teleport from L1 to L2. During execution, it runs the following scripts:
+`simple-teleport` example demonstrates teleport from L1 to L2. During execution, it runs the following scripts:
 
 ## Scripts
 
