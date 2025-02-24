@@ -110,5 +110,4 @@ All server infrastructure may undergo daily deployments to accommodate updates.
 |block cache | Server | daily | - | - |
 |notary| Server | daily | - | - |
 |web socket proxy | Server | daily | | | |
-|monitoring|  Server | daily | - | - |
 |proving network (Bonsai) | Server| | | uncontrollable |
