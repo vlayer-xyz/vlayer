@@ -1,3 +1,4 @@
+use call_common::Metadata;
 use call_engine::Call as EngineCall;
 use call_host::{Host, PreflightError, PreflightResult, ProvingInput};
 use tracing::info;
@@ -38,7 +39,33 @@ pub async fn await_preflight(
         elapsed_time = elapsed_time.as_millis(),
         "Finished stage",
     );
-    info!("Gathered metadata: {metadata:#?}");
+
+    for meta in &metadata {
+        match meta {
+            Metadata::Precompile(x) => {
+                info!(
+                    metadata = "precompile",
+                    precompile_tag = tracing::field::debug(x.tag),
+                    precompile_calldata_length = x.calldata_length
+                )
+            }
+            Metadata::StartChain(x) => info!(metadata = "start_chain", start_chain = x),
+            Metadata::SetChain(x) => {
+                info!(
+                    metadata = "set_chain",
+                    set_chain_chain_id = x.chain_id,
+                    set_chain_block_number = x.block_number
+                )
+            }
+            Metadata::SetBlock(x) => {
+                info!(
+                    metadata = "set_block",
+                    set_block_chain_id = x.chain_id,
+                    set_block_block_number = x.block_number
+                )
+            }
+        }
+    }
 
     gas_meter_client
         .refund(ComputationStage::Preflight, gas_used)
