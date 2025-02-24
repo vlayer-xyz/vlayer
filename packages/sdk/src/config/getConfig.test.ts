@@ -1,5 +1,5 @@
-import {describe, test, expect} from "vitest";
-import {getConfig} from "./getConfig";
+import { describe, test, expect } from "vitest";
+import { getConfig } from "./getConfig";
 
 describe("getConfig", () => {
   function mockEnv(env: Record<string, string>) {
@@ -16,7 +16,8 @@ describe("getConfig", () => {
       CHAIN_NAME: "ethereum",
       PROVER_URL: "http://localhost:3000",
       JSON_RPC_URL: "http://localhost:8545",
-      EXAMPLES_TEST_PRIVATE_KEY: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      EXAMPLES_TEST_PRIVATE_KEY:
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       VLAYER_API_TOKEN: "token",
       SHOULD_DEPLOY_VERIFIER_ROUTER: "true",
     });
@@ -28,7 +29,8 @@ describe("getConfig", () => {
       chainName: "ethereum",
       proverUrl: "http://localhost:3000",
       jsonRpcUrl: "http://localhost:8545",
-      privateKey: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      privateKey:
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       token: "token",
       deployConfig: {
         shouldRedeployVerifierRouter: true,
@@ -44,7 +46,8 @@ describe("getConfig", () => {
       CHAIN_NAME: "ethereum",
       PROVER_URL: "http://localhost:3000",
       JSON_RPC_URL: "http://localhost:8545",
-      EXAMPLES_TEST_PRIVATE_KEY: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      EXAMPLES_TEST_PRIVATE_KEY:
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       VLAYER_API_TOKEN: "token",
       SHOULD_DEPLOY_VERIFIER_ROUTER: "true",
     });
@@ -53,7 +56,7 @@ describe("getConfig", () => {
       chainName: "polygon",
       deployConfig: {
         shouldRedeployVerifierRouter: false,
-      }
+      },
     });
 
     expect(config).toEqual({
@@ -61,7 +64,8 @@ describe("getConfig", () => {
       chainName: "polygon",
       proverUrl: "http://localhost:3000",
       jsonRpcUrl: "http://localhost:8545",
-      privateKey: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      privateKey:
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       token: "token",
       deployConfig: {
         shouldRedeployVerifierRouter: false,
@@ -69,5 +73,5 @@ describe("getConfig", () => {
     });
 
     cleanup();
-  })
-})
+  });
+});

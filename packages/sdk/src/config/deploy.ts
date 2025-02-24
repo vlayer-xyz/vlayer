@@ -1,6 +1,6 @@
-import {getConfig} from "./getConfig";
-import {createContext} from "./createContext";
-import {type ContractArg, type ContractSpec} from "types/ethereum";
+import { getConfig } from "./getConfig";
+import { createContext } from "./createContext";
+import { type ContractArg, type ContractSpec } from "types/ethereum";
 import {
   type Account,
   type Address,
@@ -10,19 +10,19 @@ import {
   type PublicClient,
   type WalletClient,
 } from "viem";
-import {getChainConfirmations} from "./getChainConfirmations";
+import { getChainConfirmations } from "./getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
-import {v_versions} from "../api/v_versions";
+import { v_versions } from "../api/v_versions";
 
 const log = debug("vlayer:prover");
 
 export const waitForContractDeploy = async ({
-                                              hash,
-                                            }: {
+  hash,
+}: {
   hash: `0x${string}`;
 }): Promise<Address> => {
-  const {ethClient: client} = createContext(getConfig());
+  const { ethClient: client } = createContext(getConfig());
   const receipt = await client.waitForTransactionReceipt({
     hash,
     confirmations: getChainConfirmations(client.chain?.name),
@@ -40,11 +40,11 @@ export const waitForContractDeploy = async ({
 };
 
 export const waitForTransactionReceipt = async ({
-                                                  hash,
-                                                }: {
+  hash,
+}: {
   hash: `0x${string}`;
 }) => {
-  const {ethClient} = createContext(getConfig());
+  const { ethClient } = createContext(getConfig());
   return ethClient.waitForTransactionReceipt({
     hash,
     confirmations: getChainConfirmations(ethClient.chain?.name),
@@ -54,14 +54,14 @@ export const waitForTransactionReceipt = async ({
 };
 
 export const deployProver = async ({
-                                     proverSpec,
-                                     proverArgs,
-                                   }: {
+  proverSpec,
+  proverArgs,
+}: {
   proverSpec: ContractSpec;
   proverArgs?: ContractArg[];
 }) => {
   const config = getConfig();
-  const {ethClient, account, chain} = createContext(config);
+  const { ethClient, account, chain } = createContext(config);
 
   const proverHash = await ethClient.deployContract({
     chain,
@@ -71,16 +71,16 @@ export const deployProver = async ({
     bytecode: proverSpec.bytecode.object,
   });
   log(`Prover hash: ${proverHash}`);
-  const prover = await waitForContractDeploy({hash: proverHash});
+  const prover = await waitForContractDeploy({ hash: proverHash });
   return prover;
 };
 
 export const deployVlayerContracts = async ({
-                                              proverSpec,
-                                              verifierSpec,
-                                              proverArgs,
-                                              verifierArgs,
-                                            }: {
+  proverSpec,
+  verifierSpec,
+  proverArgs,
+  verifierArgs,
+}: {
   proverSpec: ContractSpec;
   verifierSpec: ContractSpec;
   proverArgs?: ContractArg[];
@@ -88,7 +88,7 @@ export const deployVlayerContracts = async ({
 }) => {
   log("Starting contract deployment process...");
   const config = getConfig();
-  const {chain, ethClient, account, deployConfig} = createContext(config);
+  const { chain, ethClient, account, deployConfig } = createContext(config);
 
   log("Deploying prover contract...");
   const proverHash = await ethClient.deployContract({
@@ -99,7 +99,7 @@ export const deployVlayerContracts = async ({
     bytecode: proverSpec.bytecode.object,
   });
   log(`Prover hash: ${proverHash}`);
-  const prover = await waitForContractDeploy({hash: proverHash});
+  const prover = await waitForContractDeploy({ hash: proverHash });
   log(`Prover contract deployed at: ${prover}`);
 
   log("Deploying verifier contract...");
@@ -110,7 +110,7 @@ export const deployVlayerContracts = async ({
     abi: verifierSpec.abi,
     bytecode: verifierSpec.bytecode.object,
   });
-  const verifier = await waitForContractDeploy({hash: verifierHash});
+  const verifier = await waitForContractDeploy({ hash: verifierHash });
   log(`Verifier contract deployed at: ${verifier}`);
 
   log("Contract deployment completed successfully");
@@ -118,7 +118,7 @@ export const deployVlayerContracts = async ({
     await swapInternalVerifier(ethClient, chain, account, verifier);
   }
 
-  return {prover, verifier};
+  return { prover, verifier };
 };
 
 const swapInternalVerifier = async (
@@ -152,12 +152,12 @@ const swapInternalVerifier = async (
     args: [newVerifier],
     abi: parseAbi(["function _setTestVerifier(address)"]),
   });
-  await waitForTransactionReceipt({hash: swapTxHash});
+  await waitForTransactionReceipt({ hash: swapTxHash });
   log("Internal verifier swapped successfully");
 };
 
 async function getImageId(): Promise<Hex> {
-  const {proverUrl} = getConfig();
+  const { proverUrl } = getConfig();
   const version = await v_versions(proverUrl);
   return version.result.call_guest_id as Hex;
 }

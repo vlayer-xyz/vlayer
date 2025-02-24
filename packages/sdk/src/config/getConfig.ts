@@ -1,17 +1,17 @@
 import dotenvflow from "dotenv-flow";
-import type {Hex} from "viem";
-import {z} from "zod";
+import type { Hex } from "viem";
+import { z } from "zod";
 
-import {type EnvConfig} from "./types";
-import {keysToCamelCase} from "../utils/camelCase";
+import { type EnvConfig } from "./types";
+import { keysToCamelCase } from "../utils/camelCase";
 
 export class EnvValidationError extends Error {
   constructor(validationResult: z.SafeParseError<unknown>) {
     super(
       "Some environment variables are misconfigured:\n" +
-      validationResult.error.errors
-        .map((err) => `  - ${err.path.join(".")}: ${err.message}`)
-        .join("\n"),
+        validationResult.error.errors
+          .map((err) => `  - ${err.path.join(".")}: ${err.message}`)
+          .join("\n"),
     );
     this.name = "EnvValidationError";
     Object.setPrototypeOf(this, EnvValidationError.prototype);
