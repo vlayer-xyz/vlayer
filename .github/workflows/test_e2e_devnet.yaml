@@ -2,14 +2,6 @@ name: E2E test against devnet
 
 on:
   pull_request:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - "packages/**"
-      - "bash/**"
-      - ".github/workflows/test_e2e_devnet.yaml"
-      - "contracts/**"
   merge_group:
   push:
     branches:

@@ -1,7 +1,7 @@
 use call_engine::Call as EngineCall;
 use call_host::Host;
 use dashmap::Entry;
-use tracing::{error, info};
+use tracing::{error, info, info_span};
 
 pub use crate::proving::RawData;
 use crate::{
@@ -91,11 +91,14 @@ pub async fn generate(
     call_hash: CallHash,
     chain_proof_config: Option<ChainProofConfig>,
 ) {
+    let span = info_span!("proof", id = tracing::field::display(call_hash));
+    let _enter = span.enter();
+
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let mut metrics = Metrics::default();
 
-    info!("Generating proof for {call_hash}");
+    info!("Generating proof");
 
     set_state(&proofs, call_hash, State::ChainProofPending);
 
