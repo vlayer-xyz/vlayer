@@ -1,4 +1,4 @@
-name: Health Check
+name: Docker Compose Smoke Tests
 
 on:
   pull_request:
