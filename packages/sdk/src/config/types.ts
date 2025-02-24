@@ -3,8 +3,7 @@
 // pre run deployment
 
 export type DeployConfig = {
-  isTesting: boolean;
-  imageId?: string;
+  shouldRedeployVerifierRouter: boolean;
 };
 
 export type EnvConfig = {
@@ -14,7 +13,7 @@ export type EnvConfig = {
   l2JsonRpcUrl?: string;
   privateKey: `0x${string}`;
   token?: string;
-  deployConfig?: DeployConfig;
+  deployConfig: DeployConfig;
 };
 
 // represents what is needed by client to properly

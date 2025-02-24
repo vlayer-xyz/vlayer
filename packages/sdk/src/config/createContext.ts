@@ -12,6 +12,8 @@ import { getChainConfirmations } from "./getChainConfirmations";
 import * as chains from "viem/chains";
 import type { EnvConfig, VlayerContextConfig } from "./types";
 
+export type EthClient = ReturnType<typeof createEthClient>;
+
 const getChainSpecs = (chainName: string): Chain => {
   try {
     return chains[chainName as keyof typeof chains] as Chain;
@@ -34,9 +36,9 @@ const createEthClient = (
 
 export function createContext(config: EnvConfig): {
   chain: Chain;
-  account: ReturnType<typeof privateKeyToAccount>;
+  account: PrivateKeyAccount;
   jsonRpcUrl: string;
-  ethClient: ReturnType<typeof createEthClient>;
+  ethClient: EthClient;
   confirmations: number;
 } & EnvConfig;
 
@@ -47,7 +49,7 @@ export function createContext(
   chain: Chain;
   jsonRpcUrl: string;
   account: PrivateKeyAccount;
-  ethClient: ReturnType<typeof createEthClient>;
+  ethClient: EthClient;
   confirmations: number;
 } & VlayerContextConfig;
 

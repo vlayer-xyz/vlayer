@@ -1,84 +1,80 @@
 import dotenvflow from "dotenv-flow";
-import { type DeployConfig, type EnvConfig } from "./types";
+import type { Hex } from "viem";
+import { z } from "zod";
 
-const ensureEnvVariable = (envVar: string) => {
-  if (!process.env[envVar]) {
-    if (envVar === "EXAMPLES_TEST_PRIVATE_KEY") {
-      throw new Error(
-        `${envVar} missing. Add a HEX private key with ETH in .env.local for deploy and verify transactions.`,
-      );
-    }
-    throw new Error(`${envVar} is not set`);
+import { type EnvConfig } from "./types";
+import { keysToCamelCase } from "../utils/camelCase";
+
+export class EnvValidationError extends Error {
+  constructor(validationResult: z.SafeParseError<unknown>) {
+    super(
+      "Some environment variables are misconfigured:\n" +
+        validationResult.error.errors
+          .map((err) => `  - ${err.path.join(".")}: ${err.message}`)
+          .join("\n"),
+    );
+    this.name = "EnvValidationError";
+    Object.setPrototypeOf(this, EnvValidationError.prototype);
   }
-  return process.env[envVar];
-};
+}
 
 const POSSIBLE_VLAYER_ENVS = ["testnet", "dev"] as const;
-type VlayerEnv = (typeof POSSIBLE_VLAYER_ENVS)[number];
-
-const ensureVlayerEnv = (): VlayerEnv => {
-  try {
-    if (!process.env.VLAYER_ENV) {
-      throw new Error(
-        `VLAYER_ENV is not set. Available options: ${POSSIBLE_VLAYER_ENVS.join(", ")}`,
-      );
-    }
-    if (!POSSIBLE_VLAYER_ENVS.includes(process.env.VLAYER_ENV as VlayerEnv)) {
-      throw new Error(
-        `Invalid VLAYER_ENV: ${process.env.VLAYER_ENV}. Available options: ${POSSIBLE_VLAYER_ENVS.join(", ")}`,
-      );
-    }
-  } catch (e) {
-    console.error(e);
-    return "dev";
-  }
-
-  return process.env.VLAYER_ENV as VlayerEnv;
-};
 
 const dotEnvFlowConfig = () => {
   dotenvflow.config({
-    node_env: ensureVlayerEnv(),
+    node_env: process.env.VLAYER_ENV,
+    default_node_env: "dev",
   });
 };
 
-export const toCamelCase = (str: string) =>
-  str
-    .toLowerCase()
-    .replace(/([-_][a-z])/g, (group) =>
-      group.toUpperCase().replace("-", "").replace("_", ""),
-    );
+const renameConfigKeys = (config: z.infer<typeof envSchema>) => {
+  const {
+    examplesTestPrivateKey,
+    vlayerApiToken,
+    shouldDeployVerifierRouter,
+    ...unchangedKeys
+  } = keysToCamelCase(config);
 
-const envVars = [
-  { var: "CHAIN_NAME" },
-  { var: "PROVER_URL" },
-  { var: "JSON_RPC_URL" },
-  { var: "L2_JSON_RPC_URL", optional: true },
-  { var: "EXAMPLES_TEST_PRIVATE_KEY", to: "privateKey" },
-  { var: "VLAYER_API_TOKEN", to: "token", optional: true },
-];
+  return {
+    ...unchangedKeys,
+    privateKey: examplesTestPrivateKey as Hex,
+    token: vlayerApiToken,
+    deployConfig: {
+      shouldRedeployVerifierRouter: shouldDeployVerifierRouter ?? false,
+    },
+  };
+};
 
-export const getConfig = () => {
+const stringBoolean = z.enum(["true", "false"]).transform((x) => x === "true");
+
+const envSchema = z.object({
+  VLAYER_ENV: z.enum(POSSIBLE_VLAYER_ENVS),
+  CHAIN_NAME: z.string(),
+  PROVER_URL: z.string().url(),
+  JSON_RPC_URL: z.string().url(),
+  L2_JSON_RPC_URL: z.string().url().optional(),
+  EXAMPLES_TEST_PRIVATE_KEY: z
+    .string()
+    .startsWith("0x")
+    .length(66)
+    .regex(/^0x[0-9a-fA-F]{64}$/),
+  VLAYER_API_TOKEN: z.string().optional(),
+  SHOULD_DEPLOY_VERIFIER_ROUTER: stringBoolean.optional(),
+});
+
+export const getConfig = (override: Partial<EnvConfig> = {}): EnvConfig => {
   dotEnvFlowConfig();
 
-  const deployConfig: DeployConfig = {
-    isTesting: true,
-  };
+  const validationResult = envSchema
+    .transform(renameConfigKeys)
+    .safeParse(process.env);
 
-  return envVars.reduce(
-    (config, envVar) => {
-      try {
-        return {
-          ...config,
-          [envVar.to ?? toCamelCase(envVar.var)]: ensureEnvVariable(envVar.var),
-        };
-      } catch (e) {
-        if (envVar.optional) {
-          return { ...config };
-        }
-        throw e;
-      }
-    },
-    { deployConfig } as EnvConfig,
-  );
+  if (!validationResult.success) {
+    throw new EnvValidationError(validationResult);
+  }
+
+  return {
+    ...validationResult.data,
+    ...override,
+  };
 };

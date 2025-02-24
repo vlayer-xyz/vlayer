@@ -42,7 +42,6 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
   proverArgs: [usdcTokenAddr, startBlock, endBlock, step],
   verifierArgs: [],
-  env: config.deployConfig,
 });
 
 const vlayer = createVlayerClient({
@@ -74,6 +73,7 @@ const verificationHash = await ethClient.writeContract({
 });
 
 const receipt = await waitForTransactionReceipt({
+  client: ethClient,
   hash: verificationHash,
 });
 
