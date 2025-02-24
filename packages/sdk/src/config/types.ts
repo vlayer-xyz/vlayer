@@ -11,6 +11,7 @@ export type EnvConfig = {
   proverUrl: string;
   jsonRpcUrl: string;
   l2JsonRpcUrl?: string;
+  dnsServiceUrl?: string;
   privateKey: `0x${string}`;
   token?: string;
   deployConfig: DeployConfig;
@@ -27,6 +28,7 @@ export type VlayerContextConfig = {
   proverUrl: string;
   wsProxyUrl?: string;
   notaryUrl?: string;
+  dnsServiceUrl?: string;
   privateKey?: `0x${string}`;
   deployConfig?: DeployConfig;
 };

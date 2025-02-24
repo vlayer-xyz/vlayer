@@ -17,6 +17,7 @@ const {
   ethClient,
   account: john,
   proverUrl,
+  dnsServiceUrl,
   confirmations,
 } = await createContext(config);
 
@@ -27,6 +28,10 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierArgs: [],
 });
 
+if (!dnsServiceUrl) {
+  throw new Error("DNS service URL is not set");
+}
+
 console.log("Proving...");
 const vlayer = createVlayerClient({
   url: proverUrl,
@@ -36,10 +41,7 @@ const hash = await vlayer.prove({
   proverAbi: proverSpec.abi,
   functionName: "main",
   chainId: chain.id,
-  args: [
-    await preverifyEmail(mimeEmail, "http://127.0.0.1:3002/dns-query"),
-    john.address,
-  ],
+  args: [await preverifyEmail(mimeEmail, dnsServiceUrl), john.address],
   token: config.token,
 });
 const result = await vlayer.waitForProvingResult({ hash });
