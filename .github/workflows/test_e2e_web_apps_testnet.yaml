@@ -59,6 +59,13 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      - name: Build extension
+        working-directory: packages/browser-extension
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+        shell: bash
+
       # Stateful GH Runners have a separate testnet private key on disk,
       # to allow concurrent runs of the workflow avoiding nonce issues.
       # Here we load the key into a variable from a location on disk.
