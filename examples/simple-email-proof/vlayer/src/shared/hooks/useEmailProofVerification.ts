@@ -13,9 +13,19 @@ import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
 import { useNavigate } from "react-router";
 
+enum ProofVerificationStep {
+  START = "Start",
+  SENDING_TO_PROVER = "Sending to prover...",
+  WAITING_FOR_PROOF = "Waiting for proof...",
+  VERIFYING_ON_CHAIN = "Verifying on-chain...",
+  DONE = "Done!",
+}
+
 export const useEmailProofVerification = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState("");
+  const [currentStep, setCurrentStep] = useState<ProofVerificationStep>(
+    ProofVerificationStep.START,
+  );
   const { address: connectedAddr } = useAccount();
 
   const {
@@ -41,7 +51,7 @@ export const useEmailProofVerification = () => {
   console.log({ proof, provingError });
 
   const verifyProofOnChain = async () => {
-    setCurrentStep("Verifying on-chain...");
+    setCurrentStep(ProofVerificationStep.VERIFYING_ON_CHAIN);
 
     if (!proof) {
       throw new Error("no_proof_to_verify");
@@ -71,7 +81,7 @@ export const useEmailProofVerification = () => {
   };
 
   const startProving = async (uploadedEmlFile: File) => {
-    setCurrentStep("Sending to prover...");
+    setCurrentStep(ProofVerificationStep.SENDING_TO_PROVER);
     const claimerAddr = usePrivateKey
       ? privateKeyToAccount(import.meta.env.VITE_PRIVATE_KEY as `0x${string}`)
           .address
@@ -83,7 +93,7 @@ export const useEmailProofVerification = () => {
       import.meta.env.VITE_DNS_SERVICE_URL,
     );
     await callProver([email, claimerAddr]);
-    setCurrentStep("Waiting for proof...");
+    setCurrentStep(ProofVerificationStep.WAITING_FOR_PROOF);
   };
 
   useEffect(() => {
@@ -94,7 +104,7 @@ export const useEmailProofVerification = () => {
 
   useEffect(() => {
     if (status === "success") {
-      setCurrentStep("Done!");
+      setCurrentStep(ProofVerificationStep.DONE);
       navigate(`/success?txHash=${txHash}`);
     }
   }, [status]);
