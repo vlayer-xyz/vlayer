@@ -20,5 +20,4 @@ jobs:
 
       - name: Run Docker Smoke Test
         run: |
-          chmod +x bash/docker_smoke_test.sh
           bash/docker_smoke_test.sh 
