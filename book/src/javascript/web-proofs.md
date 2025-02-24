@@ -99,8 +99,8 @@ const webProofProvider = createExtensionWebProofProvider({
 ```
 
 Both `notaryUrl` and `wsProxyUrl` have default values:  
-- **`notaryUrl`**: `https://notary.pse.dev/v0.1.0-alpha.5/`  
-- **`wsProxyUrl`**: `wss://notary.pse.dev/proxy`  
+- **`notaryUrl`**: `https://test-notary.vlayer.xyz`  
+- **`wsProxyUrl`**: `wss://test-wsproxy.vlayer.xyz`  
 
 Because of these defaults, the provider can be initialized without any additional configuration as follows:
 
