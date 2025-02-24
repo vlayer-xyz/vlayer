@@ -1,4 +1,4 @@
-import { InfoTip } from "./InfoTip";
+import { InfoTip } from "./ui/InfoTip";
 
 export const MintNFT = ({
   copyCode,
