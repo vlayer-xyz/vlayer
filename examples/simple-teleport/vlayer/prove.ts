@@ -24,6 +24,7 @@ const deployWhaleBadgeHash = await ethClient.deployContract({
 });
 
 const whaleBadgeNFTAddress = await waitForContractDeploy({
+  client: ethClient,
   hash: deployWhaleBadgeHash,
 });
 

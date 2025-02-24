@@ -73,6 +73,7 @@ const verificationHash = await ethClient.writeContract({
 });
 
 const receipt = await waitForTransactionReceipt({
+  client: ethClient,
   hash: verificationHash,
 });
 

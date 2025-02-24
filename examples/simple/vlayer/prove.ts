@@ -31,6 +31,7 @@ const tokenDeployTransactionHash = await ethClient.deployContract({
 });
 
 const tokenAddress = await waitForContractDeploy({
+  client: ethClient,
   hash: tokenDeployTransactionHash,
 });
 
@@ -42,6 +43,7 @@ const nftDeployTransactionHash = await ethClient.deployContract({
 });
 
 const nftContractAddress = await waitForContractDeploy({
+  client: ethClient,
   hash: nftDeployTransactionHash,
 });
 
