@@ -143,11 +143,11 @@ pub mod teleport {
 
     lazy_static! {
         static ref STATE_ROOT: B256 =
-            B256::from(hex!("25d65fff68c2248f9b0c0b04d2ce9749dbdb088bd0fe16962476f18794373e5f"));
+            B256::from(hex!("7e8a86544190c6af75997ae55dfd2b8dd179f7c9d7d5d9086393fbb5cc150203"));
         static ref WITHDRAWAL_STORAGE_ROOT: B256 =
             B256::from(hex!("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
         static ref FINALIZED_L2_HASH: B256 =
-            B256::from(hex!("8a3162ac8009f30a115f905e15c1206c89d5bde102e5cf1f72e425d3aec03fbd"));
+            B256::from(hex!("ddf2851eaeed16c6227e6b57bbba1976ccaa1d533a8e15e6b79ce329e82dd12e"));
         pub static ref OUTPUT: SequencerOutput = SequencerOutput::new(
             *STATE_ROOT,
             *WITHDRAWAL_STORAGE_ROOT,
