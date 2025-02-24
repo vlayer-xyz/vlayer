@@ -11,7 +11,7 @@ Generating and ZK-proving an Email Proof consists of the following steps:
     - Calls the `DNS Notary` to get the verification data of the sender's domain.
     - Note that all these steps can be performed without the `vlayerSDK`.
 3. The `DNS Notary` fetches the public key used to sign the email from a number of DNS providers, compares the results, and if there's a consensus among them, signs the result with its private key.
-4. The DNS record, the signed DNS record, and the raw email together form the `UnverifiedEmail` struct.
+4. The DNS record with it's signature and the raw email together form the `UnverifiedEmail` struct.
 5. A `v_call` is made to the vlayer server with the `UnverifiedEmail` struct as well as the rest of the Prover contract arguments as calldata, chain ID, and the address of the deployed Prover contract.
 6. The Prover contract must use the `EmailProofLib`, where the `DNS Notary` public key is verified. The `EmailProofLib` library calls the `Repository` contract to verify whether the `DNS Notary` public key is valid. It also checks the signature TTL against the current block timestamp.
 7. Next, the `EmailProofLib` contract calls the `email_proof.verify(UnverifiedEmail)` custom precompile (see [Precompiles](./prover.md#precompiles)), which validates the Email Proof, parses the email MIME file, and returns a `VerifiedEmail`.
