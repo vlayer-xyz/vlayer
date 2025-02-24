@@ -1,17 +1,17 @@
 import dotenvflow from "dotenv-flow";
-import type { Hex } from "viem";
-import { z } from "zod";
+import type {Hex} from "viem";
+import {z} from "zod";
 
-import { type EnvConfig } from "./types";
-import { keysToCamelCase } from "../utils/camelCase";
+import {type EnvConfig} from "./types";
+import {keysToCamelCase} from "../utils/camelCase";
 
 export class EnvValidationError extends Error {
   constructor(validationResult: z.SafeParseError<unknown>) {
     super(
       "Some environment variables are misconfigured:\n" +
-        validationResult.error.errors
-          .map((err) => `  - ${err.path.join(".")}: ${err.message}`)
-          .join("\n"),
+      validationResult.error.errors
+        .map((err) => `  - ${err.path.join(".")}: ${err.message}`)
+        .join("\n"),
     );
     this.name = "EnvValidationError";
     Object.setPrototypeOf(this, EnvValidationError.prototype);
@@ -31,7 +31,7 @@ const renameConfigKeys = (config: z.infer<typeof envSchema>) => {
   const {
     examplesTestPrivateKey,
     vlayerApiToken,
-    shouldDeployFakeVerifier,
+    shouldDeployVerifierRouter,
     ...unchangedKeys
   } = keysToCamelCase(config);
 
@@ -40,7 +40,7 @@ const renameConfigKeys = (config: z.infer<typeof envSchema>) => {
     privateKey: examplesTestPrivateKey as Hex,
     token: vlayerApiToken,
     deployConfig: {
-      deployFakeVerifier: shouldDeployFakeVerifier ?? false,
+      shouldRedeployVerifierRouter: shouldDeployVerifierRouter ?? false,
     },
   };
 };
@@ -59,7 +59,7 @@ const envSchema = z.object({
     .length(66)
     .regex(/^0x[0-9a-fA-F]{64}$/),
   VLAYER_API_TOKEN: z.string().optional(),
-  SHOULD_DEPLOY_FAKE_VERIFIER: stringBoolean.optional(),
+  SHOULD_DEPLOY_VERIFIER_ROUTER: stringBoolean.optional(),
 });
 
 export const getConfig = (override: Partial<EnvConfig> = {}): EnvConfig => {

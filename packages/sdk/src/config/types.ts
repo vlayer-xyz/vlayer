@@ -3,7 +3,7 @@
 // pre run deployment
 
 export type DeployConfig = {
-  deployFakeVerifier: boolean;
+  shouldRedeployVerifierRouter: boolean;
 };
 
 export type EnvConfig = {
