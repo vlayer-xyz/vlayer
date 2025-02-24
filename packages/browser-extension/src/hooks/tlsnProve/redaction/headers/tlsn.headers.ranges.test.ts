@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   getHeaderRange,
   XAPICallTranscript,
+  TranscriptWithDoubleHeaders,
   allRequestHeadersRedactedRanges,
   allResponseHeadersRedactedRanges,
 } from "../tlsn.ranges.test.fixtures";
@@ -297,6 +298,148 @@ describe("headers redaction", () => {
           redactionItem.request.headers,
         ),
       ).toThrowError(HeaderNotFoundError);
+    });
+  });
+
+  describe("duplicated headers", () => {
+    test("no headers", () => {
+      const redactionItem = {
+        response: {
+          headers: [],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        TranscriptWithDoubleHeaders.recv.message,
+        redactionItem.response.headers,
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    test("not duplicated header", () => {
+      const redactionItem = {
+        response: {
+          headers: ["content-type"],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        TranscriptWithDoubleHeaders.recv.message,
+        redactionItem.response.headers,
+      );
+
+      expect(result).toEqual([{ start: 105, end: 136 }]);
+    });
+
+    test("duplicated header", () => {
+      const redactionItem = {
+        response: {
+          headers: ["date"],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        TranscriptWithDoubleHeaders.recv.message,
+        redactionItem.response.headers,
+      );
+
+      expect(result).toEqual([
+        { start: 23, end: 52 },
+        { start: 60, end: 89 },
+      ]);
+    });
+
+    test("all headers", () => {
+      const redactionItem = {
+        response: {
+          headers: ["date", "content-type"],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        TranscriptWithDoubleHeaders.recv.message,
+        redactionItem.response.headers,
+      );
+
+      expect(result).toEqual([
+        { start: 23, end: 52 },
+        { start: 60, end: 89 },
+        { start: 105, end: 136 },
+      ]);
+    });
+
+    test("header duplicated 5 times", () => {
+      const redactionItem = {
+        request: {
+          headers: ["host"],
+        },
+      };
+
+      const result = calculateHeadersRanges(
+        TranscriptWithDoubleHeaders.sent.message,
+        redactionItem.request.headers,
+      );
+
+      expect(result).toEqual([
+        { start: 31, end: 36 },
+        { start: 44, end: 49 },
+        { start: 57, end: 62 },
+        { start: 70, end: 75 },
+        { start: 83, end: 88 },
+      ]);
+    });
+
+    test("headers_except duplicated", () => {
+      const redactionItem = {
+        response: {
+          headers_except: ["date"],
+        },
+      };
+
+      const result = calculateHeadersRangesExcept(
+        TranscriptWithDoubleHeaders.recv,
+        redactionItem.response.headers_except,
+      );
+
+      expect(result).toEqual([{ start: 105, end: 136 }]);
+    });
+
+    test("headers_except not duplicated", () => {
+      const redactionItem = {
+        response: {
+          headers_except: ["content-type"],
+        },
+      };
+
+      const result = calculateHeadersRangesExcept(
+        TranscriptWithDoubleHeaders.recv,
+        redactionItem.response.headers_except,
+      );
+
+      expect(result).toEqual([
+        { start: 23, end: 52 },
+        { start: 60, end: 89 },
+      ]);
+    });
+
+    test("all headers with headers_except", () => {
+      const redactionItem = {
+        response: {
+          headers_except: [],
+        },
+      };
+
+      const result = calculateHeadersRangesExcept(
+        TranscriptWithDoubleHeaders.recv,
+        redactionItem.response.headers_except,
+      );
+
+      expect(result).toEqual([
+        { start: 23, end: 52 },
+        { start: 60, end: 89 },
+        { start: 105, end: 136 },
+      ]);
     });
   });
 });
