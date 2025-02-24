@@ -1,5 +1,5 @@
 import { getConfig } from "./getConfig";
-import { createContext } from "./createContext";
+import { createContext, type EthClient } from "./createContext";
 import { type ContractArg, type ContractSpec } from "types/ethereum";
 import {
   type Account,
@@ -7,29 +7,23 @@ import {
   type Chain,
   type Hex,
   parseAbi,
-  type PublicClient,
-  type WalletClient,
 } from "viem";
 import { getChainConfirmations } from "./getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
-import type { DeployConfig } from "./types";
 import { v_versions } from "../api/v_versions";
+import type { EnvConfig } from "./types";
 
 const log = debug("vlayer:prover");
 
 export const waitForContractDeploy = async ({
+  client,
   hash,
 }: {
+  client: EthClient;
   hash: `0x${string}`;
 }): Promise<Address> => {
-  const { ethClient: client } = createContext(getConfig());
-  const receipt = await client.waitForTransactionReceipt({
-    hash,
-    confirmations: getChainConfirmations(client.chain?.name),
-    retryCount: 120,
-    retryDelay: 1000,
-  });
+  const receipt = await waitForTransactionReceipt({ client, hash });
 
   if (!receipt.contractAddress || receipt.status !== "success") {
     throw new Error(
@@ -41,14 +35,15 @@ export const waitForContractDeploy = async ({
 };
 
 export const waitForTransactionReceipt = async ({
+  client,
   hash,
 }: {
+  client: EthClient;
   hash: `0x${string}`;
 }) => {
-  const { ethClient } = createContext(getConfig());
-  return ethClient.waitForTransactionReceipt({
+  return client.waitForTransactionReceipt({
     hash,
-    confirmations: getChainConfirmations(ethClient.chain?.name),
+    confirmations: getChainConfirmations(client.chain?.name),
     retryCount: 120,
     retryDelay: 1000,
   });
@@ -72,7 +67,10 @@ export const deployProver = async ({
     bytecode: proverSpec.bytecode.object,
   });
   log(`Prover hash: ${proverHash}`);
-  const prover = await waitForContractDeploy({ hash: proverHash });
+  const prover = await waitForContractDeploy({
+    client: ethClient,
+    hash: proverHash,
+  });
   return prover;
 };
 
@@ -81,17 +79,18 @@ export const deployVlayerContracts = async ({
   verifierSpec,
   proverArgs,
   verifierArgs,
-  env,
+  config: configOverride,
 }: {
   proverSpec: ContractSpec;
   verifierSpec: ContractSpec;
   proverArgs?: ContractArg[];
   verifierArgs?: ContractArg[];
-  env?: DeployConfig;
+  config?: Partial<EnvConfig>;
 }) => {
   log("Starting contract deployment process...");
-  const config = getConfig();
-  const { chain, ethClient, account } = createContext(config);
+  const config = getConfig(configOverride);
+  const { chain, ethClient, account, deployConfig, proverUrl } =
+    createContext(config);
 
   log("Deploying prover contract...");
   const proverHash = await ethClient.deployContract({
@@ -102,7 +101,10 @@ export const deployVlayerContracts = async ({
     bytecode: proverSpec.bytecode.object,
   });
   log(`Prover hash: ${proverHash}`);
-  const prover = await waitForContractDeploy({ hash: proverHash });
+  const prover = await waitForContractDeploy({
+    client: ethClient,
+    hash: proverHash,
+  });
   log(`Prover contract deployed at: ${prover}`);
 
   log("Deploying verifier contract...");
@@ -113,25 +115,29 @@ export const deployVlayerContracts = async ({
     abi: verifierSpec.abi,
     bytecode: verifierSpec.bytecode.object,
   });
-  const verifier = await waitForContractDeploy({ hash: verifierHash });
+  const verifier = await waitForContractDeploy({
+    client: ethClient,
+    hash: verifierHash,
+  });
   log(`Verifier contract deployed at: ${verifier}`);
 
   log("Contract deployment completed successfully");
-  if (env?.isTesting) {
-    await swapInternalVerifier(ethClient, chain, account, verifier);
+  if (deployConfig.shouldRedeployVerifierRouter) {
+    await swapInternalVerifier(ethClient, chain, account, verifier, proverUrl);
   }
 
   return { prover, verifier };
 };
 
 const swapInternalVerifier = async (
-  ethClient: WalletClient & PublicClient,
+  ethClient: EthClient,
   chain: Chain,
   account: Account,
   verifierAddress: Address,
+  proverUrl: string,
 ) => {
   log("Swapping internal verifier");
-  const imageId = await getImageId();
+  const imageId = await getImageId(proverUrl);
   const routerDeployerHash = await ethClient.deployContract({
     chain,
     account,
@@ -140,6 +146,7 @@ const swapInternalVerifier = async (
     bytecode: TestVerifierRouterDeployer.bytecode.object,
   });
   const routerDeployerAddress = await waitForContractDeploy({
+    client: ethClient,
     hash: routerDeployerHash,
   });
   const newVerifier = await ethClient.readContract({
@@ -155,12 +162,11 @@ const swapInternalVerifier = async (
     args: [newVerifier],
     abi: parseAbi(["function _setTestVerifier(address)"]),
   });
-  await waitForTransactionReceipt({ hash: swapTxHash });
+  await waitForTransactionReceipt({ client: ethClient, hash: swapTxHash });
   log("Internal verifier swapped successfully");
 };
 
-async function getImageId(): Promise<Hex> {
-  const { proverUrl } = getConfig();
+async function getImageId(proverUrl: string): Promise<Hex> {
   const version = await v_versions(proverUrl);
   return version.result.call_guest_id as Hex;
 }

@@ -24,6 +24,7 @@ const deployWhaleBadgeHash = await ethClient.deployContract({
 });
 
 const whaleBadgeNFTAddress = await waitForContractDeploy({
+  client: ethClient,
   hash: deployWhaleBadgeHash,
 });
 
@@ -39,7 +40,6 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
   proverArgs: [],
   verifierArgs: [whaleBadgeNFTAddress],
-  env: config.deployConfig,
 });
 
 console.log("Proving...");

@@ -27,7 +27,7 @@ function run_prover_script() {
   fi
   pushd vlayer
     silent_unless_fails bun install "${args}"
-    bun run prove:"${VLAYER_ENV}"
+    SHOULD_DEPLOY_VERIFIER_ROUTER=true bun run prove:"${VLAYER_ENV}"
   popd
   echo "::endgroup::Running prover script"
 }

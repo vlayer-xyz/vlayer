@@ -31,7 +31,7 @@ const renameConfigKeys = (config: z.infer<typeof envSchema>) => {
   const {
     examplesTestPrivateKey,
     vlayerApiToken,
-    shouldDeployFakeVerifier,
+    shouldDeployVerifierRouter,
     ...unchangedKeys
   } = keysToCamelCase(config);
 
@@ -40,10 +40,12 @@ const renameConfigKeys = (config: z.infer<typeof envSchema>) => {
     privateKey: examplesTestPrivateKey as Hex,
     token: vlayerApiToken,
     deployConfig: {
-      isTesting: shouldDeployFakeVerifier ?? true,
+      shouldRedeployVerifierRouter: shouldDeployVerifierRouter ?? false,
     },
   };
 };
+
+const stringBoolean = z.enum(["true", "false"]).transform((x) => x === "true");
 
 const envSchema = z.object({
   VLAYER_ENV: z.enum(POSSIBLE_VLAYER_ENVS),
@@ -57,10 +59,10 @@ const envSchema = z.object({
     .length(66)
     .regex(/^0x[0-9a-fA-F]{64}$/),
   VLAYER_API_TOKEN: z.string().optional(),
-  SHOULD_DEPLOY_FAKE_VERIFIER: z.boolean().optional(),
+  SHOULD_DEPLOY_VERIFIER_ROUTER: stringBoolean.optional(),
 });
 
-export const getConfig = (): EnvConfig => {
+export const getConfig = (override: Partial<EnvConfig> = {}): EnvConfig => {
   dotEnvFlowConfig();
 
   const validationResult = envSchema
@@ -71,5 +73,8 @@ export const getConfig = (): EnvConfig => {
     throw new EnvValidationError(validationResult);
   }
 
-  return validationResult.data;
+  return {
+    ...validationResult.data,
+    ...override,
+  };
 };
