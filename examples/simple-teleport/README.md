@@ -10,7 +10,7 @@
 
 - Deploys the `L2State`, `MockERC20`, and cross-chain prover contracts.
 - Mints and transfers `L2ERC20` tokens.
-- Computes and commits the `outputRoot` to L1 in `L2State` contract.
+- Computes and commits the `outputRoot` to L1 in the `L2State` contract.
 
 ### 2. `prove`
 
