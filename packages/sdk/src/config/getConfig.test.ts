@@ -10,7 +10,7 @@ describe("getConfig", () => {
     };
   }
 
-  test("correctly parses the environment variables", async () => {
+  test("correctly parses the environment variables", () => {
     const cleanup = mockEnv({
       VLAYER_ENV: "dev",
       CHAIN_NAME: "ethereum",
@@ -40,7 +40,7 @@ describe("getConfig", () => {
     cleanup();
   });
 
-  test("correctly parses the environment variables with override", async () => {
+  test("correctly parses the environment variables with override", () => {
     const cleanup = mockEnv({
       VLAYER_ENV: "dev",
       CHAIN_NAME: "ethereum",
