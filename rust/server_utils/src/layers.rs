@@ -1,7 +1,7 @@
 mod request_id;
 mod trace;
 
-pub use request_id::RequestIdLayer;
+pub use request_id::{RequestId, RequestIdLayer};
 use tower_http::cors::CorsLayer;
 pub use trace::init_trace_layer;
 
