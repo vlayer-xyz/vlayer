@@ -11,11 +11,7 @@ export const ConnectWalletStepPresentational = ({
     <>
       <div className="flex justify-center modal-action">
         {isWalletConnected ? (
-          <button
-            onClick={next}
-            id="nextButton"
-            data-testid="start-proving-button"
-          >
+          <button onClick={next} id="nextButton">
             Start Proving
           </button>
         ) : (
