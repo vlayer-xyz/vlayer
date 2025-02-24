@@ -24,7 +24,7 @@
 
 Chain id: 31338
 
-Sets up the L2 state, which will be accessed later from L1. The L2 state is modified only in the `loadFixtures` script, and all L2 updates are completed before any updates on L1.
+The L2 state is modified only in the `loadFixtures` script, and all L2 updates are completed before any updates on L1.
 
 | Block # | Action                                      |
 | ------- | ------------------------------------------- |
