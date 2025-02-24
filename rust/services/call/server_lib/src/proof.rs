@@ -95,7 +95,7 @@ pub async fn generate(
     let call_guest_id = host.call_guest_id();
     let mut metrics = Metrics::default();
 
-    info!("Generating proof for {call_hash}");
+    info!(hash = tracing::field::display(call_hash), "Generating proof");
 
     set_state(&proofs, call_hash, State::ChainProofPending);
 

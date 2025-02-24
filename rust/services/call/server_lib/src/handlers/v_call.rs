@@ -21,15 +21,13 @@ pub async fn v_call(
     call: Call,
     context: CallContext,
 ) -> VCallResult<CallHash> {
-    info!("v_call => {call:#?} {context:#?}");
     let call = call.parse_and_validate(config.max_calldata_size())?;
 
     let host = build_host(&config, context.chain_id, call.to).await?;
     let call_hash = (&host.start_execution_location(), &call).into();
-    info!(
-        "Start execution location: {:?} call hash: {call_hash}",
-        host.start_execution_location()
-    );
+
+    info!(hash = tracing::field::display(call_hash), "Call");
+
     let gas_meter_client =
         gas_meter::init(config.gas_meter_config(), call_hash, user_token, call.gas_limit).await?;
 
