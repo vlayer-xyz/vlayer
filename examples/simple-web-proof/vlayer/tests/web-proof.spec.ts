@@ -5,7 +5,7 @@ test("web proof flow", async ({ page, context }) => {
   await context.addCookies([
     {
       name: "auth_token",
-      value: "4469c0e31f1e2054cd3ac1a6e468e2fba0bfc41e",
+      value: process.env.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN || "",
       path: "/",
       domain: ".x.com",
     },
