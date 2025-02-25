@@ -80,9 +80,10 @@ mod parse_node {
 #[cfg(test)]
 mod resolve_trie {
     use alloy_trie::HashMap;
+    use nybbles::Nibbles;
 
     use super::resolve_trie;
-    use crate::{keccak256 as hash, key_nibbles::KeyNibbles, node::KeccakNode as Node};
+    use crate::{keccak256 as hash, node::KeccakNode as Node};
 
     #[test]
     fn null() {
@@ -122,7 +123,7 @@ mod resolve_trie {
 
     #[test]
     fn extension() {
-        let extension_nibbles: KeyNibbles = [0].into();
+        let extension_nibbles = Nibbles::from_nibbles([0]);
         let leaf = Node::leaf([1], [0]);
         let digest = hash(leaf.rlp_encoded());
         let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));

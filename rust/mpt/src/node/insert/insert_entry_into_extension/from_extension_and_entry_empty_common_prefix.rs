@@ -10,6 +10,7 @@ pub(crate) fn from_extension_and_entry_empty_common_prefix<D>(
     };
     let entry = entry.into();
 
+    // `key` is not empty, since extension cannot have an empty key
     let branch = Node::branch_with_child_node(&key, *child_node);
     let updated_branch = branch.insert(&*entry.key, entry.value)?;
 
