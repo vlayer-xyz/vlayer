@@ -105,8 +105,8 @@ export const getStepPath = (kind: STEP_KIND): string => {
 
 export const getStepBackUrl = (kind: STEP_KIND): string => {
   const step = steps.find((step) => step.kind === kind);
-  if (!step) {
+  if (!step?.path) {
     throw new StepNotFoundError(kind);
   }
-  return step.backUrl || "";
+  return step.path;
 };
