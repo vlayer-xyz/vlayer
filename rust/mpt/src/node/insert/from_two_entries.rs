@@ -73,12 +73,6 @@ fn prepend_nibble<D>(nibble: u8, node: Node<D>) -> Node<D> {
     }
 }
 
-fn push_front(nibble: u8, nibbles: Nibbles) -> Nibbles {
-    let mut nibb = vec![nibble];
-    nibb.extend_from_slice(&nibbles.to_vec());
-    Nibbles::from_vec(nibb)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
