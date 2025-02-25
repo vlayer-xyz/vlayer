@@ -3,11 +3,12 @@
 // to be handled as a single unit, thus reducing code clutter and unnecessary conversions.
 
 use alloy_primitives::Bytes;
+use derive_new::new;
 use nybbles::Nibbles;
 
 use crate::node::Node;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, new)]
 pub struct Entry {
     pub key: Nibbles,
     pub value: Bytes,

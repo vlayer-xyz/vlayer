@@ -1,4 +1,4 @@
-use crate::key_nibbles::KeyNibbles;
+use nybbles::Nibbles;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PathKind {
@@ -8,7 +8,7 @@ pub enum PathKind {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Path {
-    pub nibbles: KeyNibbles,
+    pub nibbles: Nibbles,
     pub kind: PathKind,
 }
 
@@ -17,7 +17,7 @@ where
     T: AsRef<[u8]>,
 {
     fn from(path: T) -> Self {
-        let path = KeyNibbles::unpack(path);
+        let path = Nibbles::unpack(path);
         assert!(path.len() >= 2, "Path should have at least 2 nibbles");
 
         let kind = if path[0] & 2 != 0 {
@@ -27,8 +27,12 @@ where
         };
         let odd_nibbles = path[0] & 1 != 0;
 
-        let prefix = if odd_nibbles { &path[1..] } else { &path[2..] };
-        let nibbles: KeyNibbles = prefix.into();
+        let prefix = if odd_nibbles {
+            path[1..].to_vec()
+        } else {
+            path[2..].to_vec()
+        };
+        let nibbles = Nibbles::from_vec(prefix);
         Path { nibbles, kind }
     }
 }

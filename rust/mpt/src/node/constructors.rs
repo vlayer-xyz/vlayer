@@ -1,7 +1,7 @@
 use alloy_primitives::{Bytes, B256};
+use nybbles::Nibbles;
 
 use super::Node;
-use crate::key_nibbles::KeyNibbles;
 
 pub const fn empty_children<D>() -> [Option<Box<Node<D>>>; 16] {
     [const { None }; 16]
@@ -20,11 +20,13 @@ impl<D> Node<D> {
 
     pub(crate) fn leaf(key_nibs: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> Node<D> {
         assert!(!value.as_ref().is_empty(), "empty values are not allowed in MPT");
-        Node::Leaf(key_nibs.into(), Bytes::copy_from_slice(value.as_ref()))
+        let key_nibs = Nibbles::from_nibbles(key_nibs.as_ref());
+        Node::Leaf(key_nibs, Bytes::copy_from_slice(value.as_ref()))
     }
 
     pub(crate) fn extension(key_nibs: impl AsRef<[u8]>, value: impl Into<Node<D>>) -> Node<D> {
-        Node::Extension(key_nibs.into(), value.into().into())
+        let key_nibs = Nibbles::from_nibbles(key_nibs.as_ref());
+        Node::Extension(key_nibs, value.into().into())
     }
 
     #[allow(unused)]
@@ -63,18 +65,21 @@ impl<D> Node<D> {
         Node::Branch(children, None)
     }
 
+    // `child_key` passed cannot be empty
     pub(crate) fn branch_with_child_node(
-        child_key: &KeyNibbles,
+        child_key: &Nibbles,
         child_node: impl Into<Node<D>>,
     ) -> Node<D> {
-        let (first_key_nibble, remaining_key_nibbles) = child_key.split_first();
+        let (first_key_nibble, remaining_key_nibbles) = child_key
+            .split_first()
+            .expect("child_key should not be empty");
         let node = if remaining_key_nibbles.is_empty() {
             child_node.into()
         } else {
             Node::extension(remaining_key_nibbles, child_node)
         };
 
-        Node::branch_with_child(first_key_nibble, node)
+        Node::branch_with_child(*first_key_nibble, node)
     }
 
     pub const fn branch_with_children(children: [Option<Box<Node<D>>>; 16]) -> Node<D> {

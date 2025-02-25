@@ -63,7 +63,7 @@ impl<F: Fn(B256) -> ChainDbResult<DbNode>> MerkleProofBuilder<F> {
     fn visit_node(mut self, node: DbNode) -> ProofResult {
         self.nodes.push(node);
         match &self.nodes.last().expect("just pushed").node {
-            Node::Leaf(prefix, _) if *prefix == &*self.nibbles => self.finalize(),
+            Node::Leaf(prefix, _) if prefix == &*self.nibbles => self.finalize(),
             Node::Leaf(..) | Node::Null => Err(ChainDbError::BlockNotFound),
             Node::Extension(prefix, child) => {
                 self.nibbles = strip_prefix(&self.nibbles, prefix.as_slice())

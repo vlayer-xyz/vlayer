@@ -19,7 +19,7 @@ impl<D> Node<D> {
             Node::Null => Ok(Entry::from((key, value)).into()),
             Node::Digest(_) => panic!("Cannot insert into a digest node"),
             Node::Leaf(old_key, old_value) => {
-                let old_entry = (&**old_key, old_value);
+                let old_entry = Entry::new(old_key, old_value);
                 let entry = (key, value);
                 from_two_entries(old_entry, entry)
             }
