@@ -2574,6 +2574,7 @@ dependencies = [
  "bytes",
  "common",
  "derivative",
+ "derive-new",
  "derive_more",
  "digest 0.10.7",
  "itertools 0.14.0",
