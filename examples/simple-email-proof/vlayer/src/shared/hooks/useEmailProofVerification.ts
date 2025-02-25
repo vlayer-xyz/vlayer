@@ -20,7 +20,7 @@ class NoProofError extends Error {
 }
 
 enum ProofVerificationStep {
-  START = "Start",
+  MINT = "Mint",
   SENDING_TO_PROVER = "Sending to prover...",
   WAITING_FOR_PROOF = "Waiting for proof...",
   VERIFYING_ON_CHAIN = "Verifying on-chain...",
@@ -30,7 +30,7 @@ enum ProofVerificationStep {
 export const useEmailProofVerification = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<ProofVerificationStep>(
-    ProofVerificationStep.START,
+    ProofVerificationStep.MINT,
   );
   const { address: connectedAddr } = useAccount();
 

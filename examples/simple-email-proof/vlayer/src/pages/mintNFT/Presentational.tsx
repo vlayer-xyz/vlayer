@@ -11,10 +11,10 @@ export const MintNFT = ({
         <button
           type="button"
           id="nextButton"
-          data-testid="connect-wallet-button"
+          data-testid="mint-nft-button"
           onClick={handleProving}
         >
-          {currentStep ? currentStep : "Mint"}
+          {currentStep}
         </button>
       </div>
     </>
