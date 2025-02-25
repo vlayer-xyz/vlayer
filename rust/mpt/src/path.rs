@@ -75,7 +75,7 @@ mod decode_path {
     }
 
     #[test]
-    #[should_panic(expected = "KeyNibbles cannot be empty")]
+    #[should_panic(expected = "Path should have at least 2 nibbles")]
     fn too_short() {
         let _: Path = [].into();
     }
