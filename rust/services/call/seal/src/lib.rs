@@ -161,6 +161,7 @@ mod test {
             proverContractAddress: Address::from_hex("0x0000000000000000000000000000000000000001")
                 .unwrap(),
             functionSelector: FixedBytes::new([1, 2, 3, 4]),
+            settleChainId: Uint::<256, 4>::from(1),
             settleBlockNumber: Uint::<256, 4>::from(1),
             settleBlockHash: FixedBytes::new([0; 32]),
         };

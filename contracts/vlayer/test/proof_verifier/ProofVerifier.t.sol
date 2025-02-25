@@ -35,7 +35,7 @@ contract ProofVerifier_Verify_Tests is Test {
     function setUp() public {
         vm.roll(100); // have some historical blocks
 
-        assumptions = CallAssumptions(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
+        assumptions = CallAssumptions(PROVER, SELECTOR, block.chainid, block.number - 1, blockhash(block.number - 1));
     }
 
     function test_verifySuccess() public view {

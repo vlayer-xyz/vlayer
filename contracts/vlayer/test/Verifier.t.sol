@@ -69,7 +69,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         vm.roll(100); // have some historical blocks
 
         callAssumptions = CallAssumptions(
-            exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
+            exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.chainid, block.number - 1, blockhash(block.number - 1)
         );
     }
 
@@ -148,7 +148,7 @@ contract Verifier_SetTestVerifier is Test {
         newVerifier = new Groth16ProofVerifier(exampleVerifier.verifier().imageIdRepository());
 
         callAssumptions = CallAssumptions(
-            exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
+            exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.chainid, block.number - 1, blockhash(block.number - 1)
         );
     }
 

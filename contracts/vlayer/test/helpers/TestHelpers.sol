@@ -12,6 +12,7 @@ import {ImageID} from "../../src/ImageID.sol";
 
 import {FAKE_VERIFIER_SELECTOR} from "../../src/proof_verifier/FakeProofVerifier.sol";
 
+uint256 constant CHAIN_ID = 1;
 address constant PROVER = address(1);
 bytes4 constant SELECTOR = bytes4(0x01020304);
 
@@ -42,7 +43,7 @@ contract TestHelpers {
 
     function createProof() public view returns (Proof memory, bytes32) {
         CallAssumptions memory assumptions =
-            CallAssumptions(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
+            CallAssumptions(PROVER, SELECTOR, CHAIN_ID, block.number - 1, blockhash(block.number - 1));
         return createProof(assumptions);
     }
 

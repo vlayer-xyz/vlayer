@@ -62,6 +62,7 @@ library ProofFixtures {
         bytes32(0x9eebe10658931b5001400fbe6133aaf7214c01a62af1b646a8685f7c49215606);
     address public constant FIXED_PROVER_ADDRESS = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
     bytes4 public constant FIXED_SELECTOR = PinnedSimpleProver.balance.selector;
+    uint256 public constant FIXED_SETTLE_CHAIN_ID = 1;
     uint256 public constant FIXED_SETTLE_BLOCK_NUMBER = 4;
     bytes32 public constant FIXED_SETTLE_BLOCK_HASH =
         bytes32(0xa4b11124964d0edccf10a8f18771d5e3d8b28bbaa5dbd755f92b1ca22d749f5d);
@@ -105,7 +106,7 @@ library ProofFixtures {
 
     function generateProof(Seal memory seal) private pure returns (Proof memory, bytes32) {
         CallAssumptions memory callAssumptions =
-            CallAssumptions(FIXED_PROVER_ADDRESS, FIXED_SELECTOR, FIXED_SETTLE_BLOCK_NUMBER, FIXED_SETTLE_BLOCK_HASH);
+            CallAssumptions(FIXED_PROVER_ADDRESS, FIXED_SELECTOR, FIXED_SETTLE_CHAIN_ID, FIXED_SETTLE_BLOCK_NUMBER, FIXED_SETTLE_BLOCK_HASH);
 
         uint256 length = 0; // it is not used in verification, so can be set to 0
 
