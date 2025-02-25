@@ -24,7 +24,6 @@ jobs:
   test-e2e-web-apps:
     name: E2E web apps test against devnet
     runs-on: aws-linux-medium
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -51,9 +50,6 @@ jobs:
 
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
-
-      - name: Install xvfb
-        run: sudo apt-get update && sudo apt-get install -y xvfb
 
       - name: Check clang and LLVM version
         env:
