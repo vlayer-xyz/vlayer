@@ -52,6 +52,7 @@ const envSchema = z.object({
   CHAIN_NAME: z.string(),
   PROVER_URL: z.string().url(),
   JSON_RPC_URL: z.string().url(),
+  DNS_SERVICE_URL: z.string().url().optional(),
   L2_JSON_RPC_URL: z.string().url().optional(),
   EXAMPLES_TEST_PRIVATE_KEY: z
     .string()

@@ -23,6 +23,7 @@ writeEnvVariables(".env", {
   VITE_PROVER_URL: config.proverUrl,
   VITE_JSON_RPC_URL: config.jsonRpcUrl,
   VITE_PRIVATE_KEY: config.privateKey,
+  VITE_DNS_SERVICE_URL: config.dnsServiceUrl,
   VITE_USE_WINDOW_ETHEREUM_TRANSPORT:
     process.env.USE_WINDOW_ETHEREUM_TRANSPORT || "",
 });

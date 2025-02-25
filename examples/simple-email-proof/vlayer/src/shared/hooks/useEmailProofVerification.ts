@@ -75,7 +75,10 @@ export const useEmailProofVerification = () => {
       : (connectedAddr as Address);
 
     const eml = await getStrFromFile(uploadedEmlFile);
-    const email = await preverifyEmail(eml, "http://127.0.0.1:3002/dns-query");
+    const email = await preverifyEmail(
+      eml,
+      import.meta.env.VITE_DNS_SERVICE_URL,
+    );
     await callProver([email, claimerAddr]);
     setCurrentStep("Waiting for proof...");
   };
