@@ -3,7 +3,7 @@ mod private {
     alloy_sol_types::sol!(#![sol(all_derives)] "../../../../contracts/vlayer/src/CallAssumptions.sol");
 }
 
-use alloy_primitives::{Address, U256};
+use alloy_primitives::{Address, ChainId, U256};
 use alloy_sol_types::SolType;
 use block_header::EvmBlockHeader;
 /// Solidity struct representing the committed block used for validation.
@@ -13,10 +13,16 @@ use crate::io::CallSelector;
 
 impl CallAssumptions {
     /// Returns the [SolAssumptions] used to validate the environment.
-    pub fn new(header: &dyn EvmBlockHeader, to: Address, selector: CallSelector) -> Self {
+    pub fn new(
+        chain_id: ChainId,
+        header: &dyn EvmBlockHeader,
+        to: Address,
+        selector: CallSelector,
+    ) -> Self {
         Self {
             proverContractAddress: to,
             functionSelector: selector.into(),
+            settleChainId: U256::from(chain_id),
             settleBlockHash: header.hash_slow(),
             settleBlockNumber: U256::from(header.number()),
         }
