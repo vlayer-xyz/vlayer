@@ -7,7 +7,7 @@ use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{hash, key_nibbles::KeyNibbles, Digest};
+use crate::{hash, Digest};
 
 pub mod constructors;
 pub mod insert;
