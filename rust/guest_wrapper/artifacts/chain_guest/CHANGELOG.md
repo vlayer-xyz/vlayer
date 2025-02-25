@@ -5,3 +5,4 @@
   * `e1afa09f684c5a099b78b0a1425a7d9bec3ec8bd4d7a121f29a62f3bb0172573` – Teleport logging
   * `137a372bb2a4d011d502454e6f3ea45fc65094e8dd5ec9f3071d46281738f086` – Pin the versions of major dependencies
   * `eb712fcffa08e1b7777a74dae4634b91acdba28605655acf931144171e9a2b36` – Revm 19.0.0 -> 19.4.0
+  * `11f35577f01a94b9de93158f6d80b331b75cb47f1643017f685216b842df33ad` – Use Nibbles instead of KeyNibbles in MPT
