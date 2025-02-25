@@ -12,6 +12,12 @@ import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVeri
 import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
 import { useNavigate } from "react-router";
+class NoProofError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NoProofError";
+  }
+}
 
 enum ProofVerificationStep {
   START = "Start",
@@ -48,13 +54,11 @@ export const useEmailProofVerification = () => {
   const { data: proof, error: provingError } =
     useWaitForProvingResult(proofHash);
 
-  console.log({ proof, provingError });
-
   const verifyProofOnChain = async () => {
     setCurrentStep(ProofVerificationStep.VERIFYING_ON_CHAIN);
 
     if (!proof) {
-      throw new Error("no_proof_to_verify");
+      throw new NoProofError("No proof available to verify on-chain");
     }
 
     const contractArgs: Parameters<typeof writeContract>[0] = {
