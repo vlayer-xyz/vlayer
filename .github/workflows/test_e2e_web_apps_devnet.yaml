@@ -24,6 +24,12 @@ jobs:
   test-e2e-web-apps:
     name: E2E web apps test against devnet
     runs-on: aws-linux-medium
+
+    services:
+      xvfb:
+        image: "selenium/standalone-chrome"
+        options: --shm-size 2g
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
