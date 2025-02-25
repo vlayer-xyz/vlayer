@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib/set-missing-git-config.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
 
 set -ueo pipefail
 
