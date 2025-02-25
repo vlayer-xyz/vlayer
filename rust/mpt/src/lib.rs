@@ -1,5 +1,4 @@
 mod hash;
-mod key_nibbles;
 mod node;
 mod node_ref;
 mod path;
