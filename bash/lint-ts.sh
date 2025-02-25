@@ -18,6 +18,7 @@ for example in $(get_examples); do (
 echo '::endgroup::Running eslint for examples'
 
 echo "::group::Running eslint for: $VLAYER_HOME/packages"
-cd "${VLAYER_HOME}/packages"
+pushd "${VLAYER_HOME}/packages"
 bun run lint
+popd
 echo '::endgroup::Running eslint for: $VLAYER_HOME/packages'
