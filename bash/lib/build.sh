@@ -15,8 +15,8 @@ function generate_ts_bindings() {
 function build_sdk() {
   echo "::group::Building sdk"
   pushd "${VLAYER_HOME}/packages/sdk"
-    silent_unless_fails bun install --frozen-lockfile
-    silent_unless_fails bun run build
+  silent_unless_fails bun install --frozen-lockfile
+  silent_unless_fails bun run build
   popd
   echo '::endgroup::Building sdk'
 }
@@ -33,9 +33,9 @@ function build_sdk_hooks() {
 function build_vlayer_contracts() {
   echo "::group::Building vlayer contracts"
   pushd "${VLAYER_HOME}/contracts/vlayer"
-  forge soldeer install
+  silent_unless_fails forge soldeer install
   forge clean
-  forge build
+  silent_unless_fails forge build
   popd
   echo '::endgroup::Building vlayer contracts'
 }
@@ -43,9 +43,9 @@ function build_vlayer_contracts() {
 function build_fixtures_contracts() {
   echo "::group::Building fixtures contracts"
   pushd "${VLAYER_HOME}/contracts/fixtures"
-  forge soldeer install
+  silent_unless_fails forge soldeer install
   forge clean
-  forge build
+  silent_unless_fails forge build
   popd
   echo '::endgroup::Building fixtures contracts'
 }
