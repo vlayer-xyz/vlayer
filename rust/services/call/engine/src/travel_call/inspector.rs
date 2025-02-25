@@ -72,7 +72,7 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
     }
 
     fn on_call(&mut self, inputs: &CallInputs) -> Option<CallOutcome> {
-        let Some(location) = self.location else {
+        let Some(location) = self.location.take() else {
             return None; // If no setChain/setBlock happened, we don't need to teleport to a new VM, but can continue with the current one.
         };
         info!(
@@ -229,6 +229,21 @@ mod test {
         assert!(inspector
             .location
             .is_some_and(|loc| loc.block_number == block_num));
+    }
+
+    #[test]
+    fn set_block_resets_after_one_call() {
+        let block_num = 1;
+        let mut inspector: Inspector<'_, InMemoryDB> =
+            Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK);
+        assert_eq!(inspector.location, None);
+
+        inspector.set_block(block_num);
+        assert_eq!(inspector.location, Some((MAINNET_ID, block_num).into()));
+
+        let call_inputs = create_mock_call_inputs(CONTRACT_ADDR, []);
+        inspector.on_call(&call_inputs);
+        assert_eq!(inspector.location, None);
     }
 
     #[test]
