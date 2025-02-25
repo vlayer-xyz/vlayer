@@ -65,3 +65,26 @@ export const steps: Step[] = [
     index: 3,
   },
 ];
+
+export class StepNotFoundError extends Error {
+  constructor(kind: STEP_KIND) {
+    super(`Step with kind ${kind} not found`);
+    this.name = "StepNotFoundError";
+  }
+}
+
+export const getStepPath = (kind: STEP_KIND): string => {
+  const step = steps.find((step) => step.kind === kind);
+  if (!step) {
+    throw new StepNotFoundError(kind);
+  }
+  return step.path;
+};
+
+export const getStepBackUrl = (kind: STEP_KIND): string => {
+  const step = steps.find((step) => step.kind === kind);
+  if (!step) {
+    throw new StepNotFoundError(kind);
+  }
+  return step.backUrl || "";
+};
