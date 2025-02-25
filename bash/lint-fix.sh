@@ -4,9 +4,9 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/lib/prepare-to-lint.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib.sh"
 
-prepare-to-lint
+build_all_for_ts
 
 for example in $(get_examples); do
   (

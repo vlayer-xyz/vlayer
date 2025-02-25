@@ -61,6 +61,19 @@ function build_contracts() {
   echo '::endgroup::Building contracts'
 }
 
+function build_all_for_ts() {
+  echo "::group::Building all for typescript"
+
+  bun install --frozen-lockfile
+
+  build_contracts
+
+  build_sdk
+  build_sdk_hooks
+
+  echo '::endgroup::Building all for typescript'
+}
+
 function run_playwright_tests() {
   pushd vlayer
     silent_unless_fails bunx playwright install --with-deps chromium
