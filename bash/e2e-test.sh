@@ -30,7 +30,7 @@ init_template
 
 pushd $EXAMPLE
 
-silent_unless_fails build_contracts
+silent_unless_fails forge build
 run_prover_script
 
 popd
