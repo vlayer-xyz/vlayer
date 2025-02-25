@@ -19,7 +19,7 @@
   "scripts": {
     "build": "bun tsc --project tsconfig.build.json && bun tsc-alias",
     "test:unit": "vitest --run",
-    "gen:types": "sh ../../bash/build_ts_types.sh",
+    "gen:types": "sh ../../bash/build-ts-types.sh",
     "replaceCommonsSymlink": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak"
   },
   "devDependencies": {
