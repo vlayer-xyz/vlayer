@@ -28,6 +28,8 @@ jq --arg version "$VLAYER_BUILD" '
   .version = $version
 ' package.json > package.json.tmp && mv package.json.tmp package.json
 
+echo "Version updated to: $VLAYER_BUILD"
+
 # Optionally update peerDependencies if --update-peer-deps is provided
 if $UPDATE_DEPS && [[ ${#PEER_DEPENDENCIES[@]} -gt 0 ]]; then
   for PEER_DEPENDENCY_NAME in "${PEER_DEPENDENCIES[@]}"; do
@@ -36,7 +38,5 @@ if $UPDATE_DEPS && [[ ${#PEER_DEPENDENCIES[@]} -gt 0 ]]; then
     ' package.json > package.json.tmp && mv package.json.tmp package.json
     echo "Updated package.json with peerDependency $DEPENDENCY_NAME: $VLAYER_BUILD"
   done
-else
-  echo "Version updated to: $VLAYER_BUILD"
 fi
 
