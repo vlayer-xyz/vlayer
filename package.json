@@ -2,9 +2,5 @@
   "workspaces": [
     "packages/*",
     "examples/*/vlayer"
-  ],
-  "dependencies": {
-    "motion": "^12.4.2",
-    "react-router": "^7.1.5"
-  }
+  ]
 }
