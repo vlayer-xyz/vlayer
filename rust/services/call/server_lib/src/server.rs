@@ -1,8 +1,12 @@
 use std::iter::once;
 
 use axum::{
-    body::Bytes, extract::State, http::header::AUTHORIZATION, response::IntoResponse,
-    routing::post, Extension, Router,
+    body::Bytes,
+    extract::State,
+    http::header::AUTHORIZATION,
+    response::IntoResponse,
+    routing::{get, post},
+    Extension, Router,
 };
 use axum_extra::{
     headers::{authorization::Bearer, Authorization},
@@ -51,6 +55,7 @@ pub fn server(cfg: Config) -> Router {
         // NOTE: RequestIdLayer should be added after the Trace layer
         .route_layer(RequestIdLayer)
         .with_state(router)
+        .route("/health", get(|| async { "OK" }))
         .layer(cors())
         .layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
         .layer(ValidateRequestHeaderLayer::accept(mime::APPLICATION_JSON.as_ref()))

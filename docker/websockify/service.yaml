@@ -1,0 +1,9 @@
+services:
+  wsproxy:
+    image: jwnmulder/websockify:0.12
+    container_name: wsproxy
+    platform: linux/amd64
+    ports:
+      - "127.0.0.1:55688:80" 
+    command: "80 api.x.com:443"
+    

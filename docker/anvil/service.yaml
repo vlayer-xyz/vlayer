@@ -6,6 +6,8 @@ services:
     command: ["anvil --host 0.0.0.0 --chain-id 31337"]
     ports:
       - "127.0.0.1:8545:8545"
+
+
   anvil-l2-op:
     image: ghcr.io/foundry-rs/foundry:latest
     container_name: anvil-l2-op
