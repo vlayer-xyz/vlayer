@@ -41,9 +41,10 @@ pub(crate) fn resolve_trie<D>(root: Node<D>, nodes_by_hash: &HashMap<B256, Node<
 #[cfg(test)]
 mod parse_node {
     use alloy_primitives::{b256, B256};
+    use alloy_trie::Nibbles;
 
     use super::parse_node;
-    use crate::{key_nibbles::KeyNibbles, node::KeccakNode as Node};
+    use crate::node::KeccakNode as Node;
 
     #[test]
     fn inline() -> anyhow::Result<()> {
@@ -56,8 +57,8 @@ mod parse_node {
 
     #[test]
     fn non_inline() -> anyhow::Result<()> {
-        let nibbles = KeyNibbles::unpack(B256::ZERO);
-        let node = Node::leaf(&**nibbles, [0]);
+        let nibbles = Nibbles::unpack(B256::ZERO);
+        let node = Node::leaf(&*nibbles, [0]);
         let (hash, parsed_node) = parse_node(node.rlp_encoded())?;
         assert_eq!(
             hash,
