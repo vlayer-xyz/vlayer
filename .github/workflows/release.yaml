@@ -210,7 +210,7 @@ jobs:
         working-directory: packages/sdk
         env:
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-        run: ../../bash/bump-version.sh
+        run: ../../bash/bump-version.sh 
       - name: Install dependencies
         working-directory: packages/sdk
         run: bun install
@@ -241,7 +241,7 @@ jobs:
         working-directory: packages/sdk-hooks
         env:
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-        run: npm version "${VLAYER_BUILD}" --no-workspaces-update
+        run: ../../bash/bump-version.sh --update-peer-deps=@vlayer/sdk
       - name: Install dependencies
         working-directory: packages/sdk-hooks
         run: bun install --frozen-lockfile

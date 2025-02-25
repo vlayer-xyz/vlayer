@@ -1,6 +1,6 @@
 {
   "name": "@vlayer/react",
-  "version": "0.1.0",
+  "version": "1122",
   "exports": {
     ".": "./dist/index.js"
   },
@@ -19,7 +19,7 @@
     "react": "^18 || ^19",
     "wagmi": "2.x",
     "viem": "2.x",
-    "@vlayer/sdk": "^0.1.0"
+    "@vlayer/sdk": "1122"
   },
   "files": [
     "dist"
