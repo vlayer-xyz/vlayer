@@ -56,4 +56,4 @@ echo "::group::Running eslint for: $VLAYER_HOME/packages"
 pushd "${VLAYER_HOME}/packages"
 bun run lint$FIX_OPTION
 popd
-echo '::endgroup::Running eslint for: $VLAYER_HOME/packages'
+echo "::endgroup::Running eslint for: $VLAYER_HOME/packages"
