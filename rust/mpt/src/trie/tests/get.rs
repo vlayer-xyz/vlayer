@@ -1,6 +1,7 @@
 use alloy_primitives::{b256, B256};
+use nybbles::Nibbles;
 
-use crate::{key_nibbles::KeyNibbles, node::Node, KeccakMerkleTrie as MerkleTrie};
+use crate::{node::Node, KeccakMerkleTrie as MerkleTrie};
 
 #[test]
 pub fn null() {
@@ -20,7 +21,7 @@ fn digest() {
 
 #[test]
 fn leaf() {
-    let leaf_key = KeyNibbles::unpack(B256::ZERO);
+    let leaf_key = Nibbles::unpack(B256::ZERO);
     let mpt = MerkleTrie(Node::leaf(leaf_key.as_slice(), [0]));
     // A single leaf proves the inclusion of the key and non-inclusion of any other key
     assert_eq!(mpt.get(B256::ZERO).unwrap(), [0]);
