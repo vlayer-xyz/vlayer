@@ -62,18 +62,18 @@ fn from_value_and_entry<D>(value: impl AsRef<[u8]>, entry: Entry) -> Node<D> {
     Node::branch_with_child_and_value(nibble, remaining, value)
 }
 
-fn push_front(nibble: u8, nibbles: Nibbles) -> Nibbles {
-    let mut nibb = vec![nibble];
-    nibb.extend_from_slice(&nibbles.to_vec());
-    Nibbles::from_vec(nibb)
-}
-
 fn prepend_nibble<D>(nibble: u8, node: Node<D>) -> Node<D> {
     match node {
         Node::Branch(_, _) => Node::extension([nibble], node),
         Node::Extension(nibbles, child) => Node::Extension(push_front(nibble, nibbles), child),
         _ => unreachable!("from_two_ordered_entries should return only Branch or Extension"),
     }
+}
+
+fn push_front(nibble: u8, nibbles: Nibbles) -> Nibbles {
+    let mut nibb = vec![nibble];
+    nibb.extend_from_slice(&nibbles.to_vec());
+    Nibbles::from_vec(nibb)
 }
 
 #[cfg(test)]
