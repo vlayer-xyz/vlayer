@@ -1,10 +1,11 @@
-import dotenvflow from "dotenv-flow";
-import type { Hex } from "viem";
-import { z } from "zod";
 
-import { type EnvConfig } from "./types";
-import { keysToCamelCase } from "../utils/camelCase";
+import type {  VlayerContextConfig } from "./types";
+import { envToConfig } from "src/config/utils/envToConfig";
+import { envSchema } from "./utils/schema";
+import { dotEnvFlowConfig } from "src/config/utils/dotEnvConfig";
+import { EnvValidationError } from "./utils/error";
 
+<<<<<<< HEAD
 export class EnvValidationError extends Error {
   constructor(validationResult: z.SafeParseError<unknown>) {
     super(
@@ -64,10 +65,13 @@ const envSchema = z.object({
 });
 
 export const getConfig = (override: Partial<EnvConfig> = {}): EnvConfig => {
+=======
+export const getConfig = (override: Partial<VlayerContextConfig> = {}): VlayerContextConfig => {
+>>>>>>> ae6e1769 (Reorganize config)
   dotEnvFlowConfig();
 
   const validationResult = envSchema
-    .transform(renameConfigKeys)
+    .transform(envToConfig)
     .safeParse(process.env);
 
   if (!validationResult.success) {
