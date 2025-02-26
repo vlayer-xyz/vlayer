@@ -81,13 +81,6 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
-      - name: Build extension
-        working-directory: packages/browser-extension
-        run: |
-          bun install --frozen-lockfile
-          bun run build
-        shell: bash
-
       - name: Run e2e test
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}

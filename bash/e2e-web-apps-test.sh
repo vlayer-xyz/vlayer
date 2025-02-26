@@ -11,6 +11,12 @@ set_proving_mode
 echo Generating typescript bidings ...
 ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
 
+echo '::group::Build extension'
+cd "$VLAYER_HOME/packages/browsers-extension"
+bun install --frozen-lockfile
+bun run build
+echo '::endgroup::'
+
 for example in $(get_examples); do
 
   echo Running services...
@@ -26,4 +32,3 @@ for example in $(get_examples); do
 
   cleanup
 done
-
