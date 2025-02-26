@@ -13,7 +13,7 @@ contract EmailDomainVerifier is Verifier, ERC721 {
     uint256 public currentTokenId;
 
     mapping(bytes32 => bool) public takenEmailHashes;
-    mapping(uint256 => string) public emailDomains;
+    mapping(uint256 => string) public tokenIdToMetadataUri;
 
     constructor(address _prover) ERC721("EmailNFT", "EML") {
         prover = _prover;
@@ -26,8 +26,12 @@ contract EmailDomainVerifier is Verifier, ERC721 {
         require(takenEmailHashes[_emailHash] == false, "email taken");
         takenEmailHashes[_emailHash] = true;
         uint256 tokenId = currentTokenId + 1;
-        emailDomains[tokenId] = _emailDomain;
+        tokenIdToMetadataUri[tokenId] = string.concat("https://faucet.vlayer.xyz/api/xBadgeMeta?handle=", _emailDomain);
         currentTokenId = tokenId;
         _safeMint(_targetWallet, tokenId);
     }
+
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        return tokenIdToMetadataUri[tokenId];
+    }    
 }

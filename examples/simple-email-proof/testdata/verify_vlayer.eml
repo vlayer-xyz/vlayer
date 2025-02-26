@@ -1,91 +1,68 @@
-Delivered-To: chmarus@gmail.com
-Received: by 2002:a05:6638:4a07:b0:4e2:c5d7:2d0e with SMTP id cz7csp2610377jab;
-        Thu, 12 Dec 2024 01:26:40 -0800 (PST)
-X-Received: by 2002:a05:600c:3acf:b0:434:f871:1b96 with SMTP id 5b1f17b1804b1-4361c4295b1mr43730655e9.29.1733995600466;
-        Thu, 12 Dec 2024 01:26:40 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1733995600; cv=none;
-        d=google.com; s=arc-20240605;
-        b=OUVkfo5OurAponOoGBkP9za+dMie/A3zuEs9yiFuybDUc5Dk4rAQckbYyMcOZUMcOW
-         9VUX7GNG1NipX2Ks5k2FE1RANbBTQx6B3SaiGlZqEynFBmb7RVl9FerGAm9XfNIylyy0
-         Zetl/hl91H8m/RF43xr3bQBryJr9n7wTDcjUzkF/RZjUIQFApvEJSEO7LCjEEOMdGvAt
-         zN2OiWC52aXPQ8TfMha8Hj0B4AhtM9G2Ko5TQcMdzpAd/imEZAkmWNu3dBlbBLCACnoN
-         4h5v6PtaqrclUcKPRWnO/c+Z8gxHjabpG8L5Typ9+LbaOV1gnu5KwK6Ojb/iN+wDCs3y
-         l3ow==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=to:subject:message-id:date:from:mime-version:dkim-signature;
-        bh=mxM4CoKovnMiqziiIwlmU+GiIdJZluayVv0h5ezVKHk=;
-        fh=OODtGR4uyA8E4di/u4WB+BqvkOC5TAu69xQY05248q4=;
-        b=fjSWUmaEgBhENZdQL2Otuc6Yj99+QN1EiUyzn16OGCvU4HLnG3SdhN5QspcgZwGAIV
-         LfXgFrzof2zYZhoqTeSAUFJSlMGhGOGL566S74pfasDovvq+YYseZZYlsuupjkqQjsAp
-         Wyip3TBGR+MqWxNl8nqNmwlzefMS6cUMuJ0DgfRVgUAVxkPMoc4kbR/KLJfPw/CtUtg5
-         dIFgDx3AkGE/rFGx+BsIpFLjAWRDQ4HopjEagtkc0yxHxn23bCm0coS8e7VQqeA2lNoo
-         DXW+hxLaELVotzcy/RSq0r4klGhLCU2Lqpxw679HrTjs1UzNYzJ+hus+7u8+XzXur4SJ
-         78RQ==;
-        dara=google.com
-ARC-Authentication-Results: i=1; mx.google.com;
-       dkim=pass header.i=@vlayer.xyz header.s=google header.b=dIfpXPJr;
-       spf=pass (google.com: domain of artur@vlayer.xyz designates 209.85.220.41 as permitted sender) smtp.mailfrom=artur@vlayer.xyz;
-       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=vlayer.xyz;
-       dara=pass header.i=@gmail.com
-Return-Path: <ivan@vlayer.xyz>
-Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
-        by mx.google.com with SMTPS id 5b1f17b1804b1-4362023e849sor9506765e9.12.2024.12.12.01.26.40
-        for <chmarus@gmail.com>
-        (Google Transport Security);
-        Thu, 12 Dec 2024 01:26:40 -0800 (PST)
-Received-SPF: pass (google.com: domain of artur@vlayer.xyz designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
-Authentication-Results: mx.google.com;
-       dkim=pass header.i=@vlayer.xyz header.s=google header.b=dIfpXPJr;
-       spf=pass (google.com: domain of artur@vlayer.xyz designates 209.85.220.41 as permitted sender) smtp.mailfrom=artur@vlayer.xyz;
-       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=vlayer.xyz;
-       dara=pass header.i=@gmail.com
+Return-Path: <artur@vlayer.xyz>
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+ by inbound-smtp.us-east-2.amazonaws.com with SMTP id vm1p3c6jenrgbr944ldf0ljraep1ndp19hbclt01
+ for 7921e0d1-e3e1-4422-9636-70dd8cb95245@proving.vlayer.xyz;
+ Thu, 20 Feb 2025 12:38:04 +0000 (UTC)
+X-SES-Spam-Verdict: FAIL
+X-SES-Virus-Verdict: PASS
+Received-SPF: pass (spfCheck: domain of vlayer.xyz designates 209.85.128.51 as permitted sender) client-ip=209.85.128.51; envelope-from=artur@vlayer.xyz; helo=mail-wm1-f51.google.com;
+Authentication-Results: amazonses.com;
+ spf=pass (spfCheck: domain of vlayer.xyz designates 209.85.128.51 as permitted sender) client-ip=209.85.128.51; envelope-from=artur@vlayer.xyz; helo=mail-wm1-f51.google.com;
+ dkim=pass header.i=@vlayer.xyz;
+ dmarc=pass header.from=vlayer.xyz;
+X-SES-RECEIPT: AEFBQUFBQUFBQUFGMXNOUldBMU96UGRiYk03NmlXWE5pTVZEVUhlQktPdGV0UFFHeHZ6YzJnVmtwWjJINFZGTUN1cTZhRTBoakM5bVBhd012UFNta3ViWDVVK3d4aldEdmJpZmIyRlpHVUZuZFNET0JxNmFEallSZXYyMDhodmlMa0xIUTR6TGczdy8xNldqeDZXc0o2cWpNWFlVMFRSZlc5c1gzaDJReW8zRVF0NnJGYVZpZDZ4WCt4SjFzVDlmWGxqc214UjIrdVJYRUp1S1MrTjhaWmhPR3J4ZWdiMjRnZExST2RwZFMrWCt1bWRadVp6RGx4bGNOcW45QWgvWW9GZ2lRK2FrUXhUN0JTdEpuQnBEblN2V21MTVAxcUErMzl5N01LU1R1Y2FkdzFFN2t5Y3c4c0E9PQ==
+X-SES-DKIM-SIGNATURE: a=rsa-sha256; q=dns/txt; b=WemofLXoBxooRxJsFIbzg3ZPygWckEycRik2bNwcE7JT+gXw5rIYkudJMEZoV7NgYpQpJw28R81GTxbmYriPM+p4Ql+5XLVSB52FUboCyqlXz4B6O/lFK3B39OOH4SecbHrac8XgxDMf6MDX6/dtlMlu2B0D8PPhWNma36Y4blQ=; c=relaxed/simple; s=xplzuhjr4seloozmmorg6obznvt7ijlt; d=amazonses.com; t=1740055085; v=1; bh=ZhcNAhpOtSJL6zWNKLSprRJZeloGBBrDShzfzlBgc0M=; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-43994ef3872so5061475e9.2
+        for <7921e0d1-e3e1-4422-9636-70dd8cb95245@proving.vlayer.xyz>; Thu, 20 Feb 2025 04:38:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=vlayer.xyz; s=google; t=1733995599; x=1734600399; dara=google.com;
+        d=vlayer.xyz; s=google; t=1740055082; x=1740659882; darn=proving.vlayer.xyz;
         h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=mxM4CoKovnMiqziiIwlmU+GiIdJZluayVv0h5ezVKHk=;
-        b=dIfpXPJr7YwemsO93MVu+rbuJ0GtQQ868zoKSWbecKp9Hj4V2tjw+v5qmBYzF1vZtn
-         uvu7fqNEh/2as9WvFyQwySwwvxs9qkIvoideFMkgvbefI1Gx2YpwnpVKOcq0m4s8RF+K
-         Q9pf1JbSjNVv5WfMSzNpef0tJO10RnSgK6UU7vNUnnbEd4qa/c6JjfjU6DLK5p9buNiJ
-         VwqWDWoa+zv0NFtlmZwgLLdkU0C1JcMhn0hcO1mJlypq+kSWfDWjpnVcLBFsRbhlhX1T
-         jEEFXgB7Ht7OBE8y7h1JhpoBuDEh2OdF6Crcaoj88jmvrIp28DZkxq6zac1vq/lGUk0o
-         8k3A==
+        bh=ZhcNAhpOtSJL6zWNKLSprRJZeloGBBrDShzfzlBgc0M=;
+        b=F2W/iBAmmSZA+OncqRutYON6srl97A0apK9Ixc0AfXNllhEE7uzJk5+pl0EAKfeAgp
+         fLbOWX9nHdr2TjT2wE1Wge27imZWrJ8d6PIdTNnrIgY7dBMtXLRpT6Swu8/hfq7fa2O3
+         rYH9R80IZSFf5fGPmVxbLReV8BweMgdpr5lp4Sf/JUTaRYr+IlwYJCPvxIVDAmPEm6Un
+         +hMC9JHoPYDK0Y5cPHKMnUfNQUMTNxOLj2urhe7ahG64SF9DgYOsbO75Lug5FfcYxON3
+         4P0VwXGSM9Mow3AI3z89TqCaytCINNoTpNf/BhxkQDbpcspPxbfw9LUuFddhi5Hrz2n8
+         tSBw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733995599; x=1734600399;
+        d=1e100.net; s=20230601; t=1740055082; x=1740659882;
         h=to:subject:message-id:date:from:mime-version:x-gm-message-state
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=mxM4CoKovnMiqziiIwlmU+GiIdJZluayVv0h5ezVKHk=;
-        b=w7wG0b/QTeDYuw9H/wbbTF6V5KQgeJ3YqX7UzIkzomIv6n4hVXk15YqRBl20OYIcD1
-         YPErNZ3TO+cEcDSOfeuZ9Wa2kmDpdJ8Qmog1Y+hsENPgwQohH0B3PGR4Cxt2W5UNoW3s
-         vq83uqyr84SLUviLzFmBxiqKZ8c2dkHe0Mg33ZShZXsbWzo+OfIdox9d+FOHmzGMc34c
-         AhfUZmNXo8FwoOEQVUiO/rFJ/9YYXUr57KIvRbynmInckIByzqRTrSQB+iIZRWbu5cSQ
-         eiWXL1Bc6yrQgaX8yRQYKSvqDWrA7/EBX7EEjYhWG4G+SqMWi4MxoZ6bgvAv1IWjOEfM
-         9Rjg==
-X-Gm-Message-State: AOJu0YwBYGO7Qpq0wS9VGuTlljiwOXxkJMiZGtutGKbuf8CGKoEOsTad
-	1YjHcHEYD8VyaU9TwPlRZ+nLckqHHt7GIrQPbA8ByO0SIbH3P4GZ1tQkCUrrTlYl1RJ+WAuoWSO
-	WBBCoCrYhdqO93VGqnvqY6S5jLaispNjv5SR5ZvXXCV3WGKN0
-X-Gm-Gg: ASbGnctEqjEPZ7b5VGFRG2OB2um8XICKwiY/HXs9x1iPhsSKO6U5w18958d+hIOUkIu
-	XelNBiCdLk4DZU/YHY/AfmBis+ehGAtT6P8cKGIFOAhJtMCwWqV0SXaafHHMMSkxIh4Ln1zQ=
-X-Google-Smtp-Source: AGHT+IFehYgn48ZVtw+zLWPqb844xYAonyH4S52DmYMbZaSh/6mVj8A/r5+T5l1/i5bRmHc5jI8cxXmk8NMJLdqQmxM=
-X-Received: by 2002:a05:600c:1c1c:b0:434:a4b3:5ebe with SMTP id
- 5b1f17b1804b1-4361c3f4fb1mr44888025e9.24.1733995599239; Thu, 12 Dec 2024
- 01:26:39 -0800 (PST)
+        bh=ZhcNAhpOtSJL6zWNKLSprRJZeloGBBrDShzfzlBgc0M=;
+        b=HFX9W/ZmRkd/dLQccWYVAguoHloeyI1fJ9Otogjd4+FaWGJfxHpWGsL5R6j19saUao
+         wHf5Ye08aOSc3+1UIQF4ZFWdD9T+BnYklRIoR8KGs2ml7niZXm1GpKcM0WD5maVKj/Cm
+         3h/lgIItVtVsZHFfuvRoSa36+kpEXxq7fbV5UFXZg9bEtxP+7FGII3pmhwMaWjSrsjq4
+         Q1VH9CTxm8SVCQxCSUAnzq7UNJa+dCUhbhLFWsAEGnVQTkjFtQm+4xEvUyd/fOEwFdMC
+         QupqnCgeIOxomqzu4JaOKdwfr8srpPK0MIW6Kf6R8SyYCb9uALI5WenaAqjPznRHoLxS
+         ASTg==
+X-Gm-Message-State: AOJu0YyvM78PoZb6ldEnSwNQ1KHUnMSLX0tytQTk+pSOL0Sc8wYozkdx
+	FI1+rMBvTLmenu88RhbFcx/Lvoz3Z8NZKKqLdlsxnMbFWJrSCbqmYM/cgonMdPqbBozbx/6S54A
+	Iu9B3JqJ+Hema75Tzz5DIgjV6WHRUw1xEm2Oo0wdNau+npHb7CYTvdA==
+X-Gm-Gg: ASbGncuy2tUTRgqEuJY+mIsIWaCg7mgo/SigktBV6gTOMGioW2jfT5PQLU3z9GcnDoh
+	3pA1aZMMHNZNeHaUogQWZIqmDz5x25iLV1W5eUWkFj+Dkc8zeLRmm4xONO60+JnZG5hIp4Rp6Ir
+	DhlaahJFAdE4qFtCzcDhdi0EpOXboXJQ==
+X-Google-Smtp-Source: AGHT+IEEgA1Fl4tabVJsNPfV4EoC/lokBL1ZbJ/n0/yjgv+DCe/QnJqH/b3Adqg6ujkPoyKHdyrUASDkTSKh5ThtfVQ=
+X-Received: by 2002:a05:600c:1c83:b0:439:9828:c44b with SMTP id
+ 5b1f17b1804b1-4399828c601mr94739135e9.14.1740055082620; Thu, 20 Feb 2025
+ 04:38:02 -0800 (PST)
 MIME-Version: 1.0
 From: Artur Chmaro <artur@vlayer.xyz>
-Date: Thu, 12 Dec 2024 10:26:28 +0100
-Message-ID: <CAGp8hgApNn=ReZXf1H8KaCAs1C+myuMN_NH7GoW6pSVz4eb8Hw@mail.gmail.com>
-Subject: Verify me for Email NFT
-To: Artur Chmaro <chmarus@gmail.com>
-Content-Type: multipart/alternative; boundary="000000000000bc3a0f06290f4fac"
+Date: Thu, 20 Feb 2025 13:37:50 +0100
+X-Gm-Features: AWEUYZlurfcd1kR0Kqhp6pj4jjmASoepF-BmhTlrQVsZWOmoRQP8Qe0W3deFvgA
+Message-ID: <CAGp8hgAkJ5KoHVmLHUxuyrCGKAvmcigt5pYqmHi6t56udzRuEg@mail.gmail.com>
+Subject: Mint my domain NFT at address: 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf
+To: 7921e0d1-e3e1-4422-9636-70dd8cb95245@proving.vlayer.xyz
+Content-Type: multipart/alternative; boundary="00000000000016fe39062e9225db"
 
---000000000000bc3a0f06290f4fac
+--00000000000016fe39062e9225db
 Content-Type: text/plain; charset="UTF-8"
 
-Hello
 
---000000000000bc3a0f06290f4fac
+
+--00000000000016fe39062e9225db
 Content-Type: text/html; charset="UTF-8"
 
-<div dir="ltr">Hello</div>
+<div dir="ltr"><br></div>
 
---000000000000bc3a0f06290f4fac--
+--00000000000016fe39062e9225db--
