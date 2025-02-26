@@ -12,7 +12,7 @@ echo Generating typescript bidings ...
 ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
 
 echo '::group::Build extension'
-cd "$VLAYER_HOME/packages/browsers-extension"
+cd "$VLAYER_HOME/packages/browser-extension"
 bun install --frozen-lockfile
 bun run build
 echo '::endgroup::'

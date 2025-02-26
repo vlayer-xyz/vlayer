@@ -16,7 +16,7 @@ source ${VLAYER_HOME}/bash/run-services.sh
 echo '::endgroup::'
 
 echo '::group::Build extension'
-cd "$VLAYER_HOME/packages/browsers-extension"
+cd "$VLAYER_HOME/packages/browser-extension"
 bun install --frozen-lockfile
 bun run build
 echo '::endgroup::'
