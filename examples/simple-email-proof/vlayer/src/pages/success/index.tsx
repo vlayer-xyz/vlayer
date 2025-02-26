@@ -9,7 +9,8 @@ export const SuccessContainer = () => {
   return (
     <>
       <div className="desc in">
-        Your <b>{domain}</b> NFT was minted to {truncateHashOrAddr(recipient)}<br/>
+        Your <b>{domain}</b> NFT was minted to {truncateHashOrAddr(recipient)}
+        <br />
         <a
           href={`https://optimism-sepolia.blockscout.com/tx/${txHash}`}
           target="_blank"

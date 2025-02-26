@@ -12,6 +12,7 @@ import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVeri
 import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
 import { useNavigate } from "react-router";
+
 class NoProofError extends Error {
   constructor(message: string) {
     super(message);
@@ -108,10 +109,11 @@ export const useEmailProofVerification = () => {
   }, [proof]);
 
   useEffect(() => {
-    if (status === "success") {
+    if (status === "success" && proof) {
       setCurrentStep(ProofVerificationStep.DONE);
+      const proofArray = proof as unknown[];
       navigate(
-        `/success?txHash=${txHash}&domain=${proof[3] as string}&recipient=${proof[2] as string}`
+        `/success?txHash=${txHash}&domain=${String(proofArray[3])}&recipient=${String(proofArray[2])}`,
       );
     }
   }, [status]);
