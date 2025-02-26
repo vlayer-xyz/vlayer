@@ -99,8 +99,8 @@ const webProofProvider = createExtensionWebProofProvider({
 ```
 
 Both `notaryUrl` and `wsProxyUrl` have default values:  
-- **`notaryUrl`**: `https://notary.pse.dev/v0.1.0-alpha.5/`  
-- **`wsProxyUrl`**: `wss://notary.pse.dev/proxy`  
+- **`notaryUrl`**: `https://test-notary.vlayer.xyz`  
+- **`wsProxyUrl`**: `wss://test-wsproxy.vlayer.xyz`  
 
 Because of these defaults, the provider can be initialized without any additional configuration as follows:
 
@@ -108,7 +108,7 @@ Because of these defaults, the provider can be initialized without any additiona
 const webProofProvider = createExtensionWebProofProvider();
 ```
 
-TLSNotary team hosts a [public notary server](https://docs.tlsnotary.org/developers/notary_server.html#pse-development-notary-server) for development, experimentation, and demonstration purposes. Notary server can be also self-hosted using [Docker](https://docs.tlsnotary.org/developers/notary_server.html#using-docker).
+vlayer hosts a public instance of the [TLSN notary server](https://docs.tlsnotary.org/developers/notary_server.html) for development, experimentation, and demonstration purposes. Notary server can be also self-hosted using [Docker](https://docs.tlsnotary.org/developers/notary_server.html#using-docker).
 
 In the future, vlayer is planning to provide additional Web Proof provider implementations, which can be e.g. ran server-side and don't require vlayer browser extension for the purpose of Web Proof generation.
 
@@ -194,7 +194,12 @@ By default, the transcript is not redacted at all and redaction of each HTTP req
 
 ### WebSocket proxy
 
-The WebSocket proxy is required in the Web Proofs setup to allow the vlayer extension to access the low-level TLS connection of the HTTPS request for which we are generating a Web Proof (browsers do not provide this access by default). The default WebSocket proxy, `wss://notary.pse.dev/proxy`, used in our SDK and hosted by the TLSN team, supports a limited number of domains (you can view the list [here](https://docs.tlsnotary.org/developers/notary_server.html#websocket-proxy-server)). 
+The WebSocket proxy is required in the Web Proofs setup to allow the vlayer extension to access the low-level TLS connection of the HTTPS request for which we are generating a Web Proof (browsers do not provide this access by default). The default WebSocket proxy, `wss://test-wsproxy.vlayer.xyz`, used in our SDK and hosted by vlayer, supports a limited number of domains.
+
+Currently, the allowed domains are:
+
+- `x.com` and `api.x.com`
+- `swapi.dev`
 
 If you'd like to notarize a request for a different domain, you can run your own proxy server. To do this locally run websockify using Docker:
 
