@@ -3,6 +3,7 @@ import { test } from "./config";
 import { sidePanel } from "./helpers";
 
 test("web proof flow", async ({ page, context }) => {
+  // To obtain this token, log in to x.com and copy the value of the `auth_token` cookie.
   const authToken = process.env.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN;
 
   if (!authToken) {
