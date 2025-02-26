@@ -1,7 +1,7 @@
 use call_engine::Call as EngineCall;
 use call_host::Host;
 use dashmap::Entry;
-use tracing::{error, info, info_span};
+use tracing::{error, info, instrument};
 
 pub use crate::proving::RawData;
 use crate::{
@@ -83,6 +83,7 @@ fn set_metrics(
     entry.and_modify(|res| res.metrics = metrics)
 }
 
+#[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
     host: Host,
@@ -91,9 +92,6 @@ pub async fn generate(
     call_hash: CallHash,
     chain_proof_config: Option<ChainProofConfig>,
 ) {
-    let span = info_span!("proof", id = tracing::field::display(call_hash));
-    let _enter = span.enter();
-
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let mut metrics = Metrics::default();
