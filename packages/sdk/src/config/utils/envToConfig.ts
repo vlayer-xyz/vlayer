@@ -1,5 +1,5 @@
 import type { Hex } from "viem";
-import type { envSchema } from "src/config/utils/schema";
+import type { envSchema } from "./schema";
 import { keysToCamelCase } from "./camelCase";
 import type { z } from "zod";
 

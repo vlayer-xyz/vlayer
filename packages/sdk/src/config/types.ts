@@ -1,6 +1,17 @@
-import { z } from "zod";
-import { envSchema } from "./utils/schema";
-import { envToConfig } from "src/config/utils/envToConfig";
+export type DeployConfig = {
+  shouldRedeployVerifierRouter?: boolean;
+};
 
-const transformedEnvSchema = envSchema.transform(envToConfig);
-export type VlayerContextConfig = z.infer<typeof transformedEnvSchema>;
+export type VlayerContextConfig = {
+  chainName: string;
+  proverUrl: string;
+  jsonRpcUrl: string;
+  l2JsonRpcUrl?: string;
+  dnsServiceUrl?: string;
+  privateKey: `0x${string}`;
+  token?: string;
+  deployConfig: DeployConfig;
+  vlayerEnv: string;
+  notaryUrl?: string;
+  wsProxyUrl?: string;
+};

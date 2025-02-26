@@ -18,4 +18,5 @@ export const envSchema = z.object({
     SHOULD_DEPLOY_VERIFIER_ROUTER: stringBoolean.optional(),
     NOTARY_URL: z.string().url().optional(),
     WS_PROXY_URL: z.string().url().optional(),
+    DNS_SERVICE_URL: z.string().url().optional(),
   });
