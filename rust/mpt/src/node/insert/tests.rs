@@ -79,12 +79,8 @@ mod insert {
             let node = Node::leaf([0x0, 0x0], [42]);
             let updated_node = node.insert([0x0, 0x1], [43])?;
 
-            let expected_child_node = Node::branch_with_two_children(
-                0,
-                Node::leaf([], [42]),
-                1,
-                Node::leaf([], [43]),
-            );
+            let expected_child_node =
+                Node::branch_with_two_children(0, Node::leaf([], [42]), 1, Node::leaf([], [43]));
             let expected_node = Node::extension([0x0], expected_child_node);
 
             assert_eq!(updated_node, expected_node);
