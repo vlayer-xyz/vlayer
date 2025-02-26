@@ -1,7 +1,7 @@
 use alloy_primitives::ChainId;
 use call_host::{Error as HostError, Host};
 use provider::Address;
-use tracing::info;
+use tracing::{info, info_span, Instrument};
 use types::{Call, CallContext, CallHash, Result as VCallResult};
 
 use super::{Params, SharedConfig, SharedProofs};
@@ -39,8 +39,7 @@ pub async fn v_call(
 
     if !found_existing {
         tokio::spawn(async move {
-            let span = tracing::info_span!("http", id = params.req_id.to_string());
-            let _enter = span.enter();
+            let span = info_span!("http", id = params.req_id.to_string());
             proof::generate(
                 call,
                 host,
@@ -49,6 +48,7 @@ pub async fn v_call(
                 call_hash,
                 config.chain_proof_config(),
             )
+            .instrument(span)
             .await
         });
     }
