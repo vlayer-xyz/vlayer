@@ -36,7 +36,7 @@ if $UPDATE_DEPS && [[ ${#PEER_DEPENDENCIES[@]} -gt 0 ]]; then
     jq --arg version "$VLAYER_BUILD" --arg dependency "$PEER_DEPENDENCY_NAME" '
       .peerDependencies[$dependency] = $version
     ' package.json > package.json.tmp && mv package.json.tmp package.json
-    echo "Updated package.json with peerDependency $DEPENDENCY_NAME: $VLAYER_BUILD"
+    echo "Updated package.json with peerDependency $PEER_DEPENDENCY_NAME: $VLAYER_BUILD"
   done
 fi
 
