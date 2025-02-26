@@ -74,7 +74,7 @@ dependencies = [
  "const-hex",
  "derive_more",
  "foldhash",
- "hashbrown 0.15.0",
+ "hashbrown 0.15.1",
  "indexmap",
  "itoa",
  "k256",
