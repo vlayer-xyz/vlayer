@@ -3,10 +3,11 @@ use std::marker::PhantomData;
 use alloy_primitives::{Bytes, B256};
 use common::Hashable;
 use derivative::Derivative;
+use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{hash, key_nibbles::KeyNibbles, Digest};
+use crate::{hash, Digest};
 
 pub mod constructors;
 pub mod insert;
@@ -19,8 +20,8 @@ pub mod size;
 pub enum Node<D> {
     #[default]
     Null,
-    Leaf(KeyNibbles, Bytes),
-    Extension(KeyNibbles, Box<Node<D>>),
+    Leaf(Nibbles, Bytes),
+    Extension(Nibbles, Box<Node<D>>),
     Branch([Option<Box<Node<D>>>; 16], Option<Bytes>),
     Digest(B256),
     _Phantom(PhantomData<D>),
@@ -35,7 +36,7 @@ where
     pub(crate) fn get(&self, key_nibs: impl AsRef<[u8]>) -> Option<&[u8]> {
         let key_nibs = key_nibs.as_ref();
         match self {
-            Node::Leaf(prefix, value) if *prefix == key_nibs => Some(value),
+            Node::Leaf(prefix, value) if *prefix == *key_nibs => Some(value),
             Node::Leaf(..) | Node::Null => None,
             Node::Extension(prefix, child) => key_nibs
                 .strip_prefix(prefix.as_slice())

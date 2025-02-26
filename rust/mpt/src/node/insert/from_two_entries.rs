@@ -2,6 +2,8 @@
 // the number of cases to handle - we convert Leaf's key and value into an Entry struct and then use from_two_entries which
 // treats both new entry and Leaf's entry symmetrically.
 
+use nybbles::Nibbles;
+
 use super::entry::Entry;
 use crate::node::{Node, NodeError};
 
@@ -63,7 +65,10 @@ fn from_value_and_entry<D>(value: impl AsRef<[u8]>, entry: Entry) -> Node<D> {
 fn prepend_nibble<D>(nibble: u8, node: Node<D>) -> Node<D> {
     match node {
         Node::Branch(_, _) => Node::extension([nibble], node),
-        Node::Extension(nibbles, child) => Node::Extension(nibbles.push_front(nibble), child),
+        Node::Extension(nibbles, child) => {
+            let nibble = Nibbles::from_nibbles([nibble]);
+            Node::Extension(nibble.join(&nibbles), child)
+        }
         _ => unreachable!("from_two_ordered_entries should return only Branch or Extension"),
     }
 }

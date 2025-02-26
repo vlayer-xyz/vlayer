@@ -1,5 +1,4 @@
 mod hash;
-mod key_nibbles;
 mod node;
 mod node_ref;
 mod path;
@@ -8,7 +7,6 @@ mod utils;
 
 pub use alloy_trie::EMPTY_ROOT_HASH;
 pub use hash::{hash, keccak256, sha2, Digest};
-pub use key_nibbles::KeyNibbles;
 pub use node::{KeccakNode, Node, Sha2Node};
 pub use node_ref::{KeccakNodeRef, NodeRef, Sha2NodeRef};
 pub use sha2::Sha256;

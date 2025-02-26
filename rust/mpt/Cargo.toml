@@ -11,7 +11,7 @@ alloy-trie = { workspace = true }
 bytes = { workspace = true }
 common = { workspace = true }
 derivative = { workspace = true }
-derive_more = { workspace = true }
+derive-new = { workspace = true }
 digest = { workspace = true }
 itertools = { workspace = true }
 lazy_static = { workspace = true }

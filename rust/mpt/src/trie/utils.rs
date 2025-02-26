@@ -41,9 +41,10 @@ pub(crate) fn resolve_trie<D>(root: Node<D>, nodes_by_hash: &HashMap<B256, Node<
 #[cfg(test)]
 mod parse_node {
     use alloy_primitives::{b256, B256};
+    use alloy_trie::Nibbles;
 
     use super::parse_node;
-    use crate::{key_nibbles::KeyNibbles, node::KeccakNode as Node};
+    use crate::node::KeccakNode as Node;
 
     #[test]
     fn inline() -> anyhow::Result<()> {
@@ -56,8 +57,8 @@ mod parse_node {
 
     #[test]
     fn non_inline() -> anyhow::Result<()> {
-        let nibbles = KeyNibbles::unpack(B256::ZERO);
-        let node = Node::leaf(&**nibbles, [0]);
+        let nibbles = Nibbles::unpack(B256::ZERO);
+        let node = Node::leaf(&*nibbles, [0]);
         let (hash, parsed_node) = parse_node(node.rlp_encoded())?;
         assert_eq!(
             hash,
@@ -80,9 +81,10 @@ mod parse_node {
 #[cfg(test)]
 mod resolve_trie {
     use alloy_trie::HashMap;
+    use nybbles::Nibbles;
 
     use super::resolve_trie;
-    use crate::{keccak256 as hash, key_nibbles::KeyNibbles, node::KeccakNode as Node};
+    use crate::{keccak256 as hash, node::KeccakNode as Node};
 
     #[test]
     fn null() {
@@ -122,7 +124,7 @@ mod resolve_trie {
 
     #[test]
     fn extension() {
-        let extension_nibbles: KeyNibbles = [0].into();
+        let extension_nibbles = Nibbles::from_nibbles([0]);
         let leaf = Node::leaf([1], [0]);
         let digest = hash(leaf.rlp_encoded());
         let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));

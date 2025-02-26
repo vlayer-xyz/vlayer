@@ -1,6 +1,7 @@
 use alloy_primitives::B256;
+use nybbles::Nibbles;
 
-use crate::{key_nibbles::KeyNibbles, node::Node, KeccakMerkleTrie as MerkleTrie};
+use crate::{node::Node, KeccakMerkleTrie as MerkleTrie};
 
 #[test]
 fn null() {
@@ -10,7 +11,7 @@ fn null() {
 
 #[test]
 fn leaf() {
-    let key_nibbles: KeyNibbles = B256::ZERO.into();
+    let key_nibbles = Nibbles::unpack(B256::ZERO);
     let mpt = MerkleTrie(Node::Leaf(key_nibbles, [0].into()));
     assert_eq!(mpt, MerkleTrie::from_rlp_nodes(&mpt).unwrap());
 }
