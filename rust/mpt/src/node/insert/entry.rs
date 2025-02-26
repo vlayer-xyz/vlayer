@@ -34,11 +34,7 @@ where
 // creating a Branch if the key is empty or a Leaf if it is not.
 impl<D> From<Entry> for Node<D> {
     fn from(Entry { key, value }: Entry) -> Self {
-        if key.is_empty() {
-            Node::branch_with_value(value)
-        } else {
-            Node::leaf(&*key, value)
-        }
+        Node::leaf(&*key, value)
     }
 }
 
