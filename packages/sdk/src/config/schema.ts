@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { envToConfig } from "./envToConfig";
+import { envToConfig } from "./utils/envToConfig";
 
 export const POSSIBLE_VLAYER_ENVS = ["testnet", "dev"] as const;
 export const stringBoolean = z

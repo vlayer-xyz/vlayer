@@ -1,8 +1,8 @@
 import type { VlayerContextConfig } from "./types";
 import { envToConfig } from "./utils/envToConfig";
-import { envSchema } from "./utils/schema";
+import { envSchema } from "./schema";
 import { dotEnvFlowConfig } from "./utils/dotEnvConfig";
-import { EnvValidationError } from "./utils/error";
+import { EnvValidationError } from "./errors";
 
 export const getConfig = (
   override: Partial<VlayerContextConfig> = {},
