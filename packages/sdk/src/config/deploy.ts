@@ -8,11 +8,11 @@ import {
   type Hex,
   parseAbi,
 } from "viem";
-import { getChainConfirmations } from "./getChainConfirmations";
+import { getChainConfirmations } from "./utils/getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
 import { v_versions } from "../api/v_versions";
-import type { EnvConfig } from "./types";
+import type { VlayerContextConfig } from "./types";
 
 const log = debug("vlayer:prover");
 
@@ -85,7 +85,7 @@ export const deployVlayerContracts = async ({
   verifierSpec: ContractSpec;
   proverArgs?: ContractArg[];
   verifierArgs?: ContractArg[];
-  config?: Partial<EnvConfig>;
+  config?: Partial<VlayerContextConfig>;
 }) => {
   log("Starting contract deployment process...");
   const config = getConfig(configOverride);

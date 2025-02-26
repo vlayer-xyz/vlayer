@@ -43,6 +43,8 @@ const App = () => {
           <ProofProvider
             config={{
               proverUrl: import.meta.env.VITE_PROVER_URL,
+              wsProxyUrl: import.meta.env.VITE_WS_PROXY_URL,
+              notaryUrl: import.meta.env.VITE_NOTARY_URL,
             }}
           >
             <BrowserRouter>

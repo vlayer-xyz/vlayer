@@ -5,14 +5,13 @@ import {
   publicActions,
   type CustomTransport,
   custom,
-  type PrivateKeyAccount,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { getChainConfirmations } from "./getChainConfirmations";
+import { getChainConfirmations } from "./utils/getChainConfirmations";
 import * as chains from "viem/chains";
-import type { EnvConfig, VlayerContextConfig } from "./types";
+import type { VlayerContextConfig } from "./types";
 
-export type EthClient = ReturnType<typeof createEthClient>;
+export type EthClient = ReturnType<typeof createContext>["ethClient"];
 
 const getChainSpecs = (chainName: string): Chain => {
   try {
@@ -34,27 +33,8 @@ const createEthClient = (
     transport: transport || http(jsonRpcUrl),
   }).extend(publicActions);
 
-export function createContext(config: EnvConfig): {
-  chain: Chain;
-  account: PrivateKeyAccount;
-  jsonRpcUrl: string;
-  ethClient: EthClient;
-  confirmations: number;
-} & EnvConfig;
-
 export function createContext(
   config: VlayerContextConfig,
-  transport?: CustomTransport,
-): {
-  chain: Chain;
-  jsonRpcUrl: string;
-  account: PrivateKeyAccount;
-  ethClient: EthClient;
-  confirmations: number;
-} & VlayerContextConfig;
-
-export function createContext(
-  config: VlayerContextConfig | EnvConfig,
   transport?: CustomTransport,
 ) {
   const chain = getChainSpecs(config.chainName);
