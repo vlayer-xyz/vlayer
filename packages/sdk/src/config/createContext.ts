@@ -9,14 +9,14 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { getChainConfirmations } from "./utils/getChainConfirmations";
 import * as chains from "viem/chains";
-import type {  VlayerContextConfig } from "./types";
+import type { VlayerContextConfig } from "./types";
 
-export type EthClient = ReturnType<typeof createContext>['ethClient'];
+export type EthClient = ReturnType<typeof createContext>["ethClient"];
 
 const getChainSpecs = (chainName: string): Chain => {
   try {
     return chains[chainName as keyof typeof chains] as Chain;
-  } catch { 
+  } catch {
     throw Error(`Cannot import ${chainName} from viem/chains`);
   }
 };
@@ -33,9 +33,8 @@ const createEthClient = (
     transport: transport || http(jsonRpcUrl),
   }).extend(publicActions);
 
-
 export function createContext(
-  config: VlayerContextConfig ,
+  config: VlayerContextConfig,
   transport?: CustomTransport,
 ) {
   const chain = getChainSpecs(config.chainName);
