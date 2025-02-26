@@ -1,17 +1,4 @@
-export type DeployConfig = {
-  shouldRedeployVerifierRouter?: boolean;
-};
+import { z } from "zod";
+import { configSchema } from "./utils/schema";
 
-export type VlayerContextConfig = {
-  chainName: string;
-  proverUrl: string;
-  jsonRpcUrl: string;
-  l2JsonRpcUrl?: string;
-  dnsServiceUrl?: string;
-  privateKey: `0x${string}`;
-  token?: string;
-  deployConfig: DeployConfig;
-  vlayerEnv: string;
-  notaryUrl?: string;
-  wsProxyUrl?: string;
-};
+export type VlayerContextConfig = z.infer<typeof configSchema>;
