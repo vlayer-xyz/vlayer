@@ -1,11 +1,20 @@
-import { expect, test } from "./config";
+import { expect } from "playwright/test";
+import { test } from "./config";
 import { sidePanel } from "./helpers";
 
 test("web proof flow", async ({ page, context }) => {
+  const authToken = process.env.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN;
+
+  if (!authToken) {
+    throw new Error(
+      "Missing required environment variable: PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN",
+    );
+  }
+
   await context.addCookies([
     {
       name: "auth_token",
-      value: process.env.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN || "",
+      value: authToken,
       path: "/",
       domain: ".x.com",
     },
