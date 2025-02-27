@@ -3,7 +3,7 @@ use std::{collections::HashMap, env};
 use dotenvy::dotenv;
 use lazy_static::lazy_static;
 use provider::{
-    BlockingProvider, EthersProvider, EthersProviderFactory, EvmBlockHeader, ProviderFactory,
+    BlockingProvider, EthersProviderFactory, EvmBlockHeader, ProviderFactory,
 };
 
 fn get_alchemy_key() -> String {
@@ -57,7 +57,7 @@ pub fn find_block_range_by_timestamp(
 /// Performs a binary search to find the first block where `timestamp >= target_timestamp`.
 /// Searches in the range `[start_block, end_block]`.
 fn find_block_by_timestamp(
-    provider: &Box<dyn BlockingProvider>, // Adjust trait bound as needed
+    provider: &dyn BlockingProvider,
     target_timestamp: u64,
     mut start_block: u64,
     mut end_block: u64,
