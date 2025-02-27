@@ -28,11 +28,9 @@ pub fn find_block_range_by_timestamp(
 ) -> (Box<dyn EvmBlockHeader>, Box<dyn EvmBlockHeader>) {
     let provider = setup_provider();
 
-    // 1. Find the first block with timestamp >= timestamp_start (lower bound).
     let lower_block_number =
         find_block_by_timestamp(&provider, timestamp_start, 0, latest_block_number);
 
-    // 2. Find the first block with timestamp > timestamp_end, then adjust to get upper bound.
     let upper_block_candidate =
         find_block_by_timestamp(&provider, timestamp_end + 1, 0, latest_block_number);
     let upper_block_number = if upper_block_candidate > 0 {
@@ -41,7 +39,6 @@ pub fn find_block_range_by_timestamp(
         0
     };
 
-    // Retrieve the block headers for the found block numbers.
     let lower_block = provider
         .get_block_header(lower_block_number.into())
         .unwrap()
