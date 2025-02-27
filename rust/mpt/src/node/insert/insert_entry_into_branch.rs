@@ -87,7 +87,7 @@ mod tests {
                 let branch = Node::empty_branch();
                 let node = branch.insert_entry_into_branch(([0x0], [42]))?;
 
-                let expected_node = Node::branch_with_child(0, Node::branch_with_value([42]));
+                let expected_node = Node::branch_with_child(0, Node::leaf([], [42]));
 
                 assert_eq!(node, expected_node);
                 Ok(())

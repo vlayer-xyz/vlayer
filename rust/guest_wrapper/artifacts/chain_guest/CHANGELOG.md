@@ -7,3 +7,4 @@
   * `eb712fcffa08e1b7777a74dae4634b91acdba28605655acf931144171e9a2b36` – Revm 19.0.0 -> 19.4.0
   * `11f35577f01a94b9de93158f6d80b331b75cb47f1643017f685216b842df33ad` – Use Nibbles instead of KeyNibbles in MPT
   * `f943ebf08ce7d8df4d97b57bde8f2f9c84ceadcafde7d2d0a8feb6278e7ce500` – Replace push_front function with Nibbles.join
+  * `f3b12fb72b14d79384ef22555ea99f93b6d91908ffa2461186cfddaeb452c3c8` – Convert an Entry into a Leaf instead of a Branch when the key is empty

@@ -94,8 +94,7 @@ mod tests {
         let second_entry = ([0x0], [43]);
         let node = from_two_entries::<D>(first_entry, second_entry)?;
 
-        let expected_node =
-            Node::branch_with_child_and_value(0, Node::branch_with_value([43]), [42]);
+        let expected_node = Node::branch_with_child_and_value(0, Node::leaf([], [43]), [42]);
 
         assert_eq!(node, expected_node);
         Ok(())
@@ -116,12 +115,8 @@ mod tests {
 
         let node = from_two_entries::<D>(first_entry, second_entry)?;
 
-        let expected_node = Node::branch_with_two_children(
-            0,
-            Node::branch_with_value([42]),
-            1,
-            Node::branch_with_value([43]),
-        );
+        let expected_node =
+            Node::branch_with_two_children(0, Node::leaf([], [42]), 1, Node::leaf([], [43]));
 
         assert_eq!(node, expected_node);
         Ok(())
@@ -147,12 +142,8 @@ mod tests {
 
         let node = from_two_entries::<D>(first_entry, second_entry)?;
 
-        let expected_child_node = Node::branch_with_two_children(
-            0,
-            Node::branch_with_value([42]),
-            1,
-            Node::branch_with_value([43]),
-        );
+        let expected_child_node =
+            Node::branch_with_two_children(0, Node::leaf([], [42]), 1, Node::leaf([], [43]));
         let expected_node = Node::extension([0x0], expected_child_node);
 
         assert_eq!(node, expected_node);
@@ -166,12 +157,8 @@ mod tests {
 
         let node = from_two_entries::<D>(first_entry, second_entry)?;
 
-        let expected_child_node = Node::branch_with_two_children(
-            0,
-            Node::branch_with_value([42]),
-            1,
-            Node::branch_with_value([43]),
-        );
+        let expected_child_node =
+            Node::branch_with_two_children(0, Node::leaf([], [42]), 1, Node::leaf([], [43]));
         let expected_node = Node::extension([0x0, 0x1], expected_child_node);
 
         assert_eq!(node, expected_node);

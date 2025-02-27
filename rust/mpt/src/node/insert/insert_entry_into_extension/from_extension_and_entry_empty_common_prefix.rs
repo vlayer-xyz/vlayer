@@ -65,7 +65,7 @@ mod tests {
                 0,
                 Node::branch_with_value([42]),
                 1,
-                Node::branch_with_value([43]),
+                Node::leaf([], [43]),
             );
 
             assert_eq!(node, expected_node);
@@ -82,7 +82,7 @@ mod tests {
                 0,
                 Node::extension([0x0], Node::branch_with_value([42])),
                 1,
-                Node::branch_with_value([43]),
+                Node::leaf([], [43]),
             );
 
             assert_eq!(node, expected_node);
