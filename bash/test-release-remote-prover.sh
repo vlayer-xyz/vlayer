@@ -38,13 +38,26 @@ VLAYER_ENV="testnet"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
+echo '::group::Build extension'
+cd "$VLAYER_HOME/packages/browser-extension"
+bun install --frozen-lockfile
+bun run build
+echo '::endgroup::'
+
 echo "Starting VDNS server"
 docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d vdns_server
 
 for example in $(get_examples); do
 
     echo "::group::Initializing vlayer template: ${example}"
-    VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
+    TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
+    cd ${TEMP_DIR}
+
+    mkdir -p examples/${example}
+    mkdir -p packages/browser-extension
+    cp -a ${VLAYER_HOME}/packages/browser-extension/dist packages/browser-extension
+
+    VLAYER_TEMP_DIR=${TEMP_DIR}/examples/${example}
     cd ${VLAYER_TEMP_DIR}
 
     vlayer init --template "${example}"
