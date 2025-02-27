@@ -68,7 +68,6 @@ popd
 
 echo -e "${BLUE}Run playwright tests${NC}"
 pushd ${VLAYER_HOME}/packages
-VLAYER_ENV=${VLAYER_ENV} bun run test:headless
 if [ "$headed_mode" = true ]; then
     echo -e "${BLUE}Running in headed mode${NC}"
     VLAYER_ENV=${VLAYER_ENV} bun run test:headed
