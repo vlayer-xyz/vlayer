@@ -70,7 +70,6 @@ export async function tlsnProve(
     method: method as Method,
     headers: {
       ...formattedHeaders?.headers,
-      "Content-Type": "application/json",
     },
     body: requestBody,
   };
