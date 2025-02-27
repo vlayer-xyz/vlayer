@@ -19,11 +19,4 @@ library CallAssumptionsLib {
 
     uint256 public constant CALL_ASSUMPTIONS_ENCODING_LENGTH = PROVER_CONTRACT_ADDRESS_ENCODING_LENGTH
         + FUNCTION_SELECTOR_ENCODING_LENGTH + SETTLE_BLOCK_NUMBER_ENCODING_LENGTH + SETTLE_BLOCK_HASH_ENCODING_LENGTH;
-
-    /// @notice Validates if the provided CallAssumptions matches the block hash of the given block number.
-    /// @param assumptions The CallAssumptions struct to validate.
-    /// @return isValid True if the assumptions's block hash matches the block hash of the block number, false otherwise.
-    function validateAssumptions(CallAssumptions memory assumptions) internal view returns (bool isValid) {
-        return assumptions.settleBlockHash == blockhash(assumptions.settleBlockNumber);
-    }
 }
