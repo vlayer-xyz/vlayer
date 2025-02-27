@@ -2193,7 +2193,6 @@ dependencies = [
  "bytes",
  "call_common",
  "call_engine",
- "call_timestamps",
  "chain",
  "chain_client",
  "chain_common",
@@ -2301,19 +2300,6 @@ dependencies = [
  "tower-http 0.6.2",
  "tracing",
  "web_proof",
-]
-
-[[package]]
-name = "call_timestamps"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "dotenvy",
- "ethers",
- "eyre",
- "lazy_static",
- "provider",
- "tokio",
 ]
 
 [[package]]
