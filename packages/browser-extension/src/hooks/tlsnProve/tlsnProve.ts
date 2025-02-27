@@ -57,7 +57,7 @@ export async function tlsnProve(
   const notary = NotaryServer.from(notaryUrl);
   const prover = await new Prover({
     serverDns: hostname,
-    maxSentData: 14096,
+    maxSentData: 4096,
     maxRecvData: 16384,
   });
 
