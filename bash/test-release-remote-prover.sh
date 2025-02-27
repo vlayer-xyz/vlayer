@@ -22,7 +22,7 @@ vlayerup
 echo '::endgroup::'
 
 echo '::group::bun installation'
-curl -fsSL https://bun.sh/install | bash -s "bun-v1.1.34"
+curl -fsSL https://bun.sh/install | bash -s "bun-v1.2.4"
 export PATH="$PATH:~/.bun/bin"
 echo '::endgroup::'
 
