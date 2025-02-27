@@ -2,9 +2,7 @@ use std::{collections::HashMap, env};
 
 use dotenvy::dotenv;
 use lazy_static::lazy_static;
-use provider::{
-    BlockingProvider, EthersProviderFactory, EvmBlockHeader, ProviderFactory,
-};
+use provider::{BlockingProvider, EthersProviderFactory, EvmBlockHeader, ProviderFactory};
 
 fn get_alchemy_key() -> String {
     dotenv().ok();
