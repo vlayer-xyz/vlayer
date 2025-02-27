@@ -70,13 +70,13 @@ describe("ProvingProgress", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(600);
+      vi.advanceTimersByTime(2400);
     });
 
     expect(screen.getByRole("progressbar")).toHaveAttribute("data-value", "1");
 
     act(() => {
-      vi.advanceTimersByTime(600);
+      vi.advanceTimersByTime(2400);
     });
 
     expect(screen.getByRole("progressbar")).toHaveAttribute("data-value", "2");
