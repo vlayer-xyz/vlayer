@@ -73,8 +73,6 @@ fn setup_provider() -> Box<dyn BlockingProvider> {
     provider_factory.create(1).unwrap()
 }
 
-/// Performs a binary search to find the first block where `timestamp >= target_timestamp`.
-/// Searches in the range `[start_block, end_block]`.
 fn find_first_block_ge_timestamp(
     provider: &dyn BlockingProvider,
     target_timestamp: u64,
