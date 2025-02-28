@@ -161,7 +161,7 @@ mod tests {
     const LATEST_BLOCK_NUMBER: u64 = 1_000;
     const TIME_INTERVAL: u64 = 1_000;
 
-    // Tests ignored due to CI failing with missing ALCHEMY_KEY error
+    // Tests ignored because network connection necessary to run them is not possible on CI
     mod find_block_range_by_timestamp {
         use super::*;
 
@@ -172,6 +172,21 @@ mod tests {
             let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
 
             find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
+        async fn from_first_block() {
+            let timestamp_start = STORED_GENESIS_BLOCK_TIMESTAMP;
+            let timestamp_end = STORED_GENESIS_BLOCK_TIMESTAMP + TIME_INTERVAL;
+
+            let block_range =
+                find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
+
+            assert!(block_range.lower_block.timestamp() >= timestamp_start);
+            assert!(block_range.upper_block.timestamp() <= timestamp_end);
+            assert!(block_range.predecessor.is_none());
+            assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -193,7 +208,7 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn success() {
+        async fn intermediate_blocks() {
             let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
             let timestamp_end = LATEST_BLOCK_TIMESTAMP - 1;
 
@@ -217,14 +232,13 @@ mod tests {
             let start_block = 0;
             let end_block = LATEST_BLOCK_NUMBER;
 
-            let block_number = find_first_block_ge_timestamp(
-                &*provider,
-                target_timestamp,
-                start_block,
-                end_block,
-            );
-            let block = provider.get_block_header(block_number.into()).unwrap().unwrap();
-            
+            let block_number =
+                find_first_block_ge_timestamp(&*provider, target_timestamp, start_block, end_block);
+            let block = provider
+                .get_block_header(block_number.into())
+                .unwrap()
+                .unwrap();
+
             assert!(block_number == 0);
             assert!(block.timestamp() == STORED_GENESIS_BLOCK_TIMESTAMP);
         }
@@ -236,14 +250,13 @@ mod tests {
             let start_block = 0;
             let end_block = LATEST_BLOCK_NUMBER;
 
-            let block_number = find_first_block_ge_timestamp(
-                &*provider,
-                target_timestamp,
-                start_block,
-                end_block,
-            );
+            let block_number =
+                find_first_block_ge_timestamp(&*provider, target_timestamp, start_block, end_block);
 
-            let block = provider.get_block_header(block_number.into()).unwrap().unwrap();
+            let block = provider
+                .get_block_header(block_number.into())
+                .unwrap()
+                .unwrap();
             assert!(block.timestamp() >= target_timestamp);
 
             let previous_block = provider
@@ -264,14 +277,13 @@ mod tests {
             let start_block = 0;
             let end_block = LATEST_BLOCK_NUMBER;
 
-            let block_number = find_last_block_le_timestamp(
-                &*provider,
-                target_timestamp,
-                start_block,
-                end_block,
-            );
+            let block_number =
+                find_last_block_le_timestamp(&*provider, target_timestamp, start_block, end_block);
 
-            let block = provider.get_block_header(block_number.into()).unwrap().unwrap();
+            let block = provider
+                .get_block_header(block_number.into())
+                .unwrap()
+                .unwrap();
             assert!(block.timestamp() <= target_timestamp);
 
             let next_block = provider
