@@ -18,6 +18,7 @@ const vlayerProverConfig: Omit<
 > = {
   address: import.meta.env.VITE_PROVER_ADDRESS as `0x${string}`,
   proverAbi: webProofProver.abi,
+  // we specify chainId here...
   chainId:
     import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil.id : optimismSepolia.id,
   functionName: "main",
@@ -74,6 +75,7 @@ export const useSimpleWebProof = () => {
     isPending: isCallProverPending,
     data: hash,
     error: callProverError,
+    // ... and pass it here ...
   } = useCallProver(vlayerProverConfig);
 
   if (callProverError) {
