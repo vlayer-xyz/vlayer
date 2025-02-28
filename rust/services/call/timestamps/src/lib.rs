@@ -153,17 +153,20 @@ mod tests {
         static ref provider: Box<dyn BlockingProvider> = setup_provider();
     }
 
+    // https://etherscan.io/block/1000
+    const BLOCK_ONE_THOUSAND_TIMESTAMP: u64 = 1_438_272_138;
+    const LATEST_BLOCK_NUMBER: u64 = 1_000;
+
     mod find_block_range_by_timestamp {
         use super::*;
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn starting_from_genesis() {
+        async fn from_genesis() {
             let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
             let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1000;
-            let latest_block_number = 1000;
 
             let block_range =
-                find_block_range_by_timestamp(timestamp_start, timestamp_end, latest_block_number);
+                find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
 
             assert!(block_range.lower_block.timestamp() == 0);
             assert!(block_range.upper_block.timestamp() <= timestamp_end);
@@ -172,21 +175,33 @@ mod tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn ending_with_last_block() {
+        async fn until_last_block() {
             let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
-            let block_one_thousand_timestamp = 1_438_272_138;
-            let latest_block_number = 1000;
 
             let block_range = find_block_range_by_timestamp(
                 timestamp_start,
-                block_one_thousand_timestamp,
-                latest_block_number,
+                BLOCK_ONE_THOUSAND_TIMESTAMP,
+                LATEST_BLOCK_NUMBER,
             );
 
             assert!(block_range.lower_block.timestamp() >= timestamp_start);
-            assert!(block_range.upper_block.timestamp() <= block_one_thousand_timestamp);
+            assert!(block_range.upper_block.timestamp() <= BLOCK_ONE_THOUSAND_TIMESTAMP);
             assert!(block_range.predecessor.unwrap().timestamp() < timestamp_start);
             assert!(block_range.successor.is_none());
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn intermediate_timestamps() {
+            let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
+            let timestamp_end = BLOCK_ONE_THOUSAND_TIMESTAMP - 1;
+
+            let block_range =
+                find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
+
+            assert!(block_range.lower_block.timestamp() >= timestamp_start);
+            assert!(block_range.upper_block.timestamp() <= timestamp_end);
+            assert!(block_range.predecessor.unwrap().timestamp() < timestamp_start);
+            assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
         }
     }
 }
