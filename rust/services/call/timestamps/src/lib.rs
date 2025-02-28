@@ -159,6 +159,7 @@ mod tests {
     const BLOCK_ONE_THOUSAND_TIMESTAMP: u64 = 1_438_272_138;
     const LATEST_BLOCK_NUMBER: u64 = 1_000;
 
+    // Tests ignored due to CI failing with missing ALCHEMY_KEY error
     mod find_block_range_by_timestamp {
         use super::*;
 
