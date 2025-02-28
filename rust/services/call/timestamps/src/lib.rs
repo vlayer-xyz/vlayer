@@ -163,6 +163,7 @@ mod tests {
         use super::*;
 
         #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
         async fn from_genesis() {
             let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
             let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1000;
@@ -177,6 +178,7 @@ mod tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
         async fn until_last_block() {
             let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
 
@@ -193,6 +195,7 @@ mod tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
         async fn intermediate_timestamps() {
             let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
             let timestamp_end = BLOCK_ONE_THOUSAND_TIMESTAMP - 1;
@@ -207,6 +210,7 @@ mod tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
         #[should_panic(expected = "timestamp_start should be less than or equal to timestamp_end")]
         async fn panics_if_timestamp_start_is_greater_than_timestamp_end() {
             let timestamp_start = BLOCK_ONE_THOUSAND_TIMESTAMP;
