@@ -18,6 +18,10 @@ lazy_static! {
         format!("https://eth-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
 }
 
+// The actual genesis block timestamp is Jul-30-2015 03:26:13 PM +UTC
+//  (https://etherscan.io/block/0) but timestamp stored on the blockchain is 0
+const GENESIS_BLOCK_TIMESTAMP: u64 = 1_438_269_973;
+
 #[derive(Debug, new)]
 pub struct BlockRange {
     pub predecessor: Option<Box<dyn EvmBlockHeader>>,
@@ -28,11 +32,15 @@ pub struct BlockRange {
 
 /// Finds the first and last blocks within a given timestamp range by running two parallel binary searches.
 pub fn find_block_range_by_timestamp(
-    timestamp_start: u64,
+    mut timestamp_start: u64,
     timestamp_end: u64,
     latest_block_number: u64,
 ) -> BlockRange {
     let provider = setup_provider();
+
+    if timestamp_start >= GENESIS_BLOCK_TIMESTAMP {
+        timestamp_start = 0
+    };
 
     let lower_block_number =
         find_block_by_timestamp(&provider, timestamp_start, 0, latest_block_number);
@@ -80,6 +88,7 @@ fn find_block_by_timestamp(
 ) -> u64 {
     while start_block < end_block {
         let mid_block = (start_block + end_block) / 2;
+        dbg!(mid_block);
         let block = provider
             .get_block_header(mid_block.into())
             .unwrap()
@@ -125,16 +134,39 @@ fn get_successor(
 mod tests {
     use super::*;
 
-    const FIRST_BLOCK_TIMESTAMP: u64 = 1_740_545_000;
+    // https://etherscan.io/block/0
+    const GENESIS_BLOCK_TIMESTAMP: u64 = 1_438_269_973;
 
     lazy_static! {
         static ref provider: Box<dyn BlockingProvider> = setup_provider();
     }
 
+    mod find_block_range_by_timestamp {
+        use super::*;
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn finds_block_range_by_timestamp() {
+            let timestamp_start = GENESIS_BLOCK_TIMESTAMP;
+            let timestamp_end = GENESIS_BLOCK_TIMESTAMP + 100;
+            let latest_block_number = 1_000;
+
+            let block_range =
+                find_block_range_by_timestamp(timestamp_start, timestamp_end, latest_block_number);
+
+            dbg!(&block_range.lower_block.timestamp());
+            // dbg!(&block_range.predecessor.unwrap().timestamp());
+
+            assert!(block_range.lower_block.timestamp() == 0);
+            assert!(block_range.upper_block.timestamp() <= timestamp_end);
+            assert!(block_range.predecessor.is_none());
+            assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
+        }
+    }
+
     #[tokio::test(flavor = "multi_thread")]
     async fn gets_block_with_timestamp_higher_than_timestamp_start() {
-        let timestamp_start = FIRST_BLOCK_TIMESTAMP;
-        let timestamp_end = FIRST_BLOCK_TIMESTAMP + 100;
+        let timestamp_start = GENESIS_BLOCK_TIMESTAMP;
+        let timestamp_end = GENESIS_BLOCK_TIMESTAMP + 100;
         let latest_block_number = provider.get_latest_block_number().ok().unwrap();
 
         let block_range =
@@ -149,8 +181,8 @@ mod tests {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn gets_block_with_timestamp_lower_than_timestamp_end() {
-        let timestamp_start = FIRST_BLOCK_TIMESTAMP;
-        let timestamp_end = FIRST_BLOCK_TIMESTAMP + 100;
+        let timestamp_start = GENESIS_BLOCK_TIMESTAMP;
+        let timestamp_end = GENESIS_BLOCK_TIMESTAMP + 100;
         let latest_block_number = provider.get_latest_block_number().ok().unwrap();
 
         let block_range =
