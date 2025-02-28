@@ -33,20 +33,13 @@ pub struct BlockRange {
 }
 
 pub fn find_block_range_by_timestamp(
-    mut timestamp_start: u64,
+    timestamp_start: u64,
     timestamp_end: u64,
     latest_block_number: u64,
 ) -> BlockRange {
     if timestamp_start > timestamp_end {
         panic!("timestamp_start should be less than or equal to timestamp_end");
     }
-
-    // Genesis block timestamp doesn't show the correct value but 0.
-    // To be able to include it into range, we need to set timestamp_start to 0
-    // if it's less than or equal to the actual genesis block timestamp.
-    if timestamp_start <= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
-        timestamp_start = STORED_GENESIS_BLOCK_TIMESTAMP
-    };
 
     let lower_block_number =
         find_first_block_ge_timestamp(&*ethers_provider, timestamp_start, 0, latest_block_number);
@@ -78,10 +71,17 @@ fn setup_provider() -> Box<dyn BlockingProvider> {
 
 fn find_first_block_ge_timestamp(
     provider: &dyn BlockingProvider,
-    target_timestamp: u64,
+    mut target_timestamp: u64,
     mut start_block: u64,
     mut end_block: u64,
 ) -> u64 {
+    // Genesis block timestamp doesn't show the correct value but 0.
+    // To be able to include it into range, we need to set timestamp_start to 0
+    // if it's less than or equal to the actual genesis block timestamp.
+    if target_timestamp <= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
+        target_timestamp = STORED_GENESIS_BLOCK_TIMESTAMP
+    };
+
     while start_block < end_block {
         let mid_block = (start_block + end_block) / 2;
         let block = provider
@@ -157,7 +157,7 @@ mod tests {
     }
 
     // https://etherscan.io/block/1000
-    const BLOCK_ONE_THOUSAND_TIMESTAMP: u64 = 1_438_272_138;
+    const LATEST_BLOCK_TIMESTAMP: u64 = 1_438_272_138;
     const LATEST_BLOCK_NUMBER: u64 = 1_000;
     const TIME_INTERVAL: u64 = 1_000;
 
@@ -168,25 +168,10 @@ mod tests {
         #[tokio::test(flavor = "multi_thread")]
         #[should_panic(expected = "timestamp_start should be less than or equal to timestamp_end")]
         async fn panics_if_timestamp_start_is_greater_than_timestamp_end() {
-            let timestamp_start = BLOCK_ONE_THOUSAND_TIMESTAMP;
+            let timestamp_start = LATEST_BLOCK_TIMESTAMP;
             let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
 
             find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
-        }
-
-        #[tokio::test(flavor = "multi_thread")]
-        #[ignore]
-        async fn from_genesis() {
-            let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
-            let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP + TIME_INTERVAL;
-
-            let block_range =
-                find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
-
-            assert!(block_range.lower_block.timestamp() == STORED_GENESIS_BLOCK_TIMESTAMP);
-            assert!(block_range.upper_block.timestamp() <= timestamp_end);
-            assert!(block_range.predecessor.is_none());
-            assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -196,21 +181,21 @@ mod tests {
 
             let block_range = find_block_range_by_timestamp(
                 timestamp_start,
-                BLOCK_ONE_THOUSAND_TIMESTAMP,
+                LATEST_BLOCK_TIMESTAMP,
                 LATEST_BLOCK_NUMBER,
             );
 
             assert!(block_range.lower_block.timestamp() >= timestamp_start);
-            assert!(block_range.upper_block.timestamp() <= BLOCK_ONE_THOUSAND_TIMESTAMP);
+            assert!(block_range.upper_block.timestamp() <= LATEST_BLOCK_TIMESTAMP);
             assert!(block_range.predecessor.unwrap().timestamp() < timestamp_start);
             assert!(block_range.successor.is_none());
         }
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn intermediate_timestamps() {
+        async fn success() {
             let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
-            let timestamp_end = BLOCK_ONE_THOUSAND_TIMESTAMP - 1;
+            let timestamp_end = LATEST_BLOCK_TIMESTAMP - 1;
 
             let block_range =
                 find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
@@ -227,8 +212,27 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn returns_first_block_ge_timestamp() {
-            let target_timestamp = BLOCK_ONE_THOUSAND_TIMESTAMP;
+        async fn from_genesis() {
+            let target_timestamp = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
+            let start_block = 0;
+            let end_block = LATEST_BLOCK_NUMBER;
+
+            let block_number = find_first_block_ge_timestamp(
+                &*provider,
+                target_timestamp,
+                start_block,
+                end_block,
+            );
+            let block = provider.get_block_header(block_number.into()).unwrap().unwrap();
+            
+            assert!(block_number == 0);
+            assert!(block.timestamp() == STORED_GENESIS_BLOCK_TIMESTAMP);
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
+        async fn intermediate_timestamps() {
+            let target_timestamp = LATEST_BLOCK_TIMESTAMP;
             let start_block = 0;
             let end_block = LATEST_BLOCK_NUMBER;
 
@@ -255,8 +259,8 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn returns_last_block_le_timestamp() {
-            let target_timestamp = BLOCK_ONE_THOUSAND_TIMESTAMP;
+        async fn success() {
+            let target_timestamp = LATEST_BLOCK_TIMESTAMP;
             let start_block = 0;
             let end_block = LATEST_BLOCK_NUMBER;
 
