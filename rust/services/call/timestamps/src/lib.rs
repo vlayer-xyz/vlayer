@@ -21,6 +21,7 @@ lazy_static! {
 // The actual genesis block timestamp is Jul-30-2015 03:26:13 PM +UTC
 // (https://etherscan.io/block/0) but timestamp stored on the blockchain is 0
 const ACTUAL_GENESIS_BLOCK_TIMESTAMP: u64 = 1_438_269_973;
+const STORED_GENESIS_BLOCK_TIMESTAMP: u64 = 0;
 
 #[derive(Debug, new)]
 pub struct BlockRange {
@@ -38,8 +39,8 @@ pub fn find_block_range_by_timestamp(
 ) -> BlockRange {
     let provider = setup_provider();
 
-    if timestamp_start >= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
-        timestamp_start = 0
+    if timestamp_start <= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
+        timestamp_start = STORED_GENESIS_BLOCK_TIMESTAMP
     };
 
     let lower_block_number =
