@@ -41,6 +41,9 @@ pub fn find_block_range_by_timestamp(
         panic!("timestamp_start should be less than or equal to timestamp_end");
     }
 
+    // Genesis block timestamp doesn't show the correct value but 0.
+    // To be able to include it into range, we need to set timestamp_start to 0
+    // if it's less than or equal to the actual genesis block timestamp.
     if timestamp_start <= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
         timestamp_start = STORED_GENESIS_BLOCK_TIMESTAMP
     };
