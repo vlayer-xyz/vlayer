@@ -32,13 +32,15 @@ pub struct BlockRange {
     pub successor: Option<Box<dyn EvmBlockHeader>>,
 }
 
-/// Finds the first and last blocks within a given timestamp range
-/// by running two parallel binary searches.
 pub fn find_block_range_by_timestamp(
     mut timestamp_start: u64,
     timestamp_end: u64,
     latest_block_number: u64,
 ) -> BlockRange {
+    if timestamp_start > timestamp_end {
+        panic!("timestamp_start should be less than or equal to timestamp_end");
+    }
+
     if timestamp_start <= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
         timestamp_start = STORED_GENESIS_BLOCK_TIMESTAMP
     };
@@ -202,6 +204,15 @@ mod tests {
             assert!(block_range.upper_block.timestamp() <= timestamp_end);
             assert!(block_range.predecessor.unwrap().timestamp() < timestamp_start);
             assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        #[should_panic(expected = "timestamp_start should be less than or equal to timestamp_end")]
+        async fn panics_if_timestamp_start_is_greater_than_timestamp_end() {
+            let timestamp_start = BLOCK_ONE_THOUSAND_TIMESTAMP;
+            let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
+
+            find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
         }
     }
 }
