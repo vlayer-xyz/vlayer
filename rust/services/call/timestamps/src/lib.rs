@@ -1,5 +1,6 @@
 use std::{collections::HashMap, env};
 
+use derive_new::new;
 use dotenvy::dotenv;
 use lazy_static::lazy_static;
 use provider::{BlockingProvider, EthersProviderFactory, EvmBlockHeader, ProviderFactory};
@@ -17,13 +18,20 @@ lazy_static! {
         format!("https://eth-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
 }
 
+#[derive(Debug, new)]
+pub struct BlockRange {
+    pub predecessor: Option<Box<dyn EvmBlockHeader>>,
+    pub lower_block: Box<dyn EvmBlockHeader>,
+    pub upper_block: Box<dyn EvmBlockHeader>,
+    pub successor: Option<Box<dyn EvmBlockHeader>>,
+}
+
 /// Finds the first and last blocks within a given timestamp range by running two parallel binary searches.
-/// Returns the block headers of the found lower and upper bound blocks.
 pub fn find_block_range_by_timestamp(
     timestamp_start: u64,
     timestamp_end: u64,
     latest_block_number: u64,
-) -> (Box<dyn EvmBlockHeader>, Box<dyn EvmBlockHeader>) {
+) -> BlockRange {
     let provider = setup_provider();
 
     let lower_block_number =
@@ -41,12 +49,25 @@ pub fn find_block_range_by_timestamp(
         .get_block_header(lower_block_number.into())
         .unwrap()
         .unwrap();
-    let upper_block = provider
-        .get_block_header(upper_block_number.into())
-        .unwrap()
-        .unwrap();
+    let upper_block = if lower_block_number == upper_block_number {
+        lower_block.clone()
+    } else {
+        provider
+            .get_block_header(upper_block_number.into())
+            .unwrap()
+            .unwrap()
+    };
 
-    (lower_block, upper_block)
+    let predecessor = get_predecessor(&provider, &*lower_block);
+    let successor = get_successor(&provider, &*upper_block, latest_block_number);
+
+    BlockRange::new(predecessor, lower_block, upper_block, successor)
+}
+
+fn setup_provider() -> Box<dyn BlockingProvider> {
+    let rpc_endpoints = HashMap::from([(1, mainnet_url.clone())]);
+    let provider_factory = EthersProviderFactory::new(rpc_endpoints);
+    provider_factory.create(1).unwrap()
 }
 
 /// Performs a binary search to find the first block where `timestamp >= target_timestamp`.
@@ -73,10 +94,31 @@ fn find_block_by_timestamp(
     start_block
 }
 
-fn setup_provider() -> Box<dyn BlockingProvider> {
-    let rpc_endpoints = HashMap::from([(1, mainnet_url.clone())]);
-    let provider_factory = EthersProviderFactory::new(rpc_endpoints);
-    provider_factory.create(1).unwrap()
+fn get_predecessor(
+    provider: &dyn BlockingProvider,
+    block: &dyn EvmBlockHeader,
+) -> Option<Box<dyn EvmBlockHeader>> {
+    if block.number() > 0 {
+        provider
+            .get_block_header((block.number() - 1).into())
+            .unwrap()
+    } else {
+        None
+    }
+}
+
+fn get_successor(
+    provider: &dyn BlockingProvider,
+    block: &dyn EvmBlockHeader,
+    latest_block_number: u64,
+) -> Option<Box<dyn EvmBlockHeader>> {
+    if block.number() < latest_block_number {
+        provider
+            .get_block_header((block.number() + 1).into())
+            .unwrap()
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
@@ -85,15 +127,19 @@ mod tests {
 
     const FIRST_BLOCK_TIMESTAMP: u64 = 1_740_545_000;
 
+    lazy_static! {
+        static ref provider: Box<dyn BlockingProvider> = setup_provider();
+    }
+
     #[tokio::test(flavor = "multi_thread")]
     async fn gets_block_with_timestamp_higher_than_timestamp_start() {
         let timestamp_start = FIRST_BLOCK_TIMESTAMP;
         let timestamp_end = FIRST_BLOCK_TIMESTAMP + 100;
-        let provider = setup_provider();
         let latest_block_number = provider.get_latest_block_number().ok().unwrap();
 
-        let (lower_block, _) =
+        let block_range =
             find_block_range_by_timestamp(timestamp_start, timestamp_end, latest_block_number);
+        let lower_block = block_range.lower_block;
         assert!(lower_block.timestamp() >= timestamp_start);
 
         if let Ok(Some(prev_block)) = provider.get_block_header((lower_block.number() - 1).into()) {
@@ -105,11 +151,11 @@ mod tests {
     async fn gets_block_with_timestamp_lower_than_timestamp_end() {
         let timestamp_start = FIRST_BLOCK_TIMESTAMP;
         let timestamp_end = FIRST_BLOCK_TIMESTAMP + 100;
-        let provider = setup_provider();
         let latest_block_number = provider.get_latest_block_number().ok().unwrap();
 
-        let (_, upper_block) =
+        let block_range =
             find_block_range_by_timestamp(timestamp_start, timestamp_end, latest_block_number);
+        let upper_block = block_range.upper_block;
         assert!(upper_block.timestamp() <= timestamp_end);
 
         if let Ok(Some(next_block)) = provider.get_block_header((upper_block.number() + 1).into()) {
