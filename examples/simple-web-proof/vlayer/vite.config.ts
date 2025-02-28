@@ -6,6 +6,7 @@ export default defineConfig({
   build: {
     target: "esnext",
   },
+  // This is added as a temporary fix for the `process is not defined` issue appearing in one of our dependencies
   define: {
     "process.env": {},
   },
