@@ -156,21 +156,31 @@ mod tests {
     // https://etherscan.io/block/1000
     const BLOCK_ONE_THOUSAND_TIMESTAMP: u64 = 1_438_272_138;
     const LATEST_BLOCK_NUMBER: u64 = 1_000;
+    const TIME_INTERVAL: u64 = 1_000;
 
     // Tests ignored due to CI failing with missing ALCHEMY_KEY error
     mod find_block_range_by_timestamp {
         use super::*;
 
         #[tokio::test(flavor = "multi_thread")]
+        #[should_panic(expected = "timestamp_start should be less than or equal to timestamp_end")]
+        async fn panics_if_timestamp_start_is_greater_than_timestamp_end() {
+            let timestamp_start = BLOCK_ONE_THOUSAND_TIMESTAMP;
+            let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
+
+            find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
         #[ignore]
         async fn from_genesis() {
             let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
-            let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1000;
+            let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP + TIME_INTERVAL;
 
             let block_range =
                 find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
 
-            assert!(block_range.lower_block.timestamp() == 0);
+            assert!(block_range.lower_block.timestamp() == STORED_GENESIS_BLOCK_TIMESTAMP);
             assert!(block_range.upper_block.timestamp() <= timestamp_end);
             assert!(block_range.predecessor.is_none());
             assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
@@ -206,16 +216,6 @@ mod tests {
             assert!(block_range.upper_block.timestamp() <= timestamp_end);
             assert!(block_range.predecessor.unwrap().timestamp() < timestamp_start);
             assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
-        }
-
-        #[tokio::test(flavor = "multi_thread")]
-        #[ignore]
-        #[should_panic(expected = "timestamp_start should be less than or equal to timestamp_end")]
-        async fn panics_if_timestamp_start_is_greater_than_timestamp_end() {
-            let timestamp_start = BLOCK_ONE_THOUSAND_TIMESTAMP;
-            let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
-
-            find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
         }
     }
 }
