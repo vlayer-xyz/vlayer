@@ -2193,7 +2193,6 @@ dependencies = [
  "bytes",
  "call_common",
  "call_engine",
- "call_timestamps",
  "chain",
  "chain_client",
  "chain_common",

@@ -23,6 +23,7 @@ members = [
     "rust/services/call/seal",
     "rust/services/call/server",
     "rust/services/call/server_lib",
+    "rust/services/call/timestamps",
     "rust/services/chain/block_trie",
     "rust/services/chain/client",
     "rust/services/chain/common",
