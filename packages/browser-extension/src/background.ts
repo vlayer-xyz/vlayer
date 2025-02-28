@@ -14,7 +14,8 @@ import {
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
-
+import debug from "debug";
+const log = debug("extension:background");
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
@@ -42,11 +43,11 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         ),
       },
       () => {
-        console.log("sending message to webpage", message);
+        log("sending message to webpage", message);
         try {
           port?.postMessage(message);
         } catch (e) {
-          console.log("Could not send message to webpage", e);
+          console.error("Could not send message to webpage", e);
         }
       },
     )

@@ -36,6 +36,7 @@
     "@types/ramda": "^0.30.2",
     "@vlayer/extension-hooks": "file:../extension-hooks",
     "comlink": "^4.4.1",
+    "debug": "^4.4.0",
     "fp-ts": "^2.16.9",
     "framer-motion": "^11.11.1",
     "playwright": "1.48.0",

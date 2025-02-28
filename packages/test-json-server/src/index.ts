@@ -34,7 +34,6 @@ new Elysia({
   })
   .put("/update_resource", ({ request }) => {
     const { name } = request.body;
-    console.log("Update resource request", request);
     return { success: true, updatedName: name };
   })
   .use(cors())

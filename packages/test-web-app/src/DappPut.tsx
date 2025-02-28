@@ -8,7 +8,7 @@ import {
   startPage,
 } from "@vlayer/react";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Abi } from "viem";
 
 const webProofConfig: GetWebProofArgs<Abi, string> = {
@@ -48,11 +48,6 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
 function DappPutContent() {
   const { requestWebProof, webProof } = useWebProof(webProofConfig);
 
-  useEffect(() => {
-    if (webProof) {
-      console.log("webProof ready", webProof);
-    }
-  }, [webProof]);
   return (
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}

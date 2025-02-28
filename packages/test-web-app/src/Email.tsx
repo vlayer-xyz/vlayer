@@ -26,14 +26,13 @@ const useEmailFileUpload = () => {
       str,
       "http://127.0.0.1:3002/dns-query",
     );
-    const x = await vlayer.prove({
+    await vlayer.prove({
       address: PROVER_ADDRESS,
       proverAbi: proverSpec.abi,
       functionName: "main",
       chainId: foundry.id,
       args: [unverifiedEmail],
     });
-    console.log("c", x);
   }, []);
 };
 
@@ -46,7 +45,6 @@ export default function Email() {
         name="file"
         type="file"
         onChange={(evt) => {
-          console.log("File changed");
           void handleFileChange(evt);
         }}
       />

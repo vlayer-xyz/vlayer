@@ -6,6 +6,8 @@ import { Reveal, Method } from "tlsn-wasm";
 import { type RedactionConfig } from "../../web-proof-commons";
 import { redact } from "./redaction/redact";
 import { HTTPMethod } from "lib/HttpMethods";
+import debug from "debug";
+const log = debug("extension:tlsnProve");
 type ProverConfig = {
   serverDns: string;
   maxSentData?: number;
@@ -79,15 +81,15 @@ export async function tlsnProve(
     throw new Error("Authentication failed. Please restart the process.");
   }
 
-  console.log("Received response", res);
+  log("Received response", res);
 
   const transcript = await prover.transcript();
 
-  console.log("Transcript", transcript);
+  log("Transcript", transcript);
 
   const commit = redact(transcript, redactionConfig);
 
-  console.log("Commit", commit);
+  log("Commit", commit);
   const notarizationOutputs = await prover.notarize(commit);
 
   const presentation = await new Presentation({
@@ -100,13 +102,13 @@ export async function tlsnProve(
 
   const presentationJson = await presentation.json();
   const decodedProof = await presentation.verify();
-  console.log("Decoded proof", decodedProof);
+  log("Decoded proof", decodedProof);
 
   const decodedTranscript = new Transcript({
     sent: decodedProof?.transcript.sent,
     recv: decodedProof?.transcript.recv,
   });
-  console.log("Decoded transcript", decodedTranscript);
+  log("Decoded transcript", decodedTranscript);
   return {
     presentationJson,
     decodedTranscript: {
