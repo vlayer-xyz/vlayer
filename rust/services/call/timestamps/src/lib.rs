@@ -221,4 +221,60 @@ mod tests {
             assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
         }
     }
+
+    mod find_first_block_ge_timestamp {
+        use super::*;
+
+        #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
+        async fn returns_first_block_ge_timestamp() {
+            let target_timestamp = BLOCK_ONE_THOUSAND_TIMESTAMP;
+            let start_block = 0;
+            let end_block = LATEST_BLOCK_NUMBER;
+
+            let block_number = find_first_block_ge_timestamp(
+                &*provider,
+                target_timestamp,
+                start_block,
+                end_block,
+            );
+
+            let block = provider.get_block_header(block_number.into()).unwrap().unwrap();
+            assert!(block.timestamp() >= target_timestamp);
+
+            let previous_block = provider
+                .get_block_header((block_number - 1).into())
+                .unwrap()
+                .unwrap();
+            assert!(previous_block.timestamp() < target_timestamp);
+        }
+    }
+
+    mod find_last_block_le_timestamp {
+        use super::*;
+
+        #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
+        async fn returns_last_block_le_timestamp() {
+            let target_timestamp = BLOCK_ONE_THOUSAND_TIMESTAMP;
+            let start_block = 0;
+            let end_block = LATEST_BLOCK_NUMBER;
+
+            let block_number = find_last_block_le_timestamp(
+                &*provider,
+                target_timestamp,
+                start_block,
+                end_block,
+            );
+
+            let block = provider.get_block_header(block_number.into()).unwrap().unwrap();
+            assert!(block.timestamp() <= target_timestamp);
+
+            let next_block = provider
+                .get_block_header((block_number + 1).into())
+                .unwrap()
+                .unwrap();
+            assert!(next_block.timestamp() > target_timestamp);
+        }
+    }
 }
