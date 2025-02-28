@@ -9,3 +9,4 @@
   * `f943ebf08ce7d8df4d97b57bde8f2f9c84ceadcafde7d2d0a8feb6278e7ce500` – Replace push_front function with Nibbles.join
   * `f3b12fb72b14d79384ef22555ea99f93b6d91908ffa2461186cfddaeb452c3c8` – Convert an Entry into a Leaf instead of a Branch when the key is empty
   * `166acfda7e752fe8e41324206accb169af629b0a80122dd6ca3955f053f06dcb` – Reset travel location after one call [#1890] (https://github.com/vlayer-xyz/vlayer/pull/1890)
+  * `b732a05ac17d30e19bc66378e960d67290250da1c70f7c28a1c5be43e2670e7d` – Risc0 1.2.4 [#1911] (https://github.com/vlayer-xyz/vlayer/pull/1911)

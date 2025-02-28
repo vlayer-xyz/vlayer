@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 chain_guest = { path = "../../services/chain/guest" }
-risc0-zkvm = { version = "1.2.0", default-features = false, features = ["std"] }
+risc0-zkvm = { version = "=1.2.4", default-features = false, features = ["std"] }
 tokio = { version = "1.41.0", features = ["rt", "macros"] }
 
 [build-dependencies]
