@@ -149,7 +149,7 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
         base_fee_per_gas: block
             .base_fee_per_gas
             .map(from_ethers_u256)
-            .unwrap_or_default(), // If missing, use default value (0)
+            .unwrap_or_default(),
         withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
         blob_gas_used: block
             .blob_gas_used
