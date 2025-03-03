@@ -31,14 +31,13 @@ impl TryFrom<(u64, u64)> for BlockRange {
 pub fn find_first_block_ge_timestamp(
     provider: &dyn BlockingProvider,
     target_timestamp: u64,
-    block_range: &BlockRange,
+    range: BlockRange,
 ) -> Option<Box<dyn EvmBlockHeader>> {
     if target_timestamp <= ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP {
         return provider.get_block_header(0.into()).unwrap();
     }
 
-    let block_number =
-        binary_search_block_number(provider, target_timestamp, block_range.start, block_range.end);
+    let block_number = binary_search_block_number(provider, target_timestamp, range);
 
     block_number.and_then(|number| provider.get_block_header(number.into()).unwrap())
 }
@@ -50,26 +49,25 @@ pub fn find_first_block_ge_timestamp(
 pub fn binary_search_block_number(
     provider: &dyn BlockingProvider,
     target_timestamp: u64,
-    mut start_block: u64,
-    mut end_block: u64,
+    mut range: BlockRange,
 ) -> Option<u64> {
-    while start_block < end_block {
-        let mid_block = (start_block + end_block) / 2;
+    while range.start < range.end {
+        let mid_block = (range.start + range.end) / 2;
         let block = provider
             .get_block_header(mid_block.into())
             .expect("Failed to fetch block")
             .unwrap();
 
         if block.timestamp() < target_timestamp {
-            start_block = mid_block + 1;
+            range.start = mid_block + 1;
         } else {
-            end_block = mid_block;
+            range.end = mid_block;
         }
     }
 
     // Loop above can return a block with timestamp < target_timestamp if it is the last block
     provider
-        .get_block_header(start_block.into())
+        .get_block_header(range.start.into())
         .expect("Failed to fetch block")
         .and_then(|b| {
             if b.timestamp() < target_timestamp {
@@ -123,7 +121,7 @@ mod tests {
             let target_timestamp = ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP;
 
             let block =
-                find_first_block_ge_timestamp(&*provider, target_timestamp, &block_range).unwrap();
+                find_first_block_ge_timestamp(&*provider, target_timestamp, block_range).unwrap();
 
             assert!(block.number() == 0);
 
@@ -137,7 +135,7 @@ mod tests {
             let target_timestamp = LATEST_BLOCK_TIMESTAMP;
 
             let block =
-                find_first_block_ge_timestamp(&*provider, target_timestamp, &block_range).unwrap();
+                find_first_block_ge_timestamp(&*provider, target_timestamp, block_range).unwrap();
 
             assert!(block.timestamp() >= target_timestamp);
 
@@ -156,14 +154,13 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn find_middle_block() -> anyhow::Result<()> {
-            let start_block = 0;
-            let end_block = LATEST_BLOCK_NUMBER;
+        async fn found() -> anyhow::Result<()> {
+            let block_range = (0, LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp =
                 (ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP + LATEST_BLOCK_TIMESTAMP) / 2;
 
             let block_number =
-                binary_search_block_number(&*provider, target_timestamp, start_block, end_block);
+                binary_search_block_number(&*provider, target_timestamp, block_range);
 
             let block = provider
                 .get_block_header(block_number.unwrap().into())?
@@ -180,28 +177,28 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn not_found() {
-            let start_block = 0;
-            let end_block = LATEST_BLOCK_NUMBER;
+        async fn not_found() -> anyhow::Result<()> {
+            let block_range = (0, LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = LATEST_BLOCK_TIMESTAMP + 1;
 
-            let block =
-                binary_search_block_number(&*provider, target_timestamp, start_block, end_block);
+            let block = binary_search_block_number(&*provider, target_timestamp, block_range);
 
             assert!(block.is_none());
+
+            Ok(())
         }
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn timestamp_too_big() {
-            let start_block = 0;
-            let end_block = LATEST_BLOCK_NUMBER;
+        async fn timestamp_too_big() -> anyhow::Result<()> {
+            let block_range = (0, LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = LATEST_BLOCK_TIMESTAMP + 1;
 
-            let block =
-                binary_search_block_number(&*provider, target_timestamp, start_block, end_block);
+            let block = binary_search_block_number(&*provider, target_timestamp, block_range);
 
             assert!(block.is_none());
+
+            Ok(())
         }
     }
 }
