@@ -7,26 +7,8 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
-  check-if-release-exists:
-    if: github.repository == 'vlayer-xyz/vlayer'
-    runs-on: ubuntu-latest
-    outputs:
-      release_exists: ${{ steps.check_release.outputs.release_exists }}
-    steps:
-      - name: Check if release exists
-        id: check_release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if gh release view "nightly-${{ github.sha }}" --repo "${{ github.repository }}" > /dev/null 2>&1; then
-            echo "release_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "release_exists=false" >> $GITHUB_OUTPUT
-          fi
-
   build-release:
-    needs: [check-if-release-exists]
-    if: github.repository == 'vlayer-xyz/vlayer' && needs.check-if-release-exists.outputs.release_exists != 'true'
+    if: github.repository == 'vlayer-xyz/vlayer'
     uses: ./.github/workflows/build_rust_release.yaml
 
   build-examples:
@@ -96,7 +78,10 @@ jobs:
           SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
-          forge soldeer push "vlayer~${VLAYER_BUILD}" --skip-warnings
+          # Push to soldeer, only if the version is not yet published.
+          cd $(mktemp -d)
+          forge soldeer init --config-location foundry
+          forge soldeer install "vlayer~${VLAYER_BUILD}" || (cd - && forge soldeer push "vlayer~${VLAYER_BUILD}" --skip-warnings)
 
       - name: Build vlayer contracts artifact
         working-directory: contracts/vlayer
