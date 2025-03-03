@@ -1,16 +1,9 @@
 use std::{collections::HashMap, env};
 
-use derive_new::new;
+use anyhow::Error;
 use dotenvy::dotenv;
 use lazy_static::lazy_static;
 use provider::{BlockingProvider, EthersProviderFactory, EvmBlockHeader, ProviderFactory};
-
-fn get_alchemy_key() -> String {
-    dotenv().ok();
-    env::var("ALCHEMY_KEY").expect(
-        "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
-    )
-}
 
 lazy_static! {
     static ref alchemy_key: String = get_alchemy_key();
@@ -22,45 +15,31 @@ lazy_static! {
 // The actual genesis block timestamp is Jul-30-2015 03:26:13 PM +UTC
 // (https://etherscan.io/block/0) but timestamp stored on the blockchain is 0
 const ACTUAL_GENESIS_BLOCK_TIMESTAMP: u64 = 1_438_269_973;
-const STORED_GENESIS_BLOCK_TIMESTAMP: u64 = 0;
 
-#[derive(Debug, new)]
+#[derive(Debug)]
 pub struct BlockRange {
-    pub predecessor: Option<Box<dyn EvmBlockHeader>>,
-    pub lower_block: Box<dyn EvmBlockHeader>,
-    pub upper_block: Box<dyn EvmBlockHeader>,
-    pub successor: Option<Box<dyn EvmBlockHeader>>,
+    pub start: u64,
+    pub end: u64,
 }
 
-pub fn find_block_range_by_timestamp(
-    timestamp_start: u64,
-    timestamp_end: u64,
-    latest_block_number: u64,
-) -> BlockRange {
-    if timestamp_start > timestamp_end {
-        panic!("timestamp_start should be less than or equal to timestamp_end");
+impl TryFrom<(u64, u64)> for BlockRange {
+    type Error = Error;
+
+    fn try_from(value: (u64, u64)) -> Result<Self, Self::Error> {
+        let (start, end) = value;
+        if start > end {
+            return Err(anyhow::anyhow!("Start block ({}) must be less than or equal to end block ({})", start, end));
+        }
+
+        Ok(BlockRange { start, end })
     }
+}
 
-    let lower_block_number =
-        find_first_block_ge_timestamp(&*ethers_provider, timestamp_start, 0, latest_block_number);
-    let upper_block_number =
-        find_last_block_le_timestamp(&*ethers_provider, timestamp_end, 0, latest_block_number);
-    let lower_block = ethers_provider
-        .get_block_header(lower_block_number.into())
-        .unwrap()
-        .unwrap();
-    let upper_block = if lower_block_number == upper_block_number {
-        lower_block.clone()
-    } else {
-        ethers_provider
-            .get_block_header(upper_block_number.into())
-            .unwrap()
-            .unwrap()
-    };
-
-    let predecessor = get_predecessor(&*ethers_provider, &*lower_block);
-    let successor = get_successor(&*ethers_provider, &*upper_block, latest_block_number);
-    BlockRange::new(predecessor, lower_block, upper_block, successor)
+fn get_alchemy_key() -> String {
+    dotenv().ok();
+    env::var("ALCHEMY_KEY").expect(
+        "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
+    )
 }
 
 fn setup_provider() -> Box<dyn BlockingProvider> {
@@ -69,19 +48,31 @@ fn setup_provider() -> Box<dyn BlockingProvider> {
     provider_factory.create(1).unwrap()
 }
 
-fn find_first_block_ge_timestamp(
+pub fn find_first_block_ge_timestamp(
     provider: &dyn BlockingProvider,
-    mut target_timestamp: u64,
+    target_timestamp: u64,
+    block_range: &BlockRange,
+) -> Option<Box<dyn EvmBlockHeader>> {
+    if target_timestamp <= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
+        return provider.get_block_header(0.into()).unwrap();
+    }
+
+    let block_number =
+        binary_search_block_number(provider, target_timestamp, block_range.start, block_range.end);
+
+    block_number.and_then(|number| provider.get_block_header(number.into()).unwrap())
+}
+
+/// Searches for the earliest block within the given range that has a timestamp
+/// greater than or equal to the target timestamp using binary search.
+/// If no such block is found (i.e., all blocks in the range have timestamps below the target),
+/// the function returns `None`.
+pub fn binary_search_block_number(
+    provider: &dyn BlockingProvider,
+    target_timestamp: u64,
     mut start_block: u64,
     mut end_block: u64,
-) -> u64 {
-    // Genesis block timestamp doesn't show the correct value but 0.
-    // To be able to include it into range, we need to set timestamp_start to 0
-    // if it's less than or equal to the actual genesis block timestamp.
-    if target_timestamp <= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
-        target_timestamp = STORED_GENESIS_BLOCK_TIMESTAMP
-    };
-
+) -> Option<u64> {
     while start_block < end_block {
         let mid_block = (start_block + end_block) / 2;
         let block = provider
@@ -95,57 +86,17 @@ fn find_first_block_ge_timestamp(
             end_block = mid_block;
         }
     }
-    start_block
-}
 
-fn find_last_block_le_timestamp(
-    provider: &dyn BlockingProvider,
-    target_timestamp: u64,
-    mut start_block: u64,
-    mut end_block: u64,
-) -> u64 {
-    let mut result = start_block;
-    while start_block <= end_block {
-        let mid_block = (start_block + end_block) / 2;
-        let block = provider
-            .get_block_header(mid_block.into())
-            .unwrap()
-            .unwrap();
-        if block.timestamp() <= target_timestamp {
-            result = mid_block;
-            start_block = mid_block + 1;
+    let block = provider.get_block_header(start_block.into()).unwrap();
+
+    // Loop above can return a block with timestamp < target_timestamp if it is the last block
+    block.and_then(|b| {
+        if b.timestamp() < target_timestamp {
+            None
         } else {
-            end_block = mid_block - 1;
+            Some(b.number())
         }
-    }
-    result
-}
-
-fn get_predecessor(
-    provider: &dyn BlockingProvider,
-    block: &dyn EvmBlockHeader,
-) -> Option<Box<dyn EvmBlockHeader>> {
-    if block.number() > 0 {
-        provider
-            .get_block_header((block.number() - 1).into())
-            .unwrap()
-    } else {
-        None
-    }
-}
-
-fn get_successor(
-    provider: &dyn BlockingProvider,
-    block: &dyn EvmBlockHeader,
-    latest_block_number: u64,
-) -> Option<Box<dyn EvmBlockHeader>> {
-    if block.number() < latest_block_number {
-        provider
-            .get_block_header((block.number() + 1).into())
-            .unwrap()
-    } else {
-        None
-    }
+    })
 }
 
 #[cfg(test)]
@@ -156,141 +107,100 @@ mod tests {
         static ref provider: Box<dyn BlockingProvider> = setup_provider();
     }
 
-    // https://etherscan.io/block/1000
-    const LATEST_BLOCK_TIMESTAMP: u64 = 1_438_272_138;
-    const LATEST_BLOCK_NUMBER: u64 = 1_000;
-    const TIME_INTERVAL: u64 = 1_000;
+    // https://etherscan.io/block/20000000
+    const LATEST_BLOCK_NUMBER: u64 = 20_000_000;
+    const LATEST_BLOCK_TIMESTAMP: u64 = 1_717_281_407;
 
     // Tests ignored because network connection necessary to run them is not possible on CI
-    mod find_block_range_by_timestamp {
-        use super::*;
-
-        #[tokio::test(flavor = "multi_thread")]
-        #[should_panic(expected = "timestamp_start should be less than or equal to timestamp_end")]
-        async fn panics_if_timestamp_start_is_greater_than_timestamp_end() {
-            let timestamp_start = LATEST_BLOCK_TIMESTAMP;
-            let timestamp_end = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
-
-            find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
-        }
-
-        #[tokio::test(flavor = "multi_thread")]
-        #[ignore]
-        async fn from_first_block() {
-            let timestamp_start = STORED_GENESIS_BLOCK_TIMESTAMP;
-            let timestamp_end = STORED_GENESIS_BLOCK_TIMESTAMP + TIME_INTERVAL;
-
-            let block_range =
-                find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
-
-            assert!(block_range.lower_block.timestamp() >= timestamp_start);
-            assert!(block_range.upper_block.timestamp() <= timestamp_end);
-            assert!(block_range.predecessor.is_none());
-            assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
-        }
-
-        #[tokio::test(flavor = "multi_thread")]
-        #[ignore]
-        async fn until_last_block() {
-            let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
-
-            let block_range = find_block_range_by_timestamp(
-                timestamp_start,
-                LATEST_BLOCK_TIMESTAMP,
-                LATEST_BLOCK_NUMBER,
-            );
-
-            assert!(block_range.lower_block.timestamp() >= timestamp_start);
-            assert!(block_range.upper_block.timestamp() <= LATEST_BLOCK_TIMESTAMP);
-            assert!(block_range.predecessor.unwrap().timestamp() < timestamp_start);
-            assert!(block_range.successor.is_none());
-        }
-
-        #[tokio::test(flavor = "multi_thread")]
-        #[ignore]
-        async fn intermediate_blocks() {
-            let timestamp_start = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
-            let timestamp_end = LATEST_BLOCK_TIMESTAMP - 1;
-
-            let block_range =
-                find_block_range_by_timestamp(timestamp_start, timestamp_end, LATEST_BLOCK_NUMBER);
-
-            assert!(block_range.lower_block.timestamp() >= timestamp_start);
-            assert!(block_range.upper_block.timestamp() <= timestamp_end);
-            assert!(block_range.predecessor.unwrap().timestamp() < timestamp_start);
-            assert!(block_range.successor.unwrap().timestamp() > timestamp_end);
-        }
-    }
-
+    // todo: Add snapshot mechanism to run these tests
     mod find_first_block_ge_timestamp {
         use super::*;
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn from_genesis() {
+        async fn genesis_case() -> anyhow::Result<()> {
+            let block_range = (0, LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
-            let start_block = 0;
-            let end_block = LATEST_BLOCK_NUMBER;
 
-            let block_number =
-                find_first_block_ge_timestamp(&*provider, target_timestamp, start_block, end_block);
-            let block = provider
-                .get_block_header(block_number.into())
-                .unwrap()
-                .unwrap();
+            let block =
+                find_first_block_ge_timestamp(&*provider, target_timestamp, &block_range).unwrap();
 
-            assert!(block_number == 0);
-            assert!(block.timestamp() == STORED_GENESIS_BLOCK_TIMESTAMP);
+            assert!(block.number() == 0);
+
+            Ok(())
         }
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn intermediate_timestamps() {
+        async fn found() -> anyhow::Result<()> {
+            let block_range = (0, LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = LATEST_BLOCK_TIMESTAMP;
-            let start_block = 0;
-            let end_block = LATEST_BLOCK_NUMBER;
 
-            let block_number =
-                find_first_block_ge_timestamp(&*provider, target_timestamp, start_block, end_block);
+            let block =
+                find_first_block_ge_timestamp(&*provider, target_timestamp, &block_range).unwrap();
 
-            let block = provider
-                .get_block_header(block_number.into())
-                .unwrap()
-                .unwrap();
             assert!(block.timestamp() >= target_timestamp);
 
             let previous_block = provider
-                .get_block_header((block_number - 1).into())
+                .get_block_header((block.number() - 1).into())
                 .unwrap()
                 .unwrap();
             assert!(previous_block.timestamp() < target_timestamp);
+
+            Ok(())
         }
     }
 
-    mod find_last_block_le_timestamp {
+    mod binary_search_block_number {
         use super::*;
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn success() {
-            let target_timestamp = LATEST_BLOCK_TIMESTAMP;
+        async fn found() {
             let start_block = 0;
             let end_block = LATEST_BLOCK_NUMBER;
+            let target_timestamp = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
 
             let block_number =
-                find_last_block_le_timestamp(&*provider, target_timestamp, start_block, end_block);
+                binary_search_block_number(&*provider, target_timestamp, start_block, end_block);
 
             let block = provider
-                .get_block_header(block_number.into())
+                .get_block_header(block_number.unwrap().into())
                 .unwrap()
                 .unwrap();
-            assert!(block.timestamp() <= target_timestamp);
+            let previous_block = provider
+                .get_block_header((block.number() - 1).into())
+                .unwrap()
+                .unwrap();
 
-            let next_block = provider
-                .get_block_header((block_number + 1).into())
-                .unwrap()
-                .unwrap();
-            assert!(next_block.timestamp() > target_timestamp);
+            assert!(block.timestamp() >= target_timestamp);
+            assert!(previous_block.timestamp() < target_timestamp);
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
+        async fn not_found() {
+            let start_block = 0;
+            let end_block = LATEST_BLOCK_NUMBER;
+            let target_timestamp = LATEST_BLOCK_TIMESTAMP + 1;
+
+            let block =
+                binary_search_block_number(&*provider, target_timestamp, start_block, end_block);
+
+            assert!(block.is_none());
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        #[ignore]
+        async fn timestamp_too_big() {
+            let start_block = 0;
+            let end_block = LATEST_BLOCK_NUMBER;
+            let target_timestamp = LATEST_BLOCK_TIMESTAMP + 1;
+
+            let block =
+                binary_search_block_number(&*provider, target_timestamp, start_block, end_block);
+
+            assert!(block.is_none());
         }
     }
 }

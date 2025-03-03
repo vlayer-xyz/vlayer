@@ -2306,7 +2306,7 @@ dependencies = [
 name = "call_timestamps"
 version = "0.1.0"
 dependencies = [
- "derive-new",
+ "anyhow",
  "dotenvy",
  "lazy_static",
  "provider",

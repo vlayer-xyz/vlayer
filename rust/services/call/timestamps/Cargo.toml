@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-derive-new = { workspace = true }
+anyhow = { workspace = true }
 dotenvy = { workspace = true }
 lazy_static = { workspace = true }
 provider = { workspace = true }
