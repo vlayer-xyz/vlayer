@@ -96,7 +96,10 @@ jobs:
           SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
-          forge soldeer push "vlayer~${VLAYER_BUILD}" --skip-warnings
+          # Push to soldeer, only if the version is not yet published.
+          cd $(mktemp -d)
+          forge soldeer init --config-location foundry
+          forge soldeer install "vlayer~${VLAYER_BUILD}" || (cd - && forge soldeer push "vlayer~${VLAYER_BUILD}" --skip-warnings)
 
       - name: Build vlayer contracts artifact
         working-directory: contracts/vlayer
