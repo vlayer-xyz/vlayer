@@ -12,4 +12,8 @@ export default defineConfig({
   define: {
     "process.env": {},
   },
+  test: {
+    environment: "jsdom",
+    include: ["src/**/*.test.ts"],
+  },
 });
