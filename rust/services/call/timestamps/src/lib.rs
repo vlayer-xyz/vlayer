@@ -28,7 +28,11 @@ impl TryFrom<(u64, u64)> for BlockRange {
     fn try_from(value: (u64, u64)) -> Result<Self, Self::Error> {
         let (start, end) = value;
         if start > end {
-            return Err(anyhow::anyhow!("Start block ({}) must be less than or equal to end block ({})", start, end));
+            return Err(anyhow::anyhow!(
+                "Start block ({}) must be less than or equal to end block ({})",
+                start,
+                end
+            ));
         }
 
         Ok(BlockRange { start, end })
