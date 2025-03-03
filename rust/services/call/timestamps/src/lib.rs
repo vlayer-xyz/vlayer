@@ -1,20 +1,9 @@
-use std::{collections::HashMap, env};
-
 use anyhow::Error;
-use dotenvy::dotenv;
-use lazy_static::lazy_static;
-use provider::{BlockingProvider, EthersProviderFactory, EvmBlockHeader, ProviderFactory};
-
-lazy_static! {
-    static ref alchemy_key: String = get_alchemy_key();
-    static ref mainnet_url: String =
-        format!("https://eth-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
-    static ref ethers_provider: Box<dyn BlockingProvider> = setup_provider();
-}
+use provider::{BlockingProvider, EvmBlockHeader};
 
 // The actual genesis block timestamp is Jul-30-2015 03:26:13 PM +UTC
 // (https://etherscan.io/block/0) but timestamp stored on the blockchain is 0
-const ACTUAL_GENESIS_BLOCK_TIMESTAMP: u64 = 1_438_269_973;
+const ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP: u64 = 1_438_269_973;
 
 #[derive(Debug)]
 pub struct BlockRange {
@@ -39,25 +28,12 @@ impl TryFrom<(u64, u64)> for BlockRange {
     }
 }
 
-fn get_alchemy_key() -> String {
-    dotenv().ok();
-    env::var("ALCHEMY_KEY").expect(
-        "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
-    )
-}
-
-fn setup_provider() -> Box<dyn BlockingProvider> {
-    let rpc_endpoints = HashMap::from([(1, mainnet_url.clone())]);
-    let provider_factory = EthersProviderFactory::new(rpc_endpoints);
-    provider_factory.create(1).unwrap()
-}
-
 pub fn find_first_block_ge_timestamp(
     provider: &dyn BlockingProvider,
     target_timestamp: u64,
     block_range: &BlockRange,
 ) -> Option<Box<dyn EvmBlockHeader>> {
-    if target_timestamp <= ACTUAL_GENESIS_BLOCK_TIMESTAMP {
+    if target_timestamp <= ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP {
         return provider.get_block_header(0.into()).unwrap();
     }
 
@@ -81,7 +57,7 @@ pub fn binary_search_block_number(
         let mid_block = (start_block + end_block) / 2;
         let block = provider
             .get_block_header(mid_block.into())
-            .unwrap()
+            .expect("Failed to fetch block")
             .unwrap();
 
         if block.timestamp() < target_timestamp {
@@ -91,29 +67,49 @@ pub fn binary_search_block_number(
         }
     }
 
-    let block = provider.get_block_header(start_block.into()).unwrap();
-
     // Loop above can return a block with timestamp < target_timestamp if it is the last block
-    block.and_then(|b| {
-        if b.timestamp() < target_timestamp {
-            None
-        } else {
-            Some(b.number())
-        }
-    })
+    provider
+        .get_block_header(start_block.into())
+        .expect("Failed to fetch block")
+        .and_then(|b| {
+            if b.timestamp() < target_timestamp {
+                None
+            } else {
+                Some(b.number())
+            }
+        })
 }
 
 #[cfg(test)]
 mod tests {
+    use std::{collections::HashMap, env};
+
+    use ::provider::{EthersProviderFactory, ProviderFactory};
+    use dotenvy::dotenv;
+    use lazy_static::lazy_static;
+
     use super::*;
 
     lazy_static! {
+        static ref mainnet_url: String = get_mainnet_url();
         static ref provider: Box<dyn BlockingProvider> = setup_provider();
     }
 
     // https://etherscan.io/block/20000000
     const LATEST_BLOCK_NUMBER: u64 = 20_000_000;
     const LATEST_BLOCK_TIMESTAMP: u64 = 1_717_281_407;
+
+    fn get_mainnet_url() -> String {
+        dotenv().ok();
+        env::var("MAINNET_URL")
+            .expect("To use provider you need to set MAINNET_URL in an .env file.")
+    }
+
+    fn setup_provider() -> Box<dyn BlockingProvider> {
+        let rpc_endpoints = HashMap::from([(1, mainnet_url.clone())]);
+        let provider_factory = EthersProviderFactory::new(rpc_endpoints);
+        provider_factory.create(1).unwrap()
+    }
 
     // Tests ignored because network connection necessary to run them is not possible on CI
     // todo: Add snapshot mechanism to run these tests
@@ -124,7 +120,7 @@ mod tests {
         #[ignore]
         async fn genesis_case() -> anyhow::Result<()> {
             let block_range = (0, LATEST_BLOCK_NUMBER).try_into()?;
-            let target_timestamp = ACTUAL_GENESIS_BLOCK_TIMESTAMP;
+            let target_timestamp = ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP;
 
             let block =
                 find_first_block_ge_timestamp(&*provider, target_timestamp, &block_range).unwrap();
@@ -160,25 +156,26 @@ mod tests {
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn found() {
+        async fn find_middle_block() -> anyhow::Result<()> {
             let start_block = 0;
             let end_block = LATEST_BLOCK_NUMBER;
-            let target_timestamp = ACTUAL_GENESIS_BLOCK_TIMESTAMP + 1;
+            let target_timestamp =
+                (ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP + LATEST_BLOCK_TIMESTAMP) / 2;
 
             let block_number =
                 binary_search_block_number(&*provider, target_timestamp, start_block, end_block);
 
             let block = provider
-                .get_block_header(block_number.unwrap().into())
-                .unwrap()
+                .get_block_header(block_number.unwrap().into())?
                 .unwrap();
             let previous_block = provider
-                .get_block_header((block.number() - 1).into())
-                .unwrap()
+                .get_block_header((block.number() - 1).into())?
                 .unwrap();
 
             assert!(block.timestamp() >= target_timestamp);
             assert!(previous_block.timestamp() < target_timestamp);
+
+            Ok(())
         }
 
         #[tokio::test(flavor = "multi_thread")]
