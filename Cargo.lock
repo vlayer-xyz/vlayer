@@ -2311,6 +2311,7 @@ dependencies = [
  "lazy_static",
  "provider",
  "tokio",
+ "u64_range",
 ]
 
 [[package]]
