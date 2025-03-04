@@ -23,7 +23,6 @@ members = [
     "rust/services/call/seal",
     "rust/services/call/server",
     "rust/services/call/server_lib",
-    "rust/services/call/timestamps",
     "rust/services/chain/block_trie",
     "rust/services/chain/client",
     "rust/services/chain/common",
@@ -180,7 +179,6 @@ call_guest = { path = "rust/services/call/guest" }
 call_host = { path = "rust/services/call/host" }
 call_server = { path = "rust/services/call/server" }
 call_server_lib = { path = "rust/services/call/server_lib" }
-call_timestamps = { path = "rust/services/call/timestamps" }
 optimism = { path = "rust/services/call/optimism" }
 chain = { path = "rust/chain" }
 chain_client = { path = "rust/services/chain/client" }
