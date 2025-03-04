@@ -1,9 +1,4 @@
-# Define color variables globally
-RED='\033[31m'
-GREEN='\033[32m'
-YELLOW='\033[33m'
-BLUE='\033[34m'
-NC='\033[0m' # No Color
+source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
 
 TIMEOUT=60
 INTERVAL=5

@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# Define color codes
-RED='\033[0;31m'
-BLUE='\033[0;34m'
-YELLOW='\033[0;33m'
-NC='\033[0m' # No Color
+source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
 
 usage() {
     echo -e "${YELLOW}Usage: $0 [OPTIONS]${NC}"

@@ -1,3 +1,6 @@
-RED='\033[0;31m'
-YELLOW='\033[0;33m'
+# Define color variables globally
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+BLUE='\033[34m'
 NC='\033[0m' # No Color
