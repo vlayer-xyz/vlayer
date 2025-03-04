@@ -28,6 +28,7 @@ contract Prover {
     function setBlockByTimestamp(uint256 timestamp) public returns (uint256) {
         uint256 blockNo = TRAVELER.setBlockByTimestamp(timestamp);
         require(blockNo > 0, "Failed cheatcode invocation");
+        setBlock(blockNo);
         return blockNo;
     }
 
