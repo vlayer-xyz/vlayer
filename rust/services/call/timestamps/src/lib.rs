@@ -38,9 +38,9 @@ pub fn binary_search_block_number(
             .unwrap();
 
         if block.timestamp() < target_timestamp {
-            range = BlockRange::try_from_range(mid_block + 1..=range.end()).unwrap();
+            range = (mid_block + 1..=range.end()).try_into().unwrap();
         } else {
-            range = BlockRange::try_from_range(range.start()..=mid_block).unwrap();
+            range = (range.start()..=mid_block).try_into().unwrap();
         }
     }
 
@@ -96,7 +96,7 @@ mod tests {
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
         async fn genesis_case() -> anyhow::Result<()> {
-            let block_range = BlockRange::try_from_range(0..=LATEST_BLOCK_NUMBER).unwrap();
+            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP;
 
             let block =
@@ -110,7 +110,7 @@ mod tests {
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
         async fn found() -> anyhow::Result<()> {
-            let block_range = BlockRange::try_from_range(0..=LATEST_BLOCK_NUMBER).unwrap();
+            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = LATEST_BLOCK_TIMESTAMP;
 
             let block =
@@ -134,7 +134,7 @@ mod tests {
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
         async fn found() -> anyhow::Result<()> {
-            let block_range = BlockRange::try_from_range(0..=LATEST_BLOCK_NUMBER).unwrap();
+            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp =
                 (ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP + LATEST_BLOCK_TIMESTAMP) / 2;
 
@@ -157,7 +157,7 @@ mod tests {
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
         async fn not_found() -> anyhow::Result<()> {
-            let block_range = BlockRange::try_from_range(0..=LATEST_BLOCK_NUMBER).unwrap();
+            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = LATEST_BLOCK_TIMESTAMP + 1;
 
             let block = binary_search_block_number(&*provider, target_timestamp, block_range);
@@ -170,7 +170,7 @@ mod tests {
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
         async fn timestamp_too_big() -> anyhow::Result<()> {
-            let block_range = BlockRange::try_from_range(0..=LATEST_BLOCK_NUMBER).unwrap();
+            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = LATEST_BLOCK_TIMESTAMP + 1;
 
             let block = binary_search_block_number(&*provider, target_timestamp, block_range);

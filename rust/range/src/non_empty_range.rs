@@ -1,5 +1,7 @@
 use std::{borrow::Borrow, fmt::Display, ops::RangeInclusive};
 
+use derive_more::derive::Display;
+
 use crate::Range;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -125,6 +127,14 @@ impl From<&NonEmptyRange> for RangeInclusive<u64> {
     }
 }
 
+impl TryFrom<RangeInclusive<u64>> for NonEmptyRange {
+    type Error = NonEmptyRangeError;
+
+    fn try_from(range: RangeInclusive<u64>) -> Result<Self, Self::Error> {
+        NonEmptyRange::try_from_range(range).ok_or(NonEmptyRangeError::EmptyRange)
+    }
+}
+
 impl<R: Borrow<RangeInclusive<u64>>> PartialEq<R> for NonEmptyRange {
     fn eq(&self, other: &R) -> bool {
         other.borrow() == &self.into()
@@ -145,6 +155,13 @@ impl IntoIterator for NonEmptyRange {
         self.start..self.end
     }
 }
+
+#[derive(Debug, Display)]
+pub enum NonEmptyRangeError {
+    EmptyRange,
+}
+
+impl std::error::Error for NonEmptyRangeError {}
 
 #[cfg(test)]
 #[allow(clippy::reversed_empty_ranges)]
