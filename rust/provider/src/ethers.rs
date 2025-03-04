@@ -146,7 +146,10 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
         extra_data: block.extra_data.0.into(),
         mix_hash: from_ethers_h256(block.mix_hash.context("mix_hash")?),
         nonce: block.nonce.context("nonce")?.0.into(),
-        base_fee_per_gas: from_ethers_u256(block.base_fee_per_gas.context("base_fee_per_gas")?),
+        base_fee_per_gas: block
+            .base_fee_per_gas
+            .map(from_ethers_u256)
+            .unwrap_or_default(),
         withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
         blob_gas_used: block
             .blob_gas_used

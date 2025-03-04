@@ -1,5 +1,7 @@
 use std::{borrow::Borrow, fmt::Display, ops::RangeInclusive};
 
+use thiserror::Error;
+
 use crate::Range;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -105,6 +107,34 @@ impl NonEmptyRange {
     pub const fn contains(&self, value: u64) -> bool {
         self.start <= value && value <= self.end
     }
+
+    pub fn find_ge<T: Ord + Copy, E, F>(&self, value: T, f: F) -> Result<Option<u64>, E>
+    where
+        F: Fn(u64) -> Result<T, E>,
+    {
+        if f(self.start)? >= value {
+            return Ok(Some(self.start));
+        }
+        if f(self.end)? < value {
+            return Ok(None);
+        }
+        // f(l) < value <= f(r)
+        let mut l = self.start;
+        let mut r = self.end;
+        // while distance between l and r is greater than 1
+        while r - l > 1 {
+            let m = l + (r - l) / 2;
+            let m_value = f(m)?;
+            if m_value < value {
+                // f(m) < value
+                l = m;
+            } else {
+                // value <= f(m)
+                r = m;
+            }
+        }
+        Ok(Some(r))
+    }
 }
 
 impl From<u64> for NonEmptyRange {
@@ -122,6 +152,20 @@ impl From<NonEmptyRange> for RangeInclusive<u64> {
 impl From<&NonEmptyRange> for RangeInclusive<u64> {
     fn from(range: &NonEmptyRange) -> Self {
         range.start..=range.end
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Range is empty")]
+    Empty,
+}
+
+impl TryFrom<RangeInclusive<u64>> for NonEmptyRange {
+    type Error = Error;
+
+    fn try_from(range: RangeInclusive<u64>) -> Result<Self, Self::Error> {
+        NonEmptyRange::try_from_range(range).ok_or(Error::Empty)
     }
 }
 
@@ -220,5 +264,48 @@ mod tests {
         assert!(r(1..=2).contains(1));
         assert!(r(1..=2).contains(2));
         assert!(!r(1..=2).contains(3));
+    }
+
+    mod lower_bound {
+
+        use super::*;
+
+        const fn identity(x: u64) -> Result<u64, ()> {
+            Ok(x)
+        }
+
+        #[test]
+        fn element_in_range() {
+            assert_eq!(r(1..=1).find_ge(1, identity), Ok(Some(1)));
+        }
+
+        #[test]
+        fn element_not_in_range() {
+            assert_eq!(r(1..=1).find_ge(0, identity), Ok(Some(1)));
+            assert_eq!(r(1..=1).find_ge(2, identity), Ok(None));
+        }
+
+        #[test]
+        fn error() {
+            assert_eq!(r(1..=1).find_ge(0, |_| Err(())), Err(()));
+        }
+
+        #[test]
+        fn lower_bound() {
+            let mul_2 = |x| Ok::<_, ()>(x * 2);
+            assert_eq!(r(1..=2).find_ge(1, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=2).find_ge(2, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=2).find_ge(3, mul_2), Ok(Some(2)));
+            assert_eq!(r(1..=2).find_ge(5, mul_2), Ok(None));
+
+            assert_eq!(r(1..=100).find_ge(0, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=100).find_ge(1, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=100).find_ge(2, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=100).find_ge(3, mul_2), Ok(Some(2)));
+            assert_eq!(r(1..=100).find_ge(50, mul_2), Ok(Some(25)));
+            assert_eq!(r(1..=100).find_ge(51, mul_2), Ok(Some(26)));
+            assert_eq!(r(1..=100).find_ge(200, mul_2), Ok(Some(100)));
+            assert_eq!(r(1..=100).find_ge(201, mul_2), Ok(None));
+        }
     }
 }
