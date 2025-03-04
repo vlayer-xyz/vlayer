@@ -8,6 +8,8 @@ interface ITraveler {
     function setBlock(uint256 blockNo) external returns (bool);
 
     function setChain(uint256 chainId, uint256 blockNo) external returns (bool);
+
+    function setBlockByTimestamp(uint256 timestamp) external returns (uint256);
 }
 
 contract Prover {
@@ -21,6 +23,12 @@ contract Prover {
 
     function setChain(uint256 chainId, uint256 blockNo) public {
         require(TRAVELER.setChain(chainId, blockNo), "Failed cheatcode invocation");
+    }
+
+    function setBlockByTimestamp(uint256 timestamp) public returns (uint256) {
+        uint256 blockNo = TRAVELER.setBlockByTimestamp(timestamp);
+        require(blockNo > 0, "Failed cheatcode invocation");
+        return blockNo;
     }
 
     function proof() public pure returns (Proof memory) {
