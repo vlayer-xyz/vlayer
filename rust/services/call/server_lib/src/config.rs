@@ -7,7 +7,10 @@ use common::GuestElf;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
+use strum::{Display, EnumString};
 
+#[cfg(feature = "jwt")]
+use crate::jwt::Config as JwtConfig;
 use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -22,9 +25,15 @@ pub struct Config {
     api_version: String,
     gas_meter_config: Option<GasMeterConfig>,
     auth_mode: AuthMode,
+    #[cfg(feature = "jwt")]
+    jwt_config: Option<JwtConfig>,
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, Default)]
+#[derive(
+    Debug, Display, Clone, Copy, Deserialize, Serialize, Default, PartialEq, Eq, EnumString,
+)]
+#[strum(ascii_case_insensitive)]
+#[non_exhaustive]
 pub enum AuthMode {
     #[cfg(feature = "jwt")]
     Jwt,
@@ -83,6 +92,11 @@ impl Config {
     pub const fn proof_mode(&self) -> ProofMode {
         self.proof_mode
     }
+
+    #[cfg(feature = "jwt")]
+    pub fn jwt_config(&self) -> Option<JwtConfig> {
+        self.jwt_config.clone()
+    }
 }
 
 pub struct ConfigBuilder {
@@ -107,8 +121,15 @@ impl ConfigBuilder {
                 api_version,
                 gas_meter_config: None,
                 auth_mode: Default::default(),
+                #[cfg(feature = "jwt")]
+                jwt_config: None,
             },
         }
+    }
+
+    pub const fn with_auth_mode(mut self, auth_mode: AuthMode) -> Self {
+        self.config.auth_mode = auth_mode;
+        self
     }
 
     pub fn with_chain_proof_config(
@@ -156,6 +177,12 @@ impl ConfigBuilder {
         gas_meter_config: impl Into<Option<GasMeterConfig>>,
     ) -> Self {
         self.config.gas_meter_config = gas_meter_config.into();
+        self
+    }
+
+    #[cfg(feature = "jwt")]
+    pub fn with_jwt_config(mut self, jwt_config: impl Into<Option<JwtConfig>>) -> Self {
+        self.config.jwt_config = jwt_config.into();
         self
     }
 

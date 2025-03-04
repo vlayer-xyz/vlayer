@@ -1,11 +1,8 @@
-#[cfg(feature = "jwt")]
-mod jwt;
-
 use std::iter::once;
 
 use axum::{
     body::Bytes,
-    extract::State,
+    extract::State as AxumState,
     http::header::AUTHORIZATION,
     response::IntoResponse,
     routing::{get, post},
@@ -40,14 +37,14 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
 }
 
 #[derive(new, Clone)]
-struct RouterWithConfig {
-    config: Config,
-    router: JrpcRouter<AppState>,
+pub(super) struct State {
+    pub config: Config,
+    pub router: JrpcRouter<AppState>,
 }
 
 async fn handle(
     user_token: Option<TypedHeader<Authorization<Bearer>>>,
-    State(RouterWithConfig { router, .. }): State<RouterWithConfig>,
+    AxumState(State { router, .. }): AxumState<State>,
     Extension(req_id): Extension<RequestId>,
     body: Bytes,
 ) -> impl IntoResponse {
@@ -56,16 +53,13 @@ async fn handle(
     router.handle_request_with_params(body, params).await
 }
 
-pub fn server(cfg: Config) -> Router {
-    let handler = if cfg!(feature = "jwt") {
-        match cfg.auth_mode() {
-            AuthMode::Jwt => post(jwt::handle),
-            AuthMode::Token => post(handle),
-        }
-    } else {
-        post(handle)
+pub fn server(config: Config) -> Router {
+    let handler = match config.auth_mode() {
+        #[cfg(feature = "jwt")]
+        AuthMode::Jwt => post(crate::jwt::handle),
+        AuthMode::Token => post(handle),
     };
-    let router = RouterWithConfig::new(cfg.clone(), JrpcRouter::new(AppState::new(cfg).into_rpc()));
+    let router = State::new(config.clone(), JrpcRouter::new(AppState::new(config).into_rpc()));
 
     Router::new()
         .route("/", handler)

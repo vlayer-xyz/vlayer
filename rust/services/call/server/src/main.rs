@@ -3,9 +3,11 @@ mod version;
 use std::time::Duration;
 
 use alloy_primitives::ChainId;
+#[cfg(feature = "jwt")]
+use call_server_lib::jwt::{Algorithm, Config as JwtConfig};
 use call_server_lib::{
-    chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
-    ConfigBuilder, ProofMode,
+    chain_proof::Config as ChainProofConfig, config::AuthMode, gas_meter::Config as GasMeterConfig,
+    serve, Config, ConfigBuilder, ProofMode,
 };
 use clap::{ArgAction, Parser};
 use common::{init_tracing, GlobalArgs, LogFormat};
@@ -46,12 +48,20 @@ struct Cli {
     #[arg(long, requires = "gas_meter", env)]
     gas_meter_api_key: Option<String>,
 
+    #[arg(long, value_enum)]
+    auth_mode: Option<AuthMode>,
+
+    #[cfg(feature = "jwt")]
+    #[arg(long, required_if_eq("auth_mode", "jwt"))]
+    public_key: Option<String>,
+
     #[clap(flatten)]
     global_args: GlobalArgs,
 }
 
 impl Cli {
     fn into_config(self, api_version: String) -> Config {
+        let auth_mode = self.auth_mode.unwrap_or_default();
         let proof_mode = self.proof.unwrap_or_default();
         let gas_meter_config = self
             .gas_meter_url
@@ -67,14 +77,24 @@ impl Cli {
                 ChainProofConfig::new(url, poll_interval, timeout)
             });
         let chain_guest_ids = CHAIN_GUEST_IDS.into_iter().map(Into::into).collect();
-        ConfigBuilder::new(CALL_GUEST_ELF.clone(), chain_guest_ids, api_version)
+        let mut builder = ConfigBuilder::new(CALL_GUEST_ELF.clone(), chain_guest_ids, api_version)
             .with_chain_proof_config(chain_proof_config)
             .with_gas_meter_config(gas_meter_config)
             .with_rpc_mappings(self.rpc_url)
             .with_proof_mode(proof_mode)
             .with_host(self.host)
             .with_port(self.port)
-            .build()
+            .with_auth_mode(auth_mode);
+
+        #[cfg(feature = "jwt")]
+        {
+            builder = builder.with_jwt_config(
+                self.public_key
+                    .map(|pk| JwtConfig::new(pk, Algorithm::RS256)),
+            );
+        }
+
+        builder.build()
     }
 }
 
