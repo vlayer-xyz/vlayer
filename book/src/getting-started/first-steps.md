@@ -113,7 +113,13 @@ bun run prove:dev
 First, install the vlayer browser extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) (works with Chrome and Brave browsers).
 For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
 
-Then deploy the `WebProofProver` and `WebProofVerifier` contracts:
+Start web app on localhost:
+
+```sh
+cd vlayer
+bun run web:dev
+```
+You can manually deploy `WebProofProver` and `WebProofVerifier` as well:
 
 ```sh
 cd vlayer
@@ -121,11 +127,6 @@ bun run deploy:dev # deploy to local anvil
 bun run deploy:testnet # deploy to testnet
 ```
 
-Start web app on localhost:
-
-```sh
-cd vlayer
-bun run dev
-```
+> ❗️ Ensure the contracts are recompiled after every change with `forge build`
 
 The app will be available at `http://localhost:5174` and will display buttons that will let you interact with the extension and vlayer server (open browser developer console to see the app activity).

@@ -75,7 +75,7 @@ Start web app on localhost:
 
 ```sh
 cd examples/simple_web_proof/vlayer
-bun run dev
+bun run web:dev
 ```
 
 Then, start the browser extension:
