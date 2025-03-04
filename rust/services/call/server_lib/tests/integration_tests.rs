@@ -333,7 +333,7 @@ mod server_tests {
                     "data": {
                         "evm_call_result": evm_call_result.into(),
                         "proof": {
-                            "length": 160,
+                            "length": 192,
                             "seal": {
                                 "verifierSelector": "0xdeafbeef",
                                 "mode": 1,
