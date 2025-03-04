@@ -11,7 +11,7 @@
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
     "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
-    "test:dev": "echo \"No tests specified yet\"",
+    "test:dev": "VLAYER_ENV=dev bun run playwright test",
     "test:testnet": "echo \"No tests specified yet\""
   },
   "dependencies": {
