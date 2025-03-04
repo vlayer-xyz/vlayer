@@ -2,6 +2,15 @@
 
 Installs the verifiable dns service.
 
+## Generating a new key pair
+
+To generate a new key pair, replace the *.pem in `files` with:
+
+```sh
+openssl genpkey -algorithm RSA -out private-key.pem
+openssl rsa -pubout -in private-key.pem -out public-key.pem
+```
+
 ## Variables
 
 | Name | Purpose |
