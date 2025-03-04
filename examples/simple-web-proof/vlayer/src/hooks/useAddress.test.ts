@@ -32,7 +32,7 @@ describe("useAddress", () => {
   });
 
   test("should return the address based on private key", () => {
-    vi.stubEnv("CLIENT_AUTH_MODE", "envPrivateKey");
+    vi.stubEnv("VITE_CLIENT_AUTH_MODE", "envPrivateKey");
     vi.stubEnv("VITE_PRIVATE_KEY", envPrivateKey);
 
     const { result } = renderHook(() => useAddress());
@@ -42,7 +42,7 @@ describe("useAddress", () => {
   });
 
   test("should throw an error if no private key in env", () => {
-    vi.stubEnv("CLIENT_AUTH_MODE", "envPrivateKey");
+    vi.stubEnv("VITE_CLIENT_AUTH_MODE", "envPrivateKey");
     vi.stubEnv("VITE_PRIVATE_KEY", undefined);
 
     const { result } = renderHook(() => useAddress());
@@ -52,7 +52,7 @@ describe("useAddress", () => {
   });
 
   test("should throw an error if invalid private key in env", () => {
-    vi.stubEnv("CLIENT_AUTH_MODE", "envPrivateKey");
+    vi.stubEnv("VITE_CLIENT_AUTH_MODE", "envPrivateKey");
     vi.stubEnv("VITE_PRIVATE_KEY", invalidPrivateKey);
 
     const { result } = renderHook(() => useAddress());
@@ -64,7 +64,7 @@ describe("useAddress", () => {
   });
 
   test("should return the address from wallet", () => {
-    vi.stubEnv("CLIENT_AUTH_MODE", "wallet");
+    vi.stubEnv("VITE_CLIENT_AUTH_MODE", "wallet");
     mocks.useAppKitAccount.mockReturnValue(mockAppKitAccountResponse);
 
     const { result } = renderHook(() => useAddress());
@@ -74,7 +74,7 @@ describe("useAddress", () => {
   });
 
   test("should throw an error if no address found in wallet", () => {
-    vi.stubEnv("CLIENT_AUTH_MODE", "wallet");
+    vi.stubEnv("VITE_CLIENT_AUTH_MODE", "wallet");
     mocks.useAppKitAccount.mockReturnValue(mockNoWalletResponse);
 
     const { result } = renderHook(() => useAddress());
@@ -83,12 +83,12 @@ describe("useAddress", () => {
     expect(result.current.error).toEqual("No address found in wallet");
   });
 
-  test("should throw an error if invalid CLIENT_AUTH_MODE", () => {
-    vi.stubEnv("CLIENT_AUTH_MODE", "invalid");
+  test("should throw an error if invalid VITE_CLIENT_AUTH_MODE", () => {
+    vi.stubEnv("VITE_CLIENT_AUTH_MODE", "invalid");
 
     const { result } = renderHook(() => useAddress());
 
     expect(result.current.address).toEqual("");
-    expect(result.current.error).toEqual("Invalid CLIENT_AUTH_MODE");
+    expect(result.current.error).toEqual("Invalid VITE_CLIENT_AUTH_MODE");
   });
 });
