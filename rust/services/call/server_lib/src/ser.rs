@@ -18,6 +18,7 @@ pub struct SealDTO {
 pub struct CallAssumptionsDTO {
     proverContractAddress: Address,
     functionSelector: Selector,
+    settleChainId: U256,
     settleBlockNumber: U256,
     settleBlockHash: B256,
 }

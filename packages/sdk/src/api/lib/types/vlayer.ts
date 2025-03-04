@@ -37,6 +37,7 @@ export type Proof = {
   callAssumptions: {
     proverContractAddress: Address;
     functionSelector: Hex;
+    settleChainId: bigint;
     settleBlockHash: Hex;
     settleBlockNumber: bigint;
   };
