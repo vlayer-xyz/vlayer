@@ -89,28 +89,28 @@ pub fn benchmarks() -> Vec<Benchmark> {
         Benchmark::new(
             "append_single",
             with_fixture!(append_single::fixture(), append_single::run),
-            113_026,
+            16_461,
         ),
         Benchmark::new(
             "prepend_single",
             with_fixture!(prepend_single::fixture(), prepend_single::run),
-            112_947,
+            16_465,
         ),
         Benchmark::new(
             "append_10",
             with_fixture!(append_batch::fixture(10), append_batch::run),
-            1_145_303,
+            177_856,
         ),
         Benchmark::new(
             "prepend_10",
             with_fixture!(prepend_batch::fixture(10), prepend_batch::run),
-            1_159_542,
+            185_934,
         ),
         Benchmark::new(
             "prepend_20",
             with_fixture!(prepend_batch::fixture(20), prepend_batch::run),
-            2_325_021,
+            378_357,
         ),
-        Benchmark::new("hash_100", with_fixture!(hash_slow::fixture(100), hash_slow::run), 348_705),
+        Benchmark::new("hash_100", with_fixture!(hash_slow::fixture(100), hash_slow::run), 235_021),
     ]
 }

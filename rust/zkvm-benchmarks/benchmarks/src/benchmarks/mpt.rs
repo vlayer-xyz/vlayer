@@ -58,7 +58,7 @@ mod height_20 {
         vec![
             Benchmark::new("insert_shallow", with_fixture!(fixture(), insert_shallow), 23_808),
             Benchmark::new("insert_deep", with_fixture!(fixture(), insert_deep), 152_216),
-            Benchmark::new("hash", with_fixture!(fixture(), hash), 1_057_548),
+            Benchmark::new("hash", with_fixture!(fixture(), hash), 148_794),
         ]
     }
 }
