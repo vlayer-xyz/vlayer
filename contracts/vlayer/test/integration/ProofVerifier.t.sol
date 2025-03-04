@@ -109,11 +109,7 @@ library ProofFixtures {
 
     function generateProof(Seal memory seal, bytes32 blockHash) private pure returns (Proof memory, bytes32) {
         CallAssumptions memory callAssumptions = CallAssumptions(
-            FIXED_PROVER_ADDRESS,
-            FIXED_SELECTOR,
-            FIXED_SETTLE_CHAIN_ID,
-            FIXED_SETTLE_BLOCK_NUMBER,
-            blockHash
+            FIXED_PROVER_ADDRESS, FIXED_SELECTOR, FIXED_SETTLE_CHAIN_ID, FIXED_SETTLE_BLOCK_NUMBER, blockHash
         );
 
         uint256 length = 0; // it is not used in verification, so can be set to 0
