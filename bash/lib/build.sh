@@ -61,8 +61,8 @@ function build_contracts() {
   echo '::endgroup::Building contracts'
 }
 
-function build_all_for_ts() {
-  echo "::group::Building all for typescript"
+function build_react_sdk_with_deps() {
+  echo "::group::Building react sdk with dependencies"
 
   bun install --frozen-lockfile
 
@@ -71,5 +71,5 @@ function build_all_for_ts() {
   build_sdk
   build_sdk_hooks
 
-  echo '::endgroup::Building all for typescript'
+  echo "::endgroup::Building react sdk with dependencies"
 }

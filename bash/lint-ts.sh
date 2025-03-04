@@ -41,7 +41,7 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/build.sh"
 
-build_all_for_ts
+build_react_sdk_with_deps
 
 echo "::group::Running eslint for examples"
 for example in $(get_examples); do (
