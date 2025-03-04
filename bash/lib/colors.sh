@@ -7,6 +7,11 @@ NC='\033[0m' # No Color
 
 function echo_color() {
     local color_name="$1"
+
+    if [[ -n "${NO_COLOR:-}" ]]; then
+        color_name="NC"
+    fi
+
     local text="$2"
     shift
     echo -e "${!color_name}${text}${NC}"
