@@ -6,7 +6,7 @@ use bytes::Bytes;
 use derivative::Derivative;
 
 use super::node::Node;
-use crate::{hash, Digest};
+use crate::{hash, Keccak256, Digest};
 
 /// Represents the way in which a node is referenced from within another node.
 #[derive(Debug, Default, Derivative)]
@@ -64,7 +64,7 @@ where
     }
 }
 
-pub type KeccakNodeRef = NodeRef<sha3::Keccak256>;
+pub type KeccakNodeRef = NodeRef<Keccak256>;
 pub type Sha2NodeRef = NodeRef<sha2::Sha256>;
 
 #[cfg(test)]

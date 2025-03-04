@@ -12,7 +12,7 @@ use utils::{parse_node, resolve_trie};
 
 use crate::{
     node::{Node, NodeError},
-    Digest,
+    Keccak256, Digest,
 };
 
 mod utils;
@@ -162,10 +162,10 @@ pub enum MptError {
     EmptyValue,
 }
 
-pub type KeccakMerkleTrie = MerkleTrie<sha3::Keccak256>;
+pub type KeccakMerkleTrie = MerkleTrie<Keccak256>;
 #[allow(non_snake_case)]
-pub const fn KeccakMerkleTrie(node: Node<sha3::Keccak256>) -> KeccakMerkleTrie {
-    MerkleTrie::<sha3::Keccak256>(node)
+pub const fn KeccakMerkleTrie(node: Node<Keccak256>) -> KeccakMerkleTrie {
+    MerkleTrie::<Keccak256>(node)
 }
 
 pub type Sha2Trie = MerkleTrie<sha2::Sha256>;
