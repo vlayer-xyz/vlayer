@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 derive_more = { workspace = true }
+thiserror = { workspace = true }
 
 [lints]
 workspace = true
