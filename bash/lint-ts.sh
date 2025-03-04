@@ -5,10 +5,10 @@ set -ueo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
 
 usage() {
-    echo -e "${YELLOW}Usage: $0 [OPTIONS]${NC}"
-    echo -e "${YELLOW}Options:${NC}"
-    echo -e "${YELLOW} --help      Display this help message${NC}"
-    echo -e "${YELLOW} --fix       Fix linting errors${NC}"
+    echo_color YELLOW "Usage: $0 [OPTIONS]"
+    echo_color YELLOW "Options:"
+    echo_color YELLOW " --help      Display this help message"
+    echo_color YELLOW " --fix       Fix linting errors"
 }
 
 handle_options() {
@@ -23,7 +23,7 @@ handle_options() {
                 FIX_OPTION=":fix"
                 ;;
             *)
-                echo -e "${RED}Invalid option: $1${NC}" >&2
+                echo_color RED "Invalid option: $1" >&2
                 usage
                 exit 1
                 ;;

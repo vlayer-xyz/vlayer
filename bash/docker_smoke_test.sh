@@ -1,5 +1,3 @@
-source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
-
 TIMEOUT=60
 INTERVAL=5
 END=$((SECONDS+TIMEOUT))
