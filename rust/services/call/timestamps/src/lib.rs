@@ -1,60 +1,57 @@
 use provider::{BlockingProvider, EvmBlockHeader};
+use thiserror::Error;
 use u64_range::NonEmptyRange;
-
-// The actual genesis block timestamp is Jul-30-2015 03:26:13 PM +UTC
-// (https://etherscan.io/block/0) but timestamp stored on the blockchain is 0
-const ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP: u64 = 1_438_269_973;
 
 type BlockRange = NonEmptyRange;
 
-pub fn find_first_block_ge_timestamp(
-    provider: &dyn BlockingProvider,
-    target_timestamp: u64,
-    range: BlockRange,
-) -> Option<Box<dyn EvmBlockHeader>> {
-    if target_timestamp <= ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP {
-        return provider.get_block_header(0.into()).unwrap();
-    }
-
-    let block_number = binary_search_block_number(provider, target_timestamp, range);
-
-    block_number.and_then(|number| provider.get_block_header(number.into()).unwrap())
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Block not found")]
+    BlockNotFound,
+    #[error("Provider error")]
+    ProviderError(#[from] provider::Error),
+    #[error("Minimal timestamp to be used is {0}")]
+    TimestampTooEarly(u64),
 }
 
-/// Searches for the earliest block within the given range that has a timestamp
-/// greater than or equal to the target timestamp using binary search.
-/// If no such block is found (i.e., all blocks in the range have timestamps below the target),
-/// the function returns `None`.
-pub fn binary_search_block_number(
-    provider: &dyn BlockingProvider,
-    target_timestamp: u64,
-    mut range: BlockRange,
-) -> Option<u64> {
-    while range.start() < range.end() {
-        let mid_block = (range.start() + range.end()) / 2;
-        let block = provider
-            .get_block_header(mid_block.into())
-            .expect("Failed to fetch block")
-            .unwrap();
+type BlockPair = (Box<dyn EvmBlockHeader>, Box<dyn EvmBlockHeader>);
 
-        if block.timestamp() < target_timestamp {
-            range = (mid_block + 1..=range.end()).try_into().unwrap();
-        } else {
-            range = (range.start()..=mid_block).try_into().unwrap();
-        }
+/// `left_block` has timestamp lower than `target_timestamp`.
+/// `right_block` has timestamp greater or equal to `target_timestamp`.
+pub fn find_blocks_by_timestamp(
+    range: BlockRange,
+    target_timestamp: u64,
+    provider: &dyn BlockingProvider,
+) -> Result<BlockPair, Error> {
+    // Block 0 has a timestamp equal to 0. To avoid handling that timestamp case,
+    // this function only works with blocks with number 1 or higher.
+    let minimal_timestamp = get_block_timestamp(1, provider)?;
+    if target_timestamp < minimal_timestamp {
+        return Err(Error::TimestampTooEarly(minimal_timestamp));
     }
 
-    // Loop above can return a block with timestamp < target_timestamp if it is the last block
-    provider
-        .get_block_header(range.start().into())
-        .expect("Failed to fetch block")
-        .and_then(|b| {
-            if b.timestamp() < target_timestamp {
-                None
-            } else {
-                Some(b.number())
-            }
-        })
+    let block_number = range
+        .find_ge(target_timestamp, |block_number| get_block_timestamp(block_number, provider))?;
+    let block_number = block_number.ok_or(Error::BlockNotFound)?;
+    let left_block = get_block(block_number - 1, provider)?;
+    let right_block = get_block(block_number, provider)?;
+
+    Ok((left_block, right_block))
+}
+
+fn get_block(
+    block_number: u64,
+    provider: &dyn BlockingProvider,
+) -> Result<Box<dyn EvmBlockHeader>, Error> {
+    match provider.get_block_header(block_number.into()) {
+        Ok(Some(block)) => Ok(block),
+        Ok(None) => Err(Error::BlockNotFound),
+        Err(e) => Err(Error::ProviderError(e)),
+    }
+}
+
+fn get_block_timestamp(block_number: u64, provider: &dyn BlockingProvider) -> Result<u64, Error> {
+    Ok(get_block(block_number, provider)?.timestamp())
 }
 
 #[cfg(test)]
@@ -75,6 +72,8 @@ mod tests {
     // https://etherscan.io/block/20000000
     const LATEST_BLOCK_NUMBER: u64 = 20_000_000;
     const LATEST_BLOCK_TIMESTAMP: u64 = 1_717_281_407;
+    const FIRST_BLOCK_TIMESTAMP: u64 = 1_438_269_988;
+    const NON_EXISTING_BLOCK: u64 = 1_000_000_000_000_000;
 
     fn get_mainnet_url() -> String {
         dotenv().ok();
@@ -89,93 +88,59 @@ mod tests {
     }
 
     // Tests ignored because network connection necessary to run them is not possible on CI
-    // todo: Add snapshot mechanism to run these tests
-    mod find_first_block_ge_timestamp {
+    mod find_blocks_by_timestamp {
         use super::*;
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn genesis_case() -> anyhow::Result<()> {
-            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
-            let target_timestamp = ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP;
+        async fn timestamp_too_early() -> anyhow::Result<()> {
+            let block_range = (0..=0).try_into()?;
+            let target_timestamp = 0;
 
-            let block =
-                find_first_block_ge_timestamp(&*provider, target_timestamp, block_range).unwrap();
+            let result = find_blocks_by_timestamp(block_range, target_timestamp, &*provider);
 
-            assert!(block.number() == 0);
+            assert!(matches!(result, Err(Error::TimestampTooEarly(FIRST_BLOCK_TIMESTAMP))));
 
             Ok(())
         }
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn found() -> anyhow::Result<()> {
+        async fn success() -> anyhow::Result<()> {
             let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
             let target_timestamp = LATEST_BLOCK_TIMESTAMP;
 
-            let block =
-                find_first_block_ge_timestamp(&*provider, target_timestamp, block_range).unwrap();
+            let (left_block, right_block) =
+                find_blocks_by_timestamp(block_range, target_timestamp, &*provider).unwrap();
 
-            assert!(block.timestamp() >= target_timestamp);
-
-            let previous_block = provider
-                .get_block_header((block.number() - 1).into())
-                .unwrap()
-                .unwrap();
-            assert!(previous_block.timestamp() < target_timestamp);
+            assert!(left_block.timestamp() < target_timestamp);
+            assert!(right_block.timestamp() >= target_timestamp);
 
             Ok(())
         }
     }
 
-    mod binary_search_block_number {
+    #[cfg(test)]
+    mod get_block {
         use super::*;
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn found() -> anyhow::Result<()> {
-            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
-            let target_timestamp =
-                (ACTUAL_MAINNET_GENESIS_BLOCK_TIMESTAMP + LATEST_BLOCK_TIMESTAMP) / 2;
+        async fn success() -> anyhow::Result<()> {
+            let block_number = 1;
+            let block = get_block(block_number, &*provider)?;
 
-            let block_number =
-                binary_search_block_number(&*provider, target_timestamp, block_range);
-
-            let block = provider
-                .get_block_header(block_number.unwrap().into())?
-                .unwrap();
-            let previous_block = provider
-                .get_block_header((block.number() - 1).into())?
-                .unwrap();
-
-            assert!(block.timestamp() >= target_timestamp);
-            assert!(previous_block.timestamp() < target_timestamp);
+            assert_eq!(block.number(), block_number);
 
             Ok(())
         }
 
         #[tokio::test(flavor = "multi_thread")]
         #[ignore]
-        async fn not_found() -> anyhow::Result<()> {
-            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
-            let target_timestamp = LATEST_BLOCK_TIMESTAMP + 1;
+        async fn block_not_found() -> anyhow::Result<()> {
+            let result = get_block(NON_EXISTING_BLOCK, &*provider);
 
-            let block = binary_search_block_number(&*provider, target_timestamp, block_range);
-
-            assert!(block.is_none());
-
-            Ok(())
-        }
-
-        #[tokio::test(flavor = "multi_thread")]
-        #[ignore]
-        async fn timestamp_too_big() -> anyhow::Result<()> {
-            let block_range = (0..=LATEST_BLOCK_NUMBER).try_into()?;
-            let target_timestamp = LATEST_BLOCK_TIMESTAMP + 1;
-
-            let block = binary_search_block_number(&*provider, target_timestamp, block_range);
-
-            assert!(block.is_none());
+            assert!(matches!(result, Err(Error::BlockNotFound)));
 
             Ok(())
         }
