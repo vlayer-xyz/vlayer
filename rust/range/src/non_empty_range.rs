@@ -108,7 +108,7 @@ impl NonEmptyRange {
         self.start <= value && value <= self.end
     }
 
-    pub fn lower_bound<T: Ord + Copy, E>(
+    pub fn bisect_right<T: Ord + Copy, E>(
         &self,
         value: T,
         f: fn(u64) -> Result<T, E>,
@@ -277,36 +277,36 @@ mod tests {
 
         #[test]
         fn element_in_range() {
-            assert_eq!(r(1..=1).lower_bound(1, identity), Ok(Some(1)));
+            assert_eq!(r(1..=1).bisect_right(1, identity), Ok(Some(1)));
         }
 
         #[test]
         fn element_not_in_range() {
-            assert_eq!(r(1..=1).lower_bound(0, identity), Ok(Some(1)));
-            assert_eq!(r(1..=1).lower_bound(2, identity), Ok(None));
+            assert_eq!(r(1..=1).bisect_right(0, identity), Ok(Some(1)));
+            assert_eq!(r(1..=1).bisect_right(2, identity), Ok(None));
         }
 
         #[test]
         fn error() {
-            assert_eq!(r(1..=1).lower_bound(0, |_| Err(())), Err(()));
+            assert_eq!(r(1..=1).bisect_right(0, |_| Err(())), Err(()));
         }
 
         #[test]
         fn lower_bound() {
             let mul_2 = |x| Ok::<_, ()>(x * 2);
-            assert_eq!(r(1..=2).lower_bound(1, mul_2), Ok(Some(1)));
-            assert_eq!(r(1..=2).lower_bound(2, mul_2), Ok(Some(1)));
-            assert_eq!(r(1..=2).lower_bound(3, mul_2), Ok(Some(2)));
-            assert_eq!(r(1..=2).lower_bound(5, mul_2), Ok(None));
+            assert_eq!(r(1..=2).bisect_right(1, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=2).bisect_right(2, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=2).bisect_right(3, mul_2), Ok(Some(2)));
+            assert_eq!(r(1..=2).bisect_right(5, mul_2), Ok(None));
 
-            assert_eq!(r(1..=100).lower_bound(0, mul_2), Ok(Some(1)));
-            assert_eq!(r(1..=100).lower_bound(1, mul_2), Ok(Some(1)));
-            assert_eq!(r(1..=100).lower_bound(2, mul_2), Ok(Some(1)));
-            assert_eq!(r(1..=100).lower_bound(3, mul_2), Ok(Some(2)));
-            assert_eq!(r(1..=100).lower_bound(50, mul_2), Ok(Some(25)));
-            assert_eq!(r(1..=100).lower_bound(51, mul_2), Ok(Some(26)));
-            assert_eq!(r(1..=100).lower_bound(200, mul_2), Ok(Some(100)));
-            assert_eq!(r(1..=100).lower_bound(201, mul_2), Ok(None));
+            assert_eq!(r(1..=100).bisect_right(0, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=100).bisect_right(1, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=100).bisect_right(2, mul_2), Ok(Some(1)));
+            assert_eq!(r(1..=100).bisect_right(3, mul_2), Ok(Some(2)));
+            assert_eq!(r(1..=100).bisect_right(50, mul_2), Ok(Some(25)));
+            assert_eq!(r(1..=100).bisect_right(51, mul_2), Ok(Some(26)));
+            assert_eq!(r(1..=100).bisect_right(200, mul_2), Ok(Some(100)));
+            assert_eq!(r(1..=100).bisect_right(201, mul_2), Ok(None));
         }
     }
 }
