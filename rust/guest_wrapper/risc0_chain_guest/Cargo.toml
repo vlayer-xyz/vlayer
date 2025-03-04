@@ -7,8 +7,14 @@ edition = "2021"
 
 [dependencies]
 chain_guest = { path = "../../services/chain/guest" }
-risc0-zkvm = { version = "=1.2.4", default-features = false, features = ["std"] }
+risc0-zkvm = { version = "=1.2.4", default-features = false, features = ["std", "unstable"] }
 tokio = { version = "1.41.0", features = ["rt", "macros"] }
 
 [build-dependencies]
 guest_build_utils = { path = "../build_utils" }
+
+[patch.crates-io]
+ring = { git = "https://github.com/briansmith/ring.git", rev = "7c0024abaf4fd59250c9b79cc41a029aa0ef3497" }
+rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }
+sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }
+tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }

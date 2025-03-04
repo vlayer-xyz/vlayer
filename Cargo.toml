@@ -52,7 +52,7 @@ alloy-dyn-abi = "=0.8.20"
 alloy-eips = { version = "0.11.0", features = ["serde"] }
 alloy-consensus = { version = "0.11.0", features = ["serde"] }
 alloy-json-abi = "=0.8.20"
-alloy-primitives = { version = "=0.8.20", default-features = false, features = ["serde"] }
+alloy-primitives = { version = "=0.8.20", default-features = false, features = ["serde", "tiny-keccak"] }
 alloy-rlp = { version = "=0.3.11", default-features = false }
 alloy-rlp-derive = { version = "=0.3.11", default-features = false }
 alloy-serde = "0.11.0"
