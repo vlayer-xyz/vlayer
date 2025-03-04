@@ -1,3 +1,6 @@
+#[cfg(feature = "jwt")]
+mod jwt;
+
 use std::iter::once;
 
 use axum::{
@@ -12,6 +15,7 @@ use axum_extra::{
     headers::{authorization::Bearer, Authorization},
     TypedHeader,
 };
+use derive_new::new;
 use server_utils::{cors, init_trace_layer, RequestId, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
 use tower_http::{
@@ -35,9 +39,15 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
+#[derive(new, Clone)]
+struct RouterWithConfig {
+    config: Config,
+    router: JrpcRouter<AppState>,
+}
+
 async fn handle(
     user_token: Option<TypedHeader<Authorization<Bearer>>>,
-    State(router): State<JrpcRouter<AppState>>,
+    State(RouterWithConfig { router, .. }): State<RouterWithConfig>,
     Extension(req_id): Extension<RequestId>,
     body: Bytes,
 ) -> impl IntoResponse {
@@ -47,7 +57,7 @@ async fn handle(
 }
 
 pub fn server(cfg: Config) -> Router {
-    let router = JrpcRouter::new(AppState::new(cfg).into_rpc());
+    let router = RouterWithConfig::new(cfg.clone(), JrpcRouter::new(AppState::new(cfg).into_rpc()));
 
     Router::new()
         .route("/", post(handle))
