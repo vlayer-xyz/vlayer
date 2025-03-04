@@ -27,12 +27,12 @@ impl FromRef<State> for JwtState {
 }
 
 pub(super) async fn handle(
-    _: TokenClaims<Claims>,
+    TokenClaims(Claims { sub, .. }): TokenClaims<Claims>,
     AxumState(State { router, .. }): AxumState<State>,
     Extension(req_id): Extension<RequestId>,
     body: Bytes,
 ) -> impl IntoResponse {
-    let params = Params::new(None, req_id);
+    let params = Params::new(Some(sub.into()), req_id);
     router.handle_request_with_params(body, params).await
 }
 

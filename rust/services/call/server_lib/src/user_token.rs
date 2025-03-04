@@ -1,7 +1,7 @@
 use axum_extra::headers::{authorization::Bearer, Authorization};
-use derive_more::Deref;
+use derive_more::{Deref, From};
 
-#[derive(Clone, Debug, Deref)]
+#[derive(From, Clone, Debug, Deref)]
 pub struct Token(String);
 
 impl From<Authorization<Bearer>> for Token {
