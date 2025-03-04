@@ -25,7 +25,7 @@ use tower_http::{
 use tracing::info;
 
 use crate::{
-    config::Config,
+    config::{AuthMode, Config},
     handlers::{Params, RpcServer, State as AppState},
     user_token::Token as UserToken,
 };
@@ -57,10 +57,18 @@ async fn handle(
 }
 
 pub fn server(cfg: Config) -> Router {
+    let handler = if cfg!(feature = "jwt") {
+        match cfg.auth_mode() {
+            AuthMode::Jwt => post(jwt::handle),
+            AuthMode::Token => post(handle),
+        }
+    } else {
+        post(handle)
+    };
     let router = RouterWithConfig::new(cfg.clone(), JrpcRouter::new(AppState::new(cfg).into_rpc()));
 
     Router::new()
-        .route("/", post(handle))
+        .route("/", handler)
         .route_layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .route_layer(RequestIdLayer)

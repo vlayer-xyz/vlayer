@@ -21,9 +21,22 @@ pub struct Config {
     chain_guest_ids: Box<[Digest]>,
     api_version: String,
     gas_meter_config: Option<GasMeterConfig>,
+    auth_mode: AuthMode,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, Default)]
+pub enum AuthMode {
+    #[cfg(feature = "jwt")]
+    Jwt,
+    #[default]
+    Token,
 }
 
 impl Config {
+    pub const fn auth_mode(&self) -> AuthMode {
+        self.auth_mode
+    }
+
     pub const fn socket_addr(&self) -> SocketAddr {
         self.socket_addr
     }
@@ -93,6 +106,7 @@ impl ConfigBuilder {
                 max_calldata_size: 5 * 1024 * 1024, // 5 MB
                 api_version,
                 gas_meter_config: None,
+                auth_mode: Default::default(),
             },
         }
     }
