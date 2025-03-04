@@ -6,7 +6,7 @@ use bytes::Bytes;
 use derivative::Derivative;
 
 use super::node::Node;
-use crate::{hash, Keccak256, Digest};
+use crate::{hash, Digest, Keccak256};
 
 /// Represents the way in which a node is referenced from within another node.
 #[derive(Debug, Default, Derivative)]

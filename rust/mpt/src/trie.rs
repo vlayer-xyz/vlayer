@@ -12,7 +12,7 @@ use utils::{parse_node, resolve_trie};
 
 use crate::{
     node::{Node, NodeError},
-    Keccak256, Digest,
+    Digest, Keccak256,
 };
 
 mod utils;
