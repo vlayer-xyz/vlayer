@@ -8,14 +8,17 @@ alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 assert-json-diff = { workspace = true }
 axum = { workspace = true }
+axum-extra = { workspace = true }
 axum-jrpc = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
+derive_more = { workspace = true }
 ethers = { workspace = true }
 hex = { workspace = true }
 host_utils = { workspace = true }
 http-body-util = { workspace = true }
 jsonrpsee = { workspace = true }
+jsonwebtoken = { workspace = true, optional = true }
 mime = { workspace = true }
 mockito = { workspace = true }
 reqwest = { workspace = true }
@@ -31,3 +34,6 @@ tracing = { workspace = true }
 
 [lints]
 workspace = true
+
+[features]
+jwt = ["dep:jsonwebtoken"]
