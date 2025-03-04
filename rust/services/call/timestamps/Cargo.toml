@@ -8,6 +8,7 @@ anyhow = { workspace = true }
 dotenvy = { workspace = true }
 lazy_static = { workspace = true }
 provider = { workspace = true }
+thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 u64_range = { workspace = true }
 
