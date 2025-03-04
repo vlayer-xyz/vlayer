@@ -12,7 +12,7 @@ use derive_more::Deref;
 use derive_new::new;
 use jsonwebtoken::{decode, errors::Error as JwtError, Validation};
 pub use jsonwebtoken::{Algorithm, DecodingKey};
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
 
@@ -30,27 +30,12 @@ pub struct State {
     algorithm: Algorithm,
 }
 
-#[derive(Deref, Clone)]
-pub struct Claims<T>(pub T)
-where
-    T: Clone + DeserializeOwned;
-
-impl<'de, T> Deserialize<'de> for Claims<T>
-where
-    T: Clone + DeserializeOwned,
-{
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let value = T::deserialize(deserializer)?;
-        Ok(Claims(value))
-    }
-}
+#[derive(Deref, Clone, Deserialize)]
+pub struct Claims<T: Clone>(pub T);
 
 impl<S, T> FromRequestParts<S> for Claims<T>
 where
-    T: Clone + DeserializeOwned,
+    for<'de> T: Clone + Deserialize<'de>,
     S: Send + Sync,
     State: FromRef<S>,
 {
