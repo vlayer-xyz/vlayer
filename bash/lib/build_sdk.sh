@@ -1,22 +1,22 @@
 source "$(dirname "${BASH_SOURCE[0]}")/io.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/contracts.sh"
 
-function build_sdk() {
-  echo "::group::Building sdk"
-  pushd "${VLAYER_HOME}/packages/sdk"
+
+function build_package () {
+  echo "::group::Building ${1}"
+  pushd "${VLAYER_HOME}/packages/${1}"
   silent_unless_fails bun install --frozen-lockfile
   silent_unless_fails bun run build
   popd
-  echo '::endgroup::Building sdk'
+  echo "::endgroup::Building ${1}"
+}
+
+function build_sdk() {
+  build_package sdk
 }
 
 function build_sdk_hooks() {
-  echo "::group::Building sdk-hooks"
-  pushd "${VLAYER_HOME}/packages/sdk-hooks"
-    silent_unless_fails bun install --frozen-lockfile
-    silent_unless_fails bun run build
-  popd
-  echo '::endgroup::Building sdk-hooks'
+  build_package sdk-hooks
 }
 
 function build_react_sdk_with_deps() {
