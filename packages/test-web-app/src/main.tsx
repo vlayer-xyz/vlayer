@@ -11,8 +11,6 @@ import Email from "./Email";
 import { DappProveWeb } from "./DappProveWeb";
 import { DappPut } from "./DappPut";
 
-console.log("Dapp", Dapp);
-
 const router = createBrowserRouter([
   // dapp is the app developer used and launched using the sdk
   {

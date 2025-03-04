@@ -14,7 +14,6 @@ import lotrApiProver from "../../../contracts/fixtures/out/LotrApiProver.sol/Lot
 
 const PROVER_ADDRESS = import.meta.env
   .VITE_LOTR_API_PROVER_ADDRESS as `0x${string}`;
-console.log(PROVER_ADDRESS);
 
 function DappProveWeb() {
   const [zkProof, setZkProof] = useState<boolean>();
