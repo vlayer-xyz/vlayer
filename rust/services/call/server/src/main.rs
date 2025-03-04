@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use alloy_primitives::ChainId;
 #[cfg(feature = "jwt")]
-use call_server_lib::jwt::{Algorithm, Config as JwtConfig};
+use call_server_lib::jwt::Algorithm;
 use call_server_lib::{
     chain_proof::Config as ChainProofConfig, config::AuthMode, gas_meter::Config as GasMeterConfig,
     serve, Config, ConfigBuilder, ProofMode,
@@ -52,15 +52,19 @@ struct Cli {
     auth_mode: Option<AuthMode>,
 
     #[cfg(feature = "jwt")]
-    #[arg(long, required_if_eq("auth_mode", "jwt"))]
-    public_key: Option<String>,
+    #[arg(long, required_if_eq("auth_mode", "jwt"), group = "jwt")]
+    public_key: Option<std::path::PathBuf>,
+
+    #[cfg(feature = "jwt")]
+    #[arg(long, group = "jwt", default_value = "RS256")]
+    algorithm: Option<Algorithm>,
 
     #[clap(flatten)]
     global_args: GlobalArgs,
 }
 
 impl Cli {
-    fn into_config(self, api_version: String) -> Config {
+    fn into_config(self, api_version: String) -> anyhow::Result<Config> {
         let auth_mode = self.auth_mode.unwrap_or_default();
         let proof_mode = self.proof.unwrap_or_default();
         let gas_meter_config = self
@@ -88,14 +92,32 @@ impl Cli {
 
         #[cfg(feature = "jwt")]
         {
-            builder = builder.with_jwt_config(
+            builder = with_jwt_config(
+                builder,
                 self.public_key
-                    .map(|pk| JwtConfig::new(pk, Algorithm::RS256)),
-            );
+                    .expect("public key is guaranteed by clap to be non-null"),
+                self.algorithm.unwrap_or_default(),
+            )?;
         }
 
-        builder.build()
+        Ok(builder.build())
     }
+}
+
+#[cfg(feature = "jwt")]
+fn with_jwt_config(
+    mut builder: ConfigBuilder,
+    public_key: impl AsRef<std::path::Path>,
+    alg: Algorithm,
+) -> anyhow::Result<ConfigBuilder> {
+    use anyhow::Context;
+    use call_server_lib::jwt::{Config as JwtConfig, DecodingKey};
+    let public_key = std::fs::read_to_string(public_key.as_ref()).with_context(|| {
+        format!("Failed to open file '{}' for reading", public_key.as_ref().display())
+    })?;
+    let key = DecodingKey::from_rsa_pem(public_key.as_bytes())?;
+    builder = builder.with_jwt_config(JwtConfig::new(key, alg));
+    Ok(builder)
 }
 
 #[tokio::main]
@@ -105,7 +127,7 @@ async fn main() -> anyhow::Result<()> {
 
     init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
-    let config = cli.into_config(api_version);
+    let config = cli.into_config(api_version)?;
 
     info!("Running vlayer serve...");
     if config.proof_mode() == ProofMode::Fake {

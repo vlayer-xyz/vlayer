@@ -13,7 +13,7 @@ use strum::{Display, EnumString};
 use crate::jwt::Config as JwtConfig;
 use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Clone)]
 pub struct Config {
     socket_addr: SocketAddr,
     rpc_urls: HashMap<ChainId, String>,
