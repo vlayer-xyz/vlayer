@@ -122,7 +122,8 @@ impl NonEmptyRange {
         // f(l) < value <= f(r)
         let mut l = self.start;
         let mut r = self.end;
-        while l + 1 < r {
+        // while distance between l and r is greater than 1
+        while r - l > 1  {
             let m = l + (r - l) / 2;
             let m_value = f(m)?;
             if m_value < value {
