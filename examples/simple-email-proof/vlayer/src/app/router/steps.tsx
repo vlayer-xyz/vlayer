@@ -33,7 +33,7 @@ export const getStep = (kind: STEP_KIND): Step => {
   if (!meta) {
     throw new StepNotFoundError(kind);
   }
-  
+
   return {
     ...meta,
     kind,
