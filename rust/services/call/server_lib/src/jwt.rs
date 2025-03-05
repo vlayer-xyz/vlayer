@@ -1,5 +1,3 @@
-pub use server_utils::jwt::auth::{Algorithm, DecodingKey};
-
 use axum::{
     body::Bytes,
     extract::{FromRef, State as AxumState},
@@ -7,6 +5,7 @@ use axum::{
     Extension,
 };
 use derive_new::new;
+pub use server_utils::jwt::auth::{Algorithm, DecodingKey};
 use server_utils::{
     jwt::{
         auth::{Claims as TokenClaims, State as JwtState},
