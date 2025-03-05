@@ -129,6 +129,7 @@ describe("Success zk-proving", () => {
     try {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
+      //eslint-disable-next-line no-console
       console.log("Error waiting for proving result", e);
     }
 
@@ -207,6 +208,7 @@ describe("Failed zk-proving", () => {
       });
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
+      //eslint-disable-next-line no-console
       console.log("Error waiting for proving result", e);
     }
 

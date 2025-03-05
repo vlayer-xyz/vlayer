@@ -84,6 +84,6 @@ function prettyPrint(results: Results) {
     fmt += fmtRow(name, `${stats.gas}`, `${stats.cycles}`);
   });
   fmt += lineSep;
-
+  //eslint-disable-next-line no-console
   console.log(fmt);
 }

@@ -10,7 +10,7 @@ export default [
   {
     rules: {
       curly: "error",
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-console": ["error", { allow: ["warn", "error"] }],
     },
     languageOptions: {
       globals: {
