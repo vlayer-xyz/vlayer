@@ -76,8 +76,9 @@ fn prepend_nibble<D>(nibble: u8, node: Node<D>) -> Node<D> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Keccak256;
 
-    type D = sha3::Keccak256;
+    type D = Keccak256;
 
     #[test]
     fn two_empty_keys() {

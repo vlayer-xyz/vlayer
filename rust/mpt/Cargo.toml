@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-alloy-primitives = { workspace = true }
+alloy-primitives = { workspace = true, features = ["tiny-keccak"] }
 alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 alloy-trie = { workspace = true }
@@ -21,7 +21,6 @@ rlp = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
-sha3 = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]

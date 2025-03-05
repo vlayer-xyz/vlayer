@@ -1,4 +1,0 @@
-disallowed-methods = [
-    # Don't import alloy hash function. Use mpt::hash wrapper module which uses sha3 from rust-crypto
-    { path = "alloy_primitives::keccak256", reason = "use mpt::hash wrapper" },
-]

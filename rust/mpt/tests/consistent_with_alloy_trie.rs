@@ -3,9 +3,9 @@ use std::collections::BTreeMap;
 use alloy_primitives::U256;
 use alloy_trie::{HashBuilder, Nibbles};
 use common::Hashable;
-use mpt::{hash, reorder_root_first, KeccakMerkleTrie as MerkleTrie};
+use mpt::{hash, reorder_root_first, Keccak256, KeccakMerkleTrie as MerkleTrie};
 
-type D = sha3::Keccak256;
+type D = Keccak256;
 
 #[test]
 fn root_match() -> anyhow::Result<()> {
