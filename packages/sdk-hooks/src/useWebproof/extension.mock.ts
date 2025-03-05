@@ -1,4 +1,4 @@
-import type { PresentationJSON, ZkProvingStatus } from "@vlayer/sdk";
+import type { PresentationJSON } from "@vlayer/sdk";
 
 import {
   ExtensionMessageType,
@@ -25,9 +25,7 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
     } = { shouldSucceed: true, delayMs: 100 },
   ) {}
 
-  public notifyZkProvingStatus(status: ZkProvingStatus): void {
-    console.log("Mock: ZK proving status notification", status);
-  }
+  public notifyZkProvingStatus(): void {}
 
   public addEventListeners<T extends ExtensionMessageType>(
     messageType: T,
@@ -58,7 +56,6 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
           },
         };
         this.listeners[ExtensionMessageType.ProofDone]?.forEach((listener) => {
-          console.log("Mock: ProofDone message", mockProofDoneMessage);
           listener(mockProofDoneMessage);
         });
       } else {
