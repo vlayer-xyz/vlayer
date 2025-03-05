@@ -1,6 +1,8 @@
 name: Lint Bash
 on:
   pull_request:
+    paths:
+      - "bash/**"
   merge_group:
   push:
     branches:

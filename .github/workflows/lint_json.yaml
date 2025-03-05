@@ -2,6 +2,9 @@ name: Lint JSON
 
 on:
   pull_request:
+    paths:
+      - "**"
+      - "!book"
   merge_group:
   push:
     branches:
