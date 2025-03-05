@@ -35,10 +35,10 @@ pub struct Config {
 #[strum(ascii_case_insensitive)]
 #[non_exhaustive]
 pub enum AuthMode {
-    #[cfg(feature = "jwt")]
-    Jwt,
     #[default]
     Token,
+    #[cfg(feature = "jwt")]
+    Jwt,
 }
 
 impl Config {
