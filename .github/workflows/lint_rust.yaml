@@ -2,6 +2,10 @@ name: Lint Rust
 
 on:
   pull_request:
+    paths:
+      - "rust-toolchain.toml"
+      - "rust/**"
+      - "examples/**"
   merge_group:
   push:
     branches:
