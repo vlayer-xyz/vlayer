@@ -1,18 +1,10 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
 
-function generate_ts_bindings() {
-  echo "::group::Generating typescript bidings"
-  silent_unless_fails ${VLAYER_HOME}/bash/build-ts-types.sh
-  echo '::endgroup::Generating typescript bidings'
-}
-
-function build_sdk() {
-  echo "::group::Building sdk"
-  pushd "${VLAYER_HOME}/packages/sdk"
-    silent_unless_fails bun install --frozen-lockfile
-    silent_unless_fails bun run build
+function run_playwright_tests() {
+  pushd vlayer
+    silent_unless_fails bunx playwright install --with-deps chromium
+    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test:"${VLAYER_ENV}"
   popd
-  echo '::endgroup::Building sdk'
 }
 
 function run_prover_script() {
@@ -30,25 +22,6 @@ function run_prover_script() {
     SHOULD_DEPLOY_VERIFIER_ROUTER=true bun run prove:"${VLAYER_ENV}"
   popd
   echo "::endgroup::Running prover script"
-}
-
-function build_vlayer_contracts() {
-  pushd "${VLAYER_HOME}/contracts/vlayer"
-  build_contracts
-  popd
-}
-
-function build_contracts() {
-  echo "::group::Building contracts"
-  forge build
-  echo "::endgroup::Building contracts"
-}
-
-function run_playwright_tests() {
-  pushd vlayer
-    silent_unless_fails bunx playwright install --with-deps chromium
-    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test:"${VLAYER_ENV}"
-  popd
 }
 
 function generate_vlayer_init_config() {

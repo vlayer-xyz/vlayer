@@ -2,51 +2,58 @@
 
 set -ueo pipefail
 
+source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
+
+usage() {
+    echo_color YELLOW "Usage: $0 [OPTIONS]"
+    echo_color YELLOW "Options:"
+    echo_color YELLOW " --help      Display this help message"
+    echo_color YELLOW " --fix       Fix linting errors"
+}
+
+handle_options() {
+    while [ $# -gt 0 ]; do
+        case $1 in
+            --help)
+                usage
+                exit 0
+                ;;
+            --fix)
+                FIX_FLAG=" --fix"
+                FIX_OPTION=":fix"
+                ;;
+            *)
+                echo_color RED "Invalid option: $1" >&2
+                usage
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+FIX_FLAG=""
+FIX_OPTION=""
+
+handle_options "$@"
+
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-sdk.sh"
 
-bun install --frozen-lockfile
+build_react_sdk_with_deps
 
+echo "::group::Running eslint for examples"
 for example in $(get_examples); do (
-    echo "Running eslint for: ${example}"
-    cd "$VLAYER_HOME/examples/$example/vlayer"
-    bunx eslint .   
+    echo "Running eslint${FIX_FLAG} for: ${example}"
+    pushd "$VLAYER_HOME/examples/$example/vlayer"
+    bun run eslint .$FIX_FLAG
+    popd
 ) done
-
+echo '::endgroup::Running eslint for examples'
 
 echo "::group::Running eslint for: $VLAYER_HOME/packages"
-
-echo "::group::building contracts"
-echo Run Forge build vlayer
-pushd ${VLAYER_HOME}/contracts/vlayer
-forge soldeer install
-forge clean
-forge build
+pushd "${VLAYER_HOME}/packages"
+bun run lint$FIX_OPTION
 popd
-
-echo Run Forge build fixtures
-pushd ${VLAYER_HOME}/contracts/fixtures
-forge soldeer install
-forge clean
-forge build
-popd
-
-./bash/build-ts-types.sh
-echo '::endgroup::'
-
-echo "::group::Building sdk"
-cd "${VLAYER_HOME}/packages/sdk"
-bun install --frozen-lockfile
-bun run build
-echo '::endgroup::'
-
-echo "::group::Building sdk-hooks"
-cd "${VLAYER_HOME}/packages/sdk-hooks"
-bun install --frozen-lockfile
-bun run build
-echo '::endgroup::'
-
-cd "${VLAYER_HOME}/packages"
-bun install --frozen-lockfile
-bun run lint
-echo '::endgroup::'
+echo "::endgroup::Running eslint for: $VLAYER_HOME/packages"

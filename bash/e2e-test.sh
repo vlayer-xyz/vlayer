@@ -7,14 +7,15 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-sdk.sh"
 
 # Defaults
 set_proving_mode
 VLAYER_ENV=${VLAYER_ENV:-dev}
 
 generate_ts_bindings
-build_sdk
+build-sdk
 
 BUN_NO_FROZEN_LOCKFILE=1
 export EXAMPLE_NAME=$EXAMPLE
@@ -30,7 +31,7 @@ init_template
 
 pushd $EXAMPLE
 
-silent_unless_fails build_contracts
+silent_unless_fails forge build
 run_prover_script
 
 popd

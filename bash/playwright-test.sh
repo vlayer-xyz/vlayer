@@ -1,16 +1,12 @@
 #!/bin/bash
 
-# Define color codes
-RED='\033[0;31m'
-BLUE='\033[0;34m'
-YELLOW='\033[0;33m'
-NC='\033[0m' # No Color
+source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
 
 usage() {
-    echo -e "${YELLOW}Usage: $0 [OPTIONS]${NC}"
-    echo -e "${YELLOW}Options:${NC}"
-    echo -e "${YELLOW} --help      Display this help message${NC}"
-    echo -e "${YELLOW} --headed    Run tests in headed mode (with browser visible)${NC}"
+    echo_color YELLOW "Usage: $0 [OPTIONS]"
+    echo_color YELLOW "Options:"
+    echo_color YELLOW " --help      Display this help message"
+    echo_color YELLOW " --headed    Run tests in headed mode (with browser visible)"
 }
 
 handle_options() {
@@ -25,7 +21,7 @@ handle_options() {
                 headed_mode=true
                 ;;
             *)
-                echo -e "${RED}Invalid option: $1${NC}" >&2
+                echo_color RED "Invalid option: $1" >&2
                 usage
                 exit 1
                 ;;
@@ -46,33 +42,33 @@ set -ueo pipefail
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 VLAYER_ENV=${VLAYER_ENV:-dev}
 
-echo -e "${BLUE}Run services${NC}"
+echo_color BLUE "Run services"
 source ${VLAYER_HOME}/bash/run-services.sh
 
-echo -e "${BLUE}Mock ImageId.sol${NC}"
+echo_color BLUE "Mock ImageId.sol"
 source ${VLAYER_HOME}/bash/mock-imageid.sh
 
-echo -e "${BLUE}Run Forge build vlayer${NC}"
+echo_color BLUE "Run Forge build vlayer"
 pushd ${VLAYER_HOME}/contracts/vlayer
 forge soldeer install
 forge clean
 forge build
 popd
 
-echo -e "${BLUE}Run Forge build fixtures${NC}"
+echo_color BLUE "Run Forge build fixtures"
 pushd ${VLAYER_HOME}/contracts/fixtures
 forge soldeer install
 forge clean
 forge build
 popd
 
-echo -e "${BLUE}Run playwright tests${NC}"
+echo_color BLUE "Run playwright tests"
 pushd ${VLAYER_HOME}/packages
 if [ "$headed_mode" = true ]; then
-    echo -e "${BLUE}Running in headed mode${NC}"
+    echo_color BLUE "Running in headed mode"
     VLAYER_ENV=${VLAYER_ENV} bun run test:headed
 else
-    echo -e "${BLUE}Running in headless mode${NC}"
+    echo_color BLUE "Running in headless mode"
     VLAYER_ENV=${VLAYER_ENV} bun run test:headless
 fi
 popd

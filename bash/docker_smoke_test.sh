@@ -1,10 +1,3 @@
-# Define color variables globally
-RED='\033[31m'
-GREEN='\033[32m'
-YELLOW='\033[33m'
-BLUE='\033[34m'
-NC='\033[0m' # No Color
-
 TIMEOUT=60
 INTERVAL=5
 END=$((SECONDS+TIMEOUT))
