@@ -523,6 +523,8 @@ mod server_tests {
     mod jwt {
         use assert_json_diff::assert_json_eq;
         use call_server_lib::jwt::{Algorithm, Config as JwtConfig, DecodingKey};
+        use jsonwebtoken::{encode, get_current_timestamp, EncodingKey, Header};
+        use server_utils::jwt::Claims;
 
         use super::*;
 
@@ -530,6 +532,14 @@ mod server_tests {
 
         fn jwt_config() -> JwtConfig {
             JwtConfig::new(DecodingKey::from_secret(SECRET), Algorithm::default())
+        }
+
+        fn valid_token() -> String {
+            let key = EncodingKey::from_secret(SECRET);
+            let ts = get_current_timestamp() + 60;
+            let claims =
+                Claims::new("api.vlayer.xyz".to_string(), 443, ts, "1234567890abcdef".to_string());
+            encode(&Header::default(), &claims, &key).unwrap()
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -544,6 +554,17 @@ mod server_tests {
                 body_to_json(resp.into_body()).await,
                 json!({ "error": "Invalid token" })
             );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn accepts_requests_with_valid_jwt_token() {
+            let ctx = Context::default().with_jwt_config(jwt_config());
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post_with_bearer_auth("/", &req, &valid_token()).await;
+
+            assert_eq!(StatusCode::OK, resp.status());
+            assert_jrpc_err(resp, -32601, "Method `dummy` not found").await;
         }
     }
 }

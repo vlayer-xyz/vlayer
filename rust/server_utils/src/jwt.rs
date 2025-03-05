@@ -1,8 +1,9 @@
 pub mod auth;
 
-use serde::Deserialize;
+use derive_new::new;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(new, Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
     pub host: String,
     pub port: u16,
