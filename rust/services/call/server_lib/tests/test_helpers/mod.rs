@@ -45,8 +45,8 @@ pub fn rpc_body(method: &str, params: &Value) -> Value {
     })
 }
 
-pub(crate) fn call_guest_elf() -> GuestElf {
-    guest_wrapper::CALL_GUEST_ELF.clone()
+pub(crate) fn call_guest_elf() -> &'static GuestElf {
+    &guest_wrapper::CALL_GUEST_ELF
 }
 
 pub(crate) fn chain_guest_elf() -> &'static GuestElf {
@@ -103,13 +103,16 @@ impl Context {
     }
 
     #[allow(unused_mut)]
-    pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: &GuestElf) -> Server {
+    pub(crate) fn server(&self, call_guest_elf: &GuestElf, chain_guest_elf: &GuestElf) -> Server {
         let gas_meter_config = self
             .gas_meter_server
             .as_ref()
             .map(GasMeterServer::as_gas_meter_config);
-        let chain_guest_ids = vec![chain_guest_elf.id].into_boxed_slice();
-        let mut builder = ConfigBuilder::new(call_guest_elf, chain_guest_ids, API_VERSION.into())
+        let chain_guest_ids = vec![chain_guest_elf.id];
+        let mut builder = ConfigBuilder::default()
+            .with_call_guest_elf(call_guest_elf)
+            .with_chain_guest_ids(chain_guest_ids)
+            .with_semver(API_VERSION)
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
             .with_proof_mode(ProofMode::Fake)
             .with_gas_meter_config(gas_meter_config)
@@ -120,7 +123,7 @@ impl Context {
             builder = builder.with_jwt_config(self.jwt_config.clone());
         }
 
-        let config = builder.build();
+        let config = builder.build().unwrap();
         Server::new(config)
     }
 }

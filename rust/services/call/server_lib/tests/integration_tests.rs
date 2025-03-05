@@ -51,7 +51,7 @@ mod server_tests {
             let call_elf = GuestElf::new([0; 8], &[]);
             let chain_elf = GuestElf::new([1; 8], &[]);
             let ctx = Context::default();
-            let app = ctx.server(call_elf, &chain_elf);
+            let app = ctx.server(&call_elf, &chain_elf);
 
             let req = rpc_body("v_versions", &json!([]));
             let response = app.post("/", &req).await;

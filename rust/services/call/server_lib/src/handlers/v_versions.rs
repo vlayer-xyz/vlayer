@@ -22,6 +22,6 @@ pub fn v_versions(config: &Config) -> Versions {
     Versions {
         call_guest_id: config.call_guest_id_hex(),
         chain_guest_id: config.chain_guest_id_hex(),
-        api_version: config.api_version.clone(),
+        api_version: config.semver.clone(),
     }
 }

@@ -1,44 +1,38 @@
-use std::{collections::HashMap, net::SocketAddr};
+use std::{collections::HashMap, net::SocketAddr as RawSocketAddr};
 
 use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
+use derive_more::From;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 use strum::{Display, EnumString};
+use thiserror::Error;
 
 #[cfg(feature = "jwt")]
 use crate::jwt::Config as JwtConfig;
 use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
 
+#[derive(Debug, Error)]
+#[error("Missing required config field: {0}")]
+pub struct Error(String);
+
 #[derive(Clone)]
 pub struct Config {
-    pub socket_addr: SocketAddr,
+    pub socket_addr: RawSocketAddr,
     pub rpc_urls: HashMap<ChainId, String>,
     pub proof_mode: ProofMode,
     pub chain_proof_config: Option<ChainProofConfig>,
     pub max_calldata_size: usize,
     pub call_guest_elf: GuestElf,
     pub chain_guest_ids: Box<[Digest]>,
-    pub api_version: String,
+    pub semver: String,
     pub gas_meter_config: Option<GasMeterConfig>,
     pub auth_mode: AuthMode,
     #[cfg(feature = "jwt")]
     pub jwt_config: Option<JwtConfig>,
-}
-
-#[derive(
-    Debug, Display, Clone, Copy, Deserialize, Serialize, Default, PartialEq, Eq, EnumString,
-)]
-#[strum(ascii_case_insensitive)]
-#[non_exhaustive]
-pub enum AuthMode {
-    #[default]
-    Token,
-    #[cfg(feature = "jwt")]
-    Jwt,
 }
 
 impl Config {
@@ -62,95 +56,187 @@ impl Config {
     }
 }
 
+#[derive(
+    Debug, Display, Clone, Copy, Deserialize, Serialize, Default, PartialEq, Eq, EnumString,
+)]
+#[strum(ascii_case_insensitive)]
+#[non_exhaustive]
+pub enum AuthMode {
+    #[default]
+    Token,
+    #[cfg(feature = "jwt")]
+    Jwt,
+}
+
+pub struct SocketAddr(RawSocketAddr);
+
+impl Default for SocketAddr {
+    fn default() -> Self {
+        Self(
+            "127.0.0.1:3000"
+                .parse()
+                .expect("parsing default value 127.0.0.1:3000 should not fail"),
+        )
+    }
+}
+
+pub struct RpcUrls(HashMap<ChainId, String>);
+
+impl Default for RpcUrls {
+    fn default() -> Self {
+        Self(HashMap::from([(TEST_CHAIN_ID, "http://localhost:8545".to_string())]))
+    }
+}
+
+#[derive(From)]
+pub struct MaxCalldataSize(usize);
+
+impl Default for MaxCalldataSize {
+    fn default() -> Self {
+        Self(5 * 1024 * 1024) // 5 MB
+    }
+}
+
+#[derive(Default)]
 pub struct ConfigBuilder {
-    config: Config,
+    socket_addr: SocketAddr,
+    rpc_urls: RpcUrls,
+    proof_mode: ProofMode,
+    chain_proof_config: Option<ChainProofConfig>,
+    max_calldata_size: MaxCalldataSize,
+    call_guest_elf: Option<GuestElf>,
+    chain_guest_ids: Option<Box<[Digest]>>,
+    semver: Option<String>,
+    gas_meter_config: Option<GasMeterConfig>,
+    auth_mode: AuthMode,
+    #[cfg(feature = "jwt")]
+    jwt_config: Option<JwtConfig>,
 }
 
 impl ConfigBuilder {
-    pub fn new(
-        call_guest_elf: GuestElf,
-        chain_guest_ids: Box<[Digest]>,
-        api_version: String,
+    #[must_use]
+    pub fn with_chain_guest_ids<T: Into<Digest>>(
+        mut self,
+        ids: impl IntoIterator<Item = T>,
     ) -> Self {
-        Self {
-            config: Config {
-                chain_proof_config: None,
-                call_guest_elf,
-                chain_guest_ids,
-                socket_addr: "127.0.0.1:3000".parse().unwrap(),
-                rpc_urls: HashMap::from([(TEST_CHAIN_ID, "http://localhost:8545".to_string())]),
-                proof_mode: ProofMode::Groth16,
-                max_calldata_size: 5 * 1024 * 1024, // 5 MB
-                api_version,
-                gas_meter_config: None,
-                auth_mode: Default::default(),
-                #[cfg(feature = "jwt")]
-                jwt_config: None,
-            },
-        }
-    }
-
-    pub const fn with_auth_mode(mut self, auth_mode: AuthMode) -> Self {
-        self.config.auth_mode = auth_mode;
+        self.chain_guest_ids = Some(ids.into_iter().map(Into::into).collect());
         self
     }
 
+    #[must_use]
+    pub fn with_call_guest_elf(mut self, call_guest_elf: &GuestElf) -> Self {
+        self.call_guest_elf = Some(call_guest_elf.clone());
+        self
+    }
+
+    #[must_use]
+    pub const fn with_auth_mode(mut self, auth_mode: AuthMode) -> Self {
+        self.auth_mode = auth_mode;
+        self
+    }
+
+    #[must_use]
     pub fn with_chain_proof_config(
         mut self,
         chain_proof_config: impl Into<Option<ChainProofConfig>>,
     ) -> Self {
-        self.config.chain_proof_config = chain_proof_config.into();
+        self.chain_proof_config = chain_proof_config.into();
         self
     }
 
+    #[must_use]
     pub fn with_rpc_mappings(
         mut self,
         mappings: impl IntoIterator<Item = (ChainId, String)>,
     ) -> Self {
-        self.config.rpc_urls.extend(mappings);
+        self.rpc_urls.0.extend(mappings);
         self
     }
 
+    #[must_use]
     pub const fn with_proof_mode(mut self, proof_mode: ProofMode) -> Self {
-        self.config.proof_mode = proof_mode;
+        self.proof_mode = proof_mode;
         self
     }
 
+    #[must_use]
     pub fn with_host(mut self, host: Option<String>) -> Self {
         if let Some(host) = host {
-            self.config.socket_addr.set_ip(host.parse().unwrap());
+            self.socket_addr.0.set_ip(host.parse().unwrap());
         }
         self
     }
 
+    #[must_use]
     pub fn with_port(mut self, port: Option<u16>) -> Self {
         if let Some(port) = port {
-            self.config.socket_addr.set_port(port);
+            self.socket_addr.0.set_port(port);
         }
         self
     }
 
-    pub fn with_semver(mut self, semver: String) -> Self {
-        self.config.api_version = semver;
+    #[must_use]
+    pub fn with_semver(mut self, semver: impl Into<String>) -> Self {
+        self.semver = Some(semver.into());
         self
     }
 
+    #[must_use]
     pub fn with_gas_meter_config(
         mut self,
         gas_meter_config: impl Into<Option<GasMeterConfig>>,
     ) -> Self {
-        self.config.gas_meter_config = gas_meter_config.into();
+        self.gas_meter_config = gas_meter_config.into();
         self
     }
 
+    #[must_use]
+    pub fn with_max_calldata_size(mut self, size: usize) -> Self {
+        self.max_calldata_size = size.into();
+        self
+    }
+
+    #[must_use]
     #[cfg(feature = "jwt")]
     pub fn with_jwt_config(mut self, jwt_config: impl Into<Option<JwtConfig>>) -> Self {
-        self.config.jwt_config = jwt_config.into();
+        self.jwt_config = jwt_config.into();
         self
     }
 
-    pub fn build(self) -> Config {
-        self.config
+    pub fn build(self) -> Result<Config, Error> {
+        let Self {
+            socket_addr,
+            rpc_urls,
+            proof_mode,
+            chain_proof_config,
+            max_calldata_size,
+            call_guest_elf,
+            chain_guest_ids,
+            semver,
+            auth_mode,
+            gas_meter_config,
+            #[cfg(feature = "jwt")]
+            jwt_config,
+        } = self;
+
+        let call_guest_elf = call_guest_elf.ok_or(Error("call_guest_elf".into()))?;
+        let chain_guest_ids = chain_guest_ids.ok_or(Error("chain_guest_ids".into()))?;
+        let semver = semver.ok_or(Error("semver".into()))?;
+
+        Ok(Config {
+            socket_addr: socket_addr.0,
+            rpc_urls: rpc_urls.0,
+            proof_mode,
+            chain_proof_config,
+            max_calldata_size: max_calldata_size.0,
+            call_guest_elf,
+            chain_guest_ids,
+            semver,
+            gas_meter_config,
+            auth_mode,
+            #[cfg(feature = "jwt")]
+            jwt_config,
+        })
     }
 }
 
@@ -168,29 +254,35 @@ impl From<&Config> for HostConfig {
 mod tests {
     use super::*;
 
+    fn config_builder() -> ConfigBuilder {
+        let call_elf = GuestElf::new([0; 8], &[]);
+        let chain_guest_ids = vec![Digest::new([1; 8])];
+        ConfigBuilder::default()
+            .with_call_guest_elf(&call_elf)
+            .with_chain_guest_ids(chain_guest_ids)
+            .with_semver("1.2.3")
+    }
+
     #[test]
     fn local_testnet_rpc_url_always_there() {
-        let config = ConfigBuilder::new(Default::default(), Default::default(), Default::default())
-            .with_rpc_mappings(vec![])
-            .build();
+        let config = config_builder().with_rpc_mappings(vec![]).build().unwrap();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://localhost:8545");
     }
 
     #[test]
     fn local_testnet_rpc_url_can_be_overwritten() {
-        let config = ConfigBuilder::new(Default::default(), Default::default(), Default::default())
+        let config = config_builder()
             .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
-            .build();
+            .build()
+            .unwrap();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "NEW");
     }
 
     #[test]
     fn correctly_formats_guest_id() {
-        let call_elf = GuestElf::new([0; 8], &[]);
-        let chain_guest_ids = vec![Digest::new([1; 8])].into_boxed_slice();
-        let config = ConfigBuilder::new(call_elf, chain_guest_ids, "1.2.3".into()).build();
+        let config = config_builder().build().unwrap();
 
         assert_eq!(
             config.call_guest_id_hex(),
@@ -200,6 +292,6 @@ mod tests {
             config.chain_guest_id_hex(),
             "0x0100000001000000010000000100000001000000010000000100000001000000"
         );
-        assert_eq!(config.api_version, "1.2.3".to_string());
+        assert_eq!(config.semver, "1.2.3".to_string());
     }
 }
