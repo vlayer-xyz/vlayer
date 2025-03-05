@@ -47,9 +47,10 @@ where
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
             .map_err(|_| Error::InvalidToken)?;
+        let mut validation = Validation::new(state.algorithm);
+        validation.validate_exp = true;
         let token_data =
-            decode::<Claims<T>>(bearer.token(), &state.pub_key, &Validation::new(state.algorithm))
-                .map_err(Error::Jwt)?;
+            decode::<Claims<T>>(bearer.token(), &state.pub_key, &validation).map_err(Error::Jwt)?;
         Ok(token_data.claims)
     }
 }
