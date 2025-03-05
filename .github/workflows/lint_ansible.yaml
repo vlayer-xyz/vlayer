@@ -1,6 +1,8 @@
 name: Lint Ansible
 on:
   pull_request:
+    paths:
+      - "ansible/**"
   merge_group:
   push:
     branches:

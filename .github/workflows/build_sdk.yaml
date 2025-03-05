@@ -3,7 +3,7 @@ on:
   pull_request:
     paths:
       - "**"
-      - "!book"
+      - "!book/**"
   merge_group:
   push:
     branches:
