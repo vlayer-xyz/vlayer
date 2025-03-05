@@ -1,9 +1,8 @@
 name: Build extension
 on:
   pull_request:
-    paths:
-      - "**"
-      - "!book/**"
+    paths-ignore:
+      - "book/**"
   merge_group:
   push:
     branches:

@@ -1,8 +1,7 @@
 name: Build SDK
 on:
   pull_request:
-    paths:
-      - "**"
+    paths-ignore:
       - "!book/**"
   merge_group:
   push:
