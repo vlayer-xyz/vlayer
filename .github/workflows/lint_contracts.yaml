@@ -1,6 +1,11 @@
 name: Lint contracts
 on:
   pull_request:
+    paths:
+      - "contracts/**"
+      - ".github/workflows/lint_contracts.yaml"
+      - ".github/actions/contracts-prerequisites"
+      - ".github/actions/ts-prerequisites"
   merge_group:
   push:
     branches:

@@ -1,6 +1,11 @@
 name: Build examples
 on:
   pull_request:
+    paths:
+      - "examples/**"
+      - "contracts/**"
+      - "bash/**"
+      - ".github/actions/**"
   merge_group:
   push:
     branches:

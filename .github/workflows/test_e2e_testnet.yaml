@@ -15,6 +15,10 @@ on:
       - "LICENSE"
       - "book/**"
   pull_request:
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
   merge_group:
   workflow_dispatch:
 concurrency:
