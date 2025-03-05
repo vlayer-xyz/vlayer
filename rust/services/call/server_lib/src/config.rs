@@ -15,18 +15,18 @@ use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMet
 
 #[derive(Clone)]
 pub struct Config {
-    socket_addr: SocketAddr,
-    rpc_urls: HashMap<ChainId, String>,
-    proof_mode: ProofMode,
-    chain_proof_config: Option<ChainProofConfig>,
-    max_calldata_size: usize,
-    call_guest_elf: GuestElf,
-    chain_guest_ids: Box<[Digest]>,
-    api_version: String,
-    gas_meter_config: Option<GasMeterConfig>,
-    auth_mode: AuthMode,
+    pub socket_addr: SocketAddr,
+    pub rpc_urls: HashMap<ChainId, String>,
+    pub proof_mode: ProofMode,
+    pub chain_proof_config: Option<ChainProofConfig>,
+    pub max_calldata_size: usize,
+    pub call_guest_elf: GuestElf,
+    pub chain_guest_ids: Box<[Digest]>,
+    pub api_version: String,
+    pub gas_meter_config: Option<GasMeterConfig>,
+    pub auth_mode: AuthMode,
     #[cfg(feature = "jwt")]
-    jwt_config: Option<JwtConfig>,
+    pub jwt_config: Option<JwtConfig>,
 }
 
 #[derive(
@@ -42,22 +42,6 @@ pub enum AuthMode {
 }
 
 impl Config {
-    pub const fn auth_mode(&self) -> AuthMode {
-        self.auth_mode
-    }
-
-    pub const fn socket_addr(&self) -> SocketAddr {
-        self.socket_addr
-    }
-
-    pub fn rpc_urls(&self) -> HashMap<ChainId, String> {
-        self.rpc_urls.clone()
-    }
-
-    pub fn chain_proof_config(&self) -> Option<ChainProofConfig> {
-        self.chain_proof_config.clone()
-    }
-
     pub fn chain_proof_url(&self) -> Option<&str> {
         self.chain_proof_config.as_ref().map(|x| x.url.as_str())
     }
@@ -75,27 +59,6 @@ impl Config {
 
     pub fn chain_guest_id_hex(&self) -> String {
         self.chain_guest_id().encode_hex_with_prefix()
-    }
-
-    pub fn api_version(&self) -> String {
-        self.api_version.to_string()
-    }
-
-    pub fn gas_meter_config(&self) -> Option<GasMeterConfig> {
-        self.gas_meter_config.clone()
-    }
-
-    pub const fn max_calldata_size(&self) -> usize {
-        self.max_calldata_size
-    }
-
-    pub const fn proof_mode(&self) -> ProofMode {
-        self.proof_mode
-    }
-
-    #[cfg(feature = "jwt")]
-    pub fn jwt_config(&self) -> Option<JwtConfig> {
-        self.jwt_config.clone()
     }
 }
 
@@ -237,6 +200,6 @@ mod tests {
             config.chain_guest_id_hex(),
             "0x0100000001000000010000000100000001000000010000000100000001000000"
         );
-        assert_eq!(config.api_version(), "1.2.3".to_string());
+        assert_eq!(config.api_version, "1.2.3".to_string());
     }
 }

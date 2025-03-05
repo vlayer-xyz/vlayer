@@ -28,7 +28,7 @@ use crate::{
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
-    let listener = TcpListener::bind(config.socket_addr()).await?;
+    let listener = TcpListener::bind(&config.socket_addr).await?;
 
     info!("Listening on {}", listener.local_addr()?);
     axum::serve(listener, server(config)).await?;
@@ -54,7 +54,7 @@ async fn handle(
 }
 
 pub fn server(config: Config) -> Router {
-    let handler = match config.auth_mode() {
+    let handler = match config.auth_mode {
         #[cfg(feature = "jwt")]
         AuthMode::Jwt => post(crate::jwt::handle),
         AuthMode::Token => post(handle),

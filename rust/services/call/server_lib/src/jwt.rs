@@ -19,9 +19,10 @@ use crate::{handlers::Params, server::State};
 impl FromRef<State> for JwtState {
     fn from_ref(State { config, .. }: &State) -> Self {
         let config = config
-            .jwt_config()
+            .jwt_config
+            .as_ref()
             .expect("public key and algorithm must be specified at the config level");
-        Self::new(config.public_key, config.algorithm)
+        Self::new(config.public_key.clone(), config.algorithm)
     }
 }
 

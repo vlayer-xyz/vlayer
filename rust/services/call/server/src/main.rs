@@ -131,7 +131,7 @@ async fn main() -> anyhow::Result<()> {
     let config = cli.into_config(api_version)?;
 
     info!("Running vlayer serve...");
-    if config.proof_mode() == ProofMode::Fake {
+    if config.proof_mode == ProofMode::Fake {
         warn!("Running in fake mode. Server will not generate real proofs.");
         set_risc0_dev_mode();
     }

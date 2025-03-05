@@ -25,7 +25,7 @@ pub async fn v_call(
         req_id,
     } = params;
 
-    let call = call.parse_and_validate(config.max_calldata_size())?;
+    let call = call.parse_and_validate(config.max_calldata_size)?;
 
     let host = build_host(&config, context.chain_id, call.to).await?;
     let call_hash = (&host.start_execution_location(), &call).into();
@@ -33,7 +33,8 @@ pub async fn v_call(
     info!(hash = tracing::field::display(call_hash), "Call");
 
     let gas_meter_client =
-        gas_meter::init(config.gas_meter_config(), call_hash, user_token, call.gas_limit).await?;
+        gas_meter::init(config.gas_meter_config.clone(), call_hash, user_token, call.gas_limit)
+            .await?;
 
     let mut found_existing = true;
     state.entry(call_hash).or_insert_with(|| {
@@ -50,7 +51,7 @@ pub async fn v_call(
                 gas_meter_client,
                 state.clone(),
                 call_hash,
-                config.chain_proof_config(),
+                config.chain_proof_config.clone(),
             )
             .instrument(span)
             .await
@@ -66,7 +67,7 @@ async fn build_host(
     prover_contract_addr: Address,
 ) -> std::result::Result<Host, HostError> {
     let host = Host::builder()
-        .with_rpc_urls(config.rpc_urls())
+        .with_rpc_urls(config.rpc_urls.clone())
         .with_chain_guest_id(config.chain_guest_id())
         .with_chain_proof_url(config.chain_proof_url())?
         .with_start_chain_id(chain_id)?
