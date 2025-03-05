@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "bash/**"
+      - ".github/workflows/lint_bash.yaml"
   merge_group:
   push:
     branches:

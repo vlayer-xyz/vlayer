@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "ansible/**"
+      - ".github/workflows/lint_ansible.yaml"
   merge_group:
   push:
     branches:
