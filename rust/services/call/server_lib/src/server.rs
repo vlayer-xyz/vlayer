@@ -38,6 +38,7 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
 
 #[derive(new, Clone)]
 pub(super) struct State {
+    #[allow(dead_code)]
     pub config: Config,
     pub router: JrpcRouter<AppState>,
 }

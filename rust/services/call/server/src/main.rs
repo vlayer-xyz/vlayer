@@ -64,6 +64,7 @@ struct Cli {
 }
 
 impl Cli {
+    #[allow(unused_mut)]
     fn into_config(self, api_version: String) -> anyhow::Result<Config> {
         let auth_mode = self.auth_mode.unwrap_or_default();
         let proof_mode = self.proof.unwrap_or_default();
