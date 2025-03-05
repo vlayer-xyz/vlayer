@@ -1,5 +1,5 @@
 source "$(dirname "${BASH_SOURCE[0]}")/io.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/contracts.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/build-contracts.sh"
 
 
 function build_package () {
@@ -11,11 +11,11 @@ function build_package () {
   echo "::endgroup::Building ${1}"
 }
 
-function build_sdk() {
+function build-sdk() {
   build_package sdk
 }
 
-function build_sdk_hooks() {
+function build-sdk_hooks() {
   build_package sdk-hooks
 }
 
@@ -26,8 +26,8 @@ function build_react_sdk_with_deps() {
 
   build_all_contracts
 
-  build_sdk
-  build_sdk_hooks
+  build-sdk
+  build-sdk_hooks
 
   echo "::endgroup::Building react sdk with dependencies"
 }
