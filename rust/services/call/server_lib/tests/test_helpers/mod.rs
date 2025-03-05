@@ -102,6 +102,7 @@ impl Context {
         self.client.deploy_contract().await
     }
 
+    #[allow(unused_mut)]
     pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: &GuestElf) -> Server {
         let gas_meter_config = self
             .gas_meter_server
