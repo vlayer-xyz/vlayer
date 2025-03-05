@@ -1,4 +1,5 @@
 use axum::http::StatusCode;
+use ethers::types::U256;
 use serde_json::json;
 use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
 
@@ -50,7 +51,7 @@ mod server_tests {
             let call_elf = GuestElf::new([0; 8], &[]);
             let chain_elf = GuestElf::new([1; 8], &[]);
             let ctx = Context::default();
-            let app = ctx.server(call_elf, &chain_elf);
+            let app = ctx.server(&call_elf, &chain_elf);
 
             let req = rpc_body("v_versions", &json!([]));
             let response = app.post("/", &req).await;
@@ -68,7 +69,6 @@ mod server_tests {
     }
 
     mod v_call {
-        use ethers::types::U256;
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
@@ -227,7 +227,7 @@ mod server_tests {
         use call_server_lib::{v_call::CallHash, v_get_proof_receipt::State};
         use ethers::{
             abi::AbiEncode,
-            types::{Bytes, Uint8, H160, U256},
+            types::{Bytes, Uint8, H160},
         };
         use serde_json::Value;
         use server_utils::function_selector;
@@ -514,6 +514,132 @@ mod server_tests {
 
             let hash = get_hash(&app, &contract, &call_data).await;
             get_proof_result(&app, hash).await;
+
+            ctx.assert_gas_meter();
+        }
+    }
+
+    #[cfg(feature = "jwt")]
+    mod jwt {
+        use assert_json_diff::assert_json_eq;
+        use call_server_lib::jwt::{Algorithm, Config as JwtConfig, DecodingKey};
+        use jsonwebtoken::{encode, get_current_timestamp, EncodingKey, Header};
+        use server_utils::jwt::Claims;
+        use test_helpers::mock::Server;
+
+        use super::*;
+
+        const SECRET: &[u8] = b"deadbeef";
+
+        fn jwt_config() -> JwtConfig {
+            JwtConfig::new(DecodingKey::from_secret(SECRET), Algorithm::default())
+        }
+
+        #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
+        fn token(expires_in: i64, subject: &str) -> String {
+            let key = EncodingKey::from_secret(SECRET);
+            let ts = get_current_timestamp() as i64 + expires_in;
+            let claims =
+                Claims::new("api.vlayer.xyz".to_string(), 443, ts as u64, subject.to_string());
+            encode(&Header::default(), &claims, &key).unwrap()
+        }
+
+        fn default_app() -> Server {
+            Context::default()
+                .with_jwt_config(jwt_config())
+                .server(call_guest_elf(), chain_guest_elf())
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn checks_for_valid_token() {
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post("/", &req).await;
+
+            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "Invalid token" })
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn accepts_requests_with_valid_token() {
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app
+                .post_with_bearer_auth("/", &req, &token(60, "1234"))
+                .await;
+
+            assert_eq!(StatusCode::OK, resp.status());
+            assert_jrpc_err(resp, -32601, "Method `dummy` not found").await;
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn rejects_requests_with_expired_token() {
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app
+                .post_with_bearer_auth("/", &req, &token(-120, "1234"))
+                .await;
+
+            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "ExpiredSignature" })
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn rejects_requests_with_tampered_with_token() {
+            let key = EncodingKey::from_secret(b"beefdead");
+            let ts = get_current_timestamp() + 1000;
+            let claims = Claims::new("localhost".to_string(), 80, ts, "1234".to_string());
+            let token = encode(&Header::default(), &claims, &key).unwrap();
+
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post_with_bearer_auth("/", &req, &token).await;
+
+            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "InvalidSignature" })
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn passes_subject_to_the_gas_meter() {
+            const EXPECTED_HASH: &str =
+                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+            const SUBJECT: &str = "1234";
+
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_bearer_auth(SUBJECT)
+                .with_params(allocate_gas_body(EXPECTED_HASH), false)
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            let ctx = Context::default()
+                .with_gas_meter_server(gas_meter_server)
+                .with_jwt_config(jwt_config());
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = v_call_body(contract.address(), &call_data);
+            let response = app
+                .post_with_bearer_auth("/", &req, &token(60, SUBJECT))
+                .await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
 
             ctx.assert_gas_meter();
         }

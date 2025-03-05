@@ -1,7 +1,7 @@
 use jsonrpsee::{IntoResponse, ResponsePayload};
 use serde::{Deserialize, Serialize};
 
-use super::SharedConfig;
+use super::Config;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Versions {
@@ -18,10 +18,10 @@ impl IntoResponse for Versions {
     }
 }
 
-pub fn v_versions(config: &SharedConfig) -> Versions {
+pub fn v_versions(config: &Config) -> Versions {
     Versions {
         call_guest_id: config.call_guest_id_hex(),
         chain_guest_id: config.chain_guest_id_hex(),
-        api_version: config.api_version(),
+        api_version: config.semver.clone(),
     }
 }

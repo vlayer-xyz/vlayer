@@ -1,6 +1,8 @@
 use std::time::Duration;
 
-use call_server_lib::{ConfigBuilder, ProofMode};
+#[cfg(feature = "jwt")]
+use call_server_lib::jwt::Config as JwtConfig;
+use call_server_lib::{config::AuthMode, ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
 use ethers::types::{Bytes, H160};
@@ -43,8 +45,8 @@ pub fn rpc_body(method: &str, params: &Value) -> Value {
     })
 }
 
-pub(crate) fn call_guest_elf() -> GuestElf {
-    guest_wrapper::CALL_GUEST_ELF.clone()
+pub(crate) fn call_guest_elf() -> &'static GuestElf {
+    &guest_wrapper::CALL_GUEST_ELF
 }
 
 pub(crate) fn chain_guest_elf() -> &'static GuestElf {
@@ -58,17 +60,34 @@ pub(crate) struct Context {
     client: Client,
     anvil: Anvil,
     gas_meter_server: Option<GasMeterServer>,
+    auth_mode: AuthMode,
+    #[cfg(feature = "jwt")]
+    jwt_config: Option<JwtConfig>,
 }
 
 impl Context {
     pub(crate) fn default() -> Self {
         let anvil = Anvil::start();
         let client = anvil.setup_client();
-        Self::new(client, anvil, None)
+        Self::new(
+            client,
+            anvil,
+            None,
+            AuthMode::default(),
+            #[cfg(feature = "jwt")]
+            None,
+        )
     }
 
     pub(crate) fn with_gas_meter_server(mut self, gas_meter_server: GasMeterServer) -> Self {
         self.gas_meter_server = Some(gas_meter_server);
+        self
+    }
+
+    #[cfg(feature = "jwt")]
+    pub(crate) fn with_jwt_config(mut self, jwt_config: JwtConfig) -> Self {
+        self.jwt_config = Some(jwt_config);
+        self.auth_mode = AuthMode::Jwt;
         self
     }
 
@@ -83,17 +102,28 @@ impl Context {
         self.client.deploy_contract().await
     }
 
-    pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: &GuestElf) -> Server {
+    #[allow(unused_mut)]
+    pub(crate) fn server(&self, call_guest_elf: &GuestElf, chain_guest_elf: &GuestElf) -> Server {
         let gas_meter_config = self
             .gas_meter_server
             .as_ref()
             .map(GasMeterServer::as_gas_meter_config);
-        let chain_guest_ids = vec![chain_guest_elf.id].into_boxed_slice();
-        let config = ConfigBuilder::new(call_guest_elf, chain_guest_ids, API_VERSION.into())
+        let chain_guest_ids = vec![chain_guest_elf.id];
+        let mut builder = ConfigBuilder::default()
+            .with_call_guest_elf(call_guest_elf)
+            .with_chain_guest_ids(chain_guest_ids)
+            .with_semver(API_VERSION)
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
             .with_proof_mode(ProofMode::Fake)
             .with_gas_meter_config(gas_meter_config)
-            .build();
+            .with_auth_mode(self.auth_mode);
+
+        #[cfg(feature = "jwt")]
+        {
+            builder = builder.with_jwt_config(self.jwt_config.clone());
+        }
+
+        let config = builder.build().unwrap();
         Server::new(config)
     }
 }
