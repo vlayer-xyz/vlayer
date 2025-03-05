@@ -7,7 +7,7 @@ pub use crate::proving::RawData;
 use crate::{
     chain_proof::{self, Config as ChainProofConfig, Error as ChainProofError},
     gas_meter::Client as GasMeterClient,
-    handlers::SharedProofs,
+    handlers::State as AppState,
     metrics::Metrics,
     preflight::{self, Error as PreflightError},
     proving::{self, Error as ProvingError},
@@ -69,11 +69,13 @@ pub struct Status {
 }
 
 fn set_state(
-    proofs: &SharedProofs,
+    app_state: &AppState,
     call_hash: CallHash,
     state: State,
 ) -> Entry<'_, CallHash, Status> {
-    proofs.entry(call_hash).and_modify(|res| res.state = state)
+    app_state
+        .entry(call_hash)
+        .and_modify(|res| res.state = state)
 }
 
 fn set_metrics(
@@ -88,7 +90,7 @@ pub async fn generate(
     call: EngineCall,
     host: Host,
     gas_meter_client: impl GasMeterClient,
-    proofs: SharedProofs,
+    state: AppState,
     call_hash: CallHash,
     chain_proof_config: Option<ChainProofConfig>,
 ) {
@@ -98,18 +100,18 @@ pub async fn generate(
 
     info!("Generating proof");
 
-    set_state(&proofs, call_hash, State::ChainProofPending);
+    set_state(&state, call_hash, State::ChainProofPending);
 
     match chain_proof::await_ready(&host, chain_proof_config)
         .await
         .map_err(Error::ChainProof)
     {
         Ok(()) => {
-            set_state(&proofs, call_hash, State::PreflightPending);
+            set_state(&state, call_hash, State::PreflightPending);
         }
         Err(err) => {
             error!("Chain proof failed with error: {err}");
-            set_state(&proofs, call_hash, State::ChainProofError(err.into()));
+            set_state(&state, call_hash, State::ChainProofError(err.into()));
             return;
         }
     }
@@ -120,13 +122,13 @@ pub async fn generate(
             .map_err(Error::Preflight)
         {
             Ok(res) => {
-                let entry = set_state(&proofs, call_hash, State::ProvingPending);
+                let entry = set_state(&state, call_hash, State::ProvingPending);
                 set_metrics(entry, metrics);
                 res
             }
             Err(err) => {
                 error!("Preflight failed with error: {err}");
-                let entry = set_state(&proofs, call_hash, State::PreflightError(err.into()));
+                let entry = set_state(&state, call_hash, State::PreflightError(err.into()));
                 set_metrics(entry, metrics);
                 return;
             }
@@ -143,12 +145,12 @@ pub async fn generate(
     .map_err(Error::Proving)
     {
         Ok(raw_data) => {
-            let entry = set_state(&proofs, call_hash, State::Done(raw_data.into()));
+            let entry = set_state(&state, call_hash, State::Done(raw_data.into()));
             set_metrics(entry, metrics);
         }
         Err(err) => {
             error!("Proving failed with error: {err}");
-            let entry = set_state(&proofs, call_hash, State::ProvingError(err.into()));
+            let entry = set_state(&state, call_hash, State::ProvingError(err.into()));
             set_metrics(entry, metrics);
         }
     };

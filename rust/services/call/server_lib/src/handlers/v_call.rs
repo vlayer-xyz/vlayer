@@ -4,7 +4,7 @@ use provider::Address;
 use tracing::{info, info_span, Instrument};
 use types::{Call, CallContext, CallHash, Result as VCallResult};
 
-use super::{Params, SharedConfig, SharedProofs};
+use super::{Params, State};
 use crate::{
     gas_meter,
     proof::{self, Status as ProofStatus},
@@ -14,12 +14,17 @@ use crate::{
 pub mod types;
 
 pub async fn v_call(
-    config: SharedConfig,
-    state: SharedProofs,
+    state: State,
     call: Call,
     context: CallContext,
     params: Params,
 ) -> VCallResult<CallHash> {
+    let Params {
+        config,
+        user_token,
+        req_id,
+    } = params;
+
     let call = call.parse_and_validate(config.max_calldata_size())?;
 
     let host = build_host(&config, context.chain_id, call.to).await?;
@@ -28,8 +33,7 @@ pub async fn v_call(
     info!(hash = tracing::field::display(call_hash), "Call");
 
     let gas_meter_client =
-        gas_meter::init(config.gas_meter_config(), call_hash, params.user_token, call.gas_limit)
-            .await?;
+        gas_meter::init(config.gas_meter_config(), call_hash, user_token, call.gas_limit).await?;
 
     let mut found_existing = true;
     state.entry(call_hash).or_insert_with(|| {
@@ -39,7 +43,7 @@ pub async fn v_call(
 
     if !found_existing {
         tokio::spawn(async move {
-            let span = info_span!("http", id = params.req_id.to_string());
+            let span = info_span!("http", id = req_id.to_string());
             proof::generate(
                 call,
                 host,

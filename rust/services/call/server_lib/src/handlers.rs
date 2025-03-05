@@ -16,8 +16,9 @@ pub mod v_call;
 pub mod v_get_proof_receipt;
 pub mod v_versions;
 
-#[derive(new, Debug, Clone)]
+#[derive(new, Clone)]
 pub struct Params {
+    pub config: Config,
     pub user_token: Option<UserToken>,
     pub req_id: RequestId,
 }
@@ -31,29 +32,14 @@ pub trait Rpc {
     #[method(name = "v_getProofReceipt")]
     async fn v_get_proof_receipt(&self, hash: CallHash) -> VGetProofReceiptResult<CallResult>;
 
-    #[method(name = "v_versions")]
+    #[method(name = "v_versions", with_extensions)]
     async fn v_versions(&self) -> Versions;
 }
 
 #[derive(Deref, DerefMut, Default)]
 pub struct Proofs(DashMap<CallHash, ProofStatus>);
 
-pub type SharedConfig = Arc<Config>;
-pub type SharedProofs = Arc<Proofs>;
-
-#[derive(Clone)]
-pub struct State {
-    config: Arc<Config>,
-    proofs: Arc<Proofs>,
-}
-
-impl State {
-    pub fn new(cfg: Config) -> Self {
-        let config = Arc::new(cfg);
-        let proofs = Arc::new(Proofs::default());
-        Self { config, proofs }
-    }
-}
+pub type State = Arc<Proofs>;
 
 #[async_trait]
 impl RpcServer for State {
@@ -66,14 +52,17 @@ impl RpcServer for State {
         let params = extensions
             .get::<Params>()
             .expect("params should be extracted in the handler");
-        v_call::v_call(self.config.clone(), self.proofs.clone(), call, ctx, params.clone()).await
+        v_call::v_call(self.clone(), call, ctx, params.clone()).await
     }
 
     async fn v_get_proof_receipt(&self, hash: CallHash) -> VGetProofReceiptResult<CallResult> {
-        v_get_proof_receipt::v_get_proof_receipt(&self.proofs, hash)
+        v_get_proof_receipt::v_get_proof_receipt(self, hash)
     }
 
-    async fn v_versions(&self) -> Versions {
-        v_versions::v_versions(&self.config)
+    async fn v_versions(&self, extensions: &Extensions) -> Versions {
+        let params = extensions
+            .get::<Params>()
+            .expect("params should be extracted in the handler");
+        v_versions::v_versions(&params.config)
     }
 }

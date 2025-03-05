@@ -38,19 +38,18 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
 
 #[derive(new, Clone)]
 pub(super) struct State {
-    #[allow(dead_code)]
     pub config: Config,
     pub router: JrpcRouter<AppState>,
 }
 
 async fn handle(
     user_token: Option<TypedHeader<Authorization<Bearer>>>,
-    AxumState(State { router, .. }): AxumState<State>,
+    AxumState(State { router, config }): AxumState<State>,
     Extension(req_id): Extension<RequestId>,
     body: Bytes,
 ) -> impl IntoResponse {
     let user_token: Option<UserToken> = user_token.map(|TypedHeader(user_token)| user_token.into());
-    let params = Params::new(user_token, req_id);
+    let params = Params::new(config, user_token, req_id);
     router.handle_request_with_params(body, params).await
 }
 
@@ -60,7 +59,7 @@ pub fn server(config: Config) -> Router {
         AuthMode::Jwt => post(crate::jwt::handle),
         AuthMode::Token => post(handle),
     };
-    let router = State::new(config.clone(), JrpcRouter::new(AppState::new(config).into_rpc()));
+    let router = State::new(config, JrpcRouter::new(AppState::default().into_rpc()));
 
     Router::new()
         .route("/", handler)
