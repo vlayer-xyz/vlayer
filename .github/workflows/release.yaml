@@ -227,9 +227,14 @@ jobs:
         working-directory: packages/sdk
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
-          PACKAGE_NAME=$(npm pack)
-          npm publish --access public ${PACKAGE_NAME}
+          PACKAGE_TARBALL_NAME=$(npm pack)
+          if npm show "@vlayer/sdk@${VLAYER_BUILD}" > /dev/null 2>&1; then
+            echo "Version $VLAYER_BUILD already exists. Skipping publish."
+          else
+            npm publish --access public ${PACKAGE_TARBALL_NAME}
+          fi
 
   publish-react-hooks-to-npm:
     if: github.repository == 'vlayer-xyz/vlayer'
@@ -259,9 +264,14 @@ jobs:
         working-directory: packages/sdk-hooks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
-          PACKAGE_NAME=$(npm pack)
-          npm publish --access public ${PACKAGE_NAME}
+          PACKAGE_TARBALL_NAME=$(npm pack)
+          if npm show "@vlayer/react@${VLAYER_BUILD}" > /dev/null 2>&1; then
+            echo "Version $VLAYER_BUILD already exists. Skipping publish."
+          else
+            npm publish --access public ${PACKAGE_TARBALL_NAME}
+          fi
 
   push-docker-image:
     if: github.repository == 'vlayer-xyz/vlayer'
