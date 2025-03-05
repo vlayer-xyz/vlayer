@@ -38,7 +38,7 @@ jobs:
 
       - name: Run workspace rust tests
         run: |
-          cargo test --workspace --locked
+          cargo test --workspace --locked --all-features
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUST_LOG: info
