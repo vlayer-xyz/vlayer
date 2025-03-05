@@ -47,9 +47,14 @@ jobs:
   build-binaries:
     name: Build binaries
     needs: changes
-    if: needs.changes.outputs.rust == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.ts == 'true'
     runs-on: aws-linux-medium
     steps:
+      - name: Check if E2E tests are needed
+        run: |
+          if [[ "${{ needs.changes.outputs.ts }}" != "true" && "${{ needs.changes.outputs.contracts }}" != "true" && "${{ needs.changes.outputs.rust }}" != "true" ]]; then
+            echo "No relevant files changed. Skipping tests."
+            exit 0
+          fi
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
