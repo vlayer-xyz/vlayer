@@ -518,4 +518,32 @@ mod server_tests {
             ctx.assert_gas_meter();
         }
     }
+
+    #[cfg(feature = "jwt")]
+    mod jwt {
+        use assert_json_diff::assert_json_eq;
+        use call_server_lib::jwt::{Algorithm, Config as JwtConfig, DecodingKey};
+
+        use super::*;
+
+        const SECRET: &[u8] = b"deadbeef";
+
+        fn jwt_config() -> JwtConfig {
+            JwtConfig::new(DecodingKey::from_secret(SECRET), Algorithm::default())
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn checks_for_valid_jwt_token() {
+            let ctx = Context::default().with_jwt_config(jwt_config());
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post("/", &req).await;
+
+            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "Invalid token" })
+            );
+        }
+    }
 }
