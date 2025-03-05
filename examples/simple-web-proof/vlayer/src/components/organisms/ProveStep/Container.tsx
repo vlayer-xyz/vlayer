@@ -15,7 +15,7 @@ export const ProveStep = () => {
 
   useEffect(() => {
     if (webProof) {
-      callProver([webProof, address]);
+      callProver([webProof, address || "0x9999999999999999999999999999999999999999"]);
     }
   }, [webProof]);
 
