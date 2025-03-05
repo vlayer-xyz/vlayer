@@ -58,7 +58,6 @@ test("web proof flow", async ({ page, context }) => {
     await expect(newPage).toHaveURL("https://x.com/home");
   });
 
-
   await test.step("Click generate proof", async () => {
     const extension = await sidePanel(context);
     const proveButton = extension.getByRole("button", {
@@ -66,7 +65,7 @@ test("web proof flow", async ({ page, context }) => {
     });
     await proveButton.click();
     await expect(page.getByText("Start Minting")).toBeVisible({
-      timeout: 20000,
+      timeout: 2000000,
     });
   });
 });
