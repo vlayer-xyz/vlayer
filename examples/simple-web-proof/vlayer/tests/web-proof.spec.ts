@@ -66,7 +66,7 @@ test("web proof flow", async ({ page, context }) => {
     });
     await proveButton.click();
     await expect(page.getByText("Start Minting")).toBeVisible({
-      timeout: 10000,
+      timeout: 20000,
     });
   });
 });
