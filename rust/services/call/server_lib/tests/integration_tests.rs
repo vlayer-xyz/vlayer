@@ -525,6 +525,7 @@ mod server_tests {
         use call_server_lib::jwt::{Algorithm, Config as JwtConfig, DecodingKey};
         use jsonwebtoken::{encode, get_current_timestamp, EncodingKey, Header};
         use server_utils::jwt::Claims;
+        use test_helpers::mock::Server;
 
         use super::*;
 
@@ -543,10 +544,15 @@ mod server_tests {
             encode(&Header::default(), &claims, &key).unwrap()
         }
 
+        fn default_app() -> Server {
+            Context::default()
+                .with_jwt_config(jwt_config())
+                .server(call_guest_elf(), chain_guest_elf())
+        }
+
         #[tokio::test(flavor = "multi_thread")]
-        async fn checks_for_valid_jwt_token() {
-            let ctx = Context::default().with_jwt_config(jwt_config());
-            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+        async fn checks_for_valid_token() {
+            let app = default_app();
             let req = rpc_body("dummy", &json!([]));
             let resp = app.post("/", &req).await;
 
@@ -558,9 +564,8 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn accepts_requests_with_valid_jwt_token() {
-            let ctx = Context::default().with_jwt_config(jwt_config());
-            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+        async fn accepts_requests_with_valid_token() {
+            let app = default_app();
             let req = rpc_body("dummy", &json!([]));
             let resp = app
                 .post_with_bearer_auth("/", &req, &token(60, "1234"))
@@ -571,9 +576,8 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn rejects_requests_with_expired_jwt_token() {
-            let ctx = Context::default().with_jwt_config(jwt_config());
-            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+        async fn rejects_requests_with_expired_token() {
+            let app = default_app();
             let req = rpc_body("dummy", &json!([]));
             let resp = app
                 .post_with_bearer_auth("/", &req, &token(-120, "1234"))
@@ -585,5 +589,28 @@ mod server_tests {
                 json!({ "error": "ExpiredSignature" })
             );
         }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn rejects_requests_with_tampered_with_token() {
+            let key = EncodingKey::from_secret(b"beefdead");
+            let ts = get_current_timestamp() + 1000;
+            let claims = Claims::new("localhost".to_string(), 80, ts, "1234".to_string());
+            let token = encode(&Header::default(), &claims, &key).unwrap();
+
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post_with_bearer_auth("/", &req, &token).await;
+
+            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "InvalidSignature" })
+            );
+        }
+
+        // #[tokio::test(flavor = "multi_thread")]
+        // async fn passes_subject_to_the_gas_meter() {
+
+        // }
     }
 }
