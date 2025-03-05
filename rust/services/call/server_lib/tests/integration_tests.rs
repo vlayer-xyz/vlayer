@@ -1,4 +1,5 @@
 use axum::http::StatusCode;
+use ethers::types::U256;
 use serde_json::json;
 use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
 
@@ -68,7 +69,6 @@ mod server_tests {
     }
 
     mod v_call {
-        use ethers::types::U256;
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
@@ -227,7 +227,7 @@ mod server_tests {
         use call_server_lib::{v_call::CallHash, v_get_proof_receipt::State};
         use ethers::{
             abi::AbiEncode,
-            types::{Bytes, Uint8, H160, U256},
+            types::{Bytes, Uint8, H160},
         };
         use serde_json::Value;
         use server_utils::function_selector;
@@ -608,9 +608,40 @@ mod server_tests {
             );
         }
 
-        // #[tokio::test(flavor = "multi_thread")]
-        // async fn passes_subject_to_the_gas_meter() {
+        #[tokio::test(flavor = "multi_thread")]
+        async fn passes_subject_to_the_gas_meter() {
+            const EXPECTED_HASH: &str =
+                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+            const SUBJECT: &str = "1234";
 
-        // }
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_bearer_auth(SUBJECT)
+                .with_params(allocate_gas_body(EXPECTED_HASH), false)
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            let ctx = Context::default()
+                .with_gas_meter_server(gas_meter_server)
+                .with_jwt_config(jwt_config());
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = v_call_body(contract.address(), &call_data);
+            let response = app
+                .post_with_bearer_auth("/", &req, &token(60, SUBJECT))
+                .await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
+
+            ctx.assert_gas_meter();
+        }
     }
 }
