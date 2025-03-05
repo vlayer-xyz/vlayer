@@ -2,7 +2,9 @@ name: Build SDK
 on:
   pull_request:
     paths-ignore:
-      - "!book/**"
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
   merge_group:
   push:
     branches:

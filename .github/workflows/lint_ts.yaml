@@ -2,6 +2,8 @@ name: Lint TS
 on:
   pull_request:
     paths-ignore:
+      - "README.md"
+      - "LICENSE"
       - "book/**"
   merge_group:
   push:
