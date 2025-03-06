@@ -47,5 +47,5 @@ export default defineConfig({
         stderr: "pipe",
         timeout: 120_000,
       },
-  timeout: 1200_000,
+  timeout: 120_000,
 });
