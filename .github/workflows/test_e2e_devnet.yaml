@@ -15,9 +15,9 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      rust: ${{ steps.filter.outputs.rust || 'false' }}
-      ts: ${{ steps.filter.outputs.ts || 'false' }}
-      contracts: ${{ steps.filter.outputs.contracts || 'false' }}
+      rust: ${{ steps.filter.outputs.rust != '' && steps.filter.outputs.rust || 'false' }}
+      ts: ${{ steps.filter.outputs.ts != '' && steps.filter.outputs.ts || 'false' }}
+      contracts: ${{ steps.filter.outputs.contracts != '' && steps.filter.outputs.contracts || 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,7 +48,6 @@ jobs:
     name: Build binaries
     needs: changes
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
