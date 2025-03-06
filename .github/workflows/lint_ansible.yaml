@@ -29,7 +29,9 @@ jobs:
 
   lint-ansible:
     name: Lint Ansible
+    needs: changes
     runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Run ansible-lint

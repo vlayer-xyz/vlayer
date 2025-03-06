@@ -30,7 +30,9 @@ jobs:
 
   lint-bash:
     name: Lint Bash
+    needs: changes
     runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Run ShellCheck
