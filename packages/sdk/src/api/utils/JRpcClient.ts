@@ -11,7 +11,10 @@ export class Client {
     this.token = token;
   }
 
-  public async send(method: string, params: any): Promise<object> {
+  public async send(
+    method: string,
+    params: object[] | object,
+  ): Promise<object> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
