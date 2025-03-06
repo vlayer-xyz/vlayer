@@ -24,6 +24,7 @@ runs:
 
     - name: Make downloaded binaries executable
       run: sudo chmod +x target/debug/*
+      shell: bash
 
     - name: Install TypeScript prerequisites
       uses: ./.github/actions/ts-prerequisites
@@ -33,17 +34,20 @@ runs:
 
     - name: Mock ImageId.sol
       run: ./bash/mock-imageid.sh
+      shell: bash
 
     - name: Install contracts' dependencies
       working-directory: ./contracts/vlayer
       run: forge soldeer install
+      shell: bash
 
-    - name: Run e2e test
+    - name: Run e2e test for ${{ inputs.example }}
       env:
         VLAYER_TMP_DIR: ./artifacts
         BUILD_BINARIES: 0
         EXAMPLE: ${{ inputs.example }}
       run: bash/e2e-test.sh
+      shell: bash
 
     - name: Upload logs for previewing
       uses: actions/upload-artifact@v4
