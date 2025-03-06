@@ -33,7 +33,7 @@ jobs:
               - '.github/workflows/lint_rust.yaml'
               - '.github/actions/rust-prerequisites/**'
               - '.github/actions/contracts-prerequisites/**'
-  
+
   lint-rust:
     name: Lint Rust
     needs: changes

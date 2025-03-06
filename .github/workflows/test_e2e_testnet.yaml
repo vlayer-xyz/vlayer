@@ -138,4 +138,3 @@ jobs:
         uses: ./.github/actions/test-e2-testnet
         with:
           example: "simple-time-travel"
-  
