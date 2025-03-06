@@ -89,7 +89,7 @@ jobs:
         with:
           example: "simple"
 
-  test-e2e-devnet-web-proof:
+  test-e2e-devnet-simple-web-proof:
     name: E2E test against devnet (web-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
@@ -102,7 +102,7 @@ jobs:
         with:
           example: "simple-web-proof"
 
-  test-e2e-devnet-email-proof:
+  test-e2e-devnet-simple-email-proof:
     name: E2E test against devnet (email-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
@@ -115,7 +115,7 @@ jobs:
         with:
           example: "simple-email-proof"
 
-  test-e2e-devnet-teleport:
+  test-e2e-devnet-simple-teleport:
     name: E2E test against devnet (teleport)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
@@ -128,7 +128,7 @@ jobs:
         with:
           example: "simple-teleport"
 
-  test-e2e-devnet-time-travel:
+  test-e2e-devnet-simple-time-travel:
     name: E2E test against devnet (time-travel)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
