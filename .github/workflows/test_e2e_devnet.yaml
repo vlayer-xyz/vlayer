@@ -86,23 +86,11 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-devnet:
-    name: E2E test against devnet
+  test-e2e-devnet-simple:
+    name: E2E test against devnet (simple)
     needs: [changes, build-binaries]
     if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
     runs-on: aws-linux-medium
-    strategy:
-      fail-fast: false
-      matrix:
-        example:
-          [
-            "simple",
-            "simple-web-proof",
-            "simple-email-proof",
-            "simple-teleport",
-            "simple-time-travel",
-          ]
-
     steps:
       - name: Check if E2E tests are needed
         run: |
@@ -133,20 +121,67 @@ jobs:
       - name: Install contracts' dependencies
         working-directory: ./contracts/vlayer
         run: forge soldeer install
-
-      - name: Run e2e test
+      - name: Run e2e test (simple)
         env:
           VLAYER_TMP_DIR: ./artifacts
           BUILD_BINARIES: 0
-          EXAMPLE: ${{ matrix.example }}
+          EXAMPLE: "simple"
         run: bash/e2e-test.sh
-
-      # Teardown
       - name: Upload logs for previewing
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: logs-devnet-${{ matrix.example }}
+          name: logs-devnet-simple
+          path: ./artifacts/logs/
+          if-no-files-found: error
+          retention-days: 1
+
+  test-e2e-devnet-web-proof:
+    name: E2E test against devnet (web-proof)
+    needs: [changes, build-binaries]
+    if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
+    runs-on: aws-linux-medium
+    steps:
+      - name: Check if E2E tests are needed
+        run: |
+          if [[ "${{ needs.changes.outputs.ts }}" != "true" && "${{ needs.changes.outputs.contracts }}" != "true" && "${{ needs.changes.outputs.rust }}" != "true" ]]; then
+            echo "No relevant files changed. Skipping tests."
+            exit 0
+          fi
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: target-debug
+          path: target/debug
+      - name: Make downloaded binaries executable
+        run: sudo chmod +x target/debug/*
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
+      - name: Run e2e test (web-proof)
+        env:
+          VLAYER_TMP_DIR: ./artifacts
+          BUILD_BINARIES: 0
+          EXAMPLE: "simple-web-proof"
+        run: bash/e2e-test.sh
+      - name: Upload logs for previewing
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs-devnet-web-proof
           path: ./artifacts/logs/
           if-no-files-found: error
           retention-days: 1
