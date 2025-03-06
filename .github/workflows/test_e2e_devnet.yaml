@@ -69,7 +69,7 @@ jobs:
           mv target/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
 
       - name: Push binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: target-debug
           path: target_debug
