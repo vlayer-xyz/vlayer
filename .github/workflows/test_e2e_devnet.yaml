@@ -88,9 +88,8 @@ jobs:
 
   test-e2e-devnet-simple:
     name: E2E test against devnet (simple)
-    needs: [build-binaries]
+    needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
     steps:
       - name: Run E2E Test
         uses: ./.github/actions/e2e-test/devnet
