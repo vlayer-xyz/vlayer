@@ -1,7 +1,3 @@
 export const CollectEmail = () => {
-  return (
-    <>
-      <div className="w-full">Waiting</div>
-    </>
-  );
+  return <div className="w-full">Waiting</div>;
 };

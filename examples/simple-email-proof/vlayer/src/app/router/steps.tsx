@@ -7,19 +7,19 @@ import {
   SuccessContainer,
 } from "../../pages";
 import React from "react";
-import { STEP_KIND, stepsMeta, StepMeta } from "./types";
+import { StepKind, stepsMeta, StepMeta } from "./types";
 
 // Define a component mapping type
-export type StepComponentMap = Record<STEP_KIND, React.ComponentType>;
+export type StepComponentMap = Record<StepKind, React.ComponentType>;
 
 // Map step kinds to their respective components
 export const stepComponents: StepComponentMap = {
-  [STEP_KIND.WELCOME]: WelcomePage,
-  [STEP_KIND.CONNECT_WALLET]: ConnectWallet,
-  [STEP_KIND.SEND_EMAIL]: SendEmailContainer,
-  [STEP_KIND.COLLECT_EMAIL]: CollectEmailContainer,
-  [STEP_KIND.MINT_NFT]: MintNFTContainer,
-  [STEP_KIND.SUCCESS]: SuccessContainer,
+  [StepKind.welcome]: WelcomePage,
+  [StepKind.connectWallet]: ConnectWallet,
+  [StepKind.sendEmail]: SendEmailContainer,
+  [StepKind.collectEmail]: CollectEmailContainer,
+  [StepKind.mintNft]: MintNFTContainer,
+  [StepKind.success]: SuccessContainer,
 };
 
 // Create a complete step structure that combines metadata with components
@@ -28,7 +28,7 @@ export type Step = StepMeta & {
 };
 
 // Get complete step data with component
-export const getStep = (kind: STEP_KIND): Step => {
+export const getStep = (kind: StepKind): Step => {
   const meta = stepsMeta[kind];
   if (!meta) {
     throw new StepNotFoundError(kind);
@@ -44,7 +44,7 @@ export const getStep = (kind: STEP_KIND): Step => {
 // Get all steps as an array when needed
 export const getAllSteps = (): Step[] => {
   return Object.entries(stepsMeta).map(([kindStr, meta]) => {
-    const kind = Number(kindStr) as STEP_KIND;
+    const kind = Number(kindStr) as StepKind;
     return {
       ...meta,
       kind,
@@ -54,13 +54,13 @@ export const getAllSteps = (): Step[] => {
 };
 
 export class StepNotFoundError extends Error {
-  constructor(kind: STEP_KIND) {
+  constructor(kind: StepKind) {
     super(`Step with kind ${kind} not found`);
     this.name = "StepNotFoundError";
   }
 }
 
-export const getStepPath = (kind: STEP_KIND): string => {
+export const getStepPath = (kind: StepKind): string => {
   const meta = stepsMeta[kind];
   if (!meta) {
     throw new StepNotFoundError(kind);

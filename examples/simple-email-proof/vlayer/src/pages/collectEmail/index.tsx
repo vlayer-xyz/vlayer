@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router";
 import { useEffect } from "react";
 import useExampleInbox from "../../shared/hooks/useExampleInbox";
 import { getStepPath } from "../../app/router/steps";
-import { STEP_KIND } from "../../app/router/types";
+import { StepKind } from "../../app/router/types";
 
 export const CollectEmailContainer = () => {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export const CollectEmailContainer = () => {
 
   useEffect(() => {
     if (emlFetched) {
-      navigate(`/${getStepPath(STEP_KIND.MINT_NFT)}`);
+      navigate(`/${getStepPath(StepKind.mintNft)}`);
     }
   }, [emlFetched]);
 
