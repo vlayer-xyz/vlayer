@@ -36,15 +36,16 @@ console.log("Proving...");
 const vlayer = createVlayerClient({
   url: proverUrl,
 });
+const token = config.token;
 const hash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "main",
   chainId: chain.id,
   args: [await preverifyEmail(mimeEmail, dnsServiceUrl), john.address],
-  token: config.token,
+  token,
 });
-const result = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult({ hash, token });
 
 console.log("Verifying...");
 

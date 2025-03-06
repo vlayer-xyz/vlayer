@@ -43,15 +43,16 @@ const { prover, verifier } = await deployVlayerContracts({
 });
 
 console.log("Proving...");
+const token = config.token;
 const proofHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "crossChainBalanceOf",
   args: [process.env.TOKEN_HOLDER as Address, tokensToCheck],
   chainId: chain.id,
-  token: config.token,
+  token,
 });
-const result = await vlayer.waitForProvingResult({ hash: proofHash });
+const result = await vlayer.waitForProvingResult({ hash: proofHash, token });
 console.log("Proof:", result[0]);
 console.log("Verifying...");
 

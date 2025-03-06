@@ -28,6 +28,7 @@ writeEnvVariables(".env", {
 config = getConfig();
 const { chain, ethClient, account, proverUrl, confirmations } =
   await createContext(config);
+const token = config.token;
 
 const twitterUserAddress = account.address;
 const vlayer = createVlayerClient({
@@ -51,9 +52,9 @@ async function testSuccessProvingAndVerification() {
       twitterUserAddress,
     ],
     chainId: chain.id,
-    token: config.token,
+    token,
   });
-  const result = await vlayer.waitForProvingResult({ hash });
+  const result = await vlayer.waitForProvingResult({ hash, token });
   const [proof, twitterHandle, address] = result;
   console.log("Has Proof");
 
@@ -127,9 +128,9 @@ async function testFailedProving() {
         twitterUserAddress,
       ],
       chainId: chain.id,
-      token: config.token,
+      token,
     });
-    await vlayer.waitForProvingResult({ hash });
+    await vlayer.waitForProvingResult({ hash, token });
     throw new Error("Proving should have failed!");
   } catch (error) {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);

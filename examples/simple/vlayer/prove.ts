@@ -59,15 +59,16 @@ const vlayer = createVlayerClient({
   url: proverUrl,
 });
 
+const token = config.token;
 const hash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "balance",
   args: [john.address],
   chainId: chain.id,
-  token: config.token,
+  token,
 });
-const result = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult({ hash, token });
 const [proof, owner, balance] = result;
 
 if (!isAddress(owner)) {

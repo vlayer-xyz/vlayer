@@ -48,18 +48,19 @@ const vlayer = createVlayerClient({
   url: proverUrl,
 });
 
+const token = config.token;
 const provingHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
   args: [tokenOwner],
   chainId: ethClient.chain.id,
-  token: config.token,
+  token,
 });
 
 console.log("Waiting for proving result: ");
 
-const result = await vlayer.waitForProvingResult({ hash: provingHash });
+const result = await vlayer.waitForProvingResult({ hash: provingHash, token });
 
 console.log("Proof:", result[0]);
 console.log("Verifying...");
