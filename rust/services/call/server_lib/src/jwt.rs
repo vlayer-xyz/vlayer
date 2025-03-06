@@ -7,9 +7,7 @@ use derive_more::Deref;
 use derive_new::new;
 use serde::Deserialize;
 pub use server_utils::jwt::{Algorithm, DecodingKey};
-use server_utils::jwt::{
-    Claims, {ClaimsExtractor, Error as JwtError, State as JwtState},
-};
+use server_utils::jwt::{Claims, ClaimsExtractor, Error as JwtError, State as JwtState};
 
 use crate::{
     server::State,
