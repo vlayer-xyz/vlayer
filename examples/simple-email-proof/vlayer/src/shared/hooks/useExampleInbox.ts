@@ -3,17 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
-const EMAIL_SERVICE_URL =
-  "https://email-example-inbox.s3.us-east-2.amazonaws.com";
+const emailServiceUrl = import.meta.env.VITE_EMAIL_SERVICE_URL;
 
 const useExampleInbox = (emailId: string | undefined) => {
   const [emlFetched, setEmlFetched] = useState(false);
   const [, setEmlFile] = useLocalStorage("emlFile", "");
 
+  console.log("emailServiceUrl", emailServiceUrl);
+
   const { data, status } = useQuery({
     queryKey: ["receivedEmailEmlContent", emailId],
     queryFn: async () => {
-      const response = await fetch(`${EMAIL_SERVICE_URL}/${emailId}.eml`);
+      const response = await fetch(`${emailServiceUrl}/${emailId}.eml`);
       if (!response.ok) {
         throw new Error("Failed to fetch email");
       }
