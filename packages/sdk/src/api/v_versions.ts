@@ -1,13 +1,4 @@
-import debug from "debug";
-
-const log = debug("vlayer:v_versions");
-
-const v_versionsBody = {
-  method: "v_versions",
-  params: [],
-  id: 1,
-  jsonrpc: "2.0",
-};
+import { Client } from "./utils/JRpcClient";
 
 interface VVersionsResponseResult {
   call_guest_id: string;
@@ -23,19 +14,12 @@ export interface VVersionsResponse {
 
 export async function v_versions(
   url: string = "http://127.0.0.1:3000",
+  token?: string,
 ): Promise<VVersionsResponse> {
-  const response = await fetch(url, {
-    method: "POST",
-    body: JSON.stringify(v_versionsBody),
-    headers: { "Content-Type": "application/json" },
-  });
-  log("response", response);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  const response_json = await response.json();
-  assertResponseObject(response_json);
-  return response_json;
+  const client = new Client(url, token);
+  const response = await client.send("v_versions", {});
+  assertResponseObject(response);
+  return response;
 }
 
 function isFieldAString(
