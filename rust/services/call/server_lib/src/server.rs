@@ -14,40 +14,14 @@ use tower_http::{
 };
 use tracing::info;
 
+#[cfg(feature = "jwt")]
+use crate::jwt::handle;
+#[cfg(not(feature = "jwt"))]
+use crate::token::handle;
 use crate::{
     config::Config,
     handlers::{RpcServer, State as AppState},
 };
-
-#[cfg(feature = "jwt")]
-mod handle {
-    pub(super) use crate::jwt::handle;
-}
-
-#[cfg(not(feature = "jwt"))]
-mod handle {
-    use axum::{body::Bytes, extract::State as AxumState, response::IntoResponse, Extension};
-    use axum_extra::{
-        headers::{authorization::Bearer, Authorization},
-        TypedHeader,
-    };
-    use server_utils::RequestId;
-
-    use super::*;
-    use crate::{handlers::Params, user_token::Token as UserToken};
-
-    pub(super) async fn handle(
-        user_token: Option<TypedHeader<Authorization<Bearer>>>,
-        AxumState(State { router, config }): AxumState<State>,
-        Extension(req_id): Extension<RequestId>,
-        body: Bytes,
-    ) -> impl IntoResponse {
-        let user_token: Option<UserToken> =
-            user_token.map(|TypedHeader(user_token)| user_token.into());
-        let params = Params::new(config, user_token, req_id);
-        router.handle_request_with_params(body, params).await
-    }
-}
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
     let listener = TcpListener::bind(&config.socket_addr).await?;
@@ -67,7 +41,7 @@ pub(super) struct State {
 pub fn server(config: Config) -> Router {
     let router = State::new(config, JrpcRouter::new(AppState::default().into_rpc()));
     Router::new()
-        .route("/", post(handle::handle))
+        .route("/", post(handle))
         .route_layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .route_layer(RequestIdLayer)

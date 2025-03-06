@@ -1,6 +1,6 @@
 mod axum;
 
-pub use axum::{Algorithm, DecodingKey, Error, State};
+pub use axum::{Algorithm, ClaimsExtractor, DecodingKey, Error, State};
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 
