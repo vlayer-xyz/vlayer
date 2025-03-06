@@ -10,6 +10,7 @@
         "@vercel/analytics": "^1.4.1",
         "@vlayer/react": "workspace:*",
         "@vlayer/sdk": "workspace:*",
+        "debug": "^4.4.0",
         "react": "^18.3.1",
         "react-daisyui": "^5.0.5",
         "react-dom": "^18.3.1",
@@ -2785,6 +2786,8 @@
     "@typescript-eslint/visitor-keys/eslint-visitor-keys": ["eslint-visitor-keys@3.4.3", "", {}, "sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag=="],
 
     "@vitest/mocker/estree-walker": ["estree-walker@3.0.3", "", { "dependencies": { "@types/estree": "^1.0.0" } }, "sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g=="],
+
+    "@vlayer/browser-extension/@vlayer/extension-hooks": ["@vlayer/extension-hooks@file:packages/extension-hooks", { "dependencies": { "@types/react": "^18.3.5", "vitest": "^2.1.4" }, "devDependencies": { "@types/bun": "latest", "jsdom": "^25.0.1", "webextension-polyfill": "^0.12.0" }, "peerDependencies": { "react": "^18.3.1", "typescript": "^5.0.0" } }],
 
     "@vlayer/sdk/ts-pattern": ["ts-pattern@5.6.0", "", {}, "sha512-SL8u60X5+LoEy9tmQHWCdPc2hhb2pKI6I1tU5Jue3v8+iRqZdcT3mWPwKKJy1fMfky6uha82c8ByHAE8PMhKHw=="],
 

@@ -12,6 +12,9 @@ import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVeri
 import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
 import { useNavigate } from "react-router";
+import debug from "debug";
+
+const log = debug("vlayer:email-proof-verification");
 
 class NoProofError extends Error {
   constructor(message: string) {
@@ -103,7 +106,7 @@ export const useEmailProofVerification = () => {
 
   useEffect(() => {
     if (proof) {
-      console.log("proof", proof);
+      log("proof", proof);
       verifyProofOnChain();
     }
   }, [proof]);
