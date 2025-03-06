@@ -50,7 +50,7 @@ struct Cli {
 
     #[cfg(feature = "jwt")]
     #[arg(long, group = "jwt")]
-    public_key: Option<std::path::PathBuf>,
+    public_key: std::path::PathBuf,
 
     #[cfg(feature = "jwt")]
     #[arg(long, group = "jwt", default_value = "RS256")]
@@ -90,12 +90,8 @@ impl Cli {
 
         #[cfg(feature = "jwt")]
         {
-            builder = with_jwt_config(
-                builder,
-                self.public_key
-                    .expect("public key is guaranteed by clap to be non-null"),
-                self.algorithm.unwrap_or_default(),
-            )?;
+            builder =
+                with_jwt_config(builder, self.public_key, self.algorithm.unwrap_or_default())?;
         }
 
         Ok(builder.build()?)
