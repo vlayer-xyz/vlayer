@@ -1,12 +1,15 @@
 use std::iter::once;
 
 use axum::{
+    body::Bytes,
+    extract::State as AxumState,
     http::header::AUTHORIZATION,
+    response::IntoResponse,
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 use derive_new::new;
-use server_utils::{cors, init_trace_layer, RequestIdLayer, Router as JrpcRouter};
+use server_utils::{cors, init_trace_layer, RequestId, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
 use tower_http::{
     sensitive_headers::SetSensitiveRequestHeadersLayer,
@@ -15,12 +18,12 @@ use tower_http::{
 use tracing::info;
 
 #[cfg(feature = "jwt")]
-use crate::jwt::handle;
+use crate::jwt::TokenExtractor;
 #[cfg(not(feature = "jwt"))]
-use crate::token::handle;
+use crate::token::TokenExtractor;
 use crate::{
     config::Config,
-    handlers::{RpcServer, State as AppState},
+    handlers::{Params, RpcServer, State as AppState},
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -30,6 +33,16 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     axum::serve(listener, server(config)).await?;
 
     Ok(())
+}
+
+async fn handle(
+    token: Option<TokenExtractor>,
+    AxumState(State { router, config }): AxumState<State>,
+    Extension(req_id): Extension<RequestId>,
+    body: Bytes,
+) -> impl IntoResponse {
+    let params = Params::new(config, token.as_deref().cloned(), req_id);
+    router.handle_request_with_params(body, params).await
 }
 
 #[derive(new, Clone)]
