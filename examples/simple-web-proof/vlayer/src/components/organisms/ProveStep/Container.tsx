@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useSimpleWebProof } from "../../../hooks/useSimpleWebProof";
 import { ProveStepPresentational } from "./Presentational";
-import { useAppKitAccount } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
 
 export const ProveStep = () => {
   const navigate = useNavigate();
-  const { address } = useAppKitAccount();
+  const { address } = useAccount();
   const [disabled, setDisabled] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
