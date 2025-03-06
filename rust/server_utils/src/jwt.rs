@@ -1,5 +1,6 @@
-pub mod auth;
+mod axum;
 
+pub use axum::{Algorithm, DecodingKey, Error, State};
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 
