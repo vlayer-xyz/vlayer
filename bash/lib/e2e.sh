@@ -1,10 +1,15 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
 
+function install_chromium() {    
+  silent_unless_fails bunx playwright install --with-deps chromium
+}
+
 function run_playwright_tests() {
-  pushd vlayer
-    silent_unless_fails bunx playwright install --with-deps chromium
-    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test:"${VLAYER_ENV}"
-  popd
+  if grep -q "web-test:${VLAYER_ENV}" package.json; then
+    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test-web:"${VLAYER_ENV}"
+  else
+    echo "Skipping playwright tests as web-test:${VLAYER_ENV} script does not exist"
+  fi
 }
 
 function run_prover_script() {

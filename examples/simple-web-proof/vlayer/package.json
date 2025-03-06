@@ -14,8 +14,8 @@
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
-    "test:dev": "TEST_MODE=headed VLAYER_ENV=dev xvfb-run bun run playwright test",
-    "test:testnet": "VLAYER_ENV=testnet bun run playwright test",
+    "test-web:dev": "TEST_MODE=headed VLAYER_ENV=dev xvfb-run bun run playwright test",
+    "test-web:testnet": "VLAYER_ENV=testnet bun run playwright test",
     "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
     "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite"
   },
