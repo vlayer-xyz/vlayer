@@ -11,9 +11,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'bash/**'
+              - 'contracts/**'
+              - '.github/workflows/build_examples.yaml'
+              - '.github/actions/contracts-prerequisites/**'
+              - '.github/actions/ts-prerequisites/**'
+
   build-examples:
     name: Build examples
+    needs: changes
     runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,9 +58,12 @@ jobs:
 
       - name: Run tsc
         run: bash/tsc-examples.sh
+
   pack-examples:
     name: Pack examples
+    needs: changes
     runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
