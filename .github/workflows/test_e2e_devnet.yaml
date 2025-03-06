@@ -15,9 +15,9 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      rust: ${{ steps['filter'].outputs.rust || 'false' }} # actionlint-disable-line
-      ts: ${{ steps['filter'].outputs.ts || 'false' }} # actionlint-disable-line
-      contracts: ${{ steps['filter'].outputs.contracts || 'false' }} # actionlint-disable-line
+      rust: ${{ steps['filter'].outputs.rust || 'false' }}
+      ts: ${{ steps['filter'].outputs.ts || 'false' }}
+      contracts: ${{ steps['filter'].outputs.contracts || 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
