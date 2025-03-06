@@ -23,9 +23,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'rust/**'
+              - 'bash/**'
+              - 'contracts/**'
+              - 'test_contracts/**'
+              - 'examples/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'bun.lock'
+              - '.github/workflows/test_e2e_testnet.yaml'
+              - '.github/actions/test-e2e-testnet/**'
+
   build-binaries:
     name: Build binaries
+    needs: changes
     runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
 
     steps:
       - name: Checkout repository
@@ -64,80 +91,51 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-testnet:
-    name: E2E test against testnet
-    runs-on: aws-linux-medium
+  test-e2e-testnet-simple:
+    name: E2E test against testnet (simple)
     needs: [build-binaries]
-    strategy:
-      fail-fast: false
-      matrix:
-        example:
-          [
-            "simple",
-            "simple-web-proof",
-            "simple-email-proof",
-            "simple-time-travel",
-          ]
-
+    runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/run-e2e-test-testnet
         with:
-          submodules: recursive
-      - name: Install Rust prerequisites
-        id: rust_pre
-        uses: ./.github/actions/rust-prerequisites
-      - name: Download binaries
-        uses: actions/download-artifact@v4
-        with:
-          name: target-debug
-          path: target/debug
-      - name: Make downloaded binaries executable
-        run: sudo chmod +x target/debug/*
-      - name: Install contracts prerequisites
-        uses: ./.github/actions/contracts-prerequisites
-      - name: Install TypeScript prerequisites
-        uses: ./.github/actions/ts-prerequisites
-      - name: Mock ImageId.sol
-        run: ./bash/mock-imageid.sh
-      - name: Install contracts' dependencies
-        working-directory: ./contracts/vlayer
-        run: forge soldeer install
+          example: "simple"
 
-      # Stateful GH Runners have a separate testnet private key on disk,
-      # to allow concurrent runs of the workflow avoiding nonce issues.
-      # Here we load the key into a variable from a location on disk.
-      - name: Read testnet private key
-        run: |
-          EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
-          echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
-          echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
-      - name: Run e2e test in prod mode
-        env:
-          PROVING_MODE: "prod"
-          BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
-          BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
-          QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
-          QUICKNODE_ENDPOINT: "dry-alpha-tab"
-          VLAYER_ENV: testnet
-          CHAIN_NAME: "optimismSepolia"
-          JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
-          PROVER_URL: http://127.0.0.1:3000
-          GAS_METER_URL: ${{ vars.GAS_METER_URL }}
-          GAS_METER_API_KEY: ${{ secrets.GAS_METER_API_KEY }}
-          VLAYER_API_TOKEN: ${{ secrets.VLAYER_API_TOKEN }}
-          VLAYER_TMP_DIR: ./artifacts
-          BUILD_BINARIES: 0
-          CONFIRMATIONS: 2
-          EXAMPLE: ${{ matrix.example }}
-        run: bash/e2e-test.sh
-
-      # Teardown
-      - name: Upload logs for previewing
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-        if: always()
+  test-e2e-testnet-simple-web-proof:
+    name: E2E test against testnet (web-proof)
+    needs: [build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/run-e2e-test-testnet
         with:
-          name: logs-testnet-${{ matrix.example }}
-          path: ./artifacts/logs/
-          if-no-files-found: error
-          retention-days: 1
+          example: "simple-web-proof"
+
+  test-e2e-testnet-simple-email-proof:
+    name: E2E test against testnet (email-proof)
+    needs: [build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/run-e2e-test-testnet
+        with:
+          example: "simple-email-proof"
+
+  test-e2e-testnet-simple-time-travel:
+    name: E2E test against testnet (time-travel)
+    needs: [build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/run-e2e-test-testnet
+        with:
+          example: "simple-time-travel"
+  

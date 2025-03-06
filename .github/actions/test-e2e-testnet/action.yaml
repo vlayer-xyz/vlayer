@@ -1,0 +1,76 @@
+name: "Run E2E Test for Testnet"
+description: "Runs an E2E test against testnet for a given example"
+inputs:
+  example:
+    description: "The E2E test example to run"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install Rust prerequisites
+      id: rust_pre
+      uses: ./.github/actions/rust-prerequisites
+
+    - name: Download binaries
+      uses: actions/download-artifact@v4
+      with:
+        name: target-debug
+        path: target/debug
+
+    - name: Make downloaded binaries executable
+      run: sudo chmod +x target/debug/*
+      shell: bash
+
+    - name: Install contracts prerequisites
+      uses: ./.github/actions/contracts-prerequisites
+
+    - name: Install TypeScript prerequisites
+      uses: ./.github/actions/ts-prerequisites
+
+    - name: Mock ImageId.sol
+      run: ./bash/mock-imageid.sh
+      shell: bash
+
+    - name: Install contracts' dependencies
+      working-directory: ./contracts/vlayer
+      run: forge soldeer install
+      shell: bash
+
+    # Load testnet private key from secrets
+    - name: Read testnet private key
+      run: |
+        EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
+        echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
+        echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Run e2e test in prod mode
+      env:
+        PROVING_MODE: "prod"
+        BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
+        BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
+        QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
+        QUICKNODE_ENDPOINT: "dry-alpha-tab"
+        VLAYER_ENV: testnet
+        CHAIN_NAME: "optimismSepolia"
+        JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
+        PROVER_URL: http://127.0.0.1:3000
+        GAS_METER_URL: ${{ vars.GAS_METER_URL }}
+        GAS_METER_API_KEY: ${{ secrets.GAS_METER_API_KEY }}
+        VLAYER_API_TOKEN: ${{ secrets.VLAYER_API_TOKEN }}
+        VLAYER_TMP_DIR: ./artifacts
+        BUILD_BINARIES: 0
+        CONFIRMATIONS: 2
+        EXAMPLE: ${{ inputs.example }}
+      run: bash/e2e-test.sh
+      shell: bash
+
+    # Upload logs
+    - name: Upload logs for previewing
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: logs-testnet-${{ inputs.example }}
+        path: ./artifacts/logs/
+        if-no-files-found: error
+        retention-days: 1
