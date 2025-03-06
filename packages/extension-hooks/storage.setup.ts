@@ -49,12 +49,33 @@ export const mockStore = () => {
 };
 
 vi.doMock("webextension-polyfill", () => {
+  const messageListeners = new Set<(message: unknown) => void>();
+
   return {
     default: {
       storage: {
         local: mockStore(),
         sync: mockStore(),
         session: mockStore(),
+      },
+      runtime: {
+        onMessage: {
+          addListener: vi
+            .fn()
+            .mockImplementation((callback: (message: unknown) => void) => {
+              console.log("addListener", callback);
+              messageListeners.add(callback);
+            }),
+          removeListener: vi
+            .fn()
+            .mockImplementation((callback: (message: unknown) => void) => {
+              messageListeners.delete(callback);
+            }),
+        },
+        sendMessage: vi.fn().mockImplementation((message: unknown) => {
+          messageListeners.forEach((listener) => listener(message));
+          return Promise.resolve();
+        }),
       },
     },
   };
