@@ -31,6 +31,9 @@ jobs:
               - 'contracts/**'
               - 'test_contracts/**'
               - 'examples/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'bun.lock'
               - '.github/workflows/test_e2e_devnet.yaml'
               - '.github/actions/test-e2e-devnet/**'
 
