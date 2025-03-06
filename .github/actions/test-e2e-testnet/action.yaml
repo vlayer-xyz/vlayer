@@ -4,6 +4,27 @@ inputs:
   example:
     description: "The E2E test example to run"
     required: true
+  testnet_private_key_location:
+    description: "Path to testnet private key"
+    required: true
+  bonsai_api_url:
+    description: "BONSAI API URL"
+    required: true
+  bonsai_api_key:
+    description: "BONSAI API Key"
+    required: true
+  quicknode_api_key:
+    description: "Quicknode API Key"
+    required: true
+  gas_meter_url:
+    description: "Gas Meter URL"
+    required: true
+  gas_meter_api_key:
+    description: "Gas Meter API Key"
+    required: true
+  vlayer_api_token:
+    description: "VLAYER API Token"
+    required: true
 runs:
   using: "composite"
   steps:
