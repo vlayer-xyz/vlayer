@@ -112,7 +112,7 @@ jobs:
           vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
   test-e2e-testnet-simple-web-proof:
-    name: E2E test against testnet (web-proof)
+    name: E2E test against testnet (simple-web-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -132,7 +132,7 @@ jobs:
           vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
   test-e2e-testnet-simple-email-proof:
-    name: E2E test against testnet (email-proof)
+    name: E2E test against testnet (simple-email-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -152,7 +152,7 @@ jobs:
           vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
   test-e2e-testnet-simple-time-travel:
-    name: E2E test against testnet (time-travel)
+    name: E2E test against testnet (simple-time-travel)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
