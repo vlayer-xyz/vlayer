@@ -31,8 +31,8 @@ jobs:
               - 'Cargo.lock'
               - 'bash/check-elf-id.sh'
               - '.github/workflows/lint_rust.yaml'
-              - '.github/actions/rust-prerequisites/**
-              - '.github/actions/contracts-prerequisites/**
+              - '.github/actions/rust-prerequisites/**'
+              - '.github/actions/contracts-prerequisites/**'
   
   lint-rust:
     name: Lint Rust
