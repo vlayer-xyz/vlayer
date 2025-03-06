@@ -1,3 +1,4 @@
+# This action depends on built and uploaded Rust binaries; hence, the step 'Download binaries'.
 name: "Run E2E Test"
 description: "Runs an E2E test against devnet for a given example"
 inputs:
