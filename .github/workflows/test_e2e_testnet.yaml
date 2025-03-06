@@ -99,7 +99,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/run-e2e-test-testnet
+        uses: ./.github/actions/test-e2-testnet
         with:
           example: "simple"
 
@@ -111,7 +111,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/run-e2e-test-testnet
+        uses: ./.github/actions/test-e2-testnet
         with:
           example: "simple-web-proof"
 
@@ -123,7 +123,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/run-e2e-test-testnet
+        uses: ./.github/actions/test-e2-testnet
         with:
           example: "simple-email-proof"
 
@@ -135,7 +135,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/run-e2e-test-testnet
+        uses: ./.github/actions/test-e2-testnet
         with:
           example: "simple-time-travel"
   
