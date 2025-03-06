@@ -15,9 +15,7 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      rust: ${{ steps['filter'].outputs.rust || 'false' }}
-      ts: ${{ steps['filter'].outputs.ts || 'false' }}
-      contracts: ${{ steps['filter'].outputs.contracts || 'false' }}
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,27 +25,20 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            rust:
-              - '**/*.rs'
-              - 'Cargo.toml'
-              - 'Cargo.lock'
-              - '.github/actions/rust-prerequisites/**'
-            ts:
-              - '**/*.ts'
-              - '**/*.tsx'
-              - 'bash/lint-ts.sh'
-              - 'bash/build-ts-types.sh'
-              - '.github/actions/ts-prerequisites/**'
-            contracts:
+            relevant-changes:
+              - 'rust/**'
+              - 'bash/**'
               - 'contracts/**'
-              - 'bash/mock-imageid.sh'
-              - 'forge.toml'
-              - '.github/actions/contracts-prerequisites/**'
+              - 'test_contracts/**'
+              - 'examples/**'
+              - '.github/workflows/test_e2e_devnet.yaml'
+              - '.github/actions/e2e-test-devnet/**'
 
   build-binaries:
     name: Build binaries
     needs: changes
     runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -89,6 +80,7 @@ jobs:
     name: E2E test against devnet (simple)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -101,7 +93,7 @@ jobs:
     name: E2E test against devnet (web-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -114,7 +106,7 @@ jobs:
     name: E2E test against devnet (email-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -127,7 +119,7 @@ jobs:
     name: E2E test against devnet (teleport)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -140,7 +132,7 @@ jobs:
     name: E2E test against devnet (time-travel)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
