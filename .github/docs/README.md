@@ -17,6 +17,7 @@ Contains [composite actions](https://docs.github.com/en/actions/sharing-automati
 | [Package release binaries](/.github/actions/package-release-binaries/action.yml) | Zips the Rust release binaries. |
 | [Replace guest artifacts](/.github/actions/package-release-binaries/action.yml) | Replaces path in prebuild guest artifacts. |
 | [Rust prerequisites](/.github/actions/rust-prerequisites/action.yml) | Installs Rust, toolchains and other tools. |
+| [Test E2E devnet](/.github/actions/test-e2e-devnet/action.yml) | Runs an E2E test against devnet for a given example. |
 | [TS prerequisites](/.github/actions/ts-prerequisites/action.yml) | Installs TypeScript prerequisites. |
 
 ## Workflows
