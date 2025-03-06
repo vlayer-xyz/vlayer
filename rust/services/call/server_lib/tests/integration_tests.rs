@@ -522,22 +522,15 @@ mod server_tests {
     #[cfg(feature = "jwt")]
     mod jwt {
         use assert_json_diff::assert_json_eq;
-        use call_server_lib::jwt::{Algorithm, Config as JwtConfig, DecodingKey};
         use jsonwebtoken::{encode, get_current_timestamp, EncodingKey, Header};
         use server_utils::jwt::Claims;
-        use test_helpers::mock::Server;
+        use test_helpers::{mock::Server, JWT_SECRET};
 
         use super::*;
 
-        const SECRET: &[u8] = b"deadbeef";
-
-        fn jwt_config() -> JwtConfig {
-            JwtConfig::new(DecodingKey::from_secret(SECRET), Algorithm::default())
-        }
-
         #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
         fn token(expires_in: i64, subject: &str) -> String {
-            let key = EncodingKey::from_secret(SECRET);
+            let key = EncodingKey::from_secret(JWT_SECRET);
             let ts = get_current_timestamp() as i64 + expires_in;
             let claims =
                 Claims::new("api.vlayer.xyz".to_string(), 443, ts as u64, subject.to_string());
@@ -545,22 +538,39 @@ mod server_tests {
         }
 
         fn default_app() -> Server {
-            Context::default()
-                .with_jwt_config(jwt_config())
-                .server(call_guest_elf(), chain_guest_elf())
+            Context::default().server(call_guest_elf(), chain_guest_elf())
         }
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn checks_for_valid_token() {
-            let app = default_app();
-            let req = rpc_body("dummy", &json!([]));
-            let resp = app.post("/", &req).await;
+        async fn falls_back_to_old_auth() {
+            const EXPECTED_HASH: &str =
+                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+            const USER_TOKEN: &str = "sk_1234567890";
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
-            assert_json_eq!(
-                body_to_json(resp.into_body()).await,
-                json!({ "error": "Invalid token" })
-            );
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_bearer_auth(USER_TOKEN)
+                .with_params(allocate_gas_body(EXPECTED_HASH), false)
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = v_call_body(contract.address(), &call_data);
+            let resp = app.post_with_bearer_auth("/", &req, USER_TOKEN).await;
+
+            assert_eq!(StatusCode::OK, resp.status());
+            assert_jrpc_ok(resp, EXPECTED_HASH).await;
+
+            ctx.assert_gas_meter();
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -623,9 +633,7 @@ mod server_tests {
                 .add()
                 .await;
 
-            let ctx = Context::default()
-                .with_gas_meter_server(gas_meter_server)
-                .with_jwt_config(jwt_config());
+            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract

@@ -55,13 +55,16 @@ pub(crate) fn chain_guest_elf() -> &'static GuestElf {
 
 pub(crate) const API_VERSION: &str = "1.2.3";
 
+#[cfg(feature = "jwt")]
+pub(crate) const JWT_SECRET: &[u8] = b"deadbeef";
+
 #[derive(new)]
 pub(crate) struct Context {
     client: Client,
     anvil: Anvil,
     gas_meter_server: Option<GasMeterServer>,
     #[cfg(feature = "jwt")]
-    jwt_config: Option<JwtConfig>,
+    jwt_config: JwtConfig,
 }
 
 impl Context {
@@ -73,18 +76,12 @@ impl Context {
             anvil,
             None,
             #[cfg(feature = "jwt")]
-            None,
+            JwtConfig::new(jsonwebtoken::DecodingKey::from_secret(JWT_SECRET), Default::default()),
         )
     }
 
     pub(crate) fn with_gas_meter_server(mut self, gas_meter_server: GasMeterServer) -> Self {
         self.gas_meter_server = Some(gas_meter_server);
-        self
-    }
-
-    #[cfg(feature = "jwt")]
-    pub(crate) fn with_jwt_config(mut self, jwt_config: JwtConfig) -> Self {
-        self.jwt_config = Some(jwt_config);
         self
     }
 
