@@ -7,11 +7,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-
     - name: Install Rust prerequisites
       id: rust_pre
       uses: ./.github/actions/rust-prerequisites

@@ -32,7 +32,7 @@ jobs:
               - 'test_contracts/**'
               - 'examples/**'
               - '.github/workflows/test_e2e_devnet.yaml'
-              - '.github/actions/e2e-test-devnet/**'
+              - '.github/actions/test-e2e-devnet/**'
 
   build-binaries:
     name: Build binaries
@@ -85,7 +85,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test-devnet
+        uses: ./.github/actions/test-e2e-devnet
         with:
           example: "simple"
 
@@ -98,7 +98,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test-devnet
+        uses: ./.github/actions/test-e2e-devnet
         with:
           example: "simple-web-proof"
 
@@ -111,7 +111,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test-devnet
+        uses: ./.github/actions/test-e2e-devnet
         with:
           example: "simple-email-proof"
 
@@ -124,7 +124,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test-devnet
+        uses: ./.github/actions/test-e2e-devnet
         with:
           example: "simple-teleport"
 
@@ -137,6 +137,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test-devnet
+        uses: ./.github/actions/test-e2e-devnet
         with:
           example: "simple-time-travel"
