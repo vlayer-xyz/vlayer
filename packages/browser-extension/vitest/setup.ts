@@ -66,6 +66,9 @@ vi.doMock("webextension-polyfill", () => {
           addListener: vi.fn().mockImplementation(() => {}),
         },
       },
+      sidePanel: {
+        setPanelBehavior: vi.fn().mockImplementation(() => {}),
+      },
       runtime: {
         onInstalled: {
           addListener: vi.fn().mockImplementation(() => {}),
