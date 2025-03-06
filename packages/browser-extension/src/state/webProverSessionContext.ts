@@ -1,10 +1,13 @@
 import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { WebProverSessionConfig } from "../web-proof-commons";
+import { provingSessionStorageConfig } from "./config";
 
 type WebProverSessionContext = {
   webProverSessionConfig: WebProverSessionConfig;
 };
+
+//this belongs to the service worker so it does not use react under the hood
 
 export class WebProverSessionContextManager extends Store<WebProverSessionContext> {
   static #instance: WebProverSessionContextManager;
@@ -16,7 +19,7 @@ export class WebProverSessionContextManager extends Store<WebProverSessionContex
   public static get instance(): WebProverSessionContextManager {
     if (!this.#instance) {
       this.#instance = new WebProverSessionContextManager(
-        browser.storage.session,
+        provingSessionStorageConfig.storage,
       );
     }
     return this.#instance;
@@ -25,11 +28,16 @@ export class WebProverSessionContextManager extends Store<WebProverSessionContex
   async setWebProverSessionConfig(
     config: WebProverSessionConfig,
   ): Promise<void> {
-    await this.set("webProverSessionConfig", config);
+    await this.set(
+      provingSessionStorageConfig.storageKeys.webProverSessionConfig,
+      config,
+    );
   }
 
   async getWebProverSessionConfig(): Promise<WebProverSessionConfig> {
-    return await this.get("webProverSessionConfig");
+    return await this.get(
+      provingSessionStorageConfig.storageKeys.webProverSessionConfig,
+    );
   }
 }
 

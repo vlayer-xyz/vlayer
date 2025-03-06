@@ -16,6 +16,8 @@ export type ExtensionStep =
 export const enum ExtensionAction {
   RequestWebProof = "RequestWebProof",
   NotifyZkProvingStatus = "NotifyZkProvingStatus",
+  OpenSidePanel = "OpenSidePanel",
+  CloseSidePanel = "CloseSidePanel",
 }
 
 export enum ZkProvingStatus {
@@ -35,6 +37,12 @@ export type MessageToExtension =
       payload: {
         status: ZkProvingStatus;
       };
+    }
+  | {
+      action: ExtensionAction.OpenSidePanel;
+    }
+  | {
+      action: ExtensionAction.CloseSidePanel;
     };
 
 export enum ExtensionMessageType {
@@ -43,6 +51,8 @@ export enum ExtensionMessageType {
   RedirectBack = "RedirectBack",
   TabOpened = "TabOpened",
   ProofProcessing = "ProofProcessing",
+  CleanProvingSessionStorageOnClose = "CleanProvingSessionStorageOnClose",
+  CloseSidePanel = "CloseSidePanel",
 }
 
 export type PresentationJSON = TLSNPresentationJSON;
@@ -89,10 +99,11 @@ export function isEmptyWebProverSessionConfig(
   config: WebProverSessionConfig,
 ): config is EmptyWebProverSessionConfig {
   return (
-    config.notaryUrl === null &&
-    config.wsProxyUrl === null &&
-    config.logoUrl === null &&
-    config.steps.length === 0
+    !config ||
+    (!config.notaryUrl &&
+      !config.wsProxyUrl &&
+      !config.logoUrl &&
+      config.steps.length === 0)
   );
 }
 

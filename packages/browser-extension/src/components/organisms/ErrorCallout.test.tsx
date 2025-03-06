@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ErrorCalloutPresentational } from "./ErrorCallout";
 import React from "react";
-import { SidePanelContent } from "components/pages/SidePanelContent";
+import { SidePanelContainer } from "components/pages/SidePanelContent";
 
 const mocks = vi.hoisted(() => ({
   useTlsnProver: vi.fn(),
@@ -43,7 +43,7 @@ describe("ErrorCalloutPresentational", () => {
 
   it("renders when tlsn fails to start", () => {
     mocks.useTlsnProver.mockReturnValue({ error: "Test error message" });
-    render(<SidePanelContent />);
+    render(<SidePanelContainer />);
     expect(screen.getByText("Test error message")).toBeInTheDocument();
   });
 });
