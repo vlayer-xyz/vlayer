@@ -15,9 +15,9 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      rust: ${{ steps.filter.outputs.rust != '' && steps.filter.outputs.rust || 'false' }}
-      ts: ${{ steps.filter.outputs.ts != '' && steps.filter.outputs.ts || 'false' }}
-      contracts: ${{ steps.filter.outputs.contracts != '' && steps.filter.outputs.contracts || 'false' }}
+      rust: ${{ steps['filter'].outputs.rust || 'false' }} # actionlint-disable-line
+      ts: ${{ steps['filter'].outputs.ts || 'false' }} # actionlint-disable-line
+      contracts: ${{ steps['filter'].outputs.contracts || 'false' }} # actionlint-disable-line
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -91,7 +91,7 @@ jobs:
     runs-on: aws-linux-medium
     steps:
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test/devnet
+        uses: ./.github/actions/e2e-test-devnet
         with:
           example: "simple"
 
@@ -102,7 +102,7 @@ jobs:
     if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
     steps:
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test/devnet
+        uses: ./.github/actions/e2e-test-devnet
         with:
           example: "simple-web-proof"
 
@@ -113,7 +113,7 @@ jobs:
     if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
     steps:
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test/devnet
+        uses: ./.github/actions/e2e-test-devnet
         with:
           example: "simple-email-proof"
 
@@ -124,7 +124,7 @@ jobs:
     if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
     steps:
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test/devnet
+        uses: ./.github/actions/e2e-test-devnet
         with:
           example: "simple-teleport"
 
@@ -135,6 +135,6 @@ jobs:
     if: needs.changes.outputs.ts == 'true' || needs.changes.outputs.contracts == 'true' || needs.changes.outputs.rust == 'true'
     steps:
       - name: Run E2E Test
-        uses: ./.github/actions/e2e-test/devnet
+        uses: ./.github/actions/e2e-test-devnet
         with:
           example: "simple-time-travel"
