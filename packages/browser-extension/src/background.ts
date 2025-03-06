@@ -19,6 +19,10 @@ const log = debug("extension:background");
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
+// @ts-expect-error https://github.com/wxt-dev/wxt/issues/570#issuecomment-2022365906
+// eslint-disable-next-line
+browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
   port.onMessage.addListener((message: MessageToExtension) => {
