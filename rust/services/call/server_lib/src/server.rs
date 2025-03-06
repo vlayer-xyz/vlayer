@@ -1,19 +1,12 @@
 use std::iter::once;
 
 use axum::{
-    body::Bytes,
-    extract::State as AxumState,
     http::header::AUTHORIZATION,
-    response::IntoResponse,
     routing::{get, post},
-    Extension, Router,
-};
-use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
-    TypedHeader,
+    Router,
 };
 use derive_new::new;
-use server_utils::{cors, init_trace_layer, RequestId, RequestIdLayer, Router as JrpcRouter};
+use server_utils::{cors, init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
 use tower_http::{
     sensitive_headers::SetSensitiveRequestHeadersLayer,
@@ -22,10 +15,39 @@ use tower_http::{
 use tracing::info;
 
 use crate::{
-    config::{AuthMode, Config},
-    handlers::{Params, RpcServer, State as AppState},
-    user_token::Token as UserToken,
+    config::Config,
+    handlers::{RpcServer, State as AppState},
 };
+
+#[cfg(feature = "jwt")]
+mod handle {
+    pub(super) use crate::jwt::handle;
+}
+
+#[cfg(not(feature = "jwt"))]
+mod handle {
+    use axum::{body::Bytes, extract::State as AxumState, response::IntoResponse, Extension};
+    use axum_extra::{
+        headers::{authorization::Bearer, Authorization},
+        TypedHeader,
+    };
+    use server_utils::RequestId;
+
+    use super::*;
+    use crate::{handlers::Params, user_token::Token as UserToken};
+
+    pub(super) async fn handle(
+        user_token: Option<TypedHeader<Authorization<Bearer>>>,
+        AxumState(State { router, config }): AxumState<State>,
+        Extension(req_id): Extension<RequestId>,
+        body: Bytes,
+    ) -> impl IntoResponse {
+        let user_token: Option<UserToken> =
+            user_token.map(|TypedHeader(user_token)| user_token.into());
+        let params = Params::new(config, user_token, req_id);
+        router.handle_request_with_params(body, params).await
+    }
+}
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
     let listener = TcpListener::bind(&config.socket_addr).await?;
@@ -42,27 +64,10 @@ pub(super) struct State {
     pub router: JrpcRouter<AppState>,
 }
 
-async fn handle(
-    user_token: Option<TypedHeader<Authorization<Bearer>>>,
-    AxumState(State { router, config }): AxumState<State>,
-    Extension(req_id): Extension<RequestId>,
-    body: Bytes,
-) -> impl IntoResponse {
-    let user_token: Option<UserToken> = user_token.map(|TypedHeader(user_token)| user_token.into());
-    let params = Params::new(config, user_token, req_id);
-    router.handle_request_with_params(body, params).await
-}
-
 pub fn server(config: Config) -> Router {
-    let handler = match config.auth_mode {
-        #[cfg(feature = "jwt")]
-        AuthMode::Jwt => post(crate::jwt::handle),
-        AuthMode::Token => post(handle),
-    };
     let router = State::new(config, JrpcRouter::new(AppState::default().into_rpc()));
-
     Router::new()
-        .route("/", handler)
+        .route("/", post(handle::handle))
         .route_layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .route_layer(RequestIdLayer)
