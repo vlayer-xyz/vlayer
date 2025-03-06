@@ -74,10 +74,12 @@ export const createVlayerClient = (
       F extends ContractFunctionName<T>,
     >({
       hash,
+      token,
       numberOfRetries = 900,
       sleepDuration = 1000,
     }: {
       hash: BrandedHash<T, F>;
+      token?: string;
       numberOfRetries?: number;
       sleepDuration?: number;
     }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
@@ -85,6 +87,7 @@ export const createVlayerClient = (
         const { data } = await waitForProof(
           hash,
           url,
+          token,
           numberOfRetries,
           sleepDuration,
         );

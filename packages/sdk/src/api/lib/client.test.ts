@@ -229,7 +229,7 @@ describe("Authentication", () => {
     const hashStr = generateRandomHash();
     const vlayer = createVlayerClient();
 
-    fetchMocker.mockResponse((req) => {
+    fetchMocker.mockResponseOnce((req) => {
       const token = (req.headers.get("authorization") || "")
         .split("Bearer ")
         .at(1);
@@ -255,7 +255,34 @@ describe("Authentication", () => {
       chainId: 42,
       token: userToken,
     });
-    await vlayer.waitForProvingResult({ hash });
+
+    fetchMocker.mockResponseOnce((req) => {
+      const token = (req.headers.get("authorization") || "")
+        .split("Bearer ")
+        .at(1);
+      if (token !== undefined && token === userToken) {
+        return {
+          body: JSON.stringify({
+            result: {
+              state: "done",
+              status: 1,
+              metrics: {},
+              data: {},
+            },
+            jsonrpc: "2.0",
+            id: 1,
+          }),
+        };
+      }
+      return {
+        status: 400,
+        body: JSON.stringify({
+          error: "Invalid token",
+        }),
+      };
+    });
+    await vlayer.waitForProvingResult({ hash, token: userToken });
+
     expect(hash.hash).toBe(hashStr);
   });
 });

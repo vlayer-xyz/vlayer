@@ -68,11 +68,12 @@ export async function getProofReceipt<
 >(
   hash: BrandedHash<T, F>,
   url: string = "http://127.0.0.1:3000",
+  token?: string,
 ): Promise<ProofReceipt> {
   const params: VGetProofReceiptParams = {
     hash: hash.hash as Hex,
   };
-  const resp = await v_getProofReceipt(params, url);
+  const resp = await v_getProofReceipt(params, url, token);
   handleErrors(resp);
   return resp.result;
 }
@@ -100,11 +101,12 @@ export async function waitForProof<
 >(
   hash: BrandedHash<T, F>,
   url: string,
+  token?: string,
   numberOfRetries: number = 900,
   sleepDuration: number = 1000,
 ): Promise<ProofDataWithMetrics> {
   for (let retry = 0; retry < numberOfRetries; retry++) {
-    const { state, data, metrics } = await getProofReceipt(hash, url);
+    const { state, data, metrics } = await getProofReceipt(hash, url, token);
     if (state === ProofState.Done) {
       return { data, metrics };
     }

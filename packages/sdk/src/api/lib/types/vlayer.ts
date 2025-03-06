@@ -101,6 +101,7 @@ export type VlayerClient = {
     F extends ContractFunctionName<T>,
   >(args: {
     hash: BrandedHash<T, F>;
+    token?: string;
     numberOfRetries?: number;
     sleepDuration?: number;
   }) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
