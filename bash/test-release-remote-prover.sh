@@ -47,27 +47,36 @@ echo '::endgroup::'
 echo "Starting VDNS server"
 docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d vdns_server
 
-#!/bin/bash
-TEMP_DIR_FILE="/tmp/temp_dirs.txt"
-echo -n "" > "$TEMP_DIR_FILE"
+TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX)
+mkdir -p "${TEMP_DIR}/packages/browser-extension"
+cp -a "${VLAYER_HOME}/packages/browser-extension/dist" "${TEMP_DIR}/packages/browser-extension"
+
+echo '::group::Installing playwright chromium'
+silent_unless_fails bunx playwright install --with-deps chromium
+echo '::endgroup::'
+
+# We need to first create a temporary directory and perform operations there.
+# After that we copy the results to the VLAYER_HOME directory.
+# This is necessary because initializing in the repository directly causes
+# `forge init (called by vlayer init)` error because git is already initialized. 
+# This is a workaround to avoid this and make all the playwright reports available
+# in the VLAYER_HOME directory.
 
 for example in $(get_examples); do
     echo "::group::Initializing vlayer template: ${example}"
-    TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
-    echo "Created temp dir: $TEMP_DIR"
-    
-    # Append temp dir to the file
-    echo "$example:$TEMP_DIR" >> "$TEMP_DIR_FILE"
-
     cd "${TEMP_DIR}"
+    echo "Current directory: $(pwd)"
+    ls
+    echo "Current directory: $(pwd)"
     mkdir -p examples/${example}
-    mkdir -p packages/browser-extension
-    cp -a "${VLAYER_HOME}/packages/browser-extension/dist" packages/browser-extension
+    echo "Current directory: $(pwd)"
+    ls
 
-    VLAYER_TEMP_DIR="${TEMP_DIR}/examples/${example}"
+    VLAYER_TEMP_DIR="examples/${example}"
     cd "${VLAYER_TEMP_DIR}"
-
+ 
     vlayer init --template "${example}"
+    echo "Current directory: $(pwd)"
     forge build
     vlayer test
     echo "::endgroup::"
@@ -80,3 +89,9 @@ for example in $(get_examples); do
         run_playwright_tests
     echo "::endgroup::"
 done
+
+# Copy the TEMP_DIR to the final destination after the loop
+mkdir -p "${VLAYER_HOME}/vlayer-test-release"
+cp -a "${TEMP_DIR}"/* "${VLAYER_HOME}/vlayer-test-release"
+echo "Copying from ${TEMP_DIR} to ${VLAYER_HOME}/vlayer-test-release"
+find "${VLAYER_HOME}/vlayer-test-release" -name "playwright-report"
