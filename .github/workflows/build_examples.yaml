@@ -27,6 +27,9 @@ jobs:
             relevant-changes:
               - 'bash/**'
               - 'contracts/**'
+              - 'docker/**'
+              - 'examples/**'
+              - 'packages/**'
               - '.github/workflows/build_examples.yaml'
               - '.github/actions/contracts-prerequisites/**'
               - '.github/actions/ts-prerequisites/**'

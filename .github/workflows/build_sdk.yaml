@@ -25,6 +25,7 @@ jobs:
         with:
           filters: |
             relevant-changes:
+              - 'packages/**'
               - 'bash/tsc.sh'
               - '.github/workflows/lint_rust.yaml'
               - '.github/actions/ts-prerequisites/**'

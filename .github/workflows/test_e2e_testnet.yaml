@@ -38,12 +38,14 @@ jobs:
           filters: |
             relevant-changes:
               - 'rust/**'
-              - 'bash/**'
-              - 'contracts/**'
-              - 'test_contracts/**'
-              - 'examples/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
+              - 'bash/**'
+              - 'contracts/**'
+              - 'examples/**'
+              - 'packages/**'
+              - 'docker/**'
+              - 'ansible/**'
               - 'bun.lock'
               - '.github/workflows/test_e2e_testnet.yaml'
               - '.github/actions/test-e2e-testnet/**'
