@@ -172,4 +172,3 @@ jobs:
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
           vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
-          
