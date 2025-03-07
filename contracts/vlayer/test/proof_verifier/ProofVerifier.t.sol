@@ -93,6 +93,14 @@ contract ProofVerifier_Verify_Tests is Test {
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
 
+    function test_invalidChainId() public {
+        assumptions.settleChainId = assumptions.settleChainId + 1;
+        (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
+
+        vm.expectRevert("Invalid chain id");
+        verifier.verify(proof, journalHash, PROVER, SELECTOR);
+    }
+
     function test_invalidCallImageId() public {
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
 
