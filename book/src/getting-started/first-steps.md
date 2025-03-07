@@ -97,7 +97,7 @@ Running examples on a local devnet requires deploying a local instance of the pr
 If you want to run on local environment, use [Docker](/advanced/dev-and-production.html#devnet): 
 
 ```bash
-$ bun run devnet
+$ bun run devnet:up
 ```
 
 This command will start all required services in the background.
