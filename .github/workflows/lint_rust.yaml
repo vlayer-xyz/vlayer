@@ -12,9 +12,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'rust/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'bash/check-elf-id.sh'
+              - '.github/workflows/lint_rust.yaml'
+              - '.github/actions/rust-prerequisites/**'
+              - '.github/actions/contracts-prerequisites/**'
+
   lint-rust:
     name: Lint Rust
+    needs: changes
     runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
 
     steps:
       - name: Checkout repository

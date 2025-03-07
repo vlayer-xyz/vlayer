@@ -11,9 +11,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - '.github/workflows/**'
+
   prettier:
     name: Prettier check
+    needs: changes
     runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant-changes == 'true'
 
     steps:
       - name: Checkout Code
@@ -31,8 +49,10 @@ jobs:
         run: prettier --check .github/workflows/**/*.yaml
 
   actionlint:
-    runs-on: ubuntu-latest
     name: Actionlint check
+    needs: changes
+    runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Download actionlint
