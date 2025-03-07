@@ -5,11 +5,13 @@ function install_chromium() {
 }
 
 function run_playwright_tests() {
-  if grep -q "web-test:${VLAYER_ENV}" package.json; then
+  pushd vlayer
+  if grep -q "test-web:${VLAYER_ENV}" package.json; then
     WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test-web:"${VLAYER_ENV}"
   else
-    echo "Skipping playwright tests as web-test:${VLAYER_ENV} script does not exist"
+    echo "Skipping playwright tests as test-web:${VLAYER_ENV} script does not exist"
   fi
+  popd
 }
 
 function run_prover_script() {

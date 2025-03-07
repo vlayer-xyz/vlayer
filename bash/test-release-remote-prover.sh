@@ -34,7 +34,7 @@ echo '::endgroup::'
 
 
 BUN_NO_FROZEN_LOCKFILE=1
-VLAYER_ENV="testnet"
+VLAYER_ENV="testnet" 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
@@ -47,29 +47,36 @@ echo '::endgroup::'
 echo "Starting VDNS server"
 docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d vdns_server
 
-for example in $(get_examples); do
+#!/bin/bash
+TEMP_DIR_FILE="/tmp/temp_dirs.txt"
+echo -n "" > "$TEMP_DIR_FILE"
 
+for example in $(get_examples); do
     echo "::group::Initializing vlayer template: ${example}"
     TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
-    cd ${TEMP_DIR}
+    echo "Created temp dir: $TEMP_DIR"
+    
+    # Append temp dir to the file
+    echo "$example:$TEMP_DIR" >> "$TEMP_DIR_FILE"
 
+    cd "${TEMP_DIR}"
     mkdir -p examples/${example}
     mkdir -p packages/browser-extension
-    cp -a ${VLAYER_HOME}/packages/browser-extension/dist packages/browser-extension
+    cp -a "${VLAYER_HOME}/packages/browser-extension/dist" packages/browser-extension
 
-    VLAYER_TEMP_DIR=${TEMP_DIR}/examples/${example}
-    cd ${VLAYER_TEMP_DIR}
+    VLAYER_TEMP_DIR="${TEMP_DIR}/examples/${example}"
+    cd "${VLAYER_TEMP_DIR}"
 
     vlayer init --template "${example}"
     forge build
     vlayer test
-    echo '::endgroup::'
+    echo "::endgroup::"
 
     echo "::group::vlayer run prove.ts: ${example}"
     run_prover_script
-    echo '::endgroup::'
+    echo "::endgroup::"
 
     echo "::group::vlayer run Playwright test: ${example}"
-    WEB_SERVER_URL="https://web-proofs-demo.vlayer.xyz/" run_playwright_tests
-    echo '::endgroup::'
+        run_playwright_tests
+    echo "::endgroup::"
 done

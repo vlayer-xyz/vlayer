@@ -9,10 +9,10 @@ set_proving_mode
 
 echo Generating typescript bidings ...
 ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
+bun install --frozen-lockfile
 
 echo '::group::Build extension'
 pushd "$VLAYER_HOME/packages/browser-extension" > /dev/null
-bun install --frozen-lockfile
 bun run build
 popd > /dev/null
 echo '::endgroup::'
@@ -20,8 +20,14 @@ echo '::endgroup::'
 install_chromium
 
 for example in $(get_examples); do
+  echo Running services...
+  source ${VLAYER_HOME}/bash/run-services.sh
+  echo "::group::Running tests of: ${example}"
+  cd "$VLAYER_HOME/examples/$example"
+  forge build
+  cd vlayer
   echo "Running tests for ${example}"
-  pushd "$VLAYER_HOME/examples/$example/vlayer" > /dev/null
+  pushd "$VLAYER_HOME/examples/$example/" > /dev/null
     run_playwright_tests 
   popd > /dev/null
 done

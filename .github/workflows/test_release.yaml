@@ -43,7 +43,24 @@ jobs:
           JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
           VLAYER_API_TOKEN: ${{ secrets.VLAYER_API_TOKEN }}
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
-        run: bash/test-release-remote-prover.sh
+        run: |
+          bash/test-release-remote-prover.sh
+          echo "TEMP_DIRS=$(tr '\n' ' ' < /tmp/temp_dirs.txt)" >> "$GITHUB_ENV"
+
+      - name: Upload Playwright Reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            $(for temp_dir in $TEMP_DIRS; do
+              example=$(echo "$temp_dir" | cut -d ':' -f 1)
+              report_dir="${temp_dir}/examples/${example}/vlayer/playwright-report"
+              if [ -d "$report_dir" ]; then
+                echo "$report_dir"
+              fi
+            done)
+          retention-days: 30
   test-release-js-sdk:
     name: Test JS SDK release
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
