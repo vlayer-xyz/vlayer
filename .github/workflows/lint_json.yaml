@@ -8,9 +8,29 @@ on:
       - main
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - '**/*.json'
+              - 'bash/lib/lint-json.sh'
+              - '.github/workflows/lint_json.yaml'
+
   lint-json:
     name: Lint JSON
+    needs: changes
     runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
