@@ -44,7 +44,7 @@ for example in $(get_examples); do
 
     echo "Starting docker-compose"
     pushd vlayer
-        bun run devnet # TODO: use bun run devnet:up after release
+        bun run devnet:up
     popd
 
     echo "::group::vlayer run prove.ts: ${example}"
@@ -52,6 +52,6 @@ for example in $(get_examples); do
     echo '::endgroup::'
 
     pushd vlayer
-        docker compose -f docker-compose.devnet.yaml down # TODO: use bun run devnet:down after release
+        bun run devnet:down
     popd
 done
