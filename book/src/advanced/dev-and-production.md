@@ -51,8 +51,15 @@ Devnet allows you to run the full stack locally, including anvil and all require
 Navigate to the vlayer project directory and start services in the background:
 ```bash
 cd ${project}/vlayer
-bun run devnet
+bun run devnet:up
 ```
+
+You can stop devnet anytime with:
+```bash
+cd ${project}/vlayer
+bun run devnet:down
+```
+It is useful in case of any Docker configuration change. 
 
 #### Outside of the vlayer project
 

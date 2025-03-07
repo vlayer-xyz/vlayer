@@ -8,7 +8,8 @@
     "viem": "^2.17.5"
   },
   "scripts": {
-    "devnet": "docker compose --file docker-compose.devnet.yaml up -d",
+    "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
+    "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
     "lint:solidity": "solhint '../src/**/*.sol'",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run loadFixtures.ts && VLAYER_ENV=dev bun run prove.ts",
