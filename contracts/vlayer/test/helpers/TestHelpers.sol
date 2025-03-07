@@ -42,7 +42,7 @@ contract TestHelpers {
 
     function createProof() public view returns (Proof memory, bytes32) {
         CallAssumptions memory assumptions =
-            CallAssumptions(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
+            CallAssumptions(PROVER, SELECTOR, block.chainid, block.number - 1, blockhash(block.number - 1));
         return createProof(assumptions);
     }
 

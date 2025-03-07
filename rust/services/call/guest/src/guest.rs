@@ -56,7 +56,12 @@ pub async fn main(
         .get(start_execution_location)
         .expect("cannot get start evm env");
 
-    let call_assumptions = CallAssumptions::new(start_env.header(), call.to, call.selector());
+    let call_assumptions = CallAssumptions::new(
+        start_execution_location.chain_id,
+        start_env.header(),
+        call.to,
+        call.selector(),
+    );
 
     GuestOutput::new(call_assumptions, evm_call_result)
 }

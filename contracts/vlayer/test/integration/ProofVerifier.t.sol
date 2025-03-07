@@ -39,10 +39,10 @@ contract PinnedProofVerifer_Tests is Test {
         // Proof has been generated with anvil, whereas we are checking against forge chain,
         // therefore blockhashes do not match.
         vm.roll(ProofFixtures.FIXED_SETTLE_BLOCK_NUMBER + 1);
-        vm.setBlockhash(ProofFixtures.FIXED_SETTLE_BLOCK_NUMBER, ProofFixtures.FIXED_SETTLE_BLOCK_HASH);
     }
 
     function test_canVerifyFakeProof() public {
+        vm.setBlockhash(ProofFixtures.FIXED_SETTLE_BLOCK_NUMBER, ProofFixtures.FIXED_FAKE_SETTLE_BLOCK_HASH);
         IProofVerifier verifier = new FakeProofVerifierUnderTest();
         (Proof memory proof, bytes32 journalHash) = ProofFixtures.fakeProofFixture();
 
@@ -50,6 +50,7 @@ contract PinnedProofVerifer_Tests is Test {
     }
 
     function test_canVerifyGroth16Proof() public {
+        vm.setBlockhash(ProofFixtures.FIXED_SETTLE_BLOCK_NUMBER, ProofFixtures.FIXED_GROTH16_SETTLE_BLOCK_HASH);
         IProofVerifier verifier = new Groth16ProofVerifierUnderTest();
         (Proof memory proof, bytes32 journalHash) = ProofFixtures.groth16ProofFixture();
 
@@ -59,19 +60,22 @@ contract PinnedProofVerifer_Tests is Test {
 
 library ProofFixtures {
     bytes32 public constant FIXED_CALL_GUEST_ID =
-        bytes32(0x9eebe10658931b5001400fbe6133aaf7214c01a62af1b646a8685f7c49215606);
+        bytes32(0x48b3f1bbe8639486a88591ac8285d486b7eee373e6194f40e8310e3b31cbcb2c);
     address public constant FIXED_PROVER_ADDRESS = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
     bytes4 public constant FIXED_SELECTOR = PinnedSimpleProver.balance.selector;
-    uint256 public constant FIXED_SETTLE_BLOCK_NUMBER = 4;
-    bytes32 public constant FIXED_SETTLE_BLOCK_HASH =
-        bytes32(0xa4b11124964d0edccf10a8f18771d5e3d8b28bbaa5dbd755f92b1ca22d749f5d);
+    uint256 public constant FIXED_SETTLE_CHAIN_ID = 31_337;
+    uint256 public constant FIXED_SETTLE_BLOCK_NUMBER = 6;
+    bytes32 public constant FIXED_GROTH16_SETTLE_BLOCK_HASH =
+        bytes32(0x686190a32cd4175beb26676c275fe31fe8ede32a3eb402235718ce08a2f0be37);
+    bytes32 public constant FIXED_FAKE_SETTLE_BLOCK_HASH =
+        bytes32(0xc22fc501b37d1a8cfa40dea699bf6dff9356dccb9d914be09fc39c1e3802c3a1);
 
     address public constant FIXED_OWNER = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
     uint256 public constant FIXED_BALANCE = 10000000;
 
     function fakeProofFixture() public pure returns (Proof memory, bytes32) {
         bytes32[8] memory sealBytes = [
-            bytes32(0x820c1cd3846493f80da25bbf75bef1a614992015e8ac9f27d14d5110af8cf832),
+            bytes32(0xd471a5bb30e787d84eae98c70f375ee2a674946eb47ace047eb748933c09bf9f),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
@@ -83,29 +87,30 @@ library ProofFixtures {
 
         Seal memory seal = Seal(bytes4(0xdeafbeef), sealBytes, ProofMode.FAKE);
 
-        return generateProof(seal);
+        return generateProof(seal, ProofFixtures.FIXED_FAKE_SETTLE_BLOCK_HASH);
     }
 
     function groth16ProofFixture() public pure returns (Proof memory, bytes32) {
         bytes32[8] memory sealBytes = [
-            bytes32(0x125ed7a937919cad6b5ea590279d27ef4281c726df4d0cb62eff59714405192b),
-            bytes32(0x236969b16f7bfd911fe0e39bac39021b39e3e148f1c3ab5d39cbe4877212247a),
-            bytes32(0x1bb91c289be59137327d0f1c1ad96063e447bc55fdf2bf0e6f913e611628ff87),
-            bytes32(0x172ab5634c38a34b41b01dfce4cfe5f920d5f82b7f4fb3530c657bc07d9a88c0),
-            bytes32(0x08052f9b048c6412ed1c63cbf1312c1feb85319cc283f0c741e6f64c5b654601),
-            bytes32(0x1aa4f9029698b72449eaa592144b581fabbfe18f975bbd98b996704b072386ec),
-            bytes32(0x2c1970ebb50e1916b46fb786afae4927dceab64b9b3642cc0c8c1f96543865e3),
-            bytes32(0x06d5a27b5ecd7c03a3594f5d34983fd73fc3bb4c1fd9c9dad8917b61d5feee93)
+            bytes32(0x2f70448a3ecc532b5abe08657df85d8277fe340fc08507a8804166b6bf56e9b5),
+            bytes32(0x09f47d1bef2a510bed7829f949ca2f75ab4d45a99d2e4bd9f717ff6251b17007),
+            bytes32(0x077294343cc7fe14f8b17286bfd05c764dd662c8bcbc0d617ec2c866a6ae6808),
+            bytes32(0x09b562299b7532db50999a1790bb062f15375b0d44964111b4c6b75c07ed15f1),
+            bytes32(0x18dbcfcf84dbb509da769f4ad2da24a6597b929742953409f0b8a45c740702e3),
+            bytes32(0x19436dec029157c3396542a41491199a57e5faa0da1a238d5e03ba283490d5c3),
+            bytes32(0x0d309ab4096d78edd8586d7d2b0c326ec332dc7084e1781c3ca3ef4cb6bf9f7a),
+            bytes32(0x2fb04107f123bbc92bced83e6a172164aaacd39838ebf68309a233e3c469bfa4)
         ];
 
         Seal memory seal = Seal(Groth16VerifierSelector.STABLE_VERIFIER_SELECTOR, sealBytes, ProofMode.GROTH16);
 
-        return generateProof(seal);
+        return generateProof(seal, ProofFixtures.FIXED_GROTH16_SETTLE_BLOCK_HASH);
     }
 
-    function generateProof(Seal memory seal) private pure returns (Proof memory, bytes32) {
-        CallAssumptions memory callAssumptions =
-            CallAssumptions(FIXED_PROVER_ADDRESS, FIXED_SELECTOR, FIXED_SETTLE_BLOCK_NUMBER, FIXED_SETTLE_BLOCK_HASH);
+    function generateProof(Seal memory seal, bytes32 blockHash) private pure returns (Proof memory, bytes32) {
+        CallAssumptions memory callAssumptions = CallAssumptions(
+            FIXED_PROVER_ADDRESS, FIXED_SELECTOR, FIXED_SETTLE_CHAIN_ID, FIXED_SETTLE_BLOCK_NUMBER, blockHash
+        );
 
         uint256 length = 0; // it is not used in verification, so can be set to 0
 
