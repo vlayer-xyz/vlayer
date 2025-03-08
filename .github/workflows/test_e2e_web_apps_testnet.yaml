@@ -107,3 +107,15 @@ jobs:
           name: playwright-report
           path: ./examples/**/vlayer/playwright-report/
           retention-days: 30
+      - name: Install Vercel
+        shell: bash
+        run: npm install -g vercel
+      - name: Deploy Playwright Reports
+        if: ${{ !cancelled() }}
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          EXAMPLES_PATH: /examples/
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash/vercel/deploy-playwright.sh
