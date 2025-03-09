@@ -30,11 +30,14 @@ for example in $(get_examples); do
 
   DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN )
   echo "DEPLOYMENT_URL: $DEPLOYMENT_URL"
-  COMMENT_BODY="The playwright report of the ${example} example app is available at: $DEPLOYMENT_URL \n\n Context: $CONTEXT"
-  curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    -X POST \
-    -d "{\"body\":\"$COMMENT_BODY\"}" \
-    "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments"
+  echo "POST_COMMENT: $POST_COMMENT"
+  if [ "$POST_COMMENT" = true ]; then
+    COMMENT_BODY="The playwright report of the ${example} example app is available at: $DEPLOYMENT_URL \n\n Context: $CONTEXT"
+    curl -s -H "Authorization: token $GITHUB_TOKEN" \
+      -X POST \
+      -d "{\"body\":\"$COMMENT_BODY\"}" \
+      "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments"
+  fi
 
   echo "deployment_url=${DEPLOYMENT_URL}" >> $GITHUB_OUTPUT
 done

@@ -124,7 +124,7 @@ runs:
         VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
         GITHUB_TOKEN: "${{ inputs.github_token }}"
         EXAMPLE_NAME: ${{ inputs.example_name }}
-      run: bash/deploy-to-vercel.sh
+      run: bash/vercel/deploy-example.sh
     - name: Deploy to Vercel (PR Preview)
       id: deploy-vercel-preview
       if: github.event_name == 'pull_request'
@@ -137,4 +137,4 @@ runs:
         GITHUB_TOKEN: "${{ inputs.github_token }}"
         PR_NUMBER: "${{ github.event.number }}"
         EXAMPLE_NAME: ${{ inputs.example_name }}
-      run: bash/deploy-to-vercel.sh
+      run: bash/vercel/deploy-example.sh
