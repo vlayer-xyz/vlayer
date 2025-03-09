@@ -81,3 +81,4 @@ jobs:
           REPORT_PATH: "packages/playwright-report/"
           PR_NUMBER: ${{ github.event.number }}
           DEPLOY_TYPE: "packages"
+          CONTEXT: "test-e2e-web-flow"

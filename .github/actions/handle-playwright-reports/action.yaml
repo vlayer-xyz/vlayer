@@ -30,6 +30,9 @@ inputs:
   DEPLOY_TYPE:
     required: true
     description: 'Type of deployment, either examples or packages'
+  CONTEXT:
+    required: true
+    description: 'Context of the deployment, e.g. test-release, test-e2e-web-apps-testnet, deploy-simple-web-proof'
 
 runs:
   using: 'composite'
@@ -57,6 +60,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         PR_NUMBER: ${{ inputs.PR_NUMBER }}
         DEPLOY_TYPE: ${{ inputs.DEPLOY_TYPE }}
+        CONTEXT: ${{ inputs.CONTEXT }}
       run: |
         if [ "$DEPLOY_TYPE" == "examples" ]; then
           bash/vercel/deploy-playwright-examples.sh

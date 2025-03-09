@@ -104,6 +104,7 @@ jobs:
           REPORT_PATH: "examples/**/vlayer/playwright-report/"
           PR_NUMBER: ${{ github.event.number }}
           DEPLOY_TYPE: "examples"
+          CONTEXT: "deploy-simple-web-proof"
       # Teardown
       - name: Display Logs
         if: always()

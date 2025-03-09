@@ -114,3 +114,4 @@ jobs:
           REPORT_PATH: "examples/**/vlayer/playwright-report/"
           PR_NUMBER: ${{ github.event.number }}
           DEPLOY_TYPE: "examples"
+          CONTEXT: "test-e2e-web-apps-testnet"

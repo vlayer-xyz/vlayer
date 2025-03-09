@@ -23,7 +23,7 @@ echo "{
 
 DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN )
 echo "DEPLOYMENT_URL: $DEPLOYMENT_URL"
-COMMENT_BODY="The playwright report is available at: $DEPLOYMENT_URL"
+COMMENT_BODY="The playwright report is available at: $DEPLOYMENT_URL \n\n Context: $CONTEXT"
 curl -s -H "Authorization: token $GITHUB_TOKEN" \
   -X POST \
   -d "{\"body\":\"$COMMENT_BODY\"}" \
