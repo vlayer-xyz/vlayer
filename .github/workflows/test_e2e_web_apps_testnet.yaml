@@ -100,22 +100,17 @@ jobs:
             cat "$log_file"
             echo "============================="
           done
-      - name: Upload playwright report
-        uses: actions/upload-artifact@v4
+      - name: Handle Playwright Reports
+        uses: ./.github/actions/handle-playwright-reports
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
-          path: ./examples/**/vlayer/playwright-report/
-          retention-days: 30
-      - name: Install Vercel
-        shell: bash
-        run: npm install -g vercel
-      - name: Deploy Playwright Reports
-        if: ${{ !cancelled() }}
-        env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           EXAMPLES_PATH: /examples/
           GITHUB_TOKEN: ${{ github.token }}
-        run: bash/vercel/deploy-playwright.sh
+          # Optional parameters with defaults:
+          ARTIFACT_RETENTION_DAYS: "30"
+          REPORT_PATH: "examples/**/vlayer/playwright-report/"
+          PR_NUMBER: ${{ github.event.number }}
+          DEPLOY_TYPE: "examples"

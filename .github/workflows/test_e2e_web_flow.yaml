@@ -67,9 +67,17 @@ jobs:
           VLAYER_ENV: dev
         run: bash/playwright-test.sh
 
-      - uses: actions/upload-artifact@v4
+      - name: Handle Playwright Reports
+        uses: ./.github/actions/handle-playwright-reports
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
-          path: ./packages/playwright-report/
-          retention-days: 30
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          EXAMPLES_PATH: /examples/
+          GITHUB_TOKEN: ${{ github.token }}
+          # Optional parameters with defaults:
+          ARTIFACT_RETENTION_DAYS: "30"
+          REPORT_PATH: "packages/playwright-report/"
+          PR_NUMBER: ${{ github.event.number }}
+          DEPLOY_TYPE: "packages"

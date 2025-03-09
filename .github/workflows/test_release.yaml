@@ -45,26 +45,20 @@ jobs:
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
 
         run: bash/test-release-remote-prover.sh
-
-      - name: Upload Playwright Reports
+      - name: Handle Playwright Reports
+        uses: ./.github/actions/handle-playwright-reports
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: vlayer-test-release/examples/**/vlayer/playwright-report/
-          retention-days: 30
-      - name: Install Vercel
-        shell: bash
-        run: npm install -g vercel
-      - name: Deploy Playwright Reports
-        if: ${{ !cancelled() }}
-        env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           EXAMPLES_PATH: /vlayer-test-release/examples/
           GITHUB_TOKEN: ${{ github.token }}
-        run: bash/vercel/deploy-playwright.sh
+          ARTIFACT_RETENTION_DAYS: "30"
+          REPORT_PATH: "vlayer-test-release/examples/**/vlayer/playwright-report/"
+          PR_NUMBER: ${{ github.event.number }}
+          DEPLOY_TYPE: "examples"
+
   test-release-js-sdk:
     name: Test JS SDK release
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}

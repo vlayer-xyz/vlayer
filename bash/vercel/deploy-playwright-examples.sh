@@ -38,4 +38,3 @@ for example in $(get_examples); do
 
   echo "deployment_url=${DEPLOYMENT_URL}" >> $GITHUB_OUTPUT
 done
-exit 0
