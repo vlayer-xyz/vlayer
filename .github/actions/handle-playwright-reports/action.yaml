@@ -60,10 +60,11 @@ runs:
         PR_NUMBER: ${{ inputs.PR_NUMBER }}
         DEPLOY_TYPE: ${{ inputs.DEPLOY_TYPE }}
         CONTEXT: ${{ inputs.CONTEXT }}
-        POST_COMMENT: ${{ job.status == 'failure' && 'true' || 'false' }}
+        POST_COMMENT: ${{ job.status == 'failure' }}
       run: |
         if [ "$DEPLOY_TYPE" == "examples" ]; then
           bash/vercel/deploy-playwright-examples.sh
         else
           bash/vercel/deploy-playwright-packages.sh
         fi
+        

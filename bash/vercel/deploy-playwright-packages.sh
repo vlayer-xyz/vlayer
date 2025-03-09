@@ -7,9 +7,6 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 echo "Deploying playwright report for packages"
 cd "${VLAYER_HOME}/packages/playwright-report/"
 mkdir -p .vercel
-echo "VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID"
-echo "VERCEL_ORG_ID: $VERCEL_ORG_ID"
-echo "VERCEL_TOKEN: $VERCEL_TOKEN"
 echo "{
     \"projectId\":\"${VERCEL_PROJECT_ID}\",
     \"orgId\":\"${VERCEL_ORG_ID}\",
@@ -22,8 +19,6 @@ echo "{
 }" > .vercel/project.json
 
 DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN )
-echo "DEPLOYMENT_URL: $DEPLOYMENT_URL"
-echo "POST_COMMENT: $POST_COMMENT"
 if [ "$POST_COMMENT" == "true" ]; then
   COMMENT_BODY="The playwright report is available at: $DEPLOYMENT_URL \n\n Context: $CONTEXT"
   curl -s -H "Authorization: token $GITHUB_TOKEN" \
