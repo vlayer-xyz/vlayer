@@ -1,4 +1,3 @@
-import { Step, StepKind, stepsMeta, StepComponentMap } from "./types";
 import {
   WelcomePage,
   ConnectWallet,
@@ -7,7 +6,6 @@ import {
   MintNFTContainer,
   SuccessContainer,
 } from "../../pages";
-import React from "react";
 import { Step, StepKind, stepsMeta, StepComponentMap } from "./types";
 
 
