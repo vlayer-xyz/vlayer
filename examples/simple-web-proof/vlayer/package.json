@@ -2,7 +2,6 @@
   "name": "simple-web-proof",
   "type": "module",
   "scripts": {
-    "devnet": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
     "lint:solidity": "solhint '../src/**/*.sol'",
