@@ -2,6 +2,7 @@ import { z } from "zod";
 import { envToConfig } from "./utils/envToConfig";
 
 export const POSSIBLE_VLAYER_ENVS = ["testnet", "dev"] as const;
+export const POSSIBLE_CLIENT_AUTH_MODES = ["wallet", "envPrivateKey"] as const;
 export const stringBoolean = z
   .enum(["true", "false"])
   .transform((x) => x === "true");
@@ -9,6 +10,7 @@ export const stringBoolean = z
 export const envSchema = z.object({
   CHAIN_NAME: z.string(),
   EXAMPLES_TEST_PRIVATE_KEY: z.string().regex(/^0x[0-9a-fA-F]{64}$/),
+  CLIENT_AUTH_MODE: z.enum(POSSIBLE_CLIENT_AUTH_MODES),
   JSON_RPC_URL: z.string().url(),
   PROVER_URL: z.string().url(),
   VLAYER_ENV: z.enum(POSSIBLE_VLAYER_ENVS),
