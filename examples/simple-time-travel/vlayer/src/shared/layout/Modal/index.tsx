@@ -36,7 +36,7 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
   const [isSuccessStep, setIsSuccessStep] = useState(false);
   useEffect(() => {
     setIsWelcome(currentStep?.kind === StepKind.welcome);
-    setIsSuccessStep(currentStep?.kind === StepKind.success);
+    setIsSuccessStep(currentStep?.kind === StepKind.welcome);
   }, [currentStep?.kind]);
 
   const [descClass, setDescClass] = useState("");

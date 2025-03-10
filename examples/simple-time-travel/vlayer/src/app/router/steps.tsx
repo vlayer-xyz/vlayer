@@ -1,11 +1,4 @@
-import {
-  WelcomePage,
-  ConnectWallet,
-  SendEmailContainer,
-  CollectEmailContainer,
-  MintNFTContainer,
-  SuccessContainer,
-} from "../../pages";
+import { WelcomePage } from "../../pages";
 import React from "react";
 import { StepKind, stepsMeta, StepMeta } from "./types";
 
