@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCurrentStep } from "../../hooks/useCurentStep";
-import { STEP_KIND } from "../../../app/router/steps";
+import { StepKind } from "../../../app/router/types";
 import { ProgressBar } from "../ProgressBar";
 import { Navigation } from "../Navigation";
 import { motionConfig } from "./Modal.animations";
@@ -35,8 +35,8 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
   const [isWelcome, setIsWelcome] = useState(false);
   const [isSuccessStep, setIsSuccessStep] = useState(false);
   useEffect(() => {
-    setIsWelcome(currentStep?.kind === STEP_KIND.WELCOME);
-    setIsSuccessStep(currentStep?.kind === STEP_KIND.SUCCESS);
+    setIsWelcome(currentStep?.kind === StepKind.welcome);
+    setIsSuccessStep(currentStep?.kind === StepKind.success);
   }, [currentStep?.kind]);
 
   const [descClass, setDescClass] = useState("");
@@ -54,7 +54,7 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
     <dialog className="modal" ref={modalRef}>
       <div className="modal-box bg-white rounded-2xl">
         <motion.div
-          className="h-[490px] flex flex-col items-center justify-between"
+          className="flex flex-col items-center justify-between"
           {...motionConfig}
         >
           <Navigation />
@@ -71,11 +71,13 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
               />
             )}
           </AnimatePresence>
-          <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
+          <div className="flex-col flex gap-4 justify-between mb-2">
             {currentStep?.title && (
               <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
             )}
-            <p className={`h-[116px] desc ${descClass}`}>{description}</p>
+            {currentStep?.description && (
+              <p className={`h-[116px] desc ${descClass}`}>{description}</p>
+            )}
             <modalContext.Provider value={{ showModal, closeModal }}>
               {children}
             </modalContext.Provider>

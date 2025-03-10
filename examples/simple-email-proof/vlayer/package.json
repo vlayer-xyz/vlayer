@@ -13,7 +13,7 @@
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
     "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
-    "test:dev": "echo \"No tests specified yet\"",
+    "test:dev": "VLAYER_ENV=dev bun run playwright test",
     "test:testnet": "echo \"No tests specified yet\""
   },
   "dependencies": {
@@ -22,9 +22,12 @@
     "@vercel/analytics": "^1.4.1",
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
+    "debug": "^4.4.0",
     "react": "^18.3.1",
     "react-daisyui": "^5.0.5",
     "react-dom": "^18.3.1",
+    "usehooks-ts": "^3.1.1",
+    "uuid": "^11.0.5",
     "wagmi": "^2.14.6"
   },
   "devDependencies": {

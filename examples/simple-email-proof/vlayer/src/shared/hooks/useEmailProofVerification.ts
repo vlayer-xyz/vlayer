@@ -6,12 +6,16 @@ import {
 } from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
-import { usePrivateKey, getStrFromFile } from "../lib/utils";
+import { usePrivateKey } from "../lib/utils";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
 import { useNavigate } from "react-router";
+import debug from "debug";
+
+const log = debug("vlayer:email-proof-verification");
+
 class NoProofError extends Error {
   constructor(message: string) {
     super(message);
@@ -20,7 +24,7 @@ class NoProofError extends Error {
 }
 
 enum ProofVerificationStep {
-  START = "Start",
+  MINT = "Mint",
   SENDING_TO_PROVER = "Sending to prover...",
   WAITING_FOR_PROOF = "Waiting for proof...",
   VERIFYING_ON_CHAIN = "Verifying on-chain...",
@@ -30,7 +34,7 @@ enum ProofVerificationStep {
 export const useEmailProofVerification = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<ProofVerificationStep>(
-    ProofVerificationStep.START,
+    ProofVerificationStep.MINT,
   );
   const { address: connectedAddr } = useAccount();
 
@@ -49,6 +53,7 @@ export const useEmailProofVerification = () => {
     address: import.meta.env.VITE_PROVER_ADDRESS,
     proverAbi: proverSpec.abi,
     functionName: "main",
+    token: import.meta.env.VITE_VLAYER_API_TOKEN,
   });
 
   const { data: proof, error: provingError } =
@@ -84,16 +89,15 @@ export const useEmailProofVerification = () => {
     }
   };
 
-  const startProving = async (uploadedEmlFile: File) => {
+  const startProving = async (emlContent: string) => {
     setCurrentStep(ProofVerificationStep.SENDING_TO_PROVER);
     const claimerAddr = usePrivateKey
       ? privateKeyToAccount(import.meta.env.VITE_PRIVATE_KEY as `0x${string}`)
           .address
       : (connectedAddr as Address);
 
-    const eml = await getStrFromFile(uploadedEmlFile);
     const email = await preverifyEmail(
-      eml,
+      emlContent,
       import.meta.env.VITE_DNS_SERVICE_URL,
     );
     await callProver([email, claimerAddr]);
@@ -102,14 +106,18 @@ export const useEmailProofVerification = () => {
 
   useEffect(() => {
     if (proof) {
+      log("proof", proof);
       verifyProofOnChain();
     }
   }, [proof]);
 
   useEffect(() => {
-    if (status === "success") {
+    if (status === "success" && proof) {
       setCurrentStep(ProofVerificationStep.DONE);
-      navigate(`/success?txHash=${txHash}`);
+      const proofArray = proof as unknown[];
+      navigate(
+        `/success?txHash=${txHash}&domain=${String(proofArray[3])}&recipient=${String(proofArray[2])}`,
+      );
     }
   }, [status]);
 

@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import { Layout } from "../../shared/layout/Layout";
-import { steps } from "./steps";
+import { getAllSteps } from "./steps";
 
 const Router = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          {steps.map((step) => (
+          {getAllSteps().map((step) => (
             <Route
               key={step.path}
               path={step.path}

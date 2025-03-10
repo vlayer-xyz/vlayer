@@ -1,17 +1,17 @@
-import { NextButton } from "./ui/NextButton";
-import { InputWithCopy } from "./ui/InputWithCopy";
+import { useAccount } from "wagmi";
+import { SendEmail } from "./Presentational";
+import { v4 as uuidv4 } from "uuid";
 
-export const SendEmail = () => {
-  return (
-    <>
-      <div className="w-full">
-        <InputWithCopy
-          label="Subject"
-          value="Mint my domain NFT at address: 0x1234...abcd"
-        />
-        <InputWithCopy label="To" value="nft@vlayer.xyz" />
-      </div>
-      <NextButton />
-    </>
-  );
+export const SendEmailContainer = () => {
+  const { address } = useAccount();
+  const emailId = uuidv4();
+
+  const subject = `Mint my domain NFT at address: ${address}`;
+  const uniqueEmail = `${emailId}@proving.vlayer.xyz`;
+
+  if (!address) {
+    return <div>Connect your wallet to send an email</div>;
+  }
+
+  return <SendEmail subject={subject} uniqueEmail={uniqueEmail} />;
 };

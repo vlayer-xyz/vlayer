@@ -26,4 +26,5 @@ writeEnvVariables(".env", {
   VITE_DNS_SERVICE_URL: config.dnsServiceUrl,
   VITE_USE_WINDOW_ETHEREUM_TRANSPORT:
     process.env.USE_WINDOW_ETHEREUM_TRANSPORT || "",
+  VITE_EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL || "",
 });

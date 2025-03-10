@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { useEmailProofVerification } from "../../shared/hooks/useEmailProofVerification";
 import { MintNFT } from "./Presentational";
+import { useLocalStorage } from "usehooks-ts";
 
 export const MintNFTContainer = () => {
-  const [copyCode, setCopyCode] = useState(false);
-  const [emlFile, setEmlFile] = useState<File | undefined>(undefined);
+  const [emlFile] = useLocalStorage("emlFile", "");
 
   const { currentStep, startProving } = useEmailProofVerification();
 
@@ -14,14 +13,5 @@ export const MintNFTContainer = () => {
     }
   };
 
-  return (
-    <MintNFT
-      copyCode={copyCode}
-      setCopyCode={setCopyCode}
-      emlFile={emlFile}
-      setEmlFile={setEmlFile}
-      currentStep={currentStep}
-      handleProving={handleProving}
-    />
-  );
+  return <MintNFT currentStep={currentStep} handleProving={handleProving} />;
 };

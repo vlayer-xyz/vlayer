@@ -1,11 +1,12 @@
 import { Link } from "react-router";
-import { getStepBackUrl, STEP_KIND } from "../../app/router/steps";
+import { getStepPath } from "../../app/router/steps";
+import { StepKind } from "../../app/router/types";
 
 export const WelcomePage = () => {
   return (
     <div className="mt-5 flex justify-center">
       <Link
-        to={getStepBackUrl(STEP_KIND.CONNECT_WALLET)}
+        to={`/${getStepPath(StepKind.connectWallet)}`}
         id="nextButton"
         data-testid="start-page-button"
       >
