@@ -1,5 +1,15 @@
-import { WelcomePage } from "../../pages";
 import { Step, StepKind, stepsMeta, StepComponentMap } from "./types";
+import {
+  WelcomePage,
+  ConnectWallet,
+  SendEmailContainer,
+  CollectEmailContainer,
+  MintNFTContainer,
+  SuccessContainer,
+} from "../../pages";
+import React from "react";
+import { Step, StepKind, stepsMeta, StepComponentMap } from "./types";
+
 
 // Map step kinds to their respective components
 export const stepComponents: StepComponentMap = {
