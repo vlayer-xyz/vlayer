@@ -10,15 +10,18 @@ use axum_extra::{
 };
 use derive_more::Deref;
 use derive_new::new;
-use jsonwebtoken::{decode, errors::Error as JwtError, Validation};
+use jsonwebtoken::{decode, decode_header, errors::Error as JwtError, Validation};
 pub use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
 
+#[derive(Deref, Clone, Deserialize)]
+pub struct ClaimsExtractor<T: Clone>(pub T);
+
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("Invalid token")]
+    #[error("InvalidToken")]
     InvalidToken,
     #[error(transparent)]
     Jwt(JwtError),
@@ -30,10 +33,9 @@ pub struct State {
     algorithm: Algorithm,
 }
 
-#[derive(Deref, Clone, Deserialize)]
-pub struct Claims<T: Clone>(pub T);
+const HEADER_TYP: &str = "JWT";
 
-impl<S, T> FromRequestParts<S> for Claims<T>
+impl<S, T> FromRequestParts<S> for ClaimsExtractor<T>
 where
     for<'de> T: Clone + Deserialize<'de>,
     S: Send + Sync,
@@ -47,10 +49,16 @@ where
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
             .map_err(|_| Error::InvalidToken)?;
+
+        let header = decode_header(bearer.token()).map_err(|_| Error::InvalidToken)?;
+        if header.typ.is_none_or(|typ| typ != HEADER_TYP) {
+            return Err(Error::InvalidToken);
+        }
+
         let mut validation = Validation::new(state.algorithm);
         validation.validate_exp = true;
-        let token_data =
-            decode::<Claims<T>>(bearer.token(), &state.pub_key, &validation).map_err(Error::Jwt)?;
+        let token_data = decode::<ClaimsExtractor<T>>(bearer.token(), &state.pub_key, &validation)
+            .map_err(Error::Jwt)?;
         Ok(token_data.claims)
     }
 }

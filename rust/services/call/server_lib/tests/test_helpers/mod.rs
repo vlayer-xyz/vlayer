@@ -2,7 +2,7 @@ use std::time::Duration;
 
 #[cfg(feature = "jwt")]
 use call_server_lib::jwt::Config as JwtConfig;
-use call_server_lib::{config::AuthMode, ConfigBuilder, ProofMode};
+use call_server_lib::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
 use ethers::types::{Bytes, H160};
@@ -55,14 +55,16 @@ pub(crate) fn chain_guest_elf() -> &'static GuestElf {
 
 pub(crate) const API_VERSION: &str = "1.2.3";
 
+#[cfg(feature = "jwt")]
+pub(crate) const JWT_SECRET: &[u8] = b"deadbeef";
+
 #[derive(new)]
 pub(crate) struct Context {
     client: Client,
     anvil: Anvil,
     gas_meter_server: Option<GasMeterServer>,
-    auth_mode: AuthMode,
     #[cfg(feature = "jwt")]
-    jwt_config: Option<JwtConfig>,
+    jwt_config: JwtConfig,
 }
 
 impl Context {
@@ -73,21 +75,13 @@ impl Context {
             client,
             anvil,
             None,
-            AuthMode::default(),
             #[cfg(feature = "jwt")]
-            None,
+            JwtConfig::new(jsonwebtoken::DecodingKey::from_secret(JWT_SECRET), Default::default()),
         )
     }
 
     pub(crate) fn with_gas_meter_server(mut self, gas_meter_server: GasMeterServer) -> Self {
         self.gas_meter_server = Some(gas_meter_server);
-        self
-    }
-
-    #[cfg(feature = "jwt")]
-    pub(crate) fn with_jwt_config(mut self, jwt_config: JwtConfig) -> Self {
-        self.jwt_config = Some(jwt_config);
-        self.auth_mode = AuthMode::Jwt;
         self
     }
 
@@ -115,8 +109,7 @@ impl Context {
             .with_semver(API_VERSION)
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
             .with_proof_mode(ProofMode::Fake)
-            .with_gas_meter_config(gas_meter_config)
-            .with_auth_mode(self.auth_mode);
+            .with_gas_meter_config(gas_meter_config);
 
         #[cfg(feature = "jwt")]
         {

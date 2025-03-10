@@ -8,10 +8,6 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
-use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
-    TypedHeader,
-};
 use derive_new::new;
 use server_utils::{cors, init_trace_layer, RequestId, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
@@ -21,10 +17,13 @@ use tower_http::{
 };
 use tracing::info;
 
+#[cfg(feature = "jwt")]
+use crate::jwt::TokenExtractor;
+#[cfg(not(feature = "jwt"))]
+use crate::token::TokenExtractor;
 use crate::{
-    config::{AuthMode, Config},
+    config::Config,
     handlers::{Params, RpcServer, State as AppState},
-    user_token::Token as UserToken,
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -36,33 +35,26 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
+async fn handle(
+    token: Option<TokenExtractor>,
+    AxumState(State { router, config }): AxumState<State>,
+    Extension(req_id): Extension<RequestId>,
+    body: Bytes,
+) -> impl IntoResponse {
+    let params = Params::new(config, token.as_deref().cloned(), req_id);
+    router.handle_request_with_params(body, params).await
+}
+
 #[derive(new, Clone)]
 pub(super) struct State {
     pub config: Config,
     pub router: JrpcRouter<AppState>,
 }
 
-async fn handle(
-    user_token: Option<TypedHeader<Authorization<Bearer>>>,
-    AxumState(State { router, config }): AxumState<State>,
-    Extension(req_id): Extension<RequestId>,
-    body: Bytes,
-) -> impl IntoResponse {
-    let user_token: Option<UserToken> = user_token.map(|TypedHeader(user_token)| user_token.into());
-    let params = Params::new(config, user_token, req_id);
-    router.handle_request_with_params(body, params).await
-}
-
 pub fn server(config: Config) -> Router {
-    let handler = match config.auth_mode {
-        #[cfg(feature = "jwt")]
-        AuthMode::Jwt => post(crate::jwt::handle),
-        AuthMode::Token => post(handle),
-    };
     let router = State::new(config, JrpcRouter::new(AppState::default().into_rpc()));
-
     Router::new()
-        .route("/", handler)
+        .route("/", post(handle))
         .route_layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .route_layer(RequestIdLayer)

@@ -10,7 +10,7 @@ use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
 use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};
 use v_versions::Versions;
 
-use crate::{config::Config, proof::Status as ProofStatus, user_token::Token as UserToken};
+use crate::{config::Config, proof::Status as ProofStatus, token::Token};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
@@ -19,7 +19,7 @@ pub mod v_versions;
 #[derive(new, Clone)]
 pub struct Params {
     pub config: Config,
-    pub user_token: Option<UserToken>,
+    pub token: Option<Token>,
     pub req_id: RequestId,
 }
 

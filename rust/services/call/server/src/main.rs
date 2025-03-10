@@ -6,8 +6,8 @@ use alloy_primitives::ChainId;
 #[cfg(feature = "jwt")]
 use call_server_lib::jwt::Algorithm;
 use call_server_lib::{
-    chain_proof::Config as ChainProofConfig, config::AuthMode, gas_meter::Config as GasMeterConfig,
-    serve, Config, ConfigBuilder, ProofMode,
+    chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
+    ConfigBuilder, ProofMode,
 };
 use clap::{ArgAction, Parser};
 use common::{init_tracing, GlobalArgs, LogFormat};
@@ -48,12 +48,9 @@ struct Cli {
     #[arg(long, requires = "gas_meter", env)]
     gas_meter_api_key: Option<String>,
 
-    #[arg(long, value_enum)]
-    auth_mode: Option<AuthMode>,
-
     #[cfg(feature = "jwt")]
-    #[arg(long, required_if_eq("auth_mode", "jwt"), group = "jwt")]
-    public_key: Option<std::path::PathBuf>,
+    #[arg(long, group = "jwt")]
+    public_key: std::path::PathBuf,
 
     #[cfg(feature = "jwt")]
     #[arg(long, group = "jwt", default_value = "RS256")]
@@ -66,7 +63,6 @@ struct Cli {
 impl Cli {
     #[allow(unused_mut)]
     fn into_config(self, api_version: String) -> anyhow::Result<Config> {
-        let auth_mode = self.auth_mode.unwrap_or_default();
         let proof_mode = self.proof.unwrap_or_default();
         let gas_meter_config = self
             .gas_meter_url
@@ -90,17 +86,12 @@ impl Cli {
             .with_rpc_mappings(self.rpc_url)
             .with_proof_mode(proof_mode)
             .with_host(self.host)
-            .with_port(self.port)
-            .with_auth_mode(auth_mode);
+            .with_port(self.port);
 
         #[cfg(feature = "jwt")]
         {
-            builder = with_jwt_config(
-                builder,
-                self.public_key
-                    .expect("public key is guaranteed by clap to be non-null"),
-                self.algorithm.unwrap_or_default(),
-            )?;
+            builder =
+                with_jwt_config(builder, self.public_key, self.algorithm.unwrap_or_default())?;
         }
 
         Ok(builder.build()?)

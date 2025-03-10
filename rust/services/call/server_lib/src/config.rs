@@ -6,9 +6,7 @@ use chain::TEST_CHAIN_ID;
 use common::GuestElf;
 use derive_more::From;
 use risc0_zkp::core::digest::Digest;
-use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
-use strum::{Display, EnumString};
 use thiserror::Error;
 
 #[cfg(feature = "jwt")]
@@ -30,7 +28,6 @@ pub struct Config {
     pub chain_guest_ids: Box<[Digest]>,
     pub semver: String,
     pub gas_meter_config: Option<GasMeterConfig>,
-    pub auth_mode: AuthMode,
     #[cfg(feature = "jwt")]
     pub jwt_config: Option<JwtConfig>,
 }
@@ -54,18 +51,6 @@ impl Config {
     pub fn chain_guest_id_hex(&self) -> String {
         self.chain_guest_id().encode_hex_with_prefix()
     }
-}
-
-#[derive(
-    Debug, Display, Clone, Copy, Deserialize, Serialize, Default, PartialEq, Eq, EnumString,
-)]
-#[strum(ascii_case_insensitive)]
-#[non_exhaustive]
-pub enum AuthMode {
-    #[default]
-    Token,
-    #[cfg(feature = "jwt")]
-    Jwt,
 }
 
 pub struct SocketAddr(RawSocketAddr);
@@ -108,7 +93,6 @@ pub struct ConfigBuilder {
     chain_guest_ids: Option<Box<[Digest]>>,
     semver: Option<String>,
     gas_meter_config: Option<GasMeterConfig>,
-    auth_mode: AuthMode,
     #[cfg(feature = "jwt")]
     jwt_config: Option<JwtConfig>,
 }
@@ -126,12 +110,6 @@ impl ConfigBuilder {
     #[must_use]
     pub fn with_call_guest_elf(mut self, call_guest_elf: &GuestElf) -> Self {
         self.call_guest_elf = Some(call_guest_elf.clone());
-        self
-    }
-
-    #[must_use]
-    pub const fn with_auth_mode(mut self, auth_mode: AuthMode) -> Self {
-        self.auth_mode = auth_mode;
         self
     }
 
@@ -213,7 +191,6 @@ impl ConfigBuilder {
             call_guest_elf,
             chain_guest_ids,
             semver,
-            auth_mode,
             gas_meter_config,
             #[cfg(feature = "jwt")]
             jwt_config,
@@ -233,7 +210,6 @@ impl ConfigBuilder {
             chain_guest_ids,
             semver,
             gas_meter_config,
-            auth_mode,
             #[cfg(feature = "jwt")]
             jwt_config,
         })
