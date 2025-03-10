@@ -1,0 +1,97 @@
+name: "Run E2E Test for Testnet"
+description: "Runs an E2E test against testnet for a given example"
+inputs:
+  example:
+    description: "The E2E test example to run"
+    required: true
+  testnet_private_key_location:
+    description: "Path to testnet private key"
+    required: true
+  bonsai_api_url:
+    description: "BONSAI API URL"
+    required: true
+  bonsai_api_key:
+    description: "BONSAI API Key"
+    required: true
+  quicknode_api_key:
+    description: "Quicknode API Key"
+    required: true
+  gas_meter_url:
+    description: "Gas Meter URL"
+    required: true
+  gas_meter_api_key:
+    description: "Gas Meter API Key"
+    required: true
+  vlayer_api_token:
+    description: "VLAYER API Token"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install Rust prerequisites
+      id: rust_pre
+      uses: ./.github/actions/rust-prerequisites
+
+    - name: Download binaries
+      uses: actions/download-artifact@v4
+      with:
+        name: target-debug
+        path: target/debug
+
+    - name: Make downloaded binaries executable
+      run: sudo chmod +x target/debug/*
+      shell: bash
+
+    - name: Install contracts prerequisites
+      uses: ./.github/actions/contracts-prerequisites
+
+    - name: Install TypeScript prerequisites
+      uses: ./.github/actions/ts-prerequisites
+
+    - name: Mock ImageId.sol
+      run: ./bash/mock-imageid.sh
+      shell: bash
+
+    - name: Install contracts' dependencies
+      working-directory: ./contracts/vlayer
+      run: forge soldeer install
+      shell: bash
+
+    # Load testnet private key from input
+    - name: Read testnet private key
+      run: |
+        EXAMPLES_TEST_PRIVATE_KEY=$(cat "${{ inputs.testnet_private_key_location }}")
+        echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
+        echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Run e2e test in prod mode
+      env:
+        PROVING_MODE: "prod"
+        BONSAI_API_URL: ${{ inputs.bonsai_api_url }}
+        BONSAI_API_KEY: ${{ inputs.bonsai_api_key }}
+        QUICKNODE_API_KEY: ${{ inputs.quicknode_api_key }}
+        QUICKNODE_ENDPOINT: "dry-alpha-tab"
+        VLAYER_ENV: testnet
+        CHAIN_NAME: "optimismSepolia"
+        JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}"
+        PROVER_URL: http://127.0.0.1:3000
+        GAS_METER_URL: ${{ inputs.gas_meter_url }}
+        GAS_METER_API_KEY: ${{ inputs.gas_meter_api_key }}
+        VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
+        VLAYER_TMP_DIR: ./artifacts
+        BUILD_BINARIES: 0
+        CONFIRMATIONS: 2
+        EXAMPLE: ${{ inputs.example }}
+      run: bash/e2e-test.sh
+      shell: bash
+
+    # Upload logs
+    - name: Upload logs for previewing
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: logs-testnet-${{ inputs.example }}
+        path: ./artifacts/logs/
+        if-no-files-found: error
+        retention-days: 1
