@@ -16,7 +16,7 @@ export enum ClientAuthMode {
   WALLET = "wallet",
 }
 
-const projectId = `0716afdbbb2cc3df69721a879b92ad5b`;
+const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
 const chain =
   import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil : optimismSepolia;
 const chains: [Chain, ...Chain[]] = [chain];
@@ -76,14 +76,14 @@ const config = () => {
 };
 
 const wagmiAdapter = new WagmiAdapter({
-  projectId,
+  projectId: appKitProjectId,
   chains,
   networks,
 });
 
 createAppKit({
   adapters: [wagmiAdapter],
-  projectId,
+  projectId: appKitProjectId,
   networks,
   defaultNetwork: chain,
   metadata: {
