@@ -1,31 +1,31 @@
 name: Example deploy prerequisites
 description: Installs & builds example prerequisites.
 inputs:
-  EXAMPLE_NAME:
+  example_name:
     description: 'Name of the example to deploy'
     required: true
-  EXAMPLES_TEST_PRIVATE_KEY:
+  examples_test_private_key:
     description: 'Private key for the example'
     required: true
-  VERCEL_TOKEN:
+  vercel_token:
     description: 'Vercel token'
     required: true
-  VERCEL_PROJECT_ID:
+  vercel_project_id:
     description: 'Vercel project ID'
     required: true
-  VERCEL_ORG_ID:
+  vercel_org_id:
     description: 'Vercel organization ID'
     required: true
-  GITHUB_TOKEN:
+  github_token:
     description: 'Github token'
     required: true
-  JSON_RPC_URL:
+  json_rpc_url:
     description: 'JSON RPC URL'
     required: true
-  VLAYER_API_TOKEN:
+  vlayer_api_token:
     description: 'Vlayer API token'
     required: true
-  VITE_SENTRY_DSN:
+  vite_sentry_dsn:
     description: 'Sentry DSN'
     required: false
 outputs:
@@ -76,12 +76,12 @@ runs:
     - name: Build example contracts
       shell: bash
       run: forge soldeer install && forge clean && forge build
-      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}
+      working-directory: ./examples/${{ inputs.example_name }}
 
     - name: Install example dependencies
       shell: bash
       run: bun install
-      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+      working-directory: ./examples/${{ inputs.example_name }}/vlayer
 
     - name: Install Vercel
       shell: bash
@@ -93,18 +93,18 @@ runs:
       env:
         VLAYER_ENV: testnet
         USE_WINDOW_ETHEREUM_TRANSPORT: true
-        JSON_RPC_URL: ${{ inputs.JSON_RPC_URL }}
-        EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.EXAMPLES_TEST_PRIVATE_KEY }}
-        VLAYER_API_TOKEN: ${{ inputs.VLAYER_API_TOKEN }}
-      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+        JSON_RPC_URL: ${{ inputs.json_rpc_url }}
+        EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.examples_test_private_key }}
+        VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
+      working-directory: ./examples/${{ inputs.example_name }}/vlayer
 
     - name: Build vite
       shell: bash
       run: bun run vite build
       env:
         VITE_FAUCET_URL: https://faucet.vlayer.xyz
-        VITE_SENTRY_DSN: ${{ inputs.VITE_SENTRY_DSN }}
-      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+        VITE_SENTRY_DSN: ${{ inputs.vite_sentry_dsn }}
+      working-directory: ./examples/${{ inputs.example_name }}/vlayer
 
     - name: Copy vercel.json (if exists)
       shell: bash
@@ -112,18 +112,18 @@ runs:
         if [ -f "./vercel.json" ]; then
           cp ./vercel.json ./dist/vercel.json
         fi
-      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+      working-directory: ./examples/${{ inputs.example_name }}/vlayer
 
     - name: Deploy to Vercel
       if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
       shell: bash
       env:
         VERCEL_ENV: production
-        VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
-        VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
-        VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
-        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
-        EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
+        VERCEL_TOKEN: ${{ inputs.vercel_token }}
+        VERCEL_PROJECT_ID: ${{ inputs.vercel_project_id }}
+        VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
+        GITHUB_TOKEN: "${{ inputs.github_token }}"
+        EXAMPLE_NAME: ${{ inputs.example_name }}
       run: bash/deploy-to-vercel.sh
     - name: Deploy to Vercel (PR Preview)
       id: deploy-vercel-preview
@@ -131,10 +131,10 @@ runs:
       shell: bash
       env:
         VERCEL_ENV: preview
-        VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
-        VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
-        VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
-        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
+        VERCEL_TOKEN: ${{ inputs.vercel_token }}
+        VERCEL_PROJECT_ID: ${{ inputs.vercel_project_id }}
+        VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
+        GITHUB_TOKEN: "${{ inputs.github_token }}"
         PR_NUMBER: "${{ github.event.number }}"
-        EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
+        EXAMPLE_NAME: ${{ inputs.example_name }}
       run: bash/deploy-to-vercel.sh
