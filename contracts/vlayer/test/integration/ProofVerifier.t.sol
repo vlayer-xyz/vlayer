@@ -43,6 +43,7 @@ contract PinnedProofVerifer_Tests is Test {
 
     function test_canVerifyFakeProof() public {
         vm.setBlockhash(ProofFixtures.FIXED_SETTLE_BLOCK_NUMBER, ProofFixtures.FIXED_FAKE_SETTLE_BLOCK_HASH);
+        vm.chainId(ProofFixtures.FIXED_SETTLE_CHAIN_ID);
         IProofVerifier verifier = new FakeProofVerifierUnderTest();
         (Proof memory proof, bytes32 journalHash) = ProofFixtures.fakeProofFixture();
 
@@ -51,6 +52,7 @@ contract PinnedProofVerifer_Tests is Test {
 
     function test_canVerifyGroth16Proof() public {
         vm.setBlockhash(ProofFixtures.FIXED_SETTLE_BLOCK_NUMBER, ProofFixtures.FIXED_GROTH16_SETTLE_BLOCK_HASH);
+        vm.chainId(ProofFixtures.FIXED_SETTLE_CHAIN_ID);
         IProofVerifier verifier = new Groth16ProofVerifierUnderTest();
         (Proof memory proof, bytes32 journalHash) = ProofFixtures.groth16ProofFixture();
 

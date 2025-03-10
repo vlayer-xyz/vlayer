@@ -43,6 +43,7 @@ abstract contract ProofVerifierBase is IProofVerifier {
         require(proof.callAssumptions.proverContractAddress == prover, "Invalid prover");
         require(proof.callAssumptions.functionSelector == selector, "Invalid selector");
 
+        require(proof.callAssumptions.settleChainId == block.chainid, "Invalid chain id");
         require(proof.callAssumptions.settleBlockNumber < block.number, "Invalid block number: block from future");
         require(
             proof.callAssumptions.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS >= block.number,
