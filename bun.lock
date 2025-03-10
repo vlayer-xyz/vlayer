@@ -196,7 +196,7 @@
         "ramda": "^0.30.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "tlsn-js": "v0.1.0-alpha.7.1",
+        "tlsn-js": "v0.1.0-alpha.7.2",
         "ts-mockito": "^2.6.1",
         "ts-pattern": "^5.4.0",
         "urlpattern-polyfill": "^10.0.0",
@@ -2493,7 +2493,7 @@
 
     "tldts-core": ["tldts-core@6.1.83", "", {}, "sha512-I2wb9OJc6rXyh9d4aInhSNWChNI+ra6qDnFEGEwe9OoA68lE4Temw29bOkf1Uvwt8VZS079t1BFZdXVBmmB4dw=="],
 
-    "tlsn-js": ["tlsn-js@0.1.0-alpha.7.1", "", { "dependencies": { "tlsn-wasm": "^0.1.0-alpha.7.2" } }, "sha512-EWdRp1VQBfdre8jehJgmDjtDvt01ZL1JWbcscctnFTLIIwMYS7IBxU07UYG0NMZFXeTE8PlrUDEVwEl1+vla+g=="],
+    "tlsn-js": ["tlsn-js@0.1.0-alpha.7.2", "", { "dependencies": { "tlsn-wasm": "^0.1.0-alpha.7.2" } }, "sha512-G7xUog+HtDMRhw0fIRX9loUI6eUC9/4J+P0AzjBzpf8+8LAd3i8XgMkpqF8LqLUk5/vIm1b+ZakDYeCNMMiBeQ=="],
 
     "tlsn-wasm": ["tlsn-wasm@0.1.0-alpha.7.2", "", {}, "sha512-NzrDfOxmFtMHDb4lmMsx6RaS6F+IVXEHxK0zow8jpnx+NryuJ+qnp4380Lq0uj61w/Yuq+yzOhzFe6Bpeo59dA=="],
 

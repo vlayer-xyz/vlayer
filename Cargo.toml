@@ -157,7 +157,7 @@ maplit = "1.0.2"
 test-log = "0.2.16"
 thiserror = "2.0.11"
 insta = "1.42.0"
-tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.7" }
+tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.8" }
 tokio = { version = "1.43.0", default-features = false, features = ["rt-multi-thread"] }
 toml = "0.8.19"
 tower = "0.5.2"
