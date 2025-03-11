@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-contracts.sh"
 
 set -ueo pipefail
 
@@ -14,14 +15,6 @@ function install_deps {
     rm -rf node_modules
     bun install --frozen-lockfile
     echo "::endgroup::Installing dependencies"
-}
-
-function build_example_contracts {
-    echo "::group::Building example contracts" 
-    cd ${VLAYER_HOME}/examples/simple-web-proof
-    forge clean
-    forge build
-    echo "::endgroup::Building example contracts"
 }
 
 function run_web_app {
@@ -39,6 +32,6 @@ function run_browser_extension {
 }
 
 install_deps
-build_example_contracts
+build_example_contracts simple-web-proof
 run_web_app
 run_browser_extension
