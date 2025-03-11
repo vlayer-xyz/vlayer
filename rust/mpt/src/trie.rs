@@ -40,11 +40,6 @@ where
         MerkleTrie(Node::null())
     }
 
-    /// Creates a trie with no values and the given digest.
-    pub const fn digest(digest: B256) -> Self {
-        MerkleTrie(Node::digest(digest))
-    }
-
     /// Returns a reference to the byte value corresponding to the key.
     ///
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed.

@@ -6,7 +6,7 @@ use call_engine::evm::{
     input::{EvmInput, MultiEvmInput},
 };
 use common::Hashable;
-use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
+use mpt::{MerkleTrie, Node, EMPTY_ROOT_HASH};
 use thiserror::Error;
 
 use crate::db::{
@@ -31,7 +31,7 @@ fn into_input(db: &ProofDb, header: Box<dyn EvmBlockHeader>) -> Result<EvmInput>
     // If the trie contains no nodes - we replace it with empty trie that has correct digest
     // SAFETY: You can't get any account/storage info from such a trie
     if state_root == EMPTY_ROOT_HASH {
-        state_trie = MerkleTrie::digest(*header.state_root());
+        state_trie = MerkleTrie(Node::Digest(*header.state_root()));
     } else if header.state_root() != &state_root {
         return Err(Error::StateRootMismatch);
     }
@@ -66,7 +66,7 @@ mod test {
 
     use alloy_primitives::B256;
     use block_header::EthBlockHeader;
-    use mpt::MerkleTrie;
+    use mpt::{MerkleTrie, Node};
 
     use super::into_input;
     use crate::db::proof::ProofDb;
@@ -81,6 +81,6 @@ mod test {
             ..Default::default()
         };
         let input = into_input(&db, Box::new(header)).unwrap();
-        assert_eq!(input.state_trie, MerkleTrie::digest(state_root));
+        assert_eq!(input.state_trie, MerkleTrie(Node::Digest(state_root)));
     }
 }
