@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/lib/build-sdk.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
 
 set -ueo pipefail
 
