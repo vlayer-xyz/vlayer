@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { SidePanelContent } from "./SidePanelContent";
+import { SidePanelContainer } from "./SidePanelContent";
 import * as React from "react";
 import { ZkProvingStatus } from "src/web-proof-commons";
 import { LOADING } from "@vlayer/extension-hooks";
@@ -38,7 +38,7 @@ describe("SidePanelContent", () => {
     mocks.isEmptyWebProverSessionConfig.mockReturnValue(false);
     mocks.ZkProvingStatus.mockReturnValue(ZkProvingStatus.NotStarted);
 
-    render(<SidePanelContent />);
+    render(<SidePanelContainer />);
     expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 
@@ -46,7 +46,7 @@ describe("SidePanelContent", () => {
     vi.resetAllMocks();
     mocks.useProvingSessionConfig.mockReturnValue([]);
     mocks.isEmptyWebProverSessionConfig.mockReturnValue(true);
-    render(<SidePanelContent />);
+    render(<SidePanelContainer />);
     expect(screen.getByTestId("empty-flow-card")).toBeInTheDocument();
   });
 
@@ -58,7 +58,7 @@ describe("SidePanelContent", () => {
     mocks.useTlsnProver.mockReturnValue({
       error: null,
     });
-    render(<SidePanelContent />);
+    render(<SidePanelContainer />);
     expect(screen.getByTestId("steps")).toBeInTheDocument();
     //help section
     expect(screen.getByText("Having Trouble?")).toBeInTheDocument();

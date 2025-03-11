@@ -2,6 +2,7 @@ import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { webProverSessionContextManager } from "./webProverSessionContext";
 import { HTTPMethod } from "lib/HttpMethods";
+import { provingSessionStorageConfig } from "./config";
 
 export type BrowsingHistoryItem = {
   url: string;
@@ -24,7 +25,7 @@ export class HistoryContextManager {
   private updateLock: Promise<void> = Promise.resolve();
 
   constructor() {
-    this.store = new Store<History>(browser.storage.session);
+    this.store = new Store<History>(provingSessionStorageConfig.storage);
   }
 
   public static get instance(): HistoryContextManager {
@@ -45,7 +46,9 @@ export class HistoryContextManager {
     this.updateLock = this.updateLock.then(async () => {
       let newItem = item;
       let history =
-        (await historyContextManager.store.get("browsingHistory")) || [];
+        (await historyContextManager.store.get(
+          provingSessionStorageConfig.storageKeys.browsingHistory,
+        )) || [];
       const existingItemIndex = history.findIndex((i) => i.url === item.url);
       // Add cookies and headers and mark eventually as ready
       if (existingItemIndex !== -1) {
@@ -62,7 +65,10 @@ export class HistoryContextManager {
       } else {
         history = [...history, newItem];
       }
-      await historyContextManager.store.set("browsingHistory", history);
+      await historyContextManager.store.set(
+        provingSessionStorageConfig.storageKeys.browsingHistory,
+        history,
+      );
     });
     return this.updateLock;
   }

@@ -33,6 +33,12 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
       .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) => {
         void handleProvingStatusNotification(msg);
       })
+      .with({ action: ExtensionAction.OpenSidePanel }, () => {
+        void handleOpenSidePanel();
+      })
+      .with({ action: ExtensionAction.CloseSidePanel }, () => {
+        void handleCloseSidePanel();
+      })
       .exhaustive();
   });
 });
@@ -76,15 +82,40 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
 browser.runtime.onMessageExternal.addListener(
   (message: MessageToExtension, sender) => {
     return match(message)
-      .with({ action: ExtensionAction.RequestWebProof }, (msg) =>
-        handleProofRequest(msg, sender),
+      .with(
+        { action: ExtensionAction.RequestWebProof },
+        async (msg) => await handleProofRequest(msg, sender),
       )
-      .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) =>
-        handleProvingStatusNotification(msg),
+      .with(
+        { action: ExtensionAction.NotifyZkProvingStatus },
+        async (msg) => await handleProvingStatusNotification(msg),
+      )
+      .with(
+        { action: ExtensionAction.OpenSidePanel },
+        async () => await handleOpenSidePanel(sender),
+      )
+      .with({ action: ExtensionAction.CloseSidePanel }, () =>
+        handleCloseSidePanel(),
       )
       .exhaustive();
   },
 );
+
+const handleOpenSidePanel = async (sender?: browser.Runtime.MessageSender) => {
+  if (chrome.sidePanel && sender?.tab?.windowId) {
+    await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
+  }
+};
+
+const handleCloseSidePanel = () => {
+  void browser.runtime.sendMessage(ExtensionMessageType.CloseSidePanel);
+};
+
+const cleanProvingSessionStorageOnClose = () => {
+  void browser.runtime.sendMessage(
+    ExtensionMessageType.CleanProvingSessionStorageOnClose,
+  );
+};
 
 const handleProofRequest = async (
   message: Extract<
@@ -114,6 +145,9 @@ const handleProvingStatusNotification = async (
   >,
 ) => {
   await zkProvingStatusStore.setProvingStatus(message.payload);
+  if (message.payload.status === ZkProvingStatus.Done) {
+    cleanProvingSessionStorageOnClose();
+  }
 };
 
 const validateProofRequest = (

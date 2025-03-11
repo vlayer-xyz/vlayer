@@ -58,6 +58,10 @@ const router = createBrowserRouter([
     path: "/email",
     element: <Email />,
   },
+  {
+    path: "/",
+    element: <div></div>,
+  },
 ]);
 
 createRoot(document.getElementById("root")!).render(
