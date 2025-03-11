@@ -24,7 +24,7 @@ echo "::endgroup::"
 echo "::group::bun installation"
 curl -fsSL https://bun.sh/install | bash -s "bun-v1.2.4"
 export PATH="$PATH:~/.bun/bin"
-echo "::endgroup::'
+echo "::endgroup::"
 
 echo "::group::risczero installation"
 curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
