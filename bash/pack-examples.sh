@@ -50,7 +50,7 @@ touch "${ARCHIVE}"
             echo "No testdata found for ${example}"
         fi
 
-        echo '::endgroup::'
+        echo "::endgroup::"
     done
 )
 

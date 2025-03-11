@@ -2,19 +2,19 @@
 
 set -ueo pipefail
 
-echo '::group::creating js project'
+echo "::group::creating js project"
 mkdir ${HOME}/js_project_test
 cd ${HOME}/js_project_test
 echo "{
   \"type\": \"module\"
 }" >> package.json
-echo '::endgroup::'
+echo "::endgroup::"
 
-echo '::group::vlayer sdk installation'
+echo "::group::vlayer sdk installation'
 npm install @vlayer/sdk
-echo '::endgroup::'
+echo "::endgroup::"
 
-echo '::group::creating simple code using sdk'
+echo "::group::creating simple code using sdk"
 
 echo "import { createVlayerClient } from '@vlayer/sdk';
 import { strict as assert } from 'assert';
@@ -35,8 +35,8 @@ try {
 }
 " >> index.js
 
-echo '::endgroup::'
+echo "::endgroup::"
 
-echo '::group::running code'
+echo "::group::running code"
 node index
-echo '::endgroup::'
+echo "::endgroup::"

@@ -5,32 +5,32 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
 
 set -ueo pipefail
 
-echo '::group::setting git config'
+echo "::group::setting git config"
 set_missing_git_config
-echo '::endgroup::'
+echo "::endgroup::"
 
-echo '::group::foundry installation'
+echo "::group::foundry installation"
 curl -L https://foundry.paradigm.xyz | bash
 export PATH="$PATH:$HOME/.config/.foundry/bin"
 foundryup
-echo '::endgroup::'
+echo "::endgroup::"
 
-echo '::group::vlayer installation'
+echo "::group::vlayer installation"
 curl -SL https://install.vlayer.xyz | bash
 export PATH="$PATH:$HOME/.config/.vlayer/bin"
 vlayerup
-echo '::endgroup::'
+echo "::endgroup::"
 
-echo '::group::bun installation'
+echo "::group::bun installation"
 curl -fsSL https://bun.sh/install | bash -s "bun-v1.2.4"
 export PATH="$PATH:~/.bun/bin"
-echo '::endgroup::'
+echo "::endgroup::'
 
-echo '::group::risczero installation'
+echo "::group::risczero installation"
 curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
 cargo binstall -y cargo-risczero@1.2.4
 cargo risczero install
-echo '::endgroup::'
+echo "::endgroup::"
 
 
 BUN_NO_FROZEN_LOCKFILE=1
@@ -51,9 +51,9 @@ TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX)
 mkdir -p "${TEMP_DIR}/packages/browser-extension"
 cp -a "${VLAYER_HOME}/packages/browser-extension/dist" "${TEMP_DIR}/packages/browser-extension"
 
-echo '::group::Installing playwright chromium'
+echo "::group::Installing playwright chromium"
 install_chromium
-echo '::endgroup::'
+echo "::endgroup::"
 
 # We need to first create a temporary directory and perform operations there.
 # After that we copy the results to the VLAYER_HOME directory.

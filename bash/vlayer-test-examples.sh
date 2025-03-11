@@ -17,5 +17,5 @@ for example in $(get_examples); do
   else
     echo "Skipping vlayer test as test directory does not exist in ${example}"
   fi
-  echo '::endgroup::'
+  echo "::endgroup::"
 done
