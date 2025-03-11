@@ -12,8 +12,8 @@
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
     "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
-    "test-web:dev": "VLAYER_ENV=dev bun run playwright test",
-    "test-web:testnet": "VLAYER_ENV=testnet bun run playwright test"
+    "test:dev": "VLAYER_ENV=dev bun run playwright test",
+    "test:testnet": "VLAYER_ENV=testnet bun run playwright test"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",

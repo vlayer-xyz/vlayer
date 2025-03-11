@@ -28,7 +28,7 @@ for example in $(get_examples); do
 
   cd vlayer
   bun install --frozen-lockfile
-  bun run test-web:"${VLAYER_ENV}"
+  bun run test:"${VLAYER_ENV}"
 
   cleanup
 done
