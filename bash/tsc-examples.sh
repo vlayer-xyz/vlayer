@@ -8,33 +8,23 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 echo "::group::Installing npm dependencies"
 cd "${VLAYER_HOME}"
 bun install --frozen-lockfile
-echo '::endgroup::'
+echo "::endgroup::Installing npm dependencies"
 
-echo "::group::Building sdk"
-cd "${VLAYER_HOME}/packages/sdk"
-bun run build
-echo '::endgroup::'
+build_sdk
+build_sdk_hooks
 
-echo "::group::Building sdk-hooks"
-cd "${VLAYER_HOME}/packages/sdk-hooks"
-bun run build
-echo '::endgroup::'
 
 for example in $(get_examples); do
-  echo ""::group::Running tsc for: ${example}""
-  example_path="${VLAYER_HOME}/examples/${example}"
-  
-  cd $example_path
+  echo "::group::Running tsc for: ${example}"
 
-  forge soldeer install
-  forge build
+  build_example_contracts $example
 
-  echo Generating typescript bidings ...
-  ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
+  generate_ts_bindings
 
-  cd "${example_path}/vlayer"
-
+  pushd "${VLAYER_HOME}/examples/${example}/vlayer"
   bun install --frozen-lockfile
   bun tsc --noEmit
-  echo '::endgroup::'
+  popd
+
+  echo "::endgroup::Running tsc for: ${example}"
 done

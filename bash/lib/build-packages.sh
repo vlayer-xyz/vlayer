@@ -11,11 +11,11 @@ function build_package () {
   echo "::endgroup::Building ${1}"
 }
 
-function build-sdk() {
+function build_sdk() {
   build_package sdk
 }
 
-function build-sdk_hooks() {
+function build_sdk_hooks() {
   build_package sdk-hooks
 }
 
@@ -26,8 +26,8 @@ function build_react_sdk_with_deps() {
 
   build_all_contracts
 
-  build-sdk
-  build-sdk_hooks
+  build_sdk
+  build_sdk_hooks
 
   echo "::endgroup::Building react sdk with dependencies"
 }

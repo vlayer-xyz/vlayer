@@ -15,7 +15,7 @@ set_proving_mode
 VLAYER_ENV=${VLAYER_ENV:-dev}
 
 generate_ts_bindings
-build-sdk
+build_sdk
 
 BUN_NO_FROZEN_LOCKFILE=1
 export EXAMPLE_NAME=$EXAMPLE
