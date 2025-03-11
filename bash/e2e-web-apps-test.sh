@@ -7,11 +7,11 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/utils.sh"
 
 set_proving_mode
 
-echo Generating typescript bidings ...
-${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
+generate_ts_bindings
 
 build_extension
 
