@@ -1,0 +1,73 @@
+import { FormEvent, useEffect, useState } from "react";
+import verifierSpec from "../../../../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
+import { ShowBalanceForm } from "./Presentational";
+import { useLocalStorage } from "usehooks-ts";
+import { useWriteContract } from "wagmi";
+import { useNavigate } from "react-router";
+
+export const ShowBalancePage = () => {
+  const navigate = useNavigate();
+  const {
+    writeContract,
+    data: txHash,
+    status,
+    error: mintError,
+  } = useWriteContract();
+  const [holderAddress, setHolderAddress] = useState<`0x${string}` | null>(
+    null,
+  );
+  const [balance, setBalance] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const networkChain = import.meta.env.VITE_CHAIN_NAME;
+  const token = "USDC";
+  const [proverResult] = useLocalStorage("proverResult", "");
+
+  useEffect(() => {
+    if (txHash && status === "success") {
+      console.log("Claimed", txHash);
+      navigate(`/success?txHash=${txHash}`);
+    }
+  }, [txHash, status]);
+
+  useEffect(() => {
+    if (proverResult) {
+      const [, owner, balance] = JSON.parse(proverResult);
+      setHolderAddress(owner);
+      setBalance(balance);
+    }
+  }, [proverResult]);
+
+  useEffect(() => {
+    if (mintError) {
+      console.error("Mint error", mintError);
+    }
+  }, [mintError]);
+
+  if (!holderAddress) {
+    return <div>Connect your wallet to continue</div>;
+  }
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const args = JSON.parse(proverResult);
+    console.log("args", args);
+    setIsLoading(true);
+    writeContract({
+      address: import.meta.env.VITE_VERIFIER_ADDRESS,
+      abi: verifierSpec.abi,
+      functionName: "claim",
+      args: [args[0], args[1], BigInt(args[2])],
+    });
+  };
+
+  return (
+    <ShowBalanceForm
+      networkChain={networkChain}
+      token={token}
+      holderAddress={holderAddress}
+      onSubmit={handleSubmit}
+      isLoading={isLoading}
+      balance={balance}
+    />
+  );
+};

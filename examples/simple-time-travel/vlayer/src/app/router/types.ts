@@ -2,6 +2,8 @@ import { ComponentType } from "react";
 
 export enum StepKind {
   welcome,
+  showBalance,
+  success,
 }
 
 export type StepMeta = {
@@ -18,9 +20,24 @@ export const stepsMeta: Record<StepKind, StepMeta> = {
   [StepKind.welcome]: {
     path: "",
     kind: StepKind.welcome,
-    title: "Time Travel",
-    description: "placeholder for time travel example app",
+    title: "Hodler NFT",
+    description: "Prove that you HOLD a token for at least a year.",
     index: 0,
+  },
+  [StepKind.showBalance]: {
+    path: "show-balance",
+    kind: StepKind.showBalance,
+    title: "Hodler NFT",
+    description: "Prove that you HOLD a token for at least a year.",
+    index: 1,
+  },
+  [StepKind.success]: {
+    path: "success",
+    kind: StepKind.success,
+    title: "Success",
+    description:
+      "You have successfully proved that you HOLD a token for at least a year.",
+    index: 2,
   },
 };
 
