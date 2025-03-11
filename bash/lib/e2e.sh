@@ -14,7 +14,7 @@ function run_playwright_tests() {
     echo "Using test-web:${VLAYER_ENV}"
     WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test-web:"${VLAYER_ENV}"
   else
-    echo "Skipping playwright tests as neither test-web:${VLAYER_ENV} nor test-web:${VLAYER_ENV} script exists in package.json"
+    echo "Skipping playwright tests as neither test:${VLAYER_ENV} nor test-web:${VLAYER_ENV} script exists in package.json"
   fi
   popd
 }

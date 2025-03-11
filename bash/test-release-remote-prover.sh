@@ -34,7 +34,7 @@ echo '::endgroup::'
 
 
 BUN_NO_FROZEN_LOCKFILE=1
-VLAYER_ENV="testnet"
+VLAYER_ENV="testnet" 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 

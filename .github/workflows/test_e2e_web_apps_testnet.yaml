@@ -12,6 +12,13 @@ on:
       - "LICENSE"
       - "book/**"
   pull_request:
+    paths:
+      - "examples/**"
+      - "packages/**"
+      - "bash/run-services.sh"
+      - "bash/e2e-web-apps-test.sh"
+      - ".github/workflows/test_e2e_web_apps_testnet.yaml"
+      - "contracts/**"
   merge_group:
   workflow_dispatch:
 concurrency:
