@@ -49,7 +49,9 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
         },
         {
           response: {
-            headers_except: [],
+            // response from api.x.com sometimes comes with Transfer-Encoding: Chunked
+            // which needs to be recognised by Prover and cannot be redacted
+            headers_except: ["Transfer-Encoding"],
           },
         },
       ],
