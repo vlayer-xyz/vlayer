@@ -6,12 +6,12 @@ NC='\033[0m' # No Color
 
 function echo_color() {
     local color_name="$1"
+    local text="$2"
 
     if [[ -n "${NO_COLOR:-}" ]]; then
-        color_name="NC"
+        echo -e "${text}"
+    else
+        shift
+        echo -e "${!color_name}${text}${NC}"
     fi
-
-    local text="$2"
-    shift
-    echo -e "${!color_name}${text}${NC}"
 }
