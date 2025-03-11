@@ -4,6 +4,7 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build_packages.sh"
 
 set_proving_mode
 
@@ -15,11 +16,7 @@ echo '::group::Running services'
 source ${VLAYER_HOME}/bash/run-services.sh
 echo '::endgroup::'
 
-echo '::group::Build extension'
-cd "$VLAYER_HOME/packages/browser-extension"
-bun install --frozen-lockfile
-bun run build
-echo '::endgroup::'
+build_extension
 
 echo '::group::Running tests of: simple-web-proof'
 cd "$VLAYER_HOME/examples/simple-web-proof"
