@@ -4,7 +4,7 @@ import { ProofProvider } from "@vlayer/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { Layout } from "./components/layout/Layout";
-import { createAppKit } from "@reown/appkit";
+import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { Chain, http } from "viem";
 import { anvil, optimismSepolia } from "viem/chains";
