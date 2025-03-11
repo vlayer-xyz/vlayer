@@ -29,7 +29,7 @@
     "default_path": "src/templates/sidepanel/sidepanel.html"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+    "extension_pages": "script-src 'self'; object-src 'self';"
   },
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl7AI3Y9D+tSJJMHsr1G6HzGaapoiD278NjLE0AL2KuzxIWbZHYF9w6JDc7BYl4qTgooy0JK8wlwuOPMvyVDWrCzkYi/pCO+7vOtK7ALg1ulrMXWM72hajetvc+bvaYaDftGafOnc5tjJK5krQp4cSRWUnBfxxj9u5BSxM8dthzUCSkg6hprGosVgbyrhYaT+2Z2LHzkq3iJH/SRO/0KK8q5qvcEX5AytxfkZsRa646N42iWddrBu/LQqdqYpc2zSfxTrl6xBn76hOSSvWg7QnIPXAxY3I8ieW1lPAEvN7ta/23sT7BjUnZbnlcU7kO67qKj1XN1E79erl78w3VDxoQIDAQAB"
 }
