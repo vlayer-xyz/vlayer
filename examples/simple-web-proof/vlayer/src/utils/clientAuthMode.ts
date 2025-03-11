@@ -1,5 +1,9 @@
 import { privateKeyToAccount } from "viem/accounts";
-import { ClientAuthMode } from "./wagmiProviderConfig";
+
+export enum ClientAuthMode {
+  ENV_PRIVATE_KEY = "envPrivateKey",
+  WALLET = "wallet",
+}
 
 export const useEnvPrivateKey = () => {
   const authMode = import.meta.env.VITE_CLIENT_AUTH_MODE;
