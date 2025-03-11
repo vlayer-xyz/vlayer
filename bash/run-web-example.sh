@@ -1,53 +1,44 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-sdk.sh"
+
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 function install_deps {
-    cd ${VLAYER_HOME}
-    bun install --frozen-lockfile
-
-    cd ${VLAYER_HOME}/packages/sdk
-    bun run build
-
-    cd ${VLAYER_HOME}/packages/sdk-hooks
-    bun run build
+    echo "::group::Installing dependencies"
+    build_react_sdk_with_deps
     
     cd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
     rm -rf node_modules
     bun install --frozen-lockfile
-}
-
-function run_services {
-    source ${VLAYER_HOME}/bash/run-services.sh 
+    echo "::endgroup::Installing dependencies"
 }
 
 function build_example_contracts {
-    cd ${VLAYER_HOME}/contracts/vlayer
-    forge soldeer install
-    forge clean
-    forge build
-
-    ${VLAYER_HOME}/bash/build-ts-types.sh
-    
+    echo "::group::Building example contracts" 
     cd ${VLAYER_HOME}/examples/simple-web-proof
     forge clean
     forge build
+    echo "::endgroup::Building example contracts"
 }
 
 function run_web_app {
+    echo "::group::Running web app"
     cd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
     bun run web:dev &
+    echo "::endgroup::Running web app"
 }
 
 function run_browser_extension {
+    echo "::group::Running browser extension"
     cd ${VLAYER_HOME}/packages/browser-extension
     bun run dev
+    echo "::endgroup::Running browser extension"
 }
 
 install_deps
-run_services
 build_example_contracts
 run_web_app
 run_browser_extension
