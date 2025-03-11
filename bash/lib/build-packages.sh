@@ -31,3 +31,7 @@ function build_react_sdk_with_deps() {
 
   echo "::endgroup::Building react sdk with dependencies"
 }
+
+function build_extension() {
+  build_package browser-extension
+}
