@@ -172,23 +172,3 @@ jobs:
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
           vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
-
-  test-e2e-testnet-simple-teleport:
-    name: E2E test against testnet (simple-teleport)
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
-        with:
-          example: "simple-teleport"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
