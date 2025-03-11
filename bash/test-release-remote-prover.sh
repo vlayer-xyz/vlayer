@@ -81,7 +81,7 @@ for example in $(get_examples); do
     run_prover_script
     echo "::endgroup::"
 
-    echo "::group::vlayer run Playwright test: ${example}"
+    echo "::group::vlayer run Playwright test-web: ${example}"
     run_playwright_tests
     echo "::endgroup::"
 done
