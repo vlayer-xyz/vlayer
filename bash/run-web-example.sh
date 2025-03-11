@@ -11,23 +11,26 @@ function install_deps {
     echo "::group::Installing dependencies"
     build_react_sdk_with_deps
     
-    cd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
+    pushd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
     rm -rf node_modules
     bun install --frozen-lockfile
+    popd
     echo "::endgroup::Installing dependencies"
 }
 
 function run_web_app {
     echo "::group::Running web app"
-    cd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
+    pushd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
     bun run web:dev &
+    popd
     echo "::endgroup::Running web app"
 }
 
 function run_browser_extension {
     echo "::group::Running browser extension"
-    cd ${VLAYER_HOME}/packages/browser-extension
+    pushd ${VLAYER_HOME}/packages/browser-extension
     bun run dev
+    popd
     echo "::endgroup::Running browser extension"
 }
 
