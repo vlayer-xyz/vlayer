@@ -66,9 +66,9 @@ echo_color BLUE "Run playwright tests"
 pushd ${VLAYER_HOME}/packages
 if [ "$headed_mode" = true ]; then
     echo_color BLUE "Running in headed mode"
-    VLAYER_ENV=${VLAYER_ENV} bun run test:headed
+    VLAYER_ENV=${VLAYER_ENV} bun run test-web:headed
 else
     echo_color BLUE "Running in headless mode"
-    VLAYER_ENV=${VLAYER_ENV} bun run test:headless
+    VLAYER_ENV=${VLAYER_ENV} bun run test-web:headless
 fi
 popd
