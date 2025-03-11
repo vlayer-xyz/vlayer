@@ -1,3 +1,5 @@
+source "$(dirname "${BASH_SOURCE[0]}")/io.sh"
+
 function mock_imageid() {
   echo "::group::Mock ImageId"
   silent_unless_fails ${VLAYER_HOME}/bash/mock-imageid.sh

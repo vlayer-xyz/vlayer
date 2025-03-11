@@ -5,7 +5,8 @@
   "scripts": {
     "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
-    "lint:solidity": "solhint '../src/**/*.sol'",
+    "lint:solidity": "solhint '../src/**/*.sol' --max-warnings 0 && forge fmt ../src --check",
+    "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
     "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
