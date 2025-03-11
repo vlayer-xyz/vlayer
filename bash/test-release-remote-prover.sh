@@ -34,7 +34,7 @@ echo '::endgroup::'
 
 
 BUN_NO_FROZEN_LOCKFILE=1
-VLAYER_ENV="testnet" 
+VLAYER_ENV="testnet"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
@@ -52,7 +52,7 @@ mkdir -p "${TEMP_DIR}/packages/browser-extension"
 cp -a "${VLAYER_HOME}/packages/browser-extension/dist" "${TEMP_DIR}/packages/browser-extension"
 
 echo '::group::Installing playwright chromium'
-silent_unless_fails bunx playwright install --with-deps chromium
+install_chromium
 echo '::endgroup::'
 
 # We need to first create a temporary directory and perform operations there.
@@ -65,12 +65,8 @@ echo '::endgroup::'
 for example in $(get_examples); do
     echo "::group::Initializing vlayer template: ${example}"
     cd "${TEMP_DIR}"
-    echo "Current directory: $(pwd)"
-    ls
-    echo "Current directory: $(pwd)"
     mkdir -p examples/${example}
     echo "Current directory: $(pwd)"
-    ls
 
     VLAYER_TEMP_DIR="examples/${example}"
     cd "${VLAYER_TEMP_DIR}"
@@ -86,7 +82,7 @@ for example in $(get_examples); do
     echo "::endgroup::"
 
     echo "::group::vlayer run Playwright test: ${example}"
-        run_playwright_tests
+    run_playwright_tests
     echo "::endgroup::"
 done
 
