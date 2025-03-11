@@ -26,9 +26,5 @@ jobs:
       - name: Install solhint
         working-directory: contracts
         run: bun install --frozen-lockfile
-      - name: Contracts lint:solidity
-        working-directory: contracts
-        run: |
-          bun run lint:solidity
-      - name: lint Solidity examples
-        run: ./bash/lint-solidity-examples.sh
+      - name: lint Solidity
+        run: ./bash/lint-solidity.sh
