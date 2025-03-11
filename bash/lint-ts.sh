@@ -39,7 +39,7 @@ handle_options "$@"
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/lib/build-sdk.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
 
 build_react_sdk_with_deps
 
