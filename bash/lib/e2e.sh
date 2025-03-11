@@ -94,3 +94,19 @@ function init_template() {
 
   echo "::endgroup::Initializing from template $EXAMPLE"
 }
+
+function run_web_tests() {
+  echo "::group::Running playwright tests for ${1} example"
+
+  pushd ${VLAYER_HOME}/examples/${1}
+
+  forge build
+
+  cd vlayer
+
+  bun install --frozen-lockfile
+  bun run test-web:"${VLAYER_ENV}"
+  
+  popd
+  echo "::endgroup::Running playwright tests for ${1} example"
+}

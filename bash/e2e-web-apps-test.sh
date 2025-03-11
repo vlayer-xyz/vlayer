@@ -6,6 +6,7 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
 
 set_proving_mode
 
@@ -19,13 +20,7 @@ for example in $(get_examples); do
   echo Running services...
   source ${VLAYER_HOME}/bash/run-services.sh
 
-  echo "::group::Running tests of: ${example}"
-  cd "$VLAYER_HOME/examples/$example"
-  forge build
-
-  cd vlayer
-  bun install --frozen-lockfile
-  bun run test-web:"${VLAYER_ENV}"
+  run_web_tests $example
 
   cleanup
 done
