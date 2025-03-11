@@ -12,14 +12,14 @@ set_proving_mode
 
 generate_ts_bindings
 
-echo '::group::Running services'
+echo "::group::Running services"
 source ${VLAYER_HOME}/bash/run-services.sh
-echo '::endgroup::'
+echo "::endgroup::Running services"
 
 build_extension
 
 run_web_tests simple-web-proof
 
-echo '::group::Cleanup'
+echo "::group::Cleanup"
 cleanup
-echo '::endgroup::'
+echo "::endgroup::Cleanup"

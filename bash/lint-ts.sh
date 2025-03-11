@@ -50,7 +50,7 @@ for example in $(get_examples); do (
     bun run eslint .$FIX_FLAG
     popd
 ) done
-echo '::endgroup::Running eslint for examples'
+echo "::endgroup::Running eslint for examples"
 
 echo "::group::Running eslint for: $VLAYER_HOME/packages"
 pushd "${VLAYER_HOME}/packages"
