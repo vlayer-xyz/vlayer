@@ -3,8 +3,8 @@
   "module": "index.ts",
   "scripts": {
     "deploy_test_contracts": "cd test-web-app && bun run deploy.ts",
-    "test:headed": "bun run deploy_test_contracts && TEST_MODE=headed bunx playwright test --ui",
-    "test:headless": "bun run deploy_test_contracts && TEST_MODE=headless bunx playwright test",
+    "test-web:headed": "bun run deploy_test_contracts && TEST_MODE=headed bunx playwright test --ui",
+    "test-web:headless": "bun run deploy_test_contracts && TEST_MODE=headless bunx playwright test",
     "lint": "eslint ./*/src/** ",
     "lint:fix": "eslint ./*/src/** --fix"
   },
