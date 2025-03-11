@@ -13,8 +13,8 @@
     "lint:solidity": "solhint '../src/**/*.sol'",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
-    "test:dev": "echo \"No tests specified yet\"",
-    "test:testnet": "echo \"No tests specified yet\""
+    "test-web:dev": "echo \"No tests specified yet\"",
+    "test-web:testnet": "echo \"No tests specified yet\""
   },
   "peerDependencies": {
     "typescript": "^5.5.4"
