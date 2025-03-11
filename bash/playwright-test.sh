@@ -49,7 +49,7 @@ source ${VLAYER_HOME}/bash/run-services.sh
 echo_color BLUE "Mock ImageId.sol"
 source ${VLAYER_HOME}/bash/mock-imageid.sh
 
-build_all_contracts
+build_contracts
 
 echo_color BLUE "Run playwright tests"
 pushd ${VLAYER_HOME}/packages

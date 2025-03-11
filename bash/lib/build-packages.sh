@@ -24,7 +24,7 @@ function build_react_sdk_with_deps() {
 
   bun install --frozen-lockfile
 
-  build_all_contracts
+  build_contracts
 
   build_sdk
   build_sdk_hooks
