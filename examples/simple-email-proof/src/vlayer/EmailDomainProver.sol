@@ -19,7 +19,7 @@ contract EmailDomainProver is Prover {
     {
         VerifiedEmail memory email = unverifiedEmail.verify();
         string[] memory subjectCapture = email.subject.capture("^Mint my domain NFT at address: (0x[a-fA-F0-9]{40})$");
-        require(subjectCapture.length > 0, "no wallet address in subject"); 
+        require(subjectCapture.length > 0, "no wallet address in subject");
 
         string[] memory captures = email.from.capture("^[\\w.-]+@([a-zA-Z\\d.-]+\\.[a-zA-Z]{2,})$");
         require(captures.length == 2, "invalid email domain");
