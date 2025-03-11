@@ -95,6 +95,7 @@ runs:
         USE_WINDOW_ETHEREUM_TRANSPORT: true
         JSON_RPC_URL: ${{ inputs.json_rpc_url }}
         EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.examples_test_private_key }}
+        CLIENT_AUTH_MODE: envPrivateKey
         VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
       working-directory: ./examples/${{ inputs.example_name }}/vlayer
 

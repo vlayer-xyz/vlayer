@@ -10,7 +10,10 @@ import { useLocalStorage } from "usehooks-ts";
 
 import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier.json";
 import { MintStepPresentational } from "./Presentational";
-import { testPrivateKey, useTestPrivateKey } from "../../../utils";
+import {
+  getAddressFromPrivateKey,
+  useEnvPrivateKey,
+} from "../../../utils/clientAuthMode";
 import { ensureBalance } from "../../../utils/ethFaucet";
 
 export const MintStep = () => {
@@ -49,10 +52,10 @@ export const MintStep = () => {
       args: proofData,
     };
 
-    if (useTestPrivateKey) {
+    if (useEnvPrivateKey()) {
       writeContract({
         ...writeContractArgs,
-        account: testPrivateKey,
+        account: getAddressFromPrivateKey(),
       });
     } else {
       await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);

@@ -1,17 +1,6 @@
 import { Chain } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import { createConnector } from "wagmi";
-
-const getAddressFromPrivateKey = () => {
-  let address = "";
-  const envPrivateKey = import.meta.env.VITE_PRIVATE_KEY;
-  if (!envPrivateKey) {
-    throw new Error("No private key found");
-  } else {
-    address = privateKeyToAccount(envPrivateKey as "0x").address;
-  }
-  return address as "0x";
-};
+import { getAddressFromPrivateKey } from "./clientAuthMode";
 
 export const mockConnector = (chain: Chain) => {
   return createConnector((config) => ({

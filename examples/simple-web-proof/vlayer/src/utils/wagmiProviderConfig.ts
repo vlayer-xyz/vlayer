@@ -4,6 +4,7 @@ import { Chain, http } from "viem";
 import { anvil, optimismSepolia } from "viem/chains";
 import { createConfig } from "wagmi";
 import { mockConnector } from "./mockConnector";
+import { useEnvPrivateKey } from "./clientAuthMode";
 
 export enum ClientAuthMode {
   ENV_PRIVATE_KEY = "envPrivateKey",
@@ -40,23 +41,13 @@ createAppKit({
 });
 
 export const config = () => {
-  const authMode = import.meta.env.VITE_CLIENT_AUTH_MODE;
-
-  switch (authMode) {
-    case ClientAuthMode.ENV_PRIVATE_KEY: {
-      return createConfig({
+  return useEnvPrivateKey()
+    ? createConfig({
         connectors: [mockConnector(chain)],
         chains,
         transports: {
           [anvil.id]: http(),
         },
-      });
-    }
-    case ClientAuthMode.WALLET: {
-      return wagmiAdapter.wagmiConfig;
-    }
-    default: {
-      throw new Error("Invalid VITE_CLIENT_AUTH_MODE: " + authMode);
-    }
-  }
+      })
+    : wagmiAdapter.wagmiConfig;
 };
