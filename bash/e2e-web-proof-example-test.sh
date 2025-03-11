@@ -27,7 +27,7 @@ forge build
 
 cd vlayer
 bun install --frozen-lockfile
-bun run test:"${VLAYER_ENV}"
+bun run test-web:"${VLAYER_ENV}"
 echo '::endgroup::'
 
 echo '::group::Cleanup'

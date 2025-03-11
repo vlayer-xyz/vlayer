@@ -14,8 +14,8 @@
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "deploy:testnet": "CLIENT_AUTH_MODE=envPrivateKey VLAYER_ENV=testnet bun run deploy.ts",
     "deploy:dev": "CLIENT_AUTH_MODE=envPrivateKey VLAYER_ENV=dev bun run deploy.ts",
-    "test:dev": "TEST_MODE=headed VLAYER_ENV=dev CLIENT_AUTH_MODE=envPrivateKey xvfb-run bun run playwright test",
-    "test:testnet": "VLAYER_ENV=testnet CLIENT_AUTH_MODE=envPrivateKey bun run playwright test",
+    "test-web:dev": "TEST_MODE=headed VLAYER_ENV=dev CLIENT_AUTH_MODE=envPrivateKey xvfb-run bun run playwright test",
+    "test-web:testnet": "VLAYER_ENV=testnet CLIENT_AUTH_MODE=envPrivateKey bun run playwright test",
     "web:dev": "CLIENT_AUTH_MODE=envPrivateKey VLAYER_ENV=dev bun run deploy.ts && vite",
     "web:testnet": "CLIENT_AUTH_MODE=envPrivateKey VLAYER_ENV=testnet bun run deploy.ts && vite"
   },
