@@ -4,6 +4,9 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-contracts.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/utils.sh"
 
 echo "::group::Installing npm dependencies"
 cd "${VLAYER_HOME}"

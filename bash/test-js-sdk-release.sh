@@ -10,7 +10,7 @@ echo "{
 }" >> package.json
 echo "::endgroup::"
 
-echo "::group::vlayer sdk installation'
+echo "::group::vlayer sdk installation"
 npm install @vlayer/sdk
 echo "::endgroup::"
 
