@@ -51,7 +51,7 @@ ensure_binaries_built
 echo "Starting services..."
 
 if [[ $VLAYER_ENV == "dev" ]]; then
-    docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op websockify notary-server
+    docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op wsproxy notary-server
 fi
 
 if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
