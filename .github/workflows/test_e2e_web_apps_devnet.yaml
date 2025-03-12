@@ -62,10 +62,9 @@ jobs:
 
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
-          compose-file: docker/web-proof/docker-compose-release.yaml
-          up-flags: "--build"
+          compose-file: docker/docker-compose.devnet.yaml
           services: |
-            websockify
+            wsproxy
             notary-server
 
       - name: Run e2e test
