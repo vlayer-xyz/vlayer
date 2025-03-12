@@ -32,6 +32,7 @@
 
 - name: Enable and start the vlayer service
   become: true
+  no_log: true
   ansible.builtin.systemd_service:
     name: vlayer-chain-worker-{{ chain_worker_identifier }}
     enabled: true

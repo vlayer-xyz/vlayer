@@ -64,6 +64,7 @@
 
 - name: Enable and start the verifiable dns service
   become: true
+  no_log: true
   ansible.builtin.systemd_service:
     name: vlayer-verifiable-dns
     enabled: true
