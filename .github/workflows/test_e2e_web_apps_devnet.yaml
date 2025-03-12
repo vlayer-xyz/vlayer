@@ -60,13 +60,6 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
-      - uses: hoverkraft-tech/compose-action@v2.0.2
-        with:
-          compose-file: docker/docker-compose.devnet.yaml
-          services: |
-            wsproxy
-            notary-server
-
       - name: Run e2e test
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}

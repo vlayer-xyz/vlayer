@@ -22,6 +22,7 @@ BONSAI_API_KEY="${BONSAI_API_KEY:-}"
 SERVER_PROOF_ARG="fake"
 EXTERNAL_RPC_URLS=()
 DOCKER_COMPOSE_FILE="${VLAYER_HOME}/docker/docker-compose.devnet.yaml"
+DOCKER_COMPOSE_SERVICES="${DOCKER_COMPOSE_SERVICES:-anvil-l1 anvil-l2-op}"
 
 setup_tmp_dir
 
@@ -51,7 +52,7 @@ ensure_binaries_built
 echo "Starting services..."
 
 if [[ $VLAYER_ENV == "dev" ]]; then
-    docker compose -f $DOCKER_COMPOSE_FILE up -d anvil-l1 anvil-l2-op
+    docker compose -f $DOCKER_COMPOSE_FILE up -d $DOCKER_COMPOSE_SERVICES
 fi
 
 if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
