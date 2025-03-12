@@ -1,0 +1,70 @@
+name: 'Handle Playwright Reports'
+description: 'Uploads and deploys Playwright test reports'
+
+inputs:
+  VERCEL_PROJECT_ID:
+    required: true
+    description: 'Vercel Project ID for Playwright reports'
+  VERCEL_ORG_ID:
+    required: true
+    description: 'Vercel Organization ID'
+  VERCEL_TOKEN:
+    required: true
+    description: 'Vercel deployment token'
+  EXAMPLES_PATH:
+    required: true
+    description: 'Path to examples directory containing Playwright reports'
+  GITHUB_TOKEN:
+    required: true
+    description: 'GitHub token for authentication'
+  ARTIFACT_RETENTION_DAYS:
+    required: false
+    default: '30'
+    description: 'Number of days to retain the artifact'
+  REPORT_PATH:
+    required: true
+    description: 'Path pattern for Playwright reports'
+  PR_NUMBER:
+    required: true
+    description: 'Pull request number'
+  DEPLOY_TYPE:
+    required: true
+    description: 'Type of deployment, either examples or packages'
+  CONTEXT:
+    required: true
+    description: 'Context of the deployment, e.g. test-release, test-e2e-web-apps-testnet, deploy-simple-web-proof'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Upload Playwright Reports
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: ${{ inputs.REPORT_PATH }}
+        retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
+    - name: Install Vercel
+      shell: bash
+      run: npm install -g vercel
+
+    - name: Deploy Playwright Reports
+      if: ${{ !cancelled() }}
+      shell: bash
+      env:
+        VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
+        VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
+        VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
+        EXAMPLES_PATH: ${{ inputs.EXAMPLES_PATH }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        PR_NUMBER: ${{ inputs.PR_NUMBER }}
+        DEPLOY_TYPE: ${{ inputs.DEPLOY_TYPE }}
+        CONTEXT: ${{ inputs.CONTEXT }}
+        POST_COMMENT: ${{ job.status == 'failure' }}
+      run: |
+        if [ "$DEPLOY_TYPE" == "examples" ]; then
+          bash/vercel/deploy-playwright-examples.sh
+        else
+          bash/vercel/deploy-playwright-packages.sh
+        fi
+        

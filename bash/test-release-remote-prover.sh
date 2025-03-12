@@ -62,6 +62,8 @@ echo '::endgroup::'
 # This is a workaround to avoid this and make all the playwright reports available
 # in the VLAYER_HOME directory.
 
+PLAYWRIGHT_FAILED=false
+
 for example in $(get_examples); do
     echo "::group::Initializing vlayer template: ${example}"
     cd "${TEMP_DIR}"
@@ -82,12 +84,19 @@ for example in $(get_examples); do
     echo "::endgroup::"
 
     echo "::group::vlayer run Playwright test: ${example}"
-    run_playwright_tests
+    if ! run_playwright_tests; then
+        echo "Playwright test failed for ${example}..."
+        PLAYWRIGHT_FAILED=true
+    fi
     echo "::endgroup::"
 done
 
 # Copy the TEMP_DIR to the final destination after the loop
+echo "Copying from ${TEMP_DIR} to ${VLAYER_HOME}/vlayer-test-release"
 mkdir -p "${VLAYER_HOME}/vlayer-test-release"
 cp -a "${TEMP_DIR}"/* "${VLAYER_HOME}/vlayer-test-release"
-echo "Copying from ${TEMP_DIR} to ${VLAYER_HOME}/vlayer-test-release"
-find "${VLAYER_HOME}/vlayer-test-release" -name "playwright-report"
+
+# Exit with 1 if any Playwright test failed
+if [ "$PLAYWRIGHT_FAILED" = true ]; then
+    exit 1
+fi

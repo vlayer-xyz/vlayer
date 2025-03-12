@@ -12,6 +12,13 @@ on:
       - "LICENSE"
       - "book/**"
   pull_request:
+    paths:
+      - "examples/**"
+      - "packages/**"
+      - "bash/run-services.sh"
+      - "bash/e2e-web-apps-test.sh"
+      - ".github/workflows/test_e2e_web_apps_testnet.yaml"
+      - "contracts/**"
   merge_group:
   workflow_dispatch:
 concurrency:
@@ -93,10 +100,17 @@ jobs:
             cat "$log_file"
             echo "============================="
           done
-      - name: Upload playwright report
-        uses: actions/upload-artifact@v4
+      - name: Handle Playwright Reports
+        uses: ./.github/actions/handle-playwright-reports
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
-          path: ./examples/**/vlayer/playwright-report/
-          retention-days: 30
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          EXAMPLES_PATH: /examples/
+          GITHUB_TOKEN: ${{ github.token }}
+          ARTIFACT_RETENTION_DAYS: "30"
+          REPORT_PATH: "examples/**/vlayer/playwright-report/"
+          PR_NUMBER: ${{ github.event.number }}
+          DEPLOY_TYPE: "examples"
+          CONTEXT: "test-e2e-web-apps-testnet"
