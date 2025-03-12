@@ -1,7 +1,11 @@
 {
   "lockfileVersion": 1,
   "workspaces": {
-    "": {},
+    "": {
+      "dependencies": {
+        "@heroicons/react": "^2.2.0",
+      },
+    },
     "examples/simple-email-proof/vlayer": {
       "name": "simple-email-proof",
       "dependencies": {

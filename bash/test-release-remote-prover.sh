@@ -62,6 +62,8 @@ echo '::endgroup::'
 # This is a workaround to avoid this and make all the playwright reports available
 # in the VLAYER_HOME directory.
 
+PLAYWRIGHT_FAILED=false
+
 for example in $(get_examples); do
     echo "::group::Initializing vlayer template: ${example}"
     cd "${TEMP_DIR}"
