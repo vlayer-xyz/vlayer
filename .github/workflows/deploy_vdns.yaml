@@ -30,7 +30,7 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${{ secrets.PRODUCTION_DEPLOYER_SSH_KEY }}"
 
-          ansible-playbook -v -i hosts.yml verifiable_dns_service.yml \
+          ansible-playbook -i hosts.yml verifiable_dns_service.yml \
             --vault-password-file <(echo '${{ secrets.ANSIBLE_PRODUCTION_VAULT_PASSWORD }}')
       - name: Clean up manually added ssh keys
         if: always()
