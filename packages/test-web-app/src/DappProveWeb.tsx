@@ -69,7 +69,7 @@ function DappProveWeb() {
             },
             {
               request: {
-                headers: ["content-type"],
+                headers: ["connection"],
               },
             },
           ],

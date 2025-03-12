@@ -115,7 +115,7 @@ function DappWithProfile(profile: string) {
             },
             {
               request: {
-                headers: ["content-type"],
+                headers: ["connection"],
               },
             },
           ],
@@ -296,7 +296,7 @@ function Dapp() {
             },
             {
               request: {
-                headers: ["content-type"],
+                headers: ["connection"],
               },
             },
           ],
