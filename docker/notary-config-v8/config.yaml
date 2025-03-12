@@ -31,4 +31,3 @@ logging:
 
 authorization:
   enabled: false
-  whitelist_csv_path: "./fixture/auth/whitelist.csv"
