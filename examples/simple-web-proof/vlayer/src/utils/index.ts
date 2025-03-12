@@ -1,5 +1,3 @@
-import { privateKeyToAccount } from "viem/accounts";
-
 const vlayerPovingExtensionId = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 const isMobile =
@@ -28,19 +26,9 @@ const checkExtensionInstalled = async () => {
   }
 };
 
-const useTestPrivateKey =
-  !import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT &&
-  Boolean(import.meta.env.VITE_PRIVATE_KEY);
-
-const testPrivateKey = privateKeyToAccount(
-  import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
-);
-
 export {
   isMobile,
   isSupportedBrowser,
   checkExtensionInstalled,
-  useTestPrivateKey,
-  testPrivateKey,
   vlayerPovingExtensionId,
 };

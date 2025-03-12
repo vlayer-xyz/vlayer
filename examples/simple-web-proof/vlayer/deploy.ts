@@ -22,8 +22,6 @@ writeEnvVariables(".env", {
   VITE_CLIENT_AUTH_MODE: config.clientAuthMode,
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
-  VITE_USE_WINDOW_ETHEREUM_TRANSPORT:
-    process.env.USE_WINDOW_ETHEREUM_TRANSPORT || "",
   VITE_NOTARY_URL: config.notaryUrl,
   VITE_WS_PROXY_URL: config.wsProxyUrl,
 });
