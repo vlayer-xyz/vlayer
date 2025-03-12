@@ -41,7 +41,7 @@ export function parseHttpMessage(
   }
 
   //if we do not enforce content type, we use the default encoding
-  const encoding = contentType?.split("charset=")[1]?.trim() ?? defaultEncoding;
+  const encoding = contentType?.split("charset=")[1]?.trim().toLowerCase() ?? defaultEncoding;
 
   if (!validateEncoding(encoding)) {
     throw new InvalidEncodingError(encoding);

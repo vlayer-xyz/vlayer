@@ -33,6 +33,11 @@ describe("parseHttpMessage", () => {
     );
   });
 
+  test("does not throw on upper case encoding", () => {
+    const validMessage = `POST /path HTTP/1.1\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{"key": "value"}`;
+    expect(() => parseHttpMessage(validMessage)).not.toThrow();
+  });
+
   test("throws error for invalid HTTP message format", () => {
     const invalidMessage = "Invalid message without proper structure";
     expect(() => parseHttpMessage(invalidMessage)).toThrow(
