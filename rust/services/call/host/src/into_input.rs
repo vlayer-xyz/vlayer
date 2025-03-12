@@ -6,6 +6,7 @@ use call_engine::evm::{
     input::{EvmInput, MultiEvmInput},
 };
 use common::Hashable;
+use mpt::{MerkleTrie, Node, EMPTY_ROOT_HASH};
 use thiserror::Error;
 
 use crate::db::{
@@ -25,8 +26,13 @@ pub enum Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 fn into_input(db: &ProofDb, header: Box<dyn EvmBlockHeader>) -> Result<EvmInput> {
-    let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
-    if header.state_root() != &state_trie.hash_slow() {
+    let (mut state_trie, storage_tries) = db.prepare_state_storage_tries()?;
+    let state_root = state_trie.hash_slow();
+    // If the trie contains no nodes - we replace it with empty trie that has correct digest
+    // SAFETY: You can't get any account/storage info from such a trie
+    if state_root == EMPTY_ROOT_HASH {
+        state_trie = MerkleTrie(Node::Digest(*header.state_root()));
+    } else if header.state_root() != &state_root {
         return Err(Error::StateRootMismatch);
     }
 
@@ -52,4 +58,29 @@ pub(crate) fn into_multi_input(envs: CachedEvmEnv<HostDb>) -> Result<MultiEvmInp
             Ok((location, into_input(&env.db.db, env.header)?))
         })
         .collect()
+}
+
+#[cfg(test)]
+mod test {
+    use std::{marker::PhantomData, sync::Arc};
+
+    use alloy_primitives::B256;
+    use block_header::EthBlockHeader;
+    use mpt::{MerkleTrie, Node};
+
+    use super::into_input;
+    use crate::db::proof::ProofDb;
+
+    #[test]
+    fn into_input_empty_trie() {
+        let provider = provider::never::NeverProvider(PhantomData);
+        let db = ProofDb::new(Arc::new(provider), 0);
+        let state_root = B256::with_last_byte(1);
+        let header = EthBlockHeader {
+            state_root,
+            ..Default::default()
+        };
+        let input = into_input(&db, Box::new(header)).unwrap();
+        assert_eq!(input.state_trie, MerkleTrie(Node::Digest(state_root)));
+    }
 }

@@ -3,7 +3,7 @@ mod default;
 mod ethers;
 pub mod factory;
 pub mod multi;
-mod never;
+pub mod never;
 pub mod profiling;
 mod proof;
 mod provider_ext;
