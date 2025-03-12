@@ -8,14 +8,14 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/lib/build-sdk.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
 
 # Defaults
 set_proving_mode
 VLAYER_ENV=${VLAYER_ENV:-dev}
 
 generate_ts_bindings
-build-sdk
+build_sdk
 
 BUN_NO_FROZEN_LOCKFILE=1
 export EXAMPLE_NAME=$EXAMPLE

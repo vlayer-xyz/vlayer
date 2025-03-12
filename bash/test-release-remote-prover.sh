@@ -2,6 +2,7 @@
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib/set-missing-git-config.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
 
 set -ueo pipefail
 
@@ -38,11 +39,7 @@ VLAYER_ENV="testnet"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-echo '::group::Build extension'
-cd "$VLAYER_HOME/packages/browser-extension"
-bun install --frozen-lockfile
-bun run build
-echo '::endgroup::'
+build_extension
 
 echo "Starting VDNS server"
 docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d vdns_server

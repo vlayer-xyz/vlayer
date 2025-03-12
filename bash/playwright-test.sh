@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-contracts.sh"
 
 usage() {
     echo_color YELLOW "Usage: $0 [OPTIONS]"
@@ -48,19 +49,7 @@ source ${VLAYER_HOME}/bash/run-services.sh
 echo_color BLUE "Mock ImageId.sol"
 source ${VLAYER_HOME}/bash/mock-imageid.sh
 
-echo_color BLUE "Run Forge build vlayer"
-pushd ${VLAYER_HOME}/contracts/vlayer
-forge soldeer install
-forge clean
-forge build
-popd
-
-echo_color BLUE "Run Forge build fixtures"
-pushd ${VLAYER_HOME}/contracts/fixtures
-forge soldeer install
-forge clean
-forge build
-popd
+build_contracts
 
 echo_color BLUE "Run playwright tests"
 pushd ${VLAYER_HOME}/packages
