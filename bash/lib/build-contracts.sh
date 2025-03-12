@@ -12,7 +12,7 @@ function build_contracts_in() {
 
 function build_example_contracts() {
     echo "::group::Building ${1} example contracts"
-    pushd "${VLAYER_HOME}/examples/${1} "
+    pushd "${VLAYER_HOME}/examples/${1}"
     silent_unless_fails forge soldeer install
     forge clean
     silent_unless_fails forge build
