@@ -11,9 +11,9 @@ echo '::group::Generating typescript bidings'
 ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
 echo '::endgroup::'
 
-echo '::group::Running services'
+echo "::group::Running services"
 source ${VLAYER_HOME}/bash/run-services.sh
-echo '::endgroup::'
+echo "::endgroup::Running services"
 
 echo '::group::Build extension'
 cd "$VLAYER_HOME/packages/browser-extension"
@@ -30,6 +30,6 @@ bun install --frozen-lockfile
 bun run test-web:"${VLAYER_ENV}"
 echo '::endgroup::'
 
-echo '::group::Cleanup'
+echo "::group::Cleanup"
 cleanup
-echo '::endgroup::'
+echo "::endgroup::Cleanup"
