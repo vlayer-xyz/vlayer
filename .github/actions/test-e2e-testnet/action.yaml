@@ -28,6 +28,9 @@ inputs:
   chain_name:
     description: "Chain name"
     required: true
+  quicknode_chain_id:
+    description: "Chain id for quicknode"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -77,7 +80,7 @@ runs:
         QUICKNODE_ENDPOINT: "dry-alpha-tab"
         VLAYER_ENV: testnet
         CHAIN_NAME: ${{ inputs.chain_name }}
-        JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}"
+        JSON_RPC_URL: "https://dry-alpha-tab.${{ inputs.quicknode_chain_id }}.quiknode.pro/${{ inputs.quicknode_api_key }}"
         PROVER_URL: http://127.0.0.1:3000
         GAS_METER_URL: ${{ inputs.gas_meter_url }}
         GAS_METER_API_KEY: ${{ inputs.gas_meter_api_key }}

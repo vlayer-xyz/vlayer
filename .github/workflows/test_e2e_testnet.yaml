@@ -109,6 +109,7 @@ jobs:
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+          quicknode_chain_id: "optimism-sepolia"
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
@@ -130,6 +131,7 @@ jobs:
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+          quicknode_chain_id: "optimism-sepolia"
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
@@ -151,6 +153,7 @@ jobs:
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+          quicknode_chain_id: "optimism-sepolia"
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
@@ -172,6 +175,7 @@ jobs:
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+          quicknode_chain_id: "optimism-sepolia"
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
@@ -193,6 +197,7 @@ jobs:
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+          quicknode_chain_id: "sepolia"
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
