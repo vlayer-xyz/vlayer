@@ -18,6 +18,7 @@ build_extension
 for example in $(get_examples); do
 
   echo Running services...
+  DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy notary-server"
   source ${VLAYER_HOME}/bash/run-services.sh
 
   run_web_tests $example
