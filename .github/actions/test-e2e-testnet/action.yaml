@@ -25,6 +25,9 @@ inputs:
   vlayer_api_token:
     description: "VLAYER API Token"
     required: true
+  chain_name:
+    description: "Chain name"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -73,7 +76,7 @@ runs:
         QUICKNODE_API_KEY: ${{ inputs.quicknode_api_key }}
         QUICKNODE_ENDPOINT: "dry-alpha-tab"
         VLAYER_ENV: testnet
-        CHAIN_NAME: "optimismSepolia"
+        CHAIN_NAME: ${{ inputs.chain_name }}
         JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}"
         PROVER_URL: http://127.0.0.1:3000
         GAS_METER_URL: ${{ inputs.gas_meter_url }}
