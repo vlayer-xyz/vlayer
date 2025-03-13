@@ -44,7 +44,7 @@ members = [
 
 [profile.release]
 debug = "full"
-lto = false # debug + LTO leads to ICE in 1.84: https://github.com/rust-lang/rust/issues/135332
+lto = false #  debug + LTO leads to ICE in 1.84: https://github.com/rust-lang/rust/issues/135332
 
 [workspace.dependencies]
 alloy-chains = "0.1.42"
