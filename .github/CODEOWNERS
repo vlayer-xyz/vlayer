@@ -1,5 +1,10 @@
 /.github/CODEOWNERS @marekkirejczyk @vlayer-xyz/devops
 
+
+# Files with additional security requirements.
+/packages/browser-extension/src/manifest.json @marekkirejczyk @vlayer-xyz/devops @vlayer-xyz/secops
+
+
 # Audited files - 07 February 2025 - a76361451c47dbef25db03f61d2b0e26e0c5d940
 # A list of files that went into the scope of an audit.
 # Listing guest Cargo.lock's instead of root Cargo.toml to prevent unnecessary codeowner triggers.
