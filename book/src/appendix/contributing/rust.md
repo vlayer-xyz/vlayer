@@ -13,7 +13,14 @@ To start working with [this repository](https://github.com/vlayer-xyz/vlayer), y
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - [Bun](https://bun.sh) and [Node.js](https://nodejs.org)
 - [LLVM Clang](https://clang.llvm.org/) compiler version which supports [RISC-V build target](https://llvm.org/docs/RISCVUsage.html) available on the `PATH`
-- `timeout` terminal command (`brew install coreutils` on macOS)
+  ```
+  brew install llvm
+  ```
+- `timeout` terminal command
+  ```
+  brew install coreutils
+  ```
+
 
 ## Building vlayer
  
