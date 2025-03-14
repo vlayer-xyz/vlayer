@@ -3,14 +3,13 @@
 name: Release Browser Extension
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - rzadp/upload-extension # testing, to remove
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
   release-browser-extension:
+    name: Release Browser Extension
+    environment: Production
     runs-on: ubuntu-latest
     env:
       # https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl
