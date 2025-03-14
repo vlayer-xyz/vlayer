@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -11,5 +13,9 @@ export default defineConfig({
   // appearing in our dependency: reown/appkit
   define: {
     "process.env": {},
+  },
+  test: {
+    environment: "jsdom",
+    include: ["./tests/**/*.unit.ts"],
   },
 });
