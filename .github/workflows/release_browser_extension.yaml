@@ -29,7 +29,7 @@ jobs:
       - name: Read nightly version from the manifest
         run: |
           NIGHTLY_VERSION=$(
-            cat browser-extension/manifest.json | jq  -r '.version'
+            jq -r '.version' browser-extension/manifest.json
           )
           echo "NIGHTLY_VERSION=${NIGHTLY_VERSION}" >> $GITHUB_ENV
       
@@ -91,7 +91,7 @@ jobs:
              [ "${NIGHTLY_PARTS[1]}" = "${PUBLISHED_PARTS[1]}" ] && \
              [ "${NIGHTLY_PARTS[2]}" = "${PUBLISHED_PARTS[2]}" ]; then
             # If same version, increment the fourth number
-            FOURTH_NUMBER=$((${PUBLISHED_PARTS[3]} + 1))
+            FOURTH_NUMBER=$((PUBLISHED_PARTS[3] + 1))
           fi
           
           # Construct new version
