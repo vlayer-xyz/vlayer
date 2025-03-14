@@ -273,14 +273,14 @@ test.describe("Full flow of webproof using extension", () => {
       const responseText = await redactedResponse.textContent();
 
       expect(requestText).toContain("accept-encoding: identity");
-      expect(requestText).toContain("content-type: ****************");
+      expect(requestText).toContain("connection: *****");
 
       expect(responseText).toContain("Access-Control-Allow-Methods: GET");
       expect(responseText).toContain(
-        "Access-Control-Expose-Headers: ****************************************************************************************************************************",
+        "Access-Control-Expose-Headers: **************************************************************************************************************",
       );
       expect(responseText).toContain(
-        "Access-Control-Allow-Headers: ****************************************************************************************************************************",
+        "Access-Control-Allow-Headers: **************************************************************************************************************",
       );
 
       expect(responseText).toContain('"name":"Gandalf"');
@@ -512,14 +512,14 @@ test.describe("Full flow of webproof using extension", () => {
       const responseText = await redactedResponse.textContent();
 
       expect(requestText).toContain("accept-encoding: identity");
-      expect(requestText).toContain("content-type: ****************");
+      expect(requestText).toContain("connection: *****");
 
       expect(responseText).toContain("Access-Control-Allow-Methods: GET");
       expect(responseText).toContain(
-        "Access-Control-Expose-Headers: ****************************************************************************************************************************",
+        "Access-Control-Expose-Headers: **************************************************************************************************************",
       );
       expect(responseText).toContain(
-        "Access-Control-Allow-Headers: ****************************************************************************************************************************",
+        "Access-Control-Allow-Headers: **************************************************************************************************************",
       );
 
       expect(responseText).toContain('"name":"Gandalf"');

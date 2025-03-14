@@ -68,10 +68,7 @@ export async function tlsnProve(
   const request = {
     url: notarizeRequestUrl,
     method: method as Method,
-    headers: {
-      ...formattedHeaders?.headers,
-      "Content-Type": "application/json",
-    },
+    headers: formattedHeaders?.headers,
     body: requestBody,
   };
 
