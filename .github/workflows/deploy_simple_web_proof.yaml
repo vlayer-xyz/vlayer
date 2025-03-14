@@ -90,7 +90,7 @@ jobs:
           WEB_SERVER_URL: ${{needs.deploy-simple-web-proof.outputs.deployment_url}}
           VLAYER_TMP_DIR: ./artifacts
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
-        run: bash/e2e-web-proof-example-test.sh
+        run: xvfb-run bash/e2e-web-proof-example-test.sh
       - name: Handle Playwright Reports
         uses: ./.github/actions/handle-playwright-reports
         if: ${{ !cancelled() }}

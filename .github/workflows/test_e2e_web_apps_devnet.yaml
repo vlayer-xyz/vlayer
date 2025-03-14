@@ -67,7 +67,7 @@ jobs:
           VLAYER_ENV: dev
           VLAYER_TMP_DIR: ./artifacts
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
-        run: bash/e2e-web-apps-test.sh
+        run: xvfb-run bash/e2e-web-apps-test.sh
 
       # Teardown
       - name: Display Logs
