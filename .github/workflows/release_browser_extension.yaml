@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       # The extension is built and uploaded to S3 during the nightly release workflow.
       # We download it, and read its version for later use.
       - name: Download latest nightly extension archive
@@ -32,7 +32,7 @@ jobs:
             jq -r '.version' browser-extension/manifest.json
           )
           echo "NIGHTLY_VERSION=${NIGHTLY_VERSION}" >> $GITHUB_ENV
-      
+
       # https://developer.chrome.com/docs/webstore/using-api#refresh_your_access_token
       - name: Refresh Chrome Web Store API access token
         env:
@@ -50,7 +50,7 @@ jobs:
           )
           echo "::add-mask::$CHROME_WEB_STORE_API_ACCESS_TOKEN"
           echo "CHROME_WEB_STORE_API_ACCESS_TOKEN=${CHROME_WEB_STORE_API_ACCESS_TOKEN}" >> $GITHUB_ENV
-      
+
       # We read the previously-uploaded extension version from the store.
       # It will be in the `x.y.z.a` format.
       - name: Read published version of the extension from the store
@@ -63,7 +63,7 @@ jobs:
               | jq -r '.crxVersion'
           )
           echo "PUBLISHED_VERSION=${PUBLISHED_VERSION}" >> $GITHUB_ENV
-      
+
       # We need to specify a new `version` of the extension.
       # We can't use our manifest `version_name`,
       # because the nightly date and commit hash tags are incompatible with the version format:
@@ -82,10 +82,10 @@ jobs:
           # Split versions into components
           IFS='.' read -ra NIGHTLY_PARTS <<< "$NIGHTLY_VERSION"
           IFS='.' read -ra PUBLISHED_PARTS <<< "$PUBLISHED_VERSION"
-          
+
           # Default fourth number to 0
           FOURTH_NUMBER=0
-          
+
           # Check if first three numbers match
           if [ "${NIGHTLY_PARTS[0]}" = "${PUBLISHED_PARTS[0]}" ] && \
              [ "${NIGHTLY_PARTS[1]}" = "${PUBLISHED_PARTS[1]}" ] && \
@@ -93,7 +93,7 @@ jobs:
             # If same version, increment the fourth number
             FOURTH_NUMBER=$((PUBLISHED_PARTS[3] + 1))
           fi
-          
+
           # Construct new version
           NEW_VERSION="${NIGHTLY_PARTS[0]}.${NIGHTLY_PARTS[1]}.${NIGHTLY_PARTS[2]}.${FOURTH_NUMBER}"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
