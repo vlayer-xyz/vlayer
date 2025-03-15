@@ -62,9 +62,9 @@ export async function tlsnProve(
     maxSentData: 4096,
     maxRecvData: 16384,
   });
-
   const sessionUrl = await notary.sessionUrl();
   await prover.setup(sessionUrl);
+
   const request = {
     url: notarizeRequestUrl,
     method: method as Method,
@@ -78,9 +78,12 @@ export async function tlsnProve(
     throw new Error("Authentication failed. Please restart the process.");
   }
 
-  log("Received response", res);
+  const proverTranscript = await prover.transcript();
 
-  const transcript = await prover.transcript();
+  const transcript = {
+    recv: new TextDecoder().decode(new Uint8Array(proverTranscript.recv)),
+    sent: new TextDecoder().decode(new Uint8Array(proverTranscript.sent)),
+  };
 
   log("Transcript", transcript);
 
