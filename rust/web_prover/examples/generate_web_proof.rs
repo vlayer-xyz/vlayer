@@ -1,8 +1,8 @@
-use web_prover::{create_presentation, notarize};
+use web_prover::generate_web_proof;
 
 #[tokio::main]
 pub async fn main() {
-    let notarization_result = Box::pin(notarize(
+    let presentation = Box::pin(generate_web_proof(
         "127.0.0.1",
         7047,
         "lotr-api.online",
@@ -12,10 +12,6 @@ pub async fn main() {
     ))
     .await
     .unwrap();
-
-    let presentation = create_presentation(notarization_result.0, notarization_result.1)
-        .await
-        .unwrap();
 
     println!("{}", presentation);
 }
