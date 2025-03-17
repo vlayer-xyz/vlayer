@@ -34,7 +34,7 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
   },
   logoUrl: "http://twitterswap.com/logo.png",
   steps: [
-    startPage("https://x.com", "Go to x.com login page"),
+    startPage("https://x.com/", "Go to x.com login page"),
     expectUrl("https://x.com/home", "Log in"),
     notarize(
       "https://api.x.com/1.1/account/settings.json",
