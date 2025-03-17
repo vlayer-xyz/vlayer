@@ -1,4 +1,5 @@
-# This workflow uploads the latest nightly extension to the Chrome Web Store.
+# This workflow uploads the latest nightly extension to the Chrome Web Store,
+# and requests it to be published - after a successful review.
 
 name: Release Browser Extension
 on:
