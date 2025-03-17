@@ -25,7 +25,7 @@ pub async fn notarize(
     server_port: u16,
     uri: &str,
 ) -> Result<(Attestation, Secrets), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let notary_client = NotaryClient::builder()
         .host(notary_host)
