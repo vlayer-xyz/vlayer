@@ -18,9 +18,7 @@ describe("ProvingProgress", () => {
     );
     expect(screen.getByText("Generating Web Proof")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "This takes a while. Don’t close your browser.",
-      ),
+      screen.getByText("This takes a while. Don’t close your browser."),
     ).toBeInTheDocument();
     expect(screen.getByText("Step 1 of 2")).toBeInTheDocument();
     expect(screen.getByTestId("proving-progress")).toHaveAttribute(
@@ -48,9 +46,7 @@ describe("ProvingProgress", () => {
     );
     expect(screen.getByText("Generating Web Proof")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "This takes a while. Don’t close your browser.",
-      ),
+      screen.getByText("This takes a while. Don’t close your browser."),
     ).toBeInTheDocument();
 
     rerender(
@@ -58,9 +54,7 @@ describe("ProvingProgress", () => {
     );
     expect(screen.getByText("Generating ZK Proof")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "This takes a while. Don’t close your browser.",
-      ),
+      screen.getByText("This takes a while. Don’t close your browser."),
     ).toBeInTheDocument();
   });
 

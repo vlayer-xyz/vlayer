@@ -33,17 +33,13 @@ export const useProvingProgress = (props: {
     match(props.provingStatus)
       .with(ProvingStatus.Web, () => {
         setTitle("Generating Web Proof");
-        setSubtitle(
-          "This takes a while. Don’t close your browser.",
-        );
+        setSubtitle("This takes a while. Don’t close your browser.");
         setStepIndex(1);
         setDataTestId("step_proving_web");
       })
       .with(ProvingStatus.Zk, () => {
         setTitle("Generating ZK Proof");
-        setSubtitle(
-          "This takes a while. Don’t close your browser.",
-        );
+        setSubtitle("This takes a while. Don’t close your browser.");
         setStepIndex(2);
         setDataTestId("step_proving_zk");
       });
