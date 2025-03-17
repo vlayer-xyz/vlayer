@@ -59,7 +59,7 @@ const webProofConfig: GetWebProofArgs<Abi, string> = {
   ],
 };
 
-export const useTwitterAccountProof = () => {
+export const useSimpleWebProof = () => {
   const {
     requestWebProof,
     webProof,

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { useTwitterAccountProof } from "../../../hooks/useSimpleWebProof";
+import { useSimpleWebProof } from "../../../hooks/useSimpleWebProof";
 import { ProveStepPresentational } from "./Presentational";
 import { useAccount } from "wagmi";
 
@@ -11,7 +11,7 @@ export const ProveStep = () => {
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const { requestWebProof, webProof, callProver, isPending, result, error } =
-    useTwitterAccountProof();
+    useSimpleWebProof();
 
   useEffect(() => {
     if (webProof) {
