@@ -8,7 +8,6 @@ on:
       - examples/simple-web-proof/**
       - .github/workflows/deploy_simple_web_proof.yaml
       - bash/e2e-web-proof-example-test.sh
-      - .github/actions/example-deploy/**
   push:
     paths:
       - examples/simple-web-proof/**
