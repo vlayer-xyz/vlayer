@@ -19,7 +19,7 @@ describe("ProvingProgress", () => {
     expect(screen.getByText("Generating Web Proof")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "This usually takes up to 4 mins. Don’t close your browser.",
+        "This takes a while. Don’t close your browser.",
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("Step 1 of 2")).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe("ProvingProgress", () => {
     expect(screen.getByText("Generating Web Proof")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "This usually takes up to 4 mins. Don’t close your browser.",
+        "This takes a while. Don’t close your browser.",
       ),
     ).toBeInTheDocument();
 
@@ -59,7 +59,7 @@ describe("ProvingProgress", () => {
     expect(screen.getByText("Generating ZK Proof")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "This usually takes up to 4 mins. Don’t close your browser.",
+        "This takes a while. Don’t close your browser.",
       ),
     ).toBeInTheDocument();
   });

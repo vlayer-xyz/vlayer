@@ -34,7 +34,7 @@ export const useProvingProgress = (props: {
       .with(ProvingStatus.Web, () => {
         setTitle("Generating Web Proof");
         setSubtitle(
-          "This usually takes up to 4 mins. Don’t close your browser.",
+          "This takes a while. Don’t close your browser.",
         );
         setStepIndex(1);
         setDataTestId("step_proving_web");
@@ -42,7 +42,7 @@ export const useProvingProgress = (props: {
       .with(ProvingStatus.Zk, () => {
         setTitle("Generating ZK Proof");
         setSubtitle(
-          "This usually takes up to 4 mins. Don’t close your browser.",
+          "This takes a while. Don’t close your browser.",
         );
         setStepIndex(2);
         setDataTestId("step_proving_zk");
