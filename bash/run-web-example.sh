@@ -34,6 +34,9 @@ function run_browser_extension {
     echo "::endgroup::Running browser extension"
 }
 
+DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy notary-server"
+source ${VLAYER_HOME}/bash/run-services.sh
+
 install_deps
 build_example_contracts simple-web-proof
 run_web_app

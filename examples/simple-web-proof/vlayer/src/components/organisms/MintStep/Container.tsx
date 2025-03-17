@@ -72,6 +72,7 @@ export const MintStep = () => {
 
   useEffect(() => {
     if (error) {
+      console.error("error minting", error);
       setIsMinting(false);
     }
   }, [error]);
