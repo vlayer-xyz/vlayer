@@ -4,7 +4,7 @@ import { useModal } from "../../../hooks/useModal";
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useExtension } from "../../../hooks/useExtension";
-import { useAccount } from 'wagmi';
+import { useAccount } from "wagmi";
 
 const useConnectWallet = () => {
   const { open: openWallet } = useAppKit();
