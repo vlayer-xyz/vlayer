@@ -47,8 +47,8 @@ pub async fn main(
         .await
         .expect("travel call verification failed");
 
-    let evm_call_result = TravelCallExecutor::new(&cached_envs)
-        .call(&call, start_execution_location)
+    let evm_call_result = TravelCallExecutor::new(&cached_envs, start_execution_location)
+        .call(&call)
         .expect("travel call execution failed")
         .output;
 

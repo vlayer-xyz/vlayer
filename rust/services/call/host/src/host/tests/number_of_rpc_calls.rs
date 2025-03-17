@@ -32,7 +32,7 @@ fn profile(
         CachedMultiProvider::from_provider(location.chain_id, profiling_provider.clone());
     let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(multi_provider));
 
-    let _ = travel_call::Executor::new(&envs).call(call, location);
+    let _ = travel_call::Executor::new(&envs, location).call(call);
 
     Ok(profiling_provider.state())
 }
