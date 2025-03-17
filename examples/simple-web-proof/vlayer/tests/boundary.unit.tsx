@@ -12,7 +12,7 @@ const Ok = () => {
   return <h1>OK</h1>;
 };
 
-// without this line, test will pass but display "Error: Uncaught [Error: Test error]"
+// without this line, test will pass but displays a lot of error messages in the console
 vi.spyOn(console, "error").mockImplementation(() => null);
 
 describe("ErrorBoundary", () => {
