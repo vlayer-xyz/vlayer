@@ -13,5 +13,5 @@ pub async fn main() {
     .await
     .unwrap();
 
-    println!("{}", presentation);
+    println!("{presentation}");
 }
