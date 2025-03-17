@@ -29,6 +29,7 @@ export type ProofConfig = {
   notaryUrl: string;
   wsProxyUrl: string;
   env?: ProofEnv;
+  token?: string;
 };
 
 export enum WebProofRequestStatus {

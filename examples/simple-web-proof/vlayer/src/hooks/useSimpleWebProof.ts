@@ -21,7 +21,6 @@ const vlayerProverConfig: Omit<
   chainId:
     import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil.id : optimismSepolia.id,
   functionName: "main",
-  token: import.meta.env.VITE_VLAYER_API_TOKEN,
 };
 
 const webProofConfig: GetWebProofArgs<Abi, string> = {

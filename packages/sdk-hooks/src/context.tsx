@@ -19,7 +19,7 @@ export const ProofProvider = ({
 }: PropsWithChildren<{
   config?: Partial<ProofConfig>;
 }>) => {
-  const { proverUrl, notaryUrl, wsProxyUrl } = {
+  const { proverUrl, notaryUrl, wsProxyUrl, token } = {
     ...DEFAULT_CONFIG[config?.env ?? DEFAULT_CONFIG_ENV],
     ...config,
   };
@@ -32,6 +32,7 @@ export const ProofProvider = ({
   const vlayerClient = createVlayerClient({
     url: proverUrl,
     webProofProvider,
+    token,
   });
 
   return (

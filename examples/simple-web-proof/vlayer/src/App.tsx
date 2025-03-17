@@ -63,6 +63,7 @@ const App = () => {
               proverUrl: import.meta.env.VITE_PROVER_URL,
               wsProxyUrl: import.meta.env.VITE_WS_PROXY_URL,
               notaryUrl: import.meta.env.VITE_NOTARY_URL,
+              token: import.meta.env.VITE_VLAYER_API_TOKEN,
             }}
           >
             <BrowserRouter>

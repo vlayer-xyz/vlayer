@@ -53,7 +53,6 @@ export const useEmailProofVerification = () => {
     address: import.meta.env.VITE_PROVER_ADDRESS,
     proverAbi: proverSpec.abi,
     functionName: "main",
-    token: import.meta.env.VITE_VLAYER_API_TOKEN,
   });
 
   const { data: proof, error: provingError } =

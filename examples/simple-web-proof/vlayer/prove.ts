@@ -127,7 +127,6 @@ async function testFailedProving() {
         twitterUserAddress,
       ],
       chainId: chain.id,
-      token: config.token,
     });
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
