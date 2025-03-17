@@ -1,12 +1,11 @@
-name: Test Rust
+name: Web Prover Integration Test
 
 on:
   pull_request:
     paths:
       - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - ".github/workflows/test_rust.yaml"
+      - "rust/web_prover/**"
+      - ".github/workflows/test_int_web_prover.yaml"
   merge_group:
   push:
     branches:
@@ -17,8 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-rust:
-    name: Test Rust
+  test-int-web-prover:
+    name: Test Rust web_prover
     runs-on: aws-linux-medium
 
     steps:
@@ -36,9 +35,14 @@ jobs:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check-llvm-clang.sh
 
-      - name: Run workspace rust tests
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/web-proof/docker-compose-notary-v8.yaml
+          up-flags: "--build"
+
+      - name: Run web_prover rust tests
         run: |
-          cargo test --workspace --locked --all-features --exclude web_prover
+          cargo test --workspace --locked --all-features --package web_prover
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUST_LOG: info
