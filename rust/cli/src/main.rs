@@ -33,7 +33,7 @@ enum Commands {
     Test(Box<TestArgs>),
     Update,
     #[command(hide = true)]
-    FetchWebProof,
+    WebProofFetch,
 }
 
 #[tokio::main]
@@ -56,6 +56,6 @@ async fn run() -> Result<()> {
             Box::pin(run_test(args)).await
         }
         Commands::Update => run_update().await,
-        Commands::FetchWebProof => Ok(()),
+        Commands::WebProofFetch => Ok(()),
     }
 }

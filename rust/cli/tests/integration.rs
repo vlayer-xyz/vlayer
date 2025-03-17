@@ -5,6 +5,6 @@ mod tests {
     #[test]
     fn test_cli_output() {
         let mut cmd = Command::cargo_bin("vlayer").unwrap();
-        cmd.arg("fetch-web-proof").assert().success();
+        cmd.arg("web-proof-fetch").assert().success();
     }
 }
