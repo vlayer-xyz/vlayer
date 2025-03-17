@@ -61,4 +61,5 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [Test JS](/.github/workflows/test_js.yaml) | Run TS/JS unit tests. |
 | [Test release](/.github/workflows/test_release.yaml) | Runs tests against released artifacts. |
 | [Test Rust](/.github/workflows/test_rust.yaml) | Run Rust code. |
+| [Web Prover Integration Test](/.github/workflows/test_int_web_prover.yaml) | Run Web Prover integration tests. |
 | [Test vlayer](/.github/workflows/test_vlayer.yaml) | Run vlayer tests in contracts and examples. |
