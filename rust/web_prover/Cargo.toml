@@ -3,10 +3,16 @@ name = "web_prover"
 version = "0.1.0"
 edition = "2021"
 
+[[example]]
+name = "generate_web_proof"
+path = "examples/generate_web_proof.rs"
+
 [features]
 integration-tests = []
 
 [dependencies]
+bincode = { workspace = true }
+hex = { workspace = true }
 http-body-util = { workspace = true }
 hyper = { workspace = true, features = ["client", "http1"] }
 hyper-util = { workspace = true, features = ["full"] }
