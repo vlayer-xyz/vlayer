@@ -1,18 +1,19 @@
-import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
+import { useAppKit } from "@reown/appkit/react";
 import { ConnectWalletStepPresentational } from "./Presentational";
 import { useModal } from "../../../hooks/useModal";
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useExtension } from "../../../hooks/useExtension";
+import { useAccount } from 'wagmi';
 
 const useConnectWallet = () => {
   const { open: openWallet } = useAppKit();
   const { closeModal, showModal } = useModal();
   const { hasExtensionInstalled } = useExtension();
   const navigate = useNavigate();
-  const { isConnected } = useAppKitAccount();
+  const account = useAccount();
 
-  const isWalletConnected = isConnected || !!import.meta.env.VITE_PRIVATE_KEY;
+  const isWalletConnected = account.isConnected;
 
   const next = useCallback(() => {
     if (hasExtensionInstalled) {
