@@ -124,6 +124,7 @@ runs:
         VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
         GITHUB_TOKEN: "${{ inputs.github_token }}"
         EXAMPLE_NAME: ${{ inputs.example_name }}
+        CLIENT_AUTH_MODE: "wallet"
       run: bash/vercel/deploy-example.sh
     - name: Deploy to Vercel (PR Preview)
       id: deploy-vercel-preview
@@ -137,5 +138,6 @@ runs:
         GITHUB_TOKEN: "${{ inputs.github_token }}"
         PR_NUMBER: "${{ github.event.number }}"
         EXAMPLE_NAME: ${{ inputs.example_name }}
+        CLIENT_AUTH_MODE: "wallet"
       run: bash/vercel/deploy-example.sh
       
