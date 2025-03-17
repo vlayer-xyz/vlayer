@@ -57,6 +57,7 @@ const { prover, verifier } = await deployVlayerContracts({
 console.log("Proving...");
 const vlayer = createVlayerClient({
   url: proverUrl,
+  token: config.token,
 });
 
 const hash = await vlayer.prove({
@@ -65,7 +66,6 @@ const hash = await vlayer.prove({
   functionName: "balance",
   args: [john.address],
   chainId: chain.id,
-  token: config.token,
 });
 const result = await vlayer.waitForProvingResult({ hash });
 const [proof, owner, balance] = result;

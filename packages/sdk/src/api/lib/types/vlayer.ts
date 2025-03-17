@@ -88,7 +88,6 @@ export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
   functionName: F;
   chainId?: number;
   gasLimit?: number;
-  token?: string;
   args: ContractFunctionArgs<T, AbiStateMutability, F>;
 };
 
@@ -112,7 +111,6 @@ export type VlayerClient = {
     functionName: F;
     chainId: number;
     gasLimit?: number;
-    token?: string;
     args: [
       WebProofRequest,
       ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,

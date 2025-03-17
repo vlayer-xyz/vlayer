@@ -35,6 +35,7 @@ if (!dnsServiceUrl) {
 console.log("Proving...");
 const vlayer = createVlayerClient({
   url: proverUrl,
+  token: config.token,
 });
 const hash = await vlayer.prove({
   address: prover,
@@ -42,7 +43,6 @@ const hash = await vlayer.prove({
   functionName: "main",
   chainId: chain.id,
   args: [await preverifyEmail(mimeEmail, dnsServiceUrl), john.address],
-  token: config.token,
 });
 const result = await vlayer.waitForProvingResult({ hash });
 

@@ -29,9 +29,11 @@ export const createVlayerClient = (
   {
     url = "http://127.0.0.1:3000",
     webProofProvider = createExtensionWebProofProvider(),
+    token,
   }: {
     url?: string;
     webProofProvider?: WebProofProvider;
+    token?: string;
   } = {
     url: "http://127.0.0.1:3000",
     webProofProvider: createExtensionWebProofProvider(),
@@ -46,7 +48,6 @@ export const createVlayerClient = (
       functionName,
       chainId,
       gasLimit,
-      token,
       args,
     }: ProveArgs<T, F>) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
@@ -85,6 +86,7 @@ export const createVlayerClient = (
         const { data } = await waitForProof(
           hash,
           url,
+          token,
           numberOfRetries,
           sleepDuration,
         );
@@ -121,7 +123,6 @@ export const createVlayerClient = (
       functionName,
       chainId,
       gasLimit,
-      token,
       args,
     }) {
       const webProofPlaceholder = args[0];
@@ -173,7 +174,6 @@ export const createVlayerClient = (
         chainId,
         gasLimit,
         proverAbi,
-        token,
         args: [
           {
             webProofJson: JSON.stringify({
