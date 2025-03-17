@@ -39,4 +39,14 @@ describe("ErrorBoundary", () => {
     const errorDisplayed = screen.queryByTestId("Error display");
     expect(errorDisplayed).not.toBeInTheDocument();
   });
+
+  test("should display default error message when unknown error", () => {
+    render(
+      <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+        <ThrowError />
+      </ErrorBoundary>,
+    );
+    const errorDisplayed = screen.queryByText("Something went wrong");
+    expect(errorDisplayed).toBeInTheDocument();
+  });
 });
