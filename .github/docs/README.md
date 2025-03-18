@@ -63,3 +63,16 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [Test Rust](/.github/workflows/test_rust.yaml) | Run Rust code. |
 | [Web Prover Integration Test](/.github/workflows/test_int_web_prover.yaml) | Run Web Prover integration tests. |
 | [Test vlayer](/.github/workflows/test_vlayer.yaml) | Run vlayer tests in contracts and examples. |
+
+## Running jobs only when specified paths are changed
+
+There is a [native option](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore) to make jobs run only when a configured set of paths has changed.
+It is typically used for long-running jobs - to skip them, if we only change unrelated code or documentation.
+
+However, this approach is incompatible with required checks - for merging PRs and for the merge queue.
+If a job does not start at all, it does not match the requirement and the PR cannot be merged.
+
+This is solved by a [non-native approach](https://github.com/dorny/paths-filter) to path filters. The job does start, but exits shortly.
+This way, we achieve a skipped job, while still making it possible to mark the job as required.
+
+Look at [this workflow](../workflows/test_e2e_devnet.yaml) for reference.
