@@ -211,6 +211,7 @@ u64_range = { path = "rust/range" }
 verifiable_dns = { path = "rust/verifiable_dns", default-features = false }
 version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
+web_prover = { path = "rust/web_prover" }
 zkvm-benchmarks = { path = "rust/zkvm-benchmarks/benchmarks" }
 
 [workspace.lints.clippy]
