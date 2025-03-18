@@ -3,14 +3,21 @@ name = "web_prover"
 version = "0.1.0"
 edition = "2021"
 
+[[example]]
+name = "generate_web_proof"
+path = "examples/generate_web_proof.rs"
+
 [features]
 integration-tests = []
 
 [dependencies]
+bincode = { workspace = true }
+hex = { workspace = true }
 http-body-util = { workspace = true }
 hyper = { workspace = true, features = ["client", "http1"] }
 hyper-util = { workspace = true, features = ["full"] }
 notary-client = { workspace = true }
+regex = "1.11.1"
 serde_json = { workspace = true }
 spansy = { workspace = true }
 tlsn-common = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }

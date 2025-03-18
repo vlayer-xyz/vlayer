@@ -1,125 +1,57 @@
-use http_body_util::Empty;
-use hyper::{body::Bytes, Request, StatusCode};
-use hyper_util::rt::TokioIo;
-use notary_client::{Accepted, NotarizationRequest, NotaryClient};
-use spansy::Spanned;
-use tlsn_common::config::ProtocolConfig;
-use tlsn_core::{
-    attestation::Attestation, request::RequestConfig, transcript::TranscriptCommitConfig,
-    CryptoProvider, Secrets,
-};
-use tlsn_formats::http::{DefaultHttpCommitter, HttpCommit, HttpTranscript};
-use tlsn_prover::{Prover, ProverConfig};
-use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
-use tracing::debug;
+mod notarize;
+mod presentation;
+mod verify;
 
-const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
-const MAX_SENT_DATA: usize = 1 << 12;
-const MAX_RECV_DATA: usize = 1 << 14;
+pub use notarize::notarize;
+pub use presentation::create_presentation;
+use serde_json::Value;
+pub use verify::verify_presentation;
 
-pub async fn notarize(
+pub async fn generate_web_proof(
     notary_host: &str,
     notary_port: u16,
     server_domain: &str,
     server_host: &str,
     server_port: u16,
     uri: &str,
-) -> Result<(Attestation, Secrets), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::init();
+) -> Result<String, Box<dyn std::error::Error>> {
+    let (attestation, secrets) =
+        notarize(notary_host, notary_port, server_domain, server_host, server_port, uri).await?;
+    let presentation = create_presentation(attestation, secrets).await?;
+    let encoded_presentation = hex::encode(bincode::serialize(&presentation).unwrap());
 
-    let notary_client = NotaryClient::builder()
-        .host(notary_host)
-        .port(notary_port)
-        .enable_tls(false)
-        .build()
-        .unwrap();
+    let json_response = to_json(&encoded_presentation, notary_host, notary_port);
 
-    let notarization_request = NotarizationRequest::builder()
-        .max_sent_data(MAX_SENT_DATA)
-        .max_recv_data(MAX_RECV_DATA)
-        .build()?;
+    Ok(serde_json::to_string(&json_response)?)
+}
 
-    let Accepted {
-        io: notary_connection,
-        id: _session_id,
-        ..
-    } = notary_client
-        .request_notarization(notarization_request)
-        .await
-        .expect("Could not connect to notary. Make sure it is running.");
+fn to_json(encoded_presentation: &str, notary_host: &str, notary_port: u16) -> Value {
+    let notary_url = format!("https://{notary_host}:{notary_port}");
 
-    let prover_config = ProverConfig::builder()
-        .server_name(server_domain)
-        .protocol_config(
-            ProtocolConfig::builder()
-                .max_sent_data(MAX_SENT_DATA)
-                .max_recv_data(MAX_RECV_DATA)
-                .build()?,
-        )
-        .crypto_provider(CryptoProvider::default())
-        .build()?;
-
-    let prover = Prover::new(prover_config)
-        .setup(notary_connection.compat())
-        .await?;
-
-    let client_socket = tokio::net::TcpStream::connect((server_host, server_port)).await?;
-
-    let (mpc_tls_connection, prover_fut) = prover.connect(client_socket.compat()).await?;
-    let mpc_tls_connection = TokioIo::new(mpc_tls_connection.compat());
-
-    let prover_task = tokio::spawn(prover_fut);
-
-    let (mut request_sender, connection) =
-        hyper::client::conn::http1::handshake(mpc_tls_connection).await?;
-
-    tokio::spawn(connection);
-
-    let request_builder = Request::builder()
-        .uri(uri)
-        .header("Host", server_domain)
-        .header("Accept", "*/*")
-        .header("Accept-Encoding", "identity")
-        .header("Connection", "close")
-        .header("User-Agent", USER_AGENT);
-    let request = request_builder.body(Empty::<Bytes>::new())?;
-
-    println!("Starting an MPC TLS connection with the server");
-
-    let response = request_sender.send_request(request).await?;
-
-    println!("Got a response from the server: {}", response.status());
-
-    assert!(response.status() == StatusCode::OK);
-
-    let prover = prover_task.await??;
-
-    let mut prover = prover.start_notarize();
-
-    let transcript = HttpTranscript::parse(prover.transcript())?;
-
-    let body_content = &transcript.responses[0].body.as_ref().unwrap().content;
-    let body = String::from_utf8_lossy(body_content.span().as_bytes());
-
-    match body_content {
-        tlsn_formats::http::BodyContent::Json(_json) => {
-            let parsed = serde_json::from_str::<serde_json::Value>(&body)?;
-            debug!("{}", serde_json::to_string_pretty(&parsed)?);
+    let presentation_json = serde_json::json!({
+        "presentationJson": {
+            "version": "0.1.0-alpha.8",
+            "data": encoded_presentation,
+            "meta": {
+                "notaryUrl": notary_url,
+                "websocketProxyUrl": "",
+            },
         }
-        tlsn_formats::http::BodyContent::Unknown(_span) => {
-            debug!("{}", &body);
-        }
-        _ => {}
+    });
+    presentation_json
+}
+
+#[cfg(test)]
+mod tests {
+    use super::to_json;
+    #[test]
+    fn test_to_json_structure() {
+        let json = to_json("48656c6c6f20576f726c64", "127.0.0.1", 7047);
+
+        assert!(json.is_object());
+        assert_eq!(json["presentationJson"]["version"], "0.1.0-alpha.8");
+        assert_eq!(json["presentationJson"]["data"], "48656c6c6f20576f726c64");
+        assert_eq!(json["presentationJson"]["meta"]["notaryUrl"], "https://127.0.0.1:7047");
+        assert_eq!(json["presentationJson"]["meta"]["websocketProxyUrl"], "");
     }
-
-    let mut builder = TranscriptCommitConfig::builder(prover.transcript());
-
-    DefaultHttpCommitter::default().commit_transcript(&mut builder, &transcript)?;
-
-    prover.transcript_commit(builder.build()?);
-
-    let request_config = RequestConfig::default();
-
-    let (attestation, secrets) = Box::pin(prover.finalize(&request_config)).await?;
-    Ok((attestation, secrets))
 }
