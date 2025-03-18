@@ -3,6 +3,8 @@
 
 name: Release Browser Extension
 on:
+  schedule:
+    - cron: "0 8 * * 2" # Tuesday at 08:00 UTC (09:00 CET / 10:00 CEST)
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}
