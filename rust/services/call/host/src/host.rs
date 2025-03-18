@@ -153,7 +153,7 @@ impl Host {
             output: host_output,
             gas_used,
             metadata,
-        } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
+        } = TravelCallExecutor::new(&self.envs, self.start_execution_location).call(&call)?;
 
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)

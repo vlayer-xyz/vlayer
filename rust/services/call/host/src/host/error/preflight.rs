@@ -26,6 +26,11 @@ pub enum Error {
 
 #[derive(Error, Debug)]
 pub enum ExecutionError {
+    #[error(
+        "Time-travel into the future is not allowed. Started on block {start}, but attempted to jump to block {target}."
+    )]
+    TimeTravelIntoFuture { start: u64, target: u64 },
+
     #[error("EVM error: {0}")]
     EvmError(#[from] EVMError<HostDbError>),
 
@@ -44,6 +49,9 @@ pub type GuestExecutionError = call_engine::travel_call::Error<HostDbError>;
 impl From<GuestExecutionError> for ExecutionError {
     fn from(err: GuestExecutionError) -> Self {
         match err {
+            GuestExecutionError::TimeTravelIntoFuture { start, target } => {
+                ExecutionError::TimeTravelIntoFuture { start, target }
+            }
             GuestExecutionError::TransactError(err) => ExecutionError::TransactError(err.into()),
             GuestExecutionError::EvmEnv(err) => ExecutionError::EvmEnv(err),
             GuestExecutionError::EvmError(err) => ExecutionError::EvmError(err),
