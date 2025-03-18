@@ -1,10 +1,10 @@
 #[cfg(test)]
 #[cfg(feature = "integration-tests")]
 mod integration_tests {
-    use regex::Regex;
     use std::error::Error;
-    use tlsn_core::connection::ServerName;
-    use tlsn_core::presentation::Presentation;
+
+    use regex::Regex;
+    use tlsn_core::{connection::ServerName, presentation::Presentation};
     use web_prover::{generate_web_proof, verify_presentation};
 
     #[tokio::test]

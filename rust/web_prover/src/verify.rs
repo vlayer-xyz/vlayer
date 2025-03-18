@@ -1,8 +1,11 @@
 use std::error::Error;
-use tlsn_core::connection::ServerName;
-use tlsn_core::presentation::{Presentation, PresentationOutput};
-use tlsn_core::signing::VerifyingKey;
-use tlsn_core::CryptoProvider;
+
+use tlsn_core::{
+    connection::ServerName,
+    presentation::{Presentation, PresentationOutput},
+    signing::VerifyingKey,
+    CryptoProvider,
+};
 
 pub fn verify_presentation(
     presentation: Presentation,
