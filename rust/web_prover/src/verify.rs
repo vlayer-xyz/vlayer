@@ -16,7 +16,6 @@ pub fn verify_presentation(
 
     let encoded_key = hex::encode(key_data);
 
-    // Verify the presentation.
     let PresentationOutput {
         server_name,
         transcript,
@@ -25,7 +24,7 @@ pub fn verify_presentation(
 
     let server_name = server_name.unwrap();
     let mut partial_transcript = transcript.unwrap();
-    // Set the unauthenticated bytes so they are distinguishable.
+
     partial_transcript.set_unauthed(b'X');
 
     let sent = String::from_utf8_lossy(partial_transcript.sent_unsafe());
