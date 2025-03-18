@@ -1,8 +1,10 @@
 mod notarize;
 mod presentation;
+mod verify;
 
 pub use notarize::notarize;
 pub use presentation::create_presentation;
+pub use verify::verify_presentation;
 
 pub async fn generate_web_proof(
     notary_host: &str,

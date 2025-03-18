@@ -34,6 +34,7 @@ tokio = { workspace = true, features = [
 tokio-util = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+regex = "1.11.1"
 
 [lints]
 workspace = true
