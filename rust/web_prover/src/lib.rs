@@ -28,7 +28,7 @@ pub async fn generate_web_proof(
 fn to_json(encoded_presentation: &str, notary_host: &str, notary_port: u16) -> Value {
     let notary_url = format!("https://{notary_host}:{notary_port}");
 
-    let json_response = serde_json::json!({
+    let presentation_json = serde_json::json!({
         "presentationJson": {
             "version": "0.1.0-alpha.8",
             "data": encoded_presentation,
@@ -38,7 +38,7 @@ fn to_json(encoded_presentation: &str, notary_host: &str, notary_port: u16) -> V
             },
         }
     });
-    json_response
+    presentation_json
 }
 
 #[cfg(test)]
