@@ -17,5 +17,10 @@ pub async fn generate_web_proof(
     let (attestation, secrets) =
         notarize(notary_host, notary_port, server_domain, server_host, server_port, uri).await?;
     let presentation = create_presentation(attestation, secrets).await?;
-    Ok(presentation)
+
+    let json_response = serde_json::json!({
+        "data": hex::encode(bincode::serialize(&presentation)?)
+    });
+
+    Ok(serde_json::to_string(&json_response)?)
 }

@@ -4,7 +4,7 @@ use tlsn_formats::http::HttpTranscript;
 pub async fn create_presentation(
     attestation: Attestation,
     secrets: Secrets,
-) -> Result<String, Box<dyn std::error::Error>> {
+) -> Result<Presentation, Box<dyn std::error::Error>> {
     let transcript = HttpTranscript::parse(secrets.transcript())?;
 
     let mut builder = secrets.transcript_proof_builder();
@@ -24,7 +24,5 @@ pub async fn create_presentation(
         .identity_proof(secrets.identity_proof())
         .transcript_proof(transcript_proof);
 
-    let presentation: Presentation = builder.build()?;
-
-    Ok(hex::encode(bincode::serialize(&presentation)?))
+    Ok(builder.build()?)
 }

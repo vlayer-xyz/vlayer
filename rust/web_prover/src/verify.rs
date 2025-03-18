@@ -9,10 +9,7 @@ pub fn verify_presentation(
 ) -> Result<VerificationResult, Box<dyn Error>> {
     let provider = CryptoProvider::default();
 
-    let VerifyingKey {
-        data: key_data,
-        ..
-    } = presentation.verifying_key();
+    let VerifyingKey { data: key_data, .. } = presentation.verifying_key();
 
     let encoded_key = hex::encode(key_data);
 
@@ -35,7 +32,7 @@ pub fn verify_presentation(
         sent: sent.to_string(),
         recv: recv.to_string(),
         server_name,
-        key: encoded_key
+        key: encoded_key,
     })
 }
 
