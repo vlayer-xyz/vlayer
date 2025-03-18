@@ -11,7 +11,7 @@ import { useLocalStorage } from "usehooks-ts";
 import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier.json";
 import { MintStepPresentational } from "./Presentational";
 import {
-  getAddressFromPrivateKey,
+  getAccountFromPrivateKey,
   useEnvPrivateKey,
 } from "../../../utils/clientAuthMode";
 import { ensureBalance } from "../../../utils/ethFaucet";
@@ -55,7 +55,7 @@ export const MintStep = () => {
     if (useEnvPrivateKey()) {
       writeContract({
         ...writeContractArgs,
-        account: getAddressFromPrivateKey(),
+        account: getAccountFromPrivateKey(),
       });
     } else {
       await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);

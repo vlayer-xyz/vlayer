@@ -24,13 +24,11 @@ export const useEnvPrivateKey = () => {
   }
 };
 
-export const getAddressFromPrivateKey = () => {
-  let address = "";
+export const getAccountFromPrivateKey = () => {
   const envPrivateKey = import.meta.env.VITE_PRIVATE_KEY;
   if (!envPrivateKey) {
     throw new Error("No private key found");
   } else {
-    address = privateKeyToAccount(envPrivateKey as "0x").address;
+    return privateKeyToAccount(envPrivateKey as "0x");
   }
-  return address as Address;
 };
