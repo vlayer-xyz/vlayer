@@ -134,8 +134,8 @@ rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
 revm = { version = "=19.4.0", default-features = false, features = ["optimism"] }
-risc0-build = { git = "https://github.com/Wiezzel/risc0.git", rev = "45465177d126f38ccb0096682de164af8520951a" }
-risc0-build-ethereum = { git = "https://github.com/Wiezzel/risc0-ethereum.git", rev = "4d3cc153a3e36ccb657edf1575986b26e9c754c6" }
+risc0-build = { git = "https://github.com/vlayer-xyz/risc0.git", rev = "45465177d126f38ccb0096682de164af8520951a" }
+risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "12f4a76616bdc31108fc585c4a0ce7ebd97059fd" }
 risc0-zkp = { version = "=1.2.4", default-features = false }
 risc0-zkvm = "=1.2.4"
 bonsai-sdk = "=1.2.4"
