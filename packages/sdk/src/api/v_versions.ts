@@ -23,11 +23,18 @@ export interface VVersionsResponse {
 
 export async function v_versions(
   url: string = "http://127.0.0.1:3000",
+  token?: string,
 ): Promise<VVersionsResponse> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token !== undefined) {
+    headers["Authorization"] = "Bearer " + token;
+  }
   const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify(v_versionsBody),
-    headers: { "Content-Type": "application/json" },
+    headers,
   });
   log("response", response);
   if (!response.ok) {

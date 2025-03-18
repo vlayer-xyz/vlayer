@@ -46,6 +46,7 @@ const { prover, verifier } = await deployVlayerContracts({
 
 const vlayer = createVlayerClient({
   url: proverUrl,
+  token: config.token,
 });
 
 const provingHash = await vlayer.prove({
@@ -54,7 +55,6 @@ const provingHash = await vlayer.prove({
   functionName: "averageBalanceOf",
   args: [tokenOwner],
   chainId: ethClient.chain.id,
-  token: config.token,
 });
 
 console.log("Waiting for proving result: ");

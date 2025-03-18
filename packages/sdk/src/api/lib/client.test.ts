@@ -136,45 +136,6 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toBeCalledTimes(1);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
   });
-  it("should pass token if present", async () => {
-    const userToken = "deadbeef";
-
-    fetchMocker.mockResponseOnce((req) => {
-      const token = (req.headers.get("authorization") || "")
-        .split("Bearer ")
-        .at(1);
-      if (token !== undefined && token === userToken) {
-        return {
-          body: JSON.stringify({
-            result: hashStr,
-          }),
-        };
-      }
-      return {
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: 1,
-          error: {
-            code: -32603,
-            message:
-              "Gas meter error: RPC error: HTTP error: HTTP status client error (401 Unauthorized) for url (http://localhost:3000)",
-          },
-        }),
-      };
-    });
-
-    const result = await vlayer.prove({
-      address: `0x${"a".repeat(40)}`,
-      functionName: "main",
-      proverAbi: [],
-      args: [],
-      chainId: 42,
-      token: userToken,
-    });
-    expect(result.hash).toBe(hashStr);
-    expect(zkProvingSpy).toBeCalledTimes(1);
-    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
-  });
 });
 
 describe("Failed zk-proving", () => {
@@ -259,5 +220,68 @@ describe("Failed zk-proving", () => {
     expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
+  });
+});
+
+describe("Authentication", () => {
+  it("requires passing a token", async () => {
+    const userToken = "deadbeef";
+    const hashStr = generateRandomHash();
+    const vlayer = createVlayerClient({ token: userToken });
+
+    fetchMocker.mockResponseOnce((req) => {
+      const token = (req.headers.get("authorization") || "")
+        .split("Bearer ")
+        .at(1);
+      if (token !== undefined && token === userToken) {
+        return {
+          body: JSON.stringify({
+            result: hashStr,
+          }),
+        };
+      }
+      return {
+        status: 400,
+        body: JSON.stringify({
+          error: "Invalid token",
+        }),
+      };
+    });
+    const hash = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    fetchMocker.mockResponseOnce((req) => {
+      const token = (req.headers.get("authorization") || "")
+        .split("Bearer ")
+        .at(1);
+      if (token !== undefined && token === userToken) {
+        return {
+          body: JSON.stringify({
+            result: {
+              state: "done",
+              status: 1,
+              metrics: {},
+              data: {},
+            },
+            jsonrpc: "2.0",
+            id: 1,
+          }),
+        };
+      }
+      return {
+        status: 400,
+        body: JSON.stringify({
+          error: "Invalid token",
+        }),
+      };
+    });
+    await vlayer.waitForProvingResult({ hash });
+
+    expect(hash.hash).toBe(hashStr);
   });
 });

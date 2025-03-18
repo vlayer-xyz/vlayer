@@ -32,6 +32,7 @@ const { chain, ethClient, account, proverUrl, confirmations } =
 const twitterUserAddress = account.address;
 const vlayer = createVlayerClient({
   url: proverUrl,
+  token: config.token,
 });
 
 await testSuccessProvingAndVerification();
@@ -51,7 +52,6 @@ async function testSuccessProvingAndVerification() {
       twitterUserAddress,
     ],
     chainId: chain.id,
-    token: config.token,
   });
   const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
@@ -127,7 +127,6 @@ async function testFailedProving() {
         twitterUserAddress,
       ],
       chainId: chain.id,
-      token: config.token,
     });
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
