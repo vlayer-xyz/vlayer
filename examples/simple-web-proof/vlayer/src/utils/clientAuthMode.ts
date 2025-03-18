@@ -1,4 +1,4 @@
-import { Address, privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount } from "viem/accounts";
 
 export enum ClientAuthMode {
   ENV_PRIVATE_KEY = "envPrivateKey",

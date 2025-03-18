@@ -40,7 +40,6 @@ FIX_FLAG=""
 handle_options "$@"
 
 bun install --frozen-lockfile
-mock_imageid
 
 echo "::group::Running solhint for examples"
 for example in $(get_examples); do (
