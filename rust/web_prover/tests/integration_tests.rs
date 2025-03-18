@@ -40,7 +40,7 @@ mod integration_tests {
     fn to_presentation(web_proof_result: &Result<String, Box<dyn Error>>) -> Presentation {
         let json_str = web_proof_result.as_ref().unwrap();
         let parsed: serde_json::Value = serde_json::from_str(json_str).unwrap();
-        let hex_data = parsed["data"].as_str().unwrap();
+        let hex_data = parsed["presentationJson"]["data"].as_str().unwrap();
         bincode::deserialize(&hex::decode(hex_data).unwrap()).unwrap()
     }
 }
