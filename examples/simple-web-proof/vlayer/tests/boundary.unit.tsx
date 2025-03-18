@@ -12,10 +12,6 @@ const ThrowAlreadyMintedError = () => {
   throw new Error("Already minted");
 };
 
-const Ok = () => {
-  return <h1>OK</h1>;
-};
-
 // without this line, test will pass but displays a lot of error messages in the console
 vi.spyOn(console, "error").mockImplementation(() => null);
 
@@ -37,7 +33,7 @@ describe("ErrorBoundary", () => {
   test("should not render error boundary component when there is no error", () => {
     render(
       <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
-        <Ok />
+        <h1>OK</h1>
       </ErrorBoundary>,
     );
     const errorDisplayed = screen.queryByTestId("Error display");
