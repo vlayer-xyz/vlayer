@@ -3,13 +3,14 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { ErrorBoundary } from "react-error-boundary";
 import "@testing-library/jest-dom/vitest";
 import { ErrorBoundaryComponent } from "../src/components/layout/ErrorBoundary";
+import { AlreadyMintedError } from "../src/errors";
 
 const ThrowError = () => {
   throw new Error("Test error");
 };
 
 const ThrowAlreadyMintedError = () => {
-  throw new Error("Already minted");
+  throw new AlreadyMintedError();
 };
 
 // without this line, test will pass but displays a lot of error messages in the console
@@ -57,7 +58,7 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>,
     );
     const errorDisplayed = screen.queryByText(
-      "NFT has been already minted fot this account.",
+      "NFT has already been minted for this account.",
     );
     expect(errorDisplayed).toBeInTheDocument();
   });
