@@ -8,6 +8,10 @@ const ThrowError = () => {
   throw new Error("Test error");
 };
 
+const ThrowAlreadyMintedError = () => {
+  throw new Error("Already minted");
+};
+
 const Ok = () => {
   return <h1>OK</h1>;
 };
@@ -47,6 +51,18 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>,
     );
     const errorDisplayed = screen.queryByText("Something went wrong");
+    expect(errorDisplayed).toBeInTheDocument();
+  });
+
+  test("should display custom error message when known error", () => {
+    render(
+      <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+        <ThrowAlreadyMintedError />
+      </ErrorBoundary>,
+    );
+    const errorDisplayed = screen.queryByText(
+      "NFT has been already minted fot this account.",
+    );
     expect(errorDisplayed).toBeInTheDocument();
   });
 });
