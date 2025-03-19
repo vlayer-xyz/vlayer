@@ -8,7 +8,11 @@ import { redact } from "./redaction/redact";
 import { HTTPMethod } from "lib/HttpMethods";
 import debug from "debug";
 const log = debug("extension:tlsnProve");
-import { calculateRequestSize } from "./requestSizeCalculator/calculateRequestSize";
+import {
+  calculateRequestSize,
+  DEFAULT_MAX_RECV_DATA,
+} from "./requestSizeCalculator";
+
 type ProverConfig = {
   serverDns: string;
   maxSentData?: number;
@@ -69,7 +73,7 @@ export async function tlsnProve(
   const prover = await new Prover({
     serverDns: hostname,
     maxSentData: calculateRequestSize(request),
-    maxRecvData: 16384,
+    maxRecvData: DEFAULT_MAX_RECV_DATA,
   });
 
   const sessionUrl = await notary.sessionUrl();
