@@ -8,6 +8,11 @@ import { redact } from "./redaction/redact";
 import { HTTPMethod } from "lib/HttpMethods";
 import debug from "debug";
 const log = debug("extension:tlsnProve");
+import {
+  calculateRequestSize,
+  DEFAULT_MAX_RECV_DATA,
+} from "./requestSizeCalculator";
+
 type ProverConfig = {
   serverDns: string;
   maxSentData?: number;
@@ -57,20 +62,22 @@ export async function tlsnProve(
 }> {
   await init({ loggingLevel: "Debug" });
   const notary = NotaryServer.from(notaryUrl);
-  const prover = await new Prover({
-    serverDns: hostname,
-    maxSentData: 4096,
-    maxRecvData: 16384,
-  });
 
-  const sessionUrl = await notary.sessionUrl();
-  await prover.setup(sessionUrl);
   const request = {
     url: notarizeRequestUrl,
     method: method as Method,
     headers: formattedHeaders?.headers,
     body: requestBody,
   };
+  log("request size is gonna be", calculateRequestSize(request));
+  const prover = await new Prover({
+    serverDns: hostname,
+    maxSentData: calculateRequestSize(request),
+    maxRecvData: DEFAULT_MAX_RECV_DATA,
+  });
+
+  const sessionUrl = await notary.sessionUrl();
+  await prover.setup(sessionUrl);
 
   const res = await prover.sendRequest(wsProxyUrl, request);
 
