@@ -4,6 +4,7 @@
     "examples/*/vlayer"
   ],
   "dependencies": {
-    "@heroicons/react": "^2.2.0"
+    "@heroicons/react": "^2.2.0",
+    "react-error-boundary": "^5.0.0"
   }
 }
