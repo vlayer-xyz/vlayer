@@ -8,6 +8,7 @@ export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
   startPage: "startPage",
   notarize: "notarize",
+  fetchAndNotarize: "fetchAndNotarize",
 } as const;
 
 export type ExtensionStep =
@@ -110,7 +111,8 @@ export function isEmptyWebProverSessionConfig(
 export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
-  | WebProofStepStartPage;
+  | WebProofStepStartPage
+  | WebProofStepFetchAndNotarize;
 
 export type UrlPattern = Branded<string, "UrlPattern">;
 
@@ -144,6 +146,22 @@ export type WebProofStepExpectUrl = Branded<
   },
   "expectUrl"
 >;
+
+export type WebProofStepFetchAndNotarize = Branded<
+  {
+    url: UrlPattern;
+    method: string;
+    body: string;
+    headers: Headers;
+    label: string;
+    redact: RedactionConfig;
+    step: typeof EXTENSION_STEP.fetchAndNotarize;
+  },
+  "fetchAndNotarize"
+>;
+
+type Header = [string, string];
+export type Headers = Header[];
 
 export enum StepValidationErrors {
   InvalidUrl = "InvalidUrl",

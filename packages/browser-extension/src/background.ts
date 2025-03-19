@@ -15,13 +15,14 @@ import { WebProverSessionContextManager } from "./state/webProverSessionContext"
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 import debug from "debug";
+
 const log = debug("extension:background");
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
 // @ts-expect-error https://github.com/wxt-dev/wxt/issues/570#issuecomment-2022365906
 // eslint-disable-next-line
-browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
@@ -166,6 +167,9 @@ const validateProofRequest = (
           },
           ({ url }) => assertUrlPattern(url),
         )
+        .with({ step: EXTENSION_STEP.fetchAndNotarize }, () => {
+          console.warn("Unsupported step type: ", step);
+        })
         .exhaustive();
     });
   } catch (e) {

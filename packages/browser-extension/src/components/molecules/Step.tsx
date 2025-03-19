@@ -7,6 +7,7 @@ import { Separator } from "components/atoms/Separator";
 import { StepActions } from "components/molecules/StepActions/StepActions";
 import styles from "./Step.module.css";
 import { match } from "ts-pattern";
+import { ExtensionStep } from "src/web-proof-commons/types/message.ts";
 
 type StepProps = {
   label: string;
@@ -14,7 +15,7 @@ type StepProps = {
   index: number;
   showSeparator: boolean;
   link?: string;
-  kind: "expectUrl" | "notarize" | "startPage";
+  kind: ExtensionStep;
 };
 const StepStatusIndicator = (props: StepProps) => {
   return (
