@@ -1,24 +1,31 @@
 #[derive(Clone, Debug, Parser)]
 pub(crate) struct WebProofArgs {
-    /// Url to notarize
     #[arg(long)]
-    url: Option<String>,
-    /// Optional server host
-    #[arg(long)]
-    host: Option<String>,
+    url: String,
+
+    #[arg(long, default_value = "127.0.0.1")]
+    host: String,
+
+    #[arg(long, default_value = "lotr-api.online")]
+    domain: String,
+
+    #[arg(long, default_value_t = 3011)]
+    port: u16,
 }
 
 pub(crate) async fn webproof_fetch(
-    _args: WebProofArgs,
+    args: WebProofArgs,
     webproof: WebProof,
 ) -> crate::errors::Result<()> {
+    let WebProofArgs {
+        domain,
+        port,
+        url,
+        host,
+    } = args;
+
     let presentation = webproof
-        .fetch(
-            "lotr-api.online",
-            "127.0.0.1",
-            3011,
-            "/regular_json?are_you_sure=yes&auth=s3cret_t0ken",
-        )
+        .fetch(domain.as_ref(), host.as_ref(), port, url.as_ref())
         .await;
     println!("{presentation}");
 
@@ -61,12 +68,14 @@ async fn test_fetch_args() {
     use faux::when;
 
     let mut webproof_ext = WebProof::faux();
-    when!(webproof_ext.fetch("api.x.com", "127.0.0.1", 8080, "some_uri"))
+    when!(webproof_ext.fetch("api.x.com", "127.0.0.1", 8080, "/some_uri"))
         .then_return("proof".to_string());
 
     let args = WebProofArgs {
-        url: Some("https://api.x.com:8080/some_uri".to_string()),
-        host: Some("127.0.0.1".to_string()),
+        url: "/some_uri".to_string(),
+        host: "127.0.0.1".to_string(),
+        port: 8080,
+        domain: "api.x.com".to_string(),
     };
 
     webproof_fetch(args, webproof_ext).await.unwrap();
