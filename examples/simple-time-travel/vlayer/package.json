@@ -27,7 +27,8 @@
     "react-dom": "^18.3.1",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.5",
-    "wagmi": "^2.14.6"
+    "wagmi": "^2.14.6",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "typescript": "^5.5.4",
