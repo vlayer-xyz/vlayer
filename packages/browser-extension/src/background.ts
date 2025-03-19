@@ -22,7 +22,7 @@ let openedTabId: number | undefined = undefined;
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
+    dsn: import.meta.env.VITE_SENTRY_DSN as string,
     integrations: [],
     release: chrome.runtime.getManifest().version_name,
   });
@@ -149,8 +149,8 @@ const handleProofRequest = async (
   if (Sentry.isInitialized()) {
     Sentry.setContext("WebProverSessionConfig", {
       notaryUrl: message.payload.notaryUrl,
-      wsProxyUrl: message.payload.wsProxyUrl
-    })
+      wsProxyUrl: message.payload.wsProxyUrl,
+    });
   }
 };
 
@@ -165,8 +165,9 @@ const handleProvingStatusNotification = async (
     cleanProvingSessionStorageOnClose();
   }
   if (Sentry.isInitialized()) {
-    const severity: Sentry.SeverityLevel = message.payload.status === ZkProvingStatus.Error ? "error" : "info"
-    Sentry.captureMessage(`Proof status: ${message.payload.status}`, severity)
+    const severity: Sentry.SeverityLevel =
+      message.payload.status === ZkProvingStatus.Error ? "error" : "info";
+    Sentry.captureMessage(`Proof status: ${message.payload.status}`, severity);
   }
 };
 

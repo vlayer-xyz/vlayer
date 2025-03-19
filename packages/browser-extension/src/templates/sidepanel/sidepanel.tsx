@@ -6,7 +6,7 @@ import { SidePanel } from "components/pages/SidePanel";
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
+    dsn: import.meta.env.VITE_SENTRY_DSN as string,
     integrations: [],
     release: chrome.runtime.getManifest().version_name,
   });

@@ -40,11 +40,11 @@ export const SidePanelContainer = () => {
     if (config !== LOADING && Sentry.isInitialized()) {
       Sentry.setContext("WebProverSessionConfig", {
         notaryUrl: config.notaryUrl,
-        wsProxyUrl: config.wsProxyUrl
-      })
-      Sentry.captureMessage("Sidepanel initializing.", "debug")
+        wsProxyUrl: config.wsProxyUrl,
+      });
+      Sentry.captureMessage("Sidepanel initializing.", "debug");
     }
-  }, [config])
+  }, [config]);
 
   return <SidePanelContent config={config} />;
 };
