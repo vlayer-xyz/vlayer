@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { stepsMeta, StepKind } from "../src/app/router/types";
 
-test("navigates from / to wallet connection page", async ({ page }) => {
+test("renders welcome page", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText(stepsMeta[StepKind.welcome].title)).toBeVisible();
   await expect(
