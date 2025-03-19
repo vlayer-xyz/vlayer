@@ -10836,7 +10836,7 @@ dependencies = [
 [[package]]
 name = "risc0-binfmt"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
+source = "git+https://github.com/vlayer-xyz/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "anyhow",
  "borsh",
@@ -10865,7 +10865,7 @@ dependencies = [
 [[package]]
 name = "risc0-build"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
+source = "git+https://github.com/vlayer-xyz/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.18.1",
@@ -10902,7 +10902,7 @@ dependencies = [
 [[package]]
 name = "risc0-build-ethereum"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0-ethereum.git?rev=4d3cc153a3e36ccb657edf1575986b26e9c754c6#4d3cc153a3e36ccb657edf1575986b26e9c754c6"
+source = "git+https://github.com/vlayer-xyz/risc0-ethereum.git?rev=12f4a76616bdc31108fc585c4a0ce7ebd97059fd#12f4a76616bdc31108fc585c4a0ce7ebd97059fd"
 dependencies = [
  "anyhow",
  "hex",
@@ -10960,7 +10960,7 @@ dependencies = [
 [[package]]
 name = "risc0-core"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
+source = "git+https://github.com/vlayer-xyz/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "bytemuck",
  "rand_core 0.6.4",
@@ -11000,7 +11000,7 @@ dependencies = [
 [[package]]
 name = "risc0-zkp"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
+source = "git+https://github.com/vlayer-xyz/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "anyhow",
  "blake2",
@@ -11081,7 +11081,7 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
+source = "git+https://github.com/vlayer-xyz/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "stability",
 ]
