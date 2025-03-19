@@ -1,18 +1,9 @@
 import { WelcomePage } from "../../pages";
-import React from "react";
-import { StepKind, stepsMeta, StepMeta } from "./types";
-
-// Define a component mapping type
-export type StepComponentMap = Record<StepKind, React.ComponentType>;
+import { Step, StepKind, stepsMeta, StepComponentMap } from "./types";
 
 // Map step kinds to their respective components
 export const stepComponents: StepComponentMap = {
   [StepKind.welcome]: WelcomePage,
-};
-
-// Create a complete step structure that combines metadata with components
-export type Step = StepMeta & {
-  component: React.ComponentType;
 };
 
 // Get complete step data with component

@@ -1,3 +1,5 @@
+import { ComponentType } from "react";
+
 export enum StepKind {
   welcome,
 }
@@ -20,4 +22,10 @@ export const stepsMeta: Record<StepKind, StepMeta> = {
     description: "placeholder for time travel example app",
     index: 0,
   },
+};
+
+export type StepComponentMap = Record<StepKind, ComponentType>;
+
+export type Step = StepMeta & {
+  component: ComponentType;
 };

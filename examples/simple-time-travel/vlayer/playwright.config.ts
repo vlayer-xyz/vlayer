@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const LOCAL_WEB_SERVER_URL = "http://localhost:5173";
+
 export default defineConfig({
   // Look for test files in the "tests" directory, relative to this configuration file.
   testDir: "tests",
@@ -21,7 +23,7 @@ export default defineConfig({
 
   use: {
     // Base URL to use in actions like `await page.goto("/")`.
-    baseURL: "http://localhost:5173",
+    baseURL: process.env.WEB_SERVER_URL || LOCAL_WEB_SERVER_URL,
 
     // Collect trace when retrying the failed test.
     trace: "on-first-retry",
@@ -34,14 +36,17 @@ export default defineConfig({
     },
   ],
   // Run your local dev server before starting the tests.
-  webServer: {
-    // we want to be able to modify WEB_SERVER_COMMAND when running in CI
-    command:
-      process.env.WEB_SERVER_COMMAND || "bun run web:" + process.env.VLAYER_ENV,
-    url: "http://localhost:5173",
-    stdout: "pipe",
-    stderr: "pipe",
-    timeout: 120_000,
-  },
+  webServer: process.env.WEB_SERVER_URL
+    ? undefined
+    : {
+        // we want to be able to modify WEB_SERVER_COMMAND when running in CI
+        command:
+          process.env.WEB_SERVER_COMMAND ||
+          "bun run web:" + process.env.VLAYER_ENV,
+        url: LOCAL_WEB_SERVER_URL,
+        stdout: "pipe",
+        stderr: "pipe",
+        timeout: 120_000,
+      },
   timeout: 20_000,
 });
