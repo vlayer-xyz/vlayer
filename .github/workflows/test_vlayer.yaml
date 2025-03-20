@@ -38,10 +38,17 @@ jobs:
         working-directory: ./contracts/vlayer
         run: |
           forge soldeer install
+      
+      - name: Run forge tests for contracts
+        working-directory: ./contracts/vlayer
+        env:
+          FOUNDRY_PROFILE: no-vlayer
+        run: forge test -vvv
 
       - name: Run vlayer tests for contracts
         working-directory: ./contracts/vlayer
         env:
+          FOUNDRY_PROFILE: vlayer
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           # vlayer test
