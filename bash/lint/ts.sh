@@ -15,6 +15,10 @@ usage() {
     echo_color YELLOW " --fix       Fix linting errors"
 }
 
+SKIP_BUILD=false
+FIX_FLAG=""
+FIX_OPTION=""
+
 handle_options() {
     while [ $# -gt 0 ]; do
         case $1 in
@@ -26,6 +30,9 @@ handle_options() {
                 FIX_FLAG=" --fix"
                 FIX_OPTION=":fix"
                 ;;
+            --skip-build)
+                SKIP_BUILD=true
+                ;;
             *)
                 echo_color RED "Invalid option: $1" >&2
                 usage
@@ -36,12 +43,11 @@ handle_options() {
     done
 }
 
-FIX_FLAG=""
-FIX_OPTION=""
-
 handle_options "$@"
 
-build_react_sdk_with_deps
+if [ "$SKIP_BUILD" = false ]; then
+    build_react_sdk_with_deps
+fi
 
 echo "::group::Running eslint for examples"
 for example in $(get_examples); do (

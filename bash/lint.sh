@@ -9,7 +9,6 @@ SCRIPTS=(
   "json"
   "rust"
   "solidity"
-  "ts"
   "workflows"
 )
 
@@ -17,5 +16,8 @@ for script in "${SCRIPTS[@]}"; do
   SCRIPT_PATH="$SCRIPT_DIR/lint/$script.sh"
   "$SCRIPT_PATH"
 done
+
+SCRIPT_PATH="$SCRIPT_DIR/lint/ts.sh"
+"$SCRIPT_PATH" --skip-build
 
 echo "🎉 All linting scripts completed successfully!"
