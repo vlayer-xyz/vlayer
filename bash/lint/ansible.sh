@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if ! command -v ansible-lint > /dev/null; then
-    echo "Error: ansible-lint is not installed."
+    echo "❌ Error: ansible-lint is not installed."
     echo "Try: brew install ansible-lint"
     exit 1
 fi
