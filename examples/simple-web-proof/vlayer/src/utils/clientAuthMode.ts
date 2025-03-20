@@ -28,7 +28,6 @@ export const getAccountFromPrivateKey = () => {
   const envPrivateKey = import.meta.env.VITE_PRIVATE_KEY;
   if (!envPrivateKey) {
     throw new Error("No private key found");
-  } else {
-    return privateKeyToAccount(envPrivateKey as "0x");
   }
+  return privateKeyToAccount(envPrivateKey as "0x");
 };
