@@ -4,13 +4,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 SCRIPTS=(
-  "ts.sh"
-  "rust.sh"
-  "solidity.sh"
+  "bash"
+  "json"
+  "workflows"
+  "rust"
+  "solidity"
+  "ts"
+  "ansible"
 )
 
 for script in "${SCRIPTS[@]}"; do
-  SCRIPT_PATH="$SCRIPT_DIR/lint/$script"
+  SCRIPT_PATH="$SCRIPT_DIR/lint/$script.sh"
 
   if [[ -x "$SCRIPT_PATH" ]]; then
     echo "🚀 Running $script..."
