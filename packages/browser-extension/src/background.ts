@@ -1,4 +1,5 @@
 import browser from "webextension-polyfill";
+import * as Sentry from "@sentry/react";
 
 import {
   assertUrl,
@@ -15,10 +16,13 @@ import { WebProverSessionContextManager } from "./state/webProverSessionContext"
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 import debug from "debug";
+import { initSentry } from "./helpers/sentry.ts";
 
 const log = debug("extension:background");
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
+
+initSentry();
 
 // @ts-expect-error https://github.com/wxt-dev/wxt/issues/570#issuecomment-2022365906
 // eslint-disable-next-line
@@ -137,6 +141,13 @@ const handleProofRequest = async (
   await WebProverSessionContextManager.instance.setWebProverSessionConfig(
     message.payload,
   );
+
+  if (Sentry.isInitialized()) {
+    Sentry.setContext("WebProverSessionConfig", {
+      notaryUrl: message.payload.notaryUrl,
+      wsProxyUrl: message.payload.wsProxyUrl,
+    });
+  }
 };
 
 const handleProvingStatusNotification = async (
@@ -148,6 +159,11 @@ const handleProvingStatusNotification = async (
   await zkProvingStatusStore.setProvingStatus(message.payload);
   if (message.payload.status === ZkProvingStatus.Done) {
     cleanProvingSessionStorageOnClose();
+  }
+  if (Sentry.isInitialized()) {
+    const severity: Sentry.SeverityLevel =
+      message.payload.status === ZkProvingStatus.Error ? "error" : "info";
+    Sentry.captureMessage(`Proof status: ${message.payload.status}`, severity);
   }
 };
 
