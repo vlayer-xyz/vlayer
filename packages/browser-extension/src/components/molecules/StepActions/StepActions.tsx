@@ -1,4 +1,4 @@
-import { match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 import React from "react";
 
 import { ExpectUrlStepActions } from "./ExpectUrl";
@@ -40,7 +40,7 @@ export const StepActions: React.FC<{
             status={status}
           />
         ))
-        .with(EXTENSION_STEP.fetchAndNotarize, () => {
+        .with(P.union(EXTENSION_STEP.fetchAndNotarize,EXTENSION_STEP.extractVariables), () => {
           console.warn("Unsupported step type:", kind);
           return <></>;
         })

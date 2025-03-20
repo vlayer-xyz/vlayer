@@ -44,11 +44,15 @@ const isNotarizeStepCompleted = hasProof;
 const isFetchAndNotarizeStepReady = isUrlRequestCompleted;
 const isFetchAndNotarizeStepCompleted = hasProof;
 
+const isExtractVariablesStepReady = () => true;
+const isExtractVariablesStepCompleted = () => true;
+
 const checkStepCompletion = {
   startPage: isStartPageStepCompleted,
   expectUrl: isExpectUrlStepCompleted,
   notarize: isNotarizeStepCompleted,
   fetchAndNotarize: isFetchAndNotarizeStepCompleted,
+  extractVariables: isExtractVariablesStepCompleted,
 };
 
 const checkStepReadiness = {
@@ -56,6 +60,7 @@ const checkStepReadiness = {
   expectUrl: isExpectUrlStepReady,
   notarize: isNotarizeStepReady,
   fetchAndNotarize: isFetchAndNotarizeStepReady,
+  extractVariables: isExtractVariablesStepReady,
 };
 
 const calculateStepStatus = ({

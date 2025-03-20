@@ -9,6 +9,7 @@ export const EXTENSION_STEP = {
   startPage: "startPage",
   notarize: "notarize",
   fetchAndNotarize: "fetchAndNotarize",
+  extractVariables: "extractVariables",
 } as const;
 
 export type ExtensionStep =
@@ -117,7 +118,8 @@ export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
   | WebProofStepStartPage
-  | WebProofStepFetchAndNotarize;
+  | WebProofStepFetchAndNotarize
+  | WebProofStepExtractVariables;
 
 export type UrlPattern = Branded<string, "UrlPattern">;
 
@@ -163,8 +165,30 @@ export type WebProofStepFetchAndNotarize = BrandedStep<
   }
 >;
 
+export type WebProofStepExtractVariables = BrandedStep<
+  typeof EXTENSION_STEP.extractVariables,
+  {
+    label: string;
+    url: UrlPattern;
+    variables: Variables;
+  }
+>;
+
 type Header = [string, string];
 export type Headers = Header[];
+
+type Variables = Variable[];
+export type Variable = {
+  name: string;
+  path: string;
+  source: VariableSource;
+};
+
+export enum VariableSource {
+  ResponseBody = "ResponseBody",
+  RequestBody = "RequestBody",
+  Headers = "Headers",
+}
 
 export enum StepValidationErrors {
   InvalidUrl = "InvalidUrl",
