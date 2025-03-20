@@ -1,4 +1,4 @@
-name: Build SDK
+name: Build packages
 on:
   pull_request:
   merge_group:
@@ -11,12 +11,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-sdk:
-    name: Build SDK
+  build-packages:
+    name: Build packages
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
+
       - name: Run Typescript Compiler
-        run: bash/tsc.sh
+        run: bash/tsc-packages.sh
