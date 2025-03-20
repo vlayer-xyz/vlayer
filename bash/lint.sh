@@ -4,13 +4,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 SCRIPTS=(
+  "ansible"
   "bash"
   "json"
-  "workflows"
   "rust"
   "solidity"
   "ts"
-  "ansible"
+  "workflows"
 )
 
 for script in "${SCRIPTS[@]}"; do
