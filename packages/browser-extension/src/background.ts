@@ -164,10 +164,6 @@ const handleProvingStatusNotification = async (
   if (message.payload.status === ZkProvingStatus.Done) {
     cleanProvingSessionStorageOnClose();
   }
-  if (Sentry.isInitialized()) {
-    const severity: Sentry.SeverityLevel =
-      message.payload.status === ZkProvingStatus.Error ? "error" : "info";
-  }
 };
 
 const validateProofRequest = (
