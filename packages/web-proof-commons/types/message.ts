@@ -139,6 +139,7 @@ export type WebProofStepStartPage = BrandedStep<
   typeof EXTENSION_STEP.startPage,
   {
     url: Url;
+    autoredirect: boolean;
     label: string;
   }
 >;
