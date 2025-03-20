@@ -2,12 +2,11 @@
 
 set -ueo pipefail
 
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
-source "$SCRIPT_DIR/../lib/examples.sh"
-source "$SCRIPT_DIR/../lib/colors.sh"
-source "$SCRIPT_DIR/../lib/utils.sh"
+source "$VLAYER_HOME/bash/lib/examples.sh"
+source "$VLAYER_HOME/bash/lib/colors.sh"
+source "$VLAYER_HOME/bash/lib/utils.sh"
 
 usage() {
     echo_color YELLOW "Usage: $0 [OPTIONS]"
