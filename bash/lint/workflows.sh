@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+WORKFLOWS_DIR=".github/workflows"
+
 if ! command -v prettier >/dev/null; then
     echo "❌ Error: Prettier is not installed."
     echo "Try: npm install --global prettier"
@@ -15,6 +17,5 @@ if ! command -v actionlint >/dev/null; then
     exit 1
 fi
 
-WORKFLOWS_DIR=".github/workflows"
 prettier --check "$WORKFLOWS_DIR/**/*.yaml"
 actionlint
