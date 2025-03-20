@@ -12,8 +12,7 @@ fi
 
 if ! command -v actionlint >/dev/null; then
     echo "❌ Error: actionlint is not installed. Try:"
-    echo "   curl -fsSL \"https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash\" | bash"
-    echo "   export PATH=\"\$HOME/.local/bin:\$PATH\""
+    echo "Try: brew install actionlint"
     exit 1
 fi
 
