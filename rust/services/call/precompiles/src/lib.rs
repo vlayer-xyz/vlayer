@@ -3,6 +3,7 @@ mod helpers;
 mod json;
 pub mod precompile;
 mod regex;
+pub mod system;
 pub mod url_pattern;
 mod web_proof;
 
@@ -15,10 +16,11 @@ use json::{
 };
 use precompile::{Precompile, Tag};
 use regex::{capture as regex_capture, is_match as regex_is_match};
+use system::is_vlayer_test;
 use url_pattern::test as url_pattern_test;
 use web_proof::verify as web_proof;
 
-const NUM_PRECOMPILES: usize = 9;
+const NUM_PRECOMPILES: usize = 10;
 
 #[rustfmt::skip]
 pub const PRECOMPILES: [Precompile; NUM_PRECOMPILES] = generate_precompiles![
@@ -32,6 +34,7 @@ pub const PRECOMPILES: [Precompile; NUM_PRECOMPILES] = generate_precompiles![
     (0x110, regex_is_match,        1000, 10, Tag::RegexIsMatch),
     (0x111, regex_capture,         1000, 10, Tag::RegexCapture),
     (0x120, url_pattern_test,      1000, 10, Tag::UrlPatternTest),
+    (0x130, is_vlayer_test,        1000, 10, Tag::IsVlayerTest),
 ];
 
 pub fn precompile_by_address(address: &Address) -> Option<Precompile> {

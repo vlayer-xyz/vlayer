@@ -18,6 +18,7 @@ pub enum Tag {
     RegexIsMatch,
     RegexCapture,
     UrlPatternTest,
+    IsVlayerTest,
 }
 
 #[derive(Deref, Into, Debug, Clone)]
