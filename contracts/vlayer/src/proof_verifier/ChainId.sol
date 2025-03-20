@@ -12,9 +12,12 @@ library ChainIdLibrary {
 
     function isVlayerTest() internal view returns (bool) {
         (bool success, bytes memory result) = Precompiles.IS_VLAYER_TEST.staticcall("");
-        // This precompile always returns true, but we still assert it just in case
+        if (!success || result.length == 0) {
+            return false;
+        }
+        // This precompile always returns true, but we still decode and return the return value just in case
         bool returnValue = abi.decode(result, (bool));
-        return success && returnValue;
+        return returnValue;
     }
 
     function isAnvil() internal view returns (bool) {
