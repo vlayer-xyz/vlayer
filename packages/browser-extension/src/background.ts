@@ -16,17 +16,12 @@ import { WebProverSessionContextManager } from "./state/webProverSessionContext"
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 import debug from "debug";
+import { initSentry } from "./helpers/sentry.ts";
 const log = debug("extension:background");
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
-if (import.meta.env.VITE_SENTRY_DSN) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN as string,
-    integrations: [],
-    release: chrome.runtime.getManifest().version_name,
-  });
-}
+initSentry();
 
 // @ts-expect-error https://github.com/wxt-dev/wxt/issues/570#issuecomment-2022365906
 // eslint-disable-next-line
