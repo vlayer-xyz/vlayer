@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { Text, Grid } from "@radix-ui/themes";
 import { StepStatus } from "constants/step";
 import { Button } from "components/atoms";
@@ -8,6 +8,7 @@ import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { ExtensionMessageType } from "../../../../web-proof-commons";
 
 type StartPageStepActionProps = {
+  autoredirect: boolean;
   isVisited: boolean;
   link: string;
   status: StepStatus;
@@ -30,15 +31,28 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
   isVisited,
   link,
   status,
+  autoredirect: isAutoredirectFlow,
 }) => {
-  const handleClick = () => {
+  const handleAction = () => {
     openApp(link).catch((error) => {
       console.error("Error during opening app:", error);
     });
   };
+
+  const isCurrentAction = !isVisited && status == StepStatus.Current;
+  const isButtonFlow = !isAutoredirectFlow;
+
+  useEffect(() => {
+    if (isAutoredirectFlow && isCurrentAction) {
+      openApp(link).catch((error) => {
+        console.error("Error during opening app:", error);
+      });
+    }
+  }, [isAutoredirectFlow, isCurrentAction, handleAction]);
+
   return (
     <AnimatePresence>
-      {!isVisited && status == StepStatus.Current && (
+      {isButtonFlow && isCurrentAction && (
         <Grid columns={"5"}>
           <motion.div>
             <Button
@@ -50,7 +64,7 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
                 marginBottom: "1rem",
               }}
               // open app we gona take proof from in new tab
-              onClick={handleClick}
+              onClick={handleAction}
             >
               <Text>Redirect</Text>
             </Button>

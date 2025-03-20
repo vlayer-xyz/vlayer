@@ -34,6 +34,7 @@ export const StepActions: React.FC<{
         ))
         .with(EXTENSION_STEP.startPage, () => (
           <StartPageStepActions
+            autoredirect
             isVisited={false}
             link={link || ""}
             buttonText={buttonText || ""}
