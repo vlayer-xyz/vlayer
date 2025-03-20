@@ -18,6 +18,13 @@ import { useTrackHistory } from "hooks/useTrackHistory";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { LOADING } from "@vlayer/extension-hooks";
 import { tlsnProve } from "./tlsnProve/tlsnProve";
+import { z } from "zod";
+
+const claimsSchema = z.object({
+  host: z.string(),
+  port: z.number(),
+  sub: z.string(),
+});
 
 const TlsnProofContext = createContext({
   prove: async () => {},
@@ -57,6 +64,25 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
     }, 1000);
 
+    const getWsProxyUrl = (
+      baseUrl: string,
+      hostname: string,
+      jwtToken: string | null,
+    ): string => {
+      if (jwtToken === null) return baseUrl + `?token=${hostname}`;
+      const payload = jwtToken.split(".")[1] ?? "";
+      const claims = Buffer.from(payload, "base64").toString("utf8");
+      const parsed = claimsSchema.safeParse(JSON.parse(claims));
+      if (parsed.success) {
+        if (parsed.data?.host === hostname)
+          return baseUrl + `?token=${jwtToken}`;
+        throw Error(
+          `Invalid JWT token: token valid for hostname ${parsed.data?.host}, but needs ${hostname}`,
+        );
+      }
+      throw Error("Invalid JWT token");
+    };
+
     try {
       isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
@@ -67,7 +93,11 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
           : "";
       const wsProxyUrl =
         provingSessionConfig !== LOADING
-          ? provingSessionConfig.wsProxyUrl + `?token=${hostname}`
+          ? getWsProxyUrl(
+              provingSessionConfig.wsProxyUrl || "",
+              hostname,
+              provingSessionConfig.jwtToken,
+            )
           : "";
 
       const redactionConfig =
