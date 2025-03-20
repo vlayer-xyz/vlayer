@@ -279,4 +279,4 @@ insta = { opt-level = 3 }
 similar = { opt-level = 3 }
 
 [workspace.metadata.scripts]
-lint = "bash/lint/lint-rust.sh"
+lint = "bash/lint/rust.sh"

@@ -4,9 +4,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 SCRIPTS=(
-  "lint-ts.sh"
-  "lint-rust.sh"
-  "lint-solidity.sh"
+  "ts.sh"
+  "rust.sh"
+  "solidity.sh"
 )
 
 for script in "${SCRIPTS[@]}"; do
