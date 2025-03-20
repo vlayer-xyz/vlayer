@@ -39,12 +39,6 @@ jobs:
         run: |
           forge soldeer install
 
-      - name: Run forge tests for contracts
-        working-directory: ./contracts/vlayer
-        env:
-          FOUNDRY_PROFILE: no-vlayer
-        run: forge test -vvv
-
       - name: Run vlayer tests for contracts
         working-directory: ./contracts/vlayer
         env:
