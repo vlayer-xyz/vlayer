@@ -1,10 +1,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
+import {Precompiles} from "../PrecompilesAddresses.sol";
+
 error InvalidChainId();
 
 library ChainIdLibrary {
-    function isDevnet() internal view returns (bool) {
+    function isTestEnv() internal view returns (bool) {
+        return isAnvil() || isVlayerTest();
+    }
+
+    function isVlayerTest() internal view returns (bool) {
+        (bool success, bytes memory result) = Precompiles.IS_VLAYER_TEST.staticcall("");
+        // This precompile always returns true, but we still assert it just in case
+        bool returnValue = abi.decode(result, (bool));
+        return success && returnValue;
+    }
+
+    function isAnvil() internal view returns (bool) {
         return block.chainid == 3_1337 // Anvil local network
             || block.chainid == 30_1337; // vlayer test
     }

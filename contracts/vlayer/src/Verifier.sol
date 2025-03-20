@@ -52,7 +52,7 @@ abstract contract Verifier {
 
     function _setTestVerifier(IProofVerifier newVerifier) external {
         require(msg.sender == __DEPLOYER, "Only deployer can change verifier");
-        require(!ChainIdLibrary.isMainnet(), "Changing verifiers is not allowed on mainnet");
+        require(ChainIdLibrary.isTestEnv() || ChainIdLibrary.isTestnet(), "Changing verifiers is only allowed on devnet or testnet");
         require(address(newVerifier.imageIdRepository()) != address(0), "Verifier's repository address is not set");
 
         verifier = newVerifier;
