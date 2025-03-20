@@ -395,4 +395,12 @@ ZmlsZSBjb250ZW50Cg==
             );
         }
     }
+
+    #[test]
+    fn malicious_email() {
+        let email = r#"<safe@safe.org>@malicious.net"#;
+        let extracted = Email::extract_address_from_header(email);
+        // Note the real email is @malicious.org, not @safe.org!
+        assert_eq!(extracted.unwrap(), "<safe@safe.org>@malicious.net");
+    }
 }
