@@ -183,7 +183,7 @@ const validateProofRequest = (
           },
           ({ url }) => assertUrlPattern(url),
         )
-        .with({ step: P.union(EXTENSION_STEP.fetchAndNotarize, EXTENSION_STEP.extractVariables) }, () => {
+        .with({ step: P.union(EXTENSION_STEP.fetchAndNotarize, EXTENSION_STEP.extractVariables,EXTENSION_STEP.clickButton) }, () => {
           console.warn("Unsupported step type: ", step);
         })
         .exhaustive();

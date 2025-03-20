@@ -10,6 +10,7 @@ export const EXTENSION_STEP = {
   notarize: "notarize",
   fetchAndNotarize: "fetchAndNotarize",
   extractVariables: "extractVariables",
+  clickButton: "clickButton",
 } as const;
 
 export type ExtensionStep =
@@ -119,7 +120,8 @@ export type WebProofStep =
   | WebProofStepExpectUrl
   | WebProofStepStartPage
   | WebProofStepFetchAndNotarize
-  | WebProofStepExtractVariables;
+  | WebProofStepExtractVariables
+  | WebProofStepClickButton;
 
 export type UrlPattern = Branded<string, "UrlPattern">;
 
@@ -171,6 +173,15 @@ export type WebProofStepExtractVariables = BrandedStep<
     label: string;
     url: UrlPattern;
     variables: Variables;
+  }
+>;
+
+export type WebProofStepClickButton = BrandedStep<
+  typeof EXTENSION_STEP.clickButton,
+  {
+    label: string;
+    url: UrlPattern;
+    selector: string;
   }
 >;
 
