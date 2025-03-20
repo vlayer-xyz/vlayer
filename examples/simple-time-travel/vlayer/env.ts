@@ -14,7 +14,7 @@ const envSchema = z.object({
   PROVER_START_BLOCK: z
     .string()
     .optional()
-    .transform((val) => (val ? BigInt(val) : undefined)),
+    .transform((val) => (val ? BigInt(val) : BigInt(0))),
 
   PROVER_END_BLOCK: z.union([
     z.string().refine((val) => val === "latest", {
