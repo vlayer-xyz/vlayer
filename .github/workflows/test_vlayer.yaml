@@ -38,7 +38,7 @@ jobs:
         working-directory: ./contracts/vlayer
         run: |
           forge soldeer install
-      
+
       - name: Run forge tests for contracts
         working-directory: ./contracts/vlayer
         env:
