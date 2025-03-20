@@ -10,7 +10,7 @@ SCRIPTS=(
 )
 
 for script in "${SCRIPTS[@]}"; do
-  SCRIPT_PATH="$SCRIPT_DIR/$script"
+  SCRIPT_PATH="$SCRIPT_DIR/lint/$script"
 
   if [[ -x "$SCRIPT_PATH" ]]; then
     echo "🚀 Running $script..."
