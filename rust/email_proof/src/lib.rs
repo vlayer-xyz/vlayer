@@ -78,7 +78,15 @@ mod test {
             ttl: 0,
         };
 
+        static ref SPOOFED_DOMAIN_DNS_FIXTURE: SolDnsRecord = SolDnsRecord {
+            name: "google._domainkey.spoofed-vlayer.xyz".into(),
+            recordType: 16,
+            data: "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".into(),
+            ttl: 0,
+        };
+
         static ref VERIFICATION_DATA: SolVerificationData = sign_dns_fixture(&DNS_FIXTURE);
+        static ref SPOOFED_VERIFICATION_DATA: SolVerificationData = sign_dns_fixture(&SPOOFED_DOMAIN_DNS_FIXTURE);
     }
 
     #[test]
@@ -96,6 +104,14 @@ mod test {
             }
         );
         Ok(())
+    }
+
+    #[test]
+    fn fails_for_spoofed_domain_key() {
+        let email = signed_email_fixture();
+        let calldata = calldata(&email, &SPOOFED_DOMAIN_DNS_FIXTURE, &SPOOFED_VERIFICATION_DATA);
+
+        assert!(parse_and_verify(&calldata).is_err());
     }
 
     #[test]
