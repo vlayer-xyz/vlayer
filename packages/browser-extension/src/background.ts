@@ -167,7 +167,6 @@ const handleProvingStatusNotification = async (
   if (Sentry.isInitialized()) {
     const severity: Sentry.SeverityLevel =
       message.payload.status === ZkProvingStatus.Error ? "error" : "info";
-    Sentry.captureMessage(`Proof status: ${message.payload.status}`, severity);
   }
 };
 
