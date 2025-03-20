@@ -42,7 +42,6 @@ export const SidePanelContainer = () => {
         notaryUrl: config.notaryUrl,
         wsProxyUrl: config.wsProxyUrl,
       });
-      Sentry.captureMessage("Sidepanel initializing.", "debug");
     }
   }, [config]);
 
