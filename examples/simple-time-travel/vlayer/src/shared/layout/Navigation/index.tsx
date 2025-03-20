@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import { useCurrentStep } from "../../hooks/useCurentStep";
+import { useCurrentStep } from "../../hooks/useCurrentStep";
 import { useNavigate } from "react-router";
 
 export const Navigation: React.FC = () => {

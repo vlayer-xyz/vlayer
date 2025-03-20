@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCurrentStep } from "../../hooks/useCurentStep";
+import { useCurrentStep } from "../../hooks/useCurrentStep";
 import { StepKind } from "../../../app/router/types";
 import { ProgressBar } from "../ProgressBar";
 import { Navigation } from "../Navigation";

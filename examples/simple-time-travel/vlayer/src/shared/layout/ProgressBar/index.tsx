@@ -1,4 +1,4 @@
-import { useCurrentStep } from "../../hooks/useCurentStep";
+import { useCurrentStep } from "../../hooks/useCurrentStep";
 import { motion } from "motion/react";
 import motionConfig from "./ProgressBar.animations";
 
