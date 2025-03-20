@@ -9,7 +9,6 @@ if ! command -v ansible-lint > /dev/null; then
 fi
 
 ANSIBLE_DIR="ansible"
-
 pushd "$ANSIBLE_DIR" > /dev/null
 ansible-lint
 popd > /dev/null
