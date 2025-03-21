@@ -2,8 +2,6 @@
 
 set -ueo pipefail
 
-EXAMPLE_NAME=${EXAMPLE:-}
-
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
@@ -16,10 +14,10 @@ set_proving_mode
 generate_ts_bindings
 build_extension
 
-echo "🚀 Running services for example: $EXAMPLE_NAME"
+echo "🚀 Running services for example: $EXAMPLE"
 DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy notary-server"
 source "${VLAYER_HOME}/bash/run-services.sh"
 
-run_web_tests "$EXAMPLE_NAME"
+run_web_tests "$EXAMPLE"
 
 cleanup
