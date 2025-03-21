@@ -68,4 +68,9 @@ test("web proof flow", async ({ page, context }) => {
       timeout: 120_000,
     });
   });
+
+  await test.step("Click start minting", async () => {
+    await page.getByText("Start Minting").click();
+    await expect(page.getByText("Success")).toBeVisible();
+  });
 });
