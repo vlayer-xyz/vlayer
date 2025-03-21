@@ -46,7 +46,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup environment and run e2e tests
+      - name: Run E2E Test
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple"
@@ -66,7 +66,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup environment and run e2e tests
+      - name: Run E2E Test
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple-web-proof"
@@ -86,7 +86,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup environment and run e2e tests
+      - name: Run E2E Test
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple-email-proof"
@@ -106,7 +106,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup environment and run e2e tests
+      - name: Run E2E Test
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple-teleport"
@@ -126,7 +126,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup environment and run e2e tests
+      - name: Run E2E Test
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple-time-travel"
