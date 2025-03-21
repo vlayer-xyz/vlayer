@@ -35,8 +35,4 @@ jobs:
         working-directory: packages
         run: "bun --filter '*' test:unit"
       - name: Run JS tests in examples
-        working-directory: examples
-        run: |
-          for dir in ./*/vlayer; do
-            "bun run test:unit"
-          done
+        run: bash/test-js-in-examples.sh
