@@ -34,6 +34,9 @@ jobs:
       - name: Run JS tests in packages
         working-directory: packages
         run: "bun --filter '*' test:unit"
-      - name: Run JS tests in simple-web-proof example
-        working-directory: examples/simple-web-proof/vlayer
-        run: "bun run test:unit"
+      - name: Run JS tests in examples
+        working-directory: examples
+        run: |
+          for dir in ./*/vlayer; do
+            "bun run test:unit"
+          done
