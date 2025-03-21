@@ -31,12 +31,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # We detect code changes, and run the workflow only if relevant code or workflow changes are detected.
+      # Because the workflow is resource heavy (in time/compilation, in testnet ETH usage, and in Bonsai API usage),
+      # we also skip running the workflow on every commit of PRs (unless the workflow configuration is changed)
+      # Red PR cannot be merged because even though PR commits are skipped, the workflow will still run in the merge queue.
       - name: Filter changed files
         id: filter
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            relevant-changes:
+            code-changes:
               - 'rust/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
@@ -47,6 +51,7 @@ jobs:
               - 'docker/**'
               - 'ansible/**'
               - 'bun.lock'
+            workflow-changes:
               - '.github/workflows/test_e2e_testnet.yaml'
               - '.github/actions/test-e2e-testnet/**'
 
@@ -54,7 +59,7 @@ jobs:
     name: Build binaries
     needs: changes
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
+    if: needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes)
 
     steps:
       - name: Checkout repository
