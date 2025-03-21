@@ -26,6 +26,8 @@ const claimsSchema = z.object({
   sub: z.string(),
 });
 
+type Claims = z.infer<typeof claimsSchema>;
+
 const TlsnProofContext = createContext({
   prove: async () => {},
   proof: null as object | null,
@@ -64,6 +66,20 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
     }, 1000);
 
+    const getJwtClaims = (token: string): Claims | null => {
+      const payload = token.split(".")[1] ?? "";
+      const rawClaims = Buffer.from(payload, "base64").toString("utf8");
+      try {
+        const parsed = claimsSchema.safeParse(JSON.parse(rawClaims));
+        if (parsed.success) {
+          return parsed.data;
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    };
+
     const getWsProxyUrl = (
       baseUrl: string,
       hostname: string,
@@ -72,18 +88,16 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       if (jwtToken === null) {
         return baseUrl + `?token=${hostname}`;
       }
-      const payload = jwtToken.split(".")[1] ?? "";
-      const claims = Buffer.from(payload, "base64").toString("utf8");
-      const parsed = claimsSchema.safeParse(JSON.parse(claims));
-      if (parsed.success) {
-        if (parsed.data?.host === hostname) {
-          return baseUrl + `?token=${jwtToken}`;
-        }
-        throw Error(
-          `Invalid JWT token: token valid for hostname ${parsed.data?.host}, but needs ${hostname}`,
-        );
+      const claims = getJwtClaims(jwtToken);
+      if (claims === null) {
+        return baseUrl + `?token=${hostname}`;
       }
-      throw Error("Invalid JWT token");
+      if (claims.host === hostname) {
+        return baseUrl + `?token=${jwtToken}`;
+      }
+      throw Error(
+        `Invalid JWT token: token valid for hostname ${claims.host}, but needs ${hostname}`,
+      );
     };
 
     try {
