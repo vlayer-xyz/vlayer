@@ -10,12 +10,6 @@ pub(crate) struct WebProofArgs {
 
     #[arg(long)]
     host: Option<String>,
-
-    #[arg(long)]
-    domain: Option<String>,
-
-    #[arg(long)]
-    port: Option<u16>,
 }
 
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> Result<()> {
@@ -24,10 +18,10 @@ pub(crate) async fn webproof_fetch(args: WebProofArgs) -> Result<()> {
     let presentation = Box::pin(web_prover::generate_web_proof(
         "127.0.0.1",
         7047,
-        &*server_args.domain,
-        &*server_args.host,
+        &server_args.domain,
+        &server_args.host,
         server_args.port,
-        &*server_args.uri,
+        &server_args.uri,
     ))
     .await
     .unwrap();
@@ -47,11 +41,9 @@ fn to_server_proving_args(args: WebProofArgs) -> ServerProvingArgs {
 
     let domain = url.host_str().expect("URL must have host").to_string();
 
-    let port = args.port.unwrap_or_else(|| {
-        url.port().unwrap_or_else(|| match url.scheme() {
-            "https" => 443,
-            _ => 80,
-        })
+    let port = url.port().unwrap_or_else(|| match url.scheme() {
+        "https" => 443,
+        _ => 80,
     });
 
     let uri = {
@@ -75,8 +67,6 @@ fn test_convert_args() {
     let input_args = WebProofArgs {
         url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
         host: Option::from("127.0.0.1".to_string()),
-        domain: None,
-        port: None,
     };
 
     let converted = to_server_proving_args(input_args);
@@ -88,7 +78,7 @@ fn test_convert_args() {
 }
 
 #[test]
-fn test_convert_args_no_params() {
+fn test_convert_args_no_uri_params() {
     let input_args: WebProofArgs = WebProofArgs {
         url: "https://api.x.com:8080/v1/followers".to_string(),
         ..default_args()
@@ -114,7 +104,5 @@ fn default_args() -> WebProofArgs {
     WebProofArgs {
         url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
         host: Option::from("127.0.0.1".to_string()),
-        domain: None,
-        port: None,
     }
 }
