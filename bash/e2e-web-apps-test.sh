@@ -1,13 +1,9 @@
+
 #!/usr/bin/env bash
 
 set -ueo pipefail
 
 EXAMPLE_NAME=${EXAMPLE:-}
-
-if [[ -z "$EXAMPLE_NAME" ]]; then
-  echo "❌ EXAMPLE environment variable is not set"
-  exit 1
-fi
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
