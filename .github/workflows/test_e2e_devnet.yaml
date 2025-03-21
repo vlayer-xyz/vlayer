@@ -7,17 +7,12 @@ on:
     branches:
       - main
 
-env:
-  # Set this to "false" to disable the workflow, and "true" to enable it.
-  RUN_CI: "false"
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   changes:
-    if: ${{ vars.RUN_CI == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
