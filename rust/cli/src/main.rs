@@ -8,7 +8,7 @@ use tracing::error;
 use tracing_subscriber::EnvFilter;
 pub use version::version;
 
-pub use crate::{
+use crate::{
     commands::{test::run_test, update::run_update},
     errors::Result,
 };
