@@ -2,15 +2,6 @@ name: E2E test of example web apps on devnet
 
 on:
   pull_request:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - "packages/**"
-      - "bash/run-services.sh"
-      - "bash/e2e-web-apps-test.sh"
-      - ".github/workflows/test_e2e_web_apps_devnet.yaml"
-      - "contracts/**"
   merge_group:
   push:
     branches:
@@ -21,9 +12,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'rust-toolchain.toml'
+              - 'rust/**'
+              - 'examples/**'
+              - 'packages/**'
+              - 'bash/run-services.sh'
+              - 'bash/e2e-web-apps-test.sh'
+              - '.github/workflows/test_e2e_web_apps_devnet.yaml'
+              - 'contracts/**'
+
   test-e2e-web-apps:
     name: E2E web apps test against devnet
+    needs: changes
     runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
