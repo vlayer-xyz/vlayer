@@ -3,17 +3,15 @@ mod tests {
     use assert_cmd::Command;
 
     #[test]
-    #[ignore]
-    fn test_cli_output() {
+    fn test_web_proof_fetch_requires_url() {
         let mut cmd = Command::cargo_bin("vlayer").unwrap();
-        cmd.args([
-            "web-proof-fetch",
-            "--url",
-            "https://lotr-api.online:3011/regular_json?are_you_sure=yes&auth=s3cret_t0ken",
-            "--host",
-            "127.0.0.1",
-        ])
-        .assert()
-        .success();
+        cmd.args(["web-proof-fetch"])
+            .assert()
+            .failure()
+            .code(2)
+            .stderr(predicates::str::contains(
+                "error: the following required arguments were not provided:\n  --url <URL>",
+            ))
+            .stdout(predicates::str::is_empty());
     }
 }
