@@ -1,4 +1,4 @@
-import { Address, privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount } from "viem/accounts";
 
 export enum ClientAuthMode {
   ENV_PRIVATE_KEY = "envPrivateKey",
@@ -24,13 +24,10 @@ export const useEnvPrivateKey = () => {
   }
 };
 
-export const getAddressFromPrivateKey = () => {
-  let address = "";
+export const getAccountFromPrivateKey = () => {
   const envPrivateKey = import.meta.env.VITE_PRIVATE_KEY;
   if (!envPrivateKey) {
     throw new Error("No private key found");
-  } else {
-    address = privateKeyToAccount(envPrivateKey as "0x").address;
   }
-  return address as Address;
+  return privateKeyToAccount(envPrivateKey as "0x");
 };

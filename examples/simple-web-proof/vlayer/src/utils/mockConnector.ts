@@ -1,6 +1,6 @@
 import { Chain } from "viem";
 import { createConnector } from "wagmi";
-import { getAddressFromPrivateKey } from "./clientAuthMode";
+import { getAccountFromPrivateKey } from "./clientAuthMode";
 
 export const mockConnector = (chain: Chain) => {
   return createConnector((config) => ({
@@ -9,15 +9,15 @@ export const mockConnector = (chain: Chain) => {
     name: "Mock Connector",
     type: "mock",
     connect: async () => ({
-      accounts: [getAddressFromPrivateKey()],
+      accounts: [getAccountFromPrivateKey().address],
       chainId: chain.id,
     }),
     disconnect: async () => {},
-    getAccounts: async () => [getAddressFromPrivateKey()],
+    getAccounts: async () => [getAccountFromPrivateKey().address],
     getChainId: async () => chain.id,
     getProvider: async () => ({}),
     isAuthorized: async () => true,
-    address: getAddressFromPrivateKey(),
+    address: getAccountFromPrivateKey().address,
     onAccountsChanged: () => {},
     onChainChanged: () => {},
     onDisconnect: () => {},
