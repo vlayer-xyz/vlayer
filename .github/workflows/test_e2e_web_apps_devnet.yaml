@@ -54,7 +54,6 @@ jobs:
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          pr_number: ${{ github.event.number }}
 
   test-e2e-web-apps-devnet-simple-web-proof:
     name: Run setup and e2e tests (simple-web-proof)
@@ -75,7 +74,6 @@ jobs:
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          pr_number: ${{ github.event.number }}
 
   test-e2e-web-apps-devnet-simple-email-proof:
     name: Run setup and e2e tests (simple-email-proof)
@@ -96,7 +94,6 @@ jobs:
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          pr_number: ${{ github.event.number }}
 
   test-e2e-web-apps-devnet-simple-teleport:
     name: Run setup and e2e tests (simple-teleport)
@@ -117,7 +114,6 @@ jobs:
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          pr_number: ${{ github.event.number }}
 
   test-e2e-web-apps-devnet-simple-time-travel:
     name: Run setup and e2e tests (simple-time-travel)
@@ -138,4 +134,3 @@ jobs:
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          pr_number: ${{ github.event.number }}
