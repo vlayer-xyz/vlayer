@@ -75,7 +75,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
           return parsed.data;
         }
         return null;
-      } catch (e) {
+      } catch {
         return null;
       }
     };
