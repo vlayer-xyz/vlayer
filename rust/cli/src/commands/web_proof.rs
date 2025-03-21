@@ -1,5 +1,5 @@
 use clap::Parser;
-use web_prover::generate_web_proof;
+use reqwest::Url;
 
 use crate::errors::Result;
 
@@ -8,75 +8,113 @@ pub(crate) struct WebProofArgs {
     #[arg(long)]
     url: String,
 
-    #[arg(long, default_value = "127.0.0.1")]
-    host: String,
+    #[arg(long)]
+    host: Option<String>,
 
-    #[arg(long, default_value = "lotr-api.online")]
-    domain: String,
+    #[arg(long)]
+    domain: Option<String>,
 
-    #[arg(long, default_value_t = 3011)]
-    port: u16,
+    #[arg(long)]
+    port: Option<u16>,
 }
 
-pub(crate) async fn webproof_fetch(args: WebProofArgs, webproof: WebProof) -> Result<()> {
-    let WebProofArgs {
-        domain,
-        port,
-        url,
-        host,
-    } = args;
+pub(crate) async fn webproof_fetch(args: WebProofArgs) -> Result<()> {
+    let server_args = to_server_proving_args(args);
 
-    let presentation = webproof
-        .fetch(domain.as_ref(), host.as_ref(), port, url.as_ref())
-        .await;
+    let presentation = Box::pin(web_prover::generate_web_proof(
+        "127.0.0.1",
+        7047,
+        &*server_args.domain,
+        &*server_args.host,
+        server_args.port,
+        &*server_args.uri,
+    ))
+    .await
+    .unwrap();
     println!("{presentation}");
 
     Ok(())
 }
 
-#[cfg_attr(test, faux::create)]
-pub struct WebProof;
+pub struct ServerProvingArgs {
+    domain: String,
+    host: String,
+    port: u16,
+    uri: String,
+}
+fn to_server_proving_args(args: WebProofArgs) -> ServerProvingArgs {
+    let url = Url::parse(&args.url).expect("Failed to parse URL");
 
-#[cfg_attr(test, faux::methods)]
-impl WebProof {
-    pub const fn new() -> Self {
-        WebProof
-    }
+    let domain = url.host_str().expect("URL must have host").to_string();
 
-    pub async fn fetch(
-        &self,
-        server_domain: &str,
-        server_host: &str,
-        server_port: u16,
-        server_uri: &str,
-    ) -> String {
-        Box::pin(generate_web_proof(
-            "127.0.0.1",
-            7047,
-            server_domain,
-            server_host,
-            server_port,
-            server_uri,
-        ))
-        .await
-        .unwrap()
+    let port = args.port.unwrap_or_else(|| {
+        url.port().unwrap_or_else(|| match url.scheme() {
+            "https" => 443,
+            _ => 80,
+        })
+    });
+
+    let uri = {
+        let path = url.path();
+        let query = url.query().map(|q| format!("?{q}")).unwrap_or_default();
+        format!("{path}{query}")
+    };
+
+    let host = args.host.unwrap_or_else(|| domain.clone());
+
+    ServerProvingArgs {
+        domain,
+        host,
+        port,
+        uri,
     }
 }
 
-#[tokio::test]
-async fn test_fetch_args() {
-    use faux::when;
-
-    let mut webproof_ext = WebProof::faux();
-    when!(webproof_ext.fetch("api.x.com", "127.0.0.1", 8080, "/some_uri"))
-        .then_return("proof".to_string());
-
-    let args = WebProofArgs {
-        url: "/some_uri".to_string(),
-        host: "127.0.0.1".to_string(),
-        port: 8080,
-        domain: "api.x.com".to_string(),
+#[test]
+fn test_convert_args() {
+    let input_args = WebProofArgs {
+        url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
+        host: Option::from("127.0.0.1".to_string()),
+        domain: None,
+        port: None,
     };
 
-    webproof_fetch(args, webproof_ext).await.unwrap();
+    let converted = to_server_proving_args(input_args);
+
+    assert_eq!(converted.domain, "api.x.com");
+    assert_eq!(converted.host, "127.0.0.1");
+    assert_eq!(converted.port, 8080);
+    assert_eq!(converted.uri, "/v1/followers?token=5daa4f53&uid=245");
+}
+
+#[test]
+fn test_convert_args_no_params() {
+    let input_args: WebProofArgs = WebProofArgs {
+        url: "https://api.x.com:8080/v1/followers".to_string(),
+        ..default_args()
+    };
+
+    let converted = to_server_proving_args(input_args);
+
+    assert_eq!(converted.uri, "/v1/followers");
+}
+#[test]
+fn test_convert_args_no_host_provided() {
+    let input_args: WebProofArgs = WebProofArgs {
+        host: None,
+        ..default_args()
+    };
+
+    let converted = to_server_proving_args(input_args);
+
+    assert_eq!(converted.host, "api.x.com");
+}
+#[cfg(test)]
+fn default_args() -> WebProofArgs {
+    WebProofArgs {
+        url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
+        host: Option::from("127.0.0.1".to_string()),
+        domain: None,
+        port: None,
+    }
 }

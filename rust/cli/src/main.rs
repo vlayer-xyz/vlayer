@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use commands::{
     init::{run_init, InitArgs},
-    web_proof::{webproof_fetch, WebProof, WebProofArgs},
+    web_proof::{webproof_fetch, WebProofArgs},
 };
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
 use tracing::error;
@@ -59,6 +59,6 @@ async fn run() -> Result<()> {
             Box::pin(run_test(args)).await
         }
         Commands::Update => run_update().await,
-        Commands::WebProofFetch(args) => webproof_fetch(args, WebProof::new()).await,
+        Commands::WebProofFetch(args) => webproof_fetch(args).await,
     }
 }
