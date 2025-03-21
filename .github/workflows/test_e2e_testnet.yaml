@@ -26,7 +26,8 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+      code-changes: ${{ steps.filter.outputs.code-changes }}
+      workflow-changes: ${{ steps.filter.outputs.workflow-changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
