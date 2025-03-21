@@ -1,5 +1,6 @@
 use clap::Parser;
 use reqwest::Url;
+use web_prover::generate_web_proof;
 
 use crate::errors::Result;
 
@@ -15,7 +16,7 @@ pub(crate) struct WebProofArgs {
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> Result<()> {
     let server_args = to_server_proving_args(args);
 
-    let presentation = Box::pin(web_prover::generate_web_proof(
+    let presentation = Box::pin(generate_web_proof(
         "127.0.0.1",
         7047,
         &server_args.domain,
