@@ -1,3 +1,8 @@
+use clap::Parser;
+use web_prover::generate_web_proof;
+
+use crate::errors::Result;
+
 #[derive(Clone, Debug, Parser)]
 pub(crate) struct WebProofArgs {
     #[arg(long)]
@@ -13,10 +18,7 @@ pub(crate) struct WebProofArgs {
     port: u16,
 }
 
-pub(crate) async fn webproof_fetch(
-    args: WebProofArgs,
-    webproof: WebProof,
-) -> crate::errors::Result<()> {
+pub(crate) async fn webproof_fetch(args: WebProofArgs, webproof: WebProof) -> Result<()> {
     let WebProofArgs {
         domain,
         port,
@@ -32,15 +34,13 @@ pub(crate) async fn webproof_fetch(
     Ok(())
 }
 
-use clap::Parser;
-use web_prover::generate_web_proof;
-
 #[cfg_attr(test, faux::create)]
-pub struct WebProof {}
+pub struct WebProof;
+
 #[cfg_attr(test, faux::methods)]
 impl WebProof {
     pub const fn new() -> Self {
-        WebProof {}
+        WebProof
     }
 
     pub async fn fetch(
