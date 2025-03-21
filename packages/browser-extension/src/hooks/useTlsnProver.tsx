@@ -69,13 +69,16 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       hostname: string,
       jwtToken: string | null,
     ): string => {
-      if (jwtToken === null) return baseUrl + `?token=${hostname}`;
+      if (jwtToken === null) {
+        return baseUrl + `?token=${hostname}`;
+      }
       const payload = jwtToken.split(".")[1] ?? "";
       const claims = Buffer.from(payload, "base64").toString("utf8");
       const parsed = claimsSchema.safeParse(JSON.parse(claims));
       if (parsed.success) {
-        if (parsed.data?.host === hostname)
+        if (parsed.data?.host === hostname) {
           return baseUrl + `?token=${jwtToken}`;
+        }
         throw Error(
           `Invalid JWT token: token valid for hostname ${parsed.data?.host}, but needs ${hostname}`,
         );
