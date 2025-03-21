@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use commands::{
     init::{run_init, InitArgs},
-    webproof::{webproof_fetch, WebProof, WebProofArgs},
+    web_proof::{webproof_fetch, WebProof, WebProofArgs},
 };
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
 use tracing::error;
