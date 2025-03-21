@@ -39,7 +39,7 @@ jobs:
     name: E2E web apps test against devnet
     needs: changes
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

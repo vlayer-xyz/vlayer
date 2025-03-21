@@ -51,7 +51,7 @@ jobs:
     name: E2E web apps test against testnet
     needs: changes
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
