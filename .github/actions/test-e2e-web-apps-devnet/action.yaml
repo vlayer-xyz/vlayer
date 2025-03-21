@@ -2,7 +2,7 @@ name: "Run E2E Web Apps Test"
 description: "Runs an E2E web apps test against devnet for a given example"
 
 inputs:
-  example: 
+  example:
     description: "The E2E test example to run"
     required: true
   playwright_test_x_com_auth_token:
