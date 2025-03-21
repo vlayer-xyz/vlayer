@@ -12,13 +12,6 @@ on:
       - "LICENSE"
       - "book/**"
   pull_request:
-    paths:
-      - "examples/**"
-      - "packages/**"
-      - "bash/run-services.sh"
-      - "bash/e2e-web-apps-test.sh"
-      - ".github/workflows/test_e2e_web_apps_testnet.yaml"
-      - "contracts/**"
   merge_group:
   workflow_dispatch:
 concurrency:
@@ -27,9 +20,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code-changes: ${{ steps.filter.outputs.code-changes }}
+      workflow-changes: ${{ steps.filter.outputs.workflow-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # We detect code changes, and run the workflow only if relevant code or workflow changes are detected.
+      # Because the workflow is resource heavy (in time/compilation, in testnet ETH usage, and in Bonsai API usage),
+      # we also skip running the workflow on every commit of PRs (unless the workflow configuration is changed)
+      # Red PR cannot be merged because even though PR commits are skipped, the workflow will still run in the merge queue.
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code-changes:
+              - 'examples/**'
+              - 'packages/**'
+              - 'bash/run-services.sh'
+              - 'bash/e2e-web-apps-test.sh'
+              - 'contracts/**'
+            workflow-changes:
+              - '.github/workflows/test_e2e_web_apps_testnet.yaml'
+
   test-e2e-web-apps:
     name: E2E web apps test against testnet
     runs-on: aws-linux-medium
+    if: needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
