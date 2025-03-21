@@ -5,7 +5,7 @@ on:
     paths:
       - "packages/**"
       - "examples/simple-web-proof/vlayer/**"
-      - ".github/workflows/js_test.yaml"
+      - ".github/workflows/test_js.yaml"
   merge_group:
   push:
     branches:
