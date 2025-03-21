@@ -6,12 +6,14 @@ import {
   writeEnvVariables,
 } from "@vlayer/sdk/config";
 import { env } from "./env";
-import { startBlock, endBlock } from "./helpers";
+import { getStartEndBlock } from "./helpers";
 const config = getConfig();
 
 const usdcTokenAddr = env.PROVER_ERC20_CONTRACT_ADDR;
 
 const step = env.PROVER_STEP;
+
+const { startBlock, endBlock } = await getStartEndBlock(config);
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,

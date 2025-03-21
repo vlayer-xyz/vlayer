@@ -8,10 +8,12 @@ import {
   waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
 import { env } from "./env";
-import { startBlock, endBlock } from "./helpers";
+import { getStartEndBlock } from "./helpers";
 
 const config = getConfig();
 const { ethClient, account, proverUrl } = await createContext(config);
+
+const { startBlock, endBlock } = await getStartEndBlock(config);
 
 const tokenOwner = env.PROVER_ERC20_HOLDER_ADDR;
 const usdcTokenAddr = env.PROVER_ERC20_CONTRACT_ADDR;
