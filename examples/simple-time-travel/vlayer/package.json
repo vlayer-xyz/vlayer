@@ -2,34 +2,61 @@
   "name": "simple-time-travel",
   "module": "prove.ts",
   "type": "module",
-  "dependencies": {
-    "@noble/hashes": "^1.4.0",
-    "@vlayer/sdk": "workspace:*",
-    "viem": "^2.17.5"
-  },
   "scripts": {
     "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
-    "lint:solidity": "solhint '../src/**/*.sol' --max-warnings 0 && forge fmt ../src --check",
-    "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
+    "lint:solidity": "solhint '../src/**/*.sol'",
+    "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
+    "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run loadFixtures.ts && VLAYER_ENV=dev bun run prove.ts",
-    "test-web:dev": "echo \"No tests specified yet\"",
-    "test-web:testnet": "echo \"No tests specified yet\""
+    "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
+    "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
+    "test-web:dev": "VLAYER_ENV=dev bun run playwright test",
+    "test-web:testnet": "VLAYER_ENV=testnet bun run playwright test"
   },
-  "peerDependencies": {
-    "typescript": "^5.5.4"
+  "dependencies": {
+    "@noble/hashes": "^1.4.0",
+    "@sentry/react": "^8.54.0",
+    "@vercel/analytics": "^1.4.1",
+    "@vlayer/react": "workspace:*",
+    "@vlayer/sdk": "workspace:*",
+    "debug": "^4.4.0",
+    "react": "^18.3.1",
+    "react-daisyui": "^5.0.5",
+    "react-dom": "^18.3.1",
+    "usehooks-ts": "^3.1.1",
+    "uuid": "^11.0.5",
+    "wagmi": "^2.14.6",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
+    "typescript": "^5.5.4",
+    "@eslint/js": "^9.13.0",
+    "@playwright/test": "1.48.0",
     "@types/bun": "^1.1.6",
     "@types/eslint__js": "^8.42.3",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
     "@typescript-eslint/parser": "^8.25.0",
-    "eslint": "^9.7.0",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.12.14",
+    "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.13",
+    "globals": "^15.11.0",
+    "playwright": "1.48.0",
+    "postcss": "^8.4.47",
     "prettier": "^3.3.3",
-    "typescript-eslint": "^8.2.0",
-    "solhint": "^5.0.5"
+    "tailwindcss": "^3.4.14",
+    "typescript-eslint": "^8.10.0",
+    "vite": "^5.4.9",
+    "solhint": "^5.0.5",
+    "motion": "^12.4.2",
+    "react-router": "^7.1.5"
   }
 }
