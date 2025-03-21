@@ -62,47 +62,50 @@ fn to_server_proving_args(args: WebProofArgs) -> ServerProvingArgs {
     }
 }
 
-#[test]
-fn test_convert_args() {
-    let input_args = WebProofArgs {
-        url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
-        host: Option::from("127.0.0.1".to_string()),
-    };
-
-    let converted = to_server_proving_args(input_args);
-
-    assert_eq!(converted.domain, "api.x.com");
-    assert_eq!(converted.host, "127.0.0.1");
-    assert_eq!(converted.port, 8080);
-    assert_eq!(converted.uri, "/v1/followers?token=5daa4f53&uid=245");
-}
-
-#[test]
-fn test_convert_args_no_uri_params() {
-    let input_args: WebProofArgs = WebProofArgs {
-        url: "https://api.x.com:8080/v1/followers".to_string(),
-        ..default_args()
-    };
-
-    let converted = to_server_proving_args(input_args);
-
-    assert_eq!(converted.uri, "/v1/followers");
-}
-#[test]
-fn test_convert_args_no_host_provided() {
-    let input_args: WebProofArgs = WebProofArgs {
-        host: None,
-        ..default_args()
-    };
-
-    let converted = to_server_proving_args(input_args);
-
-    assert_eq!(converted.host, "api.x.com");
-}
 #[cfg(test)]
-fn default_args() -> WebProofArgs {
-    WebProofArgs {
-        url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
-        host: Option::from("127.0.0.1".to_string()),
+mod tests {
+    use super::*;
+    #[test]
+    fn test_convert_args() {
+        let input_args = WebProofArgs {
+            url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
+            host: Option::from("127.0.0.1".to_string()),
+        };
+
+        let converted = to_server_proving_args(input_args);
+
+        assert_eq!(converted.domain, "api.x.com");
+        assert_eq!(converted.host, "127.0.0.1");
+        assert_eq!(converted.port, 8080);
+        assert_eq!(converted.uri, "/v1/followers?token=5daa4f53&uid=245");
+    }
+
+    #[test]
+    fn test_convert_args_no_uri_params() {
+        let input_args: WebProofArgs = WebProofArgs {
+            url: "https://api.x.com:8080/v1/followers".to_string(),
+            ..default_args()
+        };
+
+        let converted = to_server_proving_args(input_args);
+
+        assert_eq!(converted.uri, "/v1/followers");
+    }
+    #[test]
+    fn test_convert_args_no_host_provided() {
+        let input_args: WebProofArgs = WebProofArgs {
+            url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
+            host: None,
+        };
+
+        let converted = to_server_proving_args(input_args);
+
+        assert_eq!(converted.host, "api.x.com");
+    }
+    fn default_args() -> WebProofArgs {
+        WebProofArgs {
+            url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
+            host: Option::from("127.0.0.1".to_string()),
+        }
     }
 }
