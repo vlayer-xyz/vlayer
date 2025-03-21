@@ -22,5 +22,4 @@ source "${VLAYER_HOME}/bash/run-services.sh"
 
 run_web_tests "$EXAMPLE_NAME"
 
-echo "🧹 Cleaning up"
 cleanup
