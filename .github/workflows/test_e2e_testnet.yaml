@@ -103,7 +103,6 @@ jobs:
     name: E2E test against testnet (simple)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -123,7 +122,6 @@ jobs:
     name: E2E test against testnet (simple-web-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -143,7 +141,6 @@ jobs:
     name: E2E test against testnet (simple-email-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -163,7 +160,6 @@ jobs:
     name: E2E test against testnet (simple-time-travel)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
