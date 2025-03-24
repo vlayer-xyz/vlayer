@@ -56,6 +56,7 @@
 
 - name: Install vlayer service file
   become: true
+  no_log: true
   ansible.builtin.template:
     src: verifiable-dns.service.j2
     dest: /etc/systemd/system/vlayer-verifiable-dns.service
