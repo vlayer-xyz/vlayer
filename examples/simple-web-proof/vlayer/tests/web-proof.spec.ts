@@ -21,7 +21,7 @@ test("web proof flow", async ({ page, context }) => {
     },
   ]);
 
-  await test.step("Click Start", async () => {
+  await test.step("Clicking Start should redirect to Connect Wallet", async () => {
     await page.goto("/");
 
     await expect(page.getByTestId("start-page-button")).toBeVisible();
@@ -30,14 +30,14 @@ test("web proof flow", async ({ page, context }) => {
     await expect(page).toHaveURL("/connect-wallet");
   });
 
-  await test.step("Click Start Proving", async () => {
+  await test.step("Clicking Start Proving should redirect to Start Proving", async () => {
     await expect(page.getByText("Start Proving")).toBeVisible();
     await page.getByText("Start Proving").click();
 
     await expect(page).toHaveURL("/start-proving");
   });
 
-  await test.step("Open extension", async () => {
+  await test.step("Clicking Open Extension should make side panel visible", async () => {
     await expect(page.getByText("Open Extension")).toBeVisible();
     await page.getByText("Open Extension").click();
 
@@ -45,7 +45,7 @@ test("web proof flow", async ({ page, context }) => {
     expect(extension).toBeDefined();
   });
 
-  await test.step("Redirect to x.com", async () => {
+  await test.step("Clicking extension redirect button should open x.com", async () => {
     const extension = await sidePanel(context);
     expect(extension).toBeDefined();
 
@@ -58,7 +58,7 @@ test("web proof flow", async ({ page, context }) => {
     await expect(newPage).toHaveURL("https://x.com/home");
   });
 
-  await test.step("Click generate proof", async () => {
+  await test.step("Clicking Generate proof should succeed and redirect to minting", async () => {
     const extension = await sidePanel(context);
     const proveButton = extension.getByRole("button", {
       name: "Generate proof",
@@ -67,5 +67,10 @@ test("web proof flow", async ({ page, context }) => {
     await expect(page.getByText("Start Minting")).toBeVisible({
       timeout: 120_000,
     });
+  });
+
+  await test.step("Clicking Start Minting should display Success", async () => {
+    await page.getByText("Start Minting").click();
+    await expect(page.getByText("Success")).toBeVisible();
   });
 });
