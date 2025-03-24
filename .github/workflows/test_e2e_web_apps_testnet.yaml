@@ -43,7 +43,6 @@ jobs:
               - 'packages/**'
               - 'bash/run-services.sh'
               - 'bash/e2e-web-apps-test.sh'
-              - 'bash/e2e-web-apps-tests.sh'
               - 'contracts/**'
             workflow-changes:
               - '.github/workflows/test_e2e_web_apps_testnet.yaml'
