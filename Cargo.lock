@@ -3076,6 +3076,7 @@ dependencies = [
  "assert_cmd",
  "clap 4.5.26",
  "colored 3.0.0",
+ "derive-new",
  "derive_more",
  "flate2",
  "predicates",
