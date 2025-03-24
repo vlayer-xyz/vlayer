@@ -85,7 +85,7 @@ mod tests {
     fn test_convert_args_no_uri_params() {
         let input_args: WebProofArgs = WebProofArgs {
             url: "https://api.x.com:8080/v1/followers".to_string(),
-            ..default_args()
+            ..WebProofArgs::default()
         };
 
         let converted: ServerProvingArgs = input_args.try_into().unwrap();
@@ -103,10 +103,13 @@ mod tests {
 
         assert_eq!(converted.host, "api.x.com");
     }
-    fn default_args() -> WebProofArgs {
-        WebProofArgs {
-            url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
-            host: Option::from("127.0.0.1".to_string()),
+
+    impl Default for WebProofArgs {
+        fn default() -> Self {
+            Self {
+                url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".into(),
+                host: Some("127.0.0.1".into()),
+            }
         }
     }
 }
