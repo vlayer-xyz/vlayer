@@ -49,14 +49,13 @@ export const ShowBalancePage = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const args = JSON.parse(proverResult);
-    console.log("args", args);
+    const [proof, owner, balance] = JSON.parse(proverResult);
     setIsLoading(true);
     writeContract({
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
       abi: verifierSpec.abi,
       functionName: "claim",
-      args: [args[0], args[1], BigInt(args[2])],
+      args: [proof, owner, BigInt(balance)],
     });
   };
 
