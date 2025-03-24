@@ -60,7 +60,7 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
-        uses: ./.github/actions/run-e2e-test
+        uses: ./.github/actions/test-e2e-web-apps-testnet
         with:
           example: your-example-name
           playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
