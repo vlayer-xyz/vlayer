@@ -35,7 +35,6 @@ enum Commands {
     Init(InitArgs),
     Test(Box<TestArgs>),
     Update,
-    #[command(hide = true)]
     WebProofFetch(WebProofArgs),
 }
 

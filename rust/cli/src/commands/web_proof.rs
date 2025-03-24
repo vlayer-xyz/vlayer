@@ -4,6 +4,7 @@ use web_prover::generate_web_proof;
 
 use crate::errors::Result;
 
+/// Generates a web-based proof for the specified request
 #[derive(Clone, Debug, Parser)]
 pub(crate) struct WebProofArgs {
     #[arg(long)]
