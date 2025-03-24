@@ -28,7 +28,7 @@ function dropEmptyProofFromArgs(args: unknown) {
 export const createVlayerClient = (
   {
     url = "http://127.0.0.1:3000",
-    webProofProvider = createExtensionWebProofProvider(),
+    webProofProvider,
     token,
   }: {
     url?: string;
@@ -36,10 +36,13 @@ export const createVlayerClient = (
     token?: string;
   } = {
     url: "http://127.0.0.1:3000",
-    webProofProvider: createExtensionWebProofProvider(),
   },
 ): VlayerClient => {
   const resultHashMap = new Map<string, [Abi, string]>();
+
+  if (!webProofProvider) {
+    webProofProvider = createExtensionWebProofProvider({ jwtToken: token });
+  }
 
   return {
     prove: async <T extends Abi, F extends ContractFunctionName<T>>({

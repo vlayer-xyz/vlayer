@@ -18,6 +18,15 @@ import { useTrackHistory } from "hooks/useTrackHistory";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { LOADING } from "@vlayer/extension-hooks";
 import { tlsnProve } from "./tlsnProve/tlsnProve";
+import { z } from "zod";
+
+const claimsSchema = z.object({
+  host: z.string(),
+  port: z.number(),
+  sub: z.string(),
+});
+
+type Claims = z.infer<typeof claimsSchema>;
 
 const TlsnProofContext = createContext({
   prove: async () => {},
@@ -57,6 +66,40 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
     }, 1000);
 
+    const getJwtClaims = (token: string): Claims | null => {
+      const payload = token.split(".")[1] ?? "";
+      const rawClaims = Buffer.from(payload, "base64").toString("utf8");
+      try {
+        const parsed = claimsSchema.safeParse(JSON.parse(rawClaims));
+        if (parsed.success) {
+          return parsed.data;
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    };
+
+    const getWsProxyUrl = (
+      baseUrl: string,
+      hostname: string,
+      jwtToken: string | null,
+    ): string => {
+      if (jwtToken === null) {
+        return baseUrl + `?token=${hostname}`;
+      }
+      const claims = getJwtClaims(jwtToken);
+      if (claims === null) {
+        return baseUrl + `?token=${hostname}`;
+      }
+      if (claims.host === hostname) {
+        return baseUrl + `?token=${jwtToken}`;
+      }
+      throw Error(
+        `Invalid JWT token: token valid for hostname ${claims.host}, but needs ${hostname}`,
+      );
+    };
+
     try {
       isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
@@ -67,7 +110,11 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
           : "";
       const wsProxyUrl =
         provingSessionConfig !== LOADING
-          ? provingSessionConfig.wsProxyUrl + `?token=${hostname}`
+          ? getWsProxyUrl(
+              provingSessionConfig.wsProxyUrl || "",
+              hostname,
+              provingSessionConfig.jwtToken,
+            )
           : "";
 
       const redactionConfig =

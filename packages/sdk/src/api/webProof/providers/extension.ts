@@ -58,6 +58,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
   constructor(
     private notaryUrl: string,
     private wsProxyUrl: string,
+    private jwtToken: string | null,
   ) {}
 
   public notifyZkProvingStatus(status: ZkProvingStatus) {
@@ -122,6 +123,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
       payload: {
         notaryUrl: this.notaryUrl,
         wsProxyUrl: this.wsProxyUrl,
+        jwtToken: this.jwtToken,
         logoUrl: webProofRequest.logoUrl,
         steps: webProofRequest.steps,
       },
@@ -147,6 +149,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
         payload: {
           notaryUrl: this.notaryUrl,
           wsProxyUrl: this.wsProxyUrl,
+          jwtToken: this.jwtToken,
           logoUrl: webProofRequest.logoUrl,
           steps: webProofRequest.steps,
         },
@@ -192,6 +195,7 @@ export const validateWebProofRequest = (
 export const createExtensionWebProofProvider = ({
   notaryUrl = "https://test-notary.vlayer.xyz",
   wsProxyUrl = "wss://test-wsproxy.vlayer.xyz",
+  jwtToken = null,
 }: WebProofProviderSetup = {}): WebProofProvider => {
-  return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);
+  return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl, jwtToken);
 };
