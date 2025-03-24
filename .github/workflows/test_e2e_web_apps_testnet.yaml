@@ -56,7 +56,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+        with:
+          submodules: recursive
+
       - name: Run E2E Web Apps Test Action
         uses: ./.github/actions/run-e2e-test
         with:
