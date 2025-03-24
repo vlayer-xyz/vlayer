@@ -3,6 +3,7 @@ mod helpers;
 mod json;
 pub mod precompile;
 mod regex;
+#[cfg(feature = "vlayer_test")]
 pub mod system;
 pub mod url_pattern;
 mod web_proof;
