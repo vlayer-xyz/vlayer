@@ -41,6 +41,10 @@ runs:
         name: target-debug
         path: target/debug
 
+    - name: Make downloaded binaries executable
+      run: sudo chmod +x target/debug/*
+      shell: bash
+
     - name: Install contracts prerequisites
       uses: ./.github/actions/contracts-prerequisites
 
