@@ -4,6 +4,7 @@ import {
   isSupportedBrowser,
   checkExtensionInstalled,
 } from "../utils";
+import { UseExtensionError } from "../errors";
 export const useExtension = () => {
   const [hasExtensionInstalled, setHasExtensionInstalled] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -22,7 +23,6 @@ export const useExtension = () => {
 
     const isInstalled = await checkExtensionInstalled();
     if (!isInstalled) {
-      setError("Please install vlayer extension and try again");
       setHasExtensionInstalled(false);
       return;
     }
@@ -35,5 +35,12 @@ export const useExtension = () => {
     const interval = setInterval(isExtensionReady, 5000);
     return () => clearInterval(interval);
   }, []);
-  return { hasExtensionInstalled, error };
+
+  useEffect(() => {
+    if (error) {
+      throw new UseExtensionError(error);
+    }
+  }, [error]);
+
+  return { hasExtensionInstalled };
 };

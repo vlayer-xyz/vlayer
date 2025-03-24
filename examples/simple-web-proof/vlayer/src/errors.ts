@@ -18,3 +18,9 @@ export class FaucetError extends KnownAppError {
     super("FaucetError", "Failed to fund account.");
   }
 }
+
+export class UseExtensionError extends KnownAppError {
+  constructor(message: string) {
+    super("UseExtensionError", message);
+  }
+}
