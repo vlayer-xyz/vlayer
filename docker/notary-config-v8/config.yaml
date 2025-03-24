@@ -12,7 +12,6 @@ server:
     <a href="/healthcheck">health check</a> - <a href="/info">info</a><br/>
 
 notarization:
-  max_transcript_size: 20480
   max_sent_data: 14096
   max_recv_data: 16384
   timeout: 1800
