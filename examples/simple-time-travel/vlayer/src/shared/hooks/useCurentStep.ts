@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, Location } from "react-router";
-import { getAllSteps, Step } from "../../app/router/steps";
+import { getAllSteps } from "../../app/router/steps";
+import { Step } from "../../app/router/types";
 
 export const useCurrentStep = () => {
   const location = useLocation();

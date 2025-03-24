@@ -22,11 +22,11 @@ export const useProver = () => {
     useWaitForProvingResult(provingHash);
 
   useEffect(() => {
-    if (result) {
+    if (result && Array.isArray(result)) {
       const resultsData = [
-        result[0],
-        result[1],
-        String(result[2]), // BigInt balance
+        result[0], // proof
+        result[1], // owner
+        String(result[2]), // average balance (bigint)
       ];
       setProverResult(JSON.stringify(resultsData));
     }
