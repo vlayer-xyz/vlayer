@@ -6,8 +6,9 @@ inputs:
     description: "The E2E test example to run"
     required: true
   playwright_test_x_com_auth_token:
-    description: "Token for Playwright tests authentication"
-    required: true
+    description: "Token to authenticate Playwright tests for x.com (cookie from x.com)"
+    required: false
+    default: ""
   vercel_project_id:
     description: "Vercel Project ID for Playwright reports"
     required: true

@@ -50,7 +50,6 @@ jobs:
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple"
-          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
@@ -90,7 +89,6 @@ jobs:
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple-email-proof"
-          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
@@ -110,7 +108,6 @@ jobs:
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple-teleport"
-          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
@@ -130,7 +127,6 @@ jobs:
         uses: ./.github/actions/test-e2e-web-apps-devnet
         with:
           example: "simple-time-travel"
-          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
