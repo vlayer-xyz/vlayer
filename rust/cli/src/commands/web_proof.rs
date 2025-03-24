@@ -58,7 +58,7 @@ impl TryFrom<WebProofArgs> for ServerProvingArgs {
             format!("{path}{query}")
         };
 
-        let host = value.host.unwrap_or_else(|| domain.clone());
+        let host = value.host.unwrap_or(domain.clone());
 
         Ok(ServerProvingArgs::new(domain, host, port, uri))
     }
