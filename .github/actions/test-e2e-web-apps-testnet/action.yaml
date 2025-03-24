@@ -50,6 +50,12 @@ runs:
       id: rust_pre
       uses: ./.github/actions/rust-prerequisites
 
+    - name: Download binaries
+      uses: actions/download-artifact@v4
+      with:
+        name: target-debug
+        path: target/debug
+
     - name: Install contracts prerequisites
       uses: ./.github/actions/contracts-prerequisites
 
