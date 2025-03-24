@@ -58,6 +58,8 @@ async fn run() -> Result<()> {
             Box::pin(run_test(args)).await
         }
         Commands::Update => run_update().await,
-        Commands::WebProofFetch(args) => webproof_fetch(args).await,
+        Commands::WebProofFetch(args) => {
+            webproof_fetch(args).await.map_err(derive_more::Into::into)
+        }
     }
 }

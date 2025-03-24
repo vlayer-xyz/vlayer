@@ -1,9 +1,8 @@
+use anyhow::{anyhow, Context};
 use clap::Parser;
 use derive_new::new;
 use reqwest::Url;
 use web_prover::generate_web_proof;
-
-use crate::errors::Result;
 
 /// Generates a web-based proof for the specified request
 #[derive(Clone, Debug, Parser)]
@@ -15,19 +14,19 @@ pub(crate) struct WebProofArgs {
     host: Option<String>,
 }
 
-pub(crate) async fn webproof_fetch(args: WebProofArgs) -> Result<()> {
-    let server_args = to_server_proving_args(args);
+pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
+    let server_args: ServerProvingArgs = args.try_into()?;
 
-    let presentation = Box::pin(generate_web_proof(
+    let presentation = generate_web_proof(
         "127.0.0.1",
         7047,
         &server_args.domain,
         &server_args.host,
         server_args.port,
         &server_args.uri,
-    ))
+    )
     .await
-    .unwrap();
+    .map_err(|e| anyhow!("{e}"))?;
     println!("{presentation}");
 
     Ok(())
@@ -40,27 +39,30 @@ pub struct ServerProvingArgs {
     port: u16,
     uri: String,
 }
-fn to_server_proving_args(args: WebProofArgs) -> ServerProvingArgs {
-    let url = Url::parse(&args.url).expect("Failed to parse URL");
+impl TryFrom<WebProofArgs> for ServerProvingArgs {
+    type Error = anyhow::Error;
 
-    let domain = url.host_str().expect("URL must have host").to_string();
+    fn try_from(value: WebProofArgs) -> Result<Self, Self::Error> {
+        let url = Url::parse(&value.url)?;
 
-    let port = url.port().unwrap_or_else(|| match url.scheme() {
-        "https" => 443,
-        _ => 80,
-    });
+        let domain = url.host_str().context("Url has no host")?.to_string();
 
-    let uri = {
-        let path = url.path();
-        let query = url.query().map(|q| format!("?{q}")).unwrap_or_default();
-        format!("{path}{query}")
-    };
+        let port = url.port().unwrap_or_else(|| match url.scheme() {
+            "https" => 443,
+            _ => 80,
+        });
 
-    let host = args.host.unwrap_or_else(|| domain.clone());
+        let uri = {
+            let path = url.path();
+            let query = url.query().map(|q| format!("?{q}")).unwrap_or_default();
+            format!("{path}{query}")
+        };
 
-    ServerProvingArgs::new(domain, host, port, uri)
+        let host = value.host.unwrap_or_else(|| domain.clone());
+
+        Ok(ServerProvingArgs::new(domain, host, port, uri))
+    }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -71,7 +73,7 @@ mod tests {
             host: Option::from("127.0.0.1".to_string()),
         };
 
-        let converted = to_server_proving_args(input_args);
+        let converted: ServerProvingArgs = input_args.try_into().unwrap();
 
         assert_eq!(converted.domain, "api.x.com");
         assert_eq!(converted.host, "127.0.0.1");
@@ -86,7 +88,7 @@ mod tests {
             ..default_args()
         };
 
-        let converted = to_server_proving_args(input_args);
+        let converted: ServerProvingArgs = input_args.try_into().unwrap();
 
         assert_eq!(converted.uri, "/v1/followers");
     }
@@ -97,7 +99,7 @@ mod tests {
             host: None,
         };
 
-        let converted = to_server_proving_args(input_args);
+        let converted: ServerProvingArgs = input_args.try_into().unwrap();
 
         assert_eq!(converted.host, "api.x.com");
     }
