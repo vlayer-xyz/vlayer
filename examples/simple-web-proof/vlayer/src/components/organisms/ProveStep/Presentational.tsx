@@ -3,13 +3,11 @@ export const ProveStepPresentational = ({
   isPending,
   disabled,
   setDisabled,
-  errorMsg,
 }: {
   requestWebProof: () => void;
   isPending: boolean;
   disabled: boolean;
   setDisabled: (disabled: boolean) => void;
-  errorMsg?: string;
 }) => {
   return (
     <>
@@ -24,15 +22,6 @@ export const ProveStepPresentational = ({
         >
           {isPending ? "Proving in progress..." : "Open Extension"}
         </button>
-        {errorMsg && (
-          <div
-            role="alert"
-            className="alert alert-error m-2"
-            style={{ width: "300px", height: "48px" }}
-          >
-            <span>Proving error</span>
-          </div>
-        )}
       </div>
     </>
   );
