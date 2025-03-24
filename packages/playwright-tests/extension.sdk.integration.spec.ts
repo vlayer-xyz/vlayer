@@ -3,7 +3,7 @@ import { SdkPlayground } from "./pom/sdkPlayground";
 import { sidePanel, sidePanelClosed } from "./helpers";
 
 const animationTimeout = 300;
-test("sdk playground", async ({ page, context }) => {
+test("sidepanel open/close by sdk", async ({ page, context }) => {
   const sdkPlayground = new SdkPlayground(page);
   await sdkPlayground.init();
   await sdkPlayground.openSidePanel();

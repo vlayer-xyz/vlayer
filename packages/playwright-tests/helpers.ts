@@ -31,8 +31,9 @@ export const sidePanelClosed = async (context: BrowserContext) => {
   const regex = new RegExp(`.*${extensionId}.*`);
   let sidepanel = pageByUrlRegex(context, regex);
   while (sidepanel) {
-    //
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // there is no event for sidepanel close, so we need to
+    // have such a sleep
+    await new Promise((resolve) => setTimeout(resolve, 100));
     sidepanel = pageByUrlRegex(context, regex);
   }
   return {

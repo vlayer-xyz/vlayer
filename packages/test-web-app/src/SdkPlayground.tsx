@@ -3,7 +3,7 @@ import {
   createVlayerClient,
 } from "@vlayer/sdk";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 declare global {
   interface Window {
@@ -17,19 +17,13 @@ declare global {
 }
 
 const SdkPlayground = () => {
-  const [provider, setProvider] =
-    useState<ReturnType<typeof createExtensionWebProofProvider>>();
-
   useEffect(() => {
     const provider = createExtensionWebProofProvider({});
-    setProvider(provider);
-    if (!window._vlayer && provider) {
-      window._vlayer = {
-        extensionWebProofProvider: provider,
-        vlayerClient: createVlayerClient({ webProofProvider: provider }),
-      };
-    }
-  }, [!!provider]);
+    window._vlayer = {
+      extensionWebProofProvider: provider,
+      vlayerClient: createVlayerClient({ webProofProvider: provider }),
+    };
+  }, []);
   return <></>;
 };
 
