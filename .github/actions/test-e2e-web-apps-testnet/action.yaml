@@ -89,6 +89,7 @@ runs:
     # to allow concurrent runs of the workflow avoiding nonce issues.
     # Here we load the key into a variable from a location on disk.
     - name: Read testnet private key
+      shell: bash
       run: |
         EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ inputs.testnet_private_key_location }})
         echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
