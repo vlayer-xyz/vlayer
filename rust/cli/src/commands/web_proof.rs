@@ -1,4 +1,5 @@
 use clap::Parser;
+use derive_new::new;
 use reqwest::Url;
 use web_prover::generate_web_proof;
 
@@ -32,6 +33,7 @@ pub(crate) async fn webproof_fetch(args: WebProofArgs) -> Result<()> {
     Ok(())
 }
 
+#[derive(new)]
 pub struct ServerProvingArgs {
     domain: String,
     host: String,
@@ -56,12 +58,7 @@ fn to_server_proving_args(args: WebProofArgs) -> ServerProvingArgs {
 
     let host = args.host.unwrap_or_else(|| domain.clone());
 
-    ServerProvingArgs {
-        domain,
-        host,
-        port,
-        uri,
-    }
+    ServerProvingArgs::new(domain, host, port, uri)
 }
 
 #[cfg(test)]
