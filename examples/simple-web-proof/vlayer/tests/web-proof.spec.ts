@@ -21,7 +21,7 @@ test("web proof flow", async ({ page, context }) => {
     },
   ]);
 
-  await test.step("Clicking Start should redirect to Cconnect Wallet", async () => {
+  await test.step("Clicking Start should redirect to Connect Wallet", async () => {
     await page.goto("/");
 
     await expect(page.getByTestId("start-page-button")).toBeVisible();
