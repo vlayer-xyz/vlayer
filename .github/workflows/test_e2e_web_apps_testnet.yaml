@@ -54,6 +54,9 @@ jobs:
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
       - name: Run E2E Web Apps Test Action
         uses: ./.github/actions/run-e2e-test
         with:
