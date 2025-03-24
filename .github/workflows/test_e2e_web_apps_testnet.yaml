@@ -54,87 +54,16 @@ jobs:
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/run-e2e-test
         with:
-          submodules: recursive
-      - name: Install Rust prerequisites
-        id: rust_pre
-        uses: ./.github/actions/rust-prerequisites
-      - name: Install contracts prerequisites
-        uses: ./.github/actions/contracts-prerequisites
-      - name: Install TypeScript prerequisites
-        uses: ./.github/actions/ts-prerequisites
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build sdk
-        working-directory: ./packages/sdk
-        run: bun run build
-
-      - name: Build sdk-hooks
-        working-directory: ./packages/sdk-hooks
-        run: bun run build
-
-      - name: Install Playwright Browsers
-        run: bunx playwright install --with-deps chromium
-
-      - name: Check clang and LLVM version
-        env:
-          EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check-llvm-clang.sh
-
-      - name: Install contracts' dependencies
-        working-directory: ./contracts/vlayer
-        run: forge soldeer install
-
-      # Stateful GH Runners have a separate testnet private key on disk,
-      # to allow concurrent runs of the workflow avoiding nonce issues.
-      # Here we load the key into a variable from a location on disk.
-      - name: Read testnet private key
-        run: |
-          EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
-          echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
-          echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
-
-      - name: Run e2e test
-        env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          VLAYER_ENV: testnet
-          QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
-          QUICKNODE_ENDPOINT: "dry-alpha-tab"
-          CHAIN_NAME: "optimismSepolia"
-          JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
-          PROVER_URL: http://127.0.0.1:3000
-          GAS_METER_URL: ${{ vars.GAS_METER_URL }}
-          GAS_METER_API_KEY: ${{ secrets.GAS_METER_API_KEY }}
-          VLAYER_API_TOKEN: ${{ secrets.VLAYER_API_TOKEN }}
-          CONFIRMATIONS: 2
-          VLAYER_TMP_DIR: ./artifacts
-          PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
-        run: bash/e2e-web-apps-tests.sh
-
-      # Teardown
-      - name: Display Logs
-        if: always()
-        run: |
-          for log_file in $(find ./artifacts/logs -type f); do
-            echo "=== Contents of $log_file ==="
-            cat "$log_file"
-            echo "============================="
-          done
-      - name: Handle Playwright Reports
-        uses: ./.github/actions/handle-playwright-reports
-        if: ${{ !cancelled() }}
-        with:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          EXAMPLES_PATH: /examples/
-          GITHUB_TOKEN: ${{ github.token }}
-          ARTIFACT_RETENTION_DAYS: "30"
-          REPORT_PATH: "examples/**/vlayer/playwright-report/"
-          PR_NUMBER: ${{ github.event.number }}
-          DEPLOY_TYPE: "examples"
-          CONTEXT: "test-e2e-web-apps-testnet"
+          example: your-example-name
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          gas_meter_url: ${{ vars.GAS_METER_URL }}
+          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
