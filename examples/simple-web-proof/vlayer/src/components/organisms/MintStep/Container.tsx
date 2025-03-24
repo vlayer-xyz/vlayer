@@ -15,6 +15,7 @@ import {
   useEnvPrivateKey,
 } from "../../../utils/clientAuthMode";
 import { ensureBalance } from "../../../utils/ethFaucet";
+import { AlreadyMintedError } from "../../../errors";
 
 export const MintStep = () => {
   const navigate = useNavigate();
@@ -72,16 +73,16 @@ export const MintStep = () => {
 
   useEffect(() => {
     if (error) {
-      console.error("error minting", error);
       setIsMinting(false);
+      if (error.message.includes("User has already minted a TwitterNFT")) {
+        throw new AlreadyMintedError();
+      } else {
+        throw error;
+      }
     }
   }, [error]);
 
   return (
-    <MintStepPresentational
-      handleMint={handleMint}
-      isMinting={isMinting}
-      errorMsg={error?.message}
-    />
+    <MintStepPresentational handleMint={handleMint} isMinting={isMinting} />
   );
 };
