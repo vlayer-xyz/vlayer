@@ -15,10 +15,8 @@ import {
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
-import debug from "debug";
 import { initSentry } from "./helpers/sentry.ts";
 
-const log = debug("extension:background");
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
@@ -39,7 +37,7 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
         void handleProvingStatusNotification(msg);
       })
       .with({ action: ExtensionAction.OpenSidePanel }, () => {
-        void handleOpenSidePanel();
+        void handleOpenSidePanel(connectedPort.sender);
       })
       .with({ action: ExtensionAction.CloseSidePanel }, () => {
         void handleCloseSidePanel();
@@ -58,7 +56,6 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         ),
       },
       () => {
-        log("sending message to webpage", message);
         try {
           port?.postMessage(message);
         } catch (e) {

@@ -58,3 +58,5 @@ export const expect = test.expect.extend({
     };
   },
 });
+
+export const extensionId = "jbchhcgphfokabmfacnkafoeeeppjmpl";
