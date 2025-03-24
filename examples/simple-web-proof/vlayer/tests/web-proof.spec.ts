@@ -30,7 +30,7 @@ test("web proof flow", async ({ page, context }) => {
     await expect(page).toHaveURL("/connect-wallet");
   });
 
-  await test.step("Click Start Proving should redirect to Start Proving", async () => {
+  await test.step("Clicking Start Proving should redirect to Start Proving", async () => {
     await expect(page.getByText("Start Proving")).toBeVisible();
     await page.getByText("Start Proving").click();
 
