@@ -12,11 +12,11 @@ library TestnetStableDeployment {
     }
 
     function verifiers() internal pure returns (FakeProofVerifier, Groth16ProofVerifier, ProofVerifierRouter) {
-        FakeProofVerifier fakeProofVerifier = FakeProofVerifier(address(0x1737776D145af312f24F51fFF1F0B22f2f7b9082));
+        FakeProofVerifier fakeProofVerifier = FakeProofVerifier(address(0x913649a62807b2B8144a1E4d41a0E1aEe10a3985));
         Groth16ProofVerifier groth16ProofVerifier =
-            Groth16ProofVerifier(address(0x39599aC412c14F9635f5b5Bf8f4D4C1aeeCF6307));
+            Groth16ProofVerifier(address(0x41f78ef6625E119f328EC8a88D54f9da1c227E6A));
         ProofVerifierRouter proofVerifierRouter =
-            ProofVerifierRouter(address(0xE3443ab33ba5C406056FE10715dA20c8619d4137));
+            ProofVerifierRouter(address(0x17C9793523c11eb0b6Da1DaeD53839146277AB4e));
 
         return (fakeProofVerifier, groth16ProofVerifier, proofVerifierRouter);
     }
