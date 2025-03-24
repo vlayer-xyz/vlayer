@@ -3086,8 +3086,10 @@ dependencies = [
  "assert_cmd",
  "clap 4.5.26",
  "colored 3.0.0",
+ "derive-new",
  "derive_more",
  "flate2",
+ "predicates",
  "regex",
  "reqwest 0.12.12",
  "serde",
@@ -3104,6 +3106,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber 0.3.19",
  "version",
+ "web_prover",
 ]
 
 [[package]]
@@ -4999,6 +5002,15 @@ checksum = "c936bfdafb507ebbf50b8074c54fa31c5be9a1e7e5f467dd659697041407d07c"
 dependencies = [
  "crc32fast",
  "miniz_oxide 0.8.2",
+]
+
+[[package]]
+name = "float-cmp"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b09cf3155332e944990140d967ff5eceb70df778b34f77d8075db46e4704e6d8"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -9933,7 +9945,10 @@ checksum = "a5d19ee57562043d37e82899fade9a22ebab7be9cef5026b07fda9cdd4293573"
 dependencies = [
  "anstyle",
  "difflib",
+ "float-cmp",
+ "normalize-line-endings",
  "predicates-core",
+ "regex",
 ]
 
 [[package]]
