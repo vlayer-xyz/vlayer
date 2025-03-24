@@ -1,12 +1,9 @@
 import { Page } from "@playwright/test";
 import { ExtensionAction, ZkProvingStatus } from "../web-proof-commons";
-
-const extensionId = "jbchhcgphfokabmfacnkafoeeeppjmpl";
+import { extensionId } from "../config";
 //Webpage acts as a webpage that uses SDK to communicate with extension
 export class Webpage {
-  constructor(private readonly page: Page) {
-    this.page = page;
-  }
+  constructor(protected readonly page: Page) {}
   async waitForURL(url: string) {
     await this.page.waitForURL(url);
   }
@@ -32,6 +29,7 @@ export class Webpage {
       { action, extensionId, payload },
     );
   }
+
   openExtension() {
     return this.sendMessageToExtension(ExtensionAction.OpenSidePanel);
   }

@@ -22,7 +22,6 @@ import {
 import debug from "debug";
 
 const log = debug("vlayer:WebProof:provider");
-
 const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 declare let chrome: {
@@ -114,6 +113,19 @@ class ExtensionWebProofProvider implements WebProofProvider {
     this.listeners[messageType].push(
       listener as (args: ExtensionMessage) => void,
     );
+  }
+
+  public closeSidePanel() {
+    const port = this.connectToExtension();
+    port.postMessage({
+      action: ExtensionAction.CloseSidePanel,
+    });
+  }
+
+  public openSidePanel() {
+    this.connectToExtension().postMessage({
+      action: ExtensionAction.OpenSidePanel,
+    });
   }
 
   public requestWebProof(webProofRequest: WebProofRequestInput) {

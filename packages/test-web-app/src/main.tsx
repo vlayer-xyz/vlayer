@@ -10,6 +10,7 @@ import "./main.css";
 import Email from "./Email";
 import { DappProveWeb } from "./DappProveWeb";
 import { DappPut } from "./DappPut";
+import SdkPlayground from "./SdkPlayground";
 
 const router = createBrowserRouter([
   // dapp is the app developer used and launched using the sdk
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <div></div>,
+  },
+  {
+    path: "/sdk-playground",
+    element: <SdkPlayground />,
   },
 ]);
 
