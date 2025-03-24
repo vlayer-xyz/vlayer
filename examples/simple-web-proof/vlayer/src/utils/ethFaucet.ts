@@ -1,6 +1,7 @@
 import { type Address } from "viem";
 import { createPublicClient, http, parseEther } from "viem";
 import { optimismSepolia } from "viem/chains";
+import { FaucetError } from "../errors";
 
 export const publicClient = createPublicClient({
   chain: optimismSepolia,
@@ -28,8 +29,7 @@ export const ensureBalance = async (address: Address, balance: bigint) => {
   );
 
   if (!response.ok) {
-    console.error("failed to fund account", response);
-    return;
+    throw new FaucetError();
   }
 
   const { transactionHash: hash } = await response.json();

@@ -22,6 +22,7 @@ export const MintStep = () => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const [mintedHandle, setMintedHandle] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const [mintingError, setMintingError] = useState<Error | null>(null);
   const [proverResult] = useLocalStorage("proverResult", "");
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
@@ -53,14 +54,18 @@ export const MintStep = () => {
       args: proofData,
     };
 
-    if (useEnvPrivateKey()) {
-      writeContract({
-        ...writeContractArgs,
-        account: getAccountFromPrivateKey(),
-      });
-    } else {
-      await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
-      writeContract(writeContractArgs);
+    try {
+      if (useEnvPrivateKey()) {
+        writeContract({
+          ...writeContractArgs,
+          account: getAccountFromPrivateKey(),
+        });
+      } else {
+        await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
+        writeContract(writeContractArgs);
+      }
+    } catch (error) {
+      setMintingError(error as Error);
     }
   };
 
@@ -81,6 +86,13 @@ export const MintStep = () => {
       }
     }
   }, [error]);
+
+  useEffect(() => {
+    if (mintingError) {
+      setIsMinting(false);
+      throw mintingError;
+    }
+  }, [mintingError]);
 
   return (
     <MintStepPresentational handleMint={handleMint} isMinting={isMinting} />
