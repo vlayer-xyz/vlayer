@@ -15,7 +15,6 @@ export const useProver = () => {
     proverAbi: proverSpec.abi,
     functionName: "averageBalanceOf",
     chainId: 31337,
-    token: import.meta.env.VITE_VLAYER_API_TOKEN,
   });
 
   const { data: result, error: provingResultError } =
