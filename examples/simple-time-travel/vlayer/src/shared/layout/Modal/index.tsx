@@ -31,15 +31,10 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
     showModal();
   }, [showModal]);
   const { currentStep } = useCurrentStep();
-  const [, setIsWelcome] = useState(false);
-  const [, setIsSuccessStep] = useState(false);
-  useEffect(() => {
-    setIsWelcome(currentStep?.kind === StepKind.welcome);
-    setIsSuccessStep(currentStep?.kind === StepKind.success);
-  }, [currentStep?.kind]);
 
   const [descClass, setDescClass] = useState("");
   const [description, setDescription] = useState("");
+
   useEffect(() => {
     setDescClass("out");
 
