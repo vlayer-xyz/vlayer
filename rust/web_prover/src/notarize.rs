@@ -21,6 +21,7 @@ pub async fn notarize(
     notary_host: &str,
     notary_port: u16,
     notary_path: &str,
+    enable_tls: bool,
     server_domain: &str,
     server_host: &str,
     server_port: u16,
@@ -32,7 +33,7 @@ pub async fn notarize(
         .host(notary_host)
         .port(notary_port)
         .path_prefix(notary_path)
-        .enable_tls(false)
+        .enable_tls(enable_tls)
         .build()
         .unwrap();
 

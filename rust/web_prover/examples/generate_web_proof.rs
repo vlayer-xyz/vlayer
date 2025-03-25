@@ -6,6 +6,7 @@ pub async fn main() {
         "127.0.0.1",
         7047,
         "",
+        false,
         "lotr-api.online",
         "127.0.0.1",
         3011,

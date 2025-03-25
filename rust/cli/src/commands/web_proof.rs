@@ -31,6 +31,7 @@ pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
         &server_args.notary_host,
         server_args.notary_port,
         &server_args.notary_path,
+        server_args.notary_tls,
         &server_args.domain,
         &server_args.host,
         server_args.port,
@@ -52,6 +53,7 @@ pub struct ServerProvingArgs {
     notary_host: String,
     notary_port: u16,
     notary_path: String,
+    notary_tls: bool,
 }
 impl TryFrom<WebProofArgs> for ServerProvingArgs {
     type Error = anyhow::Error;
@@ -71,22 +73,24 @@ impl TryFrom<WebProofArgs> for ServerProvingArgs {
 
         let host = value.host.unwrap_or(domain.clone());
 
-        let (notary_host, notary_port, notary_path) = if let Some(notary_url) = value.notary {
-            let notary_url = Url::parse(&notary_url)?;
-            let notary_host = notary_url
-                .host_str()
-                .context("Notary URL has no host")?
-                .to_string();
-            let notary_port = Self::extract_port(&notary_url);
-            let notary_path = notary_url
-                .path()
-                .trim_start_matches('/')
-                .trim_end_matches('/')
-                .to_string();
-            (notary_host, notary_port, notary_path)
-        } else {
-            ("test-notary.vlayer.xyz".into(), 443, "".to_string())
-        };
+        let (notary_host, notary_port, notary_path, notary_tls) =
+            if let Some(notary_url) = value.notary {
+                let notary_url = Url::parse(&notary_url)?;
+                let notary_host = notary_url
+                    .host_str()
+                    .context("Notary URL has no host")?
+                    .to_string();
+                let notary_port = Self::extract_port(&notary_url);
+                let notary_path = notary_url
+                    .path()
+                    .trim_start_matches('/')
+                    .trim_end_matches('/')
+                    .to_string();
+                let notary_tls = notary_url.scheme() == "https";
+                (notary_host, notary_port, notary_path, notary_tls)
+            } else {
+                ("test-notary.vlayer.xyz".into(), 443, "".to_string(), true)
+            };
 
         Ok(ServerProvingArgs::new(
             domain,
@@ -96,6 +100,7 @@ impl TryFrom<WebProofArgs> for ServerProvingArgs {
             notary_host,
             notary_port,
             notary_path,
+            notary_tls,
         ))
     }
 }
@@ -143,6 +148,7 @@ mod tests {
         assert_eq!(converted.notary_host, "test-notary.vlayer.xyz");
         assert_eq!(converted.notary_port, 443);
         assert_eq!(converted.notary_path, "");
+        assert_eq!(converted.notary_tls, true);
     }
 
     #[test]
@@ -156,6 +162,30 @@ mod tests {
 
         assert_eq!(converted.notary_host, "notary.vlayer.xyz");
         assert_eq!(converted.notary_path, "path/to/api");
+    }
+
+    #[test]
+    fn test_set_notary_tls_https() {
+        let input_args = WebProofArgs {
+            notary: Some("https://notary.vlayer.xyz/path/to/api/".into()),
+            ..WebProofArgs::default()
+        };
+
+        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+
+        assert_eq!(converted.notary_tls, true);
+    }
+
+    #[test]
+    fn test_set_notary_tls_http() {
+        let input_args = WebProofArgs {
+            notary: Some("http://notary.vlayer.xyz/path/to/api/".into()),
+            ..WebProofArgs::default()
+        };
+
+        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+
+        assert_eq!(converted.notary_tls, false);
     }
 
     #[test]
