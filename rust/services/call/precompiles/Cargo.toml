@@ -19,6 +19,3 @@ web_proof = { workspace = true }
 
 [lints]
 workspace = true
-
-[features]
-vlayer_test = []

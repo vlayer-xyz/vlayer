@@ -58,7 +58,7 @@ fn find_and_call_precompiles<DB: Database + DatabaseExt>(
     context: &EvmContext<DB>,
     inputs: &CallInputs,
 ) -> Option<CallOutcome> {
-    call_precompiles::PRECOMPILES
+    call_precompiles::precompiles(true)
         .iter()
         .find(|precompile| precompile.address() == &inputs.target_address)
         .and_then(|precompile| call_precompile(precompile, inputs, &context.env))

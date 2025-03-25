@@ -13,7 +13,7 @@ alloy-trie = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
 call_host = { workspace = true }
-call_precompiles = { workspace = true, features = ["vlayer_test"] }
+call_precompiles = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 chrono = { workspace = true }

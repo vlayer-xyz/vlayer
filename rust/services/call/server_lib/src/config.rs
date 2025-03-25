@@ -222,6 +222,7 @@ impl From<&Config> for HostConfig {
             proof_mode: config.proof_mode.into(),
             call_guest_elf: config.call_guest_elf.clone(),
             chain_guest_ids: config.chain_guest_ids.clone(),
+            is_vlayer_test: false,
         }
     }
 }

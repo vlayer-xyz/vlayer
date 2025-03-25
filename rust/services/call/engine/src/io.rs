@@ -25,6 +25,7 @@ pub struct Input {
     pub chain_proofs: ChainProofCache,
     pub call: Call,
     pub op_output_cache: OpOutputCache,
+    pub is_vlayer_test: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, RlpEncodable)]
