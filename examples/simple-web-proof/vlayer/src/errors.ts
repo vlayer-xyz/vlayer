@@ -1,10 +1,10 @@
-export class KnownAppError extends Error {
+export class AppError extends Error {
   constructor(name: string, message: string) {
     super(message);
     this.name = name;
   }
 }
-export class AlreadyMintedError extends KnownAppError {
+export class AlreadyMintedError extends AppError {
   constructor() {
     super(
       "AlreadyMintedError",
@@ -13,13 +13,13 @@ export class AlreadyMintedError extends KnownAppError {
   }
 }
 
-export class FaucetError extends KnownAppError {
+export class FaucetError extends AppError {
   constructor() {
     super("FaucetError", "Failed to fund account.");
   }
 }
 
-export class UseExtensionError extends KnownAppError {
+export class UseExtensionError extends AppError {
   constructor(message: string) {
     super("UseExtensionError", message);
   }
