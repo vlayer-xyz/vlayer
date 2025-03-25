@@ -36,12 +36,11 @@ struct Cli {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() {
     if let Err(e) = run().await {
         error!("{}", e.to_string());
         std::process::exit(1)
     }
-    Ok(())
 }
 
 async fn run() -> anyhow::Result<()> {
