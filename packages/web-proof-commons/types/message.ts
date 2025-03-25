@@ -53,6 +53,7 @@ export enum ExtensionMessageType {
   TabOpened = "TabOpened",
   ProofProcessing = "ProofProcessing",
   CleanProvingSessionStorageOnClose = "CleanProvingSessionStorageOnClose",
+  SidePanelClosed = "SidePanelClosed",
   CloseSidePanel = "CloseSidePanel",
 }
 
@@ -78,7 +79,9 @@ export type ExtensionMessage =
         // as we dont have progress yet from tlsn this is optional
         progress?: number;
       };
-    };
+    }
+  | { type: ExtensionMessageType.SidePanelClosed }
+  | { type: ExtensionMessageType.CloseSidePanel };
 
 export type EmptyWebProverSessionConfig = {
   notaryUrl: null;

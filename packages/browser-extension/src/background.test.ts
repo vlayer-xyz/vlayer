@@ -1,10 +1,14 @@
 import "./background";
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 import browser from "webextension-polyfill";
 import { ExtensionAction, ZkProvingStatus } from "./web-proof-commons";
+import {
+  ExtensionMessageType,
+  ExtensionMessage,
+} from "./web-proof-commons/types/message";
 
-describe("zk related messaging", () => {
+describe.only("background messaging", () => {
   beforeEach(() => {
     global.chrome = {
       //@ts-expect-error mocking
@@ -26,10 +30,11 @@ describe("zk related messaging", () => {
       },
     };
   });
-
   it("should listen to zk proving status messages ", async () => {
     const zkProvingSpy = vi.spyOn(zkProvingStatusStore, "setProvingStatus");
-    await browser.runtime.sendMessage({
+    //@ts-expect-error mocking
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    await browser.runtime.sendMessageExternal({
       action: ExtensionAction.NotifyZkProvingStatus,
       payload: { status: ZkProvingStatus.Proving },
     });
@@ -45,7 +50,9 @@ describe("zk related messaging", () => {
     await browser.storage.session.set({
       zkProvingStatus: ZkProvingStatus.Proving,
     });
-    await browser.runtime.sendMessage({
+    //@ts-expect-error mocking
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    await browser.runtime.sendMessageExternal({
       action: ExtensionAction.RequestWebProof,
       payload: { steps: [] },
     });
@@ -53,5 +60,33 @@ describe("zk related messaging", () => {
     expect(storedHistory.browsingHistory).toEqual([]);
     const storedStatus = await browser.storage.session.get("zkProvingStatus");
     expect(storedStatus.zkProvingStatus).toEqual(ZkProvingStatus.NotStarted);
+  });
+
+  it("should pass message back to port", async () => {
+    const port = browser.runtime.connect();
+    const messages = (
+      [
+        {
+          type: ExtensionMessageType.ProofDone,
+          payload: {
+            presentationJson: {},
+            decodedTranscript: {
+              sent: "sent",
+              recv: "recv",
+            },
+          },
+        },
+        {
+          type: ExtensionMessageType.ProofError,
+          payload: { error: "test error" },
+        },
+        { type: ExtensionMessageType.SidePanelClosed },
+      ] as ExtensionMessage[]
+    ).map(async (message: ExtensionMessage) => {
+      const postMessageSpy = vi.spyOn(port, "postMessage");
+      await browser.runtime.sendMessage(message);
+      expect(postMessageSpy).toHaveBeenCalledWith(message);
+    });
+    await Promise.all(messages);
   });
 });

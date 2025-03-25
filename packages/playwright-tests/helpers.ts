@@ -22,7 +22,7 @@ export const sidePanel = async (context: BrowserContext) => {
   return sidepanel;
 };
 
-export const sidePanelClosed = async (context: BrowserContext) => {
+export const waitForSidePanelClosed = async (context: BrowserContext) => {
   let [background] = context.serviceWorkers();
   if (!background) {
     background = await context.waitForEvent("serviceworker");

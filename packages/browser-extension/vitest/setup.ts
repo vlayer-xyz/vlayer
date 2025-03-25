@@ -50,7 +50,8 @@ const mockStore = function () {
 
 vi.doMock("webextension-polyfill", () => {
   const callbacks: ((message: MessageToExtension) => void)[] = [];
-
+  const externalCallbacks: ((message: MessageToExtension) => void)[] = [];
+  const onConnectExternalCallbacks: ((port: unknown) => void)[] = [];
   return {
     default: {
       storage: {
@@ -70,21 +71,53 @@ vi.doMock("webextension-polyfill", () => {
         setPanelBehavior: vi.fn().mockImplementation(() => {}),
       },
       runtime: {
+        connect: vi.fn().mockImplementation(() => {
+          const port = {
+            onMessage: {
+              addListener: vi.fn().mockImplementation(() => {}),
+            },
+            postMessage: vi.fn().mockImplementation(() => {}),
+          };
+          onConnectExternalCallbacks.forEach((callback) => {
+            callback(port);
+          });
+          return port;
+        }),
         onInstalled: {
           addListener: vi.fn().mockImplementation(() => {}),
         },
         onConnectExternal: {
-          addListener: vi.fn().mockImplementation(() => {}),
+          addListener: vi
+            .fn()
+            .mockImplementation((callback: (port: unknown) => void) => {
+              onConnectExternalCallbacks.push(callback);
+            }),
         },
-        onMessage: {
-          addListener: vi.fn().mockImplementation(() => {}),
-        },
-
-        callbacks: [],
         sendMessage: vi
           .fn()
           .mockImplementation((message: MessageToExtension) => {
             callbacks.forEach((callback) => {
+              callback(message);
+            });
+          }),
+        onMessage: {
+          addListener: vi
+            .fn()
+            .mockImplementation(
+              (callback: (message: MessageToExtension) => void) => {
+                callbacks.push(callback);
+              },
+            ),
+        },
+        // there is not such api in reality there is always send Message
+        // but depends if it is used in webpage externally or inside
+        // the extension different callback onMessage/onMessageExternal is used
+        // so we need it in that form to be able to distinguish between them
+        // in test
+        sendMessageExternal: vi
+          .fn()
+          .mockImplementation((message: MessageToExtension) => {
+            externalCallbacks.forEach((callback) => {
               callback(message);
             });
           }),
@@ -93,7 +126,7 @@ vi.doMock("webextension-polyfill", () => {
             .fn()
             .mockImplementation(
               (callback: (message: MessageToExtension) => void) => {
-                callbacks.push(callback);
+                externalCallbacks.push(callback);
               },
             ),
         },

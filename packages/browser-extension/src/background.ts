@@ -53,6 +53,7 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         type: P.union(
           ExtensionMessageType.ProofDone,
           ExtensionMessageType.ProofError,
+          ExtensionMessageType.SidePanelClosed,
         ),
       },
       () => {
@@ -78,7 +79,9 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         payload: {},
       });
     })
-    .exhaustive();
+    .otherwise((message) => {
+      console.error("No handler for message", message);
+    });
 });
 
 browser.runtime.onMessageExternal.addListener(
@@ -99,7 +102,9 @@ browser.runtime.onMessageExternal.addListener(
       .with({ action: ExtensionAction.CloseSidePanel }, () =>
         handleCloseSidePanel(),
       )
-      .exhaustive();
+      .otherwise((message) => {
+        console.error("Unknown message", message);
+      });
   },
 );
 

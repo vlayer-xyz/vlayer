@@ -104,19 +104,19 @@ test.describe("Full flow of webproof using extension", () => {
 
       expect(vlayerResponses.length).toBeGreaterThan(1);
 
-      const proveResponse = (await vlayerResponses[0])!;
-      expect(proveResponse.ok()).toBeTruthy();
+      const proveResponse = await vlayerResponses[0];
+      expect(proveResponse?.ok()).toBeTruthy();
 
-      const proveJson = (await proveResponse.json())! as object;
+      const proveJson = (await proveResponse?.json())! as object;
       expect(proveJson).toHaveProperty("result");
 
       const hash = (proveJson as { result: string }).result;
       expect(hash).toBeValidHash();
 
-      const waitForProvingResultResponse = (await vlayerResponses.pop())!;
-      expect(waitForProvingResultResponse.ok()).toBeTruthy();
+      const waitForProvingResultResponse = await vlayerResponses.pop();
+      expect(waitForProvingResultResponse?.ok()).toBeTruthy();
 
-      const proofJson = (await waitForProvingResultResponse.json()) as object;
+      const proofJson = (await waitForProvingResultResponse?.json()) as object;
       expect(proofJson).toMatchObject({
         result: {
           state: "done",
@@ -301,19 +301,19 @@ test.describe("Full flow of webproof using extension", () => {
 
       expect(vlayerResponses.length).toBeGreaterThan(1);
 
-      const proveResponse = (await vlayerResponses[0])!;
-      expect(proveResponse.ok()).toBeTruthy();
+      const proveResponse = await vlayerResponses[0];
+      expect(proveResponse?.ok()).toBeTruthy();
 
-      const proveJson = (await proveResponse.json())! as object;
+      const proveJson = (await proveResponse?.json())! as object;
       expect(proveJson).toHaveProperty("result");
 
       const hash = (proveJson as { result: string }).result;
       expect(hash).toBeValidHash();
 
-      const waitForProvingResultResponse = (await vlayerResponses.pop())!;
-      expect(waitForProvingResultResponse.ok()).toBeTruthy();
+      const waitForProvingResultResponse = await vlayerResponses.pop();
+      expect(waitForProvingResultResponse?.ok()).toBeTruthy();
 
-      const proofJson = (await waitForProvingResultResponse.json()) as object;
+      const proofJson = (await waitForProvingResultResponse?.json()) as object;
       expect(proofJson).toMatchObject({
         result: {
           state: "done",
@@ -540,19 +540,19 @@ test.describe("Full flow of webproof using extension", () => {
 
       expect(vlayerResponses.length).toBeGreaterThan(1);
 
-      const proveResponse = (await vlayerResponses[0])!;
-      expect(proveResponse.ok()).toBeTruthy();
+      const proveResponse = await vlayerResponses[0];
+      expect(proveResponse?.ok()).toBeTruthy();
 
-      const proveJson = (await proveResponse.json())! as object;
+      const proveJson = (await proveResponse?.json())! as object;
       expect(proveJson).toHaveProperty("result");
 
       const hash = (proveJson as { result: string }).result;
       expect(hash).toBeValidHash();
 
-      const waitForProvingResultResponse = (await vlayerResponses.pop())!;
-      expect(waitForProvingResultResponse.ok()).toBeTruthy();
+      const waitForProvingResultResponse = await vlayerResponses.pop();
+      expect(waitForProvingResultResponse?.ok()).toBeTruthy();
 
-      const proofJson = (await waitForProvingResultResponse.json()) as object;
+      const proofJson = (await waitForProvingResultResponse?.json()) as object;
       expect(proofJson).toMatchObject({
         result: {
           state: "done",

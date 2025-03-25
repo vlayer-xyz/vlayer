@@ -1,6 +1,7 @@
 {
   "name": "@vlayer/sdk",
   "type": "module",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
       "import": "./dist/index.js",
