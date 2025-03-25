@@ -12,7 +12,11 @@ import {BaseMainnetStableDeployment} from "../BaseMainnetStableDeployment.sol";
 
 library ProofVerifierFactory {
     function produce() internal returns (IProofVerifier) {
-        if (ChainIdLibrary.isMainnet()) {
+        if (ChainIdLibrary.isTestEnv()) {
+            Repository repository = new Repository(address(this), address(this));
+            repository.addImageIdSupport(ImageID.RISC0_CALL_GUEST_ID);
+            return new FakeProofVerifier(repository);
+        } else if (ChainIdLibrary.isMainnet()) {
             return IProofVerifier(address(0));
         } else if (ChainIdLibrary.isBaseMainnet()) {
             (,, ProofVerifierRouter proofVerifierRouter) = BaseMainnetStableDeployment.verifiers();
@@ -20,10 +24,6 @@ library ProofVerifierFactory {
         } else if (ChainIdLibrary.isTestnet()) {
             (,, ProofVerifierRouter proofVerifierRouter) = TestnetStableDeployment.verifiers();
             return proofVerifierRouter;
-        } else if (ChainIdLibrary.isDevnet()) {
-            Repository repository = new Repository(address(this), address(this));
-            repository.addImageIdSupport(ImageID.RISC0_CALL_GUEST_ID);
-            return new FakeProofVerifier(repository);
         }
 
         revert InvalidChainId();

@@ -9,6 +9,7 @@ import {CallAssumptions} from "../../src/CallAssumptions.sol";
 import {Proof, ProofLib} from "../../src/Proof.sol";
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
 import {ImageID} from "../../src/ImageID.sol";
+import {ProofVerifierFactory, IProofVerifier} from "../../src/proof_verifier/ProofVerifierFactory.sol";
 
 import {FAKE_VERIFIER_SELECTOR} from "../../src/proof_verifier/FakeProofVerifier.sol";
 
@@ -90,5 +91,9 @@ contract TestHelpers {
         words[0] = bytes32(rawSeal);
 
         return words;
+    }
+
+    function produceProofVerifier() public returns (IProofVerifier) {
+        return ProofVerifierFactory.produce();
     }
 }

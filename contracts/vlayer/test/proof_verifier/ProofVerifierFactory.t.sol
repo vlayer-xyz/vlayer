@@ -12,8 +12,11 @@ import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol"
 import {Groth16ProofVerifier} from "../../src/proof_verifier/Groth16ProofVerifier.sol";
 import {ProofVerifierRouter} from "../../src/proof_verifier/ProofVerifierRouter.sol";
 import {TestnetStableDeployment} from "../../src/TestnetStableDeployment.sol";
+import {TestHelpers} from "../helpers/TestHelpers.sol";
 
 contract VerifierFactory_Tests is Test {
+    TestHelpers helpers = new TestHelpers();
+
     struct DeployedContract {
         address contractAddress;
         string contractName;
@@ -73,7 +76,7 @@ contract VerifierFactory_Tests is Test {
         vm.chainId(11155111 + 1);
 
         vm.expectRevert(InvalidChainId.selector);
-        ProofVerifierFactory.produce();
+        helpers.produceProofVerifier();
     }
 
     function findAddress(Deployment memory deployment, string memory contractName) private pure returns (address) {

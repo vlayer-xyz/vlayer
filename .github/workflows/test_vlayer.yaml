@@ -42,6 +42,7 @@ jobs:
       - name: Run vlayer tests for contracts
         working-directory: ./contracts/vlayer
         env:
+          FOUNDRY_PROFILE: vlayer
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           # vlayer test

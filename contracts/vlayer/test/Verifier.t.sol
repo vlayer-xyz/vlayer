@@ -178,11 +178,11 @@ contract Verifier_SetTestVerifier is Test {
 
     function test_RevertsIf_CalledOnMainChain() external {
         vm.chainId(1);
-        vm.expectRevert("Changing verifiers is not allowed on mainnet");
+        vm.expectRevert("Changing verifiers is only allowed on devnet or testnet");
         exampleVerifier._setTestVerifier(newVerifier);
 
         vm.chainId(10);
-        vm.expectRevert("Changing verifiers is not allowed on mainnet");
+        vm.expectRevert("Changing verifiers is only allowed on devnet or testnet");
         exampleVerifier._setTestVerifier(newVerifier);
     }
 
