@@ -1,7 +1,7 @@
 services:
-  wsproxy-jwt:
+  wsproxy:
     image: jwnmulder/websockify:0.12
-    container_name: wsproxy-jwt
+    container_name: wsproxy
     platform: linux/amd64
     ports:
       - "127.0.0.1:3003:80" 

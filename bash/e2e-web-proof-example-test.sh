@@ -13,13 +13,7 @@ set_proving_mode
 generate_ts_bindings
 
 echo "::group::Running services"
-DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op notary-server"
-
-if [[ "${VLAYER_ENV:-dev}" == "dev" ]]; then
-  DOCKER_COMPOSE_SERVICES="${DOCKER_COMPOSE_SERVICES} wsproxy-jwt"
-else
-  DOCKER_COMPOSE_SERVICES="${DOCKER_COMPOSE_SERVICES} wsproxy"
-fi
+DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op notary-server wsproxy"
 
 source ${VLAYER_HOME}/bash/run-services.sh
 echo "::endgroup::Running services"
