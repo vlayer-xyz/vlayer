@@ -66,6 +66,9 @@ runs:
     - name: Install TypeScript prerequisites
       uses: ./.github/actions/ts-prerequisites
 
+    - name: Mock ImageId.sol
+      run: ./bash/mock-imageid.sh
+
     - name: Install dependencies with Bun
       shell: bash
       run: bun install --frozen-lockfile
