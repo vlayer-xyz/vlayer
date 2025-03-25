@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCurrentStep } from "../../hooks/useCurrentStep";
-import { StepKind } from "../../../app/router/types";
 import { Navigation } from "../Navigation";
 import { motionConfig } from "./Modal.animations";
 

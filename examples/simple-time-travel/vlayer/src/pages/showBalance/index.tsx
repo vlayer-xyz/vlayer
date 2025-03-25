@@ -43,10 +43,6 @@ export const ShowBalancePage = () => {
     }
   }, [mintError]);
 
-  if (!holderAddress) {
-    return <div>Connect your wallet to continue</div>;
-  }
-
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const [proof, owner, balance] = JSON.parse(proverResult);
@@ -58,6 +54,10 @@ export const ShowBalancePage = () => {
       args: [proof, owner, BigInt(balance)],
     });
   };
+
+  if (!holderAddress) {
+    return <div>Connect your wallet to continue</div>;
+  }
 
   return (
     <ShowBalanceForm
