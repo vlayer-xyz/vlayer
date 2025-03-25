@@ -204,16 +204,16 @@ Currently, the allowed domains are:
 If you'd like to notarize a request for a different domain, you can run your own proxy server. To do this locally run websockify using Docker:
 
 ```bash
-docker run -p 55688:80 jwnmulder/websockify 80 api.x.com:443
+docker run -p 3003:80 jwnmulder/websockify 80 api.x.com:443
 ```
 
-Replace `api.x.com` with the domain you'd like to use. Then, configure your Web Proof provider to use your local WebSocket proxy (running on port 55688):
+Replace `api.x.com` with the domain you'd like to use. Then, configure your Web Proof provider to use your local WebSocket proxy (running on port 3003):
 
 ```ts
 import { createExtensionWebProofProvider } from '@vlayer/sdk/web_proof'
 
 const webProofProvider = createExtensionWebProofProvider({
-  wsProxyUrl: "ws://localhost:55688",
+  wsProxyUrl: "ws://localhost:3003",
 })
 ```
 
