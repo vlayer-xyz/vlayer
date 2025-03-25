@@ -7,6 +7,7 @@ use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 use guest_wrapper::CHAIN_GUEST_IDS;
 use risc0_zkp::core::digest::Digest;
+use tracing::error;
 use version::version;
 
 #[derive(Parser)]
@@ -36,6 +37,14 @@ struct Cli {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    if let Err(e) = run().await {
+        error!("{}", e.to_string());
+        std::process::exit(1)
+    }
+    Ok(())
+}
+
+async fn run() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
     init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
