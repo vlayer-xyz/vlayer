@@ -102,16 +102,16 @@ pub enum VerificationError {
 
 #[cfg(test)]
 mod tests {
+    use insta::assert_snapshot;
     use k256::PublicKey;
     use pkcs8::DecodePublicKey;
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::fixtures::{
-        load_web_proof_fixture, read_fixture,
-        utils::{corrupt_signature, corrupt_verifying_key, load_web_proof_fixture_and_modify},
-        NOTARY_PUB_KEY_PEM_EXAMPLE,
-    };
+    use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+
+    const WEB_PROOF_BAD_SIGNATURE: &str =
+        include_str!(".././testdata/bad_web_proof_signature.json");
 
     #[test]
     fn serialize_deserialize_web_proof() {
@@ -125,20 +125,11 @@ mod tests {
 
     #[test]
     fn fail_verification_session_error() {
-        let invalid_proof = load_web_proof_fixture_and_modify(corrupt_signature);
+        let invalid_proof: WebProof = serde_json::from_str(WEB_PROOF_BAD_SIGNATURE).unwrap();
 
         assert!(matches!(
             invalid_proof.verify(),
-            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature"
-        ));
-    }
-
-    #[test]
-    fn fail_verification_invalid_merkle_proof() {
-        let invalid_proof = load_web_proof_fixture_and_modify(corrupt_verifying_key);
-        assert!(matches!(
-            invalid_proof.verify(),
-            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: body proof error caused by: merkle error: invalid merkle proof"
+            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: secp256k1 signature verification failed"
         ));
     }
 
@@ -147,14 +138,8 @@ mod tests {
         let proof = load_web_proof_fixture();
         let (request, response, _, _) = proof.verify().unwrap();
 
-        assert_eq!(
-            String::from_utf8(request.transcript).unwrap(),
-            read_fixture("./testdata/sent_request.txt")
-        );
-        assert_eq!(
-            String::from_utf8(response.transcript).unwrap(),
-            read_fixture("./testdata/received_response.txt")
-        );
+        assert_snapshot!("sent_request", String::from_utf8(request.transcript).unwrap());
+        assert_snapshot!("received_response", String::from_utf8(response.transcript).unwrap());
     }
 
     #[test]

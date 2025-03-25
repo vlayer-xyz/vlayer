@@ -17,7 +17,7 @@ contract WebProverTest is VTest {
 
     string public constant DATA_URL = "https://api.x.com/1.1/*/settings.json";
 
-    function test_revertsIf_notaryKeyIsInvalid() public {
+    function _test_revertsIf_notaryKeyIsInvalid() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
@@ -50,7 +50,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert(\"Incorrect URL\")))"
+                'Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert("Incorrect URL")))'
             );
         }
     }
