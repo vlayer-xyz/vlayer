@@ -35,51 +35,9 @@ jobs:
               - '.github/workflows/test_e2e_web_apps_devnet.yaml'
               - 'contracts/**'
 
-  build-binaries:
-    name: Build binaries
-    needs: changes
-    runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Install Rust prerequisites
-        id: rust_pre
-        uses: ./.github/actions/rust-prerequisites
-      - name: Install contracts prerequisites
-        uses: ./.github/actions/contracts-prerequisites
-
-      - name: Check clang and LLVM version
-        env:
-          EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check-llvm-clang.sh
-
-      - name: Install contracts' dependencies
-        working-directory: ./contracts/vlayer
-        run: forge soldeer install
-
-      - name: Build binaries
-        env:
-          RISC0_USE_DOCKER: 1
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-        run: |
-          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
-          mkdir target_debug
-          mv target/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
-
-      - name: Push binaries
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-        with:
-          name: target-debug
-          path: target_debug
-          if-no-files-found: error
-          retention-days: 3
-
   test-e2e-web-apps-simple:
     name: E2E web apps test against devnet (simple)
-    needs: [changes, build-binaries]
+    needs: changes
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
@@ -98,7 +56,7 @@ jobs:
 
   test-e2e-web-apps-devnet-simple-web-proof:
     name: Run setup and e2e tests (simple-web-proof)
-    needs: [changes, build-binaries]
+    needs: changes
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
     steps:
@@ -118,7 +76,7 @@ jobs:
 
   test-e2e-web-apps-devnet-simple-email-proof:
     name: Run setup and e2e tests (simple-email-proof)
-    needs: [changes, build-binaries]
+    needs: changes
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
     steps:
@@ -137,7 +95,7 @@ jobs:
 
   test-e2e-web-apps-devnet-simple-teleport:
     name: Run setup and e2e tests (simple-teleport)
-    needs: [changes, build-binaries]
+    needs: changes
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
     steps:
@@ -156,7 +114,7 @@ jobs:
 
   test-e2e-web-apps-devnet-simple-time-travel:
     name: Run setup and e2e tests (simple-time-travel)
-    needs: [changes, build-binaries]
+    needs: changes
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
     steps:
