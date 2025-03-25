@@ -1,22 +1,23 @@
 import js from "@eslint/js";
-import ts from "typescript-eslint";
-import prettierRecommended from "eslint-plugin-prettier/recommended";
 import globals from "globals";
+import tseslint from "typescript-eslint";
+import prettierRecommended from "eslint-plugin-prettier/recommended";
 
-export default [
-  js.configs.recommended,
-  ...ts.configs.recommended,
-  prettierRecommended,
+export default tseslint.config(
+  { ignores: ["dist"] },
   {
-    rules: {
-      "no-unused-vars": "warn",
-      "no-undef": "warn",
-      curly: "error",
-    },
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended,
+      prettierRecommended,
+    ],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      globals: {
-        ...globals.browser,
-      },
+      ecmaVersion: 2020,
+      globals: globals.browser,
     },
+    rules: {
+      curly: "error",
+    }
   },
-];
+);

@@ -12,13 +12,6 @@ on:
       - "LICENSE"
       - "book/**"
   pull_request:
-    paths:
-      - "examples/**"
-      - "packages/**"
-      - "bash/run-services.sh"
-      - "bash/e2e-web-apps-test.sh"
-      - ".github/workflows/test_e2e_web_apps_testnet.yaml"
-      - "contracts/**"
   merge_group:
   workflow_dispatch:
 concurrency:
@@ -27,9 +20,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-e2e-web-apps:
-    name: E2E web apps test against testnet
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code-changes: ${{ steps.filter.outputs.code-changes }}
+      workflow-changes: ${{ steps.filter.outputs.workflow-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # We detect code changes, and run the workflow only if relevant code or workflow changes are detected.
+      # Because the workflow is resource heavy (in time/compilation, in testnet ETH usage, and in Bonsai API usage),
+      # we also skip running the workflow on every commit of PRs (unless the workflow configuration is changed)
+      # Red PR cannot be merged because even though PR commits are skipped, the workflow will still run in the merge queue.
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code-changes:
+              - 'examples/**'
+              - 'packages/**'
+              - 'bash/run-services.sh'
+              - 'bash/e2e-web-apps-test.sh'
+              - 'contracts/**'
+            workflow-changes:
+              - '.github/workflows/test_e2e_web_apps_testnet.yaml'
+
+  build-binaries:
+    name: Build binaries
+    needs: changes
     runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,22 +62,6 @@ jobs:
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - name: Install TypeScript prerequisites
-        uses: ./.github/actions/ts-prerequisites
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build sdk
-        working-directory: ./packages/sdk
-        run: bun run build
-
-      - name: Build sdk-hooks
-        working-directory: ./packages/sdk-hooks
-        run: bun run build
-
-      - name: Install Playwright Browsers
-        run: bunx playwright install --with-deps chromium
 
       - name: Check clang and LLVM version
         env:
@@ -66,51 +72,140 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
-      # Stateful GH Runners have a separate testnet private key on disk,
-      # to allow concurrent runs of the workflow avoiding nonce issues.
-      # Here we load the key into a variable from a location on disk.
-      - name: Read testnet private key
-        run: |
-          EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
-          echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
-          echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
-      - name: Run e2e test
+      - name: Build binaries
         env:
+          RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          VLAYER_ENV: testnet
-          QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
-          QUICKNODE_ENDPOINT: "dry-alpha-tab"
-          CHAIN_NAME: "optimismSepolia"
-          JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
-          PROVER_URL: http://127.0.0.1:3000
-          GAS_METER_URL: ${{ vars.GAS_METER_URL }}
-          GAS_METER_API_KEY: ${{ secrets.GAS_METER_API_KEY }}
-          VLAYER_API_TOKEN: ${{ secrets.VLAYER_API_TOKEN }}
-          CONFIRMATIONS: 2
-          VLAYER_TMP_DIR: ./artifacts
-          PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
-        run: bash/e2e-web-apps-test.sh
-
-      # Teardown
-      - name: Display Logs
-        if: always()
         run: |
-          for log_file in $(find ./artifacts/logs -type f); do
-            echo "=== Contents of $log_file ==="
-            cat "$log_file"
-            echo "============================="
-          done
-      - name: Handle Playwright Reports
-        uses: ./.github/actions/handle-playwright-reports
-        if: ${{ !cancelled() }}
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+          mkdir target_debug
+          mv target/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
+
+      - name: Push binaries
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          EXAMPLES_PATH: /examples/
-          GITHUB_TOKEN: ${{ github.token }}
-          ARTIFACT_RETENTION_DAYS: "30"
-          REPORT_PATH: "examples/**/vlayer/playwright-report/"
-          PR_NUMBER: ${{ github.event.number }}
-          DEPLOY_TYPE: "examples"
-          CONTEXT: "test-e2e-web-apps-testnet"
+          name: target-debug
+          path: target_debug
+          if-no-files-found: error
+          retention-days: 3
+
+  test-e2e-web-apps-simple:
+    name: E2E web apps test against testnet (simple)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps-testnet
+        with:
+          example: "simple"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          gas_meter_url: ${{ vars.GAS_METER_URL }}
+          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+  test-e2e-web-apps-simple-web-proof:
+    name: E2E web apps test against testnet (simple-web-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps-testnet
+        with:
+          example: "simple-web-proof"
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          gas_meter_url: ${{ vars.GAS_METER_URL }}
+          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+  test-e2e-web-apps-simple-email-proof:
+    name: E2E web apps test against testnet (simple-email-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps-testnet
+        with:
+          example: "simple-email-proof"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          gas_meter_url: ${{ vars.GAS_METER_URL }}
+          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+  test-e2e-web-apps-simple-teleport:
+    name: E2E web apps test against testnet (simple-teleport)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps-testnet
+        with:
+          example: "simple-teleport"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          gas_meter_url: ${{ vars.GAS_METER_URL }}
+          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+  test-e2e-web-apps-simple-time-travel:
+    name: E2E web apps test against testnet (simple-time-travel)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps-testnet
+        with:
+          example: "simple-time-travel"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          gas_meter_url: ${{ vars.GAS_METER_URL }}
+          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}

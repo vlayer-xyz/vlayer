@@ -4,7 +4,8 @@ import {
   WebProverSessionConfig,
 } from "../../web-proof-commons";
 
-import * as React from "react";
+import React, { useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { LOADING } from "@vlayer/extension-hooks";
 import { EmptyFlowCard } from "components/molecules/EmptyFlow";
 import { HelpSection } from "components/organisms";
@@ -35,5 +36,14 @@ export const SidePanelContainer = () => {
   useCleanStorageOnClose();
   useCloseSidePanelOnRequest();
   const [config] = useProvingSessionConfig();
+  useEffect(() => {
+    if (config !== LOADING && Sentry.isInitialized()) {
+      Sentry.setContext("WebProverSessionConfig", {
+        notaryUrl: config.notaryUrl,
+        wsProxyUrl: config.wsProxyUrl,
+      });
+    }
+  }, [config]);
+
   return <SidePanelContent config={config} />;
 };

@@ -1,4 +1,5 @@
 import browser from "webextension-polyfill";
+import * as Sentry from "@sentry/react";
 
 import {
   assertUrl,
@@ -14,14 +15,16 @@ import {
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
-import debug from "debug";
-const log = debug("extension:background");
+import { initSentry } from "./helpers/sentry.ts";
+
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
+initSentry();
+
 // @ts-expect-error https://github.com/wxt-dev/wxt/issues/570#issuecomment-2022365906
 // eslint-disable-next-line
-browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
@@ -34,7 +37,7 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
         void handleProvingStatusNotification(msg);
       })
       .with({ action: ExtensionAction.OpenSidePanel }, () => {
-        void handleOpenSidePanel();
+        void handleOpenSidePanel(connectedPort.sender);
       })
       .with({ action: ExtensionAction.CloseSidePanel }, () => {
         void handleCloseSidePanel();
@@ -53,7 +56,6 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         ),
       },
       () => {
-        log("sending message to webpage", message);
         try {
           port?.postMessage(message);
         } catch (e) {
@@ -136,6 +138,13 @@ const handleProofRequest = async (
   await WebProverSessionContextManager.instance.setWebProverSessionConfig(
     message.payload,
   );
+
+  if (Sentry.isInitialized()) {
+    Sentry.setContext("WebProverSessionConfig", {
+      notaryUrl: message.payload.notaryUrl,
+      wsProxyUrl: message.payload.wsProxyUrl,
+    });
+  }
 };
 
 const handleProvingStatusNotification = async (
@@ -147,6 +156,11 @@ const handleProvingStatusNotification = async (
   await zkProvingStatusStore.setProvingStatus(message.payload);
   if (message.payload.status === ZkProvingStatus.Done) {
     cleanProvingSessionStorageOnClose();
+  }
+  if (Sentry.isInitialized()) {
+    const severity: Sentry.SeverityLevel =
+      message.payload.status === ZkProvingStatus.Error ? "error" : "info";
+    Sentry.captureMessage(`Proof status: ${message.payload.status}`, severity);
   }
 };
 
@@ -166,6 +180,9 @@ const validateProofRequest = (
           },
           ({ url }) => assertUrlPattern(url),
         )
+        .with({ step: EXTENSION_STEP.fetchAndNotarize }, () => {
+          console.warn("Unsupported step type: ", step);
+        })
         .exhaustive();
     });
   } catch (e) {

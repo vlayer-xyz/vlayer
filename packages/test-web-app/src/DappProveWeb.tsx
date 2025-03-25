@@ -23,7 +23,7 @@ function DappProveWeb() {
   const webProofProvider = useMemo(() => {
     return createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
-      wsProxyUrl: "ws://localhost:55688",
+      wsProxyUrl: "ws://localhost:3003",
     });
   }, []);
 

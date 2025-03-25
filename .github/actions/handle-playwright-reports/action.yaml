@@ -41,7 +41,7 @@ runs:
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v4
       with:
-        name: playwright-report
+        name: "playwright-report-${{ inputs.CONTEXT }}"
         path: ${{ inputs.REPORT_PATH }}
         retention-days: ${{ inputs.ARTIFACT_RETENTION_DAYS }}
     - name: Install Vercel

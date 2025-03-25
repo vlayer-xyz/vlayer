@@ -45,7 +45,7 @@ function DappWithProfile(profile: string) {
   const webProofProvider = useMemo(() => {
     return createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
-      wsProxyUrl: "ws://localhost:55688",
+      wsProxyUrl: "ws://localhost:3003",
     });
   }, []);
 
@@ -246,7 +246,7 @@ function Dapp() {
   const requestWebProof = useCallback(async () => {
     const provider = createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
-      wsProxyUrl: "ws://localhost:55688",
+      wsProxyUrl: "ws://localhost:3003",
     });
     const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
     const profileUrl = `${window.location.origin}${import.meta.env.BASE_URL}profile`;

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
+import {URLPatternLib} from "vlayer/URLPattern.sol";
 
 import {Prover} from "vlayer/Prover.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
@@ -18,8 +19,12 @@ import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 
 contract ExampleProver is Prover {
     using Strings for string;
+    using URLPatternLib for string;
     using WebProofLib for WebProof;
     using WebLib for Web;
+
+    string private constant NOTARY_PUB_KEY =
+        "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n-----END PUBLIC KEY-----\n";
 
     function sum(uint256 lhs, uint256 rhs) public pure returns (uint256) {
         return lhs + rhs;
@@ -27,7 +32,11 @@ contract ExampleProver is Prover {
 
     // solhint-disable-next-line func-name-mixedcase
     function web_proof(WebProof calldata webProof) public view returns (bool) {
-        Web memory web = webProof.verify("https://api.x.com/1.1/account/settings.json");
+        Web memory web = webProof.recover();
+
+        require(web.url.test("https://api.x.com/1.1/account/settings.json"), "Incorrect URL");
+
+        require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
 
         require(web.jsonGetString("screen_name").equal("wktr0"), "Invalid screen name");
 

@@ -1,5 +1,8 @@
 use clap::{Parser, Subcommand};
-use commands::init::{run_init, InitArgs};
+use commands::{
+    init::{run_init, InitArgs},
+    web_proof::{webproof_fetch, WebProofArgs},
+};
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
 use tracing::error;
 use tracing_subscriber::EnvFilter;
@@ -32,8 +35,7 @@ enum Commands {
     Init(InitArgs),
     Test(Box<TestArgs>),
     Update,
-    #[command(hide = true)]
-    WebProofFetch,
+    WebProofFetch(WebProofArgs),
 }
 
 #[tokio::main]
@@ -56,6 +58,8 @@ async fn run() -> Result<()> {
             Box::pin(run_test(args)).await
         }
         Commands::Update => run_update().await,
-        Commands::WebProofFetch => Ok(()),
+        Commands::WebProofFetch(args) => {
+            webproof_fetch(args).await.map_err(derive_more::Into::into)
+        }
     }
 }

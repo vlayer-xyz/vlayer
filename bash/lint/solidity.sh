@@ -2,7 +2,11 @@
 
 set -ueo pipefail
 
-source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
+VLAYER_HOME=$(git rev-parse --show-toplevel)
+
+source "$VLAYER_HOME/bash/lib/examples.sh"
+source "$VLAYER_HOME/bash/lib/colors.sh"
+source "$VLAYER_HOME/bash/lib/utils.sh"
 
 usage() {
     echo_color YELLOW "Usage: $0 [OPTIONS]"
@@ -19,8 +23,7 @@ handle_options() {
                 exit 0
                 ;;
             --fix)
-                FIX_FLAG=" --fix"
-                FIX_OPTION=":fix"
+                FIX_FLAG="-fix"
                 ;;
             *)
                 echo_color RED "Invalid option: $1" >&2
@@ -33,27 +36,23 @@ handle_options() {
 }
 
 FIX_FLAG=""
-FIX_OPTION=""
 
 handle_options "$@"
 
-VLAYER_HOME=$(git rev-parse --show-toplevel)
-source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
+bun install --frozen-lockfile
 
-build_react_sdk_with_deps
-
-echo "::group::Running eslint for examples"
+echo "::group::Running solhint for examples"
 for example in $(get_examples); do (
-    echo "Running eslint${FIX_FLAG} for: ${example}"
+    echo "::group::Running solhint for: ${example}"
     pushd "$VLAYER_HOME/examples/$example/vlayer"
-    bun run eslint .$FIX_FLAG
+    bun run lint$FIX_FLAG:solidity
     popd
+    echo "::endgroup::Running solhint for: ${example}"
 ) done
-echo "::endgroup::Running eslint for examples"
+echo "::endgroup::Running solhint for examples"
 
-echo "::group::Running eslint for: $VLAYER_HOME/packages"
-pushd "${VLAYER_HOME}/packages"
-bun run lint$FIX_OPTION
+echo "::group::Running solhint for contracts directory"
+pushd "$VLAYER_HOME/contracts"
+bun run lint$FIX_FLAG:solidity
 popd
-echo "::endgroup::Running eslint for: $VLAYER_HOME/packages"
+echo "::endgroup::Running solhint for contracts directory"

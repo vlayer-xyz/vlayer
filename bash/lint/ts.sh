@@ -3,9 +3,10 @@
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
-source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/lib/colors.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/lib/utils.sh"
+
+source "$VLAYER_HOME/bash/lib/colors.sh"
+source "$VLAYER_HOME/bash/lib/examples.sh"
+source "$VLAYER_HOME/bash/lib/build-packages.sh"
 
 usage() {
     echo_color YELLOW "Usage: $0 [OPTIONS]"
@@ -13,6 +14,10 @@ usage() {
     echo_color YELLOW " --help      Display this help message"
     echo_color YELLOW " --fix       Fix linting errors"
 }
+
+SKIP_BUILD=false
+FIX_FLAG=""
+FIX_OPTION=""
 
 handle_options() {
     while [ $# -gt 0 ]; do
@@ -22,7 +27,11 @@ handle_options() {
                 exit 0
                 ;;
             --fix)
-                FIX_FLAG="-fix"
+                FIX_FLAG=" --fix"
+                FIX_OPTION=":fix"
+                ;;
+            --skip-build)
+                SKIP_BUILD=true
                 ;;
             *)
                 echo_color RED "Invalid option: $1" >&2
@@ -34,25 +43,23 @@ handle_options() {
     done
 }
 
-FIX_FLAG=""
-
 handle_options "$@"
 
-bun install --frozen-lockfile
-mock_imageid
+if [ "$SKIP_BUILD" = false ]; then
+    build_react_sdk_with_deps
+fi
 
-echo "::group::Runing solhint for examples"
+echo "::group::Running eslint for examples"
 for example in $(get_examples); do (
-    echo "::group::Running solhint for: ${example}"
+    echo "Running eslint${FIX_FLAG} for: ${example}"
     pushd "$VLAYER_HOME/examples/$example/vlayer"
-    bun run lint$FIX_FLAG:solidity
+    bun run eslint .$FIX_FLAG
     popd
-    echo "::endgroup::Running solhint for: ${example}"
 ) done
-echo "::endgroup::Runing solhint for examples"
+echo "::endgroup::Running eslint for examples"
 
-echo "::group::Running solhint for contracts directory"
-pushd "$VLAYER_HOME/contracts"
-bun run lint$FIX_FLAG:solidity
+echo "::group::Running eslint for: $VLAYER_HOME/packages"
+pushd "${VLAYER_HOME}/packages"
+bun run lint$FIX_OPTION
 popd
-echo "::endgroup::Running solhint for contracts directory"
+echo "::endgroup::Running eslint for: $VLAYER_HOME/packages"

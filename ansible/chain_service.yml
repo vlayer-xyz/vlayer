@@ -59,3 +59,4 @@
         chain_worker_confirmations: "{{ item.chain_worker_confirmations }}"
         chain_worker_risc0_dev_mode: "{{ item.chain_worker_risc0_dev_mode }}"
       loop: "{{ chain_workers }}"
+      no_log: true

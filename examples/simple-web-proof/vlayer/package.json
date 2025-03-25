@@ -6,7 +6,6 @@
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
     "lint:solidity": "solhint '../src/**/*.sol' --max-warnings 0 && forge fmt ../src --check",
     "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
-    "test": "VLAYER_ENV=test bun run prove.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -18,7 +17,8 @@
     "test-web:dev": "TEST_MODE=headed VLAYER_ENV=dev bun run playwright test",
     "test-web:testnet": "echo \"No tests specified yet\"",
     "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
-    "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite"
+    "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
+    "test:unit": "vitest --run"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

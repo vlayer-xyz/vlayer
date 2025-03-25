@@ -23,7 +23,6 @@ function build_example_contracts() {
 function build_contracts() {
   echo "::group::Building contracts"
 
-  mock_imageid
   build_contracts_in vlayer
   build_contracts_in fixtures
   generate_ts_bindings
