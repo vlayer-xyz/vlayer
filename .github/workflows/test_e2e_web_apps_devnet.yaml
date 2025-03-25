@@ -55,10 +55,10 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
 
   test-e2e-web-apps-devnet-simple-web-proof:
-    name: Run setup and e2e tests (simple-web-proof)
+    name: E2E web apps test against devnet (simple-web-proof)
     needs: changes
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
@@ -75,10 +75,10 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
 
   test-e2e-web-apps-devnet-simple-email-proof:
-    name: Run setup and e2e tests (simple-email-proof)
+    name: E2E web apps test against devnet (simple-email-proof)
     needs: changes
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
@@ -94,10 +94,10 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
 
   test-e2e-web-apps-devnet-simple-teleport:
-    name: Run setup and e2e tests (simple-teleport)
+    name: E2E web apps test against devnet (simple-teleport)
     needs: changes
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
@@ -113,10 +113,10 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
 
   test-e2e-web-apps-devnet-simple-time-travel:
-    name: Run setup and e2e tests (simple-time-travel)
+    name: E2E web apps test against devnet (simple-time-travel)
     needs: changes
     runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
