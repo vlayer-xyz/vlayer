@@ -13,6 +13,7 @@ dotenvy = { workspace = true }
 guest_wrapper = { workspace = true }
 risc0-zkp = { workspace = true }
 tokio = { workspace = true }
+tracing = { workspace = true }
 version = { workspace = true }
 
 [lints]

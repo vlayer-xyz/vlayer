@@ -2845,6 +2845,7 @@ dependencies = [
  "guest_wrapper",
  "risc0-zkp 1.2.4",
  "tokio",
+ "tracing",
  "version",
 ]
 
