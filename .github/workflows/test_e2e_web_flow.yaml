@@ -57,7 +57,7 @@ jobs:
           compose-file: docker/web-proof/docker-compose-release.yaml
           up-flags: "--build"
           services: |
-            websockify-jwt
+            websockify
             notary-server
             json-server
 

@@ -6,6 +6,5 @@ include:
   - call_server/service.yaml
   # webproofs 
   - websockify/service.yaml
-  - websockify-jwt/service.yaml
   - notary-server/service.yaml
 
