@@ -1,6 +1,6 @@
 import { BrowserContext, expect, Page } from "@playwright/test";
 import { Webpage } from "./webpage";
-import { sidePanel } from "../helpers";
+import { waitForSidePanelOpened } from "../helpers";
 
 export class Extension {
   constructor(
@@ -21,7 +21,7 @@ export class Extension {
       this.context.waitForEvent("page"),
       button.click(),
     ]);
-    return new Webpage(newPage);
+    return new Webpage(newPage, this.context);
   }
   async startPageStepShouldBeCompleted() {
     const startPageStep = this.page.getByTestId("step-startPage");
@@ -43,7 +43,7 @@ export class Extension {
 }
 
 export const waitForExtension = async (context: BrowserContext) => {
-  const extensionPage = await sidePanel(context);
+  const extensionPage = await waitForSidePanelOpened(context);
   const extension = new Extension(extensionPage, context);
   return extension;
 };

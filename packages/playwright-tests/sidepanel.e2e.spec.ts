@@ -1,5 +1,5 @@
 import { expect, test } from "./config";
-import { sidePanel } from "./helpers";
+import { waitForSidePanelOpened } from "./helpers";
 import { type Response } from "@playwright/test";
 
 const config = {
@@ -21,12 +21,12 @@ test.describe("Full flow of webproof using extension", () => {
       });
 
       await requestProofButton.click();
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       expect(extension).toBeDefined();
     });
 
     await test.step("On 'redirect' click extension should open new browser tab for specified startPage url", async () => {
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
 
       if (!extension) {
         throw new Error("No sidepanel");
@@ -41,7 +41,7 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Side panel UI should indicate that startPage step is completed", async () => {
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const startPageStep = extension.getByTestId("step-startPage");
       const status = await startPageStep.getAttribute("data-status");
       expect(status).toEqual("completed");
@@ -58,7 +58,7 @@ test.describe("Full flow of webproof using extension", () => {
         name: "Login",
       });
       await loginButton.click();
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
       const status = await startPageStep.getAttribute("data-status");
 
@@ -77,14 +77,14 @@ test.describe("Full flow of webproof using extension", () => {
       });
       await profileButton.click();
       await dashboardPage.waitForURL(config.profileUrl);
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
       const status = await startPageStep.getAttribute("data-status");
       expect(status).toEqual("completed");
     });
 
     await test.step("Prove button should appear after request to external api", async () => {
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const proveButton = extension.getByRole("button", {
         name: "Generate proof",
       });
@@ -95,7 +95,7 @@ test.describe("Full flow of webproof using extension", () => {
       const vlayerResponses: Promise<Response | null>[] = [];
       page.on("requestfinished", (req) => vlayerResponses.push(req.response()));
 
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const proveButton = extension.getByRole("button", {
         name: "Generate proof",
       });
@@ -157,7 +157,7 @@ test.describe("Full flow of webproof using extension", () => {
         .getByTestId("request-webproof-button");
 
       await requestProofButton.click();
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       expect(extension).toBeDefined();
     });
 
@@ -170,14 +170,14 @@ test.describe("Full flow of webproof using extension", () => {
       await requestProofButton.click();
       await requestProofButton.click();
 
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       expect(extension).toBeDefined();
       const redirectButton = extension.getByTestId("start-page-button");
       await expect(redirectButton).toBeVisible();
     });
 
     await test.step("On 'redirect' click extension should open new browser tab for specified startPage url", async () => {
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
 
       if (!extension) {
         throw new Error("No sidepanel");
@@ -192,7 +192,7 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Side panel UI should indicate that startPage step is completed", async () => {
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const startPageStep = extension.getByTestId("step-startPage");
       const status = await startPageStep.getAttribute("data-status");
       expect(status).toEqual("completed");
@@ -209,7 +209,7 @@ test.describe("Full flow of webproof using extension", () => {
         name: "Login",
       });
       await loginButton.click();
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
       const status = await startPageStep.getAttribute("data-status");
 
@@ -228,14 +228,14 @@ test.describe("Full flow of webproof using extension", () => {
       });
       await profileButton.click();
       await dashboardPage.waitForURL(config.profileUrl);
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
       const status = await startPageStep.getAttribute("data-status");
       expect(status).toEqual("completed");
     });
 
     await test.step("Prove button should appear after request to external api", async () => {
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const proveButton = extension.getByRole("button", {
         name: "Generate proof",
       });
@@ -243,7 +243,7 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Click button should generate webproof", async () => {
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
       const proveButton = extension.getByRole("button", {
         name: "Generate proof",
       });
@@ -354,7 +354,7 @@ test.describe("Full flow of webproof using extension", () => {
         .getByTestId("request-webproof-button");
 
       await requestProofButton.click();
-      const extension = await sidePanel(context);
+      const extension = await waitForSidePanelOpened(context);
 
       const redirectButton = extension.getByTestId("start-page-button");
       const [newPage] = await Promise.all([

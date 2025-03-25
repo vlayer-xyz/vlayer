@@ -86,16 +86,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
         this.connectToExtension();
       });
       this.port.onMessage.addListener((message: ExtensionMessage) => {
-        if (message.type === ExtensionMessageType.ProofDone) {
-          this.listeners[ExtensionMessageType.ProofDone]?.forEach((cb) => {
-            cb(message);
-          });
-        }
-        if (message.type === ExtensionMessageType.ProofError) {
-          this.listeners[ExtensionMessageType.ProofError]?.forEach((cb) => {
-            cb(message);
-          });
-        }
+        this.listeners[message.type]?.forEach((cb) => cb(message));
       });
     }
     return this.port;

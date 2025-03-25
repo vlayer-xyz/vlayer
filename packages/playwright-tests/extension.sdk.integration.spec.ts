@@ -1,15 +1,13 @@
 import { test } from "./config";
 import { SdkPlayground } from "./pom/sdkPlayground";
-import { sidePanel, sidePanelClosed } from "./helpers";
-
 const animationTimeout = 300;
 test("sidepanel open/close by sdk", async ({ page, context }) => {
-  const sdkPlayground = new SdkPlayground(page);
+  const sdkPlayground = new SdkPlayground(page, context);
   await sdkPlayground.init();
+  await sdkPlayground.listenToSidePanelClosed();
   await sdkPlayground.openSidePanel();
   await page.waitForTimeout(animationTimeout);
-  await sidePanel(context);
   await sdkPlayground.closeSidePanel();
-  await page.waitForTimeout(animationTimeout);
-  await sidePanelClosed(context);
+  await sdkPlayground.waitForSidePanelClosedNotification();
+  await sdkPlayground.waitForSidePanelClosed();
 });
