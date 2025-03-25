@@ -7,31 +7,21 @@ pub use presentation::create_presentation;
 use serde_json::Value;
 pub use verify::verify_presentation;
 
+pub use crate::notarize::NotaryConfig;
+
 pub async fn generate_web_proof(
-    notary_host: &str,
-    notary_port: u16,
-    notary_path: &str,
-    notary_tls: bool,
+    notary_config: NotaryConfig,
     server_domain: &str,
     server_host: &str,
     server_port: u16,
     uri: &str,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let (attestation, secrets) = notarize(
-        notary_host,
-        notary_port,
-        notary_path,
-        notary_tls,
-        server_domain,
-        server_host,
-        server_port,
-        uri,
-    )
-    .await?;
+    let (attestation, secrets) =
+        notarize(notary_config.clone(), server_domain, server_host, server_port, uri).await?;
     let presentation = create_presentation(attestation, secrets).await?;
     let encoded_presentation = hex::encode(bincode::serialize(&presentation).unwrap());
 
-    let json_response = to_json(&encoded_presentation, notary_host, notary_port);
+    let json_response = to_json(&encoded_presentation, &notary_config.host, notary_config.port);
 
     Ok(serde_json::to_string(&json_response)?)
 }

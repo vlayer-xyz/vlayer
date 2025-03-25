@@ -1,3 +1,4 @@
+use derive_new::new;
 use http_body_util::Empty;
 use hyper::{body::Bytes, Request, StatusCode};
 use hyper_util::rt::TokioIo;
@@ -17,11 +18,20 @@ const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KH
 const MAX_SENT_DATA: usize = 1 << 12;
 const MAX_RECV_DATA: usize = 1 << 14;
 
+#[derive(Debug, Clone, new)]
+pub struct NotaryConfig {
+    /// Notary host (domain name or IP)
+    pub host: String,
+    /// Notary port
+    pub port: u16,
+    /// Notary API path
+    pub path: String,
+    /// Whether to use TLS for notary connection
+    pub tls: bool,
+}
+
 pub async fn notarize(
-    notary_host: &str,
-    notary_port: u16,
-    notary_path: &str,
-    enable_tls: bool,
+    notary_config: NotaryConfig,
     server_domain: &str,
     server_host: &str,
     server_port: u16,
@@ -30,10 +40,10 @@ pub async fn notarize(
     tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let notary_client = NotaryClient::builder()
-        .host(notary_host)
-        .port(notary_port)
-        .path_prefix(notary_path)
-        .enable_tls(enable_tls)
+        .host(notary_config.host)
+        .port(notary_config.port)
+        .path_prefix(notary_config.path)
+        .enable_tls(notary_config.tls)
         .build()
         .unwrap();
 

@@ -5,15 +5,12 @@ mod integration_tests {
 
     use regex::Regex;
     use tlsn_core::{connection::ServerName, presentation::Presentation};
-    use web_prover::{generate_web_proof, verify_presentation};
+    use web_prover::{generate_web_proof, verify_presentation, NotaryConfig};
 
     #[tokio::test]
     async fn test_full_roundtrip() {
         let web_proof_result = Box::pin(generate_web_proof(
-            "127.0.0.1",
-            7047,
-            "",
-            false,
+            NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false),
             "lotr-api.online",
             "127.0.0.1",
             3011,
