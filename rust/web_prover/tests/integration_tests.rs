@@ -12,6 +12,7 @@ mod integration_tests {
         let web_proof_result = Box::pin(generate_web_proof(
             "127.0.0.1",
             7047,
+            "",
             "lotr-api.online",
             "127.0.0.1",
             3011,

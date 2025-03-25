@@ -20,6 +20,7 @@ const MAX_RECV_DATA: usize = 1 << 14;
 pub async fn notarize(
     notary_host: &str,
     notary_port: u16,
+    notary_path: &str,
     server_domain: &str,
     server_host: &str,
     server_port: u16,
@@ -30,6 +31,7 @@ pub async fn notarize(
     let notary_client = NotaryClient::builder()
         .host(notary_host)
         .port(notary_port)
+        .path_prefix(notary_path)
         .enable_tls(false)
         .build()
         .unwrap();
