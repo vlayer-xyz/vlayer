@@ -14,7 +14,7 @@ export const envToConfig = (config: z.infer<typeof envSchema>) => {
   return {
     ...unchangedKeys,
     privateKey: examplesTestPrivateKey as Hex,
-    token: vlayerApiToken,
+    token: vlayerApiToken ?? "",
     deployConfig: {
       shouldRedeployVerifierRouter: shouldDeployVerifierRouter ?? false,
     },
