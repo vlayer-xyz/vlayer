@@ -68,6 +68,7 @@ runs:
 
     - name: Mock ImageId.sol
       run: ./bash/mock-imageid.sh
+      shell: bash
 
     - name: Install dependencies with Bun
       shell: bash
