@@ -54,18 +54,19 @@ export const MintStep = () => {
       args: proofData,
     };
 
-    try {
-      if (useEnvPrivateKey()) {
-        writeContract({
-          ...writeContractArgs,
-          account: getAccountFromPrivateKey(),
-        });
-      } else {
+    if (useEnvPrivateKey()) {
+      writeContract({
+        ...writeContractArgs,
+        account: getAccountFromPrivateKey(),
+      });
+    } else {
+      try {
         await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
-        writeContract(writeContractArgs);
+      } catch (error) {
+        setMintingError(error as Error);
       }
-    } catch (error) {
-      setMintingError(error as Error);
+
+      writeContract(writeContractArgs);
     }
   };
 
