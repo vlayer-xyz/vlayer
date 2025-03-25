@@ -67,32 +67,25 @@ impl TryFrom<WebProofArgs> for ServerProvingArgs {
 
         let host = value.host.unwrap_or(domain.clone());
 
-        let (notary_host, notary_port, notary_path, notary_tls) =
-            if let Some(notary_url) = value.notary {
-                let notary_url = Url::parse(&notary_url)?;
-                let notary_host = notary_url
-                    .host_str()
-                    .context("Notary URL has no host")?
-                    .to_string();
-                let notary_port = Self::extract_port(&notary_url);
-                let notary_path = notary_url
-                    .path()
-                    .trim_start_matches('/')
-                    .trim_end_matches('/')
-                    .to_string();
-                let notary_tls = notary_url.scheme() == "https";
-                (notary_host, notary_port, notary_path, notary_tls)
-            } else {
-                ("test-notary.vlayer.xyz".into(), 443, "".to_string(), true)
-            };
+        let notary_config = if let Some(notary_url) = value.notary {
+            let notary_url = Url::parse(&notary_url)?;
+            let notary_host = notary_url
+                .host_str()
+                .context("Notary URL has no host")?
+                .to_string();
+            let notary_port = Self::extract_port(&notary_url);
+            let notary_path = notary_url
+                .path()
+                .trim_start_matches('/')
+                .trim_end_matches('/')
+                .to_string();
+            let notary_tls = notary_url.scheme() == "https";
+            NotaryConfig::new(notary_host, notary_port, notary_path, notary_tls)
+        } else {
+            NotaryConfig::new("test-notary.vlayer.xyz".into(), 443, "".to_string(), true)
+        };
 
-        Ok(ServerProvingArgs::new(
-            domain,
-            host,
-            port,
-            uri,
-            NotaryConfig::new(notary_host, notary_port, notary_path, notary_tls),
-        ))
+        Ok(ServerProvingArgs::new(domain, host, port, uri, notary_config))
     }
 }
 
