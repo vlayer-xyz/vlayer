@@ -1,9 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import verifierSpec from "../../../../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
-import { ShowBalanceForm } from "./Presentational";
 import { useLocalStorage } from "usehooks-ts";
 import { useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
+import { HodlerForm } from "../../shared/forms/HodlerForm";
 
 export const ShowBalancePage = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export const ShowBalancePage = () => {
   const [holderAddress, setHolderAddress] = useState<`0x${string}` | null>(
     null,
   );
-  const [balance, setBalance] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const networkChain = import.meta.env.VITE_CHAIN_NAME;
   const token = "USDC";
@@ -60,13 +60,16 @@ export const ShowBalancePage = () => {
   }
 
   return (
-    <ShowBalanceForm
+    <HodlerForm
       networkChain={networkChain}
       token={token}
       holderAddress={holderAddress}
       onSubmit={handleSubmit}
       isLoading={isLoading}
       balance={balance}
+      loadingLabel="Minting..."
+      submitLabel="Generate Proof NFT"
+      isEditable={false}
     />
   );
 };

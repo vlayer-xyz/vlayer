@@ -1,10 +1,10 @@
 import { FormEvent, useEffect, useState } from "react";
-import { WelcomeForm } from "./Presentational";
 import { useAccount } from "wagmi";
 import { useProver } from "../../shared/hooks/useProver";
 import { useNavigate } from "react-router";
 import { getStepPath } from "../../app/router/steps";
 import { StepKind } from "../../app/router/types";
+import { HodlerForm } from "../../shared/forms/HodlerForm";
 
 export const WelcomePage = () => {
   const navigate = useNavigate();
@@ -35,12 +35,15 @@ export const WelcomePage = () => {
   }, [result]);
 
   return (
-    <WelcomeForm
+    <HodlerForm
       networkChain={networkChain}
       token={token}
       holderAddress={address}
       onSubmit={handleSubmit}
       isLoading={isLoading}
+      loadingLabel="Loading..."
+      submitLabel="Show balance"
+      isEditable={true}
     />
   );
 };
