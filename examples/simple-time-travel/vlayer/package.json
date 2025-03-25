@@ -6,13 +6,13 @@
     "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
     "lint:solidity": "solhint '../src/**/*.sol'",
-    "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
+    "deploy:dev": "VLAYER_ENV=dev bun run loadFixtures.ts && VLAYER_ENV=dev bun run deploy.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run loadFixtures.ts && VLAYER_ENV=dev bun run prove.ts",
-    "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
-    "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
-    "test-web:dev": "VLAYER_ENV=dev bun run playwright test",
+    "web:dev": "bun run deploy:dev && vite",
+    "web:testnet": "bun run deploy:testnet && vite",
+    "test-web:dev": "bun run deploy:dev && VLAYER_ENV=dev bun run playwright test",
     "test-web:testnet": "VLAYER_ENV=testnet bun run playwright test"
   },
   "dependencies": {

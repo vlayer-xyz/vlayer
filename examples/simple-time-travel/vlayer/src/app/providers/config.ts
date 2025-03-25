@@ -14,4 +14,5 @@ export const wagmiConfig = createConfig({
 
 export const proverConfig = {
   proverUrl: import.meta.env.VITE_PROVER_URL,
+  token: import.meta.env.VITE_VLAYER_API_TOKEN,
 };
