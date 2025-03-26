@@ -249,7 +249,7 @@ mod tests {
         let input_args: WebProofArgs = WebProofArgs {
             url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
             host: None,
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let converted: ServerProvingArgs = input_args.try_into().unwrap();
