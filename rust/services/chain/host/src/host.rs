@@ -106,7 +106,12 @@ where
 
     #[instrument(skip(self))]
     pub fn commit(&mut self, chain_update: ChainUpdate) -> Result<(), HostError> {
-        info!("Chain info: {:?}", chain_update.chain_info);
+        let chain_info = chain_update.chain_info.clone();
+        info!(
+            first_block = chain_info.first_block,
+            last_block = chain_info.last_block,
+            "Chain info"
+        );
         self.db.update_chain(self.chain_id, chain_update)?;
         Ok(())
     }
@@ -151,7 +156,9 @@ where
             info!("No new blocks to append or prepend");
             return Ok(None);
         }
-        info!("Append: {append} Prepend: {prepend}. New range: {new_range}");
+        info!(start = prepend.start(), end = prepend.end(), "prepend");
+        info!(start = append.start(), end = append.end(), "append");
+        info!(start = new_range.start(), end = new_range.end(), "new_range");
 
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
         let append_blocks = self.fetcher.get_blocks_range(append).await?;

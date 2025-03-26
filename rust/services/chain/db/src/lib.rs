@@ -40,8 +40,8 @@ const CHAINS: &str = "chains";
 
 #[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default, Debug)]
 pub struct ChainInfo {
-    first_block: BlockNumber,
-    last_block: BlockNumber,
+    pub first_block: BlockNumber,
+    pub last_block: BlockNumber,
     root_hash: B256,
     #[debug(skip)] // These proofs are really big and make logs unreadable
     zk_proof: Bytes,
