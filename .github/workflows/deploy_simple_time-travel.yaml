@@ -20,7 +20,7 @@ concurrency:
 jobs:
   deploy-simple-time-travel:
     name: Deploy simple-time-travel example
-    runs-on: ubuntu-24.04
+    runs-on: aws-linux-medium
     outputs:
       deployment_url: ${{ steps.deploy.outputs.deployment_url }}
     steps:

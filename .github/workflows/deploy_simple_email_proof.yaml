@@ -20,7 +20,7 @@ concurrency:
 jobs:
   deploy-simple-email-proof:
     name: Deploy simple-email-proof example
-    runs-on: ubuntu-24.04
+    runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
