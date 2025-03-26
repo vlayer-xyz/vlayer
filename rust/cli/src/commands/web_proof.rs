@@ -19,7 +19,7 @@ pub enum AllowedScheme {
 const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz";
 
 #[derive(Debug, Error)]
-pub enum WebProofInputError {
+pub enum InputError {
     #[error("Proven URL has no host")]
     MissingProvenUrlHost,
     #[error("Notary URL has no host")]
@@ -80,9 +80,7 @@ pub struct ServerProvingArgs {
     notary_config: NotaryConfig,
 }
 impl ServerProvingArgs {
-    fn parse_proven_url(
-        url_str: &str,
-    ) -> Result<(String, String, u16, String), WebProofInputError> {
+    fn parse_proven_url(url_str: &str) -> Result<(String, String, u16, String), InputError> {
         let url = Self::validate_proven_url(url_str)?;
 
         let domain = url.host_str().unwrap().to_string();
@@ -104,25 +102,23 @@ impl ServerProvingArgs {
         port
     }
 
-    fn validate_proven_url(url_str: &str) -> Result<Url, WebProofInputError> {
-        let url = Url::parse(url_str).map_err(|_| WebProofInputError::InvalidProvenUrl)?;
-        AllowedScheme::from_str(url.scheme())
-            .map_err(|_| WebProofInputError::InvalidProvenUrlProtocol)?;
-        url.host_str()
-            .ok_or(WebProofInputError::MissingProvenUrlHost)?;
+    fn validate_proven_url(url_str: &str) -> Result<Url, InputError> {
+        let url = Url::parse(url_str).map_err(|_| InputError::InvalidProvenUrl)?;
+        if url.scheme() != AllowedScheme::Https.to_string() {
+            return Err(InputError::InvalidProvenUrlProtocol);
+        }
+        url.host_str().ok_or(InputError::MissingProvenUrlHost)?;
         Ok(url)
     }
 
-    fn validate_notary_url(url_str: &str) -> Result<Url, WebProofInputError> {
-        let url = Url::parse(url_str).map_err(|_| WebProofInputError::InvalidNotaryUrl)?;
-        AllowedScheme::from_str(url.scheme())
-            .map_err(|_| WebProofInputError::InvalidNotaryUrlProtocol)?;
-        url.host_str()
-            .ok_or(WebProofInputError::MissingNotaryUrlHost)?;
+    fn validate_notary_url(url_str: &str) -> Result<Url, InputError> {
+        let url = Url::parse(url_str).map_err(|_| InputError::InvalidNotaryUrl)?;
+        AllowedScheme::from_str(url.scheme()).map_err(|_| InputError::InvalidNotaryUrlProtocol)?;
+        url.host_str().ok_or(InputError::MissingNotaryUrlHost)?;
         Ok(url)
     }
 
-    fn parse_notary_url(url_str: &str) -> Result<(String, u16, String, bool), WebProofInputError> {
+    fn parse_notary_url(url_str: &str) -> Result<(String, u16, String, bool), InputError> {
         let url = Self::validate_notary_url(url_str)?;
 
         let notary_host = url.host_str().unwrap().to_string();
@@ -138,7 +134,7 @@ impl ServerProvingArgs {
     }
 }
 impl TryFrom<WebProofArgs> for ServerProvingArgs {
-    type Error = WebProofInputError;
+    type Error = InputError;
 
     fn try_from(value: WebProofArgs) -> Result<Self, Self::Error> {
         let (domain, uri, port, default_host) = Self::parse_proven_url(&value.url)?;
@@ -266,10 +262,7 @@ mod tests {
 
         let result: Result<ServerProvingArgs, _> = input_args.try_into();
         assert!(result.is_err());
-        assert_eq!(
-            format!("{}", result.unwrap_err()),
-            WebProofInputError::InvalidProvenUrl.to_string()
-        );
+        assert_eq!(format!("{}", result.unwrap_err()), InputError::InvalidProvenUrl.to_string());
     }
 
     #[test]
@@ -281,10 +274,7 @@ mod tests {
 
         let result: Result<ServerProvingArgs, _> = input_args.try_into();
         assert!(result.is_err());
-        assert_eq!(
-            format!("{}", result.unwrap_err()),
-            WebProofInputError::InvalidNotaryUrl.to_string()
-        );
+        assert_eq!(format!("{}", result.unwrap_err()), InputError::InvalidNotaryUrl.to_string());
     }
 
     #[test]
@@ -298,7 +288,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             format!("{}", result.unwrap_err()),
-            WebProofInputError::InvalidProvenUrlProtocol.to_string()
+            InputError::InvalidProvenUrlProtocol.to_string()
         );
     }
 
@@ -313,7 +303,7 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(
             format!("{}", result.unwrap_err()),
-            WebProofInputError::InvalidNotaryUrlProtocol.to_string()
+            InputError::InvalidNotaryUrlProtocol.to_string()
         );
     }
 
