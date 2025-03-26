@@ -41,6 +41,12 @@ runs:
         name: target-debug
         path: target/debug
 
+    - name: Download assets
+      uses: actions/download-artifact@v4
+      with:
+        name: target-assets
+        path: target/assets
+
     - name: Make downloaded binaries executable
       run: sudo chmod +x target/debug/*
       shell: bash
@@ -50,10 +56,6 @@ runs:
 
     - name: Install TypeScript prerequisites
       uses: ./.github/actions/ts-prerequisites
-
-    - name: Mock ImageId.sol
-      run: ./bash/mock-imageid.sh
-      shell: bash
 
     - name: Install dependencies with Bun
       shell: bash
