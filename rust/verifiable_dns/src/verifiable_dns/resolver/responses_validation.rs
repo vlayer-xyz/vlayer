@@ -21,7 +21,7 @@ pub(super) fn validate_response<PError>(response: &Response) -> Result<(), Resol
     if response.truncated {
         return error_message("Response is truncated");
     }
-    if response.answer.as_ref().map_or(true, Vec::is_empty) {
+    if response.answer.as_ref().is_none_or(Vec::is_empty) {
         return error_message("No answers");
     }
 

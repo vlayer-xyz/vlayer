@@ -98,7 +98,7 @@ impl Email {
 }
 
 fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
-    move |key: &str| headers.get_first_value(key).map(String::from)
+    move |key: &str| headers.get_first_value(key)
 }
 
 #[cfg(test)]
