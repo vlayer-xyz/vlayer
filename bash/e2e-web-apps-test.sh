@@ -15,7 +15,7 @@ generate_ts_bindings
 build_extension
 
 echo "🚀 Running services for example: $EXAMPLE"
-DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op notary-server wsproxy"
+DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy notary-server"
 
 source "${VLAYER_HOME}/bash/run-services.sh"
 
