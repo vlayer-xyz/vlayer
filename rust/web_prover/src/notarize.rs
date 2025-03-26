@@ -25,7 +25,7 @@ pub struct NotaryConfig {
     /// Notary port
     pub port: u16,
     /// Notary API path
-    pub path: String,
+    pub path_prefix: String,
     /// Whether to use TLS for notary connection
     pub enable_tls: bool,
 }
