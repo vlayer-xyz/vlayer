@@ -67,7 +67,7 @@ export const useSimpleWebProof = () => {
   } = useWebProof(webProofConfig);
 
   if (webProofError) {
-    console.error("webProofError", webProofError);
+    throw webProofError;
   }
 
   const {
@@ -78,7 +78,7 @@ export const useSimpleWebProof = () => {
   } = useCallProver(vlayerProverConfig);
 
   if (callProverError) {
-    console.error("callProverError", callProverError);
+    throw callProverError;
   }
 
   const {
@@ -88,7 +88,7 @@ export const useSimpleWebProof = () => {
   } = useWaitForProvingResult(hash);
 
   if (waitForProvingResultError) {
-    console.error("waitForProvingResultError", waitForProvingResultError);
+    throw waitForProvingResultError;
   }
 
   const [, setWebProof] = useLocalStorage("webProof", "");
@@ -115,6 +115,5 @@ export const useSimpleWebProof = () => {
       isWebProofPending || isCallProverPending || isWaitingForProvingResult,
     callProver,
     result,
-    error: webProofError || callProverError || waitForProvingResultError,
   };
 };

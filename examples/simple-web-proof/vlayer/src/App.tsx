@@ -10,6 +10,8 @@ import { Chain, http } from "viem";
 import { anvil, optimismSepolia } from "viem/chains";
 import { useEnvPrivateKey } from "./utils/clientAuthMode";
 import { mockConnector } from "./utils/mockConnector";
+import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
 
 const queryClient = new QueryClient();
 const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
@@ -55,34 +57,36 @@ const config = () => {
 
 const App = () => {
   return (
-    <div id="app">
-      <WagmiProvider config={config()}>
-        <QueryClientProvider client={queryClient}>
-          <ProofProvider
-            config={{
-              proverUrl: import.meta.env.VITE_PROVER_URL,
-              wsProxyUrl: import.meta.env.VITE_WS_PROXY_URL,
-              notaryUrl: import.meta.env.VITE_NOTARY_URL,
-              token: import.meta.env.VITE_VLAYER_API_TOKEN,
-            }}
-          >
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Layout />}>
-                  {steps.map((step) => (
-                    <Route
-                      key={step.path}
-                      path={step.path}
-                      element={<step.component />}
-                    />
-                  ))}
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </ProofProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
-    </div>
+    <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+      <div id="app">
+        <WagmiProvider config={config()}>
+          <QueryClientProvider client={queryClient}>
+            <ProofProvider
+              config={{
+                proverUrl: import.meta.env.VITE_PROVER_URL,
+                wsProxyUrl: import.meta.env.VITE_WS_PROXY_URL,
+                notaryUrl: import.meta.env.VITE_NOTARY_URL,
+                token: import.meta.env.VITE_VLAYER_API_TOKEN,
+              }}
+            >
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Layout />}>
+                    {steps.map((step) => (
+                      <Route
+                        key={step.path}
+                        path={step.path}
+                        element={<step.component />}
+                      />
+                    ))}
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </ProofProvider>
+          </QueryClientProvider>
+        </WagmiProvider>
+      </div>
+    </ErrorBoundary>
   );
 };
 

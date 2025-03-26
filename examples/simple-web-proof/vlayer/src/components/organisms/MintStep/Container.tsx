@@ -15,12 +15,15 @@ import {
   useEnvPrivateKey,
 } from "../../../utils/clientAuthMode";
 import { ensureBalance } from "../../../utils/ethFaucet";
+import { AlreadyMintedError } from "../../../errors";
 
 export const MintStep = () => {
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null);
   const [mintedHandle, setMintedHandle] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  // Using mintingError state to throw error in useEffect because ErrorBoundary does not catch errors from async functions like handleMint
+  const [mintingError, setMintingError] = useState<Error | null>(null);
   const [proverResult] = useLocalStorage("proverResult", "");
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
@@ -58,7 +61,12 @@ export const MintStep = () => {
         account: getAccountFromPrivateKey(),
       });
     } else {
-      await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
+      try {
+        await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
+      } catch (error) {
+        setMintingError(error as Error);
+      }
+
       writeContract(writeContractArgs);
     }
   };
@@ -72,16 +80,23 @@ export const MintStep = () => {
 
   useEffect(() => {
     if (error) {
-      console.error("error minting", error);
       setIsMinting(false);
+      if (error.message.includes("User has already minted a TwitterNFT")) {
+        throw new AlreadyMintedError();
+      } else {
+        throw error;
+      }
     }
   }, [error]);
 
+  useEffect(() => {
+    if (mintingError) {
+      setIsMinting(false);
+      throw mintingError;
+    }
+  }, [mintingError]);
+
   return (
-    <MintStepPresentational
-      handleMint={handleMint}
-      isMinting={isMinting}
-      errorMsg={error?.message}
-    />
+    <MintStepPresentational handleMint={handleMint} isMinting={isMinting} />
   );
 };
