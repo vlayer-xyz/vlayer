@@ -10,7 +10,6 @@ import {
   type ExtensionMessage,
   ExtensionMessageType,
   type WebProofStep,
-  type PresentationJSON,
   ZkProvingStatus,
   assertUrl,
   assertUrlPattern,
@@ -139,44 +138,6 @@ class ExtensionWebProofProvider implements WebProofProvider {
         logoUrl: webProofRequest.logoUrl,
         steps: webProofRequest.steps,
       },
-    });
-  }
-
-  public async getWebProof(webProofRequest: WebProofRequestInput): Promise<{
-    presentationJson: PresentationJSON;
-    decodedTranscript: {
-      sent: string;
-      recv: string;
-    };
-  }> {
-    return new Promise<{
-      presentationJson: PresentationJSON;
-      decodedTranscript: {
-        sent: string;
-        recv: string;
-      };
-    }>((resolve, reject) => {
-      chrome.runtime.sendMessage(EXTENSION_ID, {
-        action: ExtensionAction.RequestWebProof,
-        payload: {
-          notaryUrl: this.notaryUrl,
-          wsProxyUrl: this.wsProxyUrl,
-          jwtToken: this.jwtToken,
-          logoUrl: webProofRequest.logoUrl,
-          steps: webProofRequest.steps,
-        },
-      });
-
-      this.connectToExtension().onMessage.addListener(
-        (message: ExtensionMessage) => {
-          if (message.type === ExtensionMessageType.ProofDone) {
-            resolve(message.payload);
-          }
-          if (message.type === ExtensionMessageType.ProofError) {
-            reject(new Error(message.payload.error));
-          }
-        },
-      );
     });
   }
 }

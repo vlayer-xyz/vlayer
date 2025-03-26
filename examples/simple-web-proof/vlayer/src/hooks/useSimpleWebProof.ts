@@ -5,7 +5,7 @@ import {
   useWebProof,
 } from "@vlayer/react";
 import { useLocalStorage } from "usehooks-ts";
-import { GetWebProofArgs, ProveArgs } from "@vlayer/sdk";
+import { WebProofConfig, ProveArgs } from "@vlayer/sdk";
 import { Abi, ContractFunctionName } from "viem";
 import { optimismSepolia, anvil } from "viem/chains";
 import { startPage, expectUrl, notarize } from "@vlayer/sdk/web_proof";
@@ -23,7 +23,7 @@ const vlayerProverConfig: Omit<
   functionName: "main",
 };
 
-const webProofConfig: GetWebProofArgs<Abi, string> = {
+const webProofConfig: WebProofConfig<Abi, string> = {
   proverCallCommitment: {
     address: "0x0000000000000000000000000000000000000000",
     proverAbi: [],
