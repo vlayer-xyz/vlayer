@@ -16,6 +16,7 @@ import { WebProverSessionContextManager } from "./state/webProverSessionContext"
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 import { initSentry } from "./helpers/sentry.ts";
+import { SIDE_PANEL_CONNECTION_NAME } from "constants/messaging.ts";
 
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
@@ -78,7 +79,9 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         payload: {},
       });
     })
-    .exhaustive();
+    .otherwise((message) => {
+      console.error("No handler for message", message);
+    });
 });
 
 browser.runtime.onMessageExternal.addListener(
@@ -190,3 +193,17 @@ const validateProofRequest = (
     throw e;
   }
 };
+
+// this monitors the sidepanel connection
+// when the sidepanel is closed, it sends a message to the browser
+
+browser.runtime.onConnect.addListener((sidePanelPort) => {
+  if (sidePanelPort.name === SIDE_PANEL_CONNECTION_NAME) {
+    sidePanelPort.onDisconnect.addListener(() => {
+      port?.postMessage({
+        type: ExtensionMessageType.SidePanelClosed,
+        payload: {},
+      });
+    });
+  }
+});

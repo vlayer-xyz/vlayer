@@ -1,9 +1,12 @@
-import { Page } from "@playwright/test";
+import { BrowserContext, Page } from "@playwright/test";
 import { ExtensionAction, ZkProvingStatus } from "../web-proof-commons";
 import { extensionId } from "../config";
 //Webpage acts as a webpage that uses SDK to communicate with extension
 export class Webpage {
-  constructor(protected readonly page: Page) {}
+  constructor(
+    protected readonly page: Page,
+    protected readonly context: BrowserContext,
+  ) {}
   async waitForURL(url: string) {
     await this.page.waitForURL(url);
   }

@@ -13,6 +13,7 @@ import { Steps } from "components/organisms";
 import { ErrorCallout } from "components/organisms/ErrorCallout";
 import { useCleanStorageOnClose } from "hooks/useCleanStorageOnClose";
 import { useCloseSidePanelOnRequest } from "hooks/useCloseSidePanelOnRequest";
+import { useConnectToBackground } from "hooks/useConnectToBackground";
 import { match } from "ts-pattern";
 
 export const SidePanelContent = ({
@@ -35,6 +36,7 @@ export const SidePanelContent = ({
 export const SidePanelContainer = () => {
   useCleanStorageOnClose();
   useCloseSidePanelOnRequest();
+  useConnectToBackground();
   const [config] = useProvingSessionConfig();
   useEffect(() => {
     if (config !== LOADING && Sentry.isInitialized()) {
