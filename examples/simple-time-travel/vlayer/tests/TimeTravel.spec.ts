@@ -26,7 +26,9 @@ test("Simple time travel flow", async ({ page }) => {
       timeout: 30000,
     });
     await expect(
-      page.getByText(stepsMeta[StepKind.success].description),
+      page.getByRole("heading", {
+        name: stepsMeta[StepKind.success].description,
+      }),
     ).toBeVisible();
   });
 });
