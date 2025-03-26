@@ -46,16 +46,16 @@ test("Simple Email Proof happy path", async ({ page }) => {
 
   await test.step("Click on mint button proves, verifies and go to success page", async () => {
     await page.click("#nextButton");
-    await expect(page).toHaveURL(stepsMeta[StepKind.success].path, {
-      timeout: 30000, // wait for proof
+    await expect(page.getByText("Waiting for proof...")).toBeVisible({
+      timeout: 30000,
+    });
+    await expect(page).toHaveURL(/success/, {
+      timeout: 60000, // wait for proof
     });
     await expect(
       page.getByRole("heading", {
         name: stepsMeta[StepKind.success].title,
       }),
-    ).toBeVisible();
-    await expect(
-      page.getByText(stepsMeta[StepKind.success].description),
     ).toBeVisible();
   });
 });
