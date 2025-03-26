@@ -145,7 +145,9 @@ webProofProvider.requestWebProof({
 webProofProvider.addEventListeners(
   ExtensionMessageType.ProofDone,
   ({ payload: { presentationJson } }) => {
-    setWebProof(presentationJson);
+    setWebProof({
+      webProofJson: JSON.stringify({ presentationJson: presentationJson }),
+    });
   },
 );
 ```
@@ -156,11 +158,9 @@ Once we have the Web Proof available we can directly call vlayer client `prove` 
 import { sepolia } from 'viem/chains'
 import { proverAbi } from './proverAbi'
 
-const proof = { webProofJson: JSON.stringify({ presentationJson: webProof }) };
-
 const hash = await vlayer.prove({
     ...proverCallCommitment,
-    args: [proof, ...commitmentArgs],
+    args: [webProof, ...commitmentArgs],
 })
 ```
 
