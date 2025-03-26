@@ -7,6 +7,7 @@ import {
 import { UseExtensionError } from "../errors";
 export const useExtension = () => {
   const [hasExtensionInstalled, setHasExtensionInstalled] = useState(false);
+  // Using error state to throw error in useEffect because ErrorBoundary does not catch errors from async functions like isExtensionReady
   const [error, setError] = useState<string | undefined>(undefined);
 
   const isExtensionReady = async () => {

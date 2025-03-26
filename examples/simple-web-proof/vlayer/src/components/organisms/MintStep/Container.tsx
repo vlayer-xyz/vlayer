@@ -22,6 +22,7 @@ export const MintStep = () => {
   const modalRef = useRef<HTMLDialogElement>(null);
   const [mintedHandle, setMintedHandle] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  // Using mintingError state to throw error in useEffect because ErrorBoundary does not catch errors from async functions like handleMint
   const [mintingError, setMintingError] = useState<Error | null>(null);
   const [proverResult] = useLocalStorage("proverResult", "");
   const { address } = useAccount();
