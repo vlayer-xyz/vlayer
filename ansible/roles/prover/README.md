@@ -12,4 +12,5 @@ Installs the vlayer Prover server.
 | `vlayer_proof_type` | Type of proof - `fake` or `groth16`. |
 | `vlayer_bonsai_api_url` | API url for Bonsai, required for real proofs. |
 | `vlayer_bonsai_api_key` | API key for Bonsai, required for real proofs. |
+| `vlayer_jwt_public_key_location` | Where to install the JWT public key file. |
 | `vlayer_rust_log` | An array of log levels for constructing [`RUST_LOG`](https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html). |
