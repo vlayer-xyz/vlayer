@@ -1,20 +1,14 @@
 import { expect, test } from "./config";
 import { sidePanel } from "./helpers";
 import { type Response } from "@playwright/test";
-
-const config = {
-  loginUrl: "/login",
-  profileUrl: "/profile",
-  profileFailedAuthUrl: "/profile-failed-auth",
-  dashboardUrl: "/dashboard",
-};
+import { loginUrl, profileUrl, dashboardUrl, dappProveWebUrl } from "./urls";
 
 test("Full flow from opening sidepanel to redirection using proveWeb", async ({
   page,
   context,
 }) => {
   await test.step("Web-app should open sidepanel via SDK call", async () => {
-    await page.goto("/dapp-prove-web");
+    await page.goto(dappProveWebUrl);
     const requestProofButton = page.locator("body").getByRole("button", {
       name: "Request prove web",
     });
@@ -36,7 +30,7 @@ test("Full flow from opening sidepanel to redirection using proveWeb", async ({
       redirectButton.click(),
     ]);
 
-    await newPage.waitForURL(config.loginUrl);
+    await newPage.waitForURL(loginUrl);
   });
 
   await test.step("Side panel UI should indicate that startPage step is completed", async () => {
@@ -48,7 +42,7 @@ test("Full flow from opening sidepanel to redirection using proveWeb", async ({
 
   await test.step("Side panel UI should indicate that expectUrl step is completed after history.pushState redirect", async () => {
     const startPage = context.pages().find((page) => {
-      return page.url().includes(config.loginUrl);
+      return page.url().includes(loginUrl);
     });
     if (!startPage) {
       throw new Error("No login page");
@@ -66,7 +60,7 @@ test("Full flow from opening sidepanel to redirection using proveWeb", async ({
 
   await test.step("Side panel UI should indicate that expectUrl step is completed after redirection", async () => {
     const dashboardPage = context.pages().find((page) => {
-      return page.url().includes(config.dashboardUrl);
+      return page.url().includes(dashboardUrl);
     });
     if (!dashboardPage) {
       throw new Error("No dashboard page");
@@ -75,7 +69,7 @@ test("Full flow from opening sidepanel to redirection using proveWeb", async ({
       name: /^Go to profile$/,
     });
     await profileButton.click();
-    await dashboardPage.waitForURL(config.profileUrl);
+    await dashboardPage.waitForURL(profileUrl);
     const extension = await sidePanel(context);
     const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
     const status = await startPageStep.getAttribute("data-status");

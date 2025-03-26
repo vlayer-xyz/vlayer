@@ -1,19 +1,18 @@
 import { expect, test } from "./config";
 import { sidePanel } from "./helpers";
-
-const config = {
-  loginUrl: "/login",
-  profileUrl: "/profile",
-  profileFailedAuthUrl: "/profile-failed-auth",
-  dashboardUrl: "/dashboard",
-};
+import {
+  loginUrl,
+  dashboardUrl,
+  profileFailedAuthUrl,
+  dappFailedAuthUrl,
+} from "./urls";
 
 test("Flow from opening sidepanel until 403 from proven endpoint", async ({
   page,
   context,
 }) => {
   await test.step("Web-app should open sidepanel via SDK call", async () => {
-    await page.goto("/dapp-failed-auth");
+    await page.goto(dappFailedAuthUrl);
     const requestProofButton = page
       .locator("body")
       .getByTestId("request-webproof-button");
@@ -27,10 +26,10 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
       redirectButton.click(),
     ]);
 
-    await newPage.waitForURL(config.loginUrl);
+    await newPage.waitForURL(loginUrl);
 
     const startPage = context.pages().find((page) => {
-      return page.url().includes(config.loginUrl);
+      return page.url().includes(loginUrl);
     });
     if (!startPage) {
       throw new Error("No login page");
@@ -41,7 +40,7 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
     await loginButton.click();
 
     const dashboardPage = context.pages().find((page) => {
-      return page.url().includes(config.dashboardUrl);
+      return page.url().includes(dashboardUrl);
     });
     if (!dashboardPage) {
       throw new Error("No dashboard page");
@@ -50,7 +49,7 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
       name: "Go to profile failed auth",
     });
     await profileButton.click();
-    await dashboardPage.waitForURL(config.profileFailedAuthUrl);
+    await dashboardPage.waitForURL(profileFailedAuthUrl);
 
     const proveButton = extension.getByRole("button", {
       name: "Generate proof",

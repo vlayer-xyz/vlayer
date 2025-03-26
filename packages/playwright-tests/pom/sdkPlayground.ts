@@ -1,6 +1,7 @@
 import { BrowserContext, Page } from "@playwright/test";
 import { Webpage } from "./webpage";
 import { waitForSidePanelClosed, waitForSidePanelOpened } from "../helpers";
+import { sdkPlaygroundUrl } from "../urls";
 
 declare global {
   interface Window {
@@ -20,8 +21,8 @@ export class SdkPlayground extends Webpage {
     super(page, context);
   }
 
-  async init() {
-    await this.page.goto("/sdk-playground");
+  init() {
+    return this.page.goto(sdkPlaygroundUrl);
   }
 
   async openSidePanel() {
