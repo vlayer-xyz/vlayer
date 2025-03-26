@@ -32,10 +32,7 @@ export type ProverCallCommitment<
   chainId: number;
 };
 
-export type GetWebProofArgs<
-  T extends Abi,
-  F extends ContractFunctionName<T>,
-> = {
+export type WebProofConfig<T extends Abi, F extends ContractFunctionName<T>> = {
   proverCallCommitment: ProverCallCommitment<T, F>;
 } & WebProofRequestInput;
 
@@ -51,7 +48,7 @@ export type WebProofProvider = {
   }>;
 
   requestWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
-    args: GetWebProofArgs<T, F>,
+    args: WebProofConfig<T, F>,
   ) => void;
 
   notifyZkProvingStatus: (status: ZkProvingStatus) => void;

@@ -2,7 +2,7 @@
 import {
   useWebProof,
   expectUrl,
-  GetWebProofArgs,
+  WebProofConfig,
   notarize,
   ProofProvider,
   startPage,
@@ -11,7 +11,7 @@ import {
 import React from "react";
 import { Abi } from "viem";
 
-const webProofConfig: GetWebProofArgs<Abi, string> = {
+const webProofConfig: WebProofConfig<Abi, string> = {
   proverCallCommitment: {
     address: "0x0000000000000000000000000000000000000000",
     proverAbi: [],
