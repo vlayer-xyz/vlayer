@@ -11,8 +11,8 @@
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
-    "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
-    "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
+    "web:dev": "bun run deploy:dev && vite",
+    "web:testnet": "bun run deploy:testnet && vite",
     "test-web:dev": "VLAYER_ENV=dev bun run playwright test",
     "test-web:testnet": "VLAYER_ENV=testnet bun run playwright test"
   },
