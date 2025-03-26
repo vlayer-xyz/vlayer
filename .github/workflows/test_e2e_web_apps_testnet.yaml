@@ -77,7 +77,7 @@ jobs:
           RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
-          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server --features jwt
           mkdir target_debug
           mv target/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
 
@@ -110,7 +110,8 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
+          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
   test-e2e-web-apps-simple-web-proof:
@@ -135,7 +136,8 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
+          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
   test-e2e-web-apps-simple-email-proof:
@@ -159,7 +161,8 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
+          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
   test-e2e-web-apps-simple-teleport:
@@ -183,7 +186,8 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
+          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
   test-e2e-web-apps-simple-time-travel:
@@ -207,5 +211,6 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
+          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
