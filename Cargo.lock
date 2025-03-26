@@ -3097,6 +3097,7 @@ dependencies = [
  "serde_yml",
  "soldeer-commands",
  "soldeer-core",
+ "strum",
  "tar",
  "tempfile",
  "test_runner",
