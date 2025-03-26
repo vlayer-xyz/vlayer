@@ -13,10 +13,6 @@ export const WelcomePage = () => {
   const networkChain = import.meta.env.VITE_CHAIN_NAME;
   const token = "USDC";
 
-  if (!address) {
-    return <div>Connect your wallet to continue</div>;
-  }
-
   const { callProver, result } = useProver();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -33,6 +29,10 @@ export const WelcomePage = () => {
       setIsLoading(false);
     }
   }, [result]);
+
+  if (!address) {
+    return <div>Connect your wallet to continue</div>;
+  }
 
   return (
     <HodlerForm
