@@ -66,7 +66,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
-          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server
+          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server --features jwt
 
       - name: "Print build version"
         id: vlayer_build
@@ -123,7 +123,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
-          nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server -p dns_server"
+          nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server -p dns_server --features jwt"
 
       - name: "Print build version"
         id: vlayer_build
@@ -181,7 +181,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
-          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server
+          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server --features jwt
 
       - name: "Print build version"
         id: vlayer_build
