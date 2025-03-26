@@ -1,6 +1,6 @@
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Dapp, DappNewWay, DappFailedAuth } from "./Dapp";
+import { Dapp, DappFailedAuth } from "./Dapp";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Profile, ProfileFailedAuth } from "./Profile";
@@ -17,10 +17,6 @@ const router = createBrowserRouter([
   {
     path: "/dapp",
     element: <Dapp />,
-  },
-  {
-    path: "/dapp-new-way",
-    element: <DappNewWay />,
   },
   {
     path: "/dapp-prove-web",

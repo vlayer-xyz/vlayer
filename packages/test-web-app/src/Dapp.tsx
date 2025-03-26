@@ -1,7 +1,6 @@
 import {
   type PresentationJSON,
   createVlayerClient,
-  type VlayerClient,
   ExtensionMessageType,
 } from "@vlayer/sdk";
 
@@ -13,19 +12,13 @@ import {
 } from "@vlayer/sdk/web_proof";
 
 import { foundry } from "viem/chains";
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import lotrApiProver from "../../../contracts/fixtures/out/LotrApiProver.sol/LotrApiProver";
 
 const PROVER_ADDRESS = import.meta.env
   .VITE_LOTR_API_PROVER_ADDRESS as `0x${string}`;
 
-function DappNewWay() {
+function Dapp() {
   return DappWithProfile("profile");
 }
 

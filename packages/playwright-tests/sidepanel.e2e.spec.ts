@@ -151,7 +151,7 @@ test.describe("Full flow of webproof using extension", () => {
     context,
   }) => {
     await test.step("Web-app should open sidepanel via SDK call", async () => {
-      await page.goto("/dapp-new-way");
+      await page.goto("/dapp");
       const requestProofButton = page
         .locator("body")
         .getByTestId("request-webproof-button");
@@ -162,7 +162,7 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Extension should stay ok after clicking request button multiple times", async () => {
-      await page.goto("/dapp-new-way");
+      await page.goto("/dapp");
       const requestProofButton = page
         .locator("body")
         .getByTestId("request-webproof-button");
