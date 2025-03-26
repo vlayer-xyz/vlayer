@@ -110,7 +110,9 @@ where
         info!(
             first_block = chain_info.first_block,
             last_block = chain_info.last_block,
-            "Chain info: first block, last block"
+            chain_id = self.chain_id,
+            guest_id = self.elf.id.as_bytes(),
+            "Committing chain update to the database"
         );
         self.db.update_chain(self.chain_id, chain_update)?;
         Ok(())
