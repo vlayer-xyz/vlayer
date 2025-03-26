@@ -1,6 +1,7 @@
 import { test } from "./config";
 import { waitForExtension } from "./pom/extension";
 import { Webpage } from "./pom/webpage";
+
 test("Cleanup of storage on extension close", async ({ page, context }) => {
   await test.step("Web-app should open sidepanel via SDK call", async () => {
     await page.goto("/dapp");
