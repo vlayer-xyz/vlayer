@@ -86,6 +86,16 @@ runs:
       working-directory: ./contracts/vlayer
       run: forge soldeer install
 
+    - name: List contents of contracts/vlayer/src
+      shell: bash
+      run: ls -lah
+      working-directory: ./contracts/vlayer/src
+
+    - name: List ImageID.sol from target/assets
+      shell: bash
+      run: ls -lah ./target/assets
+      working-directory: ./contracts/vlayer/src
+
     - name: Run E2E test
       shell: bash
       env:
