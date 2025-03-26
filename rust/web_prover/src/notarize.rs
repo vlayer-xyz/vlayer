@@ -27,7 +27,7 @@ pub struct NotaryConfig {
     /// Notary API path
     pub path: String,
     /// Whether to use TLS for notary connection
-    pub tls: bool,
+    pub enable_tls: bool,
 }
 
 pub async fn notarize(
