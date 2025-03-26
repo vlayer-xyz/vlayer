@@ -32,9 +32,9 @@ ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
 {% endfor %}
 {% if vlayer_prover_gas_meter_url is defined %}
 {{- ' --gas-meter-url ' ~ vlayer_prover_gas_meter_url }}
-{{- ' --gas-meter-api-key ' ~ vlayer_prover_gas_meter_api_key}}
+{{- ' --gas-meter-api-key ' ~ vlayer_prover_gas_meter_api_key -}}
 {% endif %}
-{{- ' --public-key /home/{{ ansible_user}}/.vlayer/jwt.key.pub' }}
+{{- ' --public-key ' ~ vlayer_jwt_public_key_location }}
 
 [Install]
 WantedBy=multi-user.target
