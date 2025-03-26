@@ -9,7 +9,7 @@ use thiserror::Error;
 use web_prover::{generate_web_proof, NotaryConfig};
 
 #[derive(Debug, PartialEq, Eq, EnumString)]
-pub enum AllowedScheme {
+pub enum Scheme {
     #[strum(serialize = "http")]
     Http,
     #[strum(serialize = "https")]
@@ -20,18 +20,12 @@ const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz";
 
 #[derive(Debug, Error)]
 pub enum InputError {
-    #[error("Proven URL has no host")]
-    MissingProvenUrlHost,
-    #[error("Notary URL has no host")]
-    MissingNotaryUrlHost,
-    #[error("Invalid proven URL format")]
-    InvalidProvenUrl,
-    #[error("Invalid notary URL format")]
-    InvalidNotaryUrl,
-    #[error("Invalid notary  URL protocol")]
-    InvalidNotaryUrlProtocol,
-    #[error("Invalid proven URL protocol")]
-    InvalidProvenUrlProtocol,
+    #[error("URL has no host: {0}")]
+    MissingUrlHost(String),
+    #[error("Invalid URL format: {0}")]
+    InvalidUrlFormat(String),
+    #[error("Invalid URL protocol: {0}")]
+    InvalidUrlProtocol(String),
 }
 
 /// Generates a web-based proof for the specified request
@@ -79,74 +73,88 @@ pub struct ServerProvingArgs {
     uri: String,
     notary_config: NotaryConfig,
 }
-impl ServerProvingArgs {
-    fn parse_proven_url(url_str: &str) -> Result<(String, String, u16, String), InputError> {
-        let url = Self::validate_proven_url(url_str)?;
 
-        let domain = url.host_str().unwrap().to_string();
-        let port = Self::extract_port(&url);
-        let uri = {
-            let path = url.path();
-            let query = url.query().map(|q| format!("?{q}")).unwrap_or_default();
-            format!("{path}{query}")
-        };
+struct ValidatedUrl {
+    url: Url,
+    host: String,
+    scheme: Scheme,
+    port: u16,
+}
 
-        Ok((domain.clone(), uri, port, domain))
-    }
-
-    fn extract_port(url: &Url) -> u16 {
-        let port = url.port().unwrap_or_else(|| match url.scheme() {
-            "https" => 443,
-            _ => 80,
-        });
-        port
-    }
-
-    fn validate_proven_url(url_str: &str) -> Result<Url, InputError> {
-        let url = Url::parse(url_str).map_err(|_| InputError::InvalidProvenUrl)?;
-        if url.scheme() != AllowedScheme::Https.to_string() {
-            return Err(InputError::InvalidProvenUrlProtocol);
+impl ValidatedUrl {
+    fn try_from_url(url_str: &str, allowed_schemes: &[Scheme]) -> Result<Self, InputError> {
+        let url =
+            Url::parse(url_str).map_err(|_| InputError::InvalidUrlFormat(url_str.to_string()))?;
+        let scheme = Scheme::from_str(url.scheme())
+            .map_err(|_| InputError::InvalidUrlProtocol(url.scheme().to_string()))?;
+        if !allowed_schemes.contains(&scheme) {
+            return Err(InputError::InvalidUrlProtocol(url.scheme().to_string()));
         }
-        url.host_str().ok_or(InputError::MissingProvenUrlHost)?;
-        Ok(url)
-    }
-
-    fn validate_notary_url(url_str: &str) -> Result<Url, InputError> {
-        let url = Url::parse(url_str).map_err(|_| InputError::InvalidNotaryUrl)?;
-        AllowedScheme::from_str(url.scheme()).map_err(|_| InputError::InvalidNotaryUrlProtocol)?;
-        url.host_str().ok_or(InputError::MissingNotaryUrlHost)?;
-        Ok(url)
-    }
-
-    fn parse_notary_url(url_str: &str) -> Result<(String, u16, String, bool), InputError> {
-        let url = Self::validate_notary_url(url_str)?;
-
-        let notary_host = url.host_str().unwrap().to_string();
-        let notary_port = Self::extract_port(&url);
-        let notary_path = url
-            .path()
-            .trim_start_matches('/')
-            .trim_end_matches('/')
+        let host = url
+            .host_str()
+            .ok_or_else(|| InputError::MissingUrlHost(url_str.to_string()))?
             .to_string();
-        let notary_tls = url.scheme() == "https";
+        let port = url.port().unwrap_or(match scheme {
+            Scheme::Https => 443,
+            Scheme::Http => 80,
+        });
 
-        Ok((notary_host, notary_port, notary_path, notary_tls))
+        Ok(Self {
+            url,
+            host,
+            scheme,
+            port,
+        })
     }
 }
+
+fn parse_proven_url(url_str: &str) -> Result<(String, String, u16, String), InputError> {
+    //Only https is allowed for proven urls as it does not make sense to prove http urls (not tls => no tlsn)
+
+    let ValidatedUrl {
+        url, host, port, ..
+    } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https])?;
+    let uri = {
+        let path = url.path();
+        let query = url.query().map(|q| format!("?{q}")).unwrap_or_default();
+        format!("{path}{query}")
+    };
+
+    Ok((host.clone(), uri, port, host))
+}
+
+fn parse_notary_url(url_str: &str) -> Result<(String, u16, String, bool), InputError> {
+    let ValidatedUrl {
+        url,
+        host,
+        scheme,
+        port,
+    } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https, Scheme::Http])?;
+
+    let path = url
+        .path()
+        .trim_start_matches('/')
+        .trim_end_matches('/')
+        .to_string();
+    let is_tls = scheme == Scheme::Https;
+
+    Ok((host, port, path, is_tls))
+}
+
 impl TryFrom<WebProofArgs> for ServerProvingArgs {
     type Error = InputError;
 
     fn try_from(value: WebProofArgs) -> Result<Self, Self::Error> {
-        let (domain, uri, port, default_host) = Self::parse_proven_url(&value.url)?;
+        let (domain, uri, port, default_host) = parse_proven_url(&value.url)?;
         let host = value.host.unwrap_or(default_host);
 
         let notary_config = if let Some(notary_url) = value.notary {
             let (notary_host, notary_port, notary_path, notary_tls) =
-                Self::parse_notary_url(&notary_url)?;
+                parse_notary_url(&notary_url)?;
             NotaryConfig::new(notary_host, notary_port, notary_path, notary_tls)
         } else {
             {
-                let (notary_host, _, _, _) = Self::parse_notary_url(DEFAULT_NOTARY_URL)?;
+                let (notary_host, _, _, _) = parse_notary_url(DEFAULT_NOTARY_URL)?;
                 NotaryConfig::new(notary_host, 443, "".to_string(), true)
             }
         };
@@ -174,7 +182,7 @@ mod tests {
         assert_eq!(converted.uri, "/v1/followers?token=5daa4f53&uid=245");
         assert_eq!(converted.notary_config.host, "notary.pse.dev");
         assert_eq!(converted.notary_config.port, 3030);
-        assert_eq!(converted.notary_config.path, "v0.1.0-alpha.8");
+        assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
     }
 
     #[test]
@@ -188,8 +196,8 @@ mod tests {
 
         assert_eq!(converted.notary_config.host, "test-notary.vlayer.xyz");
         assert_eq!(converted.notary_config.port, 443);
-        assert_eq!(converted.notary_config.path, "");
-        assert!(converted.notary_config.tls);
+        assert_eq!(converted.notary_config.path_prefix, "");
+        assert!(converted.notary_config.enable_tls);
     }
 
     #[test]
@@ -202,7 +210,7 @@ mod tests {
         let converted: ServerProvingArgs = input_args.try_into().unwrap();
 
         assert_eq!(converted.notary_config.host, "notary.vlayer.xyz");
-        assert_eq!(converted.notary_config.path, "path/to/api");
+        assert_eq!(converted.notary_config.path_prefix, "path/to/api");
     }
 
     #[test]
@@ -214,7 +222,7 @@ mod tests {
 
         let converted: ServerProvingArgs = input_args.try_into().unwrap();
 
-        assert!(converted.notary_config.tls);
+        assert!(converted.notary_config.enable_tls);
     }
 
     #[test]
@@ -226,7 +234,7 @@ mod tests {
 
         let converted: ServerProvingArgs = input_args.try_into().unwrap();
 
-        assert!(!converted.notary_config.tls);
+        assert!(!converted.notary_config.enable_tls);
     }
 
     #[test]
@@ -261,8 +269,10 @@ mod tests {
         };
 
         let result: Result<ServerProvingArgs, _> = input_args.try_into();
-        assert!(result.is_err());
-        assert_eq!(format!("{}", result.unwrap_err()), InputError::InvalidProvenUrl.to_string());
+        assert_eq!(
+            format!("{}", result.unwrap_err()),
+            InputError::InvalidUrlFormat("invalid-url".to_string()).to_string()
+        );
     }
 
     #[test]
@@ -273,22 +283,23 @@ mod tests {
         };
 
         let result: Result<ServerProvingArgs, _> = input_args.try_into();
-        assert!(result.is_err());
-        assert_eq!(format!("{}", result.unwrap_err()), InputError::InvalidNotaryUrl.to_string());
+        assert_eq!(
+            format!("{}", result.unwrap_err()),
+            InputError::InvalidUrlFormat("invalid-url".to_string()).to_string()
+        );
     }
 
     #[test]
     fn test_invalid_proven_url_protocol_error() {
         let input_args: WebProofArgs = WebProofArgs {
-            url: "htp:///path/to/resource".to_string(),
+            url: "xyz:///path/to/resource".to_string(),
             ..WebProofArgs::default()
         };
 
         let result: Result<ServerProvingArgs, _> = input_args.try_into();
-        assert!(result.is_err());
         assert_eq!(
             format!("{}", result.unwrap_err()),
-            InputError::InvalidProvenUrlProtocol.to_string()
+            InputError::InvalidUrlProtocol("xyz".to_string()).to_string()
         );
     }
 
@@ -300,10 +311,9 @@ mod tests {
         };
 
         let result: Result<ServerProvingArgs, _> = input_args.try_into();
-        assert!(result.is_err());
         assert_eq!(
             format!("{}", result.unwrap_err()),
-            InputError::InvalidNotaryUrlProtocol.to_string()
+            InputError::InvalidUrlProtocol("htp".to_string()).to_string()
         );
     }
 

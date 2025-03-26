@@ -42,8 +42,8 @@ pub async fn notarize(
     let notary_client = NotaryClient::builder()
         .host(notary_config.host)
         .port(notary_config.port)
-        .path_prefix(notary_config.path)
-        .enable_tls(notary_config.tls)
+        .path_prefix(notary_config.path_prefix)
+        .enable_tls(notary_config.enable_tls)
         .build()
         .unwrap();
 
