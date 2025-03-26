@@ -28,12 +28,12 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
 
 #[cfg(test)]
 mod test {
-    use alloy_sol_types::{private::bytes, SolValue};
+    use alloy_sol_types::{SolValue, private::bytes};
     use lazy_static::lazy_static;
     use test_utils::read_email_from_file;
     use verifiable_dns::{
-        verifiable_dns::{sign_record::sign_record, signer::Signer},
         DNSRecord, RecordType,
+        verifiable_dns::{sign_record::sign_record, signer::Signer},
     };
 
     use super::*;

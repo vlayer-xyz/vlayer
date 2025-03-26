@@ -1,7 +1,7 @@
 use alloy_primitives::{BlockHash, ChainId};
 use chain_client::CachedClient;
 use chain_common::{
-    mock_chain_proof_receipt, mock_chain_proof_with_hashes, ChainProof, ChainProofRef,
+    ChainProof, ChainProofRef, mock_chain_proof_receipt, mock_chain_proof_with_hashes,
 };
 use risc0_zkp::verify::VerificationError;
 

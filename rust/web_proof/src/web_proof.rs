@@ -3,10 +3,10 @@ use std::convert::TryFrom;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tlsn_core::{
+    CryptoProvider,
     connection::ServerName,
     presentation::{Presentation, PresentationError, PresentationOutput},
     signing::VerifyingKey,
-    CryptoProvider,
 };
 
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
@@ -108,9 +108,8 @@ mod tests {
 
     use super::*;
     use crate::fixtures::{
-        load_web_proof_fixture, read_fixture,
+        NOTARY_PUB_KEY_PEM_EXAMPLE, load_web_proof_fixture, read_fixture,
         utils::{corrupt_signature, corrupt_verifying_key, load_web_proof_fixture_and_modify},
-        NOTARY_PUB_KEY_PEM_EXAMPLE,
     };
 
     #[test]

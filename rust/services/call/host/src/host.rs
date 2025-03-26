@@ -7,16 +7,16 @@ use alloy_sol_types::SolValue;
 use bytes::Bytes;
 use call_common::{ExecutionLocation, Metadata};
 use call_engine::{
+    Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
     evm::{env::cached::CachedEvmEnv, execution_result::SuccessfulExecutionResult},
     travel_call::Executor as TravelCallExecutor,
     verifier::{
         teleport, time_travel,
         travel_call::{self, IVerifier},
     },
-    Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
 use chain_client::Client as ChainClient;
-use common::{verifier::zk_proof, GuestElf};
+use common::{GuestElf, verifier::zk_proof};
 pub use config::Config;
 use derive_new::new;
 use error::preflight;
@@ -24,7 +24,7 @@ pub use error::{AwaitingChainProofError, BuilderError, Error, ProvingError};
 use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;
-use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
+use risc0_zkvm::{ProveInfo, SessionStats, sha::Digest};
 use seal::EncodableReceipt;
 use tracing::instrument;
 

@@ -1,12 +1,12 @@
 use http_body_util::Empty;
-use hyper::{body::Bytes, Request, StatusCode};
+use hyper::{Request, StatusCode, body::Bytes};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
 use spansy::Spanned;
 use tlsn_common::config::ProtocolConfig;
 use tlsn_core::{
-    attestation::Attestation, request::RequestConfig, transcript::TranscriptCommitConfig,
-    CryptoProvider, Secrets,
+    CryptoProvider, Secrets, attestation::Attestation, request::RequestConfig,
+    transcript::TranscriptCommitConfig,
 };
 use tlsn_formats::http::{DefaultHttpCommitter, HttpCommit, HttpTranscript};
 use tlsn_prover::{Prover, ProverConfig};

@@ -4,13 +4,13 @@ mod forge;
 
 use std::fmt::Debug;
 
-use alloy_primitives::{BlockNumber, B256};
+use alloy_primitives::{B256, BlockNumber};
 use alloy_rlp::Encodable;
 use as_any::AsAny;
 use auto_impl::auto_impl;
 use casting_utils::is;
 pub use common::Hashable;
-use dyn_clone::{clone_trait_object, DynClone};
+use dyn_clone::{DynClone, clone_trait_object};
 pub use eth::EthBlockHeader;
 pub use forge::ForgeBlockHeader;
 use revm::primitives::BlockEnv;
@@ -170,7 +170,7 @@ mod serialize {
 
     #[cfg(test)]
     mod unsupported_block_header {
-        use alloy_primitives::{keccak256, B256};
+        use alloy_primitives::{B256, keccak256};
         use alloy_rlp_derive::RlpEncodable;
         use revm::primitives::BlockEnv;
 
@@ -230,7 +230,7 @@ mod deserialize {
     use std::fs;
 
     use alloy_primitives::hex;
-    use serde_json::{self, from_str, from_value, Value};
+    use serde_json::{self, Value, from_str, from_value};
 
     use super::*;
 

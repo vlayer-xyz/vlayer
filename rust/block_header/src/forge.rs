@@ -1,11 +1,11 @@
-use alloy_primitives::{keccak256, BlockNumber, B256};
+use alloy_primitives::{B256, BlockNumber, keccak256};
 use alloy_rlp::Encodable;
 use common::Hashable;
 use derive_new::new;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
-use crate::{casting_utils::try_downcast, EvmBlockHeader};
+use crate::{EvmBlockHeader, casting_utils::try_downcast};
 
 #[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct ForgeBlockHeader {

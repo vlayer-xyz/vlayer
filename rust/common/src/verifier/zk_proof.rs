@@ -1,5 +1,5 @@
 pub use risc0_zkp::verify::VerificationError as Error;
-use risc0_zkvm::{guest, sha::Digest, Receipt};
+use risc0_zkvm::{Receipt, guest, sha::Digest};
 
 use super::sealing::sealed_with_test_mock;
 

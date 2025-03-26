@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
 use derive_new::new;
-use jsonrpsee::{proc_macros::rpc, Extensions};
+use jsonrpsee::{Extensions, proc_macros::rpc};
 use server_utils::RequestId;
 use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
 use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};

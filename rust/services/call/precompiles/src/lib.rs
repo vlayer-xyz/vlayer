@@ -14,11 +14,11 @@ use json::{
     get_array_length as json_get_array_length, get_bool as json_get_bool, get_int as json_get_int,
     get_string as json_get_string,
 };
-use precompile::{gas_used, Precompile, Tag};
+use precompile::{Precompile, Tag, gas_used};
 use regex::{capture as regex_capture, is_match as regex_is_match};
 use revm::precompile::{
-    u64_to_address, Precompile as RawPrecompile, PrecompileOutput, PrecompileResult,
-    PrecompileWithAddress,
+    Precompile as RawPrecompile, PrecompileOutput, PrecompileResult, PrecompileWithAddress,
+    u64_to_address,
 };
 use url_pattern::test as url_pattern_test;
 use web_proof::verify as web_proof;

@@ -1,7 +1,7 @@
-use axum::{extract::OptionalFromRequestParts, http::request::Parts, RequestPartsExt};
+use axum::{RequestPartsExt, extract::OptionalFromRequestParts, http::request::Parts};
 use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
     TypedHeader,
+    headers::{Authorization, authorization::Bearer},
 };
 use derive_more::{Deref, From};
 use serde::Deserialize;

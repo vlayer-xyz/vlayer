@@ -1,5 +1,5 @@
 use tracing_subscriber::{
-    fmt::layer, layer::SubscriberExt, registry, util::SubscriberInitExt, EnvFilter,
+    EnvFilter, fmt::layer, layer::SubscriberExt, registry, util::SubscriberInitExt,
 };
 
 use crate::LogFormat;

@@ -3,7 +3,7 @@
 [package]
 name = "risc0_call_guest"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 alloy-sol-types = { version = "=0.8.20", default-features = false }

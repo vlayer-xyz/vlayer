@@ -3,7 +3,7 @@
 [package]
 name = "risc0_benchmark_guest"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 risc0-zkvm = { version = "=1.2.4", default-features = false, features = ["std", "unstable"] }

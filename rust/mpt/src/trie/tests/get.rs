@@ -1,7 +1,7 @@
-use alloy_primitives::{b256, B256};
+use alloy_primitives::{B256, b256};
 use nybbles::Nibbles;
 
-use crate::{node::Node, KeccakMerkleTrie as MerkleTrie};
+use crate::{KeccakMerkleTrie as MerkleTrie, node::Node};
 
 #[test]
 pub fn null() {

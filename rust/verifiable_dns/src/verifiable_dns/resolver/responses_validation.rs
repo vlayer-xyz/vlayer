@@ -1,7 +1,7 @@
 use std::{collections::HashSet, hash::Hash};
 
 use crate::{
-    dns_over_https::{types::Record, Response},
+    dns_over_https::{Response, types::Record},
     verifiable_dns::resolver::ResolverError,
 };
 
@@ -149,7 +149,7 @@ mod tests {
 
     mod responses_match {
         use super::*;
-        use crate::{dns_over_https::Query, PublicKey, Signature, VerificationData};
+        use crate::{PublicKey, Signature, VerificationData, dns_over_https::Query};
 
         #[test]
         fn passes_for_equal_responses() {

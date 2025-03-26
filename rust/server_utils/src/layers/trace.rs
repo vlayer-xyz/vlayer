@@ -1,6 +1,6 @@
 use axum::http::Request;
 use tower_http::trace::{HttpMakeClassifier, TraceLayer};
-use tracing::{info_span, Span};
+use tracing::{Span, info_span};
 
 use crate::layers::request_id::request_id;
 

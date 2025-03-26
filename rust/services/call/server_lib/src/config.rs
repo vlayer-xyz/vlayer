@@ -1,6 +1,6 @@
 use std::{collections::HashMap, net::SocketAddr as RawSocketAddr};
 
-use alloy_primitives::{hex::ToHexExt, ChainId};
+use alloy_primitives::{ChainId, hex::ToHexExt};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;

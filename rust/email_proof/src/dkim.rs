@@ -1,6 +1,6 @@
-use cfdkim::{validate_header, verify_email_with_key, DKIMError, DkimPublicKey};
+use cfdkim::{DKIMError, DkimPublicKey, validate_header, verify_email_with_key};
 use mailparse::{MailHeaderMap, ParsedMail};
-use slog::{o, Discard, Logger};
+use slog::{Discard, Logger, o};
 
 const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 

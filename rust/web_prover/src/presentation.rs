@@ -1,4 +1,4 @@
-use tlsn_core::{attestation::Attestation, presentation::Presentation, CryptoProvider, Secrets};
+use tlsn_core::{CryptoProvider, Secrets, attestation::Attestation, presentation::Presentation};
 use tlsn_formats::http::HttpTranscript;
 
 pub async fn create_presentation(

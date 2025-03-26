@@ -6,11 +6,11 @@ use alloy_primitives::ChainId;
 #[cfg(feature = "jwt")]
 use call_server_lib::jwt::Algorithm;
 use call_server_lib::{
-    chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
-    ConfigBuilder, ProofMode,
+    Config, ConfigBuilder, ProofMode, chain_proof::Config as ChainProofConfig,
+    gas_meter::Config as GasMeterConfig, serve,
 };
 use clap::{ArgAction, Parser};
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{GlobalArgs, LogFormat, init_tracing};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
 use server_utils::set_risc0_dev_mode;
 use tracing::{info, warn};

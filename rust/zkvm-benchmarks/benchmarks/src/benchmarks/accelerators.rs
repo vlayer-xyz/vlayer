@@ -1,4 +1,4 @@
-use crate::{benchmarks::merge, Benchmark};
+use crate::{Benchmark, benchmarks::merge};
 
 mod hash;
 

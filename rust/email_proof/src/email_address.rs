@@ -42,11 +42,7 @@ impl EmailAddress {
             .filter_map(|c| Self::handle_quotes(c, &mut inside_quotes))
             .collect();
 
-        if inside_quotes {
-            None
-        } else {
-            Some(result)
-        }
+        if inside_quotes { None } else { Some(result) }
     }
 
     fn handle_quotes(c: char, inside_quotes: &mut bool) -> Option<char> {

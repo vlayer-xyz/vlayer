@@ -1,11 +1,11 @@
-use alloy_primitives::{address, Address, ChainId};
-use call_common::{metadata::Metadata, ExecutionLocation, RevmDB, WrappedRevmDBError};
+use alloy_primitives::{Address, ChainId, address};
+use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
 use call_precompiles::precompile_by_address;
 use revm::{
+    EvmContext, Inspector as IInspector,
     db::WrapDatabaseRef,
     interpreter::{CallInputs, CallOutcome},
     primitives::ExecutionResult,
-    EvmContext, Inspector as IInspector,
 };
 use tracing::{debug, info};
 
@@ -35,10 +35,11 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
     pub fn new(
         start_chain_id: ChainId,
         transaction_callback: impl Fn(
-                &Call,
-                ExecutionLocation,
-            ) -> Result<TxResultWithMetadata, Error<WrappedRevmDBError<D>>>
-            + 'a,
+            &Call,
+            ExecutionLocation,
+        )
+            -> Result<TxResultWithMetadata, Error<WrappedRevmDBError<D>>>
+        + 'a,
         is_vlayer_test: bool,
     ) -> Self {
         Self {
@@ -135,12 +136,12 @@ mod test {
 
     use std::convert::Infallible;
 
-    use alloy_primitives::{address, Address, BlockNumber, Bytes, U256};
+    use alloy_primitives::{Address, BlockNumber, Bytes, U256, address};
     use revm::{
+        EvmContext, InMemoryDB, Inspector as IInspector,
         db::{EmptyDB, WrapDatabaseRef},
         interpreter::{CallInputs, CallScheme, CallValue},
         primitives::{AccountInfo, Output, SuccessReason},
-        EvmContext, InMemoryDB, Inspector as IInspector,
     };
 
     use super::*;
@@ -227,14 +228,13 @@ mod test {
     #[test]
     fn call_set_block() {
         let block_num = 1;
-        let inspector = inspector_call(
-            CONTRACT_ADDR,
-            &SET_BLOCK_SELECTOR,
-            &U256::from(block_num).to_be_bytes::<32>(),
+        let block_num_bytes = U256::from(block_num).to_be_bytes::<32>();
+        let inspector = inspector_call(CONTRACT_ADDR, &SET_BLOCK_SELECTOR, &block_num_bytes);
+        assert!(
+            inspector
+                .location
+                .is_some_and(|loc| loc.block_number == block_num)
         );
-        assert!(inspector
-            .location
-            .is_some_and(|loc| loc.block_number == block_num));
     }
 
     #[test]
@@ -262,9 +262,11 @@ mod test {
         ]
         .concat();
         let inspector = inspector_call(CONTRACT_ADDR, &SET_CHAIN_SELECTOR, &args);
-        assert!(inspector
-            .location
-            .is_some_and(|loc| loc.block_number == block_num && loc.chain_id == chain_id));
+        assert!(
+            inspector
+                .location
+                .is_some_and(|loc| loc.block_number == block_num && loc.chain_id == chain_id)
+        );
     }
 
     #[test]

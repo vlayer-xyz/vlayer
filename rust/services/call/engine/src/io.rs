@@ -16,7 +16,7 @@ use risc0_zkvm::sha::Digest;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{config::DEFAULT_CALLER, evm::input::MultiEvmInput, CallAssumptions};
+use crate::{CallAssumptions, config::DEFAULT_CALLER, evm::input::MultiEvmInput};
 
 #[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Input {

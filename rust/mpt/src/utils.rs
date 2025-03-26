@@ -1,7 +1,7 @@
 use alloy_primitives::B256;
 use itertools::Itertools;
 
-use crate::{hash, Digest};
+use crate::{Digest, hash};
 
 // Alloy does not return node as first element in the proof, so we need to reorder it
 pub fn reorder_root_first<T, D>(nodes: impl Iterator<Item = T>, root_hash: B256) -> Vec<T>

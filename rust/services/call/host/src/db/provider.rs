@@ -8,8 +8,8 @@ use derive_more::Debug;
 use provider::BlockingProvider;
 #[allow(clippy::disallowed_types)]
 use revm::{
-    primitives::{AccountInfo, Bytecode, KECCAK_EMPTY},
     DatabaseRef,
+    primitives::{AccountInfo, Bytecode, KECCAK_EMPTY},
 };
 use thiserror::Error;
 

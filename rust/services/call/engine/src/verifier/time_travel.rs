@@ -1,4 +1,4 @@
-use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
+use alloy_primitives::{B256, BlockHash, BlockNumber, ChainId};
 use async_trait::async_trait;
 use common::sealed_with_test_mock;
 use derive_new::new;
@@ -12,7 +12,9 @@ pub enum Error {
     ChainClient(#[from] chain_client::Error),
     #[error("Block not found in chain proof trie: {block_num}")]
     BlockNotFound { block_num: BlockNumber },
-    #[error("Block hash mismatch: block_num={block_num}, hash_in_input={hash_in_input}, proven_hash={proven_hash}")]
+    #[error(
+        "Block hash mismatch: block_num={block_num}, hash_in_input={hash_in_input}, proven_hash={proven_hash}"
+    )]
     BlockHash {
         block_num: BlockNumber,
         hash_in_input: B256,

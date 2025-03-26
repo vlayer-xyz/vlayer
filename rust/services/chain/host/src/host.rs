@@ -208,7 +208,9 @@ mod tests {
     #[cfg(test)]
     #[ctor::ctor]
     fn before_all() {
-        std::env::set_var("RISC0_DEV_MODE", "1");
+        unsafe {
+            std::env::set_var("RISC0_DEV_MODE", "1");
+        }
     }
 
     fn test_db() -> ChainDb {

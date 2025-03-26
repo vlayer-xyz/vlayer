@@ -3,11 +3,11 @@ use std::sync::Arc;
 use call_common::RevmDB;
 use call_precompiles::precompiles as generate_precompiles;
 use revm::{
-    db::WrapDatabaseRef, inspector_handle_register, precompile::PrecompileWithAddress, Evm, Handler,
+    Evm, Handler, db::WrapDatabaseRef, inspector_handle_register, precompile::PrecompileWithAddress,
 };
 
 use super::inspector::Inspector;
-use crate::{evm::env::EvmEnv, Call};
+use crate::{Call, evm::env::EvmEnv};
 
 pub fn build_evm<'inspector, 'envs, D: RevmDB>(
     env: &'envs EvmEnv<D>,

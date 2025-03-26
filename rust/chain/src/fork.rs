@@ -1,10 +1,10 @@
 use std::{cmp::Ordering, ops::Deref};
 
+use ActivationCondition::*;
 use alloy_primitives::BlockNumber;
 use derive_new::new;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
-use ActivationCondition::*;
 
 use crate::config::MAINNET_MERGE_BLOCK_TIMESTAMP;
 

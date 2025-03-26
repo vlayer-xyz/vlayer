@@ -1,6 +1,6 @@
 use bytes::Bytes;
 use call_engine::Input;
-use host_utils::{proving, ProofMode, Prover as Risc0Prover};
+use host_utils::{ProofMode, Prover as Risc0Prover, proving};
 use risc0_zkvm::{ExecutorEnv, ProveInfo};
 use tracing::instrument;
 

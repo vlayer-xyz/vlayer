@@ -6,7 +6,7 @@ use derive_new::new;
 use thiserror::Error;
 use url::ParseError;
 
-use super::{cache::CachedProvider, EthersClient};
+use super::{EthersClient, cache::CachedProvider};
 use crate::{BlockingProvider, EthersProvider};
 
 #[derive(Error, Debug)]

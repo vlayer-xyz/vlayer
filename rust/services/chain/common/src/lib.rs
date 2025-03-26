@@ -5,9 +5,9 @@ use bytes::Bytes;
 use common::{Hashable, Method};
 use derive_more::{Deref, From, Into};
 use derive_new::new;
-use mpt::{reorder_root_first, ParseNodeError, Sha256, Sha2Trie};
+use mpt::{ParseNodeError, Sha2Trie, Sha256, reorder_root_first};
 use risc0_zkvm::{
-    serde::to_vec, sha::Digest, AssumptionReceipt, FakeReceipt, Receipt, ReceiptClaim,
+    AssumptionReceipt, FakeReceipt, Receipt, ReceiptClaim, serde::to_vec, sha::Digest,
 };
 use serde::{Deserialize, Serialize};
 use serde_with::{hex::Hex, serde_as};

@@ -29,8 +29,8 @@ pub(crate) mod utils {
     };
 
     use super::{
-        tlsn_core_types::{AttestationProof, Body, BodyProof, Presentation, ServerIdentityProof},
         WEB_PROOF_FIXTURE,
+        tlsn_core_types::{AttestationProof, Body, BodyProof, Presentation, ServerIdentityProof},
     };
     use crate::web_proof::{PresentationJSON, PresentationJsonMeta, WebProof};
 

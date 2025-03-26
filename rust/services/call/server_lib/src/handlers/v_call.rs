@@ -1,14 +1,13 @@
 use alloy_primitives::ChainId;
 use call_host::{Error as HostError, Host};
 use provider::Address;
-use tracing::{info, info_span, Instrument};
+use tracing::{Instrument, info, info_span};
 use types::{Call, CallContext, CallHash, Result as VCallResult};
 
 use super::{Params, State};
 use crate::{
-    gas_meter,
+    Config, gas_meter,
     proof::{self, Status as ProofStatus},
-    Config,
 };
 
 pub mod types;

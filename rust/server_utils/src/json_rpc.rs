@@ -5,11 +5,11 @@ use axum::{
 };
 use derive_new::new;
 use jsonrpsee::{
-    types::{
-        error::{self as jrpcerror, ErrorObjectOwned},
-        Id, Request,
-    },
     ConnectionId, Extensions, MethodCallback, MethodResponse, RpcModule,
+    types::{
+        Id, Request,
+        error::{self as jrpcerror, ErrorObjectOwned},
+    },
 };
 use mime::APPLICATION_JSON;
 use tracing::{error, info};

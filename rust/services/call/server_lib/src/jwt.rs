@@ -1,7 +1,7 @@
 use axum::{
+    RequestPartsExt,
     extract::{FromRef, FromRequestParts, OptionalFromRequestParts},
     http::request::Parts,
-    RequestPartsExt,
 };
 use derive_more::Deref;
 use derive_new::new;

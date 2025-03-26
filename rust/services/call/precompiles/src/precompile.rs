@@ -1,6 +1,6 @@
 use derive_more::{Deref, Into};
 use revm::precompile::{
-    calc_linear_cost_u32, Error::OutOfGas, PrecompileErrors::Error, PrecompileWithAddress,
+    Error::OutOfGas, PrecompileErrors::Error, PrecompileWithAddress, calc_linear_cost_u32,
 };
 use serde::Serialize;
 

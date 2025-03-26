@@ -6,7 +6,7 @@ use std::env;
 use alloy_primitives::B256;
 use chain_common::ChainProofReceipt;
 use chain_db::{ChainDb, Mode};
-use risc0_zkvm::{sha::Digest, Receipt};
+use risc0_zkvm::{Receipt, sha::Digest};
 
 pub fn main() -> anyhow::Result<()> {
     let args: Vec<String> = env::args().collect();

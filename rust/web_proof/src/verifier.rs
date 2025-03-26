@@ -86,9 +86,8 @@ mod tests {
 
         use super::*;
         use crate::fixtures::{
-            read_fixture,
+            NOTARY_PUB_KEY_PEM_EXAMPLE, read_fixture,
             utils::{change_server_name, load_web_proof_fixture_and_modify},
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
         };
 
         #[test]
@@ -125,7 +124,10 @@ mod tests {
 
             let web = verify_and_parse(web_proof).unwrap();
 
-            assert_eq!(web.body, "{\"protected\":false,\"screen_name\":\"wktr0\",\"always_use_https\":true,\"use_cookie_personalization\":false,\"sleep_time\":{\"enabled\":false,\"end_time\":null,\"start_time\":null},\"geo_enabled\":false,\"language\":\"en\",\"discoverable_by_email\":false,\"discoverable_by_mobile_phone\":false,\"display_sensitive_media\":false,\"personalized_trends\":true,\"allow_media_tagging\":\"all\",\"allow_contributor_request\":\"none\",\"allow_ads_personalization\":false,\"allow_logged_out_device_personalization\":false,\"allow_location_history_personalization\":false,\"allow_sharing_data_for_third_party_personalization\":false,\"allow_dms_from\":\"following\",\"always_allow_dms_from_subscribers\":null,\"allow_dm_groups_from\":\"following\",\"translator_type\":\"none\",\"country_code\":\"pl\",\"address_book_live_sync_enabled\":false,\"universal_quality_filtering_enabled\":\"enabled\",\"dm_receipt_setting\":\"all_enabled\",\"allow_authenticated_periscope_requests\":true,\"protect_password_reset\":false,\"require_password_login\":false,\"requires_login_verification\":false,\"dm_quality_filter\":\"enabled\",\"autoplay_disabled\":false,\"settings_metadata\":{\"is_eu\":\"true\"}}");
+            assert_eq!(
+                web.body,
+                "{\"protected\":false,\"screen_name\":\"wktr0\",\"always_use_https\":true,\"use_cookie_personalization\":false,\"sleep_time\":{\"enabled\":false,\"end_time\":null,\"start_time\":null},\"geo_enabled\":false,\"language\":\"en\",\"discoverable_by_email\":false,\"discoverable_by_mobile_phone\":false,\"display_sensitive_media\":false,\"personalized_trends\":true,\"allow_media_tagging\":\"all\",\"allow_contributor_request\":\"none\",\"allow_ads_personalization\":false,\"allow_logged_out_device_personalization\":false,\"allow_location_history_personalization\":false,\"allow_sharing_data_for_third_party_personalization\":false,\"allow_dms_from\":\"following\",\"always_allow_dms_from_subscribers\":null,\"allow_dm_groups_from\":\"following\",\"translator_type\":\"none\",\"country_code\":\"pl\",\"address_book_live_sync_enabled\":false,\"universal_quality_filtering_enabled\":\"enabled\",\"dm_receipt_setting\":\"all_enabled\",\"allow_authenticated_periscope_requests\":true,\"protect_password_reset\":false,\"require_password_login\":false,\"requires_login_verification\":false,\"dm_quality_filter\":\"enabled\",\"autoplay_disabled\":false,\"settings_metadata\":{\"is_eu\":\"true\"}}"
+            );
         }
 
         #[test]
