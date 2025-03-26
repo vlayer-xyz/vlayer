@@ -8,7 +8,9 @@ services:
     pull_policy: always
     environment:
       RUST_LOG: "info,call_engine=debug"
-    command: "--proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-l1:8545 --rpc-url 31338:http://anvil-l2-op:8545"
+    volumes:
+      - ../../fixtures:/root:ro
+    command: "--proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-l1:8545 --rpc-url 31338:http://anvil-l2-op:8545 --public-key jwt-authority.key.pub"
     ports:
       - "127.0.0.1:3000:3000"
     healthcheck:
