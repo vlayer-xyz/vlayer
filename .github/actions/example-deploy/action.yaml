@@ -4,8 +4,8 @@ inputs:
   example_name:
     description: 'Name of the example to deploy'
     required: true
-  examples_test_private_key:
-    description: 'Private key for the example'
+  testnet_private_key_location:
+    description: "Path to testnet private key"
     required: true
   vercel_token:
     description: 'Vercel token'
@@ -37,8 +37,8 @@ runs:
   steps:
     - name: Install contracts prerequisites
       uses: ./.github/actions/contracts-prerequisites
-
-    - uses: oven-sh/setup-bun@v2
+    - name: Install TypeScript prerequisites
+      uses: ./.github/actions/ts-prerequisites
 
     - name: Download nightly contracts
       shell: bash
@@ -87,6 +87,13 @@ runs:
       shell: bash
       run: npm install -g vercel
 
+    - name: Read testnet private key
+      run: |
+        EXAMPLES_TEST_PRIVATE_KEY=$(cat "${{ inputs.testnet_private_key_location }}")
+        echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
+        echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
+      shell: bash
+
     - name: Deploy contracts
       shell: bash
       run: bun run deploy:testnet
@@ -94,9 +101,13 @@ runs:
         VLAYER_ENV: testnet
         USE_WINDOW_ETHEREUM_TRANSPORT: true
         JSON_RPC_URL: ${{ inputs.json_rpc_url }}
-        EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.examples_test_private_key }}
         VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
       working-directory: ./examples/${{ inputs.example_name }}/vlayer
+
+    - name: Remove no longer needed private key from env
+      run: |
+        echo "EXAMPLES_TEST_PRIVATE_KEY=removed" >> $GITHUB_ENV
+      shell: bash
 
     - name: Build vite
       shell: bash
