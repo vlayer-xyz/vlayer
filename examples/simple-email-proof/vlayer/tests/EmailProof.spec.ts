@@ -44,9 +44,11 @@ test("Simple Email Proof happy path", async ({ page }) => {
     ).toBeVisible();
   });
 
-  await test.step("Click on mint button naviages to mint page", async () => {
+  await test.step("Click on mint button proves, verifies and go to success page", async () => {
     await page.click("#nextButton");
-    await expect(page).toHaveURL(stepsMeta[StepKind.success].path);
+    await expect(page).toHaveURL(stepsMeta[StepKind.success].path, {
+      timeout: 30000, // wait for proof
+    });
     await expect(
       page.getByRole("heading", {
         name: stepsMeta[StepKind.success].title,
