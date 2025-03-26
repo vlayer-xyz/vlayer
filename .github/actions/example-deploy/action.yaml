@@ -37,8 +37,8 @@ runs:
   steps:
     - name: Install contracts prerequisites
       uses: ./.github/actions/contracts-prerequisites
-
-    - uses: oven-sh/setup-bun@v2
+    - name: Install TypeScript prerequisites
+      uses: ./.github/actions/ts-prerequisites
 
     - name: Download nightly contracts
       shell: bash
