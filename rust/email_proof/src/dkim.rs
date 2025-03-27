@@ -17,34 +17,6 @@ pub fn verify_email(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error>
     Ok(())
 }
 
-fn verify_dkim_header_dns_consistency(
-    email: &ParsedMail,
-    record: &DNSRecord,
-) -> Result<(), DKIMError> {
-    for header in email.headers.get_all_headers(DKIM_SIGNATURE_HEADER) {
-        let dkim_header = validate_header(&String::from_utf8_lossy(header.get_value_raw()))?;
-
-        let selector = dkim_header.get_tag("s").ok_or_else(|| {
-            DKIMError::SignatureSyntaxError("Missing selector tag (s=) in DKIM-Signature".into())
-        })?;
-
-        let domain = dkim_header.get_tag("d").ok_or_else(|| {
-            DKIMError::SignatureSyntaxError("Missing domain tag (d=) in DKIM-Signature".into())
-        })?;
-
-        let expected = format!("{selector}._domainkey.{domain}");
-
-        if expected != record.name {
-            return Err(DKIMError::SignatureSyntaxError(format!(
-                "DKIM-Signature identity ({expected}) does not match DNS record ({})",
-                record.name
-            )));
-        }
-    }
-
-    Ok(())
-}
-
 fn verify_dkim_headers(email: &ParsedMail) -> Result<(), DKIMError> {
     verify_email_contains_dkim_headers(email)?;
     verify_dkim_body_length_tag(email)?;
@@ -86,6 +58,34 @@ fn verify_dkim_body_length_tag(email: &ParsedMail) -> Result<(), DKIMError> {
             return Err(DKIMError::SignatureSyntaxError(
                 "DKIM-Signature header contains body length tag (l=)".into(),
             ));
+        }
+    }
+
+    Ok(())
+}
+
+fn verify_dkim_header_dns_consistency(
+    email: &ParsedMail,
+    record: &DNSRecord,
+) -> Result<(), DKIMError> {
+    for header in email.headers.get_all_headers(DKIM_SIGNATURE_HEADER) {
+        let dkim_header = validate_header(&String::from_utf8_lossy(header.get_value_raw()))?;
+
+        let selector = dkim_header.get_tag("s").ok_or_else(|| {
+            DKIMError::SignatureSyntaxError("Missing selector tag (s=) in DKIM-Signature".into())
+        })?;
+
+        let domain = dkim_header.get_tag("d").ok_or_else(|| {
+            DKIMError::SignatureSyntaxError("Missing domain tag (d=) in DKIM-Signature".into())
+        })?;
+
+        let expected = format!("{selector}._domainkey.{domain}");
+
+        if expected != record.name {
+            return Err(DKIMError::SignatureSyntaxError(format!(
+                "DKIM-Signature identity ({expected}) does not match DNS record ({})",
+                record.name
+            )));
         }
     }
 
