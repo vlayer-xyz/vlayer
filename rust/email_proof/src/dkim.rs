@@ -1,4 +1,4 @@
-use cfdkim::{validate_header, verify_email_with_key, DKIMError};
+use cfdkim::{validate_header, DKIMError, DkimPublicKey};
 use mailparse::{MailHeaderMap, ParsedMail};
 use slog::{o, Discard, Logger};
 use verifiable_dns::DNSRecord;
@@ -10,21 +10,11 @@ const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
 pub fn verify_email(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error> {
     verify_dkim_headers(email)?;
-    check_dkim_header_dns_consistency(email, record)?;
-
-    let from_domain = from_header::extract_from_domain(email)?;
     let dkim_public_key = parse_dns_record(&record.data)?;
-
-    let result =
-        verify_email_with_key(&Logger::root(Discard, o!()), &from_domain, email, dkim_public_key)?;
-
-    if result.with_detail().starts_with("pass") {
-        Ok(())
-    } else if let Some(err) = result.error() {
-        Err(Error::DkimVerification(err))
-    } else {
-        Err(Error::DkimVerification(DKIMError::SignatureDidNotVerify))
-    }
+    verify_email_with_key(email, dkim_public_key)?;
+    check_dkim_header_dns_consistency(email, record)?;
+    
+    Ok(())
 }
 
 fn check_dkim_header_dns_consistency(
@@ -60,6 +50,21 @@ fn verify_dkim_headers(email: &ParsedMail) -> Result<(), DKIMError> {
     verify_dkim_body_length_tag(email)?;
 
     Ok(())
+}
+
+fn verify_email_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), Error> {
+    let from_domain = from_header::extract_from_domain(email)?;
+
+    let result =
+        cfdkim::verify_email_with_key(&Logger::root(Discard, o!()), &from_domain, email, key)?;
+
+    if result.with_detail().starts_with("pass") {
+        Ok(())
+    } else if let Some(err) = result.error() {
+        Err(Error::DkimVerification(err))
+    } else {
+        Err(Error::DkimVerification(DKIMError::SignatureDidNotVerify))
+    }
 }
 
 fn verify_email_contains_dkim_headers(email: &ParsedMail) -> Result<(), DKIMError> {
