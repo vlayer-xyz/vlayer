@@ -45,7 +45,11 @@ new Elysia({
         error_message: "Missing or wrong authentication",
       };
     }
-    return { success: true, name: "Tom Bombadil", greeting: "Old Tom Bombadil is a merry fellow!" };
+    return {
+      success: true,
+      name: "Tom Bombadil",
+      greeting: "Old Tom Bombadil is a merry fellow!",
+    };
   })
   .use(cors())
   .listen(3011);
