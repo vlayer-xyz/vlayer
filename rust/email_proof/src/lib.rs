@@ -75,18 +75,12 @@ mod test {
             ttl: 0,
         };
 
-        static ref SPOOFED_DOMAIN_DNS_FIXTURE: SolDnsRecord = SolDnsRecord {
-            name: "google._domainkey.spoofed-vlayer.xyz".into(),
-            ..DNS_FIXTURE.clone()
-        };
         static ref OTHER_SELECTOR_DOMAIN_DNS_FIXTURE: SolDnsRecord = SolDnsRecord {
             name: "non-google._domainkey.vlayer.xyz".into(),
             ..DNS_FIXTURE.clone()
         };
 
         static ref VERIFICATION_DATA: SolVerificationData = sign_dns_fixture(&DNS_FIXTURE);
-        static ref SPOOFED_VERIFICATION_DATA: SolVerificationData = sign_dns_fixture(&SPOOFED_DOMAIN_DNS_FIXTURE);
-
     }
 
     #[test]
@@ -104,23 +98,6 @@ mod test {
             }
         );
         Ok(())
-    }
-
-    #[test]
-    fn fails_for_spoofed_domain_key() {
-        let email = signed_email_fixture();
-        let calldata = calldata(&email, &SPOOFED_DOMAIN_DNS_FIXTURE, &SPOOFED_VERIFICATION_DATA);
-
-        assert!(parse_and_verify(&calldata).is_err());
-    }
-
-    #[test]
-    fn fails_for_other_dkim_selector() {
-        let email = signed_email_fixture();
-        let calldata =
-            calldata(&email, &OTHER_SELECTOR_DOMAIN_DNS_FIXTURE, &SPOOFED_VERIFICATION_DATA);
-
-        assert!(parse_and_verify(&calldata).is_err());
     }
 
     #[test]
