@@ -42,7 +42,7 @@
     "@typescript-eslint/parser": "^8.25.0",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
-    "daisyui": "^4.12.14",
+    "daisyui": "^5.0.9",
     "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
