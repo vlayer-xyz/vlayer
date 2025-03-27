@@ -4,12 +4,16 @@ import { metaMask } from "wagmi/connectors";
 import { useEnvPrivateKey } from "../../shared/lib/clientAuthMode";
 import { mockConnector } from "../../shared/lib/mockConnector";
 
+const chain =
+  import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil : optimismSepolia;
+
 const wagmiConfig = useEnvPrivateKey()
   ? createConfig({
-      connectors: [mockConnector(anvil)],
-      chains: [anvil],
+      connectors: [mockConnector(chain)],
+      chains: [chain],
       transports: {
         [anvil.id]: http(),
+        [optimismSepolia.id]: http(),
       },
     })
   : createConfig({

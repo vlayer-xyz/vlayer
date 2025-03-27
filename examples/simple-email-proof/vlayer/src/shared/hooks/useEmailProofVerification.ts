@@ -6,12 +6,14 @@ import {
 } from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
-import { usePrivateKey } from "../lib/utils";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
-import { privateKeyToAccount } from "viem/accounts";
-import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
+import { AbiStateMutability, ContractFunctionArgs } from "viem";
 import { useNavigate } from "react-router";
+import {
+  useEnvPrivateKey,
+  getAccountFromPrivateKey,
+} from "../lib/clientAuthMode";
 import debug from "debug";
 
 const log = debug("vlayer:email-proof-verification");
@@ -76,12 +78,10 @@ export const useEmailProofVerification = () => {
       >,
     };
 
-    if (usePrivateKey) {
+    if (useEnvPrivateKey()) {
       await writeContract({
         ...contractArgs,
-        account: privateKeyToAccount(
-          import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
-        ),
+        account: getAccountFromPrivateKey(),
       });
     } else {
       await writeContract(contractArgs);
@@ -90,10 +90,7 @@ export const useEmailProofVerification = () => {
 
   const startProving = async (emlContent: string) => {
     setCurrentStep(ProofVerificationStep.SENDING_TO_PROVER);
-    const claimerAddr = usePrivateKey
-      ? privateKeyToAccount(import.meta.env.VITE_PRIVATE_KEY as `0x${string}`)
-          .address
-      : (connectedAddr as Address);
+    const claimerAddr = connectedAddr;
 
     const email = await preverifyEmail(
       emlContent,
