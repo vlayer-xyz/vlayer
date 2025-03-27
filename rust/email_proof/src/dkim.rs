@@ -12,12 +12,12 @@ pub fn verify_email(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error>
     verify_dkim_headers(email)?;
     let dkim_public_key = parse_dns_record(&record.data)?;
     verify_email_with_key(email, dkim_public_key)?;
-    check_dkim_header_dns_consistency(email, record)?;
+    verify_dkim_header_dns_consistency(email, record)?;
 
     Ok(())
 }
 
-fn check_dkim_header_dns_consistency(
+fn verify_dkim_header_dns_consistency(
     email: &ParsedMail,
     record: &DNSRecord,
 ) -> Result<(), DKIMError> {
