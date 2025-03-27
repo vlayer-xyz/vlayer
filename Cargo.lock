@@ -6088,6 +6088,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "generate_fixtures"
+version = "0.1.0"
+dependencies = [
+ "reqwest 0.12.12",
+ "serde",
+ "serde_json",
+ "tokio",
+ "web_prover",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
