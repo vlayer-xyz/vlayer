@@ -6,5 +6,5 @@ services:
     ports:
       - "127.0.0.1:3003:80" 
     volumes:
-      - ../../fixtures/:/root:ro
+      - ../fixtures/:/root:ro
     command: "80 --token-plugin JWTTokenApi --token-source ./jwt-authority.key.pub"
