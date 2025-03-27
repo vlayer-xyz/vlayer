@@ -57,6 +57,8 @@
 
           pkgs.rustup
           pkgs.libiconv
+          pkgs.openssl
+          pkgs.pkg-config
 
         ] ++ darwinInputs;
 
