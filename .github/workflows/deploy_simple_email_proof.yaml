@@ -34,5 +34,5 @@ jobs:
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           github_token: ${{ github.token }}
           json_rpc_url: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
-          vlayer_api_token: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN }}
+          vlayer_api_token: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN_JWT }}
           vite_sentry_dsn: "https://459389c1022a1e1478946c37b2810de6@o4508754893012992.ingest.de.sentry.io/4508760380014672"
