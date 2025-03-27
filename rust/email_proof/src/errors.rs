@@ -20,6 +20,10 @@ pub enum Error {
     InvalidDkimRecord(String),
     #[error("Invalid From header: {0}")]
     InvalidFromHeader(String),
+    #[error("Invalid new line separator: {0}")]
+    InvalidNewLineSeparator(u8),
+    #[error("Missing CRLF-CRLF separator in email headers")]
+    MissingHeaderSeparator,
     #[error("VDNS signature verification failed: {0}")]
     VdnsSignatureVerification(
         #[from]
