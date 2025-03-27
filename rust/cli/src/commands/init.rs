@@ -89,6 +89,14 @@ impl TryFrom<Option<PathBuf>> for WorkDir {
     }
 }
 
+struct OutDirs {
+    examples: PathBuf,
+    scripts: PathBuf,
+    tests: PathBuf,
+    testdata: PathBuf,
+    fixtures: PathBuf,
+}
+
 fn default_templates_url(version: &str) -> String {
     format!("https://vlayer-releases.s3.eu-north-1.amazonaws.com/{version}/examples.tar.gz")
 }
@@ -224,21 +232,15 @@ async fn init_existing(
             &src_path.display()
         )
     } else {
-        let scripts_dst = create_vlayer_dir(&root_path)?;
-        let examples_dst = create_vlayer_dir(&src_path)?;
-        let tests_dst = create_vlayer_dir(&root_path.join("test"))?;
-        let testdata_dst = root_path.join("testdata");
+        let out_dirs = OutDirs {
+            scripts: create_vlayer_dir(&root_path)?,
+            examples: create_vlayer_dir(&src_path)?,
+            tests: create_vlayer_dir(&root_path.join("test"))?,
+            testdata: create_vlayer_dir(&root_path.join("testdata"))?,
+            fixtures: create_vlayer_dir(&root_path.join("fixtures"))?,
+        };
         let template = config.template()?;
-        fetch_examples(
-            &examples_dst,
-            &scripts_dst,
-            &tests_dst,
-            &testdata_dst,
-            template.to_string(),
-            templates_location,
-            work_dir,
-        )
-        .await?;
+        fetch_examples(out_dirs, template.to_string(), templates_location, work_dir).await?;
         info!("Successfully downloaded vlayer template \"{}\"", template);
     }
 
@@ -323,10 +325,7 @@ fn find_src_path(root_path: &Path) -> CLIResult<PathBuf> {
 }
 
 async fn fetch_examples(
-    examples_dst: &Path,
-    scripts_dst: &Path,
-    tests_dst: &Path,
-    testdata_dst: &Path,
+    out_dirs: OutDirs,
     template: String,
     templates_location: TemplatesLocation,
     work_dir: WorkDir,
@@ -350,16 +349,18 @@ async fn fetch_examples(
     let downloaded_examples = work_dir_path.join(&template).join("src/vlayer");
     let downloaded_tests = work_dir_path.join(&template).join("test/vlayer");
     let downloaded_testdata = work_dir_path.join(&template).join("testdata");
+    let downloaded_fixtures = work_dir_path.join(&template).join("fixtures");
 
-    copy_dir_to(&downloaded_scripts, scripts_dst)?;
-    copy_dir_to(&downloaded_examples, examples_dst)?;
+    copy_dir_to(&downloaded_scripts, &out_dirs.scripts)?;
+    copy_dir_to(&downloaded_examples, &out_dirs.examples)?;
+    copy_dir_to(&downloaded_fixtures, &out_dirs.fixtures)?;
 
     // not all examples come with tests and testdata
     if downloaded_tests.exists() {
-        copy_dir_to(&downloaded_tests, tests_dst)?;
+        copy_dir_to(&downloaded_tests, &out_dirs.tests)?;
     }
     if downloaded_testdata.exists() {
-        copy_dir_to(&downloaded_testdata, testdata_dst)?;
+        copy_dir_to(&downloaded_testdata, &out_dirs.testdata)?;
     }
 
     Ok(())
