@@ -2,7 +2,7 @@ import "./background";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 import browser from "webextension-polyfill";
-import { ExtensionAction, ZkProvingStatus } from "./web-proof-commons";
+import { ExtensionAction, ZkProvingStatus } from "@vlayer/web-proof-commons";
 
 describe("zk related messaging", () => {
   beforeEach(() => {

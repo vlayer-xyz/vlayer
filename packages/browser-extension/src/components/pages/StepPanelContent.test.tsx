@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { SidePanelContainer } from "./SidePanelContent";
 import * as React from "react";
-import { ZkProvingStatus } from "src/web-proof-commons";
+import { ZkProvingStatus } from "@vlayer/web-proof-commons";
 import { LOADING } from "@vlayer/extension-hooks";
 
 const mocks = vi.hoisted(() => {
@@ -27,7 +27,7 @@ vi.mock("hooks/useSteps", () => ({
   useSteps: mocks.useSteps,
 }));
 
-vi.mock("../../web-proof-commons", () => ({
+vi.mock("@vlayer/web-proof-commons", () => ({
   isEmptyWebProverSessionConfig: mocks.isEmptyWebProverSessionConfig,
   ZkProvingStatus: mocks.ZkProvingStatus,
 }));

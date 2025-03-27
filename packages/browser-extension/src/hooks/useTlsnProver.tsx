@@ -11,7 +11,7 @@ import {
   isDefined,
   ExtensionMessageType,
   getRedactionConfig,
-} from "../web-proof-commons";
+} from "@vlayer/web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";

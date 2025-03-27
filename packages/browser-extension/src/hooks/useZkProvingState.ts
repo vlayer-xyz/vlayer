@@ -1,5 +1,5 @@
 import { useSessionStorage, LOADING } from "@vlayer/extension-hooks";
-import { ZkProvingStatus } from "../web-proof-commons";
+import { ZkProvingStatus } from "@vlayer/web-proof-commons";
 
 export function isValidZkProvingStatus(
   value: unknown,

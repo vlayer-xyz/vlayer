@@ -1,4 +1,4 @@
-import { RedactionConfig } from "src/web-proof-commons";
+import { RedactionConfig } from "@vlayer/web-proof-commons";
 import { calcRedactionRanges, calcRevealRanges } from "./redact";
 import { describe, expect, test } from "vitest";
 import {

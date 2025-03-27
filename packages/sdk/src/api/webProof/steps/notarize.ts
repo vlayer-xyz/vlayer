@@ -2,7 +2,7 @@ import {
   EXTENSION_STEP,
   type WebProofStepNotarize,
   type RedactionConfig,
-} from "../../../web-proof-commons";
+} from "@vlayer/web-proof-commons";
 
 export const notarize = (
   url: string,

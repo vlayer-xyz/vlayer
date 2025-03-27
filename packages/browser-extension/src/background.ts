@@ -10,7 +10,7 @@ import {
   ExtensionMessageType,
   MessageToExtension,
   ZkProvingStatus,
-} from "./web-proof-commons";
+} from "@vlayer/web-proof-commons";
 
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";

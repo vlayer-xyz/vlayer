@@ -4,5 +4,5 @@ export { createExtensionWebProofProvider } from "./api/webProof/providers/extens
 
 export * from "./api/lib/types";
 
-export * from "./web-proof-commons/utils";
-export * from "./web-proof-commons/types/message";
+export * from "@vlayer/web-proof-commons/utils";
+export * from "@vlayer/web-proof-commons/types/message";

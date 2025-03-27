@@ -16,7 +16,7 @@ import {
   type RedactionConfig,
   RedactionItemsArray,
   type MessageToExtension,
-} from "../../../web-proof-commons";
+} from "@vlayer/web-proof-commons";
 
 import debug from "debug";
 

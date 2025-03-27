@@ -30,10 +30,14 @@
     "vitest": "^2.1.1",
     "vitest-fetch-mock": "^0.4.1"
   },
+  "bundleDependencies": [
+    "@vlayer/web-proof-commons"
+  ],
   "peerDependencies": {
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@vlayer/web-proof-commons": "workspace:*",
     "@vitejs/plugin-react": "^4.3.2",
     "base64-js": "^1.5.1",
     "debug": "^4.4.0",

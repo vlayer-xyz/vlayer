@@ -1,6 +1,6 @@
 import { BrowsingHistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
-import { UrlPattern, WebProofStep } from "../web-proof-commons";
+import { UrlPattern, WebProofStep } from "@vlayer/web-proof-commons";
 import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
 import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 import { useZkProvingState } from "./useZkProvingState";

@@ -1,5 +1,5 @@
 import { useSessionStorage } from "@vlayer/extension-hooks";
-import { WebProverSessionConfig } from "../web-proof-commons";
+import { WebProverSessionConfig } from "@vlayer/web-proof-commons";
 
 export const useProvingSessionConfig = () => {
   const initialValue = {

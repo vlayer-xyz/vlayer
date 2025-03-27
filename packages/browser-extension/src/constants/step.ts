@@ -1,4 +1,4 @@
-import type { ExtensionStep, UrlPattern } from "src/web-proof-commons";
+import type { ExtensionStep, UrlPattern } from "@vlayer/web-proof-commons";
 
 export enum StepStatus {
   Completed = "completed",

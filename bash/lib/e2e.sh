@@ -70,6 +70,7 @@ remappings = [["risc0-ethereum-1.2.0/", "dependencies/risc0-ethereum-1.2.0/"]]
 [js-dependencies]
 "@vlayer/sdk" = { path = "$VLAYER_HOME/packages/sdk" }
 "@vlayer/react" = { path = "$VLAYER_HOME/packages/sdk-hooks" }
+"@vlayer/web-proof-commons" = { path = "$VLAYER_HOME/packages/web-proof-commons" }  
 EOF
 
   cat config.toml

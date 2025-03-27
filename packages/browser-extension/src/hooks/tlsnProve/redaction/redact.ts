@@ -2,7 +2,7 @@ import { Commit } from "tlsn-wasm";
 import { match, P } from "ts-pattern";
 import { calculateRequestRanges } from "./tlsn.request.ranges";
 import { calculateResponseRanges } from "./tlsn.response.ranges";
-import { RedactionConfig } from "src/web-proof-commons";
+import { RedactionConfig } from "@vlayer/web-proof-commons";
 import { CommitData } from "tlsn-js/src/types";
 import {
   InvalidRangeError,

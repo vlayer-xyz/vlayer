@@ -2,7 +2,7 @@ import { describe, test, expect } from "vitest";
 import {
   RedactResponseJsonBody,
   RedactResponseJsonBodyExcept,
-} from "src/web-proof-commons";
+} from "@vlayer/web-proof-commons";
 import {
   InvalidJsonError,
   PathNotFoundError,

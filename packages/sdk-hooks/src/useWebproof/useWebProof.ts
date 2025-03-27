@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { type Abi, type ContractFunctionName } from "viem";
 import { useProofContext } from "../context";
 import { WebProofRequestStatus } from "../types";
-import { ExtensionMessageType, type WebProofConfig } from "@vlayer/sdk";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
+
+import { type WebProofConfig } from "@vlayer/sdk";
 
 export const useWebProof = (
   webProofRequest: WebProofConfig<Abi, ContractFunctionName>,

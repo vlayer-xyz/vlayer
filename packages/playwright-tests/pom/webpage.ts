@@ -1,5 +1,4 @@
 import { BrowserContext, Page } from "@playwright/test";
-import { ExtensionAction, ZkProvingStatus } from "../web-proof-commons";
 import { extensionId } from "../config";
 //Webpage acts as a webpage that uses SDK to communicate with extension
 export class Webpage {
@@ -34,14 +33,14 @@ export class Webpage {
   }
 
   openExtension() {
-    return this.sendMessageToExtension(ExtensionAction.OpenSidePanel);
+    return this.sendMessageToExtension("OpenSidePanel");
   }
   closeExtension() {
-    return this.sendMessageToExtension(ExtensionAction.CloseSidePanel);
+    return this.sendMessageToExtension("CloseSidePanel");
   }
   finishZkProof() {
-    return this.sendMessageToExtension(ExtensionAction.NotifyZkProvingStatus, {
-      payload: { status: ZkProvingStatus.Done },
+    return this.sendMessageToExtension("NotifyZkProvingStatus", {
+      payload: { status: "Done" },
     });
   }
 }

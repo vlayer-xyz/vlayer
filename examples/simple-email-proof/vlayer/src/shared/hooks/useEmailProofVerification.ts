@@ -96,7 +96,9 @@ export const useEmailProofVerification = () => {
       emlContent,
       import.meta.env.VITE_DNS_SERVICE_URL,
     );
+    console.log("email", email);
     await callProver([email, claimerAddr]);
+    console.log("callProver done");
     setCurrentStep(ProofVerificationStep.WAITING_FOR_PROOF);
   };
 

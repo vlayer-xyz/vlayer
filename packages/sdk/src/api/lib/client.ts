@@ -14,7 +14,7 @@ import {
   ExtensionMessageType,
   ZkProvingStatus,
   type PresentationJSON,
-} from "../../web-proof-commons";
+} from "@vlayer/web-proof-commons";
 import { type ContractFunctionArgsWithout } from "types/viem";
 import { type ProveArgs } from "types/vlayer";
 

@@ -1,4 +1,4 @@
-import { RedactResponseHeaders } from "src/web-proof-commons";
+import { RedactResponseHeaders } from "@vlayer/web-proof-commons";
 import { describe, expect, test } from "vitest";
 import {
   getHeaderRange,

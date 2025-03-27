@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { MessageToExtension } from "../src/web-proof-commons";
+import { MessageToExtension } from "@vlayer/web-proof-commons";
 import "@testing-library/jest-dom/vitest";
 
 const mockStore = function () {

@@ -5,7 +5,7 @@ import { Button } from "components/atoms";
 import browser from "webextension-polyfill";
 import { motion, AnimatePresence } from "framer-motion";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
-import { ExtensionMessageType } from "../../../../web-proof-commons";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 
 type StartPageStepActionProps = {
   isVisited: boolean;

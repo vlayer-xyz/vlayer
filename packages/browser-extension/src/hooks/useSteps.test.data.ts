@@ -1,6 +1,6 @@
 import { BrowsingHistoryItem } from "../state/history.ts";
 import { StepStatus } from "constants/step.ts";
-import { WebProofStep } from "../web-proof-commons";
+import { WebProofStep } from "@vlayer/web-proof-commons";
 
 export const steps = [
   {

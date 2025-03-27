@@ -3,7 +3,7 @@ import { wrap } from "comlink";
 import { Prover as TProver, Presentation as TPresentation } from "tlsn-js";
 import type { PresentationJSON } from "tlsn-js/src/types";
 import { Reveal, Method } from "tlsn-wasm";
-import { type RedactionConfig } from "../../web-proof-commons";
+import { type RedactionConfig } from "@vlayer/web-proof-commons";
 import { redact } from "./redaction/redact";
 import { HTTPMethod } from "lib/HttpMethods";
 import debug from "debug";

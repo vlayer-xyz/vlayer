@@ -1,10 +1,10 @@
-import type { PresentationJSON } from "@vlayer/sdk";
+import type { WebProofProvider } from "@vlayer/sdk";
 
 import {
+  type PresentationJSON,
   ExtensionMessageType,
   type ExtensionMessage,
-  type WebProofProvider,
-} from "@vlayer/sdk";
+} from "@vlayer/web-proof-commons";
 
 export class MockExtensionWebProofProvider implements WebProofProvider {
   private listeners: Partial<

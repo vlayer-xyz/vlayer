@@ -2,7 +2,7 @@ import { useProvingSessionConfig } from "hooks/useProvingSessionConfig";
 import {
   isEmptyWebProverSessionConfig,
   WebProverSessionConfig,
-} from "../../web-proof-commons";
+} from "@vlayer/web-proof-commons";
 
 import React, { useEffect } from "react";
 import * as Sentry from "@sentry/react";

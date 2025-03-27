@@ -1,4 +1,4 @@
-import { ExtensionMessageType } from "src/web-proof-commons";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 import browser from "webextension-polyfill";
 import { useEffect } from "react";
 

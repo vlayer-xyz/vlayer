@@ -1,7 +1,7 @@
 import {
   EXTENSION_STEP,
   type WebProofStepStartPage,
-} from "../../../web-proof-commons";
+} from "@vlayer/web-proof-commons";
 
 export const startPage = (url: string, label: string) => {
   return {

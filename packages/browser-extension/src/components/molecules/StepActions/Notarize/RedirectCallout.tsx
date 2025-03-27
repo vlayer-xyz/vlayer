@@ -2,7 +2,7 @@ import React, { FC, useState, useEffect } from "react";
 import { Callout } from "@radix-ui/themes";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
-import { ExtensionMessageType } from "../../../../web-proof-commons";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
 import { useInterval } from "usehooks-ts";
 import { AnimatedContainer } from "components/molecules/AnimationContainer";

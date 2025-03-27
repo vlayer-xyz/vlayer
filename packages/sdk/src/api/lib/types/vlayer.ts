@@ -1,4 +1,4 @@
-import { type Branded } from "../../../web-proof-commons/utils";
+import { type Branded } from "@vlayer/web-proof-commons";
 import {
   type Abi,
   type AbiStateMutability,

@@ -1,6 +1,6 @@
 import { Store } from "./store";
 import browser from "webextension-polyfill";
-import { ZkProvingStatus } from "../web-proof-commons";
+import { ZkProvingStatus } from "@vlayer/web-proof-commons";
 import { provingSessionStorageConfig } from "./config";
 
 //this belongs to the service worker so it does not use react under the hood

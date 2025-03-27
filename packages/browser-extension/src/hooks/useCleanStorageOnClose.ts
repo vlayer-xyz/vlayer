@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { provingSessionStorageConfig } from "src/state/config";
-import { ExtensionMessageType } from "src/web-proof-commons";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 import browser from "webextension-polyfill";
 
 // Listen to clean storage request where window is available

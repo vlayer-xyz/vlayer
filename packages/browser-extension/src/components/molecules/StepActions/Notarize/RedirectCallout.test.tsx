@@ -3,7 +3,7 @@ import { render, screen, act, cleanup, within } from "@testing-library/react";
 import { vi, beforeEach, describe, afterEach, expect, it } from "vitest";
 import { RedirectCallout } from "./RedirectCallout";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
-import { ExtensionMessageType } from "../../../../web-proof-commons";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
 
 vi.mock("lib/sendMessageToServiceWorker", () => ({

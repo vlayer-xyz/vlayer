@@ -11,7 +11,7 @@ import {
 import { createExtensionWebProofProvider } from "../webProof";
 import { createVlayerClient } from "./client";
 import { type BrandedHash, type VlayerClient } from "types/vlayer";
-import { ZkProvingStatus } from "../../web-proof-commons";
+import { ZkProvingStatus } from "@vlayer/web-proof-commons";
 import createFetchMock from "vitest-fetch-mock";
 
 declare const global: {

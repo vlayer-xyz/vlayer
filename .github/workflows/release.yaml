@@ -231,7 +231,10 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
-          PACKAGE_TARBALL_NAME=$(npm pack)
+          ../../bash/replace-workspace-dep.sh packages/sdk @vlayer/sdk
+          ../../bash/replace-workspace-dep.sh packages/sdk @vlayer/web-proof-commons
+
+          PACKAGE_TARBALL_NAME=$(bun pm pack)
           if npm show "@vlayer/sdk@${VLAYER_BUILD}" > /dev/null 2>&1; then
             echo "Version $VLAYER_BUILD already exists. Skipping publish."
           else
@@ -268,7 +271,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
-          PACKAGE_TARBALL_NAME=$(npm pack)
+          ../../bash/replace-workspace-dep.sh packages/sdk-hooks @vlayer/web-proof-commons
+
+          PACKAGE_TARBALL_NAME=$(bun pm pack)
           if npm show "@vlayer/react@${VLAYER_BUILD}" > /dev/null 2>&1; then
             echo "Version $VLAYER_BUILD already exists. Skipping publish."
           else

@@ -1,7 +1,7 @@
 import { createExtensionWebProofProvider } from "./extension";
 import { describe, it, expect, vi } from "vitest";
 import { expectUrl, startPage, notarize } from "../steps";
-import { StepValidationError } from "../../../web-proof-commons";
+import { StepValidationError } from "@vlayer/web-proof-commons";
 
 const chrome = {
   runtime: {

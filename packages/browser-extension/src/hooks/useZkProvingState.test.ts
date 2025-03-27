@@ -1,6 +1,6 @@
 import { InvalidZkProvingStatus, useZkProvingState } from "./useZkProvingState";
 import { describe, expect, it, vi } from "vitest";
-import { ZkProvingStatus } from "../web-proof-commons";
+import { ZkProvingStatus } from "@vlayer/web-proof-commons";
 import { renderHook } from "@testing-library/react";
 import { LOADING } from "@vlayer/extension-hooks";
 

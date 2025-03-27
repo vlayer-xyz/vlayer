@@ -6,7 +6,7 @@ import {
   type ExtensionMessage,
   type WebProofStep,
   type ZkProvingStatus,
-} from "../../../web-proof-commons";
+} from "@vlayer/web-proof-commons";
 
 export type WebProofRequestInput = {
   logoUrl: string;
