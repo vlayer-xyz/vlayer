@@ -9,6 +9,8 @@ pub use verify::verify_presentation;
 
 pub use crate::notarize::NotaryConfig;
 
+pub const TLSN_VERSION: &str = "0.1.0-alpha.8";
+
 pub async fn generate_web_proof(
     notary_config: NotaryConfig,
     server_domain: &str,
@@ -31,7 +33,7 @@ fn to_json(encoded_presentation: &str, notary_host: &str, notary_port: u16) -> V
 
     let presentation_json = serde_json::json!({
         "presentationJson": {
-            "version": "0.1.0-alpha.8",
+            "version": TLSN_VERSION,
             "data": encoded_presentation,
             "meta": {
                 "notaryUrl": notary_url,
@@ -44,13 +46,14 @@ fn to_json(encoded_presentation: &str, notary_host: &str, notary_port: u16) -> V
 
 #[cfg(test)]
 mod tests {
-    use super::to_json;
+    use super::*;
+
     #[test]
     fn test_to_json_structure() {
         let json = to_json("48656c6c6f20576f726c64", "127.0.0.1", 7047);
 
         assert!(json.is_object());
-        assert_eq!(json["presentationJson"]["version"], "0.1.0-alpha.8");
+        assert_eq!(json["presentationJson"]["version"], TLSN_VERSION);
         assert_eq!(json["presentationJson"]["data"], "48656c6c6f20576f726c64");
         assert_eq!(json["presentationJson"]["meta"]["notaryUrl"], "https://127.0.0.1:7047");
         assert_eq!(json["presentationJson"]["meta"]["websocketProxyUrl"], "");
