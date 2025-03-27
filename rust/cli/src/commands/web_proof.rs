@@ -81,6 +81,12 @@ struct ValidatedUrl {
     port: u16,
 }
 
+struct ProvenUrl {
+    host: String,
+    port: u16,
+    uri: String,
+}
+
 impl ValidatedUrl {
     fn try_from_url(url_str: &str, allowed_schemes: &[Scheme]) -> Result<Self, InputError> {
         let url =
@@ -108,7 +114,7 @@ impl ValidatedUrl {
     }
 }
 
-fn parse_proven_url(url_str: &str) -> Result<(String, String, u16, String), InputError> {
+fn parse_proven_url(url_str: &str) -> Result<ProvenUrl, InputError> {
     //Only https is allowed for proven urls as it does not make sense to prove http urls (not tls => no tlsn)
 
     let ValidatedUrl {
@@ -120,10 +126,10 @@ fn parse_proven_url(url_str: &str) -> Result<(String, String, u16, String), Inpu
         format!("{path}{query}")
     };
 
-    Ok((host.clone(), uri, port, host))
+    Ok(ProvenUrl { host, port, uri })
 }
 
-fn parse_notary_url(url_str: &str) -> Result<(String, u16, String, bool), InputError> {
+fn parse_notary_url(url_str: &str) -> Result<NotaryConfig, InputError> {
     let ValidatedUrl {
         url,
         host,
@@ -131,35 +137,35 @@ fn parse_notary_url(url_str: &str) -> Result<(String, u16, String, bool), InputE
         port,
     } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https, Scheme::Http])?;
 
-    let path = url
+    let path_prefix = url
         .path()
         .trim_start_matches('/')
         .trim_end_matches('/')
         .to_string();
-    let is_tls = scheme == Scheme::Https;
+    let enable_tls = scheme == Scheme::Https;
 
-    Ok((host, port, path, is_tls))
+    Ok(NotaryConfig::new(host, port, path_prefix, enable_tls))
 }
 
 impl TryFrom<WebProofArgs> for ServerProvingArgs {
     type Error = InputError;
 
     fn try_from(value: WebProofArgs) -> Result<Self, Self::Error> {
-        let (domain, uri, port, default_host) = parse_proven_url(&value.url)?;
-        let host = value.host.unwrap_or(default_host);
+        let ProvenUrl {
+            host: urlhost,
+            port,
+            uri,
+        } = parse_proven_url(&value.url)?;
+        //If host is provided fallback to host extracted from url, otherwise use the host from the url
+        let host = value.host.unwrap_or(urlhost.clone());
 
         let notary_config = if let Some(notary_url) = value.notary {
-            let (notary_host, notary_port, notary_path, notary_tls) =
-                parse_notary_url(&notary_url)?;
-            NotaryConfig::new(notary_host, notary_port, notary_path, notary_tls)
+            parse_notary_url(&notary_url)?
         } else {
-            {
-                let (notary_host, _, _, _) = parse_notary_url(DEFAULT_NOTARY_URL)?;
-                NotaryConfig::new(notary_host, 443, "".to_string(), true)
-            }
+            parse_notary_url(DEFAULT_NOTARY_URL)?
         };
 
-        Ok(ServerProvingArgs::new(domain, host, port, uri, notary_config))
+        Ok(ServerProvingArgs::new(urlhost, host, port, uri, notary_config))
     }
 }
 
