@@ -26,7 +26,6 @@ touch "${ARCHIVE}"
         contracts="${example}/src/vlayer"
         contracts_tests="${example}/test/vlayer"
         testdata="${example}/testdata"
-        fixtures="${example}/fixtures"
 
         cp "${VLAYER_HOME}/docker/docker-compose.devnet.yaml" "${scripts}/"
         cp -a "${VLAYER_HOME}/docker/anvil" "${scripts}/"
@@ -35,11 +34,10 @@ touch "${ARCHIVE}"
         cp -a "${VLAYER_HOME}/docker/websockify" "${scripts}/"
         cp -a "${VLAYER_HOME}/docker/notary-server" "${scripts}/"
         cp -a "${VLAYER_HOME}/docker/notary-config" "${scripts}/"
-        cp -a "${VLAYER_HOME}/fixtures" "${fixtures}/"
+        cp -a "${VLAYER_HOME}/docker/fixtures" "${scripts}/"
 
         tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${contracts}"
         tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${scripts}"
-        tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${fixtures}"
 
         if [ -d "${contracts_tests}" ]; then
             tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${contracts_tests}"
