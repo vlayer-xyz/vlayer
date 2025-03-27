@@ -76,9 +76,10 @@ fn verify_dkim_header_dns_consistency(email: &ParsedMail, record: &DNSRecord) ->
         })?;
 
         let expected = format!("{selector}._domainkey.{domain}");
+        let actual = record.name.trim_end_matches('.').to_string();
 
         if expected != record.name {
-            return Err(Error::DomainMismatch(expected, record.name.clone()));
+            return Err(Error::DomainMismatch(expected, actual));
         }
     }
 
