@@ -12,7 +12,7 @@
   "dependencies": {
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
-    "react": "^18.3.1",
+    "react": "^19.0.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",
     "vite-tsconfig-paths": "^5.0.1",
@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
-    "@types/react": "^18.3.10",
+    "@types/react": "^19.0.12",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.2",
     "eslint": "^9.11.1",
