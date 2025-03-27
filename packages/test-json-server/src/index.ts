@@ -36,5 +36,16 @@ new Elysia({
     const { name } = request.body;
     return { success: true, updatedName: name };
   })
+  .get("/auth_header_require", ({ request, set }) => {
+    const auth = request.headers.get("Authorization");
+    if (auth !== "s3cret_t0ken") {
+      set.status = 403;
+      return {
+        success: false,
+        error_message: "Missing or wrong authentication",
+      };
+    }
+    return { success: true, name: "Tom Bombadil", greeting: "Old Tom Bombadil is a merry fellow!" };
+  })
   .use(cors())
   .listen(3011);

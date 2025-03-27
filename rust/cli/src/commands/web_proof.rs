@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use anyhow::anyhow;
 use clap::Parser;
@@ -26,6 +26,8 @@ pub enum InputError {
     InvalidUrlFormat(String),
     #[error("Invalid URL protocol: {0}")]
     InvalidUrlProtocol(String),
+    #[error("Invalid header format: {0}")]
+    InvalidHeaderFormat(String),
 }
 
 /// Generates a web-based proof for the specified request
@@ -46,6 +48,10 @@ pub(crate) struct WebProofArgs {
         value_name = "NOTARY_URL"
     )]
     notary: Option<String>,
+
+    /// Additional headers for the HTTP request (format: "Header-Name: Header-Value")
+    #[arg(short = 'H', long, value_name = "HEADER")]
+    headers: Vec<String>,
 }
 
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
@@ -57,6 +63,7 @@ pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
         &server_args.host,
         server_args.port,
         &server_args.uri,
+        server_args.headers,
     )
     .await
     .map_err(|e| anyhow!("{e}"))?;
@@ -72,6 +79,7 @@ pub struct ServerProvingArgs {
     port: u16,
     uri: String,
     notary_config: NotaryConfig,
+    headers: HashMap<String, String>,
 }
 
 struct ValidatedUrl {
@@ -158,6 +166,24 @@ impl TryFrom<WebProofArgs> for ServerProvingArgs {
         } = parse_proven_url(&value.url)?;
         //If host is provided fallback to host extracted from url, otherwise use the host from the url
         let host = value.host.unwrap_or(urlhost.clone());
+        let headers: Result<HashMap<String, String>, InputError> = value
+            .headers
+            .iter()
+            .map(|header| {
+                let mut parts = header.splitn(2, ':');
+                let key = parts
+                    .next()
+                    .ok_or_else(|| InputError::InvalidHeaderFormat(header.clone()))?
+                    .trim()
+                    .to_string();
+                let value = parts
+                    .next()
+                    .ok_or_else(|| InputError::InvalidHeaderFormat(header.clone()))?
+                    .trim()
+                    .to_string();
+                Ok((key, value))
+            })
+            .collect();
 
         let notary_config = if let Some(notary_url) = value.notary {
             parse_notary_url(&notary_url)?
@@ -165,7 +191,7 @@ impl TryFrom<WebProofArgs> for ServerProvingArgs {
             parse_notary_url(DEFAULT_NOTARY_URL)?
         };
 
-        Ok(ServerProvingArgs::new(urlhost, host, port, uri, notary_config))
+        Ok(ServerProvingArgs::new(urlhost, host, port, uri, notary_config, headers?))
     }
 }
 
@@ -178,6 +204,7 @@ mod tests {
             url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
             host: Some("127.0.0.1".into()),
             notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.8".into()),
+            headers: vec!["Authorization: Basic 1234".into(), "X-Api-Key: 5678".into()],
         };
 
         let converted: ServerProvingArgs = input_args.try_into().unwrap();
@@ -189,6 +216,19 @@ mod tests {
         assert_eq!(converted.notary_config.host, "notary.pse.dev");
         assert_eq!(converted.notary_config.port, 3030);
         assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
+        assert_eq!(converted.headers.get("Authorization"), Some(&"Basic 1234".to_string()));
+        assert_eq!(converted.headers.get("X-Api-Key"), Some(&"5678".to_string()));
+    }
+
+    #[test]
+    fn test_parse_headers() {
+        let input_args: WebProofArgs = WebProofArgs {
+            headers: vec!["Auth:oriza:tion: Basic 1234".into(), "X-Api-Key: 5678".into()],
+            ..WebProofArgs::default()
+        };
+        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        assert_eq!(converted.headers.get("Auth"), Some(&"oriza:tion: Basic 1234".to_string()));
+        assert_eq!(converted.headers.get("X-Api-Key"), Some(&"5678".to_string()));
     }
 
     #[test]
@@ -323,12 +363,27 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_invalid_header_format_error() {
+        let input_args: WebProofArgs = WebProofArgs {
+            headers: vec!["Authorization".into()],
+            ..WebProofArgs::default()
+        };
+
+        let result: Result<ServerProvingArgs, _> = input_args.try_into();
+        assert_eq!(
+            format!("{}", result.unwrap_err()),
+            InputError::InvalidHeaderFormat("Authorization".to_string()).to_string()
+        );
+    }
+
     impl Default for WebProofArgs {
         fn default() -> Self {
             Self {
                 url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".into(),
                 host: Some("127.0.0.1".into()),
                 notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.8".into()),
+                headers: vec![],
             }
         }
     }
