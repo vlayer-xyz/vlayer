@@ -1,5 +1,5 @@
 import { expect, test } from "./config";
-import { sidePanel } from "./helpers";
+import { waitForSidePanelOpened } from "./helpers";
 import { type Response } from "@playwright/test";
 import { loginUrl, dashboardUrl, profileUrl, dappUrl } from "./urls";
 
@@ -14,7 +14,7 @@ test("Full flow from opening sidepanel to redirection", async ({
       .getByTestId("request-webproof-button");
 
     await requestProofButton.click();
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
     expect(extension).toBeDefined();
   });
 
@@ -27,14 +27,14 @@ test("Full flow from opening sidepanel to redirection", async ({
     await requestProofButton.click();
     await requestProofButton.click();
 
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
     expect(extension).toBeDefined();
     const redirectButton = extension.getByTestId("start-page-button");
     await expect(redirectButton).toBeVisible();
   });
 
   await test.step("On 'redirect' click extension should open new browser tab for specified startPage url", async () => {
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
 
     if (!extension) {
       throw new Error("No sidepanel");
@@ -49,7 +49,7 @@ test("Full flow from opening sidepanel to redirection", async ({
   });
 
   await test.step("Side panel UI should indicate that startPage step is completed", async () => {
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
     const startPageStep = extension.getByTestId("step-startPage");
     const status = await startPageStep.getAttribute("data-status");
     expect(status).toEqual("completed");
@@ -66,7 +66,7 @@ test("Full flow from opening sidepanel to redirection", async ({
       name: "Login",
     });
     await loginButton.click();
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
     const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
     const status = await startPageStep.getAttribute("data-status");
 
@@ -85,14 +85,14 @@ test("Full flow from opening sidepanel to redirection", async ({
     });
     await profileButton.click();
     await dashboardPage.waitForURL(profileUrl);
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
     const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
     const status = await startPageStep.getAttribute("data-status");
     expect(status).toEqual("completed");
   });
 
   await test.step("Prove button should appear after request to external api", async () => {
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
     const proveButton = extension.getByRole("button", {
       name: "Generate proof",
     });
@@ -100,7 +100,7 @@ test("Full flow from opening sidepanel to redirection", async ({
   });
 
   await test.step("Click button should generate webproof", async () => {
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
     const proveButton = extension.getByRole("button", {
       name: "Generate proof",
     });

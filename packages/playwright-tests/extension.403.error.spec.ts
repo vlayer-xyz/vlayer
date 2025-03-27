@@ -1,5 +1,5 @@
 import { expect, test } from "./config";
-import { sidePanel } from "./helpers";
+import { waitForSidePanelOpened } from "./helpers";
 import {
   loginUrl,
   dashboardUrl,
@@ -18,7 +18,7 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
       .getByTestId("request-webproof-button");
 
     await requestProofButton.click();
-    const extension = await sidePanel(context);
+    const extension = await waitForSidePanelOpened(context);
 
     const redirectButton = extension.getByTestId("start-page-button");
     const [newPage] = await Promise.all([

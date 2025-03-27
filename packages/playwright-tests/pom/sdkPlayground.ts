@@ -21,8 +21,8 @@ export class SdkPlayground extends Webpage {
     super(page, context);
   }
 
-  init() {
-    return this.page.goto(sdkPlaygroundUrl);
+  async init() {
+    await this.page.goto(sdkPlaygroundUrl);
   }
 
   async openSidePanel() {
