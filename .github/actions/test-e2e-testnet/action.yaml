@@ -25,9 +25,6 @@ inputs:
   vlayer_api_token:
     description: "VLAYER API Token"
     required: true
-  ws_proxy_url:
-    description: 'Websockify proxy URL'
-    required: false
 runs:
   using: "composite"
   steps:
@@ -82,7 +79,6 @@ runs:
         GAS_METER_URL: ${{ inputs.gas_meter_url }}
         GAS_METER_API_KEY: ${{ inputs.gas_meter_api_key }}
         VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
-        WS_PROXY_URL: ${{ inputs.ws_proxy_url }}
         VLAYER_TMP_DIR: ./artifacts
         BUILD_BINARIES: 0
         CONFIRMATIONS: 2

@@ -5,4 +5,6 @@ services:
     platform: linux/amd64
     ports:
       - "127.0.0.1:3003:80" 
-    command: "80 api.x.com:443"
+    volumes:
+      - ../fixtures/:/root:ro
+    command: "80 --token-plugin JWTTokenApi --token-source ./jwt-authority.key.pub"

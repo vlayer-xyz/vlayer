@@ -21,7 +21,7 @@ BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
 SERVER_PROOF_ARG="fake"
 EXTERNAL_RPC_URLS=()
-DOCKER_COMPOSE_FILE="${VLAYER_HOME}/docker/docker-compose-jwt.devnet.yaml"
+DOCKER_COMPOSE_FILE="${VLAYER_HOME}/docker/docker-compose.devnet.yaml"
 DOCKER_COMPOSE_SERVICES="${DOCKER_COMPOSE_SERVICES:-anvil-l1 anvil-l2-op}"
 
 setup_tmp_dir

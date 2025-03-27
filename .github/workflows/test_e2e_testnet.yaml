@@ -116,8 +116,7 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
-          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
   test-e2e-testnet-simple-web-proof:
     name: E2E test against testnet (simple-web-proof)
@@ -136,8 +135,7 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
-          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
   test-e2e-testnet-simple-email-proof:
     name: E2E test against testnet (simple-email-proof)
@@ -156,8 +154,7 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
-          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
   test-e2e-testnet-simple-time-travel:
     name: E2E test against testnet (simple-time-travel)
@@ -176,5 +173,4 @@ jobs:
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           gas_meter_url: ${{ vars.GAS_METER_URL }}
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_JWT }}
-          ws_proxy_url: wss://test-wsproxy.vlayer.xyz/jwt
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
