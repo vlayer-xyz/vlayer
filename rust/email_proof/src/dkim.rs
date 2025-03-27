@@ -13,7 +13,7 @@ pub fn verify_email(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error>
     let dkim_public_key = parse_dns_record(&record.data)?;
     verify_email_with_key(email, dkim_public_key)?;
     check_dkim_header_dns_consistency(email, record)?;
-    
+
     Ok(())
 }
 
