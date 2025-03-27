@@ -24,8 +24,6 @@ writeEnvVariables(".env", {
   VITE_JSON_RPC_URL: config.jsonRpcUrl,
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_DNS_SERVICE_URL: config.dnsServiceUrl,
-  VITE_USE_WINDOW_ETHEREUM_TRANSPORT:
-    process.env.USE_WINDOW_ETHEREUM_TRANSPORT || "",
   VITE_EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL || "",
   VITE_CLIENT_AUTH_MODE: process.env.CLIENT_AUTH_MODE || "",
 });
