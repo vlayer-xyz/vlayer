@@ -13,9 +13,7 @@ const chain = chainName ? anvil : optimismSepolia;
 test.beforeEach(async ({ page }) => {
   await installMockWallet({
     page,
-    account: privateKeyToAccount(
-      privateKey,
-    ),
+    account: privateKeyToAccount(privateKey),
     defaultChain: chain,
     transports: { [chain.id]: http() },
   });

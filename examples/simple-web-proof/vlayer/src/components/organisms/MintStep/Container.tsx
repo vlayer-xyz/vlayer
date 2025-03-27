@@ -59,7 +59,7 @@ export const MintStep = () => {
 
     writeContract(writeContractArgs);
   };
-  
+
   useEffect(() => {
     if (status === "success") {
       setIsMinting(false);
