@@ -3098,6 +3098,7 @@ dependencies = [
  "serde_yml",
  "soldeer-commands",
  "soldeer-core",
+ "strum",
  "tar",
  "tempfile",
  "test_runner",
@@ -14683,6 +14684,7 @@ name = "web_prover"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "derive-new",
  "hex",
  "http-body-util",
  "hyper 1.5.2",

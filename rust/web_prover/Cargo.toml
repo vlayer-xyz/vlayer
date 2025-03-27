@@ -12,6 +12,7 @@ integration-tests = []
 
 [dependencies]
 bincode = { workspace = true }
+derive-new = { workspace = true }
 hex = { workspace = true }
 http-body-util = { workspace = true }
 hyper = { workspace = true, features = ["client", "http1"] }
