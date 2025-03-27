@@ -8,10 +8,7 @@ use crate::{dns::parse_dns_record, from_header};
 
 const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
-pub fn verify_email(
-    email: &ParsedMail,
-    dns_record: &DNSRecord,
-) -> Result<(), Error> {
+pub fn verify_email(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Error> {
     verify_dkim_headers(email)?;
 
     let from_domain = from_header::extract_from_domain(email)?;
