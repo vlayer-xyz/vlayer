@@ -2,10 +2,6 @@ name: Test JS
 
 on:
   pull_request:
-    paths:
-      - "packages/**"
-      - "examples/simple-web-proof/vlayer/**"
-      - ".github/workflows/test_js.yaml"
   merge_group:
   push:
     branches:
@@ -16,9 +12,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'packages/**'
+              - 'examples/simple-web-proof/vlayer/**'
+              - '.github/workflows/test_js.yaml'
+
   test-js:
     name: Test JS
+    needs: changes
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Install TypeScript prerequisites
