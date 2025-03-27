@@ -9,7 +9,7 @@
   ],
   "devDependencies": {
     "bun-plugin-dts": "^0.2.1",
-    "@types/bun": "^1.0.0",
+    "@types/bun": "^1.2.6",
     "typescript": "^5.2.2"
   },
   "dependencies": {

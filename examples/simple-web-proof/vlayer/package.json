@@ -58,7 +58,7 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@playwright/test": "1.48.0",
-    "@types/bun": "^1.1.6",
+    "@types/bun": "^1.2.6",
     "@types/debug": "^4.1.12",
     "@types/dotenv-flow": "^3.3.3",
     "@types/eslint__js": "^8.42.3",
