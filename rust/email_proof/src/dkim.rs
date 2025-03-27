@@ -8,11 +8,12 @@ use crate::{dns::parse_dns_record, from_header};
 
 const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
-pub fn verify_email(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Error> {
+pub fn verify_email(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error> {
     verify_dkim_headers(email)?;
+    check_dkim_header_dns_consistency(email, record)?;
 
     let from_domain = from_header::extract_from_domain(email)?;
-    let dkim_public_key = parse_dns_record(&dns_record.data)?;
+    let dkim_public_key = parse_dns_record(&record.data)?;
 
     let result =
         verify_email_with_key(&Logger::root(Discard, o!()), &from_domain, email, dkim_public_key)?;
@@ -24,6 +25,34 @@ pub fn verify_email(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Er
     } else {
         Err(Error::DkimVerification(DKIMError::SignatureDidNotVerify))
     }
+}
+
+fn check_dkim_header_dns_consistency(
+    email: &ParsedMail,
+    record: &DNSRecord,
+) -> Result<(), DKIMError> {
+    for header in email.headers.get_all_headers(DKIM_SIGNATURE_HEADER) {
+        let dkim_header = validate_header(&String::from_utf8_lossy(header.get_value_raw()))?;
+
+        let selector = dkim_header.get_tag("s").ok_or_else(|| {
+            DKIMError::SignatureSyntaxError("Missing selector tag (s=) in DKIM-Signature".into())
+        })?;
+
+        let domain = dkim_header.get_tag("d").ok_or_else(|| {
+            DKIMError::SignatureSyntaxError("Missing domain tag (d=) in DKIM-Signature".into())
+        })?;
+
+        let expected = format!("{selector}._domainkey.{domain}");
+
+        if expected != record.name {
+            return Err(DKIMError::SignatureSyntaxError(format!(
+                "DKIM-Signature identity ({expected}) does not match DNS record ({})",
+                record.name
+            )));
+        }
+    }
+
+    Ok(())
 }
 
 fn verify_dkim_headers(email: &ParsedMail) -> Result<(), DKIMError> {
