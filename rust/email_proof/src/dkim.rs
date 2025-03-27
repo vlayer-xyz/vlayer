@@ -64,17 +64,13 @@ fn verify_dkim_body_length_tag(email: &ParsedMail) -> Result<(), DKIMError> {
     Ok(())
 }
 
-fn verify_dkim_header_dns_consistency(
-    email: &ParsedMail,
-    record: &DNSRecord,
-) -> Result<(), DKIMError> {
+fn verify_dkim_header_dns_consistency(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error> {
     for header in email.headers.get_all_headers(DKIM_SIGNATURE_HEADER) {
         let dkim_header = validate_header(&String::from_utf8_lossy(header.get_value_raw()))?;
 
         let selector = dkim_header.get_tag("s").ok_or_else(|| {
             DKIMError::SignatureSyntaxError("Missing selector tag (s=) in DKIM-Signature".into())
         })?;
-
         let domain = dkim_header.get_tag("d").ok_or_else(|| {
             DKIMError::SignatureSyntaxError("Missing domain tag (d=) in DKIM-Signature".into())
         })?;
@@ -82,10 +78,7 @@ fn verify_dkim_header_dns_consistency(
         let expected = format!("{selector}._domainkey.{domain}");
 
         if expected != record.name {
-            return Err(DKIMError::SignatureSyntaxError(format!(
-                "DKIM-Signature identity ({expected}) does not match DNS record ({})",
-                record.name
-            )));
+            return Err(Error::DomainMismatch(expected, record.name.clone()));
         }
     }
 
@@ -204,11 +197,14 @@ mod tests {
             let record = record_with_name("selector2._domainkey.example.com");
 
             assert_eq!(
-                verify_dkim_header_dns_consistency(&email, &record).unwrap_err(),
-                DKIMError::SignatureSyntaxError(
-                    "DKIM-Signature identity (selector1._domainkey.example.com) does not match DNS record (selector2._domainkey.example.com)"
-                        .into()
+                verify_dkim_header_dns_consistency(&email, &record)
+                    .unwrap_err()
+                    .to_string(),
+                Error::DomainMismatch(
+                    "selector1._domainkey.example.com".into(),
+                    "selector2._domainkey.example.com".into()
                 )
+                .to_string()
             );
         }
 
@@ -221,11 +217,14 @@ mod tests {
             let record = record_with_name("selector1._domainkey.otherdomain.com");
 
             assert_eq!(
-                verify_dkim_header_dns_consistency(&email, &record).unwrap_err(),
-                DKIMError::SignatureSyntaxError(
-                    "DKIM-Signature identity (selector1._domainkey.example.com) does not match DNS record (selector1._domainkey.otherdomain.com)"
-                        .into()
+                verify_dkim_header_dns_consistency(&email, &record)
+                    .unwrap_err()
+                    .to_string(),
+                Error::DomainMismatch(
+                    "selector1._domainkey.example.com".into(),
+                    "selector1._domainkey.otherdomain.com".into()
                 )
+                .to_string()
             );
         }
     }

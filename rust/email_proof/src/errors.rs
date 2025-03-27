@@ -8,6 +8,8 @@ pub enum Error {
     Calldata(#[from] alloy_sol_types::Error),
     #[error("Error verifying DKIM: {0}")]
     DkimVerification(#[from] cfdkim::DKIMError),
+    #[error("Domain mismatch: {0} != {1}")]
+    DomainMismatch(String, String),
     #[error("Invalid DKIM public key record: {0}")]
     InvalidDkimRecord(String),
     #[error("Invalid From header: {0}")]
