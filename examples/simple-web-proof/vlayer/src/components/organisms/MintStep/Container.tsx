@@ -10,10 +10,6 @@ import { useLocalStorage } from "usehooks-ts";
 
 import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier.json";
 import { MintStepPresentational } from "./Presentational";
-import {
-  getAccountFromPrivateKey,
-  useEnvPrivateKey,
-} from "../../../utils/clientAuthMode";
 import { ensureBalance } from "../../../utils/ethFaucet";
 import { AlreadyMintedError } from "../../../errors";
 
@@ -55,22 +51,15 @@ export const MintStep = () => {
       args: proofData,
     };
 
-    if (useEnvPrivateKey()) {
-      writeContract({
-        ...writeContractArgs,
-        account: getAccountFromPrivateKey(),
-      });
-    } else {
-      try {
-        await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
-      } catch (error) {
-        setMintingError(error as Error);
-      }
-
-      writeContract(writeContractArgs);
+    try {
+      await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
+    } catch (error) {
+      setMintingError(error as Error);
     }
-  };
 
+    writeContract(writeContractArgs);
+  };
+  
   useEffect(() => {
     if (status === "success") {
       setIsMinting(false);

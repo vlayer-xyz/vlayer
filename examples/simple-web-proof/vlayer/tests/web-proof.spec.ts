@@ -1,6 +1,25 @@
 import { expect } from "playwright/test";
 import { test } from "./config";
 import { sidePanel } from "./helpers";
+import { installMockWallet } from "@johanneskares/wallet-mock";
+import { privateKeyToAccount } from "viem/accounts";
+import { anvil, optimismSepolia } from "viem/chains";
+import { http } from "viem";
+import { getConfig } from "@vlayer/sdk/config";
+
+const { privateKey, chainName } = getConfig();
+const chain = chainName ? anvil : optimismSepolia;
+
+test.beforeEach(async ({ page }) => {
+  await installMockWallet({
+    page,
+    account: privateKeyToAccount(
+      privateKey,
+    ),
+    defaultChain: chain,
+    transports: { [chain.id]: http() },
+  });
+});
 
 test("web proof flow", async ({ page, context }) => {
   // To obtain this token, log in to x.com and copy the value of the `auth_token` cookie.
