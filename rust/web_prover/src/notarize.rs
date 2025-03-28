@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use derive_new::new;
 use http_body_util::Empty;
 use hyper::{body::Bytes, Request, StatusCode};
@@ -36,6 +38,7 @@ pub async fn notarize(
     server_host: &str,
     server_port: u16,
     uri: &str,
+    headers: HashMap<String, String>,
 ) -> Result<(Attestation, Secrets), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::try_init().unwrap_or_default();
 
@@ -88,13 +91,18 @@ pub async fn notarize(
 
     tokio::spawn(connection);
 
-    let request_builder = Request::builder()
+    let mut request_builder = Request::builder()
         .uri(uri)
         .header("Host", server_domain)
         .header("Accept", "*/*")
         .header("Accept-Encoding", "identity")
         .header("Connection", "close")
         .header("User-Agent", USER_AGENT);
+
+    for (k, v) in &headers {
+        request_builder = request_builder.header(k, v);
+    }
+
     let request = request_builder.body(Empty::<Bytes>::new())?;
 
     println!("Starting an MPC TLS connection with the server");
