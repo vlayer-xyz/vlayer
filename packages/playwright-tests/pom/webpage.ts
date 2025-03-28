@@ -10,9 +10,11 @@ export class Webpage {
   async waitForURL(url: string) {
     await this.page.waitForURL(url);
   }
+
   clickButton(name?: string) {
     return this.page.getByRole("button", { name }).click();
   }
+
   private sendMessageToExtension(action: string, payload?: object) {
     return this.page.evaluate(
       ({
@@ -36,9 +38,11 @@ export class Webpage {
   openExtension() {
     return this.sendMessageToExtension(ExtensionAction.OpenSidePanel);
   }
+
   closeExtension() {
     return this.sendMessageToExtension(ExtensionAction.CloseSidePanel);
   }
+
   finishZkProof() {
     return this.sendMessageToExtension(ExtensionAction.NotifyZkProvingStatus, {
       payload: { status: ZkProvingStatus.Done },

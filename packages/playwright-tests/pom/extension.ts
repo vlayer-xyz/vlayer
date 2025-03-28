@@ -34,6 +34,7 @@ export class Extension {
     const status = await expectUrlStep.getAttribute("data-status");
     expect(status).toEqual("completed");
   }
+
   async expectSessionStorageToBeCleaned() {
     const sessionStorage = await this.page.evaluate(() =>
       chrome.storage.session.get(),
