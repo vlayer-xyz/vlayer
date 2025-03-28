@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{collections::HashMap, path::Path};
 
 use serde::Deserialize;
 use serde_json::Value;
@@ -47,6 +47,7 @@ async fn get_web_proof() -> Result<String, Box<dyn std::error::Error>> {
         SERVER_HOST,
         SERVER_PORT,
         "/regular_json?are_you_sure=yes&auth=s3cret_t0ken",
+        HashMap::new(),
     )
     .await?;
 
