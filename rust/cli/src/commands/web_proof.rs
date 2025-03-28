@@ -16,7 +16,7 @@ pub enum Scheme {
     Https,
 }
 
-const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz";
+const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/v0.1.0-alpha.8";
 
 #[derive(Debug, Error)]
 pub enum InputError {
