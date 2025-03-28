@@ -242,7 +242,7 @@ mod tests {
 
         assert_eq!(converted.notary_config.host, "test-notary.vlayer.xyz");
         assert_eq!(converted.notary_config.port, 443);
-        assert_eq!(converted.notary_config.path_prefix, "");
+        assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
         assert!(converted.notary_config.enable_tls);
     }
 
