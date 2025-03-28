@@ -28,8 +28,14 @@ jobs:
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
+      - name: Reuse cargo target dir (Host)
+        id: cargo_target_host
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          target_name: lint-rust-host
       - name: Run Host lints
         env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_host.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
@@ -37,9 +43,15 @@ jobs:
           cargo sort --check --grouped --workspace
           cargo clippy --all-targets --all-features --locked
 
+      - name: Reuse cargo target dir (Call Guest)
+        id: cargo_target_call_guest
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          target_name: lint-rust-call-guest
       - name: Run Risc0 Call Guest lints
         working-directory: rust/guest_wrapper/risc0_call_guest
         env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_call_guest.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
@@ -47,9 +59,15 @@ jobs:
           cargo sort --check --grouped
           cargo clippy --all-targets --all-features --locked
 
+      - name: Reuse cargo target dir (Chain Guest)
+        id: cargo_target_chain_guest
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          target_name: lint-rust-chain-guest
       - name: Run Risc0 Chain Guest lints
         working-directory: rust/guest_wrapper/risc0_chain_guest
         env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_chain_guest.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
@@ -60,11 +78,13 @@ jobs:
       - name: Run cargo deny
         working-directory: rust/cli
         env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_host.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo deny check bans
 
       - name: Detect unused dependencies
         env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_host.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo machete
 
