@@ -50,16 +50,16 @@ struct Encode {
     private_key: PathBuf,
 
     /// Host url for the (web) proof
-    #[arg(long, default_value = "api.x.com:443")]
-    host: Option<String>,
+    #[arg(long, default_value_t = String::from("api.x.com:443"))]
+    host: String,
 
     /// Invalid after N seconds
     #[arg(long)]
     invalid_after: Option<u64>,
 
     /// Subject
-    #[arg(long, default_value = "test")]
-    subject: Option<String>,
+    #[arg(long, default_value_t = String::from("test"))]
+    subject: String,
 }
 
 #[derive(Debug, ClapArgs)]
@@ -93,11 +93,11 @@ fn encode_jwt(args: Encode) -> Result<()> {
         .with_context(|| format!("private key {} not found", args.private_key.display()))?;
     let priv_key = EncodingKey::from_rsa_pem(&priv_key)?;
 
-    let (host, port) = parse_host(args.host.unwrap_or_default())?;
+    let (host, port) = parse_host(&args.host)?;
     let exp = args
         .invalid_after
         .map_or(u64::MAX, |x| get_current_timestamp() + x);
-    let sub = args.subject.unwrap_or_default();
+    let sub = args.subject;
 
     let claims = Claims {
         host,
