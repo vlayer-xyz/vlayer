@@ -1,19 +1,13 @@
 import { test, expect } from "./config";
 import { waitForSidePanelOpened } from "./helpers";
-
-export const config = {
-  loginUrl: "/login",
-  profileUrl: "/profile",
-  profileFailedAuthUrl: "/profile-failed-auth",
-  dashboardUrl: "/dashboard",
-};
+import { loginUrl, dashboardUrl, dappPutUrl } from "./urls";
 
 test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
   page,
   context,
 }) => {
   await test.step("Web-app should open sidepanel via SDK call", async () => {
-    await page.goto("/dapp-put");
+    await page.goto(dappPutUrl);
     const requestProofButton = page
       .locator("body")
       .getByTestId("request-webproof-button");
@@ -23,7 +17,7 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
   });
 
   await test.step("Extension should stay ok after clicking request button multiple times", async () => {
-    await page.goto("/dapp-put");
+    await page.goto(dappPutUrl);
     const requestProofButton = page
       .locator("body")
       .getByTestId("request-webproof-button");
@@ -46,7 +40,7 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
       redirectButton.click(),
     ]);
 
-    await newPage.waitForURL(config.loginUrl);
+    await newPage.waitForURL(loginUrl);
   });
 
   await test.step("Side panel UI should indicate that startPage step is completed", async () => {
@@ -58,7 +52,7 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
 
   await test.step("Side panel UI should indicate that expectUrl step is completed after history.pushState redirect", async () => {
     const startPage = context.pages().find((page) => {
-      return page.url().includes(config.loginUrl);
+      return page.url().includes(loginUrl);
     });
     if (!startPage) {
       throw new Error("No login page");
@@ -76,7 +70,7 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
 
   await test.step("Side panel UI should activate prove button after clicking update resource button", async () => {
     const dashboardPage = context.pages().find((page) => {
-      return page.url().includes(config.dashboardUrl);
+      return page.url().includes(dashboardUrl);
     });
     if (!dashboardPage) {
       throw new Error("No dashboard page");
