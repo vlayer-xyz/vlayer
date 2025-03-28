@@ -15,10 +15,10 @@ contract WebProofLibWrapper {
 contract WebProverTest is VTest {
     using WebProofLib for WebProof;
 
-    string public constant DATA_URL = "https://api.x.com/1.1/*/settings.json";
+    string public constant DATA_URL = "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken";
 
-    function _test_revertsIf_notaryKeyIsInvalid() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
+    function test_revertsIf_notaryKeyIsInvalid() public {
+        WebProof memory webProof = WebProof(vm.readFile("testdata/0.1.0-alpha.8/web_proof_invalid_notary_pub_key.json"));
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
@@ -28,7 +28,7 @@ contract WebProverTest is VTest {
     }
 
     function test_verifiesWebProof() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
+        WebProof memory webProof = WebProof(vm.readFile("testdata/0.1.0-alpha.8/web_proof.json"));
 
         callProver();
 
@@ -39,7 +39,7 @@ contract WebProverTest is VTest {
     }
 
     function test_incorrectUrl() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
+        WebProof memory webProof = WebProof(vm.readFile("testdata/0.1.0-alpha.8/web_proof.json"));
 
         callProver();
 
@@ -72,7 +72,7 @@ contract WebProverTest is VTest {
     }
 
     function test_missingPartInSerializedWebProof() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_part.json"));
+        WebProof memory webProof = WebProof(vm.readFile("testdata/0.1.0-alpha.8/web_proof_missing_part.json"));
 
         callProver();
 
@@ -83,7 +83,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight: Execution error: EVM error: Verification error: Deserialization error: Bincode deserialize error: invalid length 64, expected an array at most 64 bytes long"
+                "Preflight: Execution error: EVM error: Verification error: Deserialization error: Hex decode error: Odd number of digits"
             );
         }
     }
