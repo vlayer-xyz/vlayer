@@ -75,11 +75,16 @@ fn verify_dkim_header_dns_consistency(email: &ParsedMail, record: &DNSRecord) ->
             DKIMError::SignatureSyntaxError("Missing domain tag (d=) in DKIM-Signature".into())
         })?;
 
-        let expected = format!("{selector}._domainkey.{domain}").trim().to_string();
-        let actual = record.name.trim_end_matches('.').trim().to_string();
+        let expected = format!("{selector}._domainkey.{domain}")
+            .as_bytes()
+            .to_vec();
+        let actual = record.name.trim_end_matches('.').as_bytes().to_vec();
 
-        if expected != record.name {
-            return Err(Error::DomainMismatch(expected, actual));
+        if expected != actual {
+            return Err(Error::DomainMismatch(
+                String::from_utf8(expected).unwrap(),
+                String::from_utf8(actual).unwrap(),
+            ));
         }
     }
 
