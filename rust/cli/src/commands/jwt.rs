@@ -16,7 +16,7 @@ pub enum Error {
     Anyhow(#[from] anyhow::Error),
     #[error("Invalid host string '{0}', expected format <hostname:port>")]
     InvalidHost(String),
-    #[error("Port not u16")]
+    #[error("Specified port value '{0}' not u16")]
     InvalidPort(String),
     #[error("Hostname cannot be empty")]
     EmptyHostname,
