@@ -29,7 +29,7 @@ echo "::endgroup::"
 
 echo "::group::risczero installation"
 curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-cargo binstall -y cargo-risczero@1.2.4
+cargo binstall -y cargo-risczero@2.0.0
 cargo risczero install
 echo "::endgroup::"
 

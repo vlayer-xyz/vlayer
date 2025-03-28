@@ -60,7 +60,7 @@ runs:
       if: ${{ inputs.include_risc0 == 'true' }}
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
-        tool: cargo-risczero@1.2.4
+        tool: cargo-risczero@2.0.0
 
     - name: Initialize risc0 toolchain
       if: ${{ inputs.include_risc0 == 'true' }}

@@ -1,5 +1,5 @@
 ---
-vlayer_risc0_version: '1.2.4'
+vlayer_risc0_version: '2.0.0'
 vlayer_quicknode_api_key: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   61373138316638363730356632616361396431336636623835313766313234373766366361636130
