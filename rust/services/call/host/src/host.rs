@@ -246,7 +246,7 @@ struct EncodedProofWithStats {
 #[instrument(skip_all)]
 fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
     let now = Instant::now();
-    let ProveInfo { receipt, stats } = prover.prove(input)?;
+    let ProveInfo { receipt, stats, .. } = prover.prove(input)?;
     let elapsed_time = now.elapsed();
 
     let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
