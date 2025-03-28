@@ -1,5 +1,6 @@
-import { expect, test } from "./config";
-import { waitForSidePanelOpened } from "./helpers";
+import { test } from "./config";
+import { Webpage } from "./pom/webpage";
+import { waitForExtension } from "./pom/extension";
 import {
   loginUrl,
   dashboardUrl,
@@ -13,54 +14,23 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
 }) => {
   await test.step("Web-app should open sidepanel via SDK call", async () => {
     await page.goto(dappFailedAuthUrl);
-    const requestProofButton = page
-      .locator("body")
-      .getByTestId("request-webproof-button");
+    const webpage = new Webpage(page, context);
 
-    await requestProofButton.click();
-    const extension = await waitForSidePanelOpened(context);
+    await webpage.clickButton("Request proof of beeing a wizard");
 
-    const redirectButton = extension.getByTestId("start-page-button");
-    const [newPage] = await Promise.all([
-      context.waitForEvent("page"),
-      redirectButton.click(),
-    ]);
+    const extension = await waitForExtension(context);
 
-    await newPage.waitForURL(loginUrl);
+    const appPage = await extension.redirect();
+    await appPage.waitForURL(loginUrl);
 
-    const startPage = context.pages().find((page) => {
-      return page.url().includes(loginUrl);
-    });
-    if (!startPage) {
-      throw new Error("No login page");
-    }
-    const loginButton = startPage.getByRole("button", {
-      name: "Login",
-    });
-    await loginButton.click();
+    await appPage.clickButton("Login");
+    await appPage.waitForURL(dashboardUrl);
 
-    const dashboardPage = context.pages().find((page) => {
-      return page.url().includes(dashboardUrl);
-    });
-    if (!dashboardPage) {
-      throw new Error("No dashboard page");
-    }
-    const profileButton = dashboardPage.getByRole("button", {
-      name: "Go to profile failed auth",
-    });
-    await profileButton.click();
-    await dashboardPage.waitForURL(profileFailedAuthUrl);
+    await appPage.clickButton("Go to profile failed auth");
+    await appPage.waitForURL(profileFailedAuthUrl);
 
-    const proveButton = extension.getByRole("button", {
-      name: "Generate proof",
-    });
-    await expect(proveButton).toHaveText("Generate proof");
-
-    await proveButton.click();
-
-    await extension.waitForSelector('p[data-testid="error-message"]');
-    const errorMessage = extension.getByTestId("error-message");
-    await expect(errorMessage).toHaveText(
+    await extension.generateProof();
+    await extension.expectErrorToBeDisplayed(
       "Authentication failed. Please restart the process.",
     );
   });

@@ -23,6 +23,12 @@ export class Extension {
     ]);
     return new Webpage(newPage, this.context);
   }
+
+  async generateProof() {
+    const button = this.page.getByRole("button", { name: "Generate proof" });
+    await button.click();
+  }
+
   async startPageStepShouldBeCompleted() {
     const startPageStep = this.page.getByTestId("step-startPage");
     const status = await startPageStep.getAttribute("data-status");
@@ -40,6 +46,12 @@ export class Extension {
       chrome.storage.session.get(),
     );
     expect(sessionStorage).toEqual({});
+  }
+
+  async expectErrorToBeDisplayed(expectedErrorMessage: string) {
+    await this.page.waitForSelector('p[data-testid="error-message"]');
+    const errorMessage = this.page.getByTestId("error-message");
+    await expect(errorMessage).toHaveText(expectedErrorMessage);
   }
 }
 
