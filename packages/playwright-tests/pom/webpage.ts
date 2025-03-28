@@ -48,4 +48,9 @@ export class Webpage {
       payload: { status: ZkProvingStatus.Done },
     });
   }
+
+  async expectWebProof() {
+    await this.page.reload();
+    await this.page.waitForSelector('h1[data-testid="has-webproof"]');
+  }
 }

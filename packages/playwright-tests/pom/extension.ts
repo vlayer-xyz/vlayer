@@ -53,6 +53,24 @@ export class Extension {
     const errorMessage = this.page.getByTestId("error-message");
     await expect(errorMessage).toHaveText(expectedErrorMessage);
   }
+
+  async expectRequestWebProofButtonToBeVisible() {
+    const redirectButton = this.page.getByTestId("start-page-button");
+    await expect(redirectButton).toBeVisible();
+  }
+
+  async expectGenerateProofButtonToBeVisible() {
+    const generateProofButton = this.page.getByRole("button", {
+      name: "Generate proof",
+    });
+    await expect(generateProofButton).toBeVisible();
+  }
+
+  async expectStepToBeCompleted(stepName: string) {
+    const step = this.page.getByTestId(`step-${stepName}`);
+    const status = await step.getAttribute("data-status");
+    expect(status).toEqual("completed");
+  }
 }
 
 export const waitForExtension = async (context: BrowserContext) => {
