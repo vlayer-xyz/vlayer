@@ -1,18 +1,6 @@
 {
-  "scripts": {
-    "lint": "eslint .",
-    "lint:packages": "eslint packages/*",
-    "lint:examples": "eslint examples/*"
-  },
   "workspaces": [
     "packages/*",
     "examples/*/vlayer"
-  ],
-  "devDependencies": {
-    "eslint": "9.23.0",
-    "eslint-plugin-react": "7.37.4",
-    "eslint-plugin-react-hooks": "5.2.0",
-    "@eslint/js": "^9.23.0",
-    "typescript-eslint": "8.28.0"
-  }
+  ]
 }

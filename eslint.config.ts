@@ -1,13 +1,12 @@
-import js from "@eslint/js";
-import ts from "typescript-eslint";
+import eslint from "@eslint/js";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 import globals from "globals";
 import eslintPluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
+import tseslint from 'typescript-eslint';
 
-// One single eslint config for whole monorepo
-// thx flat config 
-export default [
+// Unified ESLint configuration for the entire monorepo using flat config
+export default tseslint.config(
   {
     ignores: [
       "**/node_modules/**/*", 
@@ -16,24 +15,27 @@ export default [
       "contracts/**/*",
       "rust/**/*",
       "docker/**/*",
-      "eslint.config.ts",
+      "**/out/**/*",
     ],
   },
-  js.configs.recommended,
-  ...(ts.configs.recommendedTypeChecked).map(config => ({
-    ...config,
-    ignores: [
-      "eslint.config.ts",
-    ],
-  })),
+  eslint.configs.recommended,
+  // Using the stricter recommendedTypeChecked configuration instead of the standard recommended
+  tseslint.configs.recommendedTypeChecked,
+  reactHooks.configs['recommended-latest'],
   prettierRecommended,
-  // eslintPluginReact.configs.recommended,
-  
+  {
+    plugins: {
+      react: eslintPluginReact,
+    },
+    // Disable the rule for React in JSX scope as React version >= 18 is used
+    rules: {
+      "react/react-in-jsx-scope": "off",
+    },
+  },
   {
     files: [
       "packages/**/*.{ts,tsx,js,jsx}",
       "examples/**/*.{ts,tsx,js,jsx}",
-    
     ],
     rules: {
       curly: "error",
@@ -42,44 +44,34 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
+        ...globals.node,
       },
       parserOptions: {
-        // find closest tsconfig.json
+        // Always find closest tsconfig.json
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
   },
-  // React rules for packages that use react 
-  // and examples
-  // {
-  //   files: [
-  //     "packages/sdk-hooks/**/*.{ts,tsx,js,jsx}", 
-  //     "packages/extension-hooks/**/*.{ts,tsx,js,jsx}", 
-  //     "examples/**/*.{ts,tsx,js,jsx}"
-  //   ],
-  //   rules: {
-  //     ...eslintPluginReact.configs.recommended.rules,
-  //     ...reactHooks.configs.recommended.rules,
-  //   },
-  //   settings: {
-  //     react: {
-  //       version: "detect",
-  //     },
-  //   },
-  // },
-
-
+  //For now console is allowed in examples 
   {
     files: [
-      "examples/**/*.{ts,tsx,js,jsx}"
+      'examples/**/*.{ts,tsx,js,jsx}',
     ],
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
+    rules: {
+      "no-console": "off",
     },
-  }
-
-];
+  },
+  // Disable type-checking rules for specific files to avoid forcing their inclusion in tsconfig.json
+  {
+    files: [
+      '**/vitest.config.ts',
+      '**/vitest.setup.ts',
+      '**/vite.config.ts',
+      '**/vite-env.d.ts',
+      '**/playwright.config.ts',
+      '**/*.js'
+    ],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+)
