@@ -17,7 +17,6 @@ usage() {
 
 SKIP_BUILD=false
 FIX_FLAG=""
-FIX_OPTION=""
 
 handle_options() {
     while [ $# -gt 0 ]; do
@@ -28,7 +27,6 @@ handle_options() {
                 ;;
             --fix)
                 FIX_FLAG=" --fix"
-                FIX_OPTION=":fix"
                 ;;
             --skip-build)
                 SKIP_BUILD=true
@@ -59,7 +57,7 @@ for example in $(get_examples); do (
 echo "::endgroup::Running eslint for examples"
 
 echo "::group::Running eslint for: $VLAYER_HOME/packages"
-pushd "${VLAYER_HOME}/packages"
-bun run lint$FIX_OPTION
+pushd "${VLAYER_HOME}"
+bun run lint:packages $FIX_FLAG
 popd
 echo "::endgroup::Running eslint for: $VLAYER_HOME/packages"
