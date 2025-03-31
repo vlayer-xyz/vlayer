@@ -1,7 +1,7 @@
 {
   "scripts": {
     "lint": "eslint .",
-    "lint:packages": "DEBUG=eslint:linter eslint packages/*",
+    "lint:packages": "eslint packages/*",
     "lint:examples": "eslint examples/*"
   },
   "workspaces": [
