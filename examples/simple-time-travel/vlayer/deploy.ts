@@ -30,4 +30,5 @@ writeEnvVariables(".env", {
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_CLIENT_AUTH_MODE: process.env.CLIENT_AUTH_MODE || "",
+  VITE_PROVER_ERC20_HOLDER_ADDR: process.env.PROVER_ERC20_HOLDER_ADDR,
 });

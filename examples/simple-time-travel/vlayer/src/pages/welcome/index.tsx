@@ -38,7 +38,7 @@ export const WelcomePage = () => {
     <HodlerForm
       networkChain={networkChain}
       token={token}
-      holderAddress={address}
+      holderAddress={import.meta.env.VITE_PROVER_ERC20_HOLDER_ADDR}
       onSubmit={handleSubmit}
       isLoading={isLoading}
       loadingLabel="Loading..."
