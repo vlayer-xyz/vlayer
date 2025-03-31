@@ -39,7 +39,7 @@ export const test = base.extend<{
             ],
           },
     );
-
+    // eslint-disable-next-line
     await use(context);
     await context.close();
   },
