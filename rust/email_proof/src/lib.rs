@@ -7,20 +7,51 @@ mod from_header;
 #[cfg(test)]
 mod test_utils;
 
-use dkim::verify_email;
+use dkim::{
+    verify_dkim_body_length_tag, verify_dkim_header_dns_consistency,
+    verify_email_contains_dkim_headers, verify_email_with_key,
+};
+use dns::parse_dns_record;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
-use mailparse::parse_mail;
+use mailparse::{parse_mail, MailHeaderMap};
 
 pub use crate::{email::Email, errors::Error};
+
+const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_record, verification_data) = UnverifiedEmail::parse_calldata(calldata)?;
     let email = parse_mail(&raw_email)?;
+    let dkim_public_key = parse_dns_record(&dns_record.data)?;
+    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
 
+    verify_header_section_crlf(email.raw_bytes)?;
     dns_record.verify(&verification_data)?;
-    verify_email(&email, &dns_record)?;
+    verify_email_contains_dkim_headers(&dkim_headers)?;
+    verify_dkim_body_length_tag(&dkim_headers)?;
+    verify_email_with_key(&email, dkim_public_key)?;
+    verify_dkim_header_dns_consistency(&dkim_headers, &dns_record)?;
 
     Ok(email.try_into()?)
+}
+
+fn verify_header_section_crlf(raw_email: &[u8]) -> Result<(), Error> {
+    let email_str = std::str::from_utf8(raw_email).expect("Email already verified");
+
+    let header_end = email_str
+        .find("\r\n\r\n")
+        .ok_or(Error::MissingHeaderSeparator)?;
+
+    let headers_part = &email_str[..header_end];
+    let bytes = headers_part.as_bytes();
+
+    for i in 1..bytes.len() {
+        if bytes[i - 1] == b'\n' && bytes[i] == b'\n' {
+            return Err(Error::InvalidHeaderLineEndings);
+        }
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -139,7 +170,7 @@ mod test {
     }
 
     #[test]
-    fn fails_for_missing_signature() -> anyhow::Result<()> {
+    fn fails_for_missing_signature() {
         let email = unsigned_email_fixture();
         let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
 
@@ -147,11 +178,10 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Error verifying DKIM: signature syntax error: No DKIM-Signature header".to_string()
         );
-        Ok(())
     }
 
     #[test]
-    fn fails_for_mismatching_body() -> anyhow::Result<()> {
+    fn fails_for_mismatching_body() {
         let email = read_email_from_file("./testdata/signed_email_modified_body.txt");
         let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
 
@@ -159,11 +189,10 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Error verifying DKIM: body hash did not verify".to_string()
         );
-        Ok(())
     }
 
     #[test]
-    fn fails_for_missing_dns_record() -> anyhow::Result<()> {
+    fn fails_for_missing_dns_record() {
         let email = signed_email_fixture();
         let dns_record = SolDnsRecord {
             name: "".into(),
@@ -177,11 +206,10 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Invalid UnverifiedEmail calldata: Unexpected DNS record type: 0. Supported types: TXT(16)".to_string()
         );
-        Ok(())
     }
 
     #[test]
-    fn fails_for_invalid_vdns_signature() -> anyhow::Result<()> {
+    fn fails_for_invalid_vdns_signature() {
         let email = signed_email_fixture();
         let verification_data = SolVerificationData {
             signature: bytes!("1234"),
@@ -193,11 +221,10 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "VDNS signature verification failed: Signature verification error".to_string()
         );
-        Ok(())
     }
 
     #[test]
-    fn fails_for_missing_vdns_signature() -> anyhow::Result<()> {
+    fn fails_for_missing_vdns_signature() {
         let email = signed_email_fixture();
         let verification_data = SolVerificationData {
             signature: Default::default(),
@@ -210,11 +237,10 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "VDNS signature verification failed: Public key decoding error: ASN.1 error: ASN.1 DER message is incomplete: expected 1, actual 0 at DER byte 0".to_string()
         );
-        Ok(())
     }
 
     #[test]
-    fn fails_for_mismatching_signer_and_sender_domain() -> anyhow::Result<()> {
+    fn fails_for_mismatching_signer_and_sender_domain() {
         let email = read_email_from_file("./testdata/signed_email_different_domains.txt");
         let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
 
@@ -222,11 +248,10 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Error verifying DKIM: signature did not verify".to_string()
         );
-        Ok(())
     }
 
     #[test]
-    fn fails_when_from_address_is_from_subdomain() -> anyhow::Result<()> {
+    fn fails_when_from_address_is_from_subdomain() {
         let email = read_email_from_file("./testdata/signed_email_from_subdomain.txt");
         let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
 
@@ -234,12 +259,10 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Error verifying DKIM: signature did not verify".to_string()
         );
-
-        Ok(())
     }
 
     #[test]
-    fn fails_when_dkim_signer_address_is_from_subdomain() -> anyhow::Result<()> {
+    fn fails_when_dkim_signer_address_is_from_subdomain() {
         let email = read_email_from_file("./testdata/signed_email_from_subdomain.txt");
         let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
 
@@ -247,12 +270,10 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Error verifying DKIM: signature did not verify".to_string()
         );
-
-        Ok(())
     }
 
     #[test]
-    fn fails_for_dkim_signature_of_truncated_body() -> anyhow::Result<()> {
+    fn fails_for_dkim_signature_of_truncated_body() {
         let email = read_email_from_file("./testdata/signed_email_with_dkim_l_tag.eml");
         let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
 
@@ -260,7 +281,45 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Error verifying DKIM: signature syntax error: DKIM-Signature header contains body length tag (l=)".to_string()
         );
+    }
 
-        Ok(())
+    mod verify_headers_and_body_sections_split_properly {
+        use super::*;
+
+        #[test]
+        fn pass() -> anyhow::Result<()> {
+            let email = read_email_from_file("./testdata/signed_email.eml");
+            let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
+            parse_and_verify(&calldata)?;
+
+            Ok(())
+        }
+
+        #[test]
+        fn fails_for_missing_header_separator() {
+            let email = signed_email_fixture().replace("\r\n\r\n", "\r\n");
+            let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
+            assert_eq!(
+                parse_and_verify(&calldata).unwrap_err().to_string(),
+                "Missing CRLF-CRLF separator in email headers"
+            );
+        }
+
+        #[test]
+        fn fails_for_header_with_extra_data() {
+            let mut email = signed_email_fixture();
+
+            email = email.replace(
+            "boundary=\"00000000000064b16c062913f525\"\r\n",
+            "boundary=\"00000000000064b16c062913f525\"\r\n\n--00000000000064b16c062913f525\r\nContent-Type: text/plain; charset=\"UTF-8\"\r\n\nTEXTRA DATA\r\n",
+        );
+
+            let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
+
+            assert_eq!(
+                parse_and_verify(&calldata).unwrap_err().to_string(),
+                "Header section contains invalid LF sequence (\\n\\n)"
+            );
+        }
     }
 }

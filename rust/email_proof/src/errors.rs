@@ -14,6 +14,10 @@ pub enum Error {
     InvalidDkimRecord(String),
     #[error("Invalid From header: {0}")]
     InvalidFromHeader(String),
+    #[error("Header section contains invalid LF sequence (\\n\\n)")]
+    InvalidHeaderLineEndings,
+    #[error("Missing CRLF-CRLF separator in email headers")]
+    MissingHeaderSeparator,
     #[error("VDNS signature verification failed: {0}")]
     VdnsSignatureVerification(#[from] verifiable_dns::RecordVerifierError),
 }

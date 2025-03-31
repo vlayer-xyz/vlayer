@@ -1,26 +1,12 @@
 use cfdkim::{validate_header, DKIMError, DkimPublicKey};
-use mailparse::{MailHeader, MailHeaderMap, ParsedMail};
+use mailparse::{MailHeader, ParsedMail};
 use slog::{o, Discard, Logger};
 use verifiable_dns::DNSRecord;
 
 pub use crate::errors::Error;
-use crate::{dns::parse_dns_record, from_header};
+use crate::from_header;
 
-const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
-
-pub fn verify_email(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error> {
-    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
-    let dkim_public_key = parse_dns_record(&record.data)?;
-
-    verify_email_contains_dkim_headers(&dkim_headers)?;
-    verify_dkim_body_length_tag(&dkim_headers)?;
-    verify_email_with_key(email, dkim_public_key)?;
-    verify_dkim_header_dns_consistency(&dkim_headers, record)?;
-
-    Ok(())
-}
-
-fn verify_email_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), Error> {
+pub fn verify_email_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), Error> {
     let from_domain = from_header::extract_from_domain(email)?;
 
     let result =
@@ -35,14 +21,14 @@ fn verify_email_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), E
     }
 }
 
-fn verify_email_contains_dkim_headers(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
+pub fn verify_email_contains_dkim_headers(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
     if headers.is_empty() {
         return Err(DKIMError::SignatureSyntaxError("No DKIM-Signature header".into()));
     }
     Ok(())
 }
 
-fn verify_dkim_body_length_tag(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
+pub fn verify_dkim_body_length_tag(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
     for h in headers {
         let value = String::from_utf8_lossy(h.get_value_raw());
         let dkim_header = validate_header(&value)?;
@@ -57,7 +43,7 @@ fn verify_dkim_body_length_tag(headers: &[&MailHeader<'_>]) -> Result<(), DKIMEr
     Ok(())
 }
 
-fn verify_dkim_header_dns_consistency(
+pub fn verify_dkim_header_dns_consistency(
     headers: &[&MailHeader<'_>],
     record: &DNSRecord,
 ) -> Result<(), Error> {
