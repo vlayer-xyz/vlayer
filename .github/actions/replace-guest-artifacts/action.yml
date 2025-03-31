@@ -27,6 +27,6 @@ runs:
           sed -i.bak "s|<$2>|$path|" ./guest_replacement/methods.rs
         }
 
-        replace_guest "risc0_call_guest" "RISC0_CALL_GUEST_ELF"
-        replace_guest "risc0_chain_guest" "RISC0_CHAIN_GUEST_ELF"
+        replace_guest "risc0_call_guest.bin" "RISC0_CALL_GUEST_ELF"
+        replace_guest "risc0_chain_guest.bin" "RISC0_CHAIN_GUEST_ELF"
       shell: bash
