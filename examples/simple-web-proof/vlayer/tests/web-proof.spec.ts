@@ -11,6 +11,8 @@ const { privateKey, chainName } = getConfig();
 const chain = chainName ? anvil : optimismSepolia;
 
 test.beforeEach(async ({ page }) => {
+  console.log("privateKey", privateKey);
+  console.log("chainName", chainName);
   await installMockWallet({
     page,
     account: privateKeyToAccount(privateKey),
