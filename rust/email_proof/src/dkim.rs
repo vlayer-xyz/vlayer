@@ -1,5 +1,5 @@
 use cfdkim::{validate_header, DKIMError, DkimPublicKey};
-use mailparse::{MailHeaderMap, ParsedMail};
+use mailparse::{MailHeader, MailHeaderMap, ParsedMail};
 use slog::{o, Discard, Logger};
 use verifiable_dns::DNSRecord;
 
@@ -9,17 +9,18 @@ use crate::{dns::parse_dns_record, from_header};
 const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
 pub fn verify_email(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error> {
-    verify_dkim_headers(email)?;
+    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
+    verify_dkim_headers(&dkim_headers)?;
     let dkim_public_key = parse_dns_record(&record.data)?;
     verify_email_with_key(email, dkim_public_key)?;
-    verify_dkim_header_dns_consistency(email, record)?;
+    verify_dkim_header_dns_consistency(&dkim_headers, record)?;
 
     Ok(())
 }
 
-fn verify_dkim_headers(email: &ParsedMail) -> Result<(), DKIMError> {
-    verify_email_contains_dkim_headers(email)?;
-    verify_dkim_body_length_tag(email)?;
+fn verify_dkim_headers(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
+    verify_email_contains_dkim_headers(headers)?;
+    verify_dkim_body_length_tag(headers)?;
 
     Ok(())
 }
@@ -39,17 +40,14 @@ fn verify_email_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), E
     }
 }
 
-fn verify_email_contains_dkim_headers(email: &ParsedMail) -> Result<(), DKIMError> {
-    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
-    if dkim_headers.is_empty() {
+fn verify_email_contains_dkim_headers(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
+    if headers.is_empty() {
         return Err(DKIMError::SignatureSyntaxError("No DKIM-Signature header".into()));
     }
     Ok(())
 }
 
-fn verify_dkim_body_length_tag(email: &ParsedMail) -> Result<(), DKIMError> {
-    let headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
-
+fn verify_dkim_body_length_tag(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
     for h in headers {
         let value = String::from_utf8_lossy(h.get_value_raw());
         let dkim_header = validate_header(&value)?;
@@ -64,8 +62,11 @@ fn verify_dkim_body_length_tag(email: &ParsedMail) -> Result<(), DKIMError> {
     Ok(())
 }
 
-fn verify_dkim_header_dns_consistency(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error> {
-    for header in email.headers.get_all_headers(DKIM_SIGNATURE_HEADER) {
+fn verify_dkim_header_dns_consistency(
+    headers: &[&MailHeader<'_>],
+    record: &DNSRecord,
+) -> Result<(), Error> {
+    for header in headers {
         let dkim_header = validate_header(&String::from_utf8_lossy(header.get_value_raw()))?;
 
         let selector = dkim_header.get_tag("s").ok_or_else(|| {
@@ -123,17 +124,19 @@ mod tests {
             let dkim_header = ("DKIM-Signature", "v=1; a=; c=; d=; s=; t=; h=From; bh=; b=");
             let mime_email = email_with_headers(&[dkim_header]).into_bytes();
             let email = mailparse::parse_mail(&mime_email).unwrap();
+            let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
 
-            assert!(verify_dkim_headers(&email).is_ok());
+            assert!(verify_dkim_headers(&dkim_headers).is_ok());
         }
 
         #[test]
         fn fails_for_email_without_dkim_headers() {
             let mime_email = email_with_headers(&[]).into_bytes();
             let email = mailparse::parse_mail(&mime_email).unwrap();
+            let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
 
             assert_eq!(
-                verify_dkim_headers(&email).unwrap_err(),
+                verify_dkim_headers(&dkim_headers).unwrap_err(),
                 DKIMError::SignatureSyntaxError("No DKIM-Signature header".into())
             );
         }
@@ -143,9 +146,10 @@ mod tests {
             let dkim_header = ("DKIM-Signature", "v=1; a=; c=; d=; s=; t=; h=From; bh=; b=; l=100");
             let mime_email = email_with_headers(&[dkim_header]).into_bytes();
             let email = mailparse::parse_mail(&mime_email).unwrap();
+            let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
 
             assert_eq!(
-                verify_dkim_headers(&email).unwrap_err(),
+                verify_dkim_headers(&dkim_headers).unwrap_err(),
                 DKIMError::SignatureSyntaxError(
                     "DKIM-Signature header contains body length tag (l=)".into()
                 )
@@ -160,9 +164,10 @@ mod tests {
             ];
             let mime_email = email_with_headers(&dkim_headers).into_bytes();
             let email = mailparse::parse_mail(&mime_email).unwrap();
+            let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
 
             assert_eq!(
-                verify_dkim_headers(&email).unwrap_err(),
+                verify_dkim_headers(&dkim_headers).unwrap_err(),
                 DKIMError::SignatureSyntaxError(
                     "DKIM-Signature header contains body length tag (l=)".into()
                 )
@@ -188,9 +193,10 @@ mod tests {
                 ("DKIM-Signature", "v=1; a=; c=; d=example.com; s=selector1; h=From; bh=; b=");
             let mime_email = email_with_headers(&[dkim_header]).into_bytes();
             let email = parse_mail(&mime_email).unwrap();
+            let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
             let record = record_with_name("selector1._domainkey.example.com");
 
-            assert!(verify_dkim_header_dns_consistency(&email, &record).is_ok());
+            assert!(verify_dkim_header_dns_consistency(&dkim_headers, &record).is_ok());
         }
 
         #[test]
@@ -199,10 +205,11 @@ mod tests {
                 ("DKIM-Signature", "v=1; a=; c=; d=example.com; s=selector1; h=From; bh=; b=");
             let mime_email = email_with_headers(&[dkim_header]).into_bytes();
             let email = parse_mail(&mime_email).unwrap();
+            let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
             let record = record_with_name("selector2._domainkey.example.com");
 
             assert_eq!(
-                verify_dkim_header_dns_consistency(&email, &record)
+                verify_dkim_header_dns_consistency(&dkim_headers, &record)
                     .unwrap_err()
                     .to_string(),
                 Error::DomainMismatch(
@@ -219,10 +226,11 @@ mod tests {
                 ("DKIM-Signature", "v=1; a=; c=; d=example.com; s=selector1; h=From; bh=; b=");
             let mime_email = email_with_headers(&[dkim_header]).into_bytes();
             let email = parse_mail(&mime_email).unwrap();
+            let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
             let record = record_with_name("selector1._domainkey.otherdomain.com");
 
             assert_eq!(
-                verify_dkim_header_dns_consistency(&email, &record)
+                verify_dkim_header_dns_consistency(&dkim_headers, &record)
                     .unwrap_err()
                     .to_string(),
                 Error::DomainMismatch(
