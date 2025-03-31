@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "lint": "eslint packages/*",
+    "lint": "eslint .",
     "lint:packages": "eslint packages/*",
     "lint:examples": "eslint examples/*"
   },

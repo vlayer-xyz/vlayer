@@ -1,7 +1,6 @@
 name: E2E test of example web apps on devnet
 
 on:
-  workflow_dispatch:
   pull_request:
   merge_group:
   push:
