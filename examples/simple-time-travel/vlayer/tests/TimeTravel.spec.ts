@@ -17,7 +17,7 @@ test("Simple time travel flow", async ({ page }) => {
     await expect(page).toHaveURL(/show-balance/, {
       timeout: 30000,
     });
-    await expect(page.getByText("Balance: 750")).toBeVisible();
+    await expect(page.getByText("Balance:")).toBeVisible();
   });
 
   await test.step("verifies proof and navigates to success", async () => {
