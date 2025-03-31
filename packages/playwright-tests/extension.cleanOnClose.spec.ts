@@ -16,7 +16,7 @@ test("Cleanup of storage on extension close", async ({ page, context }) => {
   await newPage.waitForURL(loginUrl);
   await newPage.clickButton("Login");
   await newPage.waitForURL(dashboardUrl);
-  // close and reopen 
+  // close and reopen
   await webpage.closeExtension();
   await delayMessage();
   await webpage.openExtension();

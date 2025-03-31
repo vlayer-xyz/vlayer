@@ -13,7 +13,7 @@ const emailProver = await deployProver({
   proverSpec: emailProverSpec,
 });
 
-writeEnvVariables(".env", {
+void writeEnvVariables(".env", {
   VITE_LOTR_API_PROVER_ADDRESS: unconditionalProver,
   VITE_EMAIL_PROVER_ADDRESS: emailProver,
   VITE_VLAYER_API_TOKEN: config.token,
