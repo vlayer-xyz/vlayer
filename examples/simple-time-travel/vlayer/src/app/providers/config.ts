@@ -8,9 +8,13 @@ import { mockConnector } from "../../shared/lib/mockConnector";
 const wagmiConfig = useEnvPrivateKey()
   ? createConfig({
       connectors: [mockConnector(anvil)],
-      chains: [anvil],
+      chains:
+        import.meta.env.VITE_CHAIN_NAME === "anvil"
+          ? [anvil]
+          : [optimismSepolia],
       transports: {
         [anvil.id]: http(),
+        [optimismSepolia.id]: http(),
       },
     })
   : createConfig({
