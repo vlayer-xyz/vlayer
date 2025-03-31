@@ -7,6 +7,8 @@ use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
 use web_prover::{generate_web_proof, NotaryConfig, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX};
 
+const PROJECT_DIR: &str = env!("CARGO_MANIFEST_DIR");
+
 const NOTARY_HOST: &str = "127.0.0.1";
 const NOTARY_PORT: u16 = 7047;
 
@@ -139,8 +141,8 @@ fn corrupt_data(presentation: &str) -> Result<String, Box<dyn std::error::Error>
 }
 
 async fn write_to_file(path: &str, content: &str) -> Result<(), Box<dyn std::error::Error>> {
-    info!("Writing to file: {path}");
-    let path = Path::new(path);
+    let path = Path::new(PROJECT_DIR).join(path);
+    info!("Writing to file: {}", path.display());
 
     if let Some(parent_dir) = path.parent() {
         create_dir_all(parent_dir).await?;
