@@ -9,6 +9,8 @@ runs:
   using: "composite"
   steps:
     - shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         curl -L https://risczero.com/install | bash
         export PATH=$PATH:"$HOME/.risc0/bin"
