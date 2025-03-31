@@ -5,10 +5,14 @@ use serde_json::{json, Value};
 use tokio::fs::{create_dir_all, write};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
-use web_prover::{generate_web_proof, NotaryConfig, TLSN_VERSION};
+use web_prover::{generate_web_proof, NotaryConfig, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX};
 
 const NOTARY_HOST: &str = "127.0.0.1";
 const NOTARY_PORT: u16 = 7047;
+
+const REMOTE_NOTARY_HOST: &str = "test-notary.vlayer.xyz";
+const REMOTE_NOTARY_PORT: u16 = 443;
+
 const SERVER_DOMAIN: &str = "lotr-api.online";
 const SERVER_HOST: &str = "127.0.0.1";
 const SERVER_PORT: u16 = 3011;
@@ -76,7 +80,12 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
 async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::error::Error>> {
     info!("Generate web proof using remote notary");
     let presentation = generate_web_proof(
-        NotaryConfig::new("test-notary.vlayer.xyz".into(), 443, "v0.1.0-alpha.8".into(), true),
+        NotaryConfig::new(
+            REMOTE_NOTARY_HOST.into(),
+            REMOTE_NOTARY_PORT,
+            TLSN_VERSION_WITH_V_PREFIX.into(),
+            true,
+        ),
         SERVER_DOMAIN,
         SERVER_HOST,
         SERVER_PORT,

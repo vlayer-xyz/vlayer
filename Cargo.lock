@@ -3479,6 +3479,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c74b8349d32d297c9134b8c88677813a227df8f779daa29bfc29c183fe3dca6"
 
 [[package]]
+name = "constcat"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ffb5df6dd5dadb422897e8132f415d7a054e3cd757e5070b663f75bea1840fb"
+
+[[package]]
 name = "convert_case"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12292,7 +12298,7 @@ dependencies = [
  "solar-config",
  "solar-data-structures",
  "solar-macros",
- "thiserror 1.0.69",
+ "thiserror 2.0.11",
  "tracing",
  "unicode-width 0.2.0",
 ]
@@ -12592,7 +12598,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "tempfile",
- "thiserror 1.0.69",
+ "thiserror 2.0.11",
  "url",
  "zip 2.4.2",
 ]
@@ -14697,6 +14703,7 @@ name = "web_prover"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "constcat",
  "derive-new",
  "hex",
  "http-body-util",
