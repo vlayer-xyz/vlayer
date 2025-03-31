@@ -3,6 +3,8 @@ use std::{collections::HashMap, path::Path};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::fs::{create_dir_all, write};
+use tracing::{info, level_filters::LevelFilter};
+use tracing_subscriber::EnvFilter;
 use web_prover::{generate_web_proof, NotaryConfig, TLSN_VERSION};
 
 const NOTARY_HOST: &str = "127.0.0.1";
@@ -18,17 +20,27 @@ struct NotaryInfoResponse {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let filter = EnvFilter::builder()
+        .with_default_directive(LevelFilter::INFO.into())
+        .from_env_lossy();
+
+    tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .with_writer(std::io::stderr)
+        .init();
+
     check_notary_version().await?;
 
     generate_valid_web_proof_local_notary().await?;
     generate_valid_web_proof_remote_notary().await?;
 
-    println!("Generate fixtures script completed successfully.");
+    info!("Generate fixtures script completed successfully.");
 
     Ok(())
 }
 
 async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::error::Error>> {
+    info!("Generate web proof using local notary");
     let presentation = generate_web_proof(
         NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false),
         SERVER_DOMAIN,
@@ -62,8 +74,9 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
 }
 
 async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::error::Error>> {
+    info!("Generate web proof using remote notary");
     let presentation = generate_web_proof(
-        NotaryConfig::new("notary.pse.dev".into(), 443, "v0.1.0-alpha.8".into(), true),
+        NotaryConfig::new("test-notary.vlayer.xyz".into(), 443, "v0.1.0-alpha.8".into(), true),
         SERVER_DOMAIN,
         SERVER_HOST,
         SERVER_PORT,
@@ -106,7 +119,9 @@ fn to_web_proof(presentation: &str) -> Result<String, Box<dyn std::error::Error>
 fn corrupt_data(presentation: &str) -> Result<String, Box<dyn std::error::Error>> {
     let mut presentation_json: Value = serde_json::from_str(presentation)?;
 
-    let data = presentation_json["presentationJson"]["data"].as_str()?;
+    let data = presentation_json["presentationJson"]["data"]
+        .as_str()
+        .ok_or("Missing or invalid field: 'presentationJson.data'")?;
 
     let modified_data = &data[..data.len().saturating_sub(1)];
     presentation_json["presentationJson"]["data"] = json!(modified_data);
@@ -115,7 +130,7 @@ fn corrupt_data(presentation: &str) -> Result<String, Box<dyn std::error::Error>
 }
 
 async fn write_to_file(path: &str, content: &str) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Writing to file: {path}");
+    info!("Writing to file: {path}");
     let path = Path::new(path);
 
     if let Some(parent_dir) = path.parent() {
