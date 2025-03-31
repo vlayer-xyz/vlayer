@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { stepsMeta, StepKind } from "../src/app/router/types";
+import { useMockWallet } from "./mockWallet";
+
+test.beforeEach(async ({ page }) => {
+  await useMockWallet(page);
+});
 
 test("Simple time travel flow", async ({ page }) => {
   await test.step("renders welcome page", async () => {

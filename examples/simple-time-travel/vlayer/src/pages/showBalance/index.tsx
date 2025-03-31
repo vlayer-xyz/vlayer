@@ -4,10 +4,6 @@ import { useLocalStorage } from "usehooks-ts";
 import { useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
-import {
-  getAccountFromPrivateKey,
-  useEnvPrivateKey,
-} from "../../shared/lib/clientAuthMode";
 
 export const ShowBalancePage = () => {
   const navigate = useNavigate();
@@ -51,22 +47,12 @@ export const ShowBalancePage = () => {
     e.preventDefault();
     const [proof, owner, balance] = JSON.parse(proverResult);
     setIsLoading(true);
-    if (useEnvPrivateKey()) {
-      writeContract({
-        address: import.meta.env.VITE_VERIFIER_ADDRESS,
-        abi: verifierSpec.abi,
-        functionName: "claim",
-        args: [proof, owner, BigInt(balance)],
-        account: getAccountFromPrivateKey(),
-      });
-    } else {
-      writeContract({
-        address: import.meta.env.VITE_VERIFIER_ADDRESS,
-        abi: verifierSpec.abi,
-        functionName: "claim",
-        args: [proof, owner, BigInt(balance)],
-      });
-    }
+    writeContract({
+      address: import.meta.env.VITE_VERIFIER_ADDRESS,
+      abi: verifierSpec.abi,
+      functionName: "claim",
+      args: [proof, owner, BigInt(balance)],
+    });
   };
 
   if (!holderAddress) {
