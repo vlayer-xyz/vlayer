@@ -44,14 +44,6 @@ export const MintStep = () => {
 
     const proofData = JSON.parse(proverResult);
 
-    console.log("proofData", proofData);
-    console.log("address", address);
-
-    console.log(
-      "import.meta.env.VITE_VERIFIER_ADDRESS",
-      import.meta.env.VITE_VERIFIER_ADDRESS,
-    );
-
     const writeContractArgs: Parameters<typeof writeContract>[0] = {
       address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
       abi: webProofProofVerifier.abi,
@@ -64,7 +56,7 @@ export const MintStep = () => {
     } catch (error) {
       setMintingError(error as Error);
     }
-    console.log("writeContractArgs", writeContractArgs);
+
     writeContract(writeContractArgs);
   };
 
@@ -79,8 +71,6 @@ export const MintStep = () => {
     if (error) {
       setIsMinting(false);
       if (error.message.includes("User has already minted a TwitterNFT")) {
-        console.log("AlreadyMintedError");
-        console.log(error);
         throw new AlreadyMintedError();
       } else {
         throw error;

@@ -23,9 +23,6 @@ const wagmiAdapter = new WagmiAdapter({
   chains,
   networks,
 });
-console.log("creating appkit");
-console.log("appKitProjectId", import.meta.env.VITE_APP_KIT_PROJECT_ID);
-console.log("chain", chain);
 
 createAppKit({
   adapters: [wagmiAdapter],
