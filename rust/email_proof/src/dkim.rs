@@ -103,7 +103,6 @@ mod tests {
             assert!(verify_email_contains_dkim_headers(&headers).is_ok());
         }
 
-
         #[test]
         fn fails_for_no_headers() {
             assert_eq!(
