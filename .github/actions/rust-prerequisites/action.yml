@@ -55,9 +55,3 @@ runs:
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
         tool: cargo-machete@0.7.0
-
-    - name: Install risc0 toolchain
-      if: ${{ inputs.include_risc0 == 'true' }}
-      uses: ./.github/actions/risc0
-      with:
-        version: 2.0.0
