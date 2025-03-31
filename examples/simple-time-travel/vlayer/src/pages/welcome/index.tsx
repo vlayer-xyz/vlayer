@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import { getStepPath } from "../../app/router/steps";
 import { StepKind } from "../../app/router/types";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
-
+import { ConnectWallet } from "../../shared/components/ConnectWallet";
 export const WelcomePage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +31,7 @@ export const WelcomePage = () => {
   }, [result]);
 
   if (!address) {
-    return <div>Connect your wallet to continue</div>;
+    return <ConnectWallet />;
   }
 
   return (
