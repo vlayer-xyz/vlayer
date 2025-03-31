@@ -12,3 +12,4 @@
   * `b732a05ac17d30e19bc66378e960d67290250da1c70f7c28a1c5be43e2670e7d` – Risc0 1.2.4 [#1911] (https://github.com/vlayer-xyz/vlayer/pull/1911)
   * `9200b482efbb414ff73203a2a1d4194ab3a9bea7114d5e01a6bf04ab306d7a6d` – Accelerated keccak in alloy-primitives
   * `b79154d432db45e7dd6e4ada75aca99837a8b25844a5041fd28b01f596bee43b` – Accelerated keccak in MPT
+  * `3b4d5f70a9fe3cf01638faf6f1a8d6e6079ce5f089f2a3dd875f74c107e643f2` – Risc0 2.0.0
