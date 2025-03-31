@@ -1,0 +1,18 @@
+name: Risc0 tools
+description: Installs risc0 tools
+inputs:
+  version:
+    description: 'Version of r0vm to install'
+    default: 2.0.0
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        curl -L https://risczero.com/install | bash
+        export PATH=$PATH:"$HOME/.risc0/bin"
+        rzup install rust 1.81.0
+        rzup install cargo-risczero ${{ inputs.version }}
+        rustup toolchain list -v | grep -q 'risc0' || cargo risczero install
+        rzup show

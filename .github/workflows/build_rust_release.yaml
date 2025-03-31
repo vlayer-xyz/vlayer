@@ -156,21 +156,8 @@ jobs:
       - name: Darwin prerequisites
         uses: ./.github/actions/darwin-prerequisites
 
-      # Shared risc0 installation using `cache-cargo-install-action` did not work on darwin,
-      # so installing separately.
       - name: Install Rust prerequisites
         uses: ./.github/actions/rust-prerequisites
-        with:
-          include_risc0: false
-      - name: Install risc0 installer
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cargo binstall -y cargo-risczero@2.0.0 --force
-      - name: Install risc0 toolchain
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cargo risczero install
-
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Replace guest artifacts
