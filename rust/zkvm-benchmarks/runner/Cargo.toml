@@ -5,11 +5,13 @@ edition = "2021"
 
 [dependencies]
 common = { workspace = true }
+cfg-if = { workspace = true }
 derivative = { workspace = true }
 derive_more = { workspace = true }
 host_utils = { workspace = true }
 insta = { workspace = true }
-risc0-zkvm = { workspace = true }
+risc0-zkvm = { workspace = true, optional = true }
+sp1-sdk = { workspace = true, optional = true }
 tabled = { workspace = true }
 thiserror = { workspace = true }
 thousands = { workspace = true }
@@ -17,10 +19,15 @@ zkvm-benchmarks = { workspace = true }
 
 [build-dependencies]
 anyhow = { workspace = true }
-risc0-build = { workspace = true }
+risc0-build = { workspace = true, optional = true }
+sp1-build = { workspace = true, optional = true }
 
 [package.metadata.risc0]
 methods = ["risc0_guest"]
+
+[features]
+risc0 = ["dep:risc0-zkvm", "dep:risc0-build" ]
+sp1 = ["dep:sp1-sdk", "dep:sp1-build"]
 
 [lints]
 workspace = true

@@ -1,31 +1,19 @@
 use std::time::Duration;
 
-use derivative::Derivative;
 use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
     SessionStats,
 };
-use thiserror::Error;
 use tracing::info;
 
-use crate::ProofMode;
+use crate::{error::Result, ProofMode};
 
 #[derive(Debug, Default, Clone, Copy)]
-pub struct Prover {
+pub struct Risc0Prover {
     mode: ProofMode,
 }
 
-#[derive(Debug, Error, Derivative)]
-#[derivative(PartialEq, Eq)]
-#[error(transparent)]
-pub struct Error(
-    #[from]
-    #[derivative(PartialEq = "ignore")]
-    anyhow::Error,
-);
-pub type Result<T> = std::result::Result<T, Error>;
-
-impl Prover {
+impl Risc0Prover {
     pub fn try_new(mode: ProofMode) -> Result<Self> {
         if mode == ProofMode::Fake && !risc0_dev_mode_on() {
             Err(anyhow::anyhow!("fake proofs require `RISC0_DEV_MODE=1`"))?

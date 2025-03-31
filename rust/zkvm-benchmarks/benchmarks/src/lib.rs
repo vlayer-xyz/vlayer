@@ -5,7 +5,6 @@ use std::fmt::Display;
 use benchmarks::benchmarks;
 use derive_more::Debug;
 use derive_new::new;
-use risc0_zkvm::guest::env;
 use serde::{Deserialize, Serialize};
 
 mod benchmarks;
@@ -79,10 +78,22 @@ impl Benchmark {
     }
 
     fn run(self) -> BenchmarkResult {
-        let start = env::cycle_count();
+        #[cfg(feature = "risc0")]
+        let start = risc0_zkvm::guest::env::cycle_count();
+        #[cfg(feature = "sp1")]
+        println!("cycle-tracker-report-start: {}", self.name);
+
         (self.workload)();
-        let end = env::cycle_count();
+        #[cfg(feature = "risc0")]
+        let end = risc0_zkvm::guest::env::cycle_count();
+        #[cfg(feature = "sp1")]
+        println!("cycle-tracker-report-end: {}", self.name);
+
+        #[cfg(feature = "risc0")]
         let cycles = end - start;
+
+        #[cfg(not(feature = "risc0"))]
+        let cycles = 0;
 
         BenchmarkResult::new(self.name, cycles, self.snapshot_cycles)
     }

@@ -139,6 +139,8 @@ rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
 revm = { version = "=19.4.0", default-features = false, features = ["optimism"] }
+sp1-build = "4.1.5"
+sp1-sdk = "4.1.5"
 risc0-build = "=2.0.1"
 risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "cf3d1381f076f1094455a0fc6ebd5bd172424d09" }
 risc0-zkp = { version = "=2.0.0", default-features = false }
@@ -203,7 +205,7 @@ chain_server_lib = { path = "rust/services/chain/server_lib" }
 chain_common = { path = "rust/services/chain/common" }
 chain_test_utils = { path = "rust/services/chain/test_utils" }
 chain_worker = { path = "rust/services/chain/worker" }
-common = { path = "rust/common" }
+common = { path = "rust/common", default-features = false }
 email_proof = { path = "rust/email_proof" }
 guest_build_utils = { path = "rust/guest_wrapper/build_utils" }
 guest_wrapper = { path = "rust/guest_wrapper" }

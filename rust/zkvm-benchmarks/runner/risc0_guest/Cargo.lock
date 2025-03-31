@@ -818,9 +818,9 @@ dependencies = [
 
 [[package]]
 name = "blake3"
-version = "1.5.4"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d82033247fd8e890df8f740e407ad4d038debb9eb1f40533fffb32e7d17dc6f7"
+checksum = "b17679a8d69b6d7fd9cd9801a536cec9fa5e5970b69f9d4747f70b39b031f5e7"
 dependencies = [
  "arrayref",
  "arrayvec",
@@ -1168,7 +1168,6 @@ dependencies = [
  "clap",
  "derive_more 1.0.0",
  "risc0-zkp",
- "risc0-zkvm",
  "serde",
  "serde_json",
  "tracing-subscriber 0.3.19",
@@ -3258,14 +3257,14 @@ dependencies = [
 
 [[package]]
 name = "ring"
-version = "0.17.8"
-source = "git+https://github.com/briansmith/ring.git?rev=7c0024abaf4fd59250c9b79cc41a029aa0ef3497#7c0024abaf4fd59250c9b79cc41a029aa0ef3497"
+version = "0.17.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e75ec5e92c4d8aede845126adc388046234541629e76029599ed35a003c7ed24"
 dependencies = [
  "cc",
  "cfg-if",
  "getrandom 0.2.15",
  "libc",
- "spin",
  "untrusted",
  "windows-sys 0.52.0",
 ]
@@ -3697,9 +3696,9 @@ dependencies = [
 
 [[package]]
 name = "rustversion"
-version = "1.0.19"
+version = "1.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7c45b9784283f1b2e7fb61b42047c2fd678ef0960d4f6f1eba131594cc369d4"
+checksum = "eded382c5f5f786b989652c49544c4877d9f015cc22e145a5ea8ea66c2921cd2"
 
 [[package]]
 name = "rusty-fork"
@@ -5133,3 +5132,8 @@ dependencies = [
  "serde",
  "sha2",
 ]
+
+[[patch.unused]]
+name = "ring"
+version = "0.17.8"
+source = "git+https://github.com/briansmith/ring.git?rev=7c0024abaf4fd59250c9b79cc41a029aa0ef3497#7c0024abaf4fd59250c9b79cc41a029aa0ef3497"

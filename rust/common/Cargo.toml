@@ -11,12 +11,14 @@ bytes = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 derive_more = { workspace = true }
 risc0-zkp = { workspace = true }
-risc0-zkvm = { workspace = true }
+risc0-zkvm = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["ansi"] }
 
 [features]
+default = ["risc0"]
+risc0 = ["dep:risc0-zkvm"]
 testing = []
 
 [lints]
