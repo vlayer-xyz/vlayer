@@ -112,7 +112,7 @@ fn to_web_proof(presentation: &str) -> Result<String, Box<dyn std::error::Error>
 }
 
 async fn write_to_file(path: &str, content: &str) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Writing to file: {}", path);
+    println!("Writing to file: {path}");
     let path = Path::new(path);
 
     if let Some(parent_dir) = path.parent() {
