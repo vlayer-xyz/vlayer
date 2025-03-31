@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "lint": "eslint .",
+    "lint:packages": "eslint packages/*",
+    "lint:examples": "eslint examples/*"
+  },
   "workspaces": [
     "packages/*",
     "examples/*/vlayer"
