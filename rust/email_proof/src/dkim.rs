@@ -12,16 +12,10 @@ pub fn verify_email(email: &ParsedMail, record: &DNSRecord) -> Result<(), Error>
     let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
     let dkim_public_key = parse_dns_record(&record.data)?;
 
-    verify_dkim_headers(&dkim_headers)?;
+    verify_email_contains_dkim_headers(&dkim_headers)?;
+    verify_dkim_body_length_tag(&dkim_headers)?;
     verify_email_with_key(email, dkim_public_key)?;
     verify_dkim_header_dns_consistency(&dkim_headers, record)?;
-
-    Ok(())
-}
-
-fn verify_dkim_headers(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
-    verify_email_contains_dkim_headers(headers)?;
-    verify_dkim_body_length_tag(headers)?;
 
     Ok(())
 }
