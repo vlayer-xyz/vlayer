@@ -14,7 +14,8 @@ runs:
       run: |
         curl -L https://risczero.com/install | bash
         export PATH=$PATH:"$HOME/.risc0/bin"
+        echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         rzup install rust 1.81.0
-        rzup install cargo-risczero ${{ inputs.version }}
-        rustup toolchain list -v | grep -q 'risc0' || cargo risczero install
+        rzup install r0vm ${{ inputs.version }}
         rzup show
