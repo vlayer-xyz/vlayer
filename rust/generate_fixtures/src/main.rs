@@ -50,19 +50,11 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
     )
     .await?;
 
-    let mut presentation_json: Value = serde_json::from_str(&presentation)?;
-
-    let data = presentation_json["presentationJson"]["data"]
-        .as_str()
-        .unwrap();
-    let modified_data = &data[..data.len().saturating_sub(1)];
-    presentation_json["presentationJson"]["data"] = json!(modified_data);
-
-    let modified_json = serde_json::to_string_pretty(&presentation_json).unwrap();
+    let presentation_json_with_corrupted_data = corrupt_data(&presentation)?;
 
     write_to_file(
         &format!("../../contracts/vlayer/testdata/{TLSN_VERSION}/web_proof_missing_part.json"),
-        &modified_json,
+        &presentation_json_with_corrupted_data,
     )
     .await?;
 
@@ -109,6 +101,17 @@ fn to_web_proof(presentation: &str) -> Result<String, Box<dyn std::error::Error>
     let web_proof = serde_json::to_string_pretty(&presentation_json)? + "\n";
 
     Ok(web_proof)
+}
+
+fn corrupt_data(presentation: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let mut presentation_json: Value = serde_json::from_str(presentation)?;
+
+    let data = presentation_json["presentationJson"]["data"].as_str()?;
+
+    let modified_data = &data[..data.len().saturating_sub(1)];
+    presentation_json["presentationJson"]["data"] = json!(modified_data);
+
+    Ok(serde_json::to_string_pretty(&presentation_json)?)
 }
 
 async fn write_to_file(path: &str, content: &str) -> Result<(), Box<dyn std::error::Error>> {
