@@ -19,7 +19,8 @@ build_sdk_hooks
 
 echo "🚀 Running services for example: $EXAMPLE"
 DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy notary-server"
-
+DOCKER_COMPOSE_FILE="${VLAYER_HOME}/docker/docker-compose.devnet.yaml"
+docker compose -f "${DOCKER_COMPOSE_FILE}" down
 source "${VLAYER_HOME}/bash/run-services.sh"
 
 run_web_tests "$EXAMPLE"

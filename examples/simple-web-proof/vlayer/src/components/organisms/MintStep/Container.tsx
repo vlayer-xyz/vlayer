@@ -43,7 +43,7 @@ export const MintStep = () => {
     }
 
     const proofData = JSON.parse(proverResult);
-
+    console.log("proofData", proofData);
     const writeContractArgs: Parameters<typeof writeContract>[0] = {
       address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
       abi: webProofProofVerifier.abi,
