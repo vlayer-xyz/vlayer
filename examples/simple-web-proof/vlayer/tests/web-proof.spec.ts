@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
 
 test("web proof flow", async ({ page, context }) => {
   // To obtain this token, log in to x.com and copy the value of the `auth_token` cookie.
-  const authToken = process.env.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN;
+  const authToken = "69337e9cd9078cd2ec9fb8783ecfda1c1e672ba5";
 
   if (!authToken) {
     throw new Error(
