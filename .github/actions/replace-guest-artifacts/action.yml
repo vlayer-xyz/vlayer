@@ -17,7 +17,12 @@ runs:
     - name: "Update elf path in methods.rs"
       run: |
         replace_guest () {
-          local path=$(realpath "./guest_replacement/$1")
+          local guest_path="./guest_replacement/$1"
+          if [ ! -f $guest_path ]; then
+            echo "File $guest_path does not exist!"
+            exit 1
+          fi
+          local path=$(realpath $guest_path)
           echo "Replacing $1 path to: $path"
           sed -i.bak "s|<$2>|$path|" ./guest_replacement/methods.rs
         }
