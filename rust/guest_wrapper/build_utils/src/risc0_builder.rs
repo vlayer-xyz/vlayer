@@ -70,7 +70,7 @@ impl Builder {
 
         if self.use_docker {
             // Assert that image ID was correctly updated, or guest was unchanged
-            chain_guest_id::assert(chain_guest.image_id.into())?;
+            chain_guest_id::assert(chain_guest.image_id)?;
         }
         self.generate_guest_sol_files(call_guest)?;
 
@@ -136,7 +136,7 @@ impl Builder {
     fn update_chain_guest(&self) -> anyhow::Result<()> {
         chain_guest_id::add_current_to_history()?;
         let (_, chain_guest) = self.build_guests()?;
-        chain_guest_id::update(chain_guest.image_id.into())?;
+        chain_guest_id::update(chain_guest.image_id)?;
 
         Ok(())
     }
