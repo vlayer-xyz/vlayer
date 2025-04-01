@@ -4,6 +4,7 @@ mod verify;
 
 use std::collections::HashMap;
 
+use constcat::concat;
 pub use notarize::notarize;
 pub use presentation::create_presentation;
 use serde_json::Value;
@@ -12,6 +13,7 @@ pub use verify::verify_presentation;
 pub use crate::notarize::NotaryConfig;
 
 pub const TLSN_VERSION: &str = "0.1.0-alpha.8";
+pub const TLSN_VERSION_WITH_V_PREFIX: &str = concat!("v", TLSN_VERSION);
 
 pub async fn generate_web_proof(
     notary_config: NotaryConfig,
