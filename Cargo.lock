@@ -4382,6 +4382,7 @@ dependencies = [
  "anyhow",
  "base64 0.21.7",
  "cfdkim",
+ "derivative",
  "hex-literal",
  "lazy_static",
  "mailparse 0.14.1",
