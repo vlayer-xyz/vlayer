@@ -10,7 +10,6 @@ use tlsn_core::{
     attestation::Attestation, request::RequestConfig, transcript::TranscriptCommitConfig,
     CryptoProvider, Secrets,
 };
-use tlsn_formats::http::{DefaultHttpCommitter, HttpCommit, HttpTranscript};
 use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 use tracing::debug;
