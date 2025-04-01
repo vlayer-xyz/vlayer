@@ -1,4 +1,4 @@
-name: E2E test against devnet
+name: E2E test
 
 on:
   pull_request:
@@ -37,8 +37,8 @@ jobs:
               - 'docker/**'
               - 'ansible/**'
               - 'bun.lock'
-              - '.github/workflows/test_e2e_devnet.yaml'
-              - '.github/actions/test-e2e-devnet/**'
+              - '.github/workflows/test_e2e.yaml'
+              - '.github/actions/test-e2e/**'
 
   build-binaries:
     name: Build binaries
@@ -82,8 +82,8 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-devnet-simple:
-    name: E2E test against devnet (simple)
+  test-e2e-simple:
+    name: E2E test (simple)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -91,12 +91,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple"
 
-  test-e2e-devnet-simple-web-proof:
-    name: E2E test against devnet (simple-web-proof)
+  test-e2e-simple-web-proof:
+    name: E2E test (simple-web-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -104,12 +104,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-web-proof"
 
-  test-e2e-devnet-simple-email-proof:
-    name: E2E test against devnet (simple-email-proof)
+  test-e2e-simple-email-proof:
+    name: E2E test (simple-email-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -117,12 +117,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-email-proof"
 
-  test-e2e-devnet-simple-teleport:
-    name: E2E test against devnet (simple-teleport)
+  test-e2e-simple-teleport:
+    name: E2E test (simple-teleport)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -130,12 +130,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-teleport"
 
-  test-e2e-devnet-simple-time-travel:
-    name: E2E test against devnet (simple-time-travel)
+  test-e2e-simple-time-travel:
+    name: E2E test (simple-time-travel)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -143,6 +143,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-time-travel"

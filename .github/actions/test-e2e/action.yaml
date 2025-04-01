@@ -1,6 +1,6 @@
 # This action depends on built and uploaded Rust binaries; hence, the step 'Download binaries'.
 name: "Run E2E Test"
-description: "Runs an E2E test against devnet for a given example"
+description: "Runs E2E tests for a given example"
 inputs:
   example:
     description: "The E2E test example to run"
@@ -49,7 +49,7 @@ runs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: logs-devnet-${{ inputs.example }}
+        name: logs-e2e-${{ inputs.example }}
         path: ./artifacts/logs/
         if-no-files-found: error
         retention-days: 1

@@ -1,4 +1,4 @@
-name: E2E test of example web apps on devnet
+name: E2E example web apps test
 
 on:
   pull_request:
@@ -32,11 +32,12 @@ jobs:
               - 'packages/**'
               - 'bash/run-services.sh'
               - 'bash/e2e-web-apps-test.sh'
-              - '.github/workflows/test_e2e_web_apps_devnet.yaml'
+              - '.github/workflows/test_e2e_web_apps.yaml'
+              - '.github/actions/test-e2e-web-apps/action.yaml'
               - 'contracts/**'
 
   test-e2e-web-apps-simple:
-    name: E2E web apps test against devnet (simple)
+    name: E2E web apps test (simple)
     needs: changes
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
@@ -47,15 +48,15 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps-devnet
+        uses: ./.github/actions/test-e2e-web-apps
         with:
           example: "simple"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
 
-  test-e2e-web-apps-devnet-simple-web-proof:
-    name: E2E web apps test against devnet (simple-web-proof)
+  test-e2e-web-apps-simple-web-proof:
+    name: E2E web apps test (simple-web-proof)
     needs: changes
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
@@ -66,7 +67,7 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps-devnet
+        uses: ./.github/actions/test-e2e-web-apps
         with:
           example: "simple-web-proof"
           playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
@@ -74,8 +75,8 @@ jobs:
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
 
-  test-e2e-web-apps-devnet-simple-email-proof:
-    name: E2E web apps test against devnet (simple-email-proof)
+  test-e2e-web-apps-simple-email-proof:
+    name: E2E web apps test (simple-email-proof)
     needs: changes
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
@@ -86,15 +87,15 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps-devnet
+        uses: ./.github/actions/test-e2e-web-apps
         with:
           example: "simple-email-proof"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
 
-  test-e2e-web-apps-devnet-simple-teleport:
-    name: E2E web apps test against devnet (simple-teleport)
+  test-e2e-web-apps-simple-teleport:
+    name: E2E web apps test (simple-teleport)
     needs: changes
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
@@ -105,15 +106,15 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps-devnet
+        uses: ./.github/actions/test-e2e-web-apps
         with:
           example: "simple-teleport"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
 
-  test-e2e-web-apps-devnet-simple-time-travel:
-    name: E2E web apps test against devnet (simple-time-travel)
+  test-e2e-web-apps-simple-time-travel:
+    name: E2E web apps test (simple-time-travel)
     needs: changes
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
@@ -124,7 +125,7 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps-devnet
+        uses: ./.github/actions/test-e2e-web-apps
         with:
           example: "simple-time-travel"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
