@@ -5,10 +5,9 @@
 To start working with [this repository](https://github.com/vlayer-xyz/vlayer), you will need to install following software:
 
 - [Rust](https://www.rust-lang.org/tools/install) compiler
-- Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart) version v1.2.4
+- Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart) version v2.0.0
   ```
-  rzup install cargo-risczero 1.2.4
-  cargo risczero install
+  rzup install r0vm 2.0.0
   ```
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - [Bun](https://bun.sh) and [Node.js](https://nodejs.org)
