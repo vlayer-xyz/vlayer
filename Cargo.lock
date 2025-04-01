@@ -3090,6 +3090,7 @@ dependencies = [
  "derive-new",
  "derive_more",
  "flate2",
+ "jsonwebtoken 9.3.1",
  "predicates",
  "regex",
  "reqwest 0.12.12",

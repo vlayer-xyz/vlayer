@@ -1,4 +1,6 @@
 use clap::{Parser, Subcommand};
+#[cfg(feature = "jwt")]
+use commands::jwt::{run as run_jwt, Args as JwtArgs};
 use commands::{
     init::{run_init, InitArgs},
     web_proof::{webproof_fetch, WebProofArgs},
@@ -38,6 +40,8 @@ enum Commands {
     WebProofFetch(WebProofArgs),
     #[command(hide = true)]
     TestLoggingConfiguration,
+    #[cfg(feature = "jwt")]
+    Jwt(JwtArgs),
 }
 
 #[tokio::main]
@@ -68,6 +72,8 @@ async fn run() -> Result<()> {
             webproof_fetch(args).await.map_err(derive_more::Into::into)
         }
         Commands::TestLoggingConfiguration => run_logging_test(),
+        #[cfg(feature = "jwt")]
+        Commands::Jwt(args) => run_jwt(args).map_err(crate::errors::Error::Jwt),
     }
 }
 

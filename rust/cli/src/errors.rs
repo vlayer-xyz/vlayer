@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use soldeer_core::errors::SoldeerError;
 
+#[cfg(feature = "jwt")]
+use crate::commands::jwt::Error as JwtError;
 use crate::config::Error as ConfigError;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -40,6 +42,9 @@ pub enum Error {
     Soldeer(#[from] SoldeerError),
     #[error(transparent)]
     Config(#[from] ConfigError),
+    #[cfg(feature = "jwt")]
+    #[error(transparent)]
+    Jwt(#[from] JwtError),
 }
 
 impl Error {
