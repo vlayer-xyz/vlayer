@@ -24,8 +24,9 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let email = parse_mail(&raw_email)?;
     let dkim_public_key = parse_dns_record(&dns_record.data)?;
     let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
+    let raw_headers = parse_headers_bytes(email.raw_bytes)?;
 
-    verify_header_section_crlfs(email.raw_bytes)?;
+    verify_headers_crlfs(raw_headers)?;
     dns_record.verify(&verification_data)?;
     verify_email_contains_dkim_headers(&dkim_headers)?;
     verify_dkim_body_length_tag(&dkim_headers)?;
@@ -35,17 +36,19 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     Ok(email.try_into()?)
 }
 
-fn verify_header_section_crlfs(raw_email: &[u8]) -> Result<(), Error> {
+fn parse_headers_bytes(raw_email: &[u8]) -> Result<&[u8], Error> {
     let email_str = std::str::from_utf8(raw_email).expect("Email already verified");
 
     let header_end = email_str
         .find("\r\n\r\n")
-        .ok_or(Error::MissingHeaderSeparator)?;
+        .ok_or(Error::MissingBodySeparator)?;
 
     let headers_part = &email_str[..header_end];
-    let bytes = headers_part.as_bytes();
+    Ok(headers_part.as_bytes())
+}
 
-    for window in bytes.windows(3) {
+fn verify_headers_crlfs(raw_headers: &[u8]) -> Result<(), Error> {
+    for window in raw_headers.windows(3) {
         match window {
             [b'\r', b'\n', next]
                 if !is_valid_header_start(*next) && !is_valid_folded_line_start(*next) =>
@@ -55,15 +58,14 @@ fn verify_header_section_crlfs(raw_email: &[u8]) -> Result<(), Error> {
             _ => {}
         }
     }
-
     Ok(())
 }
 
 // https://datatracker.ietf.org/doc/html/rfc5322#section-2.2
 // A header field name must be composed of printable US-ASCII characters (i.e.,
-// characters that have values between 33 and 126, inclusive), except colon
+// characters that have values between 33 and 126, inclusive), except colon.
 fn is_valid_header_start(c: u8) -> bool {
-    (33..=57).contains(&c) || (59..=126).contains(&c)
+    c != b':' && (33..=126).contains(&c)
 }
 
 // https://datatracker.ietf.org/doc/html/rfc5322#section-2.2.3
@@ -304,16 +306,19 @@ mod test {
         );
     }
 
-    mod verify_header_section_crlfs {
+    mod verify_headers_crlfs {
         use super::*;
 
         fn verify(raw: &str) -> Result<(), Error> {
-            verify_header_section_crlfs(raw.as_bytes())
+            verify_headers_crlfs(raw.as_bytes())
         }
 
         #[test]
         fn accepts_valid_simple_headers() {
-            let email = "From: test@example.com\r\nSubject: Hello\r\n\r\nBody";
+            let email = concat!(
+                "From: test@example.com\r\n",
+                "Subject: Hello"
+            );
             assert!(verify(email).is_ok());
         }
 
@@ -322,24 +327,37 @@ mod test {
             let email = concat!(
                 "Subject: This is a long subject\r\n",
                 " continuing here\r\n",
-                "From: test@example.com\r\n\r\n",
-                "Body"
+                "From: test@example.com",
             );
             assert!(verify(email).is_ok());
         }
 
         #[test]
-        fn rejects_missing_header_body_separator() {
-            let email = "From: test@example.com\r\nSubject: Hello\r\nBody";
-            let err = verify(email).unwrap_err();
-            assert_eq!(err, Error::MissingHeaderSeparator);
+        fn rejects_line_with_wrong_next_line_character() {
+            let email = concat!(
+                "From: test@example.com\r\n",
+                ": invalid next line character"
+            );
+            assert_eq!(verify(email).unwrap_err(), Error::InvalidNewLineSeparator(b':'));
+        }
+    }
+
+    mod parse_headers_bytes {
+        use super::*;
+
+        #[test]
+        fn parses_headers_for_valid_email() {
+            let email = b"From: test@example.com\r\nSubject: Hello\r\n\r\nBody";
+            assert_eq!(
+                parse_headers_bytes(email).unwrap(),
+                b"From: test@example.com\r\nSubject: Hello"
+            )
         }
 
         #[test]
-        fn rejects_line_with_wrong_next_line_character() {
-            let email = "From: test@example.com\r\n: invalid next line character\r\n\r\nBody";
-            let err = verify(email).unwrap_err();
-            assert_eq!(err, Error::InvalidNewLineSeparator(b':'));
+        fn rejects_missing_header_body_separator() {
+            let email = b"From: test@example.com\r\nSubject: Hello\r\nBody";
+            assert_eq!(parse_headers_bytes(email).unwrap_err(), Error::MissingBodySeparator);
         }
     }
 }
