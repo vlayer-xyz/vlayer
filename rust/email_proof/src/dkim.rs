@@ -1,23 +1,28 @@
-use cfdkim::{validate_header, verify_email_with_key, DKIMError, DkimPublicKey};
+use cfdkim::{validate_header, verify_email_with_key, DKIMError};
 use mailparse::{MailHeaderMap, ParsedMail};
 use slog::{o, Discard, Logger};
+use verifiable_dns::DNSRecord;
+
+pub use crate::errors::Error;
+use crate::{dns::parse_dns_record, from_header};
 
 const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
-pub fn verify_email<'a>(
-    email: ParsedMail<'a>,
-    from_domain: &str,
-    dkim_public_key: DkimPublicKey,
-) -> Result<ParsedMail<'a>, DKIMError> {
-    verify_dkim_headers(&email)?;
+pub fn verify_email(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Error> {
+    verify_dkim_headers(email)?;
 
-    let logger = Logger::root(Discard, o!());
-    let result = verify_email_with_key(&logger, from_domain, &email, dkim_public_key)?;
+    let from_domain = from_header::extract_from_domain(email)?;
+    let dkim_public_key = parse_dns_record(&dns_record.data)?;
 
-    match result {
-        result if result.with_detail().starts_with("pass") => Ok(email),
-        result if result.error().is_some() => Err(result.error().unwrap()),
-        _ => Err(DKIMError::SignatureDidNotVerify),
+    let result =
+        verify_email_with_key(&Logger::root(Discard, o!()), &from_domain, email, dkim_public_key)?;
+
+    if result.with_detail().starts_with("pass") {
+        Ok(())
+    } else if let Some(err) = result.error() {
+        Err(Error::DkimVerification(err))
+    } else {
+        Err(Error::DkimVerification(DKIMError::SignatureDidNotVerify))
     }
 }
 
