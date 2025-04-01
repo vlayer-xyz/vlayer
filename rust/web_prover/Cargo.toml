@@ -26,6 +26,7 @@ tlsn-common = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080
 tlsn-core = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
 tlsn-formats = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
 tlsn-prover = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
+tlsn-utils = { git = "https://github.com/tlsnotary/tlsn-utils", rev = "425614e" }
 tokio = { workspace = true, features = [
     "rt",
     "rt-multi-thread",
@@ -36,6 +37,7 @@ tokio = { workspace = true, features = [
 ] }
 tokio-util = { workspace = true }
 tracing = { workspace = true }
+log = "0.4.22"
 
 [lints]
 workspace = true
