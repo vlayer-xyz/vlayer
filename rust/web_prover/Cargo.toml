@@ -23,7 +23,6 @@ regex = "1.11.1"
 serde_json = { workspace = true }
 tlsn-common = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
 tlsn-core = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
-tlsn-formats = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
 tlsn-prover = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
 tlsn-utils = { git = "https://github.com/tlsnotary/tlsn-utils", rev = "425614e" }
 tokio = { workspace = true, features = [
@@ -39,3 +38,6 @@ tracing = { workspace = true }
 
 [lints]
 workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["tlsn-utils"]

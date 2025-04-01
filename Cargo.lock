@@ -12382,20 +12382,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "spansy"
-version = "0.1.0"
-source = "git+https://github.com/tlsnotary/tlsn-utils?rev=425614e#425614e45783946d1636ff629ffade549e4e1426"
-dependencies = [
- "bytes",
- "httparse",
- "pest",
- "pest_derive",
- "serde",
- "thiserror 1.0.69",
- "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
-]
-
-[[package]]
 name = "spin"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -13187,17 +13173,6 @@ dependencies = [
  "thiserror 1.0.69",
  "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
  "tokio",
-]
-
-[[package]]
-name = "tlsn-formats"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
-dependencies = [
- "bytes",
- "spansy",
- "thiserror 1.0.69",
- "tlsn-core 0.1.0-alpha.8",
 ]
 
 [[package]]
@@ -14714,7 +14689,6 @@ dependencies = [
  "serde_json",
  "tlsn-common",
  "tlsn-core 0.1.0-alpha.8",
- "tlsn-formats",
  "tlsn-prover",
  "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
  "tokio",
