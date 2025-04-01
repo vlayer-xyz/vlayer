@@ -115,29 +115,12 @@ pub async fn notarize(
 
     let mut prover = prover.start_notarize();
 
-    // let transcript = HttpTranscript::parse(prover.transcript())?;
+    let transcript = prover.transcript();
 
-    // let body_content = &transcript.responses[0].body.as_ref().unwrap().content;
-    // let body = String::from_utf8_lossy(body_content.span().as_bytes());
-    //
-    // match body_content {
-    //     tlsn_formats::http::BodyContent::Json(_json) => {
-    //         let parsed = serde_json::from_str::<serde_json::Value>(&body)?;
-    //         debug!("{}", serde_json::to_string_pretty(&parsed)?);
-    //     }
-    //     tlsn_formats::http::BodyContent::Unknown(_span) => {
-    //         debug!("{}", &body);
-    //     }
-    //     _ => {}
-    // }
+    let mut builder = TranscriptCommitConfig::builder(transcript);
 
-    let mut builder = TranscriptCommitConfig::builder(prover.transcript());
-    //
-    // let recv = prover.transcript().received();
-    // let sent = prover.transcript().sent();
-    // DefaultHttpCommitter::default().commit_transcript(&mut builder, &transcript)?;
-    builder.commit_recv(&RangeSet::from(0..prover.transcript().received().len()))?;
-    builder.commit_sent(&RangeSet::from(0..prover.transcript().sent().len()))?;
+    builder.commit_recv(&RangeSet::from(0..transcript.received().len()))?;
+    builder.commit_sent(&RangeSet::from(0..transcript.sent().len()))?;
 
     prover.transcript_commit(builder.build()?);
 
