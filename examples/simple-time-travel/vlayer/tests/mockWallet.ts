@@ -6,7 +6,7 @@ import { anvil, optimismSepolia } from "viem/chains";
 import { getConfig } from "@vlayer/sdk/config";
 
 const { privateKey, chainName } = getConfig();
-const chain = chainName ? anvil : optimismSepolia;
+const chain = chainName === "anvil" ? anvil : optimismSepolia;
 
 export const useMockWallet = (page: Page) => {
   return installMockWallet({
