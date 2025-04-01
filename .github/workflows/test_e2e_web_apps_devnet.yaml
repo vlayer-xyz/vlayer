@@ -76,14 +76,14 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
-      - name: Run e2e test
+      - name: Run e2e tests
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "dev"
           VLAYER_ENV: dev
           VLAYER_TMP_DIR: ./artifacts
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
-        run: xvfb-run bash/e2e-web-apps-test.sh
+        run: xvfb-run bash/e2e-web-apps-tests.sh
 
       # Teardown
       - name: Display Logs
