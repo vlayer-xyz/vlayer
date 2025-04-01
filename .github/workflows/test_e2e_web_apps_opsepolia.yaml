@@ -1,4 +1,4 @@
-name: E2E test of example web apps on testnet
+name: E2E example web apps test with OP Sepolia
 
 on:
   push:
@@ -89,8 +89,8 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-web-apps-simple:
-    name: E2E web apps test against testnet (simple)
+  test-e2e-web-apps-opsepolia-simple:
+    name: E2E web apps test (simple) with OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
@@ -101,20 +101,17 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
-        uses: ./.github/actions/test-e2e-web-apps-testnet
+        uses: ./.github/actions/test-e2e-web-apps-opsepolia
         with:
           example: "simple"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
-  test-e2e-web-apps-simple-web-proof:
-    name: E2E web apps test against testnet (simple-web-proof)
+  test-e2e-web-apps-opsepolia-simple-web-proof:
+    name: E2E web apps test (simple-web-proof) with OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
@@ -125,7 +122,7 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
-        uses: ./.github/actions/test-e2e-web-apps-testnet
+        uses: ./.github/actions/test-e2e-web-apps-opsepolia
         with:
           example: "simple-web-proof"
           playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
@@ -133,13 +130,10 @@ jobs:
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
-  test-e2e-web-apps-simple-email-proof:
-    name: E2E web apps test against testnet (simple-email-proof)
+  test-e2e-web-apps-opsepolia-simple-email-proof:
+    name: E2E web apps test (simple-email-proof) with OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
@@ -150,20 +144,17 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
-        uses: ./.github/actions/test-e2e-web-apps-testnet
+        uses: ./.github/actions/test-e2e-web-apps-opsepolia
         with:
           example: "simple-email-proof"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
-  test-e2e-web-apps-simple-teleport:
-    name: E2E web apps test against testnet (simple-teleport)
+  test-e2e-web-apps-opsepolia-simple-teleport:
+    name: E2E web apps test (simple-teleport) with OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
@@ -174,20 +165,17 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
-        uses: ./.github/actions/test-e2e-web-apps-testnet
+        uses: ./.github/actions/test-e2e-web-apps-opsepolia
         with:
           example: "simple-teleport"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
-  test-e2e-web-apps-simple-time-travel:
-    name: E2E web apps test against testnet (simple-time-travel)
+  test-e2e-web-apps-opsepolia-simple-time-travel:
+    name: E2E web apps test (simple-time-travel) with OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
@@ -198,14 +186,11 @@ jobs:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
-        uses: ./.github/actions/test-e2e-web-apps-testnet
+        uses: ./.github/actions/test-e2e-web-apps-opsepolia
         with:
           example: "simple-time-travel"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}

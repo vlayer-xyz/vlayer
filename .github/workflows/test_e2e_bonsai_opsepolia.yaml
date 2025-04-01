@@ -1,4 +1,4 @@
-name: E2E test against testnet
+name: E2E test with Bonsai and OP Sepolia
 
 # This workflow has additional constraints to run on `main`,
 # because it uses external API resources.
@@ -54,7 +54,7 @@ jobs:
               - 'bun.lock'
             workflow-changes:
               - '.github/workflows/test_e2e_testnet.yaml'
-              - '.github/actions/test-e2e-testnet/**'
+              - '.github/actions/test-e2e-bonsai-opsepolia/**'
 
   build-binaries:
     name: Build binaries
@@ -99,78 +99,66 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-testnet-simple:
-    name: E2E test against testnet (simple)
+  test-e2e-bonsai-opsepolia-simple:
+    name: E2E test (simple) with Bonsai and OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
+        uses: ./.github/actions/test-e2e-bonsai-opsepolia
         with:
           example: "simple"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
-  test-e2e-testnet-simple-web-proof:
-    name: E2E test against testnet (simple-web-proof)
+  test-e2e-bonsai-opsepolia-simple-web-proof:
+    name: E2E test (simple-web-proof) with Bonsai and OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
+        uses: ./.github/actions/test-e2e-bonsai-opsepolia
         with:
           example: "simple-web-proof"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
-  test-e2e-testnet-simple-email-proof:
-    name: E2E test against testnet (simple-email-proof)
+  test-e2e-bonsai-opsepolia-simple-email-proof:
+    name: E2E test (simple-email-proof) with Bonsai and OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
+        uses: ./.github/actions/test-e2e-bonsai-opsepolia
         with:
           example: "simple-email-proof"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
-  test-e2e-testnet-simple-time-travel:
-    name: E2E test against testnet (simple-time-travel)
+  test-e2e-bonsai-opsepolia-simple-time-travel:
+    name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
+        uses: ./.github/actions/test-e2e-bonsai-opsepolia
         with:
           example: "simple-time-travel"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
