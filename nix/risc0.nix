@@ -34,6 +34,7 @@ let
       sourceRoot = ".";
       installPhase = ''
         mkdir -p $out/bin
+        install_name_tool -change /opt/homebrew/opt/xz/lib/liblzma.5.dylib ${pkgs.xz.out}/lib/liblzma.dylib ./cargo-risczero
         cp -r ./cargo-risczero $out/bin/
       '';
     };
@@ -46,6 +47,7 @@ let
       sourceRoot = ".";
       installPhase = ''
         mkdir -p $out/bin
+        install_name_tool -change /opt/homebrew/opt/xz/lib/liblzma.5.dylib ${pkgs.xz.out}/lib/liblzma.dylib ./r0vm
         cp -r ./r0vm $out/bin/
       '';
     };
