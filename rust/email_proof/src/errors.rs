@@ -22,8 +22,8 @@ pub enum Error {
     InvalidFromHeader(String),
     #[error("Invalid new line separator: {0}")]
     InvalidNewLineSeparator(u8),
-    #[error("Missing CRLF-CRLF separator in email headers")]
-    MissingHeaderSeparator,
+    #[error("Missing CRLF-CRLF separator between email headers and body")]
+    MissingBodySeparator,
     #[error("VDNS signature verification failed: {0}")]
     VdnsSignatureVerification(
         #[from]
