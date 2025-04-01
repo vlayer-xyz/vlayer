@@ -304,7 +304,7 @@ mod test {
         );
     }
 
-    mod verify_headers_and_body_sections_split_properly {
+    mod verify_header_section_crlfs {
         use super::*;
 
         fn verify(raw: &str) -> Result<(), Error> {
