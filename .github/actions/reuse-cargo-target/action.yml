@@ -1,5 +1,5 @@
-name: Reuse Cargo target dir
-description: Reuses the Cargo target directory in a custom subdirectory.
+name: Create reusable Cargo target dir
+description: Creates a reusable Cargo target directory in a custom subdirectory.
 inputs:
   target_name:
     description: 'Unique name for separating the target from others.'
