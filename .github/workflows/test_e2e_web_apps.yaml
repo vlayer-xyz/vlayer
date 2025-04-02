@@ -33,7 +33,6 @@ jobs:
               - 'bash/run-services.sh'
               - 'bash/e2e-web-apps-test.sh'
               - '.github/workflows/test_e2e_web_apps.yaml'
-              - '.github/actions/test-e2e-web-apps/action.yaml'
               - 'contracts/**'
 
   test-e2e-web-apps:
