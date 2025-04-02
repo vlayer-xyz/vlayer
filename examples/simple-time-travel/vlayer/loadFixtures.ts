@@ -55,4 +55,4 @@ export const loadFixtures = async () => {
     account,
   });
   await testClient.mine({ blocks: 20 });
-}
+};
