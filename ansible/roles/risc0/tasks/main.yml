@@ -21,12 +21,26 @@
     executable: /bin/bash
     creates: .cargo/bin/rustup
 
-- name: Install risc0
+# rzup itself does not yet have a stable version, install most-recent.
+- name: Install rzup  # noqa: no-changed-when
   ansible.builtin.shell: |
     set -ueo pipefail
+    export PATH=$PATH:"$HOME/.cargo/bin/"
     curl -L https://risczero.com/install | bash
-    export PATH=$PATH:"$HOME/.risc0/bin"
-    rzup install r0vm ${{ vlayer_risc0_version }}
   args:
     executable: /bin/bash
-    creates: ~/.cargo/bin/r0vm
+  async: 600  # 10 minutes to complete
+  poll: 10  # check every 10 seconds
+
+- name: Install r0vm with specified version
+  ansible.builtin.shell: |
+    set -ueo pipefail
+    export PATH=$PATH:"$HOME/.cargo/bin/"
+    export PATH=$PATH:"$HOME/.risc0/bin"
+    rzup install r0vm {{ vlayer_risc0_version }}
+  args:
+    executable: /bin/bash
+  register: r0vm_install_result
+  changed_when: "'is already installed' not in r0vm_install_result.stdout"
+  async: 600  # 10 minutes to complete
+  poll: 10  # check every 10 seconds
