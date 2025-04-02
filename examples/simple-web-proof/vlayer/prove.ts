@@ -134,7 +134,7 @@ async function testFailedProving() {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
     assert.equal(
       error.message,
-      "Preflight failed with error: Preflight error: Execution error: EVM error: Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature",
+      "Preflight failed with error: Preflight error: Execution error: EVM transact error: revert: ContractError(Revert(Revert(\"Invalid notary public key\")))",
       `Error with wrong message returned: ${error.message}`,
     );
     console.log("✅ Done");

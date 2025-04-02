@@ -74,6 +74,12 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
     )
     .await?;
 
+    write_to_file(
+        &format!("../../examples/simple-web-proof/vlayer/{TLSN_VERSION}/web_proof.json"),
+        &web_proof,
+    )
+    .await?;
+
     let presentation_json_with_corrupted_data = corrupt_data(&presentation)?;
 
     write_to_file(
@@ -107,6 +113,14 @@ async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::err
     write_to_file(
         &format!(
             "../../contracts/vlayer/testdata/{TLSN_VERSION}/web_proof_invalid_notary_pub_key.json"
+        ),
+        &web_proof,
+    )
+    .await?;
+
+    write_to_file(
+        &format!(
+            "../../examples/simple-web-proof/vlayer/{TLSN_VERSION}/web_proof_invalid_signature.json"
         ),
         &web_proof,
     )
