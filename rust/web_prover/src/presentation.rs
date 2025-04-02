@@ -1,19 +1,19 @@
 use tlsn_core::{attestation::Attestation, presentation::Presentation, CryptoProvider, Secrets};
 use tracing::debug;
-use utils::range::RangeSet;
 
-pub async fn create_presentation(
-    attestation: Attestation,
-    secrets: Secrets,
+use crate::RedactionConfig;
+
+pub fn create_presentation_with_redaction(
+    attestation: &Attestation,
+    secrets: &Secrets,
+    redaction_config: &RedactionConfig,
 ) -> Result<Presentation, Box<dyn std::error::Error>> {
     debug!("Creating presentation");
 
     let mut builder = secrets.transcript_proof_builder();
 
-    let transcript = secrets.transcript();
-
-    builder.reveal_sent(&RangeSet::from(0..transcript.sent().len()))?;
-    builder.reveal_recv(&RangeSet::from(0..transcript.received().len()))?;
+    builder.reveal_sent(&redaction_config.sent)?;
+    builder.reveal_recv(&redaction_config.recv)?;
 
     let transcript_proof = builder.build()?;
 

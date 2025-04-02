@@ -5,7 +5,11 @@ mod integration_tests {
 
     use regex::Regex;
     use tlsn_core::{connection::ServerName, presentation::Presentation};
-    use web_prover::{generate_web_proof, verify_presentation, NotaryConfig};
+    use utils::range::RangeSet;
+    use web_prover::{
+        generate_web_proof, generate_web_proof_with_redaction, verify_presentation, NotaryConfig,
+        RedactionConfig,
+    };
 
     #[tokio::test]
     async fn test_full_roundtrip() {
@@ -35,6 +39,34 @@ mod integration_tests {
             verification_result.key,
             "037b48f19c139b6888fb5e383a4d72c2335186fd5858e7ae743ab4bf8e071b06e7"
         );
+    }
+
+    #[tokio::test]
+    async fn test_redaction() {
+        let web_proof_result = Box::pin(generate_web_proof_with_redaction(
+            NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false),
+            "lotr-api.online",
+            "127.0.0.1",
+            3011,
+            "/auth_header_require?param1=value1&param2=value2",
+            HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]),
+            |_| RedactionConfig {
+                sent: RangeSet::from([0..10, 20..30, 100..200]),
+                recv: RangeSet::from([0..10, 20..30, 100..200]),
+            },
+        ))
+        .await;
+
+        assert!(
+            web_proof_result.is_ok(),
+            "Generate web proof error: {:?}",
+            web_proof_result.unwrap_err()
+        );
+
+        let verification_result = verify_presentation(to_presentation(&web_proof_result)).unwrap();
+
+        assert_eq!(verification_result.sent, "GET /auth_XXXXXXXXXXuire?paramXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXccept-encoding: identity\r\nconnection: close\r\nuser-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKitXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+        assert_eq!(verification_result.recv, "HTTP/1.1 2XXXXXXXXXXess-ControXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXcess-Control-Allow-Methods: GET\r\nAccess-Control-Allow-Headers: host, accept, accept-encoding, connecXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
     }
 
     fn to_presentation(web_proof_result: &Result<String, Box<dyn Error>>) -> Presentation {
