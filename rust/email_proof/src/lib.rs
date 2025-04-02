@@ -331,7 +331,8 @@ mod test {
 
         #[test]
         fn rejects_line_with_wrong_next_line_character() {
-            let raw_headers = concat!("From: test@example.com\r\n", ": invalid next line character");
+            let raw_headers =
+                concat!("From: test@example.com\r\n", ": invalid next line character");
             assert_eq!(verify(raw_headers).unwrap_err(), Error::InvalidNewLineSeparator(b':'));
         }
     }
