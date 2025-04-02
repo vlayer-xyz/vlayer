@@ -105,7 +105,7 @@ function run_web_tests() {
   cd vlayer
 
   bun install --frozen-lockfile
-  bun run test-web:"${VLAYER_ENV}"
+  SHOULD_DEPLOY_VERIFIER_ROUTER=true bun run test-web:"${VLAYER_ENV}"
   
   popd
   echo "::endgroup::Running playwright tests for ${1} example"
