@@ -4,12 +4,12 @@ on:
   pull_request:
   merge_group:
   push:
-    branches:
-      - main
-concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+    # branches:
+    #   - main
+# concurrency:
+#   # Do not cancel jobs on main by forcing a unique group name.
+#   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+#   cancel-in-progress: true
 
 jobs:
   lint-rust:
