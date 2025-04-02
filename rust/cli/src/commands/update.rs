@@ -44,10 +44,8 @@ fn check_if_vlayerup_exists() -> Result<()> {
 }
 
 fn update_cli() -> Result<()> {
-    let old_version = vlayer::Cli::version()?;
     print_update_intention("vlayer CLI");
     let status = spawn("vlayerup", &["update"])?;
-    let new_version = vlayer::Cli::version()?;
     ensure_success(status, "vlayer CLI")
 }
 
@@ -64,7 +62,7 @@ fn do_update_sdk(path: &Path, package_json: &Value) -> Result<()> {
         return warn(&format!("{} not found in {}", "@vlayer/sdk".bold(), "package.json".bold()));
     }
     print_update_intention("@vlayer/sdk");
-    package_manager(path).update_vlayer()
+    JSPackageManager::guess(path).update_vlayer()
 }
 
 async fn update_contracts() -> Result<()> {
@@ -160,6 +158,18 @@ enum JSPackageManager {
 }
 
 impl JSPackageManager {
+    fn guess(package_path: &Path) -> Self {
+        if package_path.join("bun.lockb").exists() {
+            JSPackageManager::Bun
+        } else if package_path.join("pnpm-lock.yaml").exists() {
+            JSPackageManager::Pnpm
+        } else if package_path.join("yarn.lock").exists() {
+            JSPackageManager::Yarn
+        } else {
+            JSPackageManager::Npm
+        }
+    }
+
     const fn command_args(&self) -> (&str, &str) {
         match self {
             JSPackageManager::Npm => ("npm", "install"),
@@ -177,18 +187,6 @@ impl JSPackageManager {
     pub fn update_vlayer(&self) -> Result<()> {
         let (pm_name, install_command) = self.command_args();
         Self::install_package(pm_name, install_command)
-    }
-}
-
-fn package_manager(package_path: &Path) -> JSPackageManager {
-    if package_path.join("bun.lockb").exists() {
-        JSPackageManager::Bun
-    } else if package_path.join("pnpm-lock.yaml").exists() {
-        JSPackageManager::Pnpm
-    } else if package_path.join("yarn.lock").exists() {
-        JSPackageManager::Yarn
-    } else {
-        JSPackageManager::Npm
     }
 }
 
