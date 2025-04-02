@@ -13,6 +13,7 @@ on:
       - main
 jobs:
   test-e2e-web-flow:
+    name: E2E Web Flow Test
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
     steps:
