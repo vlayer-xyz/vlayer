@@ -13,7 +13,11 @@ for example in $(get_examples); do
   forge build
 
   if [ -d "test" ]; then
-    cargo run --manifest-path ../../Cargo.toml --package cli -- test
+    if [ -n "${CARGO_TARGET_DIR:-}" ]; then
+      "${CARGO_TARGET_DIR}/debug/vlayer" test
+    else
+      cargo run --manifest-path ../../Cargo.toml --package cli -- test
+    fi
   else
     echo "Skipping vlayer test as test directory does not exist in ${example}"
   fi
