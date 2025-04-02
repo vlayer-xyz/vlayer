@@ -28,9 +28,12 @@ export PATH="$PATH:~/.bun/bin"
 echo "::endgroup::"
 
 echo "::group::risczero installation"
-curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-cargo binstall -y cargo-risczero@2.0.0
-cargo risczero install
+curl -L https://risczero.com/install | bash
+export PATH="$PATH:~/.risc0/bin"
+export PATH="$PATH:~/.cargo/bin"
+rzup install r0vm 2.0.0
+rzup install rust 1.81.0
+rzup show
 echo "::endgroup::"
 
 
