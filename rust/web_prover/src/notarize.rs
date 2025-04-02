@@ -7,13 +7,16 @@ use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
 use tlsn_common::config::ProtocolConfig;
 use tlsn_core::{
-    attestation::Attestation, request::RequestConfig, transcript::TranscriptCommitConfig,
+    attestation::Attestation,
+    request::RequestConfig,
+    transcript::{Transcript, TranscriptCommitConfig},
     CryptoProvider, Secrets,
 };
 use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 use tracing::debug;
-use utils::range::RangeSet;
+
+use crate::RedactionConfig;
 
 const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 const MAX_SENT_DATA: usize = 1 << 12;
@@ -31,14 +34,18 @@ pub struct NotaryConfig {
     pub enable_tls: bool,
 }
 
-pub async fn notarize(
+pub async fn notarize<RedactionConfigFn>(
     notary_config: NotaryConfig,
     server_domain: &str,
     server_host: &str,
     server_port: u16,
     uri: &str,
     headers: HashMap<String, String>,
-) -> Result<(Attestation, Secrets), Box<dyn std::error::Error>> {
+    redaction_config_fn: RedactionConfigFn,
+) -> Result<(Attestation, Secrets, RedactionConfig), Box<dyn std::error::Error>>
+where
+    RedactionConfigFn: Fn(&Transcript) -> RedactionConfig,
+{
     let notary_client = NotaryClient::builder()
         .host(notary_config.host)
         .port(notary_config.port)
@@ -118,8 +125,10 @@ pub async fn notarize(
 
     let mut builder = TranscriptCommitConfig::builder(transcript);
 
-    builder.commit_recv(&RangeSet::from(0..transcript.received().len()))?;
-    builder.commit_sent(&RangeSet::from(0..transcript.sent().len()))?;
+    let redaction_config = redaction_config_fn(transcript);
+
+    builder.commit_sent(&redaction_config.sent)?;
+    builder.commit_recv(&redaction_config.recv)?;
 
     prover.transcript_commit(builder.build()?);
 
@@ -127,5 +136,5 @@ pub async fn notarize(
 
     let (attestation, secrets) = Box::pin(prover.finalize(&request_config)).await?;
     debug!("Finished notarizing");
-    Ok((attestation, secrets))
+    Ok((attestation, secrets, redaction_config))
 }
