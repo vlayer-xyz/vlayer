@@ -4,8 +4,8 @@ on:
   pull_request:
   merge_group:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
