@@ -12,7 +12,7 @@ const PROJECT_DIR: &str = env!("CARGO_MANIFEST_DIR");
 const NOTARY_HOST: &str = "127.0.0.1";
 const NOTARY_PORT: u16 = 7047;
 
-const REMOTE_NOTARY_HOST: &str = "test-notary.vlayer.xyz";
+const REMOTE_NOTARY_HOST: &str = "notary.pse.dev";
 const REMOTE_NOTARY_PORT: u16 = 443;
 
 const SERVER_DOMAIN: &str = "lotr-api.online";
