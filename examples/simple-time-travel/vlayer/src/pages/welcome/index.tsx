@@ -5,17 +5,13 @@ import { useNavigate } from "react-router";
 import { getStepPath } from "../../app/router/steps";
 import { StepKind } from "../../app/router/types";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
-
+import { ConnectWallet } from "../../shared/components/ConnectWallet";
 export const WelcomePage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { address } = useAccount();
   const networkChain = import.meta.env.VITE_CHAIN_NAME;
   const token = "USDC";
-
-  if (!address) {
-    return <div>Connect your wallet to continue</div>;
-  }
 
   const { callProver, result } = useProver();
 
@@ -34,11 +30,15 @@ export const WelcomePage = () => {
     }
   }, [result]);
 
+  if (!address) {
+    return <ConnectWallet />;
+  }
+
   return (
     <HodlerForm
       networkChain={networkChain}
       token={token}
-      holderAddress={address}
+      holderAddress={import.meta.env.VITE_PROVER_ERC20_HOLDER_ADDR}
       onSubmit={handleSubmit}
       isLoading={isLoading}
       loadingLabel="Loading..."

@@ -1,6 +1,9 @@
 use std::{collections::HashMap, fs, io};
 
-use risc0_build::{embed_methods_with_options, DockerOptions, GuestListEntry, GuestOptions};
+use risc0_build::{
+    embed_methods_with_options, DockerOptionsBuilder, GuestListEntry, GuestOptions,
+    GuestOptionsBuilder,
+};
 
 use crate::{
     chain_guest_id, data_layout, path_from_env, remove_file_if_exists, use_bool_var, PROJECT_ROOT,
@@ -67,7 +70,7 @@ impl Builder {
 
         if self.use_docker {
             // Assert that image ID was correctly updated, or guest was unchanged
-            chain_guest_id::assert(chain_guest.image_id.into())?;
+            chain_guest_id::assert(chain_guest.image_id)?;
         }
         self.generate_guest_sol_files(call_guest)?;
 
@@ -100,25 +103,26 @@ impl Builder {
         Ok(true)
     }
 
-    fn get_guest_options(&self) -> GuestOptions {
-        let use_docker = self.use_docker.then_some(DockerOptions {
-            root_dir: Some(self.data_layout.project_root().into()),
-            env: vec![
-                ("CC_riscv32im_risc0_zkvm_elf".to_string(), "clang".to_string()),
-                (
-                    "CFLAGS_riscv32im_risc0_zkvm_elf".to_string(),
-                    "-nostdlibinc -DRING_CORE_NOSTDLIBINC=1 -target riscv32-unknown-elf -march=rv32im -D__ILP32__=1".to_string()
-                ),
-            ],
-        });
-        GuestOptions {
-            use_docker,
-            ..Default::default()
+    fn get_guest_options(&self) -> anyhow::Result<GuestOptions> {
+        let mut builder = GuestOptionsBuilder::default();
+
+        if self.use_docker {
+            builder.use_docker(
+                DockerOptionsBuilder::default()
+                    .root_dir(self.data_layout.project_root())
+                    .env(Vec::from([
+                        ("CC_riscv32im_risc0_zkvm_elf".to_string(), "clang".to_string()),
+                        ("CFLAGS_riscv32im_risc0_zkvm_elf".to_string(), "-nostdlibinc -DRING_CORE_NOSTDLIBINC=1 -target riscv32-unknown-elf -march=rv32im -D__ILP32__=1".to_string()),
+                    ]))
+                    .build()?,
+            );
         }
+
+        Ok(builder.build()?)
     }
 
     fn build_guests(&self) -> anyhow::Result<(GuestListEntry, GuestListEntry)> {
-        let guest_options = self.get_guest_options();
+        let guest_options = self.get_guest_options()?;
         let mut guests = embed_methods_with_options(HashMap::from([
             ("risc0_call_guest", guest_options.clone()),
             ("risc0_chain_guest", guest_options),
@@ -132,7 +136,7 @@ impl Builder {
     fn update_chain_guest(&self) -> anyhow::Result<()> {
         chain_guest_id::add_current_to_history()?;
         let (_, chain_guest) = self.build_guests()?;
-        chain_guest_id::update(chain_guest.image_id.into())?;
+        chain_guest_id::update(chain_guest.image_id)?;
 
         Ok(())
     }

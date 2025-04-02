@@ -104,14 +104,17 @@ where
         Ok(())
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all)]
     pub fn commit(&mut self, chain_update: ChainUpdate) -> Result<(), HostError> {
         let chain_info = &chain_update.chain_info;
         info!(
             first_block = chain_info.first_block,
             last_block = chain_info.last_block,
+            root_hash = %chain_info.root_hash,
             chain_id = self.chain_id,
-            guest_id = self.elf.id.as_bytes(),
+            guest_id = %self.elf.id,
+            added_nodes = chain_update.added_nodes.len(),
+            removed_nodes = chain_update.removed_nodes.len(),
             "Committing chain update to the database"
         );
         self.db.update_chain(self.chain_id, chain_update)?;
