@@ -42,7 +42,7 @@ const CHAINS: &str = "chains";
 pub struct ChainInfo {
     pub first_block: BlockNumber,
     pub last_block: BlockNumber,
-    root_hash: B256,
+    pub root_hash: B256,
     #[debug(skip)] // These proofs are really big and make logs unreadable
     zk_proof: Bytes,
 }

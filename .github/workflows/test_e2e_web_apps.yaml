@@ -36,98 +36,76 @@ jobs:
               - '.github/actions/test-e2e-web-apps/action.yaml'
               - 'contracts/**'
 
-  test-e2e-web-apps-simple:
-    name: E2E web apps test (simple)
+  test-e2e-web-apps:
+    name: E2E web apps test
     needs: changes
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
-      - name: Checkout repository with submodules
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
 
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps
-        with:
-          example: "simple"
-          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
-  test-e2e-web-apps-simple-web-proof:
-    name: E2E web apps test (simple-web-proof)
-    needs: changes
-    runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Build sdk
+        working-directory: ./packages/sdk
+        run: bun run build
 
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps
-        with:
-          example: "simple-web-proof"
-          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
-          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+      - name: Build sdk-hooks
+        working-directory: ./packages/sdk-hooks
+        run: bun run build
 
-  test-e2e-web-apps-simple-email-proof:
-    name: E2E web apps test (simple-email-proof)
-    needs: changes
-    runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Install Playwright Browsers
+        run: bunx playwright install --with-deps chromium
 
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps
-        with:
-          example: "simple-email-proof"
-          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: bash/check-llvm-clang.sh
 
-  test-e2e-web-apps-simple-teleport:
-    name: E2E web apps test (simple-teleport)
-    needs: changes
-    runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
 
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps
-        with:
-          example: "simple-teleport"
-          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+      - name: Run e2e tests
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          PROVING_MODE: "dev"
+          VLAYER_ENV: dev
+          VLAYER_TMP_DIR: ./artifacts
+          PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+        run: xvfb-run bash/e2e-web-apps-tests.sh
 
-  test-e2e-web-apps-simple-time-travel:
-    name: E2E web apps test (simple-time-travel)
-    needs: changes
-    runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository with submodules
-        uses: actions/checkout@v4
+      # Teardown
+      - name: Display Logs
+        if: always()
+        run: |
+          for log_file in $(find ./artifacts/logs -type f); do
+            echo "=== Contents of $log_file ==="
+            cat "$log_file"
+            echo "============================="
+          done
+      - name: Handle Playwright Reports
+        uses: ./.github/actions/handle-playwright-reports
+        if: ${{ !cancelled() }}
         with:
-          submodules: recursive
-
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-web-apps
-        with:
-          example: "simple-time-travel"
-          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          EXAMPLES_PATH: /examples/
+          GITHUB_TOKEN: ${{ github.token }}
+          ARTIFACT_RETENTION_DAYS: "30"
+          REPORT_PATH: "examples/**/vlayer/playwright-report/"
+          PR_NUMBER: ${{ github.event.number }}
+          DEPLOY_TYPE: "examples"
+          CONTEXT: "test-e2e-web-apps-devnet"

@@ -30,7 +30,6 @@ const envSchema = z.object({
   PROVER_ERC20_CONTRACT_ADDR: addressSchema,
   PROVER_ERC20_HOLDER_ADDR: addressSchema,
   PROVER_STEP: z.string().transform((val) => BigInt(val)),
-  USE_WINDOW_ETHEREUM_TRANSPORT: z.enum(["true", "false"]),
 });
 
 type Env = z.infer<typeof envSchema>;

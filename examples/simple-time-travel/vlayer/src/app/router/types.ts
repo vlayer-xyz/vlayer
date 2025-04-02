@@ -22,6 +22,7 @@ export const stepsMeta: Record<StepKind, StepMeta> = {
     kind: StepKind.welcome,
     title: "Hodler NFT",
     description: "Prove that you HODL a token for at least a year.",
+    headerIcon: "/img/time-travel-icon.svg",
     index: 0,
   },
   [StepKind.showBalance]: {
@@ -29,14 +30,15 @@ export const stepsMeta: Record<StepKind, StepMeta> = {
     kind: StepKind.showBalance,
     title: "Hodler NFT",
     description: "Prove that you HODL a token for at least a year.",
+    headerIcon: "/img/time-travel-icon.svg",
     index: 1,
   },
   [StepKind.success]: {
     path: "success",
     kind: StepKind.success,
     title: "Success",
-    description:
-      "You have successfully proved that you HODL a token for at least a year.",
+    description: "",
+    headerIcon: "/img/success.svg",
     index: 2,
   },
 };

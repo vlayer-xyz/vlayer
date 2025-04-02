@@ -4,6 +4,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
+import { ConnectWallet } from "../../shared/components/ConnectWallet";
 
 export const ShowBalancePage = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export const ShowBalancePage = () => {
   };
 
   if (!holderAddress) {
-    return <div>Connect your wallet to continue</div>;
+    return <ConnectWallet />;
   }
 
   return (
