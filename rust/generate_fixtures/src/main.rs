@@ -2,10 +2,15 @@ use std::{collections::HashMap, path::Path};
 
 use serde::Deserialize;
 use serde_json::{json, Value};
+use tlsn_core::transcript::Transcript;
 use tokio::fs::{create_dir_all, write};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
-use web_prover::{generate_web_proof, NotaryConfig, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX};
+use utils::range::RangeSet;
+use web_prover::{
+    generate_web_proof, generate_web_proof_with_redaction, NotaryConfig, RedactionConfig,
+    TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,
+};
 
 const PROJECT_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
@@ -39,6 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     generate_valid_web_proof_local_notary().await?;
     generate_valid_web_proof_remote_notary().await?;
+    generate_web_proofs_with_redaction().await?;
 
     info!("Generate fixtures script completed successfully.");
 
@@ -105,6 +111,90 @@ async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::err
         &web_proof,
     )
     .await?;
+
+    Ok(())
+}
+
+async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::Error>> {
+    info!("Generate web proofs with redaction");
+
+    generate_web_proofs_with_redaction_config(
+        |transcript| RedactionConfig {
+            sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
+            recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
+        },
+        &format!("../web_proof/testdata/{TLSN_VERSION}/web_proof_all_redaction_types.json"),
+    )
+    .await?;
+
+    generate_web_proofs_with_redaction_config(
+        |transcript| RedactionConfig {
+            sent: RangeSet::from([0..56, 61..161, 166..transcript.sent().len()]),
+            recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
+        },
+        &format!(
+            "../web_proof/testdata/{TLSN_VERSION}/web_proof_request_url_partial_redaction.json"
+        ),
+    )
+    .await?;
+
+    generate_web_proofs_with_redaction_config(
+        |transcript| RedactionConfig {
+            sent: RangeSet::from([0..55, 61..162, 166..transcript.sent().len()]),
+            recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
+        },
+        &format!(
+            "../web_proof/testdata/{TLSN_VERSION}/web_proof_request_header_partial_redaction.json"
+        ),
+    )
+    .await?;
+
+    generate_web_proofs_with_redaction_config(
+        |transcript| RedactionConfig {
+            sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
+            recv: RangeSet::from([0..386, 414..463, 475..transcript.received().len()]),
+        },
+        &format!(
+            "../web_proof/testdata/{TLSN_VERSION}/web_proof_response_header_partial_redaction.json"
+        ),
+    )
+    .await?;
+
+    generate_web_proofs_with_redaction_config(
+        |transcript| RedactionConfig {
+            sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
+            recv: RangeSet::from([0..386, 415..464, 475..transcript.received().len()]),
+        },
+        &format!(
+            "../web_proof/testdata/{TLSN_VERSION}/web_proof_response_json_partial_redaction.json"
+        ),
+    )
+    .await?;
+
+    Ok(())
+}
+
+async fn generate_web_proofs_with_redaction_config<RedactionConfigFn>(
+    redaction_config: RedactionConfigFn,
+    path: &str,
+) -> Result<(), Box<dyn std::error::Error>>
+where
+    RedactionConfigFn: Fn(&Transcript) -> RedactionConfig,
+{
+    let presentation = generate_web_proof_with_redaction(
+        NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false),
+        SERVER_DOMAIN,
+        SERVER_HOST,
+        SERVER_PORT,
+        "https://lotr-api.online/auth_header_require?param1=value1&param2=value2",
+        HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]),
+        redaction_config,
+    )
+    .await?;
+
+    let web_proof = to_web_proof(&presentation)?;
+
+    write_to_file(path, &web_proof).await?;
 
     Ok(())
 }

@@ -6309,6 +6309,8 @@ dependencies = [
  "reqwest 0.12.12",
  "serde",
  "serde_json",
+ "tlsn-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-utils",
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.19",

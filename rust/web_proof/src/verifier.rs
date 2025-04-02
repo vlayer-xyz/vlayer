@@ -140,9 +140,9 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
         fn success_all_redaction_turned_on() {
-            let web_proof = read_fixture("./testdata/web_proof_all_redaction_types.json");
+            let web_proof =
+                read_fixture("./testdata/0.1.0-alpha.8/web_proof_all_redaction_types.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             let web = verify_and_parse(web_proof).unwrap();
@@ -151,31 +151,35 @@ mod tests {
             let parsed: Value = serde_json::from_str(body).unwrap();
 
             let name = parsed.get("name").unwrap().as_str().unwrap();
-            let eye_color = parsed.get("eye_color").unwrap().as_str().unwrap();
+            let greeting = parsed.get("greeting").unwrap().as_str().unwrap();
 
-            assert_eq!(name, "Luke Skywalker");
-            assert_eq!(eye_color, "****");
+            assert_eq!(name, "************");
+            assert_eq!(greeting, "Old Tom Bombadil is a merry fellow!");
 
             let url = &web.url;
-            assert_eq!(url, "https://swapi.dev/api/people/1?format=****");
+            assert_eq!(
+                url,
+                "https://lotr-api.online/auth_header_require?param1=******&param2=value2"
+            );
         }
 
         #[test]
-        #[ignore]
         fn fail_request_url_partial_redaction() {
-            let web_proof = read_fixture("./testdata/web_proof_request_url_partial_redaction.json");
+            let web_proof = read_fixture(
+                "./testdata/0.1.0-alpha.8/web_proof_request_url_partial_redaction.json",
+            );
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
-                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestUrlParam, err)) if err == "format: j***"
-            ));
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestUrlParam, err)) if err == "param1: v*****"
+            ),);
         }
         #[test]
-        #[ignore]
         fn fail_request_header_partial_redaction() {
-            let web_proof =
-                read_fixture("./testdata/web_proof_request_header_partial_redaction.json");
+            let web_proof = read_fixture(
+                "./testdata/0.1.0-alpha.8/web_proof_request_header_partial_redaction.json",
+            );
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
@@ -184,27 +188,27 @@ mod tests {
             ));
         }
         #[test]
-        #[ignore]
         fn fail_response_header_partial_redaction() {
-            let web_proof =
-                read_fixture("./testdata/web_proof_response_header_partial_redaction.json");
+            let web_proof = read_fixture(
+                "./testdata/0.1.0-alpha.8/web_proof_response_header_partial_redaction.json",
+            );
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
-                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseHeader, err)) if err == "Server: n***********"
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseHeader, err)) if err == "Date: ****************************T"
             ));
         }
         #[test]
-        #[ignore]
         fn fail_response_body_json_value_partial_redaction() {
-            let web_proof =
-                read_fixture("./testdata/web_proof_response_json_partial_redaction.json");
+            let web_proof = read_fixture(
+                "./testdata/0.1.0-alpha.8/web_proof_response_json_partial_redaction.json",
+            );
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
-                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseBody, err)) if err == "$.eye_color: b***"
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseBody, err)) if err == "$.name: T***********"
             ));
         }
     }
