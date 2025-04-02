@@ -1,16 +1,26 @@
 use std::{
-    fs,
+    fs, io,
     path::{Path, PathBuf},
 };
 
 use colored::Colorize;
 
 use super::logger::UpdateLogger;
-use crate::{
-    cli_wrappers::vlayer,
-    errors::{Error, Result},
-    utils::path::find_file_up_tree,
-};
+use crate::{cli_wrappers::vlayer, utils::path::find_file_up_tree};
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("Failed to create vlayer docker image replacement regex: {0}")]
+    Regex(#[from] regex::Error),
+    #[error(transparent)]
+    IO(#[from] io::Error),
+    #[error(transparent)]
+    Serde(#[from] serde_yml::Error),
+    #[error(transparent)]
+    Vlayer(#[from] vlayer::Error),
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
 
 pub fn update_docker() -> Result<()> {
     let version = vlayer::Cli::version()?;
@@ -32,10 +42,8 @@ pub fn update_docker() -> Result<()> {
 
 // Look at the docker-compose file, and recursively update all included files as well.
 fn do_update_docker_images(docker_compose_path: &Path, version: &String) -> Result<()> {
-    let yaml_content =
-        fs::read_to_string(docker_compose_path).map_err(|e| Error::Upgrade(e.to_string()))?;
-    let mut compose: serde_yml::Value =
-        serde_yml::from_str(&yaml_content).map_err(|e| Error::Upgrade(e.to_string()))?;
+    let yaml_content = fs::read_to_string(docker_compose_path)?;
+    let mut compose: serde_yml::Value = serde_yml::from_str(&yaml_content)?;
 
     let replaced = replace_vlayer_docker_image_version(&yaml_content, version)?;
     fs::write(docker_compose_path, replaced)?;
@@ -53,17 +61,10 @@ fn do_update_docker_images(docker_compose_path: &Path, version: &String) -> Resu
 }
 
 fn replace_vlayer_docker_image_version(content: &str, version: &String) -> Result<String> {
-    regex::Regex::new(r"(image:\s*ghcr\.io/vlayer-xyz/[^:\s]+:)[^\s]+")
-        .map(|regex| {
-            regex
-                .replace_all(content, |captures: &regex::Captures| {
-                    format!("{}{}", &captures[1], version)
-                })
-                .to_string()
-        })
-        .map_err(|_| {
-            Error::Upgrade("Failed to create vlayer docker image replacement regex".to_string())
-        })
+    let re = regex::Regex::new(r"(image:\s*ghcr\.io/vlayer-xyz/[^:\s]+:)[^\s]+")?;
+    Ok(re
+        .replace_all(content, |captures: &regex::Captures| format!("{}{}", &captures[1], version))
+        .to_string())
 }
 
 #[cfg(test)]

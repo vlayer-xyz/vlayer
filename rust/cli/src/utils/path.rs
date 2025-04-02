@@ -1,5 +1,5 @@
 use std::{
-    fs,
+    fs, io,
     os::unix::fs as unix_fs,
     path::{Path, PathBuf},
     process::Command,
@@ -116,8 +116,8 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf> {
     Ok(PathBuf::from(path))
 }
 
-pub fn find_file_up_tree(name: &str) -> Result<Option<PathBuf>> {
-    let mut path = std::env::current_dir().map_err(|e| Error::Upgrade(e.to_string()))?;
+pub fn find_file_up_tree(name: &str) -> std::result::Result<Option<PathBuf>, io::Error> {
+    let mut path = std::env::current_dir()?;
     loop {
         path.push(name);
         if path.exists() {

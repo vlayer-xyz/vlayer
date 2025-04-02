@@ -13,7 +13,7 @@ use crate::{
     utils::path::find_file_up_tree,
 };
 
-mod docker;
+pub mod docker;
 mod logger;
 
 pub async fn run_update() -> Result<()> {

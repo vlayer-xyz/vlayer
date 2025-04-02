@@ -6,6 +6,7 @@ use soldeer_core::errors::SoldeerError;
 use crate::commands::jwt::Error as JwtError;
 use crate::{
     cli_wrappers::{base, js, vlayer},
+    commands::update,
     config::Error as ConfigError,
 };
 
@@ -51,6 +52,8 @@ pub enum Error {
     JsPm(#[from] js::Error),
     #[error(transparent)]
     Cli(#[from] base::Error),
+    #[error(transparent)]
+    UpdateDocker(#[from] update::docker::Error),
     #[cfg(feature = "jwt")]
     #[error(transparent)]
     Jwt(#[from] JwtError),
