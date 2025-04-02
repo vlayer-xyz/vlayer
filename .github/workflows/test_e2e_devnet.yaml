@@ -69,8 +69,15 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      - name: Create reusable Cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: test-e2e
       - name: Build binaries
         env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
