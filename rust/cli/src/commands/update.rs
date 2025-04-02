@@ -11,6 +11,7 @@ use crate::{
     config::{Config, Error as ConfigError, SolDependencies},
     errors::{Error, Result},
     soldeer::{add_remappings, install},
+    utils::vlayer,
 };
 
 pub async fn run_update() -> Result<()> {
@@ -75,8 +76,7 @@ async fn update_contracts() -> Result<()> {
 }
 
 fn update_docker() -> Result<()> {
-    let version = newest_vlayer_version()?;
-
+    let version = vlayer::Cli::version()?;
     let docker_compose = find_file_up_tree("docker-compose.devnet.yaml")?;
     if let Some(docker_compose_path) = docker_compose {
         print_update_intention(&format!("vlayer docker images to {}", &version));
@@ -126,9 +126,7 @@ fn replace_vlayer_docker_image_version(content: &str, version: &String) -> Resul
 }
 
 async fn do_update_contracts(foundry_toml_path: &Path) -> Result<()> {
-    let version = newest_vlayer_version()?;
-
-    print_update_intention(&format!("vlayer contracts to {}", &version));
+    print_update_intention(&format!("vlayer contracts to {}", &vlayer::Cli::version()?));
 
     let config = Config::default();
     install_solidity_dependencies(&config.sol_dependencies).await?;
@@ -150,26 +148,6 @@ async fn install_solidity_dependencies(dependencies: &SolDependencies) -> Result
         install(name, &version, url.as_ref()).await?;
     }
     Ok(())
-}
-
-fn newest_vlayer_version() -> Result<String> {
-    let output = std::process::Command::new("vlayer")
-        .arg("--version")
-        .output()
-        .map_err(into_update_err)?;
-
-    if !output.status.success() {
-        return Err(Error::Upgrade(format!(
-            "Failed to run newest vlayer: {}",
-            String::from_utf8_lossy(&output.stderr)
-        )));
-    }
-
-    String::from_utf8_lossy(&output.stdout)
-        .split_ascii_whitespace()
-        .nth(1)
-        .map(String::from)
-        .ok_or(Error::Upgrade("Corrupted vlayer binary".to_string()))
 }
 
 enum PackageManager {
