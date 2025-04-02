@@ -7,7 +7,7 @@ edition = "2021"
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 chain_host = { workspace = true }
-clap = { workspace = true, features = ["derive", "env"] }
+clap = { workspace = true, features = ["derive", "env", "string"] }
 common = { workspace = true }
 derivative = { workspace = true }
 dotenvy = { workspace = true }
