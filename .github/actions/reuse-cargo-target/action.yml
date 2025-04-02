@@ -20,6 +20,7 @@ runs:
       id: configure_cargo_target
       run: |
         FULL_PATH="${{ inputs.targets_path }}/${{ inputs.target_name }}"
-        mkdir -p "$FULL_PATH"
+        sudo mkdir -p "$FULL_PATH"
+        sudo chown "$(whoami):$(whoami)" "$FULL_PATH"
         echo "CARGO_TARGET_DIR=$FULL_PATH" >> $GITHUB_OUTPUT
       shell: bash
