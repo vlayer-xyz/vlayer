@@ -36,7 +36,7 @@ struct Cli {
     #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "5s")]
     chain_proof_poll_interval: Option<Duration>,
 
-    #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "180s")]
+    #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "240s")]
     chain_proof_timeout: Option<Duration>,
 
     #[arg(long, group = "gas_meter", env)]
