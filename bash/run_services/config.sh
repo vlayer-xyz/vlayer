@@ -1,4 +1,5 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
+CHAIN_NAME=${CHAIN_NAME:-anvil}
 
 # Set the SERVER_PROOF_MODE variable based on the mode
 function set_proof_mode() {
