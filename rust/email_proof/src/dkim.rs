@@ -1,4 +1,4 @@
-use cfdkim::{validate_header, DKIMError, DkimPublicKey};
+use cfdkim::{validate_header, DKIMError, DKIMResult, DkimPublicKey};
 use mailparse::{MailHeader, ParsedMail};
 use slog::{o, Discard, Logger};
 use verifiable_dns::DNSRecord;
@@ -7,11 +7,18 @@ pub use crate::errors::Error;
 use crate::from_header;
 
 pub fn verify_email_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), Error> {
-    let from_domain = from_header::extract_from_domain(email)?;
+    let result = dkim_key_verification(email, key)?;
+    interpret_dkim_result(&result)
+}
 
+fn dkim_key_verification(email: &ParsedMail, key: DkimPublicKey) -> Result<DKIMResult, Error> {
+    let from_domain = from_header::extract_from_domain(email)?;
     let result =
         cfdkim::verify_email_with_key(&Logger::root(Discard, o!()), &from_domain, email, key)?;
+    Ok(result)
+}
 
+fn interpret_dkim_result(result: &DKIMResult) -> Result<(), Error> {
     if result.with_detail().starts_with("pass") {
         Ok(())
     } else if let Some(err) = result.error() {
@@ -184,6 +191,45 @@ mod tests {
             let name = "Example.com. ";
             let normalized = normalize_dns_name(name);
             assert_eq!(normalized, "example.com");
+        }
+    }
+
+    mod interpret_dkim_result {
+        use cfdkim::{canonicalization::Type, DKIMError, DKIMResult};
+
+        use super::*;
+
+        fn dummy_domain() -> String {
+            "example.com".to_string()
+        }
+
+        #[test]
+        fn returns_ok_for_pass_result() {
+            let result = DKIMResult::pass(dummy_domain(), Type::Simple, Type::Simple);
+            let res = interpret_dkim_result(&result);
+            assert!(res.is_ok());
+        }
+
+        #[test]
+        fn returns_error_if_dkim_error_present() {
+            let result = DKIMResult::fail(DKIMError::SignatureExpired, dummy_domain());
+            let err = interpret_dkim_result(&result).unwrap_err();
+
+            match err {
+                Error::DkimVerification(DKIMError::SignatureExpired) => {}
+                other => panic!("Unexpected error: {other:?}"),
+            }
+        }
+
+        #[test]
+        fn returns_signature_did_not_verify_if_no_error_and_summary_not_pass() {
+            let result = DKIMResult::neutral(dummy_domain());
+            let err = interpret_dkim_result(&result).unwrap_err();
+
+            match err {
+                Error::DkimVerification(DKIMError::SignatureDidNotVerify) => {}
+                other => panic!("Unexpected error: {other:?}"),
+            }
         }
     }
 }
