@@ -45,15 +45,7 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: `${__dirname}/../../node_modules/tlsn-js/build/*`,
-          dest: "assets/",
-        },
-        {
-          src: `${__dirname}/../../node_modules/tlsn-js/build/tlsn_wasm.js`,
-          dest: "./",
-        },
-        {
-          src: `${__dirname}/../../node_modules/tlsn-js/build/tlsn_wasm_bg.wasm`,
+          src: `${__dirname}/../../node_modules/tlsn-js/build/**`,
           dest: "./",
         },
       ],

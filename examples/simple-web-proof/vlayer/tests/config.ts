@@ -27,7 +27,6 @@ export const test = base.extend<{
       process.env.TEST_MODE === "headed"
         ? {
             headless: false,
-            // slowMo: 100000000,
             args: [
               `--disable-extensions-except=${pathToExtension}`,
               `--load-extension=${pathToExtension}`,
