@@ -68,10 +68,10 @@ function set_testnet_chain_worker_args() {
 
 function set_chain_worker_args() {
     if [[ "${CHAIN_NAME}" == "anvil" ]]; then
-        CONFIRMATIONS=${CONFIRMATIONS:-0}
+        CONFIRMATIONS=${CONFIRMATIONS:-1}
         set_devnet_chain_worker_args
     else
-        CONFIRMATIONS=${CONFIRMATIONS:-2}
+        CONFIRMATIONS=${CONFIRMATIONS:-1}
         set_testnet_chain_worker_args
     fi
 }
