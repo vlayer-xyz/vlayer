@@ -44,8 +44,10 @@ fn check_if_vlayerup_exists() -> Result<()> {
 }
 
 fn update_cli() -> Result<()> {
+    let old_version = vlayer::Cli::version()?;
     print_update_intention("vlayer CLI");
     let status = spawn("vlayerup", &["update"])?;
+    let new_version = vlayer::Cli::version()?;
     ensure_success(status, "vlayer CLI")
 }
 
@@ -150,20 +152,20 @@ async fn install_solidity_dependencies(dependencies: &SolDependencies) -> Result
     Ok(())
 }
 
-enum PackageManager {
+enum JSPackageManager {
     Npm,
     Yarn,
     Pnpm,
     Bun,
 }
 
-impl PackageManager {
+impl JSPackageManager {
     const fn command_args(&self) -> (&str, &str) {
         match self {
-            PackageManager::Npm => ("npm", "install"),
-            PackageManager::Yarn => ("yarn", "add"),
-            PackageManager::Pnpm => ("pnpm", "add"),
-            PackageManager::Bun => ("bun", "add"),
+            JSPackageManager::Npm => ("npm", "install"),
+            JSPackageManager::Yarn => ("yarn", "add"),
+            JSPackageManager::Pnpm => ("pnpm", "add"),
+            JSPackageManager::Bun => ("bun", "add"),
         }
     }
 
@@ -178,15 +180,15 @@ impl PackageManager {
     }
 }
 
-fn package_manager(package_path: &Path) -> PackageManager {
+fn package_manager(package_path: &Path) -> JSPackageManager {
     if package_path.join("bun.lockb").exists() {
-        PackageManager::Bun
+        JSPackageManager::Bun
     } else if package_path.join("pnpm-lock.yaml").exists() {
-        PackageManager::Pnpm
+        JSPackageManager::Pnpm
     } else if package_path.join("yarn.lock").exists() {
-        PackageManager::Yarn
+        JSPackageManager::Yarn
     } else {
-        PackageManager::Npm
+        JSPackageManager::Npm
     }
 }
 
