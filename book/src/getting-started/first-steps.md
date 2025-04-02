@@ -67,7 +67,7 @@ and save it in `vlayer/.env.testnet.local` as
 VLAYER_API_TOKEN=...
 ```
 
-> ❗️ It is important to note that the JWT token is valid for 24 hours after which you will need to
+> ❗️ It is important to note that the JWT token is valid for 1 year after which you will need to
 >    generate a new token to continue developing using vlayer.
 
 > ❗️ We are currently rolling out JWT-based authentication in all of our services,
