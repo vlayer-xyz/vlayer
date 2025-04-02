@@ -1,6 +1,11 @@
 name: Create reusable Cargo target dir
 description: Creates a reusable Cargo target directory in a custom subdirectory.
 inputs:
+# We cannot use a global variable/secret in an action,
+# so it has to come from a workflow outside.
+  targets_path:
+    description: 'Path to a directory containing all unique target names.'
+    required: true
   target_name:
     description: 'Unique name for separating the target from others.'
     required: true
@@ -14,6 +19,7 @@ runs:
     - name: Configure the CARGO_TARGET_DIR variable
       id: configure_cargo_target
       run: |
-        mkdir -p "${{ vars.VLAYER_CARGO_TARGET_DIRS }}/${{ inputs.target_name }}"
-        echo "CARGO_TARGET_DIR=${{ vars.VLAYER_CARGO_TARGET_DIRS }}/${{ inputs.target_name }}" >> $GITHUB_OUTPUT
+        FULL_PATH="${{ inputs.targets_path }}/${{ inputs.target_name }}"
+        mkdir -p "$FULL_PATH"
+        echo "CARGO_TARGET_DIR=$FULL_PATH" >> $GITHUB_OUTPUT
       shell: bash

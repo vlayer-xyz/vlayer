@@ -63,6 +63,7 @@ jobs:
         id: cargo_target
         uses: ./.github/actions/reuse-cargo-target
         with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
           target_name: test-vlayer
       - name: Build CLI
         env:
