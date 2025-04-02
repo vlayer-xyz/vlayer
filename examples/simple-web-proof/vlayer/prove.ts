@@ -134,7 +134,7 @@ async function testFailedProving() {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
     assert.equal(
       error.message,
-      "Preflight failed with error: Preflight error: Execution error: EVM transact error: revert: ContractError(Revert(Revert(\"Invalid notary public key\")))",
+      'Preflight failed with error: Preflight error: Execution error: EVM transact error: revert: ContractError(Revert(Revert("Invalid notary public key")))',
       `Error with wrong message returned: ${error.message}`,
     );
     console.log("✅ Done");
