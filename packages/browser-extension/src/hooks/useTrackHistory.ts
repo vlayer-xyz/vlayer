@@ -40,14 +40,23 @@ export const useTrackCookies = () => {
   return useCallback((urls: string[]) => {
     browser.webRequest.onResponseStarted.addListener(
       (details) => {
-        browser.cookies
-          .getAll({ url: details.url })
-          .then((cookies) => {
+        const url = details.url;
+        const origin = new URL(url).origin;
+
+        Promise.all([
+          browser.cookies.getAll({ url }),
+          browser.cookies.getAll({
+            partitionKey: { topLevelSite: origin },
+          }),
+        ])
+          .then(([regularCookies, partitionedCookies]) => {
+            const allCookies = [...regularCookies, ...partitionedCookies];
+
             historyContextManager
               .updateHistory({
-                url: details.url,
+                url,
                 method: details.method as HTTPMethod,
-                cookies,
+                cookies: allCookies,
               })
               .catch(console.error);
           })
