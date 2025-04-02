@@ -315,10 +315,7 @@ mod test {
 
         #[test]
         fn accepts_valid_simple_headers() {
-            let email = concat!(
-                "From: test@example.com\r\n",
-                "Subject: Hello"
-            );
+            let email = concat!("From: test@example.com\r\n", "Subject: Hello");
             assert!(verify(email).is_ok());
         }
 
@@ -334,10 +331,7 @@ mod test {
 
         #[test]
         fn rejects_line_with_wrong_next_line_character() {
-            let email = concat!(
-                "From: test@example.com\r\n",
-                ": invalid next line character"
-            );
+            let email = concat!("From: test@example.com\r\n", ": invalid next line character");
             assert_eq!(verify(email).unwrap_err(), Error::InvalidNewLineSeparator(b':'));
         }
     }
