@@ -4,7 +4,10 @@ use soldeer_core::errors::SoldeerError;
 
 #[cfg(feature = "jwt")]
 use crate::commands::jwt::Error as JwtError;
-use crate::{config::Error as ConfigError, utils::vlayer};
+use crate::{
+    cli_wrappers::{base, js, vlayer},
+    config::Error as ConfigError,
+};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -44,6 +47,10 @@ pub enum Error {
     Config(#[from] ConfigError),
     #[error(transparent)]
     Vlayer(#[from] vlayer::Error),
+    #[error(transparent)]
+    JsPm(#[from] js::Error),
+    #[error(transparent)]
+    Cli(#[from] base::Error),
     #[cfg(feature = "jwt")]
     #[error(transparent)]
     Jwt(#[from] JwtError),

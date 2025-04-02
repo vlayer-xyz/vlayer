@@ -116,6 +116,20 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf> {
     Ok(PathBuf::from(path))
 }
 
+pub fn find_file_up_tree(name: &str) -> Result<Option<PathBuf>> {
+    let mut path = std::env::current_dir().map_err(|e| Error::Upgrade(e.to_string()))?;
+    loop {
+        path.push(name);
+        if path.exists() {
+            return Ok(Some(path));
+        }
+        path.pop();
+        if !path.pop() {
+            return Ok(None);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use tempfile::tempdir;

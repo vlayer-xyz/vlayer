@@ -1,11 +1,9 @@
-use std::process::Output;
+use super::base;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    #[error("Failed to spawn command: {0}")]
-    Spawn(#[from] std::io::Error),
-    #[error("Failed to run vlayer --version: {0}")]
-    Version(String),
+    #[error(transparent)]
+    Cli(#[from] base::Error),
     #[error("Invalid version format: {0}")]
     InvalidVersionFormat(String),
 }
@@ -14,23 +12,7 @@ pub struct Cli;
 
 impl Cli {
     pub fn version() -> Result<String, Error> {
-        Cli::parse_version(Cli::run_version()?)
-    }
-
-    fn run_version() -> Result<String, Error> {
-        let Output {
-            status,
-            stdout,
-            stderr,
-        } = std::process::Command::new("vlayer")
-            .arg("--version")
-            .output()?;
-
-        if !status.success() {
-            return Err(Error::Version(String::from_utf8_lossy(&stderr).into_owned()));
-        }
-
-        Ok(String::from_utf8_lossy(&stdout).into_owned())
+        Cli::parse_version(base::Cli::run("vlayer", &["--version"])?)
     }
 
     fn parse_version(output: String) -> Result<String, Error> {
