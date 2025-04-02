@@ -3,7 +3,7 @@ description: Installs risc0 tools
 inputs:
   version:
     description: 'Version of r0vm to install'
-    default: 2.0.0
+    default: 2.0.1
     required: false
   rust_version:
     description: 'Version of Rust toolchain for building guest images'

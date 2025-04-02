@@ -2,10 +2,10 @@
 
 let
   releases = {
-    "2.0.0" = {
+    "2.0.1" = {
       "aarch64-darwin" = {
         arch = "aarch64-apple-darwin";
-        hash = "sha256-I+SgeXytOSxiXrtyf4aQOdglPKZb0t6GC61Qf4yTn38=";
+        hash = "sha256-d/gQVXK+WAPTGRnx8Fw3XTWe6oKPw8FsLK7VNxC9aF8=";
       };
     };
     "1.2.4" = {
@@ -34,7 +34,6 @@ let
       sourceRoot = ".";
       installPhase = ''
         mkdir -p $out/bin
-        install_name_tool -change /opt/homebrew/opt/xz/lib/liblzma.5.dylib ${pkgs.xz.out}/lib/liblzma.dylib ./cargo-risczero
         cp -r ./cargo-risczero $out/bin/
       '';
     };
@@ -47,7 +46,6 @@ let
       sourceRoot = ".";
       installPhase = ''
         mkdir -p $out/bin
-        install_name_tool -change /opt/homebrew/opt/xz/lib/liblzma.5.dylib ${pkgs.xz.out}/lib/liblzma.dylib ./r0vm
         cp -r ./r0vm $out/bin/
       '';
     };
@@ -60,8 +58,8 @@ let
 in
 rec {
   risc0 = {
-    default = risc0."2.0.0";
-    inherit (package "2.0.0") "2.0.0";
+    default = risc0."2.0.1";
+    inherit (package "2.0.1") "2.0.1";
     inherit (package "1.2.4") "1.2.4";
   };
 }
