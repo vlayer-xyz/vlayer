@@ -7,23 +7,20 @@ mod from_header;
 #[cfg(test)]
 mod test_utils;
 
+use dkim::verify_email;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
+use mailparse::parse_mail;
 
 pub use crate::{email::Email, errors::Error};
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_record, verification_data) = UnverifiedEmail::parse_calldata(calldata)?;
+    let email = parse_mail(&raw_email)?;
 
-    verification_data.verify_signature(&dns_record)?;
+    dns_record.verify(&verification_data)?;
+    verify_email(&email, &dns_record)?;
 
-    let email = mailparse::parse_mail(&raw_email)?;
-
-    let from_domain = from_header::extract_from_domain(&email)?;
-
-    dkim::verify_email(email, &from_domain, dns::parse_dns_record(&dns_record.data)?)
-        .map_err(Error::DkimVerification)?
-        .try_into()
-        .map_err(Error::EmailParse)
+    Ok(email.try_into()?)
 }
 
 #[cfg(test)]
@@ -76,6 +73,11 @@ mod test {
             recordType: 16,
             data: "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".into(),
             ttl: 0,
+        };
+
+        static ref SPOOFED_DOMAIN_DNS_FIXTURE: SolDnsRecord = SolDnsRecord {
+            name: "google._domainkey.spoofed-vlayer.xyz".into(),
+            ..DNS_FIXTURE.clone()
         };
 
         static ref VERIFICATION_DATA: SolVerificationData = sign_dns_fixture(&DNS_FIXTURE);

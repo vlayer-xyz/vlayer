@@ -1574,6 +1574,7 @@ dependencies = [
  "alloy-sol-types",
  "base64 0.21.7",
  "cfdkim",
+ "derivative",
  "mailparse",
  "rsa",
  "slog",

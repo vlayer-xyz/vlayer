@@ -164,7 +164,7 @@ impl TryFrom<WebProofArgs> for ServerProvingArgs {
             port,
             uri,
         } = parse_proven_url(&value.url)?;
-        //If host is provided fallback to host extracted from url, otherwise use the host from the url
+        // If host is not provided fallback to host extracted from url
         let host = value.host.unwrap_or(urlhost.clone());
         let headers: Result<HashMap<String, String>, InputError> = value
             .headers

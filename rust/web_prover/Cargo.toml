@@ -12,6 +12,7 @@ integration-tests = []
 
 [dependencies]
 bincode = { workspace = true }
+constcat = { workspace = true }
 derive-new = { workspace = true }
 hex = { workspace = true }
 http-body-util = { workspace = true }
@@ -35,7 +36,6 @@ tokio = { workspace = true, features = [
 ] }
 tokio-util = { workspace = true }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
 
 [lints]
 workspace = true

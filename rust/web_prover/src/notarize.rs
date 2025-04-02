@@ -40,8 +40,6 @@ pub async fn notarize(
     uri: &str,
     headers: HashMap<String, String>,
 ) -> Result<(Attestation, Secrets), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::try_init().unwrap_or_default();
-
     let notary_client = NotaryClient::builder()
         .host(notary_config.host)
         .port(notary_config.port)
@@ -105,11 +103,11 @@ pub async fn notarize(
 
     let request = request_builder.body(Empty::<Bytes>::new())?;
 
-    println!("Starting an MPC TLS connection with the server");
+    debug!("Starting an MPC TLS connection with the server");
 
     let response = request_sender.send_request(request).await?;
 
-    println!("Got a response from the server: {}", response.status());
+    debug!("Got a response from the server: {}", response.status());
 
     assert!(response.status() == StatusCode::OK);
 
