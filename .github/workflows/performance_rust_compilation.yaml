@@ -38,7 +38,7 @@ jobs:
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
-      - name: Reuse cargo target dir
+      - name: Create reusable Cargo target dir
         id: cargo_target
         uses: ./.github/actions/reuse-cargo-target
         with:

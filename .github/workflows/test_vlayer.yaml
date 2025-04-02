@@ -59,7 +59,7 @@ jobs:
         run: |
           forge soldeer install
 
-      - name: Reuse cargo target dir
+      - name: Create reusable Cargo target dir
         id: cargo_target
         uses: ./.github/actions/reuse-cargo-target
         with:

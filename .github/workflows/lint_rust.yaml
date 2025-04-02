@@ -32,7 +32,7 @@ jobs:
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
-      - name: Reuse cargo target dir (Host)
+      - name: Create reusable Cargo target dir (Host)
         id: cargo_target_host
         uses: ./.github/actions/reuse-cargo-target
         with:
@@ -48,7 +48,7 @@ jobs:
           cargo sort --check --grouped --workspace
           cargo clippy --all-targets --all-features --locked
 
-      - name: Reuse cargo target dir (Call Guest)
+      - name: Create reusable Cargo target dir (Call Guest)
         id: cargo_target_call_guest
         uses: ./.github/actions/reuse-cargo-target
         with:
@@ -65,7 +65,7 @@ jobs:
           cargo sort --check --grouped
           cargo clippy --all-targets --all-features --locked
 
-      - name: Reuse cargo target dir (Chain Guest)
+      - name: Create reusable Cargo target dir (Chain Guest)
         id: cargo_target_chain_guest
         uses: ./.github/actions/reuse-cargo-target
         with:
