@@ -315,24 +315,24 @@ mod test {
 
         #[test]
         fn accepts_valid_simple_headers() {
-            let email = concat!("From: test@example.com\r\n", "Subject: Hello");
-            assert!(verify(email).is_ok());
+            let raw_headers = concat!("From: test@example.com\r\n", "Subject: Hello");
+            assert!(verify(raw_headers).is_ok());
         }
 
         #[test]
         fn accepts_folded_headers() {
-            let email = concat!(
+            let raw_headers = concat!(
                 "Subject: This is a long subject\r\n",
                 " continuing here\r\n",
                 "From: test@example.com",
             );
-            assert!(verify(email).is_ok());
+            assert!(verify(raw_headers).is_ok());
         }
 
         #[test]
         fn rejects_line_with_wrong_next_line_character() {
-            let email = concat!("From: test@example.com\r\n", ": invalid next line character");
-            assert_eq!(verify(email).unwrap_err(), Error::InvalidNewLineSeparator(b':'));
+            let raw_headers = concat!("From: test@example.com\r\n", ": invalid next line character");
+            assert_eq!(verify(raw_headers).unwrap_err(), Error::InvalidNewLineSeparator(b':'));
         }
     }
 
