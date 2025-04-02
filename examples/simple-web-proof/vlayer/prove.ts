@@ -35,11 +35,9 @@ const vlayer = createVlayerClient({
   token: config.token,
 });
 
-// Reguire call_server with tlsn v8 on docker image
-// await testSuccessProvingAndVerification();
-// await testFailedProving();
+await testSuccessProvingAndVerification();
+await testFailedProving();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
@@ -114,7 +112,6 @@ async function testSuccessProvingAndVerification() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function testFailedProving() {
   console.log("Proving...");
 
