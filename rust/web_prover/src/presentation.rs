@@ -1,19 +1,19 @@
 use tlsn_core::{attestation::Attestation, presentation::Presentation, CryptoProvider, Secrets};
-use tlsn_formats::http::HttpTranscript;
+use tracing::debug;
+use utils::range::RangeSet;
 
 pub async fn create_presentation(
     attestation: Attestation,
     secrets: Secrets,
 ) -> Result<Presentation, Box<dyn std::error::Error>> {
-    let transcript = HttpTranscript::parse(secrets.transcript())?;
+    debug!("Creating presentation");
 
     let mut builder = secrets.transcript_proof_builder();
 
-    let request = &transcript.requests[0];
-    builder.reveal_sent(request)?;
+    let transcript = secrets.transcript();
 
-    let response = &transcript.responses[0];
-    builder.reveal_recv(response)?;
+    builder.reveal_sent(&RangeSet::from(0..transcript.sent().len()))?;
+    builder.reveal_recv(&RangeSet::from(0..transcript.received().len()))?;
 
     let transcript_proof = builder.build()?;
 
