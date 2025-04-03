@@ -3,7 +3,7 @@ services:
     image: jwnmulder/websockify
     platform: linux/amd64
     ports:
-      - "55688:80"
+      - "3003:80"
     command: "80 lotr-api.online:3011"
 
   notary-server:

@@ -433,7 +433,7 @@ mod tests {
             container_name: wsproxy
             platform: linux/amd64
             ports:
-              - "127.0.0.1:55688:80"
+              - "127.0.0.1:3003:80"
             command: "80 api.x.com:443"
           notary-server:
             image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.8
