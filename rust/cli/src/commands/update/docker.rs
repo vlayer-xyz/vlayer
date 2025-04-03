@@ -13,10 +13,14 @@ use crate::{cli_wrappers::vlayer, utils::path::find_file_up_tree};
 pub enum Error {
     #[error("Failed to create vlayer docker image replacement regex: {0}")]
     Regex(#[from] regex::Error),
-    #[error(transparent)]
-    IO(#[from] io::Error),
-    #[error(transparent)]
-    Serde(#[from] serde_yml::Error),
+    #[error("Failed to find dockerfile: {0}")]
+    FindDockerfile(#[from] anyhow::Error),
+    #[error("Docker compose read failed: {0}")]
+    DockerComposeRead(io::Error),
+    #[error("Docker compose write failed: {0}")]
+    DockerComposeWrite(io::Error),
+    #[error("Docker compose parse failed: {0}")]
+    DockerComposeParse(serde_yml::Error),
     #[error(transparent)]
     Vlayer(#[from] vlayer::Error),
 }
@@ -43,11 +47,12 @@ pub fn update_docker() -> Result<()> {
 
 // Look at the docker-compose file, and recursively update all included files as well.
 fn do_update_docker_images(docker_compose_path: &Path, version: &String) -> Result<()> {
-    let yaml_content = fs::read_to_string(docker_compose_path)?;
-    let mut compose: serde_yml::Value = serde_yml::from_str(&yaml_content)?;
+    let yaml_content = fs::read_to_string(docker_compose_path).map_err(Error::DockerComposeRead)?;
+    let mut compose: serde_yml::Value =
+        serde_yml::from_str(&yaml_content).map_err(Error::DockerComposeParse)?;
 
     let replaced = replace_vlayer_docker_image_version(&yaml_content, version)?;
-    fs::write(docker_compose_path, replaced)?;
+    fs::write(docker_compose_path, replaced).map_err(Error::DockerComposeWrite)?;
 
     if let Some(includes) = &mut compose["include"].as_sequence_mut() {
         for include in includes.iter_mut() {

@@ -116,7 +116,7 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf> {
     Ok(PathBuf::from(path))
 }
 
-pub fn find_file_up_tree(name: &str) -> std::result::Result<Option<PathBuf>, io::Error> {
+pub fn find_file_up_tree(name: &str) -> anyhow::Result<Option<PathBuf>> {
     let mut path = std::env::current_dir()?;
     loop {
         path.push(name);
