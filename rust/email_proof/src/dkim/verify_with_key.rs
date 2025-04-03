@@ -7,7 +7,7 @@ use crate::from_header;
 
 pub fn verify_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), Error> {
     let result = dkim_key_verification(email, key)?;
-    interpret_dkim_result(&result)
+    interpret_dkim_verification_result(&result)
 }
 
 fn dkim_key_verification(email: &ParsedMail, key: DkimPublicKey) -> Result<DKIMResult, Error> {
@@ -17,7 +17,7 @@ fn dkim_key_verification(email: &ParsedMail, key: DkimPublicKey) -> Result<DKIMR
     Ok(result)
 }
 
-fn interpret_dkim_result(result: &DKIMResult) -> Result<(), Error> {
+fn interpret_dkim_verification_result(result: &DKIMResult) -> Result<(), Error> {
     if result.with_detail().starts_with("pass") {
         Ok(())
     } else if let Some(err) = result.error() {
@@ -30,7 +30,7 @@ fn interpret_dkim_result(result: &DKIMResult) -> Result<(), Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    mod interpret_dkim_result {
+    mod interpret_dkim_verification_result {
         use cfdkim::{canonicalization::Type, DKIMError, DKIMResult};
         use lazy_static::lazy_static;
 
@@ -43,7 +43,7 @@ mod tests {
         #[test]
         fn returns_ok_for_pass_result() {
             let result = DKIMResult::pass(DOMAIN_NAME.clone(), Type::Simple, Type::Simple);
-            let res = interpret_dkim_result(&result);
+            let res = interpret_dkim_verification_result(&result);
             assert!(res.is_ok());
         }
 
@@ -52,7 +52,7 @@ mod tests {
             let result = DKIMResult::fail(DKIMError::SignatureExpired, DOMAIN_NAME.clone());
 
             assert_eq!(
-                interpret_dkim_result(&result).unwrap_err(),
+                interpret_dkim_verification_result(&result).unwrap_err(),
                 Error::DkimVerification(DKIMError::SignatureExpired)
             );
         }
@@ -62,7 +62,7 @@ mod tests {
             let result = DKIMResult::neutral(DOMAIN_NAME.clone());
 
             assert_eq!(
-                interpret_dkim_result(&result).unwrap_err(),
+                interpret_dkim_verification_result(&result).unwrap_err(),
                 Error::DkimVerification(DKIMError::SignatureDidNotVerify)
             )
         }
@@ -78,7 +78,7 @@ mod tests {
         lazy_static! {
             static ref DNS_RECORD_DATA: String = "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".to_string();
             static ref PUBLIC_KEY: DkimPublicKey = {
-                parse_dns_record(&DNS_RECORD_DATA).expect("Failed to parse DNS record")
+                parse_dns_record(&DNS_RECORD_DATA).unwrap()
             };
         }
 
