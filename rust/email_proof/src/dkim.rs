@@ -28,7 +28,7 @@ pub fn verify_dkim_body_length_tag(headers: &[&MailHeader<'_>]) -> Result<(), DK
     Ok(())
 }
 
-pub fn verify_dkim_header_dns_consistency(
+pub fn verify_dns_consistency(
     headers: &[&MailHeader<'_>],
     record: &DNSRecord,
 ) -> Result<(), Error> {
@@ -108,7 +108,7 @@ mod tests {
         }
     }
 
-    mod verify_dkim_header_dns_consistency {
+    mod verify_dns_consistency {
         use super::*;
 
         fn record_with_name(name: &str) -> DNSRecord {
@@ -125,7 +125,7 @@ mod tests {
             let headers = [&parse_header(header).unwrap().0];
             let record = record_with_name("selector1._domainkey.example.com");
 
-            assert!(verify_dkim_header_dns_consistency(&headers, &record).is_ok());
+            assert!(verify_dns_consistency(&headers, &record).is_ok());
         }
 
         #[test]
@@ -136,7 +136,7 @@ mod tests {
             let record = record_with_name("selector2._domainkey.example.com");
 
             assert_eq!(
-                verify_dkim_header_dns_consistency(&headers, &record).unwrap_err(),
+                verify_dns_consistency(&headers, &record).unwrap_err(),
                 Error::DomainMismatch(
                     "selector1._domainkey.example.com".into(),
                     "selector2._domainkey.example.com".into()
@@ -152,7 +152,7 @@ mod tests {
             let record = record_with_name("selector1._domainkey.otherdomain.com");
 
             assert_eq!(
-                verify_dkim_header_dns_consistency(&headers, &record).unwrap_err(),
+                verify_dns_consistency(&headers, &record).unwrap_err(),
                 Error::DomainMismatch(
                     "selector1._domainkey.example.com".into(),
                     "selector1._domainkey.otherdomain.com".into()
