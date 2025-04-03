@@ -1,4 +1,4 @@
-name: E2E test of example web apps on devnet
+name: E2E example web apps test
 
 on:
   pull_request:
@@ -32,11 +32,11 @@ jobs:
               - 'packages/**'
               - 'bash/run-services.sh'
               - 'bash/e2e-web-apps-test.sh'
-              - '.github/workflows/test_e2e_web_apps_devnet.yaml'
+              - '.github/workflows/test_e2e_web_apps.yaml'
               - 'contracts/**'
 
   test-e2e-web-apps:
-    name: E2E web apps test against devnet
+    name: E2E web apps test
     needs: changes
     runs-on: aws-linux-medium
     if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'

@@ -7,7 +7,12 @@ import {
 } from "@vlayer/sdk/config";
 import { env } from "./env";
 import { getStartEndBlock } from "./helpers";
+import { loadFixtures } from "./loadFixtures";
 const config = getConfig();
+
+if (config.chainName === "anvil") {
+  await loadFixtures();
+}
 
 const usdcTokenAddr = env.PROVER_ERC20_CONTRACT_ADDR;
 

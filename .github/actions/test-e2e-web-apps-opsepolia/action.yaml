@@ -1,5 +1,5 @@
-name: "Run E2E Web Apps Test"
-description: "Runs an E2E web apps test against testnet for a given example"
+name: "Run E2E Web Apps Test with OP Sepolia"
+description: "Runs an E2E web apps test with OP Sepolia for a given example"
 
 inputs:
   example:
@@ -20,15 +20,6 @@ inputs:
     required: true
   quicknode_api_key:
     description: "QuickNode API Key"
-    required: true
-  gas_meter_url:
-    description: "Gas Meter URL"
-    required: true
-  gas_meter_api_key:
-    description: "Gas Meter API Key"
-    required: true
-  vlayer_api_token:
-    description: "VLAYER API Token"
     required: true
   testnet_private_key_location: 
     description: "Path to testnet private key"
@@ -115,19 +106,17 @@ runs:
     - name: Run E2E test
       shell: bash
       env:
+        VLAYER_TMP_DIR: ./artifacts
         BUILD_SERVICES: 0
         BUILD_CLI: 0
-        RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-        VLAYER_ENV: testnet
+        EXAMPLE: ${{ inputs.example }}
+        PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
+
+        # OP Sepolia
+        CHAIN_NAME: "optimismSepolia"
         QUICKNODE_API_KEY: ${{ inputs.quicknode_api_key }}
         QUICKNODE_ENDPOINT: "dry-alpha-tab"
-        CHAIN_NAME: "optimismSepolia"
-        PROVER_URL: http://127.0.0.1:3000
         JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}"
-        VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
-        VLAYER_TMP_DIR: ./artifacts
-        PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
-        EXAMPLE: ${{ inputs.example }}
       run: xvfb-run bash/e2e-web-apps-test.sh
 
     - name: Display Logs

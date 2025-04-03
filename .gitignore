@@ -11,6 +11,7 @@ target/
 
 # .env files to store your secrets
 *.env
+*.env.local
 
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb

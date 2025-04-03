@@ -9,8 +9,14 @@ import {
 } from "@vlayer/sdk/config";
 import { env } from "./env";
 import { getStartEndBlock } from "./helpers";
+import { loadFixtures } from "./loadFixtures";
 
 const config = getConfig();
+
+if (config.chainName === "anvil") {
+  await loadFixtures();
+}
+
 const { ethClient, account, proverUrl } = await createContext(config);
 
 const { startBlock, endBlock } = await getStartEndBlock(config);

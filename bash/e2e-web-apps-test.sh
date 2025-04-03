@@ -3,6 +3,7 @@
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+[ -f "${VLAYER_HOME}/.env.local" ] && source "${VLAYER_HOME}/.env.local"
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
