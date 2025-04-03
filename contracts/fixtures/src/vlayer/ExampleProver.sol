@@ -34,11 +34,13 @@ contract ExampleProver is Prover {
     function web_proof(WebProof calldata webProof) public view returns (bool) {
         Web memory web = webProof.recover();
 
-        require(web.url.test("https://api.x.com/1.1/account/settings.json"), "Incorrect URL");
+        require(
+            web.url.test("https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken"), "Incorrect URL"
+        );
 
         require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
 
-        require(web.jsonGetString("screen_name").equal("g_p_vlayer"), "Invalid screen name");
+        require(web.jsonGetString("name").equal("Gandalf"), "Invalid name");
 
         return true;
     }

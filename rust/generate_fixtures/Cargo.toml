@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bincode = { workspace = true }
+hex = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -12,6 +14,7 @@ tlsn-utils = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+web_proof = { path = "../web_proof", version = "0.1.0" }
 web_prover = { path = "../web_prover", version = "0.1.0" }
 
 [lints]

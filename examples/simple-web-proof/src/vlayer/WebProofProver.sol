@@ -12,7 +12,7 @@ contract WebProofProver is Prover {
     using WebProofLib for WebProof;
     using WebLib for Web;
 
-    string public constant DATA_URL = "https://api.x.com/1.1/account/settings.json";
+    string public constant DATA_URL = "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken";
 
     function main(WebProof calldata webProof, address account)
         public
@@ -21,7 +21,7 @@ contract WebProofProver is Prover {
     {
         Web memory web = webProof.verify(DATA_URL);
 
-        string memory screenName = web.jsonGetString("screen_name");
+        string memory screenName = web.jsonGetString("name");
 
         return (proof(), screenName, account);
     }
