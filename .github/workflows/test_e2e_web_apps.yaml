@@ -94,6 +94,8 @@ jobs:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           cargo build --bin call_server --bin chain_server --bin worker --bin dns_server --features jwt
+          mkdir -p ./target/debug
+          mv ${CARGO_TARGET_DIR}/debug/{call_server,chain_server,worker,dns_server} ./target/debug/
 
       - name: Run e2e tests
         env:
