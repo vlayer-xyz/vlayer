@@ -116,6 +116,7 @@ runs:
       shell: bash
       env:
         BUILD_SERVICES: 0
+        BUILD_CLI: 0
         RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         VLAYER_ENV: testnet
         QUICKNODE_API_KEY: ${{ inputs.quicknode_api_key }}
