@@ -52,7 +52,7 @@ ensure_binaries_built
 echo "Starting services..."
 
 if [[ $VLAYER_ENV == "dev" ]]; then
-    docker compose -f $DOCKER_COMPOSE_FILE up -d $DOCKER_COMPOSE_SERVICES
+    docker compose -f $DOCKER_COMPOSE_FILE up -d --build --force-recreate $DOCKER_COMPOSE_SERVICES
 fi
 
 if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
