@@ -11,7 +11,7 @@ struct Output(std::process::Output);
 pub enum Error {
     #[error("Failed to spawn command: {0}")]
     Spawn(#[from] std::io::Error),
-    #[error("Command returned non-zero exit code: {0}")]
+    #[error("Command returned non-zero exit code: {0} {1}")]
     NonZeroExitCode(ExitStatus, String),
 }
 
