@@ -110,6 +110,11 @@ mod tests {
         }
 
         #[test]
+        fn fails_for_missing_signature() {
+            assert_signature_did_not_verify("./testdata/email.txt");
+        }
+
+        #[test]
         fn fails_for_mismatching_body() {
             let email = read_email_from_file("./testdata/signed_email_modified_body.txt");
             let parsed_email = parse_mail(email.as_bytes()).unwrap();
