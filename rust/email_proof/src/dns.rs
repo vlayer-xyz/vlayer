@@ -37,7 +37,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn parses_dns_record() {
+    fn parses_dns_record() -> anyhow::Result<()> {
         let record = concat!(
             "v=DKIM1; k=rsa ; p=MIIBIjANBgkqhkiG9w0BAQEFAAOC",
             "AQ8AMIIBCgKCAQEAvzwKQIIWzQXv0nihasFTT3+JO23hXCg",
@@ -50,13 +50,14 @@ mod test {
             "p5wMedWasaPS74TZ1b7tI39ncp6QIDAQAB ; t= y : s :yy:x;",
             "s=*:email;; h= sha1:sha 256:other;; n=ignore these notes "
         );
-        let result = extract_public_key(record);
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap().key_type(), "rsa");
+        let public_key = extract_public_key(record)?;
+        assert_eq!(public_key.key_type(), "rsa");
+
+        Ok(())
     }
 
     #[test]
-    fn parses_dns_record_with_missing_v_and_k_tags() {
+    fn parses_dns_record_with_missing_v_and_k_tags() -> anyhow::Result<()> {
         let record = concat!(
             " p=MIIBIjANBgkqhkiG9w0BAQEFAAOC",
             "AQ8AMIIBCgKCAQEAvzwKQIIWzQXv0nihasFTT3+JO23hXCg",
@@ -69,9 +70,10 @@ mod test {
             "p5wMedWasaPS74TZ1b7tI39ncp6QIDAQAB ; t= y : s :yy:x;",
             "s=*:email;; h= sha1:sha 256:other;; n=ignore these notes "
         );
-        let result = extract_public_key(record);
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap().key_type(), "rsa");
+        let public_key = extract_public_key(record)?;
+        assert_eq!(public_key.key_type(), "rsa");
+
+        Ok(())
     }
 
     #[test]
