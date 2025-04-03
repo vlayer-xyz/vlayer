@@ -6306,6 +6306,8 @@ dependencies = [
 name = "generate_fixtures"
 version = "0.1.0"
 dependencies = [
+ "bincode",
+ "hex",
  "reqwest 0.12.12",
  "serde",
  "serde_json",
@@ -6314,6 +6316,7 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.19",
+ "web_proof",
  "web_prover",
 ]
 

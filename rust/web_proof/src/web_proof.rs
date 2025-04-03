@@ -15,15 +15,15 @@ use crate::{request_transcript::RequestTranscript, response_transcript::Response
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
     #[serde(rename = "presentationJson")]
-    pub(crate) presentation_json: PresentationJSON,
+    pub presentation_json: PresentationJSON,
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct PresentationJSON {
-    pub(crate) version: String,
-    pub(crate) data: String,
-    pub(crate) meta: PresentationJsonMeta,
+    pub version: String,
+    pub data: String,
+    pub meta: PresentationJsonMeta,
 }
 
 impl WebProof {
@@ -108,10 +108,10 @@ mod tests {
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+    use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
     const WEB_PROOF_BAD_SIGNATURE: &str =
-        include_str!(".././testdata/bad_web_proof_signature.json");
+        include_str!(".././testdata/0.1.0-alpha.8/web_proof_bad_signature.json");
 
     #[test]
     fn serialize_deserialize_web_proof() {
@@ -129,7 +129,7 @@ mod tests {
 
         assert!(matches!(
             invalid_proof.verify(),
-            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: secp256k1 signature verification failed"
+            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature"
         ));
     }
 
@@ -146,7 +146,7 @@ mod tests {
     fn success_get_server_name() {
         let proof = load_web_proof_fixture();
         let (_, _, server_name, _) = proof.verify().unwrap();
-        assert_eq!(server_name.as_str(), "api.x.com");
+        assert_eq!(server_name.as_str(), "lotr-api.online");
     }
 
     #[test]
@@ -161,8 +161,7 @@ mod tests {
 
     #[test]
     fn deserialize_presentation() {
-        let web_proof = read_fixture("./testdata/web_proof.json");
-        let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
+        let web_proof: WebProof = load_web_proof_fixture();
 
         let presentation: Presentation = Presentation::try_from(web_proof).unwrap();
         assert_eq!(presentation.verifying_key().alg, KeyAlgId::K256);

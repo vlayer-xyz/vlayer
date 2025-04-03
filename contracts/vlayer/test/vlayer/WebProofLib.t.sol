@@ -45,7 +45,8 @@ contract WebProverTest is VTest {
 
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
-        try wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json") returns (Web memory) {
+        try wrapper.verify(webProof, "https://lotr-bad-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken")
+        returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(

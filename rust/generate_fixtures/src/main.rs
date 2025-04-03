@@ -2,11 +2,12 @@ use std::{collections::HashMap, path::Path};
 
 use serde::Deserialize;
 use serde_json::{json, Value};
-use tlsn_core::transcript::Transcript;
+use tlsn_core::{presentation::Presentation, transcript::Transcript};
 use tokio::fs::{create_dir_all, write};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
 use utils::range::RangeSet;
+use web_proof::web_proof::{PresentationJSON, WebProof};
 use web_prover::{
     generate_web_proof, generate_web_proof_with_redaction, NotaryConfig, RedactionConfig,
     TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,
@@ -75,7 +76,7 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
     .await?;
 
     write_to_file(
-        &format!("../../examples/simple-web-proof/vlayer/{TLSN_VERSION}/web_proof.json"),
+        &format!("../../examples/simple-web-proof/testdata/{TLSN_VERSION}/web_proof.json"),
         &web_proof,
     )
     .await?;
@@ -87,6 +88,20 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
         &presentation_json_with_corrupted_data,
     )
     .await?;
+
+    write_to_file(
+        &format!("../web_proof/testdata/{TLSN_VERSION}/web_proof_identity_name_changed.json"),
+        &modify(&web_proof, |value| value["identity"]["name"] = "example.com".into()),
+    )
+    .await
+    .unwrap();
+
+    write_to_file(
+        &format!("../web_proof/testdata/{TLSN_VERSION}/web_proof_bad_signature.json"),
+        &modify(&web_proof, |value| value["attestation"]["signature"]["data"] = json!([])),
+    )
+    .await
+    .unwrap();
 
     Ok(())
 }
@@ -120,7 +135,7 @@ async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::err
 
     write_to_file(
         &format!(
-            "../../examples/simple-web-proof/vlayer/{TLSN_VERSION}/web_proof_invalid_signature.json"
+            "../../examples/simple-web-proof/testdata/{TLSN_VERSION}/web_proof_invalid_notary_pub_key.json"
         ),
         &web_proof,
     )
@@ -242,6 +257,35 @@ fn corrupt_data(presentation: &str) -> Result<String, Box<dyn std::error::Error>
     presentation_json["presentationJson"]["data"] = json!(modified_data);
 
     Ok(serde_json::to_string_pretty(&presentation_json)?)
+}
+
+fn modify<Modifier>(web_proof: &str, modifier: Modifier) -> String
+where
+    Modifier: Fn(&mut Value),
+{
+    let web_proof: WebProof = serde_json::from_str(web_proof).unwrap();
+    let res: Presentation =
+        bincode::deserialize(&hex::decode(web_proof.presentation_json.data).unwrap()).unwrap();
+
+    let presentation_json = serde_json::to_string(&res).unwrap();
+
+    let mut presentation_json: Value = serde_json::from_str(&presentation_json).unwrap();
+
+    modifier(&mut presentation_json);
+
+    let presentation_json: Presentation =
+        serde_json::from_str(&serde_json::to_string(&presentation_json).unwrap()).unwrap();
+
+    let data = hex::encode(bincode::serialize(&presentation_json).unwrap());
+
+    let modified_web_proof = WebProof {
+        presentation_json: PresentationJSON {
+            data,
+            ..web_proof.presentation_json
+        },
+    };
+
+    serde_json::to_string_pretty(&modified_web_proof).unwrap()
 }
 
 async fn write_to_file(path: &str, content: &str) -> Result<(), Box<dyn std::error::Error>> {
