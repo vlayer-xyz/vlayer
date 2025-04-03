@@ -1,5 +1,5 @@
 use std::{
-    fs, io,
+    fs,
     os::unix::fs as unix_fs,
     path::{Path, PathBuf},
     process::Command,
