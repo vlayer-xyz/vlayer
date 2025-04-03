@@ -4,11 +4,12 @@ use std::{
 };
 
 use colored::Colorize;
+use thiserror::Error;
 
 use super::logger::UpdateLogger;
 use crate::{cli_wrappers::vlayer, utils::path::find_file_up_tree};
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
     #[error("Failed to create vlayer docker image replacement regex: {0}")]
     Regex(#[from] regex::Error),

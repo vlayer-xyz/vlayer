@@ -2,6 +2,7 @@ use std::path::Path;
 
 use colored::Colorize;
 use derive_new::new;
+use thiserror::Error;
 
 use super::base;
 
@@ -42,7 +43,7 @@ impl PackageManager {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
     Cli(#[from] base::Error),

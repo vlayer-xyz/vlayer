@@ -2,11 +2,12 @@ use std::process::ExitStatus;
 
 use derive_more::derive::{Deref, From};
 use derive_new::new;
+use thiserror::Error;
 
 #[derive(From, Deref, new)]
 struct Output(std::process::Output);
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
     #[error("Failed to spawn command: {0}")]
     Spawn(#[from] std::io::Error),

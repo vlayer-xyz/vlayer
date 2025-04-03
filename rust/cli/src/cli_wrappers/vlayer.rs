@@ -1,6 +1,8 @@
+use thiserror::Error;
+
 use super::base;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
     #[error(transparent)]
     Cli(#[from] base::Error),

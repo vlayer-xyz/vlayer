@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use soldeer_core::errors::SoldeerError;
+use thiserror::Error;
 
 #[cfg(feature = "jwt")]
 use crate::commands::jwt::Error as JwtError;
@@ -12,7 +13,7 @@ use crate::{
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
     #[error("Command execution failed: {0}")]
     CommandExecution(#[from] std::io::Error),
