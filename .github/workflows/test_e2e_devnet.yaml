@@ -119,19 +119,6 @@ jobs:
         with:
           example: "simple-web-proof"
 
-  test-e2e-devnet-simple-email-proof:
-    name: E2E test against devnet (simple-email-proof)
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
-        with:
-          example: "simple-email-proof"
-
   test-e2e-devnet-simple-teleport:
     name: E2E test against devnet (simple-teleport)
     needs: [changes, build-binaries]

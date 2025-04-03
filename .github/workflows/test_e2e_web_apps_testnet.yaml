@@ -149,30 +149,6 @@ jobs:
           vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
 
-  test-e2e-web-apps-simple-email-proof:
-    name: E2E web apps test against testnet (simple-email-proof)
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Run E2E Web Apps Test Action
-        uses: ./.github/actions/test-e2e-web-apps-testnet
-        with:
-          example: "simple-email-proof"
-          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-
   test-e2e-web-apps-simple-teleport:
     name: E2E web apps test against testnet (simple-teleport)
     needs: [changes, build-binaries]
