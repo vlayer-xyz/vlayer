@@ -26,3 +26,5 @@ Learn in-depth how:
  * [Global Variables](./advanced/prover-global-variables.md) are set.
  * [Tests](/advanced/tests.html) are run.
  * [Devnet and Testnet](/advanced/dev-and-production.md)
+ * [JSON Web Tokens](/advanced/jwt.html) used for authentication across vlayer network
+   can be generated and validated.
