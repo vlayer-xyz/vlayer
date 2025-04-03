@@ -315,7 +315,7 @@ mod test {
 
         #[test]
         fn accepts_valid_simple_headers() {
-            let raw_headers = concat!("From: test@example.com\r\n", "Subject: Hello");
+            let raw_headers = concat!("From: test@example.com\r\n", "Subject: Hello\r\n");
             assert!(verify(raw_headers).is_ok());
         }
 
@@ -324,7 +324,7 @@ mod test {
             let raw_headers = concat!(
                 "Subject: This is a long subject\r\n",
                 " continuing here\r\n",
-                "From: test@example.com",
+                "From: test@example.com\r\n",
             );
             assert!(verify(raw_headers).is_ok());
         }
