@@ -1,0 +1,44 @@
+{
+  "name": "kraken-web-proof",
+  "type": "module",
+  "scripts": {
+    "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
+    "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
+    "lint:solidity": "solhint '../src/**/*.sol' --max-warnings 0 && forge fmt ../src --check",
+    "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
+    "prove:dev": "VLAYER_ENV=dev bun run prove.ts"
+  },
+  "dependencies": {
+    "@types/node": "^22.5.4",
+    "@vlayer/sdk": "workspace:*",
+    "chalk": "^5.3.0",
+    "debug": "^4.3.7",
+    "dotenv": "^16.4.5",
+    "dotenv-flow": "^4.1.0",
+    "viem": "^2.22.10"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@types/bun": "^1.1.6",
+    "@types/debug": "^4.1.12",
+    "@types/dotenv-flow": "^3.3.3",
+    "@types/eslint__js": "^8.42.3",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.2.0",
+    "solhint": "^5.0.5"
+  }
+}
+
