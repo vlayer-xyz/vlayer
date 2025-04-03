@@ -7,9 +7,10 @@ mod from_header;
 #[cfg(test)]
 mod test_utils;
 
+use cfdkim::DKIMError;
 use dkim::{
     verify_dkim_body_length_tag, verify_dns_consistency, verify_email_contains_dkim_headers,
-    verify_signature::verify_signature,
+    verify_required_headers_signed, verify_signature::verify_signature,
 };
 use dns::extract_public_key;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
@@ -37,9 +38,10 @@ fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Er
     let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
     let raw_headers = parse_headers_bytes(email.raw_bytes)?;
 
+    verify_no_fake_separator(raw_headers)?;
     verify_email_contains_dkim_headers(&dkim_headers)?;
     verify_dns_consistency(&dkim_headers, dns_record)?;
-    verify_no_fake_separator(raw_headers)?;
+    verify_required_headers_signed(&dkim_headers, &["from", "to", "subject"])?;
     verify_dkim_body_length_tag(&dkim_headers)?;
 
     Ok(())

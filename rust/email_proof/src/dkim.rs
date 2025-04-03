@@ -6,16 +6,18 @@ pub use crate::errors::Error;
 
 pub(crate) mod verify_signature;
 
-pub fn verify_email_contains_dkim_headers(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
-    if headers.is_empty() {
+pub fn verify_email_contains_dkim_headers(
+    dkim_headers: &[&MailHeader<'_>],
+) -> Result<(), DKIMError> {
+    if dkim_headers.is_empty() {
         return Err(DKIMError::SignatureSyntaxError("No DKIM-Signature header".into()));
     }
     Ok(())
 }
 
-pub fn verify_dkim_body_length_tag(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
-    for h in headers {
-        let value = String::from_utf8_lossy(h.get_value_raw());
+pub fn verify_dkim_body_length_tag(dkim_headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
+    for header in dkim_headers {
+        let value = String::from_utf8_lossy(header.get_value_raw());
         let dkim_header = validate_header(&value)?;
 
         if dkim_header.get_tag("l").is_some() {
@@ -29,10 +31,10 @@ pub fn verify_dkim_body_length_tag(headers: &[&MailHeader<'_>]) -> Result<(), DK
 }
 
 pub fn verify_dns_consistency(
-    headers: &[&MailHeader<'_>],
+    dkim_headers: &[&MailHeader],
     record: &DNSRecord,
 ) -> Result<(), Error> {
-    for header in headers {
+    for header in dkim_headers {
         let dkim_header = validate_header(&String::from_utf8_lossy(header.get_value_raw()))?;
 
         let selector = dkim_header.get_tag("s").ok_or_else(|| {
@@ -55,6 +57,28 @@ pub fn verify_dns_consistency(
 
 fn normalize_dns_name(name: &str) -> String {
     name.trim().trim_end_matches('.').to_lowercase()
+}
+
+pub fn verify_required_headers_signed(
+    dkim_headers: &[&MailHeader],
+    required: &[&str],
+) -> Result<(), Error> {
+    for header in dkim_headers {
+        let value = String::from_utf8_lossy(header.get_value_raw());
+        let dkim = validate_header(&value)?;
+        let signed_headers = dkim
+            .get_required_tag("h")
+            .split(':')
+            .map(|s| s.trim().to_lowercase())
+            .collect::<Vec<_>>();
+
+        for &required_field in required {
+            if !signed_headers.contains(&required_field.to_lowercase()) {
+                return Err(Error::MissingRequiredDkimHeader(required_field.to_string()));
+            }
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -169,6 +193,34 @@ mod tests {
             let name = "Example.com. ";
             let normalized = normalize_dns_name(name);
             assert_eq!(normalized, "example.com");
+        }
+    }
+
+    mod verify_required_headers_signed {
+        use super::*;
+
+        #[test]
+        fn passes_when_required_headers_are_signed() {
+            let header = b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From:To:Subject; bh=; b=";
+            let headers = [&parse_header(header).unwrap().0];
+            let required = ["From", "To", "Subject"];
+
+            let result = verify_required_headers_signed(&headers, &required);
+            assert!(result.is_ok());
+        }
+
+        #[test]
+        fn fails_when_required_header_is_missing() {
+            let header = b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From:Subject; bh=; b=";
+            let headers = [&parse_header(header).unwrap().0];
+            let required = ["From", "To", "Subject"];
+
+            let err = verify_required_headers_signed(&headers, &required).unwrap_err();
+
+            assert_eq!(
+                err.to_string(),
+                "Error verifying DKIM: signature syntax error: Missing required header `To` in DKIM h= tag"
+            );
         }
     }
 }

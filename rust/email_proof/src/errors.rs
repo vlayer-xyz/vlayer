@@ -24,6 +24,8 @@ pub enum Error {
     LoneNewLine(u8),
     #[error("Missing CRLF-CRLF separator between email headers and body")]
     MissingBodySeparator,
+    #[error("Missing required header `{0}` in DKIM h= tag")]
+    MissingRequiredDkimHeader(String),
     #[error("VDNS signature verification failed: {0}")]
     VdnsSignatureVerification(
         #[from]
