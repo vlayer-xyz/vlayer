@@ -83,7 +83,8 @@ runs:
         GAS_METER_API_KEY: ${{ inputs.gas_meter_api_key }}
         VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
         VLAYER_TMP_DIR: ./artifacts
-        BUILD_BINARIES: 0
+        BUILD_SERVICES: 0
+        BUILD_CLI: 0
         CONFIRMATIONS: 2
         EXAMPLE: ${{ inputs.example }}
       run: bash/e2e-test.sh

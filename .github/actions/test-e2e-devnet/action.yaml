@@ -43,7 +43,8 @@ runs:
     - name: Run e2e test for ${{ inputs.example }}
       env:
         VLAYER_TMP_DIR: ./artifacts
-        BUILD_BINARIES: 0
+        BUILD_SERVICES: 0
+        BUILD_CLI: 0
         EXAMPLE: ${{ inputs.example }}
       run: bash/e2e-test.sh
       shell: bash
