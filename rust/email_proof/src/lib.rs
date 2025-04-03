@@ -13,7 +13,8 @@ use dkim::{
 };
 use dns::parse_dns_record;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
-use mailparse::{parse_mail, MailHeaderMap};
+use mailparse::{parse_mail, MailHeaderMap, ParsedMail};
+use verifiable_dns::DNSRecord;
 
 pub use crate::{email::Email, errors::Error};
 
@@ -21,19 +22,27 @@ const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_record, verification_data) = UnverifiedEmail::parse_calldata(calldata)?;
+
     let email = parse_mail(&raw_email)?;
     let dkim_public_key = parse_dns_record(&dns_record.data)?;
-    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
-    let raw_headers = parse_headers_bytes(email.raw_bytes)?;
 
-    verify_no_fake_separator(raw_headers)?;
+    validate_headers(&email, &dns_record)?;
     dns_record.verify(&verification_data)?;
-    verify_dkim_header_dns_consistency(&dkim_headers, &dns_record)?;
-    verify_email_contains_dkim_headers(&dkim_headers)?;
-    verify_dkim_body_length_tag(&dkim_headers)?;
     verify_signature(&email, dkim_public_key)?;
 
     Ok(email.try_into()?)
+}
+
+fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Error> {
+    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
+    let raw_headers = parse_headers_bytes(email.raw_bytes)?;
+
+    verify_email_contains_dkim_headers(&dkim_headers)?;
+    verify_dkim_header_dns_consistency(&dkim_headers, dns_record)?;
+    verify_no_fake_separator(raw_headers)?;
+    verify_dkim_body_length_tag(&dkim_headers)?;
+
+    Ok(())
 }
 
 fn parse_headers_bytes(raw_email: &[u8]) -> Result<&[u8], Error> {
