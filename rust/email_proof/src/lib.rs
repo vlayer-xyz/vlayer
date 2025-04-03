@@ -7,7 +7,6 @@ mod from_header;
 #[cfg(test)]
 mod test_utils;
 
-use cfdkim::DKIMError;
 use dkim::{
     verify_dkim_body_length_tag, verify_dns_consistency, verify_email_contains_dkim_headers,
     verify_required_headers_signed, verify_signature::verify_signature,
@@ -20,6 +19,7 @@ use verifiable_dns::DNSRecord;
 pub use crate::{email::Email, errors::Error};
 
 const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
+const REQUIRED_SIGNED_HEADERS: [&str; 3] = ["from", "to", "subject"];
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_record, verification_data) = UnverifiedEmail::parse_calldata(calldata)?;
@@ -41,7 +41,7 @@ fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Er
     verify_no_fake_separator(raw_headers)?;
     verify_email_contains_dkim_headers(&dkim_headers)?;
     verify_dns_consistency(&dkim_headers, dns_record)?;
-    verify_required_headers_signed(&dkim_headers, &["from", "to", "subject"])?;
+    verify_required_headers_signed(&dkim_headers, &REQUIRED_SIGNED_HEADERS)?;
     verify_dkim_body_length_tag(&dkim_headers)?;
 
     Ok(())
