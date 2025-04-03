@@ -5,16 +5,18 @@ use http_body_util::Empty;
 use hyper::{body::Bytes, Request, StatusCode};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
-use spansy::Spanned;
 use tlsn_common::config::ProtocolConfig;
 use tlsn_core::{
-    attestation::Attestation, request::RequestConfig, transcript::TranscriptCommitConfig,
+    attestation::Attestation,
+    request::RequestConfig,
+    transcript::{Transcript, TranscriptCommitConfig},
     CryptoProvider, Secrets,
 };
-use tlsn_formats::http::{DefaultHttpCommitter, HttpCommit, HttpTranscript};
 use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 use tracing::debug;
+
+use crate::RedactionConfig;
 
 const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 const MAX_SENT_DATA: usize = 1 << 12;
@@ -32,14 +34,18 @@ pub struct NotaryConfig {
     pub enable_tls: bool,
 }
 
-pub async fn notarize(
+pub async fn notarize<RedactionConfigFn>(
     notary_config: NotaryConfig,
     server_domain: &str,
     server_host: &str,
     server_port: u16,
     uri: &str,
     headers: HashMap<String, String>,
-) -> Result<(Attestation, Secrets), Box<dyn std::error::Error>> {
+    redaction_config_fn: RedactionConfigFn,
+) -> Result<(Attestation, Secrets, RedactionConfig), Box<dyn std::error::Error>>
+where
+    RedactionConfigFn: Fn(&Transcript) -> RedactionConfig,
+{
     let notary_client = NotaryClient::builder()
         .host(notary_config.host)
         .port(notary_config.port)
@@ -115,30 +121,20 @@ pub async fn notarize(
 
     let mut prover = prover.start_notarize();
 
-    let transcript = HttpTranscript::parse(prover.transcript())?;
+    let transcript = prover.transcript();
 
-    let body_content = &transcript.responses[0].body.as_ref().unwrap().content;
-    let body = String::from_utf8_lossy(body_content.span().as_bytes());
+    let mut builder = TranscriptCommitConfig::builder(transcript);
 
-    match body_content {
-        tlsn_formats::http::BodyContent::Json(_json) => {
-            let parsed = serde_json::from_str::<serde_json::Value>(&body)?;
-            debug!("{}", serde_json::to_string_pretty(&parsed)?);
-        }
-        tlsn_formats::http::BodyContent::Unknown(_span) => {
-            debug!("{}", &body);
-        }
-        _ => {}
-    }
+    let redaction_config = redaction_config_fn(transcript);
 
-    let mut builder = TranscriptCommitConfig::builder(prover.transcript());
-
-    DefaultHttpCommitter::default().commit_transcript(&mut builder, &transcript)?;
+    builder.commit_sent(&redaction_config.sent)?;
+    builder.commit_recv(&redaction_config.recv)?;
 
     prover.transcript_commit(builder.build()?);
 
     let request_config = RequestConfig::default();
 
     let (attestation, secrets) = Box::pin(prover.finalize(&request_config)).await?;
-    Ok((attestation, secrets))
+    debug!("Finished notarizing");
+    Ok((attestation, secrets, redaction_config))
 }

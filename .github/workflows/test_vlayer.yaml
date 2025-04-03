@@ -59,14 +59,28 @@ jobs:
         run: |
           forge soldeer install
 
+      - name: Create reusable Cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: test-vlayer
+      - name: Build CLI
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          cargo build --package cli
+
       - name: Run vlayer tests for contracts
         working-directory: ./contracts/vlayer
         env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           FOUNDRY_PROFILE: vlayer
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
-          # vlayer test
-          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+          ${CARGO_TARGET_DIR}/debug/vlayer test -vvv
 
       - name: Run vlayer tests for examples
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
         run: bash/vlayer-test-examples.sh

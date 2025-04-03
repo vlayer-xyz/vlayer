@@ -29,5 +29,5 @@ writeEnvVariables(".env", {
   VITE_PROVER_URL: config.proverUrl,
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
-  VITE_USE_WINDOW_ETHEREUM_TRANSPORT: env.USE_WINDOW_ETHEREUM_TRANSPORT || "",
+  VITE_PROVER_ERC20_HOLDER_ADDR: process.env.PROVER_ERC20_HOLDER_ADDR,
 });
