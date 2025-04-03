@@ -130,20 +130,23 @@ mod test {
     mod parse_record_type {
         use super::*;
 
+        const TXT_RECORD_TYPE: u8 = 16;
+        const UNSUPPORTED_RECORD_TYPE: u8 = 1;
+
         #[test]
         fn test_parse_record_type() {
-            let record_type = 16;
-            let result = parse_record_type(record_type);
+            let result = parse_record_type(TXT_RECORD_TYPE);
             assert_eq!(result, Ok(RecordType::TXT));
         }
 
         #[test]
         fn test_parse_record_type_invalid() {
-            let record_type = 5;
-            let result = parse_record_type(record_type);
+            let result = parse_record_type(UNSUPPORTED_RECORD_TYPE);
             assert_eq!(
                 result,
-                Err(Error::custom("Unexpected DNS record type: 5. Supported types: TXT(16)"))
+                Err(Error::custom(format!(
+                    "Unexpected DNS record type: {UNSUPPORTED_RECORD_TYPE}. Supported types: TXT(16)"
+                )))
             );
         }
     }
