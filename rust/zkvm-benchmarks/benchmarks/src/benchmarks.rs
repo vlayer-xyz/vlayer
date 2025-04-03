@@ -29,8 +29,8 @@ pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
 pub fn benchmarks() -> Vec<Benchmark> {
     merge([
         ("accelerators", accelerators::benchmarks()),
-        //("mpt", mpt::benchmarks()),
-        //("block_trie", block_trie::benchmarks()),
-        //("precompiles", precompiles::benchmarks()),
+        ("mpt", mpt::benchmarks()),
+        ("block_trie", block_trie::benchmarks()),
+        ("precompiles", precompiles::benchmarks()),
     ])
 }

@@ -821,9 +821,11 @@ dependencies = [
  "alloy-primitives",
  "anyhow",
  "auto_impl",
+ "bytemuck",
  "bytes",
  "clap",
  "derive_more",
+ "hex",
  "serde",
  "serde_json",
  "tracing-subscriber",
@@ -1287,6 +1289,7 @@ dependencies = [
  "alloy-sol-types",
  "base64 0.21.7",
  "cfdkim",
+ "derivative",
  "mailparse",
  "rsa",
  "slog",
@@ -2913,7 +2916,6 @@ dependencies = [
 [[package]]
 name = "rsa"
 version = "0.9.6"
-source = "git+https://github.com/sp1-patches/RustCrypto-RSA/?tag=patch-0.9.6-sp1-4.0.0#27cc8e7b1dfb43a2bc7ecc3726c13f049a4ec096"
 dependencies = [
  "bytemuck",
  "cfg-if",

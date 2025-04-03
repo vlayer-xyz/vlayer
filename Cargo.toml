@@ -289,7 +289,3 @@ similar = { opt-level = 3 }
 
 [workspace.metadata.scripts]
 lint = "bash/lint/rust.sh"
-
-[patch.crates-io]
-sp1-build = { path = "../sp1/crates/build" }
-sp1-sdk = { path = "../sp1/crates/sdk" }
