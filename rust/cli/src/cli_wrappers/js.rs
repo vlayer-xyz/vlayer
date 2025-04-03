@@ -15,7 +15,7 @@ pub enum PackageManager {
 
 impl PackageManager {
     pub fn guess(package_path: &Path) -> Self {
-        if package_path.join("bun.lockb").exists() {
+        if package_path.join("bun.lockb").exists() || package_path.join("bun.lock").exists() {
             PackageManager::Bun
         } else if package_path.join("pnpm-lock.yaml").exists() {
             PackageManager::Pnpm
