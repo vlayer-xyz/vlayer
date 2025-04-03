@@ -5,7 +5,7 @@ use cfdkim::DkimPublicKey;
 
 use crate::Error;
 
-pub fn parse_dns_record(record: &str) -> Result<DkimPublicKey, Error> {
+pub fn extract_public_key(record: &str) -> Result<DkimPublicKey, Error> {
     let tags: HashMap<&str, &str> = record
         .split(';')
         .map(str::trim)
@@ -50,7 +50,7 @@ mod test {
             "p5wMedWasaPS74TZ1b7tI39ncp6QIDAQAB ; t= y : s :yy:x;",
             "s=*:email;; h= sha1:sha 256:other;; n=ignore these notes "
         );
-        let result = parse_dns_record(record);
+        let result = extract_public_key(record);
         assert!(result.is_ok());
         assert_eq!(result.unwrap().key_type(), "rsa");
     }
@@ -69,7 +69,7 @@ mod test {
             "p5wMedWasaPS74TZ1b7tI39ncp6QIDAQAB ; t= y : s :yy:x;",
             "s=*:email;; h= sha1:sha 256:other;; n=ignore these notes "
         );
-        let result = parse_dns_record(record);
+        let result = extract_public_key(record);
         assert!(result.is_ok());
         assert_eq!(result.unwrap().key_type(), "rsa");
     }
@@ -88,7 +88,7 @@ mod test {
             "p5wMedWasaPS74TZ1b7tI39ncp6QIDAQAB ; t= y : s :yy:x;",
             "s=*:email;; h= sha1:sha 256:other;; n=ignore these notes "
         );
-        let result = parse_dns_record(record);
+        let result = extract_public_key(record);
         assert_eq!(
             result.err().unwrap().to_string(),
             "Invalid DKIM public key record: Invalid k tag value: ecdsa".to_string()

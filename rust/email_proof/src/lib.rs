@@ -11,7 +11,7 @@ use dkim::{
     verify_dkim_body_length_tag, verify_dkim_header_dns_consistency,
     verify_email_contains_dkim_headers, verify_signature::verify_signature,
 };
-use dns::parse_dns_record;
+use dns::extract_public_key;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
 use mailparse::{parse_mail, MailHeaderMap, ParsedMail};
 use verifiable_dns::DNSRecord;
@@ -24,7 +24,7 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_record, verification_data) = UnverifiedEmail::parse_calldata(calldata)?;
 
     let email = parse_mail(&raw_email)?;
-    let dkim_public_key = parse_dns_record(&dns_record.data)?;
+    let dkim_public_key = extract_public_key(&dns_record.data)?;
 
     validate_headers(&email, &dns_record)?;
     dns_record.verify(&verification_data)?;

@@ -73,12 +73,12 @@ mod tests {
         use mailparse::parse_mail;
 
         use super::*;
-        use crate::{dns::parse_dns_record, test_utils::read_email_from_file};
+        use crate::{dns::extract_public_key, test_utils::read_email_from_file};
 
         lazy_static! {
             static ref DNS_RECORD_DATA: String = "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".to_string();
             static ref PUBLIC_KEY: DkimPublicKey = {
-                parse_dns_record(&DNS_RECORD_DATA).unwrap()
+                extract_public_key(&DNS_RECORD_DATA).unwrap()
             };
         }
 
@@ -86,7 +86,7 @@ mod tests {
             let email = read_email_from_file(file_path);
             let parsed_email = parse_mail(email.as_bytes()).unwrap();
             let result =
-                verify_signature(&parsed_email, parse_dns_record(&DNS_RECORD_DATA).unwrap());
+                verify_signature(&parsed_email, extract_public_key(&DNS_RECORD_DATA).unwrap());
 
             assert_eq!(
                 result.unwrap_err().to_string(),
@@ -114,7 +114,7 @@ mod tests {
             let email = read_email_from_file("./testdata/signed_email_modified_body.txt");
             let parsed_email = parse_mail(email.as_bytes()).unwrap();
             let result =
-                verify_signature(&parsed_email, parse_dns_record(&DNS_RECORD_DATA).unwrap());
+                verify_signature(&parsed_email, extract_public_key(&DNS_RECORD_DATA).unwrap());
 
             assert_eq!(
                 result.unwrap_err().to_string(),
