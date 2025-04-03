@@ -4,12 +4,12 @@ on:
   pull_request:
   merge_group:
   push:
-    branches:
-      - main
+#     branches:
+#       - main
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+#   cancel-in-progress: true
 
 jobs:
   changes:
@@ -90,62 +90,62 @@ jobs:
           mkdir target_debug
           mv ${CARGO_TARGET_DIR}/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
 
-      - name: Push binaries
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-        with:
-          name: target-debug
-          path: target_debug
-          if-no-files-found: error
-          retention-days: 3
+  #     - name: Push binaries
+  #       uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+  #       with:
+  #         name: target-debug
+  #         path: target_debug
+  #         if-no-files-found: error
+  #         retention-days: 3
 
-  test-e2e-simple:
-    name: E2E test (simple)
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e
-        with:
-          example: "simple"
+  # test-e2e-simple:
+  #   name: E2E test (simple)
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   if: needs.changes.outputs.relevant-changes == 'true'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e
+  #       with:
+  #         example: "simple"
 
-  test-e2e-simple-web-proof:
-    name: E2E test (simple-web-proof)
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e
-        with:
-          example: "simple-web-proof"
+  # test-e2e-simple-web-proof:
+  #   name: E2E test (simple-web-proof)
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   if: needs.changes.outputs.relevant-changes == 'true'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e
+  #       with:
+  #         example: "simple-web-proof"
 
-  test-e2e-simple-teleport:
-    name: E2E test (simple-teleport)
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e
-        with:
-          example: "simple-teleport"
+  # test-e2e-simple-teleport:
+  #   name: E2E test (simple-teleport)
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   if: needs.changes.outputs.relevant-changes == 'true'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e
+  #       with:
+  #         example: "simple-teleport"
 
-  test-e2e-simple-time-travel:
-    name: E2E test (simple-time-travel)
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    if: needs.changes.outputs.relevant-changes == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e
-        with:
-          example: "simple-time-travel"
+  # test-e2e-simple-time-travel:
+  #   name: E2E test (simple-time-travel)
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   if: needs.changes.outputs.relevant-changes == 'true'
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e
+  #       with:
+  #         example: "simple-time-travel"

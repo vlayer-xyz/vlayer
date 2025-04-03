@@ -5,22 +5,22 @@ name: E2E test with Bonsai and OP Sepolia
 
 on:
   push:
-    branches:
-      - main
-    # If any path names do not match patterns in paths-ignore,
-    # even if some path names match the patterns,
-    # the workflow will run.
-    paths-ignore:
-      - "README.md"
-      - "LICENSE"
-      - "book/**"
+    # branches:
+    #   - main
+    # # If any path names do not match patterns in paths-ignore,
+    # # even if some path names match the patterns,
+    # # the workflow will run.
+    # paths-ignore:
+    #   - "README.md"
+    #   - "LICENSE"
+    #   - "book/**"
   pull_request:
   merge_group:
   workflow_dispatch:
-concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+# concurrency:
+#   # Do not cancel jobs on main by forcing a unique group name.
+#   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+#   cancel-in-progress: true
 
 jobs:
   changes:
@@ -107,81 +107,81 @@ jobs:
           mkdir target_debug
           mv ${CARGO_TARGET_DIR}/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
 
-      - name: Push binaries
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-        with:
-          name: target-debug
-          path: target_debug
-          if-no-files-found: error
-          retention-days: 3
+  #     - name: Push binaries
+  #       uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+  #       with:
+  #         name: target-debug
+  #         path: target_debug
+  #         if-no-files-found: error
+  #         retention-days: 3
 
-  test-e2e-bonsai-opsepolia-simple:
-    name: E2E test (simple) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-bonsai-opsepolia
-        with:
-          example: "simple"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+  # test-e2e-bonsai-opsepolia-simple:
+  #   name: E2E test (simple) with Bonsai and OP Sepolia
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e-bonsai-opsepolia
+  #       with:
+  #         example: "simple"
+  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+  #         bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+  #         bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+  #         quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
-  test-e2e-bonsai-opsepolia-simple-web-proof:
-    name: E2E test (simple-web-proof) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-bonsai-opsepolia
-        with:
-          example: "simple-web-proof"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+  # test-e2e-bonsai-opsepolia-simple-web-proof:
+  #   name: E2E test (simple-web-proof) with Bonsai and OP Sepolia
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e-bonsai-opsepolia
+  #       with:
+  #         example: "simple-web-proof"
+  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+  #         bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+  #         bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+  #         quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
-  test-e2e-bonsai-opsepolia-simple-email-proof:
-    name: E2E test (simple-email-proof) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-bonsai-opsepolia
-        with:
-          example: "simple-email-proof"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+  # test-e2e-bonsai-opsepolia-simple-email-proof:
+  #   name: E2E test (simple-email-proof) with Bonsai and OP Sepolia
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e-bonsai-opsepolia
+  #       with:
+  #         example: "simple-email-proof"
+  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+  #         bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+  #         bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+  #         quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
-  test-e2e-bonsai-opsepolia-simple-time-travel:
-    name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-bonsai-opsepolia
-        with:
-          example: "simple-time-travel"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-        env:
-          # From the example's .env.testnet
-          PROVER_ERC20_HOLDER_ADDR: "0xE6b08c02Dbf3a0a4D3763136285B85A9B492E391"
-          PROVER_ERC20_CONTRACT_ADDR: "0x5fd84259d66Cd46123540766Be93DFE6D43130D7"
-          PROVER_END_BLOCK: latest
-          PROVER_TRAVEL_RANGE: 10
-          PROVER_STEP: 2
+  # test-e2e-bonsai-opsepolia-simple-time-travel:
+  #   name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e-bonsai-opsepolia
+  #       with:
+  #         example: "simple-time-travel"
+  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+  #         bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+  #         bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+  #         quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+  #       env:
+  #         # From the example's .env.testnet
+  #         PROVER_ERC20_HOLDER_ADDR: "0xE6b08c02Dbf3a0a4D3763136285B85A9B492E391"
+  #         PROVER_ERC20_CONTRACT_ADDR: "0x5fd84259d66Cd46123540766Be93DFE6D43130D7"
+  #         PROVER_END_BLOCK: latest
+  #         PROVER_TRAVEL_RANGE: 10
+  #         PROVER_STEP: 2

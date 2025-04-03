@@ -8,15 +8,15 @@ on:
       - ".github/workflows/performance_rust_compilation.yaml"
   merge_group:
   push:
-    branches:
-      - main
-concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
-permissions:
-  contents: read
-  pull-requests: write
+#     branches:
+#       - main
+# concurrency:
+#   # Do not cancel jobs on main by forcing a unique group name.
+#   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+#   cancel-in-progress: true
+# permissions:
+#   contents: read
+#   pull-requests: write
 
 jobs:
   performance-rust-compilation:
