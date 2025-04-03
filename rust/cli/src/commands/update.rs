@@ -58,7 +58,9 @@ fn update_sdk() -> Result<()> {
         return Ok(());
     }
 
-    let js_pm = js::PackageManager::guess(&path);
+    let Some(js_pm) = js::PackageManager::guess(&path) else {
+        return Err(Error::Upgrade("Failed to guess which JS package manager is used".to_string()));
+    };
     js::Cli::new(js_pm).install("@vlayer/sdk")?;
     logger.success();
 

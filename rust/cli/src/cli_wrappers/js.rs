@@ -14,15 +14,17 @@ pub enum PackageManager {
 }
 
 impl PackageManager {
-    pub fn guess(package_path: &Path) -> Self {
+    pub fn guess(package_path: &Path) -> Option<Self> {
         if package_path.join("bun.lockb").exists() || package_path.join("bun.lock").exists() {
-            PackageManager::Bun
+            Some(PackageManager::Bun)
         } else if package_path.join("pnpm-lock.yaml").exists() {
-            PackageManager::Pnpm
+            Some(PackageManager::Pnpm)
         } else if package_path.join("yarn.lock").exists() {
-            PackageManager::Yarn
+            Some(PackageManager::Yarn)
+        } else if package_path.join("package-lock.json").exists() {
+            Some(PackageManager::Npm)
         } else {
-            PackageManager::Npm
+            None
         }
     }
 
