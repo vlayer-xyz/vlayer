@@ -66,4 +66,4 @@ jobs:
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          RUST_LOG: info,cargo::core::compiler::fingerprint=trace
+          RUST_LOG: cargo::core::compiler::fingerprint=trace
