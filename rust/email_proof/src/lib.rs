@@ -161,6 +161,23 @@ mod test {
         );
     }
 
+    #[test]
+    fn fails_for_missing_dns_record() {
+        let email = signed_email_fixture();
+        let dns_record = SolDnsRecord {
+            name: "".into(),
+            recordType: 0,
+            data: "".into(),
+            ttl: 0,
+        };
+        let calldata = calldata(&email, &dns_record, &VERIFICATION_DATA);
+
+        assert_eq!(
+            parse_and_verify(&calldata).unwrap_err().to_string(),
+            "Invalid UnverifiedEmail calldata: Unexpected DNS record type: 0. Supported types: TXT(16)".to_string()
+        );
+    }
+
     mod verifiable_dns_integration {
         use super::*;
 
