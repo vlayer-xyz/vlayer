@@ -115,7 +115,7 @@ runs:
     - name: Run E2E test
       shell: bash
       env:
-        BUILD_BINARIES: 0
+        BUILD_SERVICES: 0
         RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         VLAYER_ENV: testnet
         QUICKNODE_API_KEY: ${{ inputs.quicknode_api_key }}
