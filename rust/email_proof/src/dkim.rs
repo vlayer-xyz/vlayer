@@ -215,11 +215,9 @@ mod tests {
             let headers = [&parse_header(header).unwrap().0];
             let required = ["From", "To", "Subject"];
 
-            let err = verify_required_headers_signed(&headers, &required).unwrap_err();
-
             assert_eq!(
-                err.to_string(),
-                "Error verifying DKIM: signature syntax error: Missing required header `To` in DKIM h= tag"
+                verify_required_headers_signed(&headers, &required).unwrap_err(),
+                Error::MissingRequiredDkimHeader("To".to_string())
             );
         }
     }
