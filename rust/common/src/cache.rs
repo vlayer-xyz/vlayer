@@ -28,7 +28,7 @@ where
         F: FnOnce() -> Result<RV, E>,
         RV: Into<Arc<V>>,
     {
-        let mut cache = self.write().expect("poisoned lock");
+        let mut cache = self.write().expect("poisoned lockxx");
         let value = match cache.entry(key) {
             Entry::Occupied(value) => Ok(value.into_mut()),
             Entry::Vacant(entry) => {
@@ -67,7 +67,7 @@ mod interior_mutability_cache {
         let value = cache
             .try_get_or_insert::<_, i32, anyhow::Error>("key", || Ok::<_, anyhow::Error>(42))?;
         assert_eq!(*value, 42);
-        assert_eq!(**cache.read().expect("poisoned lock").get("key").unwrap(), 42);
+        assert_eq!(**cache.read().expect("poisoned lockx").get("key").unwrap(), 42);
         Ok(())
     }
 
