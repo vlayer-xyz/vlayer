@@ -14,6 +14,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
 # Defaults
 set_proving_mode
 VLAYER_ENV=${VLAYER_ENV:-dev}
+BUILD_CLI=${BUILD_CLI:-1}
 
 generate_ts_bindings
 build_sdk
@@ -28,6 +29,7 @@ echo "::endgroup::Running services"
 cd $(mktemp -d)
 
 generate_vlayer_init_config
+ensure_cli_built
 init_template
 
 pushd $EXAMPLE

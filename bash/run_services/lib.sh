@@ -107,8 +107,8 @@ function startup_vlayer() {
     popd
 }
 
-function ensure_binaries_built() {
-    if [[ "${BUILD_BINARIES}" == "1" ]] ; then
+function ensure_services_built() {
+    if [[ "${BUILD_SERVICES}" == "1" ]] ; then
         pushd "${VLAYER_HOME}"
         silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker --bin dns_server --features jwt
         popd

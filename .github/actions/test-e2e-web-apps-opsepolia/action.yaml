@@ -107,7 +107,8 @@ runs:
       shell: bash
       env:
         VLAYER_TMP_DIR: ./artifacts
-        BUILD_BINARIES: 0
+        BUILD_SERVICES: 0
+        BUILD_CLI: 0
         EXAMPLE: ${{ inputs.example }}
         PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
 

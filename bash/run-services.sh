@@ -15,7 +15,7 @@ trap cleanup EXIT ERR INT
 
 # Default values
 VLAYER_ENV=${VLAYER_ENV:-dev}
-BUILD_BINARIES=${BUILD_BINARIES:-1}
+BUILD_SERVICES=${BUILD_SERVICES:-1}
 set_proving_mode
 BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
@@ -47,7 +47,7 @@ echo "CHAIN_WORKER_ARGS: ${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"
 echo "EXTERNAL_RPC_URLS: ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}"
 echo
 
-ensure_binaries_built
+ensure_services_built
 
 echo "Starting services..."
 

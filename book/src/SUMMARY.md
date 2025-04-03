@@ -19,6 +19,7 @@
   - [Global variables](./advanced/prover-global-variables.md)
   - [Tests](./advanced/tests.md)
   - [Devnet & Testnet](./advanced/dev-and-production.md)
+  - [JWT](./advanced/jwt.md)
 
 - [From JavaScript]()
   - [Vanilla JS/TS](./javascript/javascript.md)
