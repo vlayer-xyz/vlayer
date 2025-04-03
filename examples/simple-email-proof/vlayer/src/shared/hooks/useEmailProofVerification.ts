@@ -10,10 +10,6 @@ import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver"
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import { AbiStateMutability, ContractFunctionArgs } from "viem";
 import { useNavigate } from "react-router";
-import {
-  useEnvPrivateKey,
-  getAccountFromPrivateKey,
-} from "../lib/clientAuthMode";
 import debug from "debug";
 
 const log = debug("vlayer:email-proof-verification");
@@ -78,14 +74,7 @@ export const useEmailProofVerification = () => {
       >,
     };
 
-    if (useEnvPrivateKey()) {
-      await writeContract({
-        ...contractArgs,
-        account: getAccountFromPrivateKey(),
-      });
-    } else {
-      await writeContract(contractArgs);
-    }
+    await writeContract(contractArgs);
   };
 
   const startProving = async (emlContent: string) => {
