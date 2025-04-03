@@ -161,35 +161,39 @@ mod test {
         );
     }
 
-    #[test]
-    fn fails_for_invalid_vdns_signature() {
-        let email = signed_email_fixture();
-        let verification_data = SolVerificationData {
-            signature: bytes!("1234"),
-            ..VERIFICATION_DATA.clone()
-        };
-        let calldata = calldata(&email, &DNS_FIXTURE, &verification_data);
+    mod verifiable_dns_integration {
+        use super::*;
 
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "VDNS signature verification failed: Signature verification error".to_string()
-        );
-    }
+        #[test]
+        fn fails_for_invalid_vdns_signature() {
+            let email = signed_email_fixture();
+            let verification_data = SolVerificationData {
+                signature: bytes!("1234"),
+                ..VERIFICATION_DATA.clone()
+            };
+            let calldata = calldata(&email, &DNS_FIXTURE, &verification_data);
 
-    #[test]
-    fn fails_for_missing_vdns_signature() {
-        let email = signed_email_fixture();
-        let verification_data = SolVerificationData {
-            signature: Default::default(),
-            pubKey: Default::default(),
-            validUntil: 0,
-        };
-        let calldata = calldata(&email, &DNS_FIXTURE, &verification_data);
+            assert_eq!(
+                parse_and_verify(&calldata).unwrap_err().to_string(),
+                "VDNS signature verification failed: Signature verification error".to_string()
+            );
+        }
 
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "VDNS signature verification failed: Public key decoding error: ASN.1 error: ASN.1 DER message is incomplete: expected 1, actual 0 at DER byte 0".to_string()
-        );
+        #[test]
+        fn fails_for_missing_vdns_signature() {
+            let email = signed_email_fixture();
+            let verification_data = SolVerificationData {
+                signature: Default::default(),
+                pubKey: Default::default(),
+                validUntil: 0,
+            };
+            let calldata = calldata(&email, &DNS_FIXTURE, &verification_data);
+
+            assert_eq!(
+                parse_and_verify(&calldata).unwrap_err().to_string(),
+                "VDNS signature verification failed: Public key decoding error: ASN.1 error: ASN.1 DER message is incomplete: expected 1, actual 0 at DER byte 0".to_string()
+            );
+        }
     }
 
     mod verify_no_lone_separator {
