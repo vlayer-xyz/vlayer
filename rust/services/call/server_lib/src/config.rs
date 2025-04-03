@@ -3,9 +3,8 @@ use std::{collections::HashMap, net::SocketAddr as RawSocketAddr};
 use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
-use common::GuestElf;
+use common::{Digest, GuestElf};
 use derive_more::From;
-use risc0_zkp::core::digest::Digest;
 use server_utils::ProofMode;
 use thiserror::Error;
 

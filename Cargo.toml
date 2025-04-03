@@ -202,7 +202,7 @@ chain_guest = { path = "rust/services/chain/guest" }
 chain_host = { path = "rust/services/chain/host" }
 chain_server = { path = "rust/services/chain/server" }
 chain_server_lib = { path = "rust/services/chain/server_lib" }
-chain_common = { path = "rust/services/chain/common" }
+chain_common = { path = "rust/services/chain/common", default-features = false}
 chain_test_utils = { path = "rust/services/chain/test_utils" }
 chain_worker = { path = "rust/services/chain/worker" }
 common = { path = "rust/common", default-features = false }
@@ -289,3 +289,7 @@ similar = { opt-level = 3 }
 
 [workspace.metadata.scripts]
 lint = "bash/lint/rust.sh"
+
+[patch.crates-io]
+sp1-build = { path = "../sp1/crates/build" }
+sp1-sdk = { path = "../sp1/crates/sdk" }

@@ -8,10 +8,9 @@ use call_engine::{
     CallAssumptions, GuestOutput, Input,
 };
 use chain_client::{CachedClient, ChainProofCache};
-use common::verifier::zk_proof;
+use common::{verifier::zk_proof, Digest};
 use env::create_envs_from_input;
 use optimism::client::factory::cached::OpOutputCache;
-use risc0_zkvm::sha::Digest;
 
 use crate::db::GuestDb;
 

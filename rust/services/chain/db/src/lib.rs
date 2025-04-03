@@ -24,11 +24,10 @@ mod proof_builder;
 mod tests;
 
 pub use chain_trie::ChainTrie;
-use common::Hashable;
+use common::{Digest, Hashable};
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
-use risc0_zkvm::sha::Digest;
 use tracing::warn;
 use u64_range::NonEmptyRange;
 

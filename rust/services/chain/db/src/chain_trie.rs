@@ -1,9 +1,8 @@
 use block_trie::BlockTrie;
 use chain_common::{verifier::IVerifier, ChainProofReceipt, ChainProofRef};
-use common::verifier::zk_proof::HostVerifier;
+use common::{verifier::zk_proof::HostVerifier, Digest};
 use derive_new::new;
 use mpt::Sha2Trie as MerkleTrie;
-use risc0_zkvm::sha::Digest;
 use u64_range::NonEmptyRange;
 
 #[derive(new)]

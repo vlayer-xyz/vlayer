@@ -1,0 +1,12 @@
+[workspace]
+
+[package]
+name = "sp1_call_guest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-sol-types = { version = "=0.8.20", default-features = false }
+call_guest = { path = "../../services/call/guest", default-features = false, features = ["sp1"] }
+sp1-zkvm = "4.1.5"
+tokio = { version = "1.41.0", features = ["rt", "macros"] }

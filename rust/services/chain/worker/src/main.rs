@@ -5,12 +5,11 @@ use chain_host::{
     set_risc0_dev_mode, AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode,
 };
 use clap::Parser;
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{init_tracing, Digest, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 use ethers::{providers::Http, types::BlockNumber as BlockTag};
 use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
 use retry::HostErrorFilter;
-use risc0_zkp::core::digest::Digest;
 use strum::{Display, EnumString};
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};

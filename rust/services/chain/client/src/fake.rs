@@ -1,9 +1,9 @@
 use alloy_primitives::ChainId;
 use async_trait::async_trait;
 use chain_common::{fake_proof_result, ChainProof, SyncStatus};
+use common::Digest;
 use derive_new::new;
 use provider::{BlockNumber, BlockingProviderExt, CachedMultiProvider};
-use risc0_zkp::core::digest::Digest;
 
 use crate::{Client, Error};
 

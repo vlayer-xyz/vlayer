@@ -3,10 +3,9 @@ use std::{net::SocketAddr, path::PathBuf};
 use chain_db::{ChainDb, Mode};
 use chain_server_lib::{serve, ServerConfig};
 use clap::Parser;
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{init_tracing, Digest, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 use guest_wrapper::CHAIN_GUEST_IDS;
-use risc0_zkp::core::digest::Digest;
 use tracing::error;
 use version::version;
 

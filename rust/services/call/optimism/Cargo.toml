@@ -11,7 +11,7 @@ anyhow = { workspace = true }
 async-trait = { workspace = true }
 auto_impl = { workspace = true }
 call_common = { workspace = true }
-common = { workspace = true }
+common = { workspace = true, default-features = false }
 derivative = { workspace = true }
 derive-new = { workspace = true }
 jsonrpsee = { workspace = true, optional = true }

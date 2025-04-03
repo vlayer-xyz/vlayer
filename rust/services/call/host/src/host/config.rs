@@ -1,6 +1,5 @@
-use common::GuestElf;
+use common::{Digest, GuestElf};
 use host_utils::ProofMode;
-use risc0_zkvm::sha::Digest;
 
 pub struct Config {
     pub proof_mode: ProofMode,

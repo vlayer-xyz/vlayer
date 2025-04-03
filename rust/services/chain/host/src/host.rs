@@ -193,11 +193,11 @@ mod tests {
 
     use alloy_primitives::BlockNumber;
     use chain_test_utils::mock_provider;
+    use common::Digest;
     use ethers::providers::{MockProvider, Provider};
     use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
     use host_utils::ProofMode;
     use lazy_static::lazy_static;
-    use risc0_zkvm::sha::Digest;
 
     use super::*;
 

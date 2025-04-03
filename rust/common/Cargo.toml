@@ -7,18 +7,23 @@ edition = "2021"
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 auto_impl = { workspace = true }
+bytemuck = { workspace = true }
 bytes = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 derive_more = { workspace = true }
-risc0-zkp = { workspace = true }
+hex = { workspace = true }
+risc0-zkp = { workspace = true, optional = true }
 risc0-zkvm = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+sp1-sdk = { workspace = true, optional = true }
 tracing-subscriber = { workspace = true, features = ["ansi"] }
 
 [features]
 default = ["risc0"]
-risc0 = ["dep:risc0-zkvm"]
+risc0 = ["dep:risc0-zkvm", "dep:risc0-zkp"]
+sp1 = []
+sp1-host = ["dep:sp1-sdk"]
 testing = []
 
 [lints]

@@ -1,10 +1,9 @@
 use std::path::PathBuf;
 
 use alloy_primitives::ChainId;
-use common::GuestElf;
+use common::{Digest, GuestElf};
 use ethers::types::BlockNumber as BlockTag;
 use host_utils::ProofMode;
-use risc0_zkvm::sha::Digest;
 
 use super::strategy::{AppendStrategy, PrependStrategy};
 

@@ -16,7 +16,7 @@ use call_engine::{
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
 use chain_client::Client as ChainClient;
-use common::{verifier::zk_proof, GuestElf};
+use common::{verifier::zk_proof, Digest, GuestElf};
 pub use config::Config;
 use derive_new::new;
 use error::preflight;
@@ -24,7 +24,7 @@ pub use error::{AwaitingChainProofError, BuilderError, Error, ProvingError};
 use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;
-use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
+use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
 use tracing::instrument;
 

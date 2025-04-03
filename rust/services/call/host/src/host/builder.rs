@@ -27,8 +27,8 @@ use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
 use call_common::ExecutionLocation;
+use common::Digest;
 use provider::{Address, BlockNumber, CachedMultiProvider, EthersProviderFactory};
-use risc0_zkvm::sha::Digest;
 use tracing::warn;
 
 use super::{BuilderError as Error, Config, Host};

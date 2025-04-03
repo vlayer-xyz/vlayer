@@ -8,6 +8,7 @@ common = { workspace = true }
 
 [build-dependencies]
 guest_build_utils = { workspace = true, features = ["risc0"] }
+sp1-build = { workspace = true }
 
 [package.metadata.risc0]
 methods = ["risc0_call_guest", "risc0_chain_guest"]
