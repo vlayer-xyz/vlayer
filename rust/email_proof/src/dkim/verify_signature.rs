@@ -5,7 +5,7 @@ use slog::{o, Discard, Logger};
 pub use crate::errors::Error;
 use crate::from_header;
 
-pub fn verify_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), Error> {
+pub fn verify_signature(email: &ParsedMail, key: DkimPublicKey) -> Result<(), Error> {
     let result = dkim_key_verification(email, key)?;
     interpret_dkim_verification_result(&result)
 }
@@ -68,7 +68,7 @@ mod tests {
         }
     }
 
-    mod verify_with_key {
+    mod verify_signature {
         use lazy_static::lazy_static;
         use mailparse::parse_mail;
 
@@ -86,7 +86,7 @@ mod tests {
             let email = read_email_from_file(file_path);
             let parsed_email = parse_mail(email.as_bytes()).unwrap();
             let result =
-                verify_with_key(&parsed_email, parse_dns_record(&DNS_RECORD_DATA).unwrap());
+                verify_signature(&parsed_email, parse_dns_record(&DNS_RECORD_DATA).unwrap());
 
             assert_eq!(
                 result.unwrap_err().to_string(),
@@ -114,7 +114,7 @@ mod tests {
             let email = read_email_from_file("./testdata/signed_email_modified_body.txt");
             let parsed_email = parse_mail(email.as_bytes()).unwrap();
             let result =
-                verify_with_key(&parsed_email, parse_dns_record(&DNS_RECORD_DATA).unwrap());
+                verify_signature(&parsed_email, parse_dns_record(&DNS_RECORD_DATA).unwrap());
 
             assert_eq!(
                 result.unwrap_err().to_string(),

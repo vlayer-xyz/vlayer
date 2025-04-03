@@ -9,7 +9,7 @@ mod test_utils;
 
 use dkim::{
     verify_dkim_body_length_tag, verify_dkim_header_dns_consistency,
-    verify_email_contains_dkim_headers, verify_with_key::verify_with_key,
+    verify_email_contains_dkim_headers, verify_signature::verify_signature,
 };
 use dns::parse_dns_record;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
@@ -28,10 +28,10 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
 
     verify_no_fake_separator(raw_headers)?;
     dns_record.verify(&verification_data)?;
+    verify_dkim_header_dns_consistency(&dkim_headers, &dns_record)?;
     verify_email_contains_dkim_headers(&dkim_headers)?;
     verify_dkim_body_length_tag(&dkim_headers)?;
-    verify_with_key(&email, dkim_public_key)?;
-    verify_dkim_header_dns_consistency(&dkim_headers, &dns_record)?;
+    verify_signature(&email, dkim_public_key)?;
 
     Ok(email.try_into()?)
 }

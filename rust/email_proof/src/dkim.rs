@@ -4,7 +4,7 @@ use verifiable_dns::DNSRecord;
 
 pub use crate::errors::Error;
 
-pub(crate) mod verify_with_key;
+pub(crate) mod verify_signature;
 
 pub fn verify_email_contains_dkim_headers(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
     if headers.is_empty() {
