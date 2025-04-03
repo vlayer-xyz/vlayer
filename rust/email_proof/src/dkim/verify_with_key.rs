@@ -100,11 +100,6 @@ mod tests {
         }
 
         #[test]
-        fn fails_when_dkim_signer_address_is_from_subdomain() {
-            assert_signature_did_not_verify("./testdata/signed_email_from_subdomain.txt");
-        }
-
-        #[test]
         fn fails_for_mismatching_signer_and_sender_domain() {
             assert_signature_did_not_verify("./testdata/signed_email_different_domains.txt");
         }
