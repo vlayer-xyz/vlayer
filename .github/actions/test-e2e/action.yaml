@@ -89,7 +89,7 @@ runs:
         CHAIN_NAME: ${{ inputs.chain_name }}
         QUICKNODE_API_KEY: ${{ inputs.quicknode_api_key }}
         QUICKNODE_ENDPOINT: ${{ inputs.quicknode_api_key && 'dry-alpha-tab' || '' }}
-        JSON_RPC_URL: ${{ inputs.quicknode_api_key && "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" || '' }}
+        JSON_RPC_URL: ${{ inputs.quicknode_api_key && format('https://dry-alpha-tab.optimism-sepolia.quiknode.pro/{0}', inputs.quicknode_api_key) || '' }}
       run: bash/e2e-test.sh
       shell: bash
 
