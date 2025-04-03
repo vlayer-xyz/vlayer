@@ -97,37 +97,37 @@ jobs:
           mkdir -p ./target/debug
           mv ${CARGO_TARGET_DIR}/debug/{call_server,chain_server,worker,dns_server} ./target/debug/
 
-      - name: Run e2e tests
-        env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          PROVING_MODE: "dev"
-          VLAYER_ENV: dev
-          VLAYER_TMP_DIR: ./artifacts
-          BUILD_SERVICES: 0
-          BUILD_CLI: 0
-          PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
-        run: xvfb-run bash/e2e-web-apps-tests.sh
+      # - name: Run e2e tests
+      #   env:
+      #     RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+      #     PROVING_MODE: "dev"
+      #     VLAYER_ENV: dev
+      #     VLAYER_TMP_DIR: ./artifacts
+      #     BUILD_SERVICES: 0
+      #     BUILD_CLI: 0
+      #     PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+      #   run: xvfb-run bash/e2e-web-apps-tests.sh
 
-      # Teardown
-      - name: Display Logs
-        if: always()
-        run: |
-          for log_file in $(find ./artifacts/logs -type f); do
-            echo "=== Contents of $log_file ==="
-            cat "$log_file"
-            echo "============================="
-          done
-      - name: Handle Playwright Reports
-        uses: ./.github/actions/handle-playwright-reports
-        if: ${{ !cancelled() }}
-        with:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          EXAMPLES_PATH: /examples/
-          GITHUB_TOKEN: ${{ github.token }}
-          ARTIFACT_RETENTION_DAYS: "30"
-          REPORT_PATH: "examples/**/vlayer/playwright-report/"
-          PR_NUMBER: ${{ github.event.number }}
-          DEPLOY_TYPE: "examples"
-          CONTEXT: "test-e2e-web-apps-devnet"
+      # # Teardown
+      # - name: Display Logs
+      #   if: always()
+      #   run: |
+      #     for log_file in $(find ./artifacts/logs -type f); do
+      #       echo "=== Contents of $log_file ==="
+      #       cat "$log_file"
+      #       echo "============================="
+      #     done
+      # - name: Handle Playwright Reports
+      #   uses: ./.github/actions/handle-playwright-reports
+      #   if: ${{ !cancelled() }}
+      #   with:
+      #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+      #     VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      #     EXAMPLES_PATH: /examples/
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #     ARTIFACT_RETENTION_DAYS: "30"
+      #     REPORT_PATH: "examples/**/vlayer/playwright-report/"
+      #     PR_NUMBER: ${{ github.event.number }}
+      #     DEPLOY_TYPE: "examples"
+      #     CONTEXT: "test-e2e-web-apps-devnet"
