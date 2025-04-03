@@ -54,7 +54,7 @@ jobs:
               - 'bun.lock'
             workflow-changes:
               - '.github/workflows/test_e2e_testnet.yaml'
-              - '.github/actions/test-e2e-bonsai-opsepolia/**'
+              - '.github/actions/test-e2e/**'
 
   build-binaries:
     name: Build binaries
@@ -118,12 +118,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-bonsai-opsepolia
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+          # Proving related
+          proving_mode: 'prod'
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
   test-e2e-bonsai-opsepolia-simple-web-proof:
@@ -134,12 +140,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-bonsai-opsepolia
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-web-proof"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+          # Proving related
+          proving_mode: 'prod'
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
   test-e2e-bonsai-opsepolia-simple-email-proof:
@@ -150,13 +162,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-bonsai-opsepolia
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-email-proof"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+          # Proving related
+          proving_mode: 'prod'
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
   test-e2e-bonsai-opsepolia-simple-time-travel:
     name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
@@ -166,12 +184,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-bonsai-opsepolia
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-time-travel"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+          # Proving related
+          proving_mode: 'prod'
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
         env:
           # From the example's .env.testnet

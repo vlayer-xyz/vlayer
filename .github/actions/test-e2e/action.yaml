@@ -5,6 +5,30 @@ inputs:
   example:
     description: "The E2E test example to run"
     required: true
+
+# Proving related - fake or prod (Bonsai)
+  proving_mode:
+    description: "Proving mode - 'prod' (Bonsai) or 'fake'"
+    required: true
+    default: 'fake'
+  bonsai_api_url:
+    description: "Required if proving_mode is 'prod'"
+    required: false
+  bonsai_api_key:
+    description: "Required if proving_mode is 'prod'"
+    required: false
+
+# Chain related - anvil or testnet.
+  chain_name:
+    description: "'anvil' or testnet like 'optimismSepolia'"
+    required: true
+    default: 'anvil'
+  testnet_private_key_location:
+    description: "Required for chain testnets."
+    required: false
+  quicknode_api_key:
+    description: "Required for chain testnets."
+    required: false
 runs:
   using: "composite"
   steps:
@@ -40,12 +64,32 @@ runs:
       run: forge soldeer install
       shell: bash
 
+    # Load testnet private key for testnets
+    - name: Read testnet private key
+      if: ${{ inputs.testnet_private_key_location != '' }}
+      run: |
+        EXAMPLES_TEST_PRIVATE_KEY=$(cat "${{ inputs.testnet_private_key_location }}")
+        echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
+        echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
+      shell: bash
+
     - name: Run e2e test for ${{ inputs.example }}
       env:
         VLAYER_TMP_DIR: ./artifacts
         BUILD_SERVICES: 0
         BUILD_CLI: 0
         EXAMPLE: ${{ inputs.example }}
+
+        # Proving related
+        PROVING_MODE: ${{ inputs.proving_mode }}
+        BONSAI_API_URL: ${{ inputs.bonsai_api_url }}
+        BONSAI_API_KEY: ${{ inputs.bonsai_api_key }}
+
+        # Chain related
+        CHAIN_NAME: ${{ inputs.chain_name }}
+        QUICKNODE_API_KEY: ${{ inputs.quicknode_api_key }}
+        QUICKNODE_ENDPOINT: ${{ inputs.quicknode_api_key && 'dry-alpha-tab' || '' }}
+        JSON_RPC_URL: ${{ inputs.quicknode_api_key && "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" || '' }}
       run: bash/e2e-test.sh
       shell: bash
 
