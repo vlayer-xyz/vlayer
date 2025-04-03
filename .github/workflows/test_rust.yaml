@@ -4,8 +4,8 @@ on:
   pull_request:
   merge_group:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
@@ -66,4 +66,4 @@ jobs:
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          RUST_LOG: info
+          RUST_LOG: info,cargo::core::compiler::fingerprint=trace
