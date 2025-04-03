@@ -48,6 +48,10 @@ export default defineConfig({
           src: `${__dirname}/../../node_modules/tlsn-js/build/**`,
           dest: "./",
         },
+        {
+          src: `${__dirname}/../../node_modules/tlsn-js/build/**`,
+          dest: "assets/",
+        },
       ],
     }),
     nodePolyfills({
