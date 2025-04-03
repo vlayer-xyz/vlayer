@@ -73,6 +73,15 @@ runs:
         echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
       shell: bash
 
+    # Configure RPC endpoints
+    - name: Configure RPC endpoints
+      if: ${{ inputs.quicknode_api_key != '' }}
+      run: |
+        echo "QUICKNODE_ENDPOINT=dry-alpha-tab" >> $GITHUB_ENV
+        echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+        echo "JSON_RPC_URL=https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+      shell: bash
+
     - name: Run e2e test for ${{ inputs.example }}
       env:
         VLAYER_TMP_DIR: ./artifacts
@@ -87,9 +96,6 @@ runs:
 
         # Chain related
         CHAIN_NAME: ${{ inputs.chain_name }}
-        QUICKNODE_API_KEY: ${{ inputs.quicknode_api_key }}
-        QUICKNODE_ENDPOINT: ${{ inputs.quicknode_api_key && 'dry-alpha-tab' || '' }}
-        JSON_RPC_URL: ${{ inputs.quicknode_api_key && format('https://dry-alpha-tab.optimism-sepolia.quiknode.pro/{0}', inputs.quicknode_api_key) || '' }}
       run: bash/e2e-test.sh
       shell: bash
 
