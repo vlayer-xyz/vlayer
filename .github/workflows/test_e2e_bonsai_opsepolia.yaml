@@ -123,7 +123,7 @@ jobs:
           example: "simple"
 
           # Proving related
-          proving_mode: 'prod'
+          proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
@@ -145,7 +145,7 @@ jobs:
           example: "simple-web-proof"
 
           # Proving related
-          proving_mode: 'prod'
+          proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
@@ -167,7 +167,7 @@ jobs:
           example: "simple-email-proof"
 
           # Proving related
-          proving_mode: 'prod'
+          proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
@@ -189,7 +189,7 @@ jobs:
           example: "simple-time-travel"
 
           # Proving related
-          proving_mode: 'prod'
+          proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
