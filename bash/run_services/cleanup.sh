@@ -15,6 +15,7 @@ function cleanup() {
     done < "${CHAIN_WORKER_PIDS}"
 
     if [[ $VLAYER_ENV == "dev" ]]; then
+        docker compose -f $DOCKER_COMPOSE_FILE logs $DOCKER_COMPOSE_SERVICES
         docker compose -f $DOCKER_COMPOSE_FILE down
     fi
 
