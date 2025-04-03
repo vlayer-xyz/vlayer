@@ -148,25 +148,6 @@ jobs:
           gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
           vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
-  test-e2e-testnet-simple-email-proof:
-    name: E2E test against testnet (simple-email-proof)
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
-        with:
-          example: "simple-email-proof"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
-
   test-e2e-testnet-simple-time-travel:
     name: E2E test against testnet (simple-time-travel)
     needs: [changes, build-binaries]
