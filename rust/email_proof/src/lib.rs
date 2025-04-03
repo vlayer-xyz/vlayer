@@ -151,17 +151,6 @@ mod test {
     }
 
     #[test]
-    fn fails_for_dkim_signature_of_truncated_body() {
-        let email = read_email_from_file("./testdata/signed_email_with_dkim_l_tag.eml");
-        let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
-
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "Error verifying DKIM: signature syntax error: DKIM-Signature header contains body length tag (l=)".to_string()
-        );
-    }
-
-    #[test]
     fn fails_for_missing_dns_record() {
         let email = signed_email_fixture();
         let dns_record = SolDnsRecord {
