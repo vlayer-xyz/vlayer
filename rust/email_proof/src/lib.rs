@@ -26,7 +26,7 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
     let raw_headers = parse_headers_bytes(email.raw_bytes)?;
 
-    verify_headers_crlfs(raw_headers)?;
+    verify_no_fake_separator(raw_headers)?;
     dns_record.verify(&verification_data)?;
     verify_email_contains_dkim_headers(&dkim_headers)?;
     verify_dkim_body_length_tag(&dkim_headers)?;
@@ -47,34 +47,13 @@ fn parse_headers_bytes(raw_email: &[u8]) -> Result<&[u8], Error> {
     Ok(headers_part.as_bytes())
 }
 
-fn verify_headers_crlfs(raw_headers: &[u8]) -> Result<(), Error> {
-    for window in raw_headers.windows(3) {
-        match window {
-            [b'\r', b'\n', next]
-                if !is_valid_header_start(*next) && !is_valid_folded_line_start(*next) =>
-            {
-                return Err(Error::InvalidNewLineSeparator(*next));
-            }
-            _ => {}
+fn verify_no_fake_separator(raw_headers: &[u8]) -> Result<(), Error> {
+    for i in 0..raw_headers.len() {
+        if raw_headers[i] == b'\n' && (i == 0 || raw_headers[i - 1] != b'\r') {
+            return Err(Error::LoneNewLine(raw_headers[i - 1]));
         }
     }
     Ok(())
-}
-
-// https://datatracker.ietf.org/doc/html/rfc5322#section-2.2
-// A header field name must be composed of printable US-ASCII characters (i.e.,
-// characters that have values between 33 and 126, inclusive), except colon.
-fn is_valid_header_start(c: u8) -> bool {
-    c != b':' && (33..=126).contains(&c)
-}
-
-// https://datatracker.ietf.org/doc/html/rfc5322#section-2.2.3
-// https://datatracker.ietf.org/doc/html/rfc5322#section-3.2.2
-// Header fields are single lines of text, but the field body can be split
-// into multiple lines using "folding". Folding allows inserting a CRLF
-// before any whitespace to handle line length limits.
-const fn is_valid_folded_line_start(curr: u8) -> bool {
-    curr == b' ' || curr == b'\t'
 }
 
 #[cfg(test)]
@@ -306,34 +285,21 @@ mod test {
         );
     }
 
-    mod verify_headers_crlfs {
+    mod verify_no_lone_separator {
         use super::*;
 
-        fn verify(raw: &str) -> Result<(), Error> {
-            verify_headers_crlfs(raw.as_bytes())
-        }
-
         #[test]
-        fn accepts_valid_simple_headers() {
+        fn pass() {
             let raw_headers = concat!("From: test@example.com\r\n", "Subject: Hello\r\n");
-            assert!(verify(raw_headers).is_ok());
+            let result = verify_no_fake_separator(raw_headers.as_bytes());
+            assert!(result.is_ok());
         }
 
         #[test]
-        fn accepts_folded_headers() {
-            let raw_headers = concat!(
-                "Subject: This is a long subject\r\n",
-                " continuing here\r\n",
-                "From: test@example.com\r\n",
-            );
-            assert!(verify(raw_headers).is_ok());
-        }
-
-        #[test]
-        fn rejects_line_with_wrong_next_line_character() {
-            let raw_headers =
-                concat!("From: test@example.com\r\n", ": invalid next line character");
-            assert_eq!(verify(raw_headers).unwrap_err(), Error::InvalidNewLineSeparator(b':'));
+        fn fail() {
+            let raw_headers = concat!("From: test@example.com\n", "Subject: Hello\r\n");
+            let result = verify_no_fake_separator(raw_headers.as_bytes());
+            assert_eq!(result.unwrap_err(), Error::LoneNewLine(b'm'));
         }
     }
 
