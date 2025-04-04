@@ -4,7 +4,7 @@ pub fn version() -> String {
         env!("CARGO_PKG_VERSION"),
         env!("VLAYER_RELEASE"),
         build_date.as_str(),
-        env!("VERGEN_GIT_SHA"),
+        &env!("VERGEN_GIT_SHA")[..7],
     ]
     .join("-")
 }
