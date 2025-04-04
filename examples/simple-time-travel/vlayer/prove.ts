@@ -10,8 +10,10 @@ import {
 import { env } from "./env";
 import { getStartEndBlock } from "./helpers";
 import { loadFixtures } from "./loadFixtures";
+import { getChainConfig } from "./constants";
 
 const config = getConfig();
+const chainConfig = getChainConfig(config.chainName);
 
 if (config.chainName === "anvil") {
   await loadFixtures();
@@ -21,14 +23,11 @@ const { ethClient, account, proverUrl } = await createContext(config);
 
 const { startBlock, endBlock } = await getStartEndBlock(config);
 
-const tokenOwner = env.PROVER_ERC20_HOLDER_ADDR;
-const usdcTokenAddr = env.PROVER_ERC20_CONTRACT_ADDR;
-
 const step = env.PROVER_STEP;
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [usdcTokenAddr, startBlock, endBlock, step],
+  proverArgs: [chainConfig.usdcTokenAddr, startBlock, endBlock, step],
   verifierArgs: [],
 });
 
@@ -41,7 +40,7 @@ const provingHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
-  args: [tokenOwner],
+  args: [chainConfig.tokenOwner],
   chainId: ethClient.chain.id,
 });
 
