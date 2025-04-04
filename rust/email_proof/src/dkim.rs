@@ -81,7 +81,7 @@ fn signed_headers(dkim_header: &DKIMHeader) -> Vec<String> {
     dkim_header
         .get_required_tag("h")
         .split(':')
-        .map(|s| s.trim().to_string())
+        .map(|s| s.trim().to_lowercase())
         .collect()
 }
 
