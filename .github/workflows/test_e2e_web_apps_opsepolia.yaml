@@ -45,7 +45,7 @@ jobs:
               - 'bash/e2e-web-apps-test.sh'
               - 'contracts/**'
             workflow-changes:
-              - '.github/workflows/test_e2e_web_apps_testnet.yaml'
+              - '.github/workflows/test_e2e_web_apps_opsepolia.yaml'
 
   build-binaries:
     name: Build binaries
