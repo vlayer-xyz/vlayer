@@ -28,13 +28,11 @@ export const chainConfigs: Record<string, ChainConfig> = {
 };
 
 export const getChainConfig = (chainName: string): ChainConfig => {
-  if (chainName === "anvil") {
-    return chainConfigs.anvil;
-  } else if (chainName == "optimismSepolia") {
-    return chainConfigs.optimismSepolia;
-  } else {
+  const config: ChainConfig | undefined = chainConfigs[chainName];
+  if (!config) {
     throw new Error(
       `The "${chainName}" chain is not yet configured in this example.`,
     );
   }
+  return config;
 };
