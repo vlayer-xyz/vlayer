@@ -27,14 +27,12 @@ type Result<T> = result::Result<T, Error>;
 #[derive(Debug, Clone, Default)]
 pub struct Prover {
     inner: Risc0Prover,
-    elf: GuestElf,
 }
 
 impl Prover {
     pub fn try_new(proof_mode: ProofMode, elf: GuestElf) -> Result<Self> {
         Ok(Self {
-            inner: Risc0Prover::try_new(proof_mode)?,
-            elf,
+            inner: Risc0Prover::try_new(proof_mode, elf.elf)?,
         })
     }
 
@@ -48,7 +46,7 @@ impl Prover {
         let executor_env = build_executor_env(input, previous_proof)
             .map_err(|err| Error::ExecutorEnvBuilder(err.to_string()))?;
 
-        let ProveInfo { receipt, .. } = self.inner.prove(executor_env, &self.elf.elf)?;
+        let ProveInfo { receipt, .. } = self.inner.prove(executor_env)?;
         Ok(receipt.into())
     }
 }

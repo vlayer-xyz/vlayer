@@ -5,7 +5,9 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
+bytes = { workspace = true }
 derivative = { workspace = true }
+hex = { workspace = true }
 risc0-zkvm = { workspace = true }
 sp1-sdk = { workspace = true }
 strum = { workspace = true, features = ["derive"] }

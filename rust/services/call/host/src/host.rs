@@ -3,7 +3,6 @@ use std::{
     time::{Duration, Instant},
 };
 
-use alloy_sol_types::SolValue;
 use bytes::Bytes;
 use call_common::{ExecutionLocation, Metadata};
 use call_engine::{
@@ -13,7 +12,7 @@ use call_engine::{
         teleport, time_travel,
         travel_call::{self, IVerifier},
     },
-    Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
+    Call, CallGuestId, GuestOutput, HostOutput, Input,
 };
 use chain_client::Client as ChainClient;
 use common::{verifier::zk_proof, Digest, GuestElf};
@@ -24,8 +23,6 @@ pub use error::{AwaitingChainProofError, BuilderError, Error, ProvingError};
 use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;
-use risc0_zkvm::{ProveInfo, SessionStats};
-use seal::EncodableReceipt;
 use tracing::instrument;
 
 use crate::{db::HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
@@ -101,7 +98,8 @@ impl Host {
         config: Config,
     ) -> Result<Self, crate::BuilderError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
-        let prover = Prover::try_new(config.proof_mode, &config.call_guest_elf)?;
+        let prover =
+            Prover::try_new(config.proof_mode, config.proof_provider, &config.call_guest_elf)?;
         let chain_client = chain_client.map(chain_client::RecordingClient::new);
         let recording_op_client_factory = recording::Factory::new(op_client_factory);
 
@@ -200,12 +198,12 @@ impl Host {
         let EncodedProofWithStats {
             seal,
             raw_guest_output,
-            stats,
+            total_cycles: cycles_used,
             elapsed_time,
-        } = provably_execute(prover, &input)?;
+        } = prover.prove(&input)?;
+
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
-        let cycles_used = stats.total_cycles;
 
         if guest_output.evm_call_result != host_output {
             return Err(ProvingError::HostGuestOutputMismatch(
@@ -239,19 +237,6 @@ impl Host {
 struct EncodedProofWithStats {
     seal: Bytes,
     raw_guest_output: Bytes,
-    stats: SessionStats,
+    total_cycles: u64,
     elapsed_time: Duration,
-}
-
-#[instrument(skip_all)]
-fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
-    let now = Instant::now();
-    let ProveInfo { receipt, stats, .. } = prover.prove(input)?;
-    let elapsed_time = now.elapsed();
-
-    let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
-    let seal: Bytes = seal.abi_encode().into();
-    let raw_guest_output: Bytes = receipt.journal.bytes.into();
-
-    Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats, elapsed_time))
 }

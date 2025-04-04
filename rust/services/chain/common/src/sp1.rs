@@ -11,15 +11,15 @@ pub struct ChainProof {
 
 impl ChainProof {
     pub fn as_ref(&self) -> ChainProofRef<'_, '_> {
-        ChainProofRef::new(&self.receipt, &self.block_trie)
+        ChainProofRef::new(self.receipt.0.as_ref(), &self.block_trie)
     }
 }
 
 #[derive(Clone, Debug, new)]
 pub struct ChainProofRef<'receipt, 'trie> {
-    pub(crate) receipt: &'receipt u64, // TODO: fake type
+    pub(crate) receipt: &'receipt [u8],
     pub(crate) block_trie: &'trie BlockTrie,
 }
 
 #[derive(Debug, Clone, From, Into, Deref, Serialize, Deserialize)]
-pub struct ChainProofReceipt(u64); // TODO: fake type
+pub struct ChainProofReceipt(Vec<u8>);

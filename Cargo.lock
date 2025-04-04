@@ -2846,6 +2846,7 @@ dependencies = [
  "revm",
  "risc0-zkvm",
  "seal",
+ "sp1-sdk",
  "test-log",
  "thiserror 2.0.11",
  "tokio",
@@ -7115,6 +7116,7 @@ dependencies = [
  "common",
  "guest_build_utils",
  "sp1-build",
+ "sp1-sdk",
 ]
 
 [[package]]
@@ -7429,7 +7431,9 @@ name = "host_utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bytes",
  "derivative",
+ "hex",
  "risc0-zkvm",
  "sp1-sdk",
  "strum",
@@ -12674,6 +12678,7 @@ dependencies = [
  "alloy-sol-types",
  "call_engine",
  "risc0-zkvm",
+ "sp1-sdk",
  "thiserror 2.0.11",
 ]
 

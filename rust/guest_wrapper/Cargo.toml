@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 common = { workspace = true }
+sp1-sdk = { workspace = true }
 
 [build-dependencies]
 guest_build_utils = { workspace = true, features = ["risc0"] }

@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use bytes::Bytes;
 use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
     SessionStats,
@@ -8,24 +9,25 @@ use tracing::info;
 
 use crate::{error::Result, ProofMode};
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone)]
 pub struct Risc0Prover {
     mode: ProofMode,
+    guest_elf: Bytes,
 }
 
 impl Risc0Prover {
-    pub fn try_new(mode: ProofMode) -> Result<Self> {
+    pub fn try_new(mode: ProofMode, guest_elf: Bytes) -> Result<Self> {
         if mode == ProofMode::Fake && !risc0_dev_mode_on() {
             Err(anyhow::anyhow!("fake proofs require `RISC0_DEV_MODE=1`"))?
         }
-        Ok(Self { mode })
+        Ok(Self { mode, guest_elf })
     }
 
-    pub fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
+    pub fn prove(&self, env: ExecutorEnv<'_>) -> Result<ProveInfo> {
         let (prove_info, elapsed) = match self.mode {
-            ProofMode::Groth16 => prove_bonsai(env, elf, &ProverOpts::groth16()),
-            ProofMode::Succinct => prove_bonsai(env, elf, &ProverOpts::succinct()),
-            ProofMode::Fake => prove_fake(env, elf),
+            ProofMode::Groth16 => prove_bonsai(env, &self.guest_elf, &ProverOpts::groth16()),
+            ProofMode::Succinct => prove_bonsai(env, &self.guest_elf, &ProverOpts::succinct()),
+            ProofMode::Fake => prove_fake(env, &self.guest_elf),
         }?;
         log_stats(&prove_info.stats, &elapsed);
         Ok(prove_info)

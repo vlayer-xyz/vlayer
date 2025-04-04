@@ -1,31 +1,45 @@
+use std::{sync::Arc, time::Instant};
+
+use alloy_sol_types::SolValue;
 use bytes::Bytes;
-use call_engine::Input;
-use host_utils::{proving, ProofMode, Prover as Risc0Prover};
+use call_engine::{Input, Seal};
+use host_utils::{proving, ProofMode, ProofProvider, Prover as Risc0Prover, SP1Prover};
 use risc0_zkvm::{ExecutorEnv, ProveInfo};
+use seal::{EncodableProof, EncodableReceipt};
+use sp1_sdk::SP1Stdin;
 use tracing::instrument;
 
-#[derive(Debug, Clone, Default)]
+use super::{EncodedProofWithStats, ProvingError};
+
+#[derive(Clone)]
 pub struct Prover {
-    prover: Risc0Prover,
-    guest_elf: Bytes,
+    prover: Arc<dyn CallProver>,
 }
 
 impl Prover {
     pub fn try_new(
         proof_mode: ProofMode,
+        proof_provider: ProofProvider,
         guest_elf: impl AsRef<Bytes>,
     ) -> Result<Self, crate::BuilderError> {
-        Ok(Self {
-            prover: Risc0Prover::try_new(proof_mode)?,
-            guest_elf: guest_elf.as_ref().clone(), // Bytes is cheap to clone
-        })
+        // Bytes is cheap to clone
+        match proof_provider {
+            ProofProvider::Risc0 => {
+                let prover =
+                    Arc::new(Risc0Prover::try_new(proof_mode, guest_elf.as_ref().clone())?);
+                Ok(Self { prover })
+            }
+            ProofProvider::SP1 => {
+                let prover = Arc::new(SP1Prover::try_new(proof_mode, guest_elf.as_ref().clone())?);
+                Ok(Self { prover })
+            }
+        }
     }
 
     /// Wrapper around Risc0Prover which specifies the call guest ELF
     #[instrument(skip_all)]
-    pub fn prove(&self, input: &Input) -> proving::Result<ProveInfo> {
-        let executor_env = build_executor_env(input)?;
-        Ok(self.prover.prove(executor_env, &self.guest_elf)?)
+    pub fn prove(&self, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
+        self.prover.prove(input)
     }
 }
 
@@ -43,6 +57,56 @@ fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
         .build()
 }
 
+pub trait CallProver: Sync + Send {
+    fn prove(&self, input: &Input) -> Result<EncodedProofWithStats, ProvingError>;
+}
+
+impl CallProver for Risc0Prover {
+    fn prove(&self, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
+        let executor_env = build_executor_env(input).map_err(proving::Error::ExecutorEnvBuilder)?;
+        let now = Instant::now();
+        let ProveInfo { receipt, stats, .. } =
+            self.prove(executor_env).map_err(proving::Error::Prover)?;
+        let elapsed_time = now.elapsed();
+
+        let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
+        let seal: Bytes = seal.abi_encode().into();
+        let raw_guest_output: Bytes = receipt.journal.bytes.into();
+
+        Ok(EncodedProofWithStats::new(
+            seal,
+            raw_guest_output,
+            stats.total_cycles,
+            elapsed_time,
+        ))
+    }
+}
+
+impl CallProver for SP1Prover {
+    fn prove(&self, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
+        let mut stdin = SP1Stdin::new();
+
+        stdin.write(input);
+
+        let now = Instant::now();
+        let proof = self.prove(&stdin).map_err(proving::Error::Prover)?;
+        let elapsed_time = now.elapsed();
+
+        let seal: Seal = EncodableProof::from(&proof.proof).try_into()?;
+        let seal: Bytes = seal.abi_encode().into();
+
+        Ok(EncodedProofWithStats::new(
+            seal,
+            proof.proof.public_values.to_vec().into(),
+            proof
+                .report
+                .map(|r| r.total_instruction_count())
+                .unwrap_or_default(),
+            elapsed_time,
+        ))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use guest_wrapper::CALL_GUEST_ELF;
@@ -51,7 +115,7 @@ mod tests {
 
     #[test]
     fn invalid_input() {
-        let res = Prover::try_new(ProofMode::Fake, &CALL_GUEST_ELF)
+        let res = Prover::try_new(ProofMode::Fake, ProofProvider::Risc0, &CALL_GUEST_ELF)
             .unwrap()
             .prove(&Input::default());
 
