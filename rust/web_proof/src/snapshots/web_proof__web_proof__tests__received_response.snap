@@ -1,0 +1,16 @@
+---
+source: rust/web_proof/src/web_proof.rs
+expression: "String::from_utf8(response.transcript).unwrap()"
+---
+HTTP/1.1 200 OK
+Access-Control-Allow-Credentials: true
+Vary: *
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET
+Access-Control-Allow-Headers: host, accept, accept-encoding, connection, user-agent
+Access-Control-Expose-Headers: host, accept, accept-encoding, connection, user-agent
+Content-Type: application/json;charset=utf-8
+Date: Thu, 03 Apr 2025 13:40:15 GMT
+Content-Length: 60
+
+{"success":true,"name":"Gandalf","greeting":"Hello, Frodo!"}

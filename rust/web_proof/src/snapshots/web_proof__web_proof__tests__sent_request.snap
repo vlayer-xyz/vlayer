@@ -1,0 +1,10 @@
+---
+source: rust/web_proof/src/web_proof.rs
+expression: "String::from_utf8(request.transcript).unwrap()"
+---
+GET https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken HTTP/1.1
+host: lotr-api.online
+accept: */*
+accept-encoding: identity
+connection: close
+user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str};
 
 use derive_new::new;
 use http_body_util::Empty;
@@ -122,6 +122,9 @@ where
     let mut prover = prover.start_notarize();
 
     let transcript = prover.transcript();
+
+    debug!("Transcript sent: {:?}", str::from_utf8(transcript.sent()));
+    debug!("Transcript received: {:?}", str::from_utf8(transcript.received()));
 
     let mut builder = TranscriptCommitConfig::builder(transcript);
 
