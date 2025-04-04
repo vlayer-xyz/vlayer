@@ -9,7 +9,7 @@ import { WebProofConfig, ProveArgs } from "@vlayer/sdk";
 import { Abi, ContractFunctionName } from "viem";
 import { optimismSepolia, anvil } from "viem/chains";
 import { startPage, expectUrl, notarize } from "@vlayer/sdk/web_proof";
-
+import { WebProofError } from "../errors";
 import webProofProver from "../../../out/WebProofProver.sol/WebProofProver";
 
 const vlayerProverConfig: Omit<
@@ -67,7 +67,7 @@ export const useTwitterAccountProof = () => {
   } = useWebProof(webProofConfig);
 
   if (webProofError) {
-    throw webProofError;
+    throw new WebProofError(webProofError.message);
   }
 
   const {
