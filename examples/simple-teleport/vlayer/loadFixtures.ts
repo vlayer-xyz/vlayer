@@ -25,6 +25,9 @@ const opL2 = {
   id: 31_338,
 };
 
+// Anvil test private key, for the purpose of fixtures only.
+const opAccount = privateKeyToAccount("0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659" as Address);
+
 export const loadFixtures = async () => {
   const config = getConfig();
   const chainConfig = getChainConfig(config.chainName);
@@ -62,10 +65,6 @@ export const loadFixtures = async () => {
   const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
 
   const account = privateKeyToAccount(config.privateKey as Address);
-
-  const opAccount = privateKeyToAccount(
-    process.env.EXAMPLES_TEST_OP_PRIVATE_KEY as Address,
-  );
 
   const hash = await l2TestClient.deployContract({
     abi: MockERC20.abi,
