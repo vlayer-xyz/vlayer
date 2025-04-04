@@ -6,13 +6,14 @@ use std::collections::HashMap;
 
 use constcat::concat;
 pub use notarize::notarize;
+use notarize::NotarizeParamsBuilder;
 pub use presentation::create_presentation_with_redaction;
 use serde_json::Value;
 use tlsn_core::transcript::Transcript;
 use utils::range::RangeSet;
 pub use verify::verify_presentation;
 
-pub use crate::notarize::NotaryConfig;
+pub use crate::notarize::{NotaryConfig, RedactionConfigFn};
 
 pub const TLSN_VERSION: &str = "0.1.0-alpha.8";
 pub const TLSN_VERSION_WITH_V_PREFIX: &str = concat!("v", TLSN_VERSION);
@@ -29,7 +30,7 @@ pub fn no_redaction_config(transcript: &Transcript) -> RedactionConfig {
     }
 }
 
-pub async fn generate_web_proof_with_redaction<RedactionConfigFn>(
+pub async fn generate_web_proof_with_redaction(
     notary_config: NotaryConfig,
     server_domain: &str,
     server_host: &str,
@@ -37,20 +38,18 @@ pub async fn generate_web_proof_with_redaction<RedactionConfigFn>(
     uri: &str,
     headers: HashMap<String, String>,
     redaction_config_fn: RedactionConfigFn,
-) -> Result<String, Box<dyn std::error::Error>>
-where
-    RedactionConfigFn: Fn(&Transcript) -> RedactionConfig,
-{
-    let (attestation, secrets, redaction_config) = notarize(
-        notary_config.clone(),
-        server_domain,
-        server_host,
-        server_port,
-        uri,
-        headers,
-        redaction_config_fn,
-    )
-    .await?;
+) -> Result<String, Box<dyn std::error::Error>> {
+    let params = NotarizeParamsBuilder::default()
+        .notary_config(notary_config.clone())
+        .server_domain(server_domain.to_string())
+        .server_host(server_host.to_string())
+        .server_port(server_port)
+        .uri(uri.to_string())
+        .headers(headers)
+        .redaction_config_fn(redaction_config_fn)
+        .build()?;
+
+    let (attestation, secrets, redaction_config) = notarize(params).await?;
     let presentation =
         create_presentation_with_redaction(&attestation, &secrets, &redaction_config)?;
     let encoded_presentation = hex::encode(bincode::serialize(&presentation).unwrap());

@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::Path};
 
 use serde::Deserialize;
 use serde_json::{json, Value};
-use tlsn_core::{presentation::Presentation, transcript::Transcript};
+use tlsn_core::presentation::Presentation;
 use tokio::fs::{create_dir_all, write};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
@@ -10,7 +10,7 @@ use utils::range::RangeSet;
 use web_proof::web_proof::{PresentationJSON, WebProof};
 use web_prover::{
     generate_web_proof, generate_web_proof_with_redaction, NotaryConfig, RedactionConfig,
-    TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,
+    RedactionConfigFn, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,
 };
 
 const PROJECT_DIR: &str = env!("CARGO_MANIFEST_DIR");
@@ -203,13 +203,10 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
     Ok(())
 }
 
-async fn generate_web_proofs_with_redaction_config<RedactionConfigFn>(
+async fn generate_web_proofs_with_redaction_config(
     redaction_config: RedactionConfigFn,
     path: &str,
-) -> Result<(), Box<dyn std::error::Error>>
-where
-    RedactionConfigFn: Fn(&Transcript) -> RedactionConfig,
-{
+) -> Result<(), Box<dyn std::error::Error>> {
     let presentation = generate_web_proof_with_redaction(
         NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false),
         SERVER_DOMAIN,

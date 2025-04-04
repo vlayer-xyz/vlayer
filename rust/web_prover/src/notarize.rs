@@ -1,5 +1,6 @@
-use std::{collections::HashMap, str};
+use std::{collections::HashMap, fmt::Debug, str};
 
+use derive_builder::Builder;
 use derive_new::new;
 use http_body_util::Empty;
 use hyper::{body::Bytes, Request, StatusCode};
@@ -34,18 +35,33 @@ pub struct NotaryConfig {
     pub enable_tls: bool,
 }
 
-pub async fn notarize<RedactionConfigFn>(
-    notary_config: NotaryConfig,
-    server_domain: &str,
-    server_host: &str,
-    server_port: u16,
-    uri: &str,
-    headers: HashMap<String, String>,
-    redaction_config_fn: RedactionConfigFn,
-) -> Result<(Attestation, Secrets, RedactionConfig), Box<dyn std::error::Error>>
-where
-    RedactionConfigFn: Fn(&Transcript) -> RedactionConfig,
-{
+#[derive(Builder, Debug, Clone, new)]
+#[builder(setter(into))]
+pub struct NotarizeParams {
+    pub notary_config: NotaryConfig,
+    pub server_domain: String,
+    pub server_host: String,
+    pub server_port: u16,
+    pub uri: String,
+    pub headers: HashMap<String, String>,
+    pub redaction_config_fn: RedactionConfigFn,
+}
+
+pub type RedactionConfigFn = fn(&Transcript) -> RedactionConfig;
+
+pub async fn notarize(
+    params: NotarizeParams,
+) -> Result<(Attestation, Secrets, RedactionConfig), Box<dyn std::error::Error>> {
+    let NotarizeParams {
+        notary_config,
+        server_domain,
+        server_host,
+        server_port,
+        uri,
+        headers,
+        redaction_config_fn,
+    } = params;
+
     let notary_client = NotaryClient::builder()
         .host(notary_config.host)
         .port(notary_config.port)
@@ -69,7 +85,7 @@ where
         .expect("Could not connect to notary. Make sure it is running.");
 
     let prover_config = ProverConfig::builder()
-        .server_name(server_domain)
+        .server_name(server_domain.as_ref())
         .protocol_config(
             ProtocolConfig::builder()
                 .max_sent_data(MAX_SENT_DATA)
