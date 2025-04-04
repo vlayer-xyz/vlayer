@@ -1,0 +1,25 @@
+name: Alert on failed release
+on:
+  workflow_run:
+    workflows:
+      - "Release vlayer artifacts"
+      - "Deploy Provers"
+      - "Deploy Chain Services"
+      - "Test Release"
+    types: [completed]
+jobs:
+  alert-failed-release:
+    if: ${{ github.repository == 'vlayer-xyz/vlayer' && github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification to team-devops channel
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_TEAM_DEVOPS }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+        run: |
+          MESSAGE="🔴 Release failed. Workflow: **${WORKFLOW_NAME}**.\n<${RUN_URL}>"
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
+               "$DISCORD_WEBHOOK"
