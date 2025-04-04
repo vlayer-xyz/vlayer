@@ -26,7 +26,9 @@ const opL2 = {
 };
 
 // Anvil test private key, for the purpose of fixtures only.
-const opAccount = privateKeyToAccount("0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659" as Address);
+const opAccount = privateKeyToAccount(
+  "0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659" as Address,
+);
 
 export const loadFixtures = async () => {
   const config = getConfig();
@@ -101,5 +103,4 @@ export const loadFixtures = async () => {
     account,
     args: [outputRoot, latestBlock.number],
   });
-}
-
+};
