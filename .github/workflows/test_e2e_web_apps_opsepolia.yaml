@@ -132,3 +132,24 @@ jobs:
           PROVER_END_BLOCK: latest
           PROVER_TRAVEL_RANGE: 10
           PROVER_STEP: 2
+
+  test-e2e-web-apps-opsepolia-simple-web-proof:
+    name: E2E web apps test (simple-web-proof) with OP Sepolia
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps-opsepolia
+        with:
+          example: "simple-web-proof"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
