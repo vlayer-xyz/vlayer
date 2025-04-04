@@ -171,3 +171,143 @@ It is important to understand that the *Notary* is a trusted party in the above 
  Currently vlayer also needs to be trusted when passing additional data (data other than the Web Proof itself) to `Prover` smart contract, e.g. `account` in the example above. The Web Proof could be hijacked before running `Prover` and additional data, different from the original, could be passed to `Prover`, e.g. an attacker could pass their own address as `account` in our `WebProofProver` example. Before going to production this will be addressed by making the setup trustless through an association of the additional data with a particular Web Proof in a way that's impossible to forge.
 
 vlayer will publish a roadmap outlining how it will achieve a high level of security when using the *Notary* service.
+
+## Quickstart guide for web proofs with custom data source
+This guide walks you through setting up a development environment, configuring a custom data source, and generating/verifying Web Proofs using vlayer.
+
+### Setting up dev environment
+
+Initialize new project using `simple-web-proof` template:
+```sh
+vlayer init my-web-proof --template simple-web-proof 
+```
+
+Enter newly created project: 
+```sh
+cd my-web-proof
+```
+
+Build contracts: 
+```sh
+forge build
+```
+This step must be repeated whenever you modify the prover or verifier contract code. 
+
+Navigate to the `/vlayer` directory and install JavaScript dependencies: 
+```sh
+cd vlayer 
+bun install
+```
+
+Start local devnet: 
+```sh
+bun run devnet:up 
+```
+
+In separate terminal run example web application: 
+```sh 
+bun run web:dev 
+```
+
+### Configuring data source
+Once the application is running, you can customize it for your chosen data source.
+We recommend first obtaining a web proof in your browser.
+
+To configure new data source open `vlayer/src/hooks/useTwitterAccountProof.ts` and take a look into `steps[]` attribute in `webProofConfig` object. 
+Example logic is wrapped within React Hook, but you can achieve same thing in vanilla JS. 
+
+Now you can setup new data source: 
+```javascript
+// specify starting page where extension redirects your user
+startPage("https://x.com/", "Go to start page"), 
+// in case of authentication/redirect go to specific page
+expectUrl("https://x.com/home", "Log in"), 
+// specify which HTTP endpoint called in the back contains data to be proven 
+// (check it the Network Tabs or similiar tool in your browser) 
+notarize(
+    "https://api.x.com/1.1/account/settings.json",
+    "GET",
+    "Generate Proof of Twitter profile",
+    [
+    {
+        request: {
+        // redact all the headers
+        headers_except: [],
+        },
+    },
+    {
+        response: {
+        // response from api.x.com sometimes comes with Transfer-Encoding: Chunked
+        // which needs to be recognised by Prover and cannot be redacted
+        headers_except: ["Transfer-Encoding"],
+        },
+    },
+    ],
+),
+```
+
+If you picked any other data source than `api.x.com` you would need to regenerate your local API token that sits in `vlayer/.env.testnet`. 
+
+To configure `https://api.example.com` use following command: 
+```sh
+vlayer jwt encode -p ./fixtures/jwt-authority.key --subject deadbeef --host "api.example.com" --post 443
+```
+
+Before further development, generated token should be placed in `.env` file. Make sure that local web server got reloaded after this change. 
+
+### Obtaining Web Proof
+
+Now you can navigate through example app in your browser (by default running on `http://localhost:5137`) and check if [Chrome browser extension](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) correctly redirects your user to data source. 
+
+A correctly generated web proof is stored in your browser's `localStorage` under the `webProof` key. To inspect `localStorage`: 
+- Open Developer Console (F12 or right-click > Inspect).
+- Navigate to the "Application" tab.
+- In the sidebar, find "Local Storage" and select your site's domain.
+- Look for the key `webProof`.
+
+### Generating ZK proof in the prover 
+
+After obtaining the web proof via the browser extension, it must be sent to the vlayer prover contract.
+That is performed by `callProver()` function in `vlayer/src/components/organisms/ProveStep/Container.tsx`. 
+Through vlayer sdk proof is injected into prover contract: `src/vlayer/WebProofProver.sol`. Make sure that proper URL is checked there:
+```solidity
+Web memory web = webProof.verify("https://api.x.com/1.1/account/settings.json");
+```
+
+Do not forget about building contracts and deploying them after any change in their code:
+```sh
+forge build 
+cd vlayer 
+bun run deploy:dev 
+```
+
+### Verifying on-chain 
+Once ZK proof is returned from prover it can be used for on-chain verification. Proof along with public inputs have to passed to `WebProofVerifier.sol` using write call: 
+```javascript
+const writeContractArgs: Parameters<typeof writeContract>[0] = {
+    address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`, // Verifier contract address
+    abi: webProofProofVerifier.abi, // ABI for the verifier contract
+    functionName: "verify", // Function to call for verification
+    args: proofData, // ZK proof data to verify (proof + public input)
+};
+```
+
+Whole logic for this step is available in `handleMint()` in `vlayer/src/components/organisms/MintStep/Container.tsx` file.
+
+### **Common Issues / FAQ**  
+
+#### **Are there any limitations on the data that can be verified?**  
+Currently, we only support JSON payloads with a maximum size of **10 KB**.  
+
+#### **Can I prove GraphQL responses?**  
+No, this is not supported at the moment.  
+
+#### **How can I debug extension errors?**  
+1. Right-click on the extension sidebar window.  
+2. Select **Inspect**.  
+3. Go to the **Console** tab.  
+
+> **Note:** The extension console is separate from your application console.  
+
+#### **Can I make assertions about JSON attributes?**  
+Yes, assertions must be implemented in the Prover code. You can find more details [here](/features/json-and-regex.html).  
