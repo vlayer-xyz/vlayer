@@ -1,6 +1,6 @@
 export interface ChainConfig {
-  usdcTokenAddr: string;
-  tokenOwner: string;
+  usdcTokenAddr: `0x${string}`;
+  tokenOwner: `0x${string}`;
   prover:
     | { endBlock: "latest"; travelRange: bigint; step: bigint }
     | { startBlock: bigint; endBlock: bigint; step: bigint };
