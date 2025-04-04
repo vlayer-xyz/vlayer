@@ -13,6 +13,7 @@ import MockERC20 from "../out/MockERC20.sol/MockERC20";
 import { privateKeyToAccount } from "viem/accounts";
 import L2State from "../out/L2State.sol/L2State";
 import { type Address } from "viem";
+import { getChainConfig } from "./constants";
 
 const l1 = {
   ...foundry,
@@ -26,6 +27,7 @@ const opL2 = {
 
 export const loadFixtures = async () => {
   const config = getConfig();
+  const chainConfig = getChainConfig(config.chainName);
 
   function createAnvilClient(chain: Chain, url: string) {
     return createTestClient({
@@ -87,7 +89,7 @@ export const loadFixtures = async () => {
     address: erc20addr,
     abi: MockERC20.abi,
     functionName: "transfer",
-    args: [process.env.TOKEN_HOLDER as Address, 100n],
+    args: [chainConfig.tokenHolder as Address, 100n],
     account: opAccount,
   });
 
