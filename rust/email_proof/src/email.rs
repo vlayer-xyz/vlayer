@@ -97,8 +97,9 @@ impl Email {
     }
 }
 
+// Last headers are signed first: https://datatracker.ietf.org/doc/html/rfc6376#section-5.4.2
 fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
-    move |key: &str| headers.get_first_value(key).map(String::from)
+    move |key: &str| headers.get_all_values(key).pop()
 }
 
 #[cfg(test)]
@@ -270,14 +271,14 @@ ZmlsZSBjb250ZW50Cg==
         }
 
         #[test]
-        fn takes_first_header_if_multiple() {
+        fn takes_last_header_if_multiple() {
             let email = parsed_email(
                 vec![("From", "me@aa.aa"), ("From", "you@aa.aa"), ("To", "you"), ("To", "me")],
                 "body",
             )
             .unwrap();
-            assert_eq!(email.from, "me@aa.aa");
-            assert_eq!(email.to, "you");
+            assert_eq!(email.from, "you@aa.aa");
+            assert_eq!(email.to, "me");
         }
 
         #[test]
