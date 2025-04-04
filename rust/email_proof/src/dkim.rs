@@ -1,4 +1,4 @@
-use cfdkim::{validate_header, DKIMError};
+use cfdkim::{header::DKIMHeader, validate_header, DKIMError};
 use mailparse::MailHeader;
 use verifiable_dns::DNSRecord;
 
@@ -65,12 +65,8 @@ pub fn verify_required_headers_signed(
 ) -> Result<(), Error> {
     for header in dkim_headers {
         let value = String::from_utf8_lossy(header.get_value_raw());
-        let dkim = validate_header(&value)?;
-        let signed_headers = dkim
-            .get_required_tag("h")
-            .split(':')
-            .map(|s| s.trim().to_lowercase())
-            .collect::<Vec<_>>();
+        let dkim_header = validate_header(&value)?;
+        let signed_headers = signed_headers(&dkim_header);
 
         for &required_field in required {
             if !signed_headers.contains(&required_field.to_lowercase()) {
@@ -79,6 +75,14 @@ pub fn verify_required_headers_signed(
         }
     }
     Ok(())
+}
+
+fn signed_headers(dkim_header: &DKIMHeader) -> Vec<String> {
+    dkim_header
+        .get_required_tag("h")
+        .split(':')
+        .map(|s| s.trim().to_string())
+        .collect()
 }
 
 #[cfg(test)]
