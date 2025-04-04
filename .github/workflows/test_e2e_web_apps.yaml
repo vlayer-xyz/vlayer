@@ -45,6 +45,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0 # Needed for restoring mtime
+      # For more efficient Cargo target dir reuse
+      - name: Restore timestamps
+        uses: chetan/git-restore-mtime-action@26fb42a93ac0f66e9c0c5ad3bd03079cb9ee5300 # v2.1
+
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
@@ -76,12 +81,30 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      - name: Create reusable Cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: test-e2e-web-apps-mtime
+      - name: Build binaries
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RISC0_USE_DOCKER: 1
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          cargo build --bin call_server --bin chain_server --bin worker --bin dns_server --features jwt
+          mkdir -p ./target/debug
+          mv ${CARGO_TARGET_DIR}/debug/{call_server,chain_server,worker,dns_server} ./target/debug/
+
       - name: Run e2e tests
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "dev"
           VLAYER_ENV: dev
           VLAYER_TMP_DIR: ./artifacts
+          BUILD_SERVICES: 0
+          BUILD_CLI: 0
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
         run: xvfb-run bash/e2e-web-apps-tests.sh
 
