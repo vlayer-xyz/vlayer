@@ -9,8 +9,14 @@ import {
   waitForContractDeploy,
 } from "@vlayer/sdk/config";
 import { type Address } from "viem";
+import { loadFixtures } from "./loadFixtures";
 
 const config = getConfig();
+
+if (config.chainName === "anvil") {
+  await loadFixtures();
+}
+
 const { chain, ethClient, account, proverUrl, confirmations } =
   await createContext(config);
 const vlayer = createVlayerClient({
