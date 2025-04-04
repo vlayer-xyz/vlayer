@@ -125,8 +125,3 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-        env:
-          # From the example's .env.testnet
-          PROVER_END_BLOCK: latest
-          PROVER_TRAVEL_RANGE: 10
-          PROVER_STEP: 2

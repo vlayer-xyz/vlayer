@@ -5,7 +5,6 @@ import {
   getConfig,
   writeEnvVariables,
 } from "@vlayer/sdk/config";
-import { env } from "./env";
 import { getStartEndBlock } from "./helpers";
 import { loadFixtures } from "./loadFixtures";
 import { getChainConfig } from "./constants";
@@ -16,14 +15,20 @@ if (config.chainName === "anvil") {
   await loadFixtures();
 }
 
-const step = env.PROVER_STEP;
-
-const { startBlock, endBlock } = await getStartEndBlock(config);
+const { startBlock, endBlock } = await getStartEndBlock({
+  config,
+  chainConfig,
+});
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [chainConfig.usdcTokenAddr, startBlock, endBlock, step],
+  proverArgs: [
+    chainConfig.usdcTokenAddr,
+    startBlock,
+    endBlock,
+    chainConfig.prover.step,
+  ],
   verifierArgs: [],
 });
 

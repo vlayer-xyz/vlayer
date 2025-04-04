@@ -202,8 +202,3 @@ jobs:
           chain_name: "optimismSepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-        env:
-          # From the example's .env.testnet
-          PROVER_END_BLOCK: latest
-          PROVER_TRAVEL_RANGE: 10
-          PROVER_STEP: 2

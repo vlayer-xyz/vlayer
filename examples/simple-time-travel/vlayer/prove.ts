@@ -7,7 +7,6 @@ import {
   getConfig,
   waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
-import { env } from "./env";
 import { getStartEndBlock } from "./helpers";
 import { loadFixtures } from "./loadFixtures";
 import { getChainConfig } from "./constants";
@@ -21,13 +20,20 @@ if (config.chainName === "anvil") {
 
 const { ethClient, account, proverUrl } = await createContext(config);
 
-const { startBlock, endBlock } = await getStartEndBlock(config);
+const { startBlock, endBlock } = await getStartEndBlock({
+  config,
+  chainConfig,
+});
 
-const step = env.PROVER_STEP;
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [chainConfig.usdcTokenAddr, startBlock, endBlock, step],
+  proverArgs: [
+    chainConfig.usdcTokenAddr,
+    startBlock,
+    endBlock,
+    chainConfig.prover.step,
+  ],
   verifierArgs: [],
 });
 
