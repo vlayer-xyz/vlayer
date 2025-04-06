@@ -52,7 +52,3 @@ web_proof = { workspace = true, features = ["fixtures"] }
 
 [lints]
 workspace = true
-
-[features]
-default = []
-jwt = ["server_utils/jwt"]

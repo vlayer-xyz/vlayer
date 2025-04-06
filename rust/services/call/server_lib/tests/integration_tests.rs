@@ -519,7 +519,6 @@ mod server_tests {
         }
     }
 
-    #[cfg(feature = "jwt")]
     mod jwt {
         use assert_json_diff::assert_json_eq;
         use jsonwebtoken::{encode, get_current_timestamp, EncodingKey, Header};

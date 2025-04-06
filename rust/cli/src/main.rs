@@ -1,8 +1,7 @@
 use clap::{Parser, Subcommand};
-#[cfg(feature = "jwt")]
-use commands::jwt::{run as run_jwt, Args as JwtArgs};
 use commands::{
     init::{run_init, InitArgs},
+    jwt::{run as run_jwt, Args as JwtArgs},
     web_proof::{webproof_fetch, WebProofArgs},
 };
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
@@ -40,7 +39,6 @@ enum Commands {
     WebProofFetch(WebProofArgs),
     #[command(hide = true)]
     TestLoggingConfiguration,
-    #[cfg(feature = "jwt")]
     Jwt(JwtArgs),
 }
 
@@ -72,7 +70,6 @@ async fn run() -> Result<()> {
             webproof_fetch(args).await.map_err(derive_more::Into::into)
         }
         Commands::TestLoggingConfiguration => run_logging_test(),
-        #[cfg(feature = "jwt")]
         Commands::Jwt(args) => run_jwt(args).map_err(crate::errors::Error::Jwt),
     }
 }

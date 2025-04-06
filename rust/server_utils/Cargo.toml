@@ -18,7 +18,7 @@ hex = { workspace = true }
 host_utils = { workspace = true }
 http-body-util = { workspace = true }
 jsonrpsee = { workspace = true }
-jsonwebtoken = { workspace = true, optional = true }
+jsonwebtoken = { workspace = true }
 mime = { workspace = true }
 mockito = { workspace = true }
 reqwest = { workspace = true }
@@ -34,6 +34,3 @@ tracing = { workspace = true }
 
 [lints]
 workspace = true
-
-[features]
-jwt = ["dep:jsonwebtoken"]

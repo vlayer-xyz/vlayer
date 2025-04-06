@@ -22,7 +22,3 @@ regex = { workspace = true }
 
 [lints]
 workspace = true
-
-[features]
-default = []
-jwt = ["call_server_lib/jwt", "server_utils/jwt"]

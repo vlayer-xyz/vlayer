@@ -1,8 +1,6 @@
 use std::time::Duration;
 
-#[cfg(feature = "jwt")]
-use call_server_lib::jwt::Config as JwtConfig;
-use call_server_lib::{ConfigBuilder, ProofMode};
+use call_server_lib::{jwt::Config as JwtConfig, ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
 use ethers::types::{Bytes, H160};
@@ -54,8 +52,6 @@ pub(crate) fn chain_guest_elf() -> &'static GuestElf {
 }
 
 pub(crate) const API_VERSION: &str = "1.2.3";
-
-#[cfg(feature = "jwt")]
 pub(crate) const JWT_SECRET: &[u8] = b"deadbeef";
 
 #[derive(new)]
@@ -63,7 +59,6 @@ pub(crate) struct Context {
     client: Client,
     anvil: Anvil,
     gas_meter_server: Option<GasMeterServer>,
-    #[cfg(feature = "jwt")]
     jwt_config: JwtConfig,
 }
 
@@ -75,7 +70,6 @@ impl Context {
             client,
             anvil,
             None,
-            #[cfg(feature = "jwt")]
             JwtConfig::new(jsonwebtoken::DecodingKey::from_secret(JWT_SECRET), Default::default()),
         )
     }
@@ -96,27 +90,22 @@ impl Context {
         self.client.deploy_contract().await
     }
 
-    #[allow(unused_mut)]
     pub(crate) fn server(&self, call_guest_elf: &GuestElf, chain_guest_elf: &GuestElf) -> Server {
         let gas_meter_config = self
             .gas_meter_server
             .as_ref()
             .map(GasMeterServer::as_gas_meter_config);
         let chain_guest_ids = vec![chain_guest_elf.id];
-        let mut builder = ConfigBuilder::default()
+        let config = ConfigBuilder::default()
             .with_call_guest_elf(call_guest_elf)
             .with_chain_guest_ids(chain_guest_ids)
             .with_semver(API_VERSION)
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
             .with_proof_mode(ProofMode::Fake)
-            .with_gas_meter_config(gas_meter_config);
-
-        #[cfg(feature = "jwt")]
-        {
-            builder = builder.with_jwt_config(self.jwt_config.clone());
-        }
-
-        let config = builder.build().unwrap();
+            .with_gas_meter_config(gas_meter_config)
+            .with_jwt_config(self.jwt_config.clone())
+            .build()
+            .unwrap();
         Server::new(config)
     }
 }
