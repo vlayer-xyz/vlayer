@@ -40,7 +40,18 @@ struct Cli {
     #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "240s")]
     chain_proof_timeout: Option<Duration>,
 
-    #[arg(long, group = "gas_meter", env)]
+    #[arg(long, group = "auth")]
+    jwt_public_key: Option<PathBuf>,
+
+    #[arg(long, requires = "auth", default_value = "RS256")]
+    jwt_algorithm: Option<Algorithm>,
+
+    #[arg(
+        long,
+        group = "gas_meter",
+        requires_all = ["auth", "gas_meter_api_key"],
+        env
+    )]
     gas_meter_url: Option<String>,
 
     #[arg(long, requires = "gas_meter", value_parser = humantime::parse_duration, default_value = "1h")]
@@ -48,15 +59,6 @@ struct Cli {
 
     #[arg(long, requires = "gas_meter", env)]
     gas_meter_api_key: Option<String>,
-
-    #[arg(long, group = "jwt_auth")]
-    jwt_auth: bool,
-
-    #[arg(long, group = "jwt_auth")]
-    jwt_public_key: PathBuf,
-
-    #[arg(long, group = "jwt_auth", default_value = "RS256")]
-    jwt_algorithm: Option<Algorithm>,
 
     #[clap(flatten)]
     global_args: GlobalArgs,
@@ -78,14 +80,15 @@ impl Cli {
             .map(|(url, (poll_interval, timeout))| {
                 ChainProofConfig::new(url, poll_interval, timeout)
             });
-        let jwt_config = if self.jwt_auth {
-            let public_key = std::fs::read_to_string(&self.jwt_public_key).with_context(|| {
-                format!("Failed to open file '{}' for reading", self.jwt_public_key.display())
-            })?;
-            let public_key = DecodingKey::from_rsa_pem(public_key.as_bytes())?;
-            Some(JwtConfig::new(public_key, self.jwt_algorithm.unwrap_or_default()))
-        } else {
-            None
+        let jwt_config = match self.jwt_public_key {
+            Some(public_key) => {
+                let public_key = std::fs::read_to_string(&public_key).with_context(|| {
+                    format!("Failed to open file '{}' for reading", public_key.display())
+                })?;
+                let public_key = DecodingKey::from_rsa_pem(public_key.as_bytes())?;
+                Some(JwtConfig::new(public_key, self.jwt_algorithm.unwrap_or_default()))
+            }
+            None => None,
         };
         Ok(ConfigBuilder::default()
             .with_call_guest_elf(&CALL_GUEST_ELF)
