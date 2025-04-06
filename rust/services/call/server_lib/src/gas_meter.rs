@@ -80,7 +80,7 @@ pub struct RpcClient {
     hash: CallHash,
     time_to_live: Duration,
     api_key: Option<String>,
-    token: Option<Token>,
+    token: Token,
 }
 
 impl RpcClient {
@@ -93,7 +93,7 @@ impl RpcClient {
             api_key,
         }: Config,
         hash: CallHash,
-        token: Option<Token>,
+        token: Token,
     ) -> Self {
         let client = RawRpcClient::new(&url);
         Self {
@@ -106,12 +106,9 @@ impl RpcClient {
     }
 
     async fn call(&self, method: impl Method) -> Result<()> {
-        let mut req = self.client.request(method);
+        let mut req = self.client.request(method).with_bearer_auth(&self.token);
         if let Some(api_key) = &self.api_key {
             req = req.with_header(Self::PROVER_API_KEY_HEADER_NAME, api_key);
-        }
-        if let Some(token) = &self.token {
-            req = req.with_bearer_auth(token);
         }
         let _resp = req.send().await?;
         Ok(())
@@ -171,7 +168,7 @@ impl Client for NoOpClient {
 pub async fn init(
     config: Option<Config>,
     call_hash: CallHash,
-    token: Option<Token>,
+    token: Token,
     gas_limit: u64,
 ) -> Result<Box<dyn Client>> {
     let client: Box<dyn Client> = config.map_or(Box::new(NoOpClient), |config| {
