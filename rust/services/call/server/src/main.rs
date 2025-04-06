@@ -1,6 +1,6 @@
 mod version;
 
-use std::time::Duration;
+use std::{path::PathBuf, time::Duration};
 
 use alloy_primitives::ChainId;
 use anyhow::Context;
@@ -49,11 +49,14 @@ struct Cli {
     #[arg(long, requires = "gas_meter", env)]
     gas_meter_api_key: Option<String>,
 
-    #[arg(long, group = "jwt")]
-    public_key: std::path::PathBuf,
+    #[arg(long, group = "jwt_auth")]
+    jwt_auth: bool,
 
-    #[arg(long, group = "jwt", default_value = "RS256")]
-    algorithm: Option<Algorithm>,
+    #[arg(long, group = "jwt_auth")]
+    jwt_public_key: PathBuf,
+
+    #[arg(long, group = "jwt_auth", default_value = "RS256")]
+    jwt_algorithm: Option<Algorithm>,
 
     #[clap(flatten)]
     global_args: GlobalArgs,
@@ -75,11 +78,15 @@ impl Cli {
             .map(|(url, (poll_interval, timeout))| {
                 ChainProofConfig::new(url, poll_interval, timeout)
             });
-        let public_key = std::fs::read_to_string(&self.public_key).with_context(|| {
-            format!("Failed to open file '{}' for reading", self.public_key.display())
-        })?;
-        let public_key = DecodingKey::from_rsa_pem(public_key.as_bytes())?;
-        let jwt_config = JwtConfig::new(public_key, self.algorithm.unwrap_or_default());
+        let jwt_config = if self.jwt_auth {
+            let public_key = std::fs::read_to_string(&self.jwt_public_key).with_context(|| {
+                format!("Failed to open file '{}' for reading", self.jwt_public_key.display())
+            })?;
+            let public_key = DecodingKey::from_rsa_pem(public_key.as_bytes())?;
+            Some(JwtConfig::new(public_key, self.jwt_algorithm.unwrap_or_default()))
+        } else {
+            None
+        };
         Ok(ConfigBuilder::default()
             .with_call_guest_elf(&CALL_GUEST_ELF)
             .with_chain_guest_ids(CHAIN_GUEST_IDS)

@@ -521,7 +521,8 @@ mod server_tests {
 
     mod jwt {
         use assert_json_diff::assert_json_eq;
-        use jsonwebtoken::{encode, get_current_timestamp, EncodingKey, Header};
+        use call_server_lib::jwt::Config as JwtConfig;
+        use jsonwebtoken::{encode, get_current_timestamp, DecodingKey, EncodingKey, Header};
         use server_utils::jwt::Claims;
         use test_helpers::{mock::Server, JWT_SECRET};
 
@@ -537,7 +538,11 @@ mod server_tests {
         }
 
         fn default_app() -> Server {
-            Context::default().server(call_guest_elf(), chain_guest_elf())
+            let jwt_config =
+                JwtConfig::new(DecodingKey::from_secret(JWT_SECRET), Default::default());
+            Context::default()
+                .with_jwt_auth(jwt_config)
+                .server(call_guest_elf(), chain_guest_elf())
         }
 
         #[tokio::test(flavor = "multi_thread")]

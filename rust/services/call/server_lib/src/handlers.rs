@@ -19,7 +19,7 @@ pub mod v_versions;
 #[derive(new, Clone)]
 pub struct Params {
     pub config: Config,
-    pub token: Token,
+    pub token: Option<Token>,
     pub req_id: RequestId,
 }
 
