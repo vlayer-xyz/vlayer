@@ -1,16 +1,16 @@
 mod notarize;
+mod params;
 mod presentation;
 mod verify;
 
 use constcat::concat;
-pub use notarize::{notarize, NotarizeParams, NotarizeParamsBuilder};
+pub use notarize::notarize;
+pub use params::{NotarizeParams, NotarizeParamsBuilder, NotaryConfig, RedactionConfigFn};
 pub use presentation::create_presentation_with_redaction;
 use serde_json::Value;
 use tlsn_core::transcript::Transcript;
 use utils::range::RangeSet;
 pub use verify::verify_presentation;
-
-pub use crate::notarize::{NotaryConfig, RedactionConfigFn};
 
 pub const TLSN_VERSION: &str = "0.1.0-alpha.8";
 pub const TLSN_VERSION_WITH_V_PREFIX: &str = concat!("v", TLSN_VERSION);

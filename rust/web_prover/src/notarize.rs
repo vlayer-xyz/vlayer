@@ -1,68 +1,23 @@
-use std::{collections::HashMap, fmt::Debug, str, sync::Arc};
+use std::{collections::HashMap, str};
 
-use derive_builder::Builder;
-use derive_new::new;
 use http_body_util::Full;
 use hyper::{body::Bytes, Request, StatusCode};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
 use tlsn_common::config::ProtocolConfig;
 use tlsn_core::{
-    attestation::Attestation,
-    request::RequestConfig,
-    transcript::{Transcript, TranscriptCommitConfig},
+    attestation::Attestation, request::RequestConfig, transcript::TranscriptCommitConfig,
     CryptoProvider, Secrets,
 };
 use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 use tracing::debug;
-use utils::range::RangeSet;
 
-use crate::RedactionConfig;
+use crate::{NotarizeParams, RedactionConfig};
 
 const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 const MAX_SENT_DATA: usize = 1 << 12;
 const MAX_RECV_DATA: usize = 1 << 14;
-
-#[derive(Debug, Clone, new, Default)]
-pub struct NotaryConfig {
-    /// Notary host (domain name or IP)
-    pub host: String,
-    /// Notary port
-    pub port: u16,
-    /// Notary API path
-    pub path_prefix: String,
-    /// Whether to use TLS for notary connection
-    pub enable_tls: bool,
-}
-
-#[derive(Builder, Clone)]
-#[builder(setter(into))]
-pub struct NotarizeParams {
-    pub notary_config: NotaryConfig,
-    pub server_domain: String,
-    pub server_host: String,
-    pub server_port: u16,
-    pub uri: String,
-    #[builder(setter(strip_option), default)]
-    pub headers: HashMap<String, String>,
-    #[builder(setter(into, strip_option), default)]
-    pub body: Option<Vec<u8>>,
-    #[builder(setter(custom, strip_option), default)]
-    pub redaction_config_fn: Option<RedactionConfigFn>,
-}
-
-pub type RedactionConfigFn = Arc<dyn Fn(&Transcript) -> RedactionConfig + Send + Sync>;
-
-impl NotarizeParamsBuilder {
-    pub fn redaction_config_fn<F>(&mut self, f: F) -> &mut Self
-    where
-        F: Fn(&Transcript) -> RedactionConfig + Send + Sync + 'static,
-    {
-        self.redaction_config_fn = Some(Some(Arc::new(f)));
-        self
-    }
-}
 
 pub async fn notarize(
     params: NotarizeParams,
@@ -148,14 +103,7 @@ pub async fn notarize(
 
     let mut builder = TranscriptCommitConfig::builder(transcript);
 
-    let redaction_config = if let Some(redaction_config_fn) = redaction_config_fn {
-        redaction_config_fn(transcript)
-    } else {
-        RedactionConfig {
-            sent: RangeSet::from(0..transcript.sent().len()),
-            recv: RangeSet::from(0..transcript.received().len()),
-        }
-    };
+    let redaction_config = redaction_config_fn(transcript);
 
     builder.commit_sent(&redaction_config.sent)?;
     builder.commit_recv(&redaction_config.recv)?;
