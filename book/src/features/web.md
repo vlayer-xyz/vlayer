@@ -222,8 +222,8 @@ Now you can setup new data source:
 startPage("https://x.com/", "Go to start page"), 
 // in case of authentication/redirect go to specific page
 expectUrl("https://x.com/home", "Log in"), 
-// specify which HTTP endpoint called in the back contains data to be proven 
-// (check it in the Network Tabs or similar tool in your browser) 
+// Specify which HTTP endpoint made by the browser from the visited website contains the data to be proven.
+// This is typically an asynchronous request — you can inspect it using the Network tab in your browser’s developer tools.
 notarize(
     "https://api.x.com/1.1/account/settings.json",
     "GET",
@@ -258,6 +258,8 @@ Before further development, generated token should be placed in `.env` file as `
 ### Obtaining Web Proof
 
 Now you can navigate through example app in your browser (by default running on `http://localhost:5137`) and check if [Chrome browser extension](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) correctly redirects your user to data source. 
+
+Finding the correct data source HTTP endpoint can be tricky. We recommend using the Network tab in your browser’s Developer Console. To narrow down the results, filter requests by Fetch/XHR, which helps isolate relevant API calls from the rest.  
 
 A correctly generated web proof is stored in your browser's `localStorage` under the `webProof` key. To inspect `localStorage`: 
 - Open Developer Console (F12 or right-click > Inspect).
@@ -297,7 +299,7 @@ Whole logic for this step is available in `handleMint()` in `vlayer/src/componen
 ### **Common Issues / FAQ**  
 
 #### **Are there any limitations on the data that can be verified?**  
-Currently, we only support JSON payloads with a maximum size of **10 KB**.  
+Currently, we only support JSON payloads. The maximum payload size per request and response is 10 KB. 
 
 #### **Can I prove GraphQL responses?**  
 No, this is not supported at the moment.  
