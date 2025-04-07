@@ -18,7 +18,6 @@ pub use verify::verify_presentation;
 pub const TLSN_VERSION: &str = "0.1.0-alpha.8";
 pub const TLSN_VERSION_WITH_V_PREFIX: &str = concat!("v", TLSN_VERSION);
 
-#[derive(Default)]
 pub struct RedactionConfig {
     pub sent: RangeSet<usize>,
     pub recv: RangeSet<usize>,

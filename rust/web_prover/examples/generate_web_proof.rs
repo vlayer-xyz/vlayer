@@ -11,7 +11,6 @@ pub async fn main() {
             .server_host("127.0.0.1")
             .server_port(3011_u16)
             .uri("/regular_json?are_you_sure=yes&auth=s3cret_t0ken")
-            .headers(HashMap::new())
             .build()
             .unwrap(),
     ))

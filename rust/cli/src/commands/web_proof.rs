@@ -30,8 +30,8 @@ pub enum InputError {
     InvalidUrlProtocol(String),
     #[error("Invalid header format: {0}")]
     InvalidHeaderFormat(String),
-    #[error("Invalid NotarizeParams: {0}")]
-    NotarizeParamsError(#[from] NotarizeParamsBuilderError),
+    #[error("Invalid notarize params: {0}")]
+    NotarizeParams(#[from] NotarizeParamsBuilderError),
 }
 
 /// Generates a web-based proof for the specified request
