@@ -1,7 +1,8 @@
 import { expect, test } from "./config";
-import { waitForSidePanelOpened } from "./helpers";
 import { type Response } from "@playwright/test";
 import { loginUrl, dashboardUrl, profileUrl, dappUrl } from "./urls";
+import { Webpage } from "./pom/webpage";
+import { waitForExtension } from "./pom/extension";
 
 test("Full flow from opening sidepanel to redirection", async ({
   page,
@@ -9,191 +10,105 @@ test("Full flow from opening sidepanel to redirection", async ({
 }) => {
   await test.step("Web-app should open sidepanel via SDK call", async () => {
     await page.goto(dappUrl);
-    const requestProofButton = page
-      .locator("body")
-      .getByTestId("request-webproof-button");
+    const webpage = new Webpage(page, context);
 
-    await requestProofButton.click();
-    const extension = await waitForSidePanelOpened(context);
+    await webpage.clickButton("Request proof of beeing a wizard");
+
+    const extension = await waitForExtension(context);
     expect(extension).toBeDefined();
   });
+
+  await page.goto(dappUrl);
+  const webpage = new Webpage(page, context);
 
   await test.step("Extension should stay ok after clicking request button multiple times", async () => {
-    await page.goto(dappUrl);
-    const requestProofButton = page
-      .locator("body")
-      .getByTestId("request-webproof-button");
-    await requestProofButton.click();
-    await requestProofButton.click();
-    await requestProofButton.click();
+    await webpage.clickButton("Request proof of beeing a wizard");
+    await webpage.clickButton("Request proof of beeing a wizard");
+    await webpage.clickButton("Request proof of beeing a wizard");
 
-    const extension = await waitForSidePanelOpened(context);
+    const extension = await waitForExtension(context);
     expect(extension).toBeDefined();
-    const redirectButton = extension.getByTestId("start-page-button");
-    await expect(redirectButton).toBeVisible();
+    await extension.expectRequestWebProofButtonToBeVisible();
   });
 
+  const extension = await waitForExtension(context);
+  const appPage = await extension.redirect();
+
   await test.step("On 'redirect' click extension should open new browser tab for specified startPage url", async () => {
-    const extension = await waitForSidePanelOpened(context);
-
-    if (!extension) {
-      throw new Error("No sidepanel");
-    }
-    const redirectButton = extension.getByTestId("start-page-button");
-    const [newPage] = await Promise.all([
-      context.waitForEvent("page"),
-      redirectButton.click(),
-    ]);
-
-    await newPage.waitForURL(loginUrl);
+    await appPage.waitForURL(loginUrl);
   });
 
   await test.step("Side panel UI should indicate that startPage step is completed", async () => {
-    const extension = await waitForSidePanelOpened(context);
-    const startPageStep = extension.getByTestId("step-startPage");
-    const status = await startPageStep.getAttribute("data-status");
-    expect(status).toEqual("completed");
+    await extension.expectStepToBeCompleted("startPage");
   });
 
   await test.step("Side panel UI should indicate that expectUrl step is completed after history.pushState redirect", async () => {
-    const startPage = context.pages().find((page) => {
-      return page.url().includes(loginUrl);
-    });
-    if (!startPage) {
-      throw new Error("No login page");
-    }
-    const loginButton = startPage.getByRole("button", {
-      name: "Login",
-    });
-    await loginButton.click();
-    const extension = await waitForSidePanelOpened(context);
-    const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
-    const status = await startPageStep.getAttribute("data-status");
+    await appPage.clickButton("Login");
+    await appPage.waitForURL(dashboardUrl);
 
-    expect(status).toEqual("completed");
+    await extension.expectStepToBeCompleted("expectUrl");
   });
 
   await test.step("Side panel UI should indicate that expectUrl step is completed after redirection", async () => {
-    const dashboardPage = context.pages().find((page) => {
-      return page.url().includes(dashboardUrl);
-    });
-    if (!dashboardPage) {
-      throw new Error("No dashboard page");
-    }
-    const profileButton = dashboardPage.getByRole("button", {
-      name: /^Go to profile$/,
-    });
-    await profileButton.click();
-    await dashboardPage.waitForURL(profileUrl);
-    const extension = await waitForSidePanelOpened(context);
-    const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
-    const status = await startPageStep.getAttribute("data-status");
-    expect(status).toEqual("completed");
+    await appPage.clickButton(new RegExp("^Go to profile$"));
+    await appPage.waitForURL(profileUrl);
+
+    await extension.expectStepToBeCompleted("expectUrl", 1);
   });
 
   await test.step("Prove button should appear after request to external api", async () => {
-    const extension = await waitForSidePanelOpened(context);
-    const proveButton = extension.getByRole("button", {
-      name: "Generate proof",
-    });
-    await expect(proveButton).toHaveText("Generate proof");
+    await extension.expectGenerateProofButtonToBeVisible();
   });
 
   await test.step("Click button should generate webproof", async () => {
-    const extension = await waitForSidePanelOpened(context);
-    const proveButton = extension.getByRole("button", {
-      name: "Generate proof",
-    });
-    await proveButton.click();
-    await page.reload();
-    await page.getByText("Has web proof").waitFor();
+    await extension.generateProof();
+
+    await webpage.expectWebProof();
   });
 
   await test.step("Zk prove button should appear after receiving webProof", async () => {
-    const proveButton = page.locator("body").getByRole("button", {
-      name: "Request zk proof",
-    });
-    await expect(proveButton).toBeVisible();
+    await webpage.expectRequestZkProofButtonToBeVisible();
   });
 
   await test.step("Request and response should be displayed with correctly redacted headers", async () => {
-    const redactedRequest = page
-      .locator("body")
-      .getByTestId("redacted-request");
-    const redactedResponse = page
-      .locator("body")
-      .getByTestId("redacted-response");
-    await expect(redactedRequest).toBeVisible();
-    await expect(redactedResponse).toBeVisible();
+    await webpage.expectContainText(
+      "redacted-request",
+      "accept-encoding: identity",
+    );
+    await webpage.expectContainText("redacted-request", "connection: *****");
 
-    const requestText = await redactedRequest.textContent();
-    const responseText = await redactedResponse.textContent();
-
-    expect(requestText).toContain("accept-encoding: identity");
-    expect(requestText).toContain("connection: *****");
-
-    expect(responseText).toContain("Access-Control-Allow-Methods: GET");
-    expect(responseText).toContain(
+    await webpage.expectContainText(
+      "redacted-response",
+      "Access-Control-Allow-Methods: GET",
+    );
+    await webpage.expectContainText(
+      "redacted-response",
       "Access-Control-Expose-Headers: **************************************************************************************************************",
     );
-    expect(responseText).toContain(
+    await webpage.expectContainText(
+      "redacted-response",
       "Access-Control-Allow-Headers: **************************************************************************************************************",
     );
-
-    expect(responseText).toContain('"name":"Gandalf"');
-    expect(responseText).toContain('"greeting":"*************"');
+    await webpage.expectContainText("redacted-response", '"name":"Gandalf"');
+    await webpage.expectContainText(
+      "redacted-response",
+      '"greeting":"*************"',
+    );
   });
 
   await test.step("Proving request has succeeded", async () => {
-    const proveButton = page.locator("body").getByRole("button", {
-      name: "Request zk proof",
-    });
-
     const vlayerResponses: Promise<Response | null>[] = [];
     page.on("requestfinished", (req) => vlayerResponses.push(req.response()));
 
-    await proveButton.click();
+    await webpage.requestZkProof();
 
     await page.getByText("Has zk proof").waitFor();
 
-    expect(vlayerResponses.length).toBeGreaterThan(1);
-
-    const proveResponse = (await vlayerResponses[0])!;
-    expect(proveResponse.ok()).toBeTruthy();
-
-    const proveJson = (await proveResponse.json())! as object;
-    expect(proveJson).toHaveProperty("result");
-
-    const hash = (proveJson as { result: string }).result;
-    expect(hash).toBeValidHash();
-
-    const waitForProvingResultResponse = (await vlayerResponses.pop())!;
-    expect(waitForProvingResultResponse.ok()).toBeTruthy();
-
-    const proofJson = (await waitForProvingResultResponse.json()) as object;
-    expect(proofJson).toMatchObject({
-      result: {
-        state: "done",
-        status: 1,
-        metrics: {},
-        data: {
-          evm_call_result: {},
-          proof: {},
-        },
-      },
-    });
+    await webpage.checkProof(vlayerResponses);
   });
 
   await test.step("Prover returned correctly redacted parts of response body", async () => {
-    const nameFromProver = page.locator("body").getByTestId("name-from-prover");
-    const greetingFromProver = page
-      .locator("body")
-      .getByTestId("greeting-from-prover");
-
-    const name = await nameFromProver.textContent();
-    const greeting = await greetingFromProver.textContent();
-
-    expect(name).toEqual("Gandalf");
-    expect(greeting).toEqual("*************");
+    await webpage.expectText("name-from-prover", "Gandalf");
+    await webpage.expectText("greeting-from-prover", "*************");
   });
 });

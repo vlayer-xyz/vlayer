@@ -51,9 +51,18 @@ export class Webpage {
     });
   }
 
+  async expectRequestZkProofButtonToBeVisible() {
+    const button = this.page.getByRole("button", { name: "Request zk proof" });
+    await expect(button).toBeVisible();
+  }
+
+  async requestZkProof() {
+    const button = this.page.getByRole("button", { name: "Request zk proof" });
+    await button.click();
+  }
+
   async expectWebProof() {
-    await this.page.reload();
-    await this.page.waitForSelector('h1[data-testid="has-webproof"]');
+    await this.page.getByText("Has web proof").waitFor();
   }
 
   async expectZkProof() {
@@ -63,6 +72,13 @@ export class Webpage {
   async expectText(id: string, expectedText: string) {
     const text = this.page.locator("body").getByTestId(id);
     expect(await text.textContent()).toEqual(expectedText);
+  }
+
+  async expectContainText(id: string, expectedText: string) {
+    const text = this.page.locator("body").getByTestId(id);
+    await expect(text).toBeVisible();
+
+    expect(await text.textContent()).toContain(expectedText);
   }
 
   async checkProof(vlayerResponses: Promise<Response | null>[]) {
