@@ -7,6 +7,7 @@ import { dappUrl, dashboardUrl, loginUrl } from "./urls";
 const delayMessage = async () => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 };
+
 test("Cleanup of storage on extension close", async ({ page, context }) => {
   await page.goto(dappUrl);
   const webpage = new Webpage(page, context);
