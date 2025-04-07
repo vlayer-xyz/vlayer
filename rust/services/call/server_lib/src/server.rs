@@ -9,7 +9,11 @@ use axum::{
     Extension, Router,
 };
 use derive_new::new;
-use server_utils::{cors, init_trace_layer, RequestId, RequestIdLayer, Router as JrpcRouter};
+use server_utils::{
+    cors, init_trace_layer,
+    jwt::{Claims, ClaimsExtractor},
+    RequestId, RequestIdLayer, Router as JrpcRouter,
+};
 use tokio::net::TcpListener;
 use tower_http::{
     sensitive_headers::SetSensitiveRequestHeadersLayer,
@@ -20,7 +24,7 @@ use tracing::info;
 use crate::{
     config::Config,
     handlers::{Params, RpcServer, State as AppState},
-    jwt::TokenExtractor,
+    token::Token,
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -33,12 +37,21 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
 }
 
 async fn handle(
-    token: Option<TokenExtractor>,
     AxumState(State { router, config }): AxumState<State>,
     Extension(req_id): Extension<RequestId>,
     body: Bytes,
 ) -> impl IntoResponse {
-    let params = Params::new(config, token.as_deref().cloned(), req_id);
+    let params = Params::new(config, None, req_id);
+    router.handle_request_with_params(body, params).await
+}
+
+async fn handle_with_auth(
+    ClaimsExtractor(Claims { sub, .. }): ClaimsExtractor<Claims>,
+    AxumState(State { router, config }): AxumState<State>,
+    Extension(req_id): Extension<RequestId>,
+    body: Bytes,
+) -> impl IntoResponse {
+    let params = Params::new(config, Some(Token::new(sub)), req_id);
     router.handle_request_with_params(body, params).await
 }
 
@@ -49,9 +62,14 @@ pub(super) struct State {
 }
 
 pub fn server(config: Config) -> Router {
+    let handler = if config.jwt_config.is_some() {
+        post(handle_with_auth)
+    } else {
+        post(handle)
+    };
     let router = State::new(config, JrpcRouter::new(AppState::default().into_rpc()));
     Router::new()
-        .route("/", post(handle))
+        .route("/", handler)
         .route_layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .route_layer(RequestIdLayer)

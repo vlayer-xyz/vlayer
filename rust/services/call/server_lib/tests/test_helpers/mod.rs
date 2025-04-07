@@ -59,19 +59,19 @@ pub(crate) struct Context {
     client: Client,
     anvil: Anvil,
     gas_meter_server: Option<GasMeterServer>,
-    jwt_config: JwtConfig,
+    jwt_config: Option<JwtConfig>,
 }
 
 impl Context {
     pub(crate) fn default() -> Self {
         let anvil = Anvil::start();
         let client = anvil.setup_client();
-        Self::new(
-            client,
-            anvil,
-            None,
-            JwtConfig::new(jsonwebtoken::DecodingKey::from_secret(JWT_SECRET), Default::default()),
-        )
+        Self::new(client, anvil, None, None)
+    }
+
+    pub(crate) fn with_jwt_auth(mut self, jwt_config: JwtConfig) -> Self {
+        self.jwt_config = Some(jwt_config);
+        self
     }
 
     pub(crate) fn with_gas_meter_server(mut self, gas_meter_server: GasMeterServer) -> Self {
