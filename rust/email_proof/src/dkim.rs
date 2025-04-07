@@ -61,14 +61,14 @@ fn normalize_dns_name(name: &str) -> String {
 
 pub fn verify_required_headers_signed(
     dkim_headers: &[&MailHeader],
-    required: &[&str],
+    required_signed_headers: &[&str],
 ) -> Result<(), Error> {
     for header in dkim_headers {
         let value = String::from_utf8_lossy(header.get_value_raw());
         let dkim_header = validate_header(&value)?;
         let signed_headers = signed_headers(&dkim_header);
 
-        for &required_field in required {
+        for &required_field in required_signed_headers {
             if !signed_headers.contains(&required_field.to_lowercase()) {
                 return Err(Error::MissingRequiredDkimHeader(required_field.to_string()));
             }
