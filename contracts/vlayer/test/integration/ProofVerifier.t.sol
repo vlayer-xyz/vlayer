@@ -98,17 +98,18 @@ contract PinnedProofVerifer_Tests is Test {
     }
 
     function _arbitraryProof(Proof memory originalProof, Proof memory randomProof) internal returns (Proof memory, bytes32) {
-        randomProof.seal.verifierSelector = _randomBool() ? randomProof.seal.verifierSelector : originalProof.seal.verifierSelector;
-        randomProof.seal.seal = _randomBool() ? randomProof.seal.seal : originalProof.seal.seal;
-        randomProof.seal.mode = _randomBool() ? randomProof.seal.mode : originalProof.seal.mode;
-        randomProof.callGuestId = _randomBool() ? randomProof.callGuestId : originalProof.callGuestId;
-        randomProof.length = originalProof.length; // Not actually verified
-        randomProof.callAssumptions.proverContractAddress = _randomBool() ? randomProof.callAssumptions.proverContractAddress : originalProof.callAssumptions.proverContractAddress;
-        randomProof.callAssumptions.functionSelector = _randomBool() ? randomProof.callAssumptions.functionSelector : originalProof.callAssumptions.functionSelector;
-        randomProof.callAssumptions.settleChainId = _randomBool() ? randomProof.callAssumptions.settleChainId : originalProof.callAssumptions.settleChainId;
-        randomProof.callAssumptions.settleBlockNumber = _randomBool() ? randomProof.callAssumptions.settleBlockNumber : originalProof.callAssumptions.settleBlockNumber;
-        randomProof.callAssumptions.settleBlockHash = _randomBool() ? randomProof.callAssumptions.settleBlockHash : originalProof.callAssumptions.settleBlockHash;
-        return (randomProof, ProofFixtures.journalHash(randomProof.callAssumptions, ProofFixtures.FIXED_OWNER, ProofFixtures.FIXED_BALANCE));
+        Proof memory arbitraryProof;
+        arbitraryProof.seal.verifierSelector = _randomBool() ? randomProof.seal.verifierSelector : originalProof.seal.verifierSelector;
+        arbitraryProof.seal.seal = _randomBool() ? randomProof.seal.seal : originalProof.seal.seal;
+        arbitraryProof.seal.mode = _randomBool() ? randomProof.seal.mode : originalProof.seal.mode;
+        arbitraryProof.callGuestId = _randomBool() ? randomProof.callGuestId : originalProof.callGuestId;
+        arbitraryProof.length = originalProof.length; // Not actually verified
+        arbitraryProof.callAssumptions.proverContractAddress = _randomBool() ? randomProof.callAssumptions.proverContractAddress : originalProof.callAssumptions.proverContractAddress;
+        arbitraryProof.callAssumptions.functionSelector = _randomBool() ? randomProof.callAssumptions.functionSelector : originalProof.callAssumptions.functionSelector;
+        arbitraryProof.callAssumptions.settleChainId = _randomBool() ? randomProof.callAssumptions.settleChainId : originalProof.callAssumptions.settleChainId;
+        arbitraryProof.callAssumptions.settleBlockNumber = _randomBool() ? randomProof.callAssumptions.settleBlockNumber : originalProof.callAssumptions.settleBlockNumber;
+        arbitraryProof.callAssumptions.settleBlockHash = _randomBool() ? randomProof.callAssumptions.settleBlockHash : originalProof.callAssumptions.settleBlockHash;
+        return (arbitraryProof, ProofFixtures.journalHash(randomProof.callAssumptions, ProofFixtures.FIXED_OWNER, ProofFixtures.FIXED_BALANCE));
     }
 
     function testFuzz_cannotVerifyManipulatedGroth16Proof(FuzzableProof calldata randomFuzzableProof, bytes32 _fuzzingSeed) public {
