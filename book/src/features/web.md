@@ -223,7 +223,7 @@ startPage("https://x.com/", "Go to start page"),
 // in case of authentication/redirect go to specific page
 expectUrl("https://x.com/home", "Log in"), 
 // specify which HTTP endpoint called in the back contains data to be proven 
-// (check it the Network Tabs or similiar tool in your browser) 
+// (check it in the Network Tabs or similar tool in your browser) 
 notarize(
     "https://api.x.com/1.1/account/settings.json",
     "GET",
