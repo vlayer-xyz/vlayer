@@ -1,4 +1,4 @@
-name: E2E test against testnet
+name: E2E test with Bonsai and OP Sepolia
 
 # This workflow has additional constraints to run on `main`,
 # because it uses external API resources.
@@ -54,7 +54,7 @@ jobs:
               - 'bun.lock'
             workflow-changes:
               - '.github/workflows/test_e2e_testnet.yaml'
-              - '.github/actions/test-e2e-testnet/**'
+              - '.github/actions/test-e2e/**'
 
   build-binaries:
     name: Build binaries
@@ -67,6 +67,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0 # Needed for restoring mtime
+      # For more efficient Cargo target dir reuse
+      - name: Restore timestamps
+        uses: chetan/git-restore-mtime-action@26fb42a93ac0f66e9c0c5ad3bd03079cb9ee5300 # v2.1
+
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
@@ -91,14 +96,14 @@ jobs:
         uses: ./.github/actions/reuse-cargo-target
         with:
           targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
-          target_name: test-e2e-bonsai-opsepolia
+          target_name: test-e2e-bonsai-opsepolia-mtime
       - name: Build binaries
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
-          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server --features jwt
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
           mkdir target_debug
           mv ${CARGO_TARGET_DIR}/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
 
@@ -110,78 +115,90 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-testnet-simple:
-    name: E2E test against testnet (simple)
+  test-e2e-bonsai-opsepolia-simple:
+    name: E2E test (simple) with Bonsai and OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+          # Proving related
+          proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
-  test-e2e-testnet-simple-web-proof:
-    name: E2E test against testnet (simple-web-proof)
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+  test-e2e-bonsai-opsepolia-simple-web-proof:
+    name: E2E test (simple-web-proof) with Bonsai and OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-web-proof"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+          # Proving related
+          proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
-  test-e2e-testnet-simple-email-proof:
-    name: E2E test against testnet (simple-email-proof)
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+  test-e2e-bonsai-opsepolia-simple-email-proof:
+    name: E2E test (simple-email-proof) with Bonsai and OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-email-proof"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
-  test-e2e-testnet-simple-time-travel:
-    name: E2E test against testnet (simple-time-travel)
+          # Proving related
+          proving_mode: "prod"
+          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+  test-e2e-bonsai-opsepolia-simple-time-travel:
+    name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-testnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-time-travel"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+
+          # Proving related
+          proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          gas_meter_url: ${{ vars.GAS_METER_URL }}
-          gas_meter_api_key: ${{ secrets.GAS_METER_API_KEY }}
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}

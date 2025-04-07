@@ -25,5 +25,4 @@ writeEnvVariables(".env", {
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_DNS_SERVICE_URL: config.dnsServiceUrl,
   VITE_EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL || "",
-  VITE_CLIENT_AUTH_MODE: process.env.CLIENT_AUTH_MODE || "",
 });

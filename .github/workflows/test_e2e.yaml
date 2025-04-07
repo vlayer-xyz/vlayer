@@ -1,4 +1,4 @@
-name: E2E test against devnet
+name: E2E test
 
 on:
   pull_request:
@@ -37,8 +37,8 @@ jobs:
               - 'docker/**'
               - 'ansible/**'
               - 'bun.lock'
-              - '.github/workflows/test_e2e_devnet.yaml'
-              - '.github/actions/test-e2e-devnet/**'
+              - '.github/workflows/test_e2e.yaml'
+              - '.github/actions/test-e2e/**'
 
   build-binaries:
     name: Build binaries
@@ -50,6 +50,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0 # Needed for restoring mtime
+      # For more efficient Cargo target dir reuse
+      - name: Restore timestamps
+        uses: chetan/git-restore-mtime-action@26fb42a93ac0f66e9c0c5ad3bd03079cb9ee5300 # v2.1
+
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
@@ -74,14 +79,14 @@ jobs:
         uses: ./.github/actions/reuse-cargo-target
         with:
           targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
-          target_name: test-e2e
+          target_name: test-e2e-mtime
       - name: Build binaries
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
-          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server --features jwt
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
           mkdir target_debug
           mv ${CARGO_TARGET_DIR}/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
 
@@ -93,8 +98,8 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-devnet-simple:
-    name: E2E test against devnet (simple)
+  test-e2e-simple:
+    name: E2E test (simple)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -102,12 +107,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple"
 
-  test-e2e-devnet-simple-web-proof:
-    name: E2E test against devnet (simple-web-proof)
+  test-e2e-simple-web-proof:
+    name: E2E test (simple-web-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -115,12 +120,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-web-proof"
 
-  test-e2e-devnet-simple-teleport:
-    name: E2E test against devnet (simple-teleport)
+  test-e2e-simple-teleport:
+    name: E2E test (simple-teleport)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -128,12 +133,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-teleport"
 
-  test-e2e-devnet-simple-time-travel:
-    name: E2E test against devnet (simple-time-travel)
+  test-e2e-simple-time-travel:
+    name: E2E test (simple-time-travel)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     if: needs.changes.outputs.relevant-changes == 'true'
@@ -141,6 +146,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Run E2E Test
-        uses: ./.github/actions/test-e2e-devnet
+        uses: ./.github/actions/test-e2e
         with:
           example: "simple-time-travel"

@@ -17,13 +17,10 @@ use tower_http::{
 };
 use tracing::info;
 
-#[cfg(feature = "jwt")]
-use crate::jwt::TokenExtractor;
-#[cfg(not(feature = "jwt"))]
-use crate::token::TokenExtractor;
 use crate::{
     config::Config,
     handlers::{Params, RpcServer, State as AppState},
+    jwt::TokenExtractor,
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {

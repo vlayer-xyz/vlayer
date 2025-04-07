@@ -133,7 +133,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn web_proof_success() {
             const EXPECTED_HASH: &str =
-                "0x1a1fac6c674fd5a09b9a1c3df14eb6ea34786f0707eee014e1f9200dec9f380e";
+                "0x9f4b649006847f0d58e31163c72e92e1a7b2387854e3e2c7b6f60c27e58ee50a";
 
             let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
@@ -519,7 +519,6 @@ mod server_tests {
         }
     }
 
-    #[cfg(feature = "jwt")]
     mod jwt {
         use assert_json_diff::assert_json_eq;
         use jsonwebtoken::{encode, get_current_timestamp, EncodingKey, Header};

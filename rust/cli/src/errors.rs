@@ -3,11 +3,9 @@ use std::path::PathBuf;
 use soldeer_core::errors::SoldeerError;
 use thiserror::Error;
 
-#[cfg(feature = "jwt")]
-use crate::commands::jwt::Error as JwtError;
 use crate::{
     cli_wrappers::{base, js, vlayer},
-    commands::update,
+    commands::{jwt::Error as JwtError, update},
     config::Error as ConfigError,
 };
 
@@ -55,7 +53,6 @@ pub enum Error {
     Cli(#[from] base::Error),
     #[error(transparent)]
     UpdateDocker(#[from] update::docker::Error),
-    #[cfg(feature = "jwt")]
     #[error(transparent)]
     Jwt(#[from] JwtError),
 }

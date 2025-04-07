@@ -6,10 +6,6 @@ pub fn signed_email_fixture() -> String {
     read_email_from_file("./testdata/signed_email.eml")
 }
 
-pub fn unsigned_email_fixture() -> String {
-    read_email_from_file("./testdata/email.txt")
-}
-
 pub fn build_mime_email(headers: Vec<(&str, &str)>, body: &str) -> String {
     let mut email = String::new();
     for (key, value) in headers {

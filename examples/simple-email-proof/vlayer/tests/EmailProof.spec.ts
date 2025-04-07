@@ -1,8 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "fs";
 import { stepsMeta, StepKind } from "../src/app/router/types";
+import { useMockWallet } from "./mockWallet";
 
 const testEmlFile = readFileSync("../testdata/valid_vlayer.eml");
+
+test.beforeEach(async ({ page }) => {
+  await useMockWallet(page);
+});
 
 test("Simple Email Proof happy path", async ({ page }) => {
   await test.step("Navigate to welcome page", async () => {

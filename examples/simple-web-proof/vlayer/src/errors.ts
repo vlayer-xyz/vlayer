@@ -24,3 +24,9 @@ export class UseExtensionError extends AppError {
     super("UseExtensionError", message);
   }
 }
+
+export class WebProofError extends AppError {
+  constructor(message: string) {
+    super("WebProofError", message);
+  }
+}

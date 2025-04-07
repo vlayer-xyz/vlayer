@@ -1,25 +1,10 @@
-use cfdkim::{validate_header, DKIMError, DkimPublicKey};
-use mailparse::{MailHeader, ParsedMail};
-use slog::{o, Discard, Logger};
+use cfdkim::{validate_header, DKIMError};
+use mailparse::MailHeader;
 use verifiable_dns::DNSRecord;
 
 pub use crate::errors::Error;
-use crate::from_header;
 
-pub fn verify_email_with_key(email: &ParsedMail, key: DkimPublicKey) -> Result<(), Error> {
-    let from_domain = from_header::extract_from_domain(email)?;
-
-    let result =
-        cfdkim::verify_email_with_key(&Logger::root(Discard, o!()), &from_domain, email, key)?;
-
-    if result.with_detail().starts_with("pass") {
-        Ok(())
-    } else if let Some(err) = result.error() {
-        Err(Error::DkimVerification(err))
-    } else {
-        Err(Error::DkimVerification(DKIMError::SignatureDidNotVerify))
-    }
-}
+pub(crate) mod verify_signature;
 
 pub fn verify_email_contains_dkim_headers(headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
     if headers.is_empty() {
@@ -43,7 +28,7 @@ pub fn verify_dkim_body_length_tag(headers: &[&MailHeader<'_>]) -> Result<(), DK
     Ok(())
 }
 
-pub fn verify_dkim_header_dns_consistency(
+pub fn verify_dns_consistency(
     headers: &[&MailHeader<'_>],
     record: &DNSRecord,
 ) -> Result<(), Error> {
@@ -123,7 +108,7 @@ mod tests {
         }
     }
 
-    mod verify_dkim_header_dns_consistency {
+    mod verify_dns_consistency {
         use super::*;
 
         fn record_with_name(name: &str) -> DNSRecord {
@@ -140,7 +125,7 @@ mod tests {
             let headers = [&parse_header(header).unwrap().0];
             let record = record_with_name("selector1._domainkey.example.com");
 
-            assert!(verify_dkim_header_dns_consistency(&headers, &record).is_ok());
+            assert!(verify_dns_consistency(&headers, &record).is_ok());
         }
 
         #[test]
@@ -151,7 +136,7 @@ mod tests {
             let record = record_with_name("selector2._domainkey.example.com");
 
             assert_eq!(
-                verify_dkim_header_dns_consistency(&headers, &record).unwrap_err(),
+                verify_dns_consistency(&headers, &record).unwrap_err(),
                 Error::DomainMismatch(
                     "selector1._domainkey.example.com".into(),
                     "selector2._domainkey.example.com".into()
@@ -167,7 +152,7 @@ mod tests {
             let record = record_with_name("selector1._domainkey.otherdomain.com");
 
             assert_eq!(
-                verify_dkim_header_dns_consistency(&headers, &record).unwrap_err(),
+                verify_dns_consistency(&headers, &record).unwrap_err(),
                 Error::DomainMismatch(
                     "selector1._domainkey.example.com".into(),
                     "selector1._domainkey.otherdomain.com".into()

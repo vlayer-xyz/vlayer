@@ -1,36 +1,41 @@
-import { http, createConfig } from "wagmi";
-import { optimismSepolia, anvil } from "wagmi/chains";
-import { metaMask } from "wagmi/connectors";
-import { useEnvPrivateKey } from "../../shared/lib/clientAuthMode";
-import { mockConnector } from "../../shared/lib/mockConnector";
+import { optimismSepolia, anvil, Chain } from "wagmi/chains";
+import { createAppKit } from "@reown/appkit/react";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
+const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
 const chain =
   import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil : optimismSepolia;
+const chains: [Chain, ...Chain[]] = [chain];
+const networks = chains;
 
-const wagmiConfig = useEnvPrivateKey()
-  ? createConfig({
-      connectors: [mockConnector(chain)],
-      chains: [chain],
-      transports: {
-        [anvil.id]: http(),
-        [optimismSepolia.id]: http(),
-      },
-    })
-  : createConfig({
-      chains:
-        import.meta.env.VITE_CHAIN_NAME === "anvil"
-          ? [anvil]
-          : [optimismSepolia],
-      connectors: [metaMask()],
-      transports: {
-        [anvil.id]: http(),
-        [optimismSepolia.id]: http(),
-      },
-    });
+const wagmiAdapter = new WagmiAdapter({
+  projectId: appKitProjectId,
+  chains,
+  networks,
+});
+
+createAppKit({
+  adapters: [wagmiAdapter],
+  projectId: appKitProjectId,
+  networks,
+  defaultNetwork: chain,
+  metadata: {
+    name: "vlayer-email-proof-example",
+    description: "vlayer Email Proof Example",
+    url: "https://vlayer.xyz",
+    icons: ["https://avatars.githubusercontent.com/u/179229932"],
+  },
+  themeVariables: {
+    "--w3m-color-mix": "#551fbc",
+    "--w3m-color-mix-strength": 40,
+  },
+});
 
 const proverConfig = {
   proverUrl: import.meta.env.VITE_PROVER_URL,
   token: import.meta.env.VITE_VLAYER_API_TOKEN,
 };
+
+const { wagmiConfig } = wagmiAdapter;
 
 export { wagmiConfig, proverConfig };

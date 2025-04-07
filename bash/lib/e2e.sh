@@ -95,6 +95,14 @@ function init_template() {
   echo "::endgroup::Initializing from template $EXAMPLE"
 }
 
+function ensure_cli_built() {
+  if [[ "${BUILD_CLI}" == "1" ]] ; then
+    pushd "${VLAYER_HOME}"
+    silent_unless_fails cargo build --bin vlayer
+    popd
+  fi
+}
+
 function run_web_tests() {
   echo "::group::Running playwright tests for ${1} example"
 

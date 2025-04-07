@@ -15,15 +15,15 @@ use crate::{request_transcript::RequestTranscript, response_transcript::Response
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
     #[serde(rename = "presentationJson")]
-    pub(crate) presentation_json: PresentationJSON,
+    pub presentation_json: PresentationJSON,
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct PresentationJSON {
-    pub(crate) version: String,
-    pub(crate) data: String,
-    pub(crate) meta: PresentationJsonMeta,
+    pub version: String,
+    pub data: String,
+    pub meta: PresentationJsonMeta,
 }
 
 impl WebProof {
@@ -102,16 +102,16 @@ pub enum VerificationError {
 
 #[cfg(test)]
 mod tests {
+    use insta::assert_snapshot;
     use k256::PublicKey;
     use pkcs8::DecodePublicKey;
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::fixtures::{
-        load_web_proof_fixture, read_fixture,
-        utils::{corrupt_signature, corrupt_verifying_key, load_web_proof_fixture_and_modify},
-        NOTARY_PUB_KEY_PEM_EXAMPLE,
-    };
+    use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+
+    const WEB_PROOF_BAD_SIGNATURE: &str =
+        include_str!(".././testdata/0.1.0-alpha.8/web_proof_bad_signature.json");
 
     #[test]
     fn serialize_deserialize_web_proof() {
@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn fail_verification_session_error() {
-        let invalid_proof = load_web_proof_fixture_and_modify(corrupt_signature);
+        let invalid_proof: WebProof = serde_json::from_str(WEB_PROOF_BAD_SIGNATURE).unwrap();
 
         assert!(matches!(
             invalid_proof.verify(),
@@ -134,34 +134,19 @@ mod tests {
     }
 
     #[test]
-    fn fail_verification_invalid_merkle_proof() {
-        let invalid_proof = load_web_proof_fixture_and_modify(corrupt_verifying_key);
-        assert!(matches!(
-            invalid_proof.verify(),
-            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: body proof error caused by: merkle error: invalid merkle proof"
-        ));
-    }
-
-    #[test]
     fn success_verification() {
         let proof = load_web_proof_fixture();
         let (request, response, _, _) = proof.verify().unwrap();
 
-        assert_eq!(
-            String::from_utf8(request.transcript).unwrap(),
-            read_fixture("./testdata/sent_request.txt")
-        );
-        assert_eq!(
-            String::from_utf8(response.transcript).unwrap(),
-            read_fixture("./testdata/received_response.txt")
-        );
+        assert_snapshot!("sent_request", String::from_utf8(request.transcript).unwrap());
+        assert_snapshot!("received_response", String::from_utf8(response.transcript).unwrap());
     }
 
     #[test]
     fn success_get_server_name() {
         let proof = load_web_proof_fixture();
         let (_, _, server_name, _) = proof.verify().unwrap();
-        assert_eq!(server_name.as_str(), "api.x.com");
+        assert_eq!(server_name.as_str(), "lotr-api.online");
     }
 
     #[test]
@@ -176,8 +161,7 @@ mod tests {
 
     #[test]
     fn deserialize_presentation() {
-        let web_proof = read_fixture("./testdata/web_proof.json");
-        let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
+        let web_proof: WebProof = load_web_proof_fixture();
 
         let presentation: Presentation = Presentation::try_from(web_proof).unwrap();
         assert_eq!(presentation.verifying_key().alg, KeyAlgId::K256);

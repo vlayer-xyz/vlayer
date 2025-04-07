@@ -24,7 +24,7 @@ contract ExampleProver is Prover {
     using WebLib for Web;
 
     string private constant NOTARY_PUB_KEY =
-        "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n-----END PUBLIC KEY-----\n";
+        "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
 
     function sum(uint256 lhs, uint256 rhs) public pure returns (uint256) {
         return lhs + rhs;
@@ -34,11 +34,13 @@ contract ExampleProver is Prover {
     function web_proof(WebProof calldata webProof) public view returns (bool) {
         Web memory web = webProof.recover();
 
-        require(web.url.test("https://api.x.com/1.1/account/settings.json"), "Incorrect URL");
+        require(
+            web.url.test("https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken"), "Incorrect URL"
+        );
 
         require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
 
-        require(web.jsonGetString("screen_name").equal("wktr0"), "Invalid screen name");
+        require(web.jsonGetString("name").equal("Gandalf"), "Invalid name");
 
         return true;
     }

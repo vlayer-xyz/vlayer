@@ -5,20 +5,30 @@ import {
   getConfig,
   writeEnvVariables,
 } from "@vlayer/sdk/config";
-import { env } from "./env";
 import { getStartEndBlock } from "./helpers";
+import { loadFixtures } from "./loadFixtures";
+import { getChainConfig } from "./constants";
 const config = getConfig();
+const chainConfig = getChainConfig(config.chainName);
 
-const usdcTokenAddr = env.PROVER_ERC20_CONTRACT_ADDR;
+if (config.chainName === "anvil") {
+  await loadFixtures();
+}
 
-const step = env.PROVER_STEP;
-
-const { startBlock, endBlock } = await getStartEndBlock(config);
+const { startBlock, endBlock } = await getStartEndBlock({
+  config,
+  chainConfig,
+});
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [usdcTokenAddr, startBlock, endBlock, step],
+  proverArgs: [
+    chainConfig.usdcTokenAddr,
+    startBlock,
+    endBlock,
+    chainConfig.prover.step,
+  ],
   verifierArgs: [],
 });
 
@@ -29,5 +39,5 @@ writeEnvVariables(".env", {
   VITE_PROVER_URL: config.proverUrl,
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
-  VITE_PROVER_ERC20_HOLDER_ADDR: process.env.PROVER_ERC20_HOLDER_ADDR,
+  VITE_PROVER_ERC20_HOLDER_ADDR: chainConfig.tokenOwner,
 });
