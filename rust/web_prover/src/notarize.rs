@@ -16,6 +16,7 @@ use tlsn_core::{
 use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 use tracing::debug;
+use utils::range::RangeSet;
 
 use crate::RedactionConfig;
 
@@ -47,8 +48,8 @@ pub struct NotarizeParams {
     pub headers: HashMap<String, String>,
     #[builder(setter(into, strip_option), default)]
     pub body: Option<Vec<u8>>,
-    #[builder(setter(custom))]
-    pub redaction_config_fn: RedactionConfigFn,
+    #[builder(setter(custom, strip_option), default)]
+    pub redaction_config_fn: Option<RedactionConfigFn>,
 }
 
 pub type RedactionConfigFn = Arc<dyn Fn(&Transcript) -> RedactionConfig + Send + Sync>;
@@ -58,7 +59,7 @@ impl NotarizeParamsBuilder {
     where
         F: Fn(&Transcript) -> RedactionConfig + Send + Sync + 'static,
     {
-        self.redaction_config_fn = Some(Arc::new(f));
+        self.redaction_config_fn = Some(Some(Arc::new(f)));
         self
     }
 }
@@ -147,7 +148,14 @@ pub async fn notarize(
 
     let mut builder = TranscriptCommitConfig::builder(transcript);
 
-    let redaction_config = redaction_config_fn(transcript);
+    let redaction_config = if let Some(redaction_config_fn) = redaction_config_fn {
+        redaction_config_fn(transcript)
+    } else {
+        RedactionConfig {
+            sent: RangeSet::from(0..transcript.sent().len()),
+            recv: RangeSet::from(0..transcript.received().len()),
+        }
+    };
 
     builder.commit_sent(&redaction_config.sent)?;
     builder.commit_recv(&redaction_config.recv)?;

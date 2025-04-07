@@ -1,5 +1,5 @@
 #[cfg(test)]
-#[cfg(feature = "integration-tests")]
+// #[cfg(feature = "integration-tests")]
 mod integration_tests {
     use std::{collections::HashMap, error::Error};
 
@@ -21,10 +21,6 @@ mod integration_tests {
                 .server_port(3011_u16)
                 .uri("/auth_header_require")
                 .headers(HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]))
-                .redaction_config_fn(|transcript| RedactionConfig {
-                    sent: RangeSet::from(0..transcript.sent().len()),
-                    recv: RangeSet::from(0..transcript.received().len()),
-                })
                 .build()
                 .unwrap(),
         ))
