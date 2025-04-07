@@ -2,11 +2,8 @@ mod notarize;
 mod presentation;
 mod verify;
 
-use std::collections::HashMap;
-
 use constcat::concat;
-pub use notarize::notarize;
-use notarize::NotarizeParamsBuilder;
+pub use notarize::{notarize, NotarizeParams, NotarizeParamsBuilder};
 pub use presentation::create_presentation_with_redaction;
 use serde_json::Value;
 use tlsn_core::transcript::Transcript;
@@ -18,6 +15,7 @@ pub use crate::notarize::{NotaryConfig, RedactionConfigFn};
 pub const TLSN_VERSION: &str = "0.1.0-alpha.8";
 pub const TLSN_VERSION_WITH_V_PREFIX: &str = concat!("v", TLSN_VERSION);
 
+#[derive(Default)]
 pub struct RedactionConfig {
     pub sent: RangeSet<usize>,
     pub recv: RangeSet<usize>,
@@ -30,53 +28,19 @@ pub fn no_redaction_config(transcript: &Transcript) -> RedactionConfig {
     }
 }
 
-pub async fn generate_web_proof_with_redaction(
-    notary_config: NotaryConfig,
-    server_domain: &str,
-    server_host: &str,
-    server_port: u16,
-    uri: &str,
-    headers: HashMap<String, String>,
-    redaction_config_fn: RedactionConfigFn,
+pub async fn generate_web_proof(
+    notarize_params: NotarizeParams,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let params = NotarizeParamsBuilder::default()
-        .notary_config(notary_config.clone())
-        .server_domain(server_domain.to_string())
-        .server_host(server_host.to_string())
-        .server_port(server_port)
-        .uri(uri.to_string())
-        .headers(headers)
-        .redaction_config_fn(redaction_config_fn)
-        .build()?;
-
-    let (attestation, secrets, redaction_config) = notarize(params).await?;
+    let (attestation, secrets, redaction_config) = notarize(notarize_params.clone()).await?;
     let presentation =
         create_presentation_with_redaction(&attestation, &secrets, &redaction_config)?;
     let encoded_presentation = hex::encode(bincode::serialize(&presentation).unwrap());
 
+    let notary_config = notarize_params.notary_config;
+
     let json_response = to_json(&encoded_presentation, &notary_config.host, notary_config.port);
 
     Ok(serde_json::to_string(&json_response)?)
-}
-
-pub async fn generate_web_proof(
-    notary_config: NotaryConfig,
-    server_domain: &str,
-    server_host: &str,
-    server_port: u16,
-    uri: &str,
-    headers: HashMap<String, String>,
-) -> Result<String, Box<dyn std::error::Error>> {
-    generate_web_proof_with_redaction(
-        notary_config,
-        server_domain,
-        server_host,
-        server_port,
-        uri,
-        headers,
-        no_redaction_config,
-    )
-    .await
 }
 
 fn to_json(encoded_presentation: &str, notary_host: &str, notary_port: u16) -> Value {

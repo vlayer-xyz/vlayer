@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Debug, str};
+use std::{collections::HashMap, fmt::Debug, str, sync::Arc};
 
 use derive_builder::Builder;
 use derive_new::new;
@@ -23,7 +23,7 @@ const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KH
 const MAX_SENT_DATA: usize = 1 << 12;
 const MAX_RECV_DATA: usize = 1 << 14;
 
-#[derive(Debug, Clone, new)]
+#[derive(Debug, Clone, new, Default)]
 pub struct NotaryConfig {
     /// Notary host (domain name or IP)
     pub host: String,
@@ -35,7 +35,7 @@ pub struct NotaryConfig {
     pub enable_tls: bool,
 }
 
-#[derive(Builder, Debug, Clone)]
+#[derive(Builder, Clone)]
 #[builder(setter(into))]
 pub struct NotarizeParams {
     pub notary_config: NotaryConfig,
@@ -43,13 +43,25 @@ pub struct NotarizeParams {
     pub server_host: String,
     pub server_port: u16,
     pub uri: String,
+    #[builder(setter(strip_option), default)]
     pub headers: HashMap<String, String>,
     #[builder(setter(into, strip_option), default)]
     pub body: Option<Vec<u8>>,
+    #[builder(setter(custom))]
     pub redaction_config_fn: RedactionConfigFn,
 }
 
-pub type RedactionConfigFn = fn(&Transcript) -> RedactionConfig;
+pub type RedactionConfigFn = Arc<dyn Fn(&Transcript) -> RedactionConfig + Send + Sync>;
+
+impl NotarizeParamsBuilder {
+    pub fn redaction_config_fn<F>(&mut self, f: F) -> &mut Self
+    where
+        F: Fn(&Transcript) -> RedactionConfig + Send + Sync + 'static,
+    {
+        self.redaction_config_fn = Some(Arc::new(f));
+        self
+    }
+}
 
 pub async fn notarize(
     params: NotarizeParams,

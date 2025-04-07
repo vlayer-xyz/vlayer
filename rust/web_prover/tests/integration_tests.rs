@@ -7,19 +7,26 @@ mod integration_tests {
     use tlsn_core::{connection::ServerName, presentation::Presentation};
     use utils::range::RangeSet;
     use web_prover::{
-        generate_web_proof, generate_web_proof_with_redaction, verify_presentation, NotaryConfig,
+        generate_web_proof, verify_presentation, NotarizeParamsBuilder, NotaryConfig,
         RedactionConfig,
     };
 
     #[tokio::test]
     async fn test_full_roundtrip() {
         let web_proof_result = Box::pin(generate_web_proof(
-            NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false),
-            "lotr-api.online",
-            "127.0.0.1",
-            3011,
-            "/auth_header_require",
-            HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]),
+            NotarizeParamsBuilder::default()
+                .notary_config(NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false))
+                .server_domain("lotr-api.online")
+                .server_host("127.0.0.1")
+                .server_port(3011_u16)
+                .uri("/auth_header_require")
+                .headers(HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]))
+                .redaction_config_fn(|transcript| RedactionConfig {
+                    sent: RangeSet::from(0..transcript.sent().len()),
+                    recv: RangeSet::from(0..transcript.received().len()),
+                })
+                .build()
+                .unwrap(),
         ))
         .await;
 
@@ -43,17 +50,20 @@ mod integration_tests {
 
     #[tokio::test]
     async fn test_redaction() {
-        let web_proof_result = Box::pin(generate_web_proof_with_redaction(
-            NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false),
-            "lotr-api.online",
-            "127.0.0.1",
-            3011,
-            "/auth_header_require?param1=value1&param2=value2",
-            HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]),
-            |_| RedactionConfig {
-                sent: RangeSet::from([0..10, 20..30, 100..200]),
-                recv: RangeSet::from([0..10, 20..30, 100..200]),
-            },
+        let web_proof_result = Box::pin(generate_web_proof(
+            NotarizeParamsBuilder::default()
+                .notary_config(NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false))
+                .server_domain("lotr-api.online")
+                .server_host("127.0.0.1")
+                .server_port(3011_u16)
+                .uri("/auth_header_require?param1=value1&param2=value2")
+                .headers(HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]))
+                .redaction_config_fn(|_| RedactionConfig {
+                    sent: RangeSet::from([0..10, 20..30, 100..200]),
+                    recv: RangeSet::from([0..10, 20..30, 100..200]),
+                })
+                .build()
+                .unwrap(),
         ))
         .await;
 
