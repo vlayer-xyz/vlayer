@@ -2,15 +2,15 @@ use std::{collections::HashMap, path::Path};
 
 use serde::Deserialize;
 use serde_json::{json, Value};
-use tlsn_core::presentation::Presentation;
+use tlsn_core::{presentation::Presentation, transcript::Transcript};
 use tokio::fs::{create_dir_all, write};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
 use utils::range::RangeSet;
 use web_proof::web_proof::{PresentationJSON, WebProof};
 use web_prover::{
-    generate_web_proof, generate_web_proof_with_redaction, NotaryConfig, RedactionConfig,
-    RedactionConfigFn, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,
+    generate_web_proof, NotarizeParamsBuilder, NotaryConfig, RedactionConfig, TLSN_VERSION,
+    TLSN_VERSION_WITH_V_PREFIX,
 };
 
 const PROJECT_DIR: &str = env!("CARGO_MANIFEST_DIR");
@@ -55,12 +55,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::error::Error>> {
     info!("Generate web proof using local notary");
     let presentation = generate_web_proof(
-        NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false),
-        SERVER_DOMAIN,
-        SERVER_HOST,
-        SERVER_PORT,
-        "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken",
-        HashMap::new(),
+        NotarizeParamsBuilder::default()
+            .notary_config(NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false))
+            .server_domain(SERVER_DOMAIN)
+            .server_host(SERVER_HOST)
+            .server_port(SERVER_PORT)
+            .uri("/regular_json?are_you_sure=yes&auth=s3cret_t0ken")
+            .build()
+            .unwrap(),
     )
     .await?;
 
@@ -109,17 +111,19 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
 async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::error::Error>> {
     info!("Generate web proof using remote notary");
     let presentation = generate_web_proof(
-        NotaryConfig::new(
-            REMOTE_NOTARY_HOST.into(),
-            REMOTE_NOTARY_PORT,
-            TLSN_VERSION_WITH_V_PREFIX.into(),
-            true,
-        ),
-        SERVER_DOMAIN,
-        SERVER_HOST,
-        SERVER_PORT,
-        "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken",
-        HashMap::new(),
+        NotarizeParamsBuilder::default()
+            .notary_config(NotaryConfig::new(
+                REMOTE_NOTARY_HOST.into(),
+                REMOTE_NOTARY_PORT,
+                TLSN_VERSION_WITH_V_PREFIX.into(),
+                true,
+            ))
+            .server_domain(SERVER_DOMAIN)
+            .server_host(SERVER_HOST)
+            .server_port(SERVER_PORT)
+            .uri("https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken")
+            .build()
+            .unwrap(),
     )
     .await?;
 
@@ -204,17 +208,20 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
 }
 
 async fn generate_web_proofs_with_redaction_config(
-    redaction_config: RedactionConfigFn,
+    redaction_config: impl Fn(&Transcript) -> RedactionConfig + Send + Sync + 'static,
     path: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let presentation = generate_web_proof_with_redaction(
-        NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false),
-        SERVER_DOMAIN,
-        SERVER_HOST,
-        SERVER_PORT,
-        "https://lotr-api.online/auth_header_require?param1=value1&param2=value2",
-        HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]),
-        redaction_config,
+    let presentation = generate_web_proof(
+        NotarizeParamsBuilder::default()
+            .notary_config(NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false))
+            .server_domain(SERVER_DOMAIN)
+            .server_host(SERVER_HOST)
+            .server_port(SERVER_PORT)
+            .uri("https://lotr-api.online/auth_header_require?param1=value1&param2=value2")
+            .headers(HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]))
+            .redaction_config_fn(redaction_config)
+            .build()
+            .unwrap(),
     )
     .await?;
 

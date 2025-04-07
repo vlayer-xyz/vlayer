@@ -2,11 +2,13 @@ use std::{collections::HashMap, str::FromStr};
 
 use anyhow::anyhow;
 use clap::Parser;
-use derive_new::new;
 use reqwest::Url;
 use strum::EnumString;
 use thiserror::Error;
-use web_prover::{generate_web_proof, NotaryConfig};
+use web_prover::{
+    generate_web_proof, NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError,
+    NotaryConfig,
+};
 
 #[derive(Debug, PartialEq, Eq, EnumString)]
 pub enum Scheme {
@@ -28,6 +30,8 @@ pub enum InputError {
     InvalidUrlProtocol(String),
     #[error("Invalid header format: {0}")]
     InvalidHeaderFormat(String),
+    #[error("Invalid NotarizeParams: {0}")]
+    NotarizeParamsError(#[from] NotarizeParamsBuilderError),
 }
 
 /// Generates a web-based proof for the specified request
@@ -55,31 +59,14 @@ pub(crate) struct WebProofArgs {
 }
 
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
-    let server_args: ServerProvingArgs = args.try_into()?;
+    let server_args: NotarizeParams = args.try_into()?;
 
-    let presentation = generate_web_proof(
-        server_args.notary_config,
-        &server_args.domain,
-        &server_args.host,
-        server_args.port,
-        &server_args.uri,
-        server_args.headers,
-    )
-    .await
-    .map_err(|e| anyhow!("{e}"))?;
+    let presentation = generate_web_proof(server_args)
+        .await
+        .map_err(|e| anyhow!("{e}"))?;
     println!("{presentation}");
 
     Ok(())
-}
-
-#[derive(new, Debug)]
-pub struct ServerProvingArgs {
-    domain: String,
-    host: String,
-    port: u16,
-    uri: String,
-    notary_config: NotaryConfig,
-    headers: HashMap<String, String>,
 }
 
 struct ValidatedUrl {
@@ -155,7 +142,7 @@ fn parse_notary_url(url_str: &str) -> Result<NotaryConfig, InputError> {
     Ok(NotaryConfig::new(host, port, path_prefix, enable_tls))
 }
 
-impl TryFrom<WebProofArgs> for ServerProvingArgs {
+impl TryFrom<WebProofArgs> for NotarizeParams {
     type Error = InputError;
 
     fn try_from(value: WebProofArgs) -> Result<Self, Self::Error> {
@@ -191,7 +178,14 @@ impl TryFrom<WebProofArgs> for ServerProvingArgs {
             parse_notary_url(DEFAULT_NOTARY_URL)?
         };
 
-        Ok(ServerProvingArgs::new(urlhost, host, port, uri, notary_config, headers?))
+        Ok(NotarizeParamsBuilder::default()
+            .notary_config(notary_config)
+            .server_domain(urlhost)
+            .server_host(host)
+            .server_port(port)
+            .uri(uri)
+            .headers(headers?)
+            .build()?)
     }
 }
 
@@ -207,11 +201,11 @@ mod tests {
             headers: vec!["Authorization: Basic 1234".into(), "X-Api-Key: 5678".into()],
         };
 
-        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        let converted: NotarizeParams = input_args.try_into().unwrap();
 
-        assert_eq!(converted.domain, "api.x.com");
-        assert_eq!(converted.host, "127.0.0.1");
-        assert_eq!(converted.port, 8080);
+        assert_eq!(converted.server_domain, "api.x.com");
+        assert_eq!(converted.server_host, "127.0.0.1");
+        assert_eq!(converted.server_port, 8080);
         assert_eq!(converted.uri, "/v1/followers?token=5daa4f53&uid=245");
         assert_eq!(converted.notary_config.host, "notary.pse.dev");
         assert_eq!(converted.notary_config.port, 3030);
@@ -226,7 +220,7 @@ mod tests {
             headers: vec!["Auth:oriza:tion: Basic 1234".into(), "X-Api-Key: 5678".into()],
             ..WebProofArgs::default()
         };
-        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        let converted: NotarizeParams = input_args.try_into().unwrap();
         assert_eq!(converted.headers.get("Auth"), Some(&"oriza:tion: Basic 1234".to_string()));
         assert_eq!(converted.headers.get("X-Api-Key"), Some(&"5678".to_string()));
     }
@@ -238,7 +232,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        let converted: NotarizeParams = input_args.try_into().unwrap();
 
         assert_eq!(converted.notary_config.host, "test-notary.vlayer.xyz");
         assert_eq!(converted.notary_config.port, 443);
@@ -253,7 +247,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        let converted: NotarizeParams = input_args.try_into().unwrap();
 
         assert_eq!(converted.notary_config.host, "notary.vlayer.xyz");
         assert_eq!(converted.notary_config.path_prefix, "path/to/api");
@@ -266,7 +260,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        let converted: NotarizeParams = input_args.try_into().unwrap();
 
         assert!(converted.notary_config.enable_tls);
     }
@@ -278,7 +272,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        let converted: NotarizeParams = input_args.try_into().unwrap();
 
         assert!(!converted.notary_config.enable_tls);
     }
@@ -290,7 +284,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        let converted: NotarizeParams = input_args.try_into().unwrap();
 
         assert_eq!(converted.uri, "/v1/followers");
     }
@@ -302,9 +296,9 @@ mod tests {
             ..Default::default()
         };
 
-        let converted: ServerProvingArgs = input_args.try_into().unwrap();
+        let converted: NotarizeParams = input_args.try_into().unwrap();
 
-        assert_eq!(converted.host, "api.x.com");
+        assert_eq!(converted.server_host, "api.x.com");
     }
 
     #[test]
@@ -314,7 +308,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<ServerProvingArgs, _> = input_args.try_into();
+        let result: Result<NotarizeParams, _> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidUrlFormat("invalid-url".to_string()).to_string()
@@ -328,7 +322,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<ServerProvingArgs, _> = input_args.try_into();
+        let result: Result<NotarizeParams, _> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidUrlFormat("invalid-url".to_string()).to_string()
@@ -342,7 +336,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<ServerProvingArgs, _> = input_args.try_into();
+        let result: Result<NotarizeParams, _> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidUrlProtocol("xyz".to_string()).to_string()
@@ -356,7 +350,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<ServerProvingArgs, _> = input_args.try_into();
+        let result: Result<NotarizeParams, _> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidUrlProtocol("htp".to_string()).to_string()
@@ -370,7 +364,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<ServerProvingArgs, _> = input_args.try_into();
+        let result: Result<NotarizeParams, _> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidHeaderFormat("Authorization".to_string()).to_string()

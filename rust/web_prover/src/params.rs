@@ -1,6 +1,7 @@
-use std::{collections::HashMap, fmt::Debug, str, sync::Arc};
+use std::{collections::HashMap, str, sync::Arc};
 
 use derive_builder::Builder;
+use derive_more::derive::Debug;
 use derive_new::new;
 use tlsn_core::transcript::Transcript;
 use utils::range::RangeSet;
@@ -19,7 +20,7 @@ pub struct NotaryConfig {
     pub enable_tls: bool,
 }
 
-#[derive(Builder, Clone)]
+#[derive(Builder, Clone, Debug)]
 #[builder(setter(into))]
 pub struct NotarizeParams {
     pub notary_config: NotaryConfig,
@@ -35,6 +36,7 @@ pub struct NotarizeParams {
         setter(custom, strip_option),
         default = "default_redaction_config_fn()"
     )]
+    #[debug(skip)]
     pub redaction_config_fn: RedactionConfigFn,
 }
 

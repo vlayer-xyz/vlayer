@@ -15,6 +15,7 @@ bincode = { workspace = true }
 constcat = { workspace = true }
 derive-new = { workspace = true }
 derive_builder = { workspace = true }
+derive_more = { workspace = true }
 hex = { workspace = true }
 http-body-util = { workspace = true }
 hyper = { workspace = true, features = ["client", "http1"] }

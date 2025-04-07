@@ -14817,6 +14817,7 @@ dependencies = [
  "constcat",
  "derive-new",
  "derive_builder 0.12.0",
+ "derive_more 1.0.0",
  "hex",
  "http-body-util",
  "hyper 1.5.2",

@@ -5,7 +5,10 @@ mod verify;
 
 use constcat::concat;
 pub use notarize::notarize;
-pub use params::{NotarizeParams, NotarizeParamsBuilder, NotaryConfig, RedactionConfigFn};
+pub use params::{
+    NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
+    RedactionConfigFn,
+};
 pub use presentation::create_presentation_with_redaction;
 use serde_json::Value;
 use tlsn_core::transcript::Transcript;
