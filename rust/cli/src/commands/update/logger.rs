@@ -18,4 +18,18 @@ impl UpdateLogger {
     pub fn success(&self) {
         println!("{} {} updated {}\n", "✔".green().bold(), self.0.bold(), "successfully".green());
     }
+
+    pub fn success_with_version_info(&self, prev: &str, new: &str) {
+        if prev != new {
+            println!(
+                "{} {} version updated from {} to {}\n",
+                "✔".green().bold(),
+                self.0.bold(),
+                prev.red(),
+                new.green()
+            );
+        } else {
+            println!("{} {} version is up to date\n", "✔".green().bold(), self.0.bold());
+        }
+    }
 }
