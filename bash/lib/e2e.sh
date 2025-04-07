@@ -98,7 +98,7 @@ function init_template() {
 function ensure_cli_built() {
   if [[ "${BUILD_CLI}" == "1" ]] ; then
     pushd "${VLAYER_HOME}"
-    silent_unless_fails cargo build --bin vlayer --features jwt
+    silent_unless_fails cargo build --bin vlayer
     popd
   fi
 }

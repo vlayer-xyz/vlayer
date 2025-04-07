@@ -110,7 +110,7 @@ function startup_vlayer() {
 function ensure_services_built() {
     if [[ "${BUILD_SERVICES}" == "1" ]] ; then
         pushd "${VLAYER_HOME}"
-        silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker --bin dns_server --features jwt
+        silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker --bin dns_server
         popd
     fi
 }
