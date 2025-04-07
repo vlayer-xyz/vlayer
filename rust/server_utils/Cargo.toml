@@ -8,7 +8,7 @@ alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 assert-json-diff = { workspace = true }
 axum = { workspace = true }
-axum-extra = { workspace = true }
+axum-extra = { workspace = true, features = ["typed-header"] }
 axum-jrpc = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
