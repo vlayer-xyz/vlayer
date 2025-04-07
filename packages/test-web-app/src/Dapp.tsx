@@ -152,9 +152,7 @@ function DappWithProfile(profile: string) {
 
   return (
     <div className="container">
-      <button
-        onClick={handleWebProofRequestClick}
-      >
+      <button onClick={handleWebProofRequestClick}>
         Request proof of being a wizard
       </button>
 
