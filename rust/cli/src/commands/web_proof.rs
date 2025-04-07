@@ -56,6 +56,10 @@ pub(crate) struct WebProofArgs {
     /// Additional headers for the HTTP request (format: "Header-Name: Header-Value")
     #[arg(short = 'H', long, value_name = "HEADER")]
     headers: Vec<String>,
+
+    /// HTTP data to be sent with the request
+    #[arg(short = 'd', long, value_name = "DATA")]
+    data: Option<String>,
 }
 
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
@@ -178,14 +182,20 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
             parse_notary_url(DEFAULT_NOTARY_URL)?
         };
 
-        Ok(NotarizeParamsBuilder::default()
+        let mut notarize_params_builder = NotarizeParamsBuilder::default();
+        notarize_params_builder
             .notary_config(notary_config)
             .server_domain(urlhost)
             .server_host(host)
             .server_port(port)
             .uri(uri)
-            .headers(headers?)
-            .build()?)
+            .headers(headers?);
+
+        if let Some(body) = value.data {
+            notarize_params_builder.body(body);
+        }
+
+        Ok(notarize_params_builder.build()?)
     }
 }
 
@@ -199,6 +209,7 @@ mod tests {
             host: Some("127.0.0.1".into()),
             notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.8".into()),
             headers: vec!["Authorization: Basic 1234".into(), "X-Api-Key: 5678".into()],
+            data: Some("example body data".into()),
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -212,6 +223,7 @@ mod tests {
         assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
         assert_eq!(converted.headers.get("Authorization"), Some(&"Basic 1234".to_string()));
         assert_eq!(converted.headers.get("X-Api-Key"), Some(&"5678".to_string()));
+        assert_eq!(converted.body, Some("example body data".into()));
     }
 
     #[test]
@@ -378,6 +390,7 @@ mod tests {
                 host: Some("127.0.0.1".into()),
                 notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.8".into()),
                 headers: vec![],
+                data: None,
             }
         }
     }
