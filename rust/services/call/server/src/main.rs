@@ -82,13 +82,21 @@ impl Cli {
             });
         let jwt_config = match self.jwt_public_key {
             Some(public_key) => {
-                let public_key = std::fs::read_to_string(&public_key).with_context(|| {
+                let key = std::fs::read_to_string(&public_key).with_context(|| {
                     format!("Failed to open file '{}' for reading", public_key.display())
                 })?;
-                let public_key = DecodingKey::from_rsa_pem(public_key.as_bytes())?;
-                Some(JwtConfig::new(public_key, self.jwt_algorithm.unwrap_or_default()))
+                let key = DecodingKey::from_rsa_pem(key.as_bytes())?;
+                let algorithm = self.jwt_algorithm.unwrap_or_default();
+                info!(
+                    "Using JWT-based authorization with public key '{}' and algorithm '{algorithm:#?}'.",
+                    public_key.display()
+                );
+                Some(JwtConfig::new(key, algorithm))
             }
-            None => None,
+            None => {
+                warn!("Running without authorization.");
+                None
+            }
         };
         Ok(ConfigBuilder::default()
             .with_call_guest_elf(&CALL_GUEST_ELF)

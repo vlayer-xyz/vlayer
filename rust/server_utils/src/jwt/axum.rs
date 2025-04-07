@@ -15,6 +15,7 @@ pub use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
+use tracing::error;
 
 #[derive(Deref, Clone, Deserialize)]
 pub struct ClaimsExtractor<T: Clone>(pub T);
@@ -65,9 +66,10 @@ where
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        let body = Json(json!({
+        let body = json!({
             "error": self.to_string(),
-        }));
-        (StatusCode::BAD_REQUEST, body).into_response()
+        });
+        error!("authorization error: {body}");
+        (StatusCode::BAD_REQUEST, Json(body)).into_response()
     }
 }
