@@ -30,9 +30,13 @@ export interface ProveOptions {
   preverifyVersions?: boolean;
 }
 
-async function preverifyVersions(url: string, shouldPreverify: boolean) {
+async function preverifyVersions(
+  url: string,
+  shouldPreverify: boolean,
+  token?: string,
+) {
   if (shouldPreverify) {
-    const proverVersions = await v_versions(url);
+    const proverVersions = await v_versions(url, token);
     checkVersionCompatibility(proverVersions.result.api_version, sdkVersion);
   }
 }
