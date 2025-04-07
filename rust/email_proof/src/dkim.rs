@@ -6,13 +6,13 @@ pub use crate::errors::Error;
 
 pub(crate) mod verify_signature;
 
-pub fn verify_email_contains_dkim_headers(
-    dkim_headers: &[&MailHeader<'_>],
-) -> Result<(), DKIMError> {
-    if dkim_headers.is_empty() {
-        return Err(DKIMError::SignatureSyntaxError("No DKIM-Signature header".into()));
+pub const fn verify_single_dkim_header<'a>(
+    dkim_headers: &'a [&MailHeader<'a>],
+) -> Result<&'a MailHeader<'a>, Error> {
+    if dkim_headers.len() != 1 {
+        return Err(Error::InvalidDkimHeaderCount(dkim_headers.len()));
     }
-    Ok(())
+    Ok(dkim_headers[0])
 }
 
 pub fn verify_dkim_body_length_tag(dkim_headers: &[&MailHeader<'_>]) -> Result<(), DKIMError> {
@@ -70,7 +70,7 @@ pub fn verify_required_headers_signed(
 
         for &required_field in required_signed_headers {
             if !signed_headers.contains(&required_field.to_lowercase()) {
-                return Err(Error::MissingRequiredDkimHeader(required_field.to_string()));
+                return Err(Error::MissingRequiredHeaderTag(required_field.to_string()));
             }
         }
     }
@@ -91,23 +91,37 @@ mod tests {
 
     use super::*;
 
-    mod verify_email_contains_dkim_headers {
+    mod verify_single_dkim_header {
+        use mailparse::parse_header;
+
         use super::*;
 
         #[test]
-        fn passes_for_no_empty_headers() {
+        fn passes_for_single_dkim_header() {
             let header = b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From; bh=; b=";
             let headers = [&parse_header(header).unwrap().0];
 
-            assert!(verify_email_contains_dkim_headers(&headers).is_ok());
+            let result = verify_single_dkim_header(&headers);
+            assert!(result.is_ok());
         }
 
         #[test]
-        fn fails_for_no_headers() {
-            assert_eq!(
-                verify_email_contains_dkim_headers(&[] as &[&MailHeader]).unwrap_err(),
-                DKIMError::SignatureSyntaxError("No DKIM-Signature header".into())
-            );
+        fn fails_for_no_dkim_headers() {
+            let headers: &[&MailHeader] = &[];
+
+            let err = verify_single_dkim_header(headers).unwrap_err();
+            assert_eq!(err, Error::InvalidDkimHeaderCount(headers.len()));
+        }
+
+        #[test]
+        fn fails_for_multiple_dkim_headers() {
+            let header1 = b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From; bh=; b=";
+            let header2 = b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From; bh=; b=";
+
+            let headers = [&parse_header(header1).unwrap().0, &parse_header(header2).unwrap().0];
+
+            let err = verify_single_dkim_header(&headers).unwrap_err();
+            assert_eq!(err, Error::InvalidDkimHeaderCount(headers.len()));
         }
     }
 
@@ -221,7 +235,7 @@ mod tests {
 
             assert_eq!(
                 verify_required_headers_signed(&headers, &required).unwrap_err(),
-                Error::MissingRequiredDkimHeader("To".to_string())
+                Error::MissingRequiredHeaderTag("To".to_string())
             );
         }
     }

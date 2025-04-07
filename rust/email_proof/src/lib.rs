@@ -8,8 +8,8 @@ mod from_header;
 mod test_utils;
 
 use dkim::{
-    verify_dkim_body_length_tag, verify_dns_consistency, verify_email_contains_dkim_headers,
-    verify_required_headers_signed, verify_signature::verify_signature,
+    verify_dkim_body_length_tag, verify_dns_consistency,
+    verify_required_headers_signed, verify_signature::verify_signature, verify_single_dkim_header,
 };
 use dns::extract_public_key;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
@@ -39,7 +39,7 @@ fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Er
     let raw_headers = parse_headers_bytes(email.raw_bytes)?;
 
     verify_no_fake_separator(raw_headers)?;
-    verify_email_contains_dkim_headers(&dkim_headers)?;
+    let _dkim_header = verify_single_dkim_header(&dkim_headers)?;
     verify_dns_consistency(&dkim_headers, dns_record)?;
     verify_required_headers_signed(&dkim_headers, &REQUIRED_SIGNED_HEADERS)?;
     verify_dkim_body_length_tag(&dkim_headers)?;
