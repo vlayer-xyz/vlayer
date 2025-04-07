@@ -2,7 +2,7 @@ use std::{collections::HashMap, fmt::Debug, str};
 
 use derive_builder::Builder;
 use derive_new::new;
-use http_body_util::Empty;
+use http_body_util::Full;
 use hyper::{body::Bytes, Request, StatusCode};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
@@ -35,7 +35,7 @@ pub struct NotaryConfig {
     pub enable_tls: bool,
 }
 
-#[derive(Builder, Debug, Clone, new)]
+#[derive(Builder, Debug, Clone)]
 #[builder(setter(into))]
 pub struct NotarizeParams {
     pub notary_config: NotaryConfig,
@@ -44,6 +44,8 @@ pub struct NotarizeParams {
     pub server_port: u16,
     pub uri: String,
     pub headers: HashMap<String, String>,
+    #[builder(setter(into, strip_option), default)]
+    pub body: Option<Vec<u8>>,
     pub redaction_config_fn: RedactionConfigFn,
 }
 
@@ -59,6 +61,7 @@ pub async fn notarize(
         server_port,
         uri,
         headers,
+        body,
         redaction_config_fn,
     } = params;
 
@@ -111,19 +114,7 @@ pub async fn notarize(
 
     tokio::spawn(connection);
 
-    let mut request_builder = Request::builder()
-        .uri(uri)
-        .header("Host", server_domain)
-        .header("Accept", "*/*")
-        .header("Accept-Encoding", "identity")
-        .header("Connection", "close")
-        .header("User-Agent", USER_AGENT);
-
-    for (k, v) in &headers {
-        request_builder = request_builder.header(k, v);
-    }
-
-    let request = request_builder.body(Empty::<Bytes>::new())?;
+    let request = prepare_request(&server_domain, &uri, &headers, body.unwrap_or(Vec::default()))?;
 
     debug!("Starting an MPC TLS connection with the server");
 
@@ -156,4 +147,45 @@ pub async fn notarize(
     let (attestation, secrets) = Box::pin(prover.finalize(&request_config)).await?;
     debug!("Finished notarizing");
     Ok((attestation, secrets, redaction_config))
+}
+
+fn prepare_request(
+    server_domain: &str,
+    uri: &str,
+    headers: &HashMap<String, String>,
+    body: impl AsRef<[u8]>,
+) -> Result<Request<Full<Bytes>>, hyper::http::Error> {
+    let mut request_builder = Request::builder()
+        .uri(uri)
+        .header("Host", server_domain)
+        .header("Accept", "*/*")
+        .header("Accept-Encoding", "identity")
+        .header("Connection", "close")
+        .header("User-Agent", USER_AGENT);
+
+    for (k, v) in headers {
+        request_builder = request_builder.header(k, v);
+    }
+
+    request_builder.body(Full::new(Bytes::from(body.as_ref().to_vec())))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_prepare_request() {
+        let request = prepare_request(
+            "lotr-api.online",
+            "/auth_header_require?param1=value1&param2=value2",
+            &HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]),
+            "abc",
+        )
+        .unwrap();
+
+        let body = request.body();
+
+        assert_eq!(r#"Full { data: Some(b"abc") }"#, format!("{body:?}"));
+    }
 }
