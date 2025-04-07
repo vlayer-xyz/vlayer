@@ -153,7 +153,23 @@ async fn run(mode: Mode, config: HostConfig) -> anyhow::Result<()> {
 async fn main() {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+
+    // The RPC URLs typically contain a secret token in path.
+    // We redact it in logs.
+    let mut secrets = Vec::new();
+    let stripped_url = cli
+        .rpc_url
+        .trim_start_matches("http://")
+        .trim_start_matches("https://");
+
+    if let Some(pos) = stripped_url.find('/') {
+        let token = &stripped_url[pos + 1..];
+        if !token.is_empty() {
+            secrets.push(token.to_string());
+        }
+    }
+
+    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain), Some(secrets));
 
     let mode = cli.mode;
     let config: HostConfig = cli.into();

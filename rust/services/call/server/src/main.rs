@@ -118,7 +118,27 @@ async fn main() -> anyhow::Result<()> {
     let api_version = version::version();
     let cli = Cli::parse();
 
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+    // The RPC URLs typically contain a secret token in path.
+    // We redact it in logs.
+    let mut secrets = Vec::new();
+    cli.rpc_url
+        .clone()
+        .into_iter()
+        .for_each(|(_chain_id, url)| {
+            let stripped_url = url
+                .trim_start_matches("http://")
+                .trim_start_matches("https://");
+
+            // Extract the part after the first '/' if it exists
+            if let Some(pos) = stripped_url.find('/') {
+                let token = &stripped_url[pos + 1..];
+                if !token.is_empty() {
+                    secrets.push(token.to_string());
+                }
+            }
+        });
+
+    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain), Some(secrets));
 
     let config = cli.into_config(api_version)?;
 
