@@ -28,6 +28,9 @@ inputs:
     description: "Number of days to retain artifacts"
     required: false
     default: "30"
+  playwright_test_x_com_auth_token:
+    description: "x.com auth token (cookie) for Playwright tests"
+    required: true
 
 runs:
   using: composite
@@ -142,4 +145,5 @@ runs:
         REPORT_PATH: "examples/**/vlayer/playwright-report/"
         PR_NUMBER: ${{ github.event.number }}
         DEPLOY_TYPE: "examples"
+        TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
         CONTEXT: "test-e2e-web-apps-devnet-${{ inputs.example }}"

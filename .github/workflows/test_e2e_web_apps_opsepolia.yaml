@@ -153,3 +153,4 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
