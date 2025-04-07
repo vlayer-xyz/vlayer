@@ -35,7 +35,7 @@ contract Groth16ProofVerifierUnderTest is Groth16ProofVerifier {
 }
 
 contract PinnedProofVerifer_Tests is Test {
-    bytes32 internal seed;
+    bytes32 internal fuzzingSeed;
 
     function setUp() public {
         // Proof has been generated with anvil, whereas we are checking against forge chain,
@@ -62,8 +62,8 @@ contract PinnedProofVerifer_Tests is Test {
     }
 
     function _randomBool() internal returns (bool) {
-        seed = keccak256(abi.encode(seed));
-        return uint256(seed) % 2 == 1;
+        fuzzingSeed = keccak256(abi.encode(fuzzingSeed));
+        return uint256(fuzzingSeed) % 2 == 1;
     }
 
     // Enums can't be fuzzed https://github.com/foundry-rs/foundry/issues/871
@@ -111,8 +111,8 @@ contract PinnedProofVerifer_Tests is Test {
         return (randomProof, ProofFixtures.journalHash(randomProof.callAssumptions, ProofFixtures.FIXED_OWNER, ProofFixtures.FIXED_BALANCE));
     }
 
-    function testFuzz_cannotVerifyManipulatedGroth16Proof(FuzzableProof calldata randomFuzzableProof, bytes32 _seed) public {
-        seed = _seed;
+    function testFuzz_cannotVerifyManipulatedGroth16Proof(FuzzableProof calldata randomFuzzableProof, bytes32 _fuzzingSeed) public {
+        fuzzingSeed = _fuzzingSeed;
         Proof memory randomProof = _fromFuzzable(randomFuzzableProof);
 
         vm.setBlockhash(ProofFixtures.FIXED_SETTLE_BLOCK_NUMBER, ProofFixtures.FIXED_GROTH16_SETTLE_BLOCK_HASH);
