@@ -8,12 +8,13 @@ mod from_header;
 mod test_utils;
 
 use dkim::{
-    verify_dkim_body_length_tag, verify_dkim_header_dns_consistency,
-    verify_email_contains_dkim_headers, verify_email_with_key,
+    verify_dkim_body_length_tag, verify_dns_consistency, verify_email_contains_dkim_headers,
+    verify_signature::verify_signature,
 };
-use dns::parse_dns_record;
+use dns::extract_public_key;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
-use mailparse::{parse_mail, MailHeaderMap};
+use mailparse::{parse_mail, MailHeaderMap, ParsedMail};
+use verifiable_dns::DNSRecord;
 
 pub use crate::{email::Email, errors::Error};
 
@@ -21,19 +22,27 @@ const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_record, verification_data) = UnverifiedEmail::parse_calldata(calldata)?;
+
     let email = parse_mail(&raw_email)?;
-    let dkim_public_key = parse_dns_record(&dns_record.data)?;
+    let dkim_public_key = extract_public_key(&dns_record.data)?;
+
+    validate_headers(&email, &dns_record)?;
+    dns_record.verify(&verification_data)?;
+    verify_signature(&email, dkim_public_key)?;
+
+    Ok(email.try_into()?)
+}
+
+fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Error> {
     let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
     let raw_headers = parse_headers_bytes(email.raw_bytes)?;
 
-    verify_no_fake_separator(raw_headers)?;
-    dns_record.verify(&verification_data)?;
     verify_email_contains_dkim_headers(&dkim_headers)?;
+    verify_dns_consistency(&dkim_headers, dns_record)?;
+    verify_no_fake_separator(raw_headers)?;
     verify_dkim_body_length_tag(&dkim_headers)?;
-    verify_email_with_key(&email, dkim_public_key)?;
-    verify_dkim_header_dns_consistency(&dkim_headers, &dns_record)?;
 
-    Ok(email.try_into()?)
+    Ok(())
 }
 
 fn parse_headers_bytes(raw_email: &[u8]) -> Result<&[u8], Error> {
@@ -67,7 +76,7 @@ mod test {
     };
 
     use super::*;
-    use crate::test_utils::{signed_email_fixture, unsigned_email_fixture};
+    use crate::test_utils::signed_email_fixture;
 
     fn sign_dns_fixture(dns_fixture: &SolDnsRecord) -> SolVerificationData {
         let verification_data_signed = sign_record(
@@ -151,49 +160,6 @@ mod test {
     }
 
     #[test]
-    fn passes_for_dns_record_with_missing_v_and_k_tags() -> anyhow::Result<()> {
-        let dns_record = SolDnsRecord {
-            data: "  p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB".into(),
-            ..DNS_FIXTURE.clone()
-        };
-        let verification_data = sign_dns_fixture(&dns_record);
-        let calldata = calldata(&signed_email_fixture(), &dns_record, &verification_data);
-
-        assert_eq!(
-            parse_and_verify(&calldata)?,
-            Email {
-                from: "ivan@vlayer.xyz".into(),
-                to: "Ivan Rukhavets <ivanruch@gmail.com>".into(),
-                subject: Some("Is dinner ready?".into(),),
-                body: "Foo bar\r\n\r\n".into(),
-            }
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn fails_for_missing_signature() {
-        let email = unsigned_email_fixture();
-        let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
-
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "Error verifying DKIM: signature syntax error: No DKIM-Signature header".to_string()
-        );
-    }
-
-    #[test]
-    fn fails_for_mismatching_body() {
-        let email = read_email_from_file("./testdata/signed_email_modified_body.txt");
-        let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
-
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "Error verifying DKIM: body hash did not verify".to_string()
-        );
-    }
-
-    #[test]
     fn fails_for_missing_dns_record() {
         let email = signed_email_fixture();
         let dns_record = SolDnsRecord {
@@ -210,79 +176,39 @@ mod test {
         );
     }
 
-    #[test]
-    fn fails_for_invalid_vdns_signature() {
-        let email = signed_email_fixture();
-        let verification_data = SolVerificationData {
-            signature: bytes!("1234"),
-            ..VERIFICATION_DATA.clone()
-        };
-        let calldata = calldata(&email, &DNS_FIXTURE, &verification_data);
+    mod verifiable_dns_integration {
+        use super::*;
 
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "VDNS signature verification failed: Signature verification error".to_string()
-        );
-    }
+        #[test]
+        fn fails_for_invalid_vdns_signature() {
+            let email = signed_email_fixture();
+            let verification_data = SolVerificationData {
+                signature: bytes!("1234"),
+                ..VERIFICATION_DATA.clone()
+            };
+            let calldata = calldata(&email, &DNS_FIXTURE, &verification_data);
 
-    #[test]
-    fn fails_for_missing_vdns_signature() {
-        let email = signed_email_fixture();
-        let verification_data = SolVerificationData {
-            signature: Default::default(),
-            pubKey: Default::default(),
-            validUntil: 0,
-        };
-        let calldata = calldata(&email, &DNS_FIXTURE, &verification_data);
+            assert_eq!(
+                parse_and_verify(&calldata).unwrap_err().to_string(),
+                "VDNS signature verification failed: Signature verification error".to_string()
+            );
+        }
 
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "VDNS signature verification failed: Public key decoding error: ASN.1 error: ASN.1 DER message is incomplete: expected 1, actual 0 at DER byte 0".to_string()
-        );
-    }
+        #[test]
+        fn fails_for_missing_vdns_signature() {
+            let email = signed_email_fixture();
+            let verification_data = SolVerificationData {
+                signature: Default::default(),
+                pubKey: Default::default(),
+                validUntil: 0,
+            };
+            let calldata = calldata(&email, &DNS_FIXTURE, &verification_data);
 
-    #[test]
-    fn fails_for_mismatching_signer_and_sender_domain() {
-        let email = read_email_from_file("./testdata/signed_email_different_domains.txt");
-        let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
-
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "Error verifying DKIM: signature did not verify".to_string()
-        );
-    }
-
-    #[test]
-    fn fails_when_from_address_is_from_subdomain() {
-        let email = read_email_from_file("./testdata/signed_email_from_subdomain.txt");
-        let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
-
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "Error verifying DKIM: signature did not verify".to_string()
-        );
-    }
-
-    #[test]
-    fn fails_when_dkim_signer_address_is_from_subdomain() {
-        let email = read_email_from_file("./testdata/signed_email_from_subdomain.txt");
-        let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
-
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "Error verifying DKIM: signature did not verify".to_string()
-        );
-    }
-
-    #[test]
-    fn fails_for_dkim_signature_of_truncated_body() {
-        let email = read_email_from_file("./testdata/signed_email_with_dkim_l_tag.eml");
-        let calldata = calldata(&email, &DNS_FIXTURE, &VERIFICATION_DATA);
-
-        assert_eq!(
-            parse_and_verify(&calldata).unwrap_err().to_string(),
-            "Error verifying DKIM: signature syntax error: DKIM-Signature header contains body length tag (l=)".to_string()
-        );
+            assert_eq!(
+                parse_and_verify(&calldata).unwrap_err().to_string(),
+                "VDNS signature verification failed: Public key decoding error: ASN.1 error: ASN.1 DER message is incomplete: expected 1, actual 0 at DER byte 0".to_string()
+            );
+        }
     }
 
     mod verify_no_lone_separator {
