@@ -119,6 +119,13 @@ export class Webpage {
     expect(await text.textContent()).toEqual(expectedText);
   }
 
+  async expectContainText(id: string, expectedText: string) {
+    const text = this.page.locator("body").getByTestId(id);
+    await expect(text).toBeVisible();
+
+    expect(await text.textContent()).toContain(expectedText);
+  }
+
   async checkProof(vlayerResponses: Promise<Response | null>[]) {
     expect(vlayerResponses.length).toBeGreaterThan(1);
 
