@@ -3,7 +3,7 @@ import { waitForExtension } from "./pom/extension";
 import { Webpage } from "./pom/webpage";
 import { dappUrl, dashboardUrl, loginUrl } from "./urls";
 
-// For now to remove flakyness of tests we need to delay messages
+// For now to remove flakiness of tests we need to delay messages
 const delayMessage = async () => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 };
