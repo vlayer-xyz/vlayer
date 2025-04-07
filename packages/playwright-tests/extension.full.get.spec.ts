@@ -12,7 +12,7 @@ test("Full flow from opening sidepanel to redirection", async ({
     await page.goto(dappUrl);
     const webpage = new Webpage(page, context);
 
-    await webpage.clickButton("Request proof of beeing a wizard");
+    await webpage.clickButton("Request proof of being a wizard");
 
     const extension = await waitForExtension(context);
     expect(extension).toBeDefined();
@@ -22,9 +22,9 @@ test("Full flow from opening sidepanel to redirection", async ({
   const webpage = new Webpage(page, context);
 
   await test.step("Extension should stay ok after clicking request button multiple times", async () => {
-    await webpage.clickButton("Request proof of beeing a wizard");
-    await webpage.clickButton("Request proof of beeing a wizard");
-    await webpage.clickButton("Request proof of beeing a wizard");
+    await webpage.clickButton("Request proof of being a wizard");
+    await webpage.clickButton("Request proof of being a wizard");
+    await webpage.clickButton("Request proof of being a wizard");
 
     const extension = await waitForExtension(context);
     expect(extension).toBeDefined();

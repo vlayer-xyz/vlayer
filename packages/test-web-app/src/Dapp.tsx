@@ -156,7 +156,7 @@ function DappWithProfile(profile: string) {
         data-testid="request-webproof-button"
         onClick={handleWebProofRequestClick}
       >
-        Request proof of beeing a wizard
+        Request proof of being a wizard
       </button>
 
       <div>

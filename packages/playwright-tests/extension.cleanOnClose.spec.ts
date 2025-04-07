@@ -10,7 +10,7 @@ const delayMessage = async () => {
 test("Cleanup of storage on extension close", async ({ page, context }) => {
   await page.goto(dappUrl);
   const webpage = new Webpage(page, context);
-  await webpage.clickButton("Request proof of beeing a wizard");
+  await webpage.clickButton("Request proof of being a wizard");
 
   let extension = await waitForExtension(context);
 

@@ -16,7 +16,7 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
     await page.goto(dappFailedAuthUrl);
     const webpage = new Webpage(page, context);
 
-    await webpage.clickButton("Request proof of beeing a wizard");
+    await webpage.clickButton("Request proof of being a wizard");
 
     const extension = await waitForExtension(context);
 
