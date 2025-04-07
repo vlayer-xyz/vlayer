@@ -35,7 +35,7 @@ struct RedactingWriter<W: std::io::Write> {
 }
 
 impl<W: std::io::Write> RedactingWriter<W> {
-    fn new(inner: W, secrets: Arc<Vec<String>>) -> Self {
+    const fn new(inner: W, secrets: Arc<Vec<String>>) -> Self {
         Self { inner, secrets }
     }
 }
