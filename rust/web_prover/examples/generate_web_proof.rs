@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use web_prover::{generate_web_proof, NotarizeParamsBuilder, NotaryConfig};
 
 #[tokio::main]
