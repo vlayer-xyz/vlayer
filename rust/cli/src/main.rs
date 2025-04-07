@@ -14,6 +14,7 @@ use crate::{
     errors::Result,
 };
 
+mod cli_wrappers;
 mod commands;
 mod config;
 pub mod errors;
