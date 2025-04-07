@@ -11,6 +11,8 @@ import {
 import React from "react";
 import { Abi } from "viem";
 
+const TOKEN = import.meta.env.VITE_VLAYER_API_TOKEN;
+
 const webProofConfig: WebProofConfig<Abi, string> = {
   proverCallCommitment: {
     address: "0x0000000000000000000000000000000000000000",
@@ -66,6 +68,7 @@ function DappPut() {
       config={{
         notaryUrl: "http://localhost:7047",
         wsProxyUrl: "ws://localhost:3003",
+        token: TOKEN,
       }}
     >
       <DappPutContent />
