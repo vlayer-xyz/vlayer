@@ -253,7 +253,7 @@ To configure `https://api.example.com` use following command:
 vlayer jwt encode -p ./fixtures/jwt-authority.key --subject deadbeef --host "api.example.com" --post 443
 ```
 
-Before further development, generated token should be placed in `.env` file. Make sure that local web server got reloaded after this change. 
+Before further development, generated token should be placed in `.env` file as `VLAYER_API_TOKEN`. Make sure that local web server got reloaded after this change. 
 
 ### Obtaining Web Proof
 
@@ -267,7 +267,7 @@ A correctly generated web proof is stored in your browser's `localStorage` under
 
 ### Generating ZK proof in the prover 
 
-After obtaining the web proof via the browser extension, it must be sent to the vlayer prover contract.
+After obtaining the Web Proof via the browser extension, it must be sent to the vlayer prover contract.
 That is performed by `callProver()` function in `vlayer/src/components/organisms/ProveStep/Container.tsx`. 
 Through vlayer sdk proof is injected into prover contract: `src/vlayer/WebProofProver.sol`. Make sure that proper URL is checked there:
 ```solidity
@@ -282,7 +282,7 @@ bun run deploy:dev
 ```
 
 ### Verifying on-chain 
-Once ZK proof is returned from prover it can be used for on-chain verification. Proof along with public inputs have to passed to `WebProofVerifier.sol` using write call: 
+Once ZK proof is returned from prover it can be used for on-chain verification. Proof along with public inputs has to passed to `WebProofVerifier.sol` using write call: 
 ```javascript
 const writeContractArgs: Parameters<typeof writeContract>[0] = {
     address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`, // Verifier contract address
@@ -307,7 +307,7 @@ No, this is not supported at the moment.
 2. Select **Inspect**.  
 3. Go to the **Console** tab.  
 
-> **Note:** The extension console is separate from your application console.  
+> **Note:** The extension console is separate from your webapp console.  
 
 #### **Can I make assertions about JSON attributes?**  
 Yes, assertions must be implemented in the Prover code. You can find more details [here](/features/json-and-regex.html).  
