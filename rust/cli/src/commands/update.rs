@@ -6,7 +6,10 @@ use logger::UpdateLogger;
 use serde_json::Value;
 
 use crate::{
-    cli_wrappers::{base, js, vlayer::Cli as Vlayer},
+    cli_wrappers::{
+        base, js,
+        vlayer::{self, Cli as Vlayer},
+    },
     config::Config,
     errors::{Error, Result},
     soldeer::{add_remappings, install_solidity_dependencies},
@@ -42,8 +45,10 @@ fn ensure_vlayerup_exists() -> Result<()> {
 
 fn update_cli() -> Result<()> {
     let logger = UpdateLogger::new("CLI");
+    let previous_version = vlayer::Cli::version()?;
     base::Cli::run("vlayerup", &["update"])?;
-    logger.success();
+    let updated_version = vlayer::Cli::version()?;
+    logger.success_with_version_info(&previous_version, &updated_version);
     Ok(())
 }
 
