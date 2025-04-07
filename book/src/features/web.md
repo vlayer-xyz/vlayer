@@ -204,7 +204,7 @@ Start local devnet:
 bun run devnet:up 
 ```
 
-In separate terminal run example web application: 
+In a separate terminal, run the example web application:
 ```sh 
 bun run web:dev 
 ```
@@ -213,10 +213,10 @@ bun run web:dev
 Once the application is running, you can customize it for your chosen data source.
 We recommend first obtaining a web proof in your browser.
 
-To configure new data source open `vlayer/src/hooks/useTwitterAccountProof.ts` and take a look into `steps[]` attribute in `webProofConfig` object. 
-Example logic is wrapped within React Hook, but you can achieve same thing in vanilla JS. 
+To configure a new data source, open `vlayer/src/hooks/useTwitterAccountProof.ts` and examine the `steps[]` attribute in the `webProofConfig` object. 
+Example logic is wrapped within a React Hook, but you can achieve the same thing in vanilla JS. 
 
-Now you can setup new data source: 
+Now you can set up a new data source: 
 ```javascript
 // specify starting page where extension redirects your user
 startPage("https://x.com/", "Go to start page"), 
@@ -248,7 +248,7 @@ notarize(
 
 If you picked any other data source than `api.x.com` you would need to regenerate your local API token that sits in `vlayer/.env.testnet`. 
 
-To configure `https://api.example.com` use following command: 
+To configure `https://api.example.com`, use the following command:
 ```sh
 vlayer jwt encode -p ./fixtures/jwt-authority.key --subject deadbeef --host "api.example.com" --post 443
 ```
@@ -284,7 +284,7 @@ bun run deploy:dev
 ```
 
 ### Verifying on-chain 
-Once ZK proof is returned from prover it can be used for on-chain verification. Proof along with public inputs has to passed to `WebProofVerifier.sol` using write call: 
+Once ZK proof is returned from prover it can be used for on-chain verification. Proof along with public inputs has to be passed to `WebProofVerifier.sol` using a write call: 
 ```javascript
 const writeContractArgs: Parameters<typeof writeContract>[0] = {
     address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`, // Verifier contract address
