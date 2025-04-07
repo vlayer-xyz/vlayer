@@ -12,26 +12,24 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
   page,
   context,
 }) => {
-  await test.step("Web-app should open sidepanel via SDK call", async () => {
-    await page.goto(dappFailedAuthUrl);
-    const webpage = new Webpage(page, context);
+  await page.goto(dappFailedAuthUrl);
+  const webpage = new Webpage(page, context);
 
-    await webpage.clickButton("Request proof of being a wizard");
+  await webpage.clickButton("Request proof of being a wizard");
 
-    const extension = await waitForExtension(context);
+  const extension = await waitForExtension(context);
 
-    const appPage = await extension.redirect();
-    await appPage.waitForURL(loginUrl);
+  const appPage = await extension.redirect();
+  await appPage.waitForURL(loginUrl);
 
-    await appPage.clickButton("Login");
-    await appPage.waitForURL(dashboardUrl);
+  await appPage.clickButton("Login");
+  await appPage.waitForURL(dashboardUrl);
 
-    await appPage.clickButton("Go to profile failed auth");
-    await appPage.waitForURL(profileFailedAuthUrl);
+  await appPage.clickButton("Go to profile failed auth");
+  await appPage.waitForURL(profileFailedAuthUrl);
 
-    await extension.generateWebProof();
-    await extension.expectErrorToBeDisplayed(
-      "Authentication failed. Please restart the process.",
-    );
-  });
+  await extension.generateProof();
+  await extension.expectErrorToBeDisplayed(
+    "Authentication failed. Please restart the process.",
+  );
 });
