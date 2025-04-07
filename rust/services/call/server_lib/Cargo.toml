@@ -12,7 +12,7 @@ anyhow = { workspace = true }
 async-trait = { workspace = true }
 auto_impl = { workspace = true }
 axum = { workspace = true }
-axum-extra = { workspace = true, features = ["typed-header"] }
+axum-extra = { workspace = true }
 call_common = { workspace = true }
 call_engine = { workspace = true }
 call_host = { workspace = true }
@@ -52,7 +52,3 @@ web_proof = { workspace = true, features = ["fixtures"] }
 
 [lints]
 workspace = true
-
-[features]
-default = []
-jwt = ["server_utils/jwt"]

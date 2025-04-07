@@ -1,6 +1,5 @@
 mod field_validation;
 mod json_rpc;
-#[cfg(feature = "jwt")]
 pub mod jwt;
 mod layers;
 mod proof_mode;
