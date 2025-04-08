@@ -6,6 +6,7 @@ function get_examples() {
         "simple-web-proof"
         "simple-time-travel"
         "simple-teleport"
+        "kraken-web-proof"
     )
 
     # "simple-teleport" is not enabled on testnet as we still need to deploy chain workers
