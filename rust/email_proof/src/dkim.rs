@@ -14,15 +14,19 @@ pub struct DKIMHeader {
     pub header: header::DKIMHeader,
 }
 
-impl DKIMHeader {
-    pub fn new(dkim_header: &MailHeader) -> Self {
-        let value = String::from_utf8_lossy(dkim_header.get_value_raw());
-        let dkim_header = validate_header(&value).expect("Invalid DKIM header");
-        Self {
-            header: dkim_header,
-        }
-    }
+impl TryFrom<&MailHeader<'_>> for DKIMHeader {
+    type Error = DKIMError;
 
+    fn try_from(dkim_header: &MailHeader) -> Result<Self, Self::Error> {
+        let value = String::from_utf8_lossy(dkim_header.get_value_raw());
+        let dkim_header = validate_header(&value)?;
+        Ok(Self {
+            header: dkim_header,
+        })
+    }
+}
+
+impl DKIMHeader {
     pub fn verify_body_length_tag(&self) -> Result<(), DKIMError> {
         if self.header.get_tag("l").is_some() {
             return Err(DKIMError::SignatureSyntaxError(
@@ -92,8 +96,8 @@ pub fn get_dkim_header(email: &ParsedMail) -> Result<DKIMHeader, Error> {
         .headers
         .get_all_headers(DKIM_SIGNATURE_HEADER)
         .iter()
-        .map(|header| DKIMHeader::new(header))
-        .collect();
+        .map(|header| (*header).try_into())
+        .collect::<Result<_, _>>()?;
     let from_headers = email.headers.get_all_headers("From");
 
     let Some(from_header) = from_headers.last() else {
@@ -156,8 +160,7 @@ mod tests {
     use super::*;
 
     pub fn from_raw_data(raw_data: &[u8]) -> DKIMHeader {
-        let header = parse_header(raw_data).unwrap().0;
-        DKIMHeader::new(&header)
+        DKIMHeader::try_from(&parse_header(raw_data).unwrap().0).unwrap()
     }
 
     mod get_dkim_header {
