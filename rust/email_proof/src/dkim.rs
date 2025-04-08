@@ -32,12 +32,16 @@ impl DKIMHeader {
     }
 
     pub fn verify_dns_consistency(&self, record: &DNSRecord) -> Result<(), Error> {
-        let selector = self.header.get_tag("s").ok_or_else(|| {
-            DKIMError::SignatureSyntaxError("Missing selector tag (s=) in DKIM-Signature".into())
-        })?;
-        let domain = self.header.get_tag("d").ok_or_else(|| {
-            DKIMError::SignatureSyntaxError("Missing domain tag (d=) in DKIM-Signature".into())
-        })?;
+        let Some(selector) = self.header.get_tag("s") else {
+            return Err(Error::DkimVerification(DKIMError::SignatureSyntaxError(
+                "Missing selector tag (s=) in DKIM-Signature".into(),
+            )));
+        };
+        let Some(domain) = self.header.get_tag("d") else {
+            return Err(Error::DkimVerification(DKIMError::SignatureSyntaxError(
+                "Missing domain tag (d=) in DKIM-Signature".into(),
+            )));
+        };
 
         let expected = normalize_dns_name(&format!("{selector}._domainkey.{domain}"));
         let actual = normalize_dns_name(&record.name);
