@@ -132,9 +132,7 @@ impl ValidatedUrl {
 fn parse_proven_url(url_str: &str) -> Result<ProvenUrl, InputError> {
     //Only https is allowed for proven urls as it does not make sense to prove http urls (not tls => no tlsn)
 
-    let ValidatedUrl {
-        host, port, ..
-    } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https])?;
+    let ValidatedUrl { host, port, .. } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https])?;
 
     Ok(ProvenUrl { host, port })
 }
