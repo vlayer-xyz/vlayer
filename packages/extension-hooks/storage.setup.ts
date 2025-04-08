@@ -63,7 +63,6 @@ vi.doMock("webextension-polyfill", () => {
           addListener: vi
             .fn()
             .mockImplementation((callback: (message: unknown) => void) => {
-              console.log("addListener", callback);
               messageListeners.add(callback);
             }),
           removeListener: vi

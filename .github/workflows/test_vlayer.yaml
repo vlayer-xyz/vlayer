@@ -44,11 +44,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0 # Needed for restoring mtime
-      # For more efficient Cargo target dir reuse
-      - name: Restore timestamps
-        uses: chetan/git-restore-mtime-action@26fb42a93ac0f66e9c0c5ad3bd03079cb9ee5300 # v2.1
-
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
@@ -69,7 +64,7 @@ jobs:
         uses: ./.github/actions/reuse-cargo-target
         with:
           targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
-          target_name: test-vlayer-mtime
+          target_name: test-vlayer
       - name: Build CLI
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}

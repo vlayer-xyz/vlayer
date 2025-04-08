@@ -32,6 +32,6 @@ function verify_deployment_is_stable_across_networks(){
 cd "${CONTRACTS_DIR}"
 
 cleanup
-build_contracts
+build_core_contracts
 deploy_contracts
 verify_deployment_is_stable_across_networks
