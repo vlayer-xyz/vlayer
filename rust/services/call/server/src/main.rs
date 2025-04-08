@@ -11,7 +11,7 @@ use call_server_lib::{
     serve, Config, ConfigBuilder, ProofMode,
 };
 use clap::{ArgAction, Parser};
-use common::{init_tracing, GlobalArgs};
+use common::{extract_rpc_url_token, init_tracing, GlobalArgs};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
 use server_utils::set_risc0_dev_mode;
 use tracing::{info, warn};
@@ -118,25 +118,11 @@ async fn main() -> anyhow::Result<()> {
     let api_version = version::version();
     let cli = Cli::parse();
 
-    // The RPC URLs typically contain a secret token in path.
-    // We redact it in logs.
-    let mut secrets = Vec::new();
-    cli.rpc_url
-        .clone()
-        .into_iter()
-        .for_each(|(_chain_id, url)| {
-            let stripped_url = url
-                .trim_start_matches("http://")
-                .trim_start_matches("https://");
-
-            // Extract the part after the first '/' if it exists
-            if let Some(pos) = stripped_url.find('/') {
-                let token = &stripped_url[pos + 1..];
-                if !token.is_empty() {
-                    secrets.push(token.to_string());
-                }
-            }
-        });
+    let secrets: Vec<String> = cli
+        .rpc_url
+        .iter()
+        .filter_map(|(_chain_id, url)| extract_rpc_url_token(url))
+        .collect();
 
     init_tracing(cli.global_args.log_format, secrets);
 

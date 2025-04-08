@@ -5,7 +5,7 @@ use chain_host::{
     set_risc0_dev_mode, AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode,
 };
 use clap::Parser;
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{extract_rpc_url_token, init_tracing, GlobalArgs};
 use dotenvy::dotenv;
 use ethers::{providers::Http, types::BlockNumber as BlockTag};
 use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
@@ -154,21 +154,10 @@ async fn main() {
     dotenv().ok();
     let cli = Cli::parse();
 
-    // The RPC URLs typically contain a secret token in path.
-    // We redact it in logs.
-    let mut secrets = Vec::new();
-    let stripped_url = cli
-        .rpc_url
-        .trim_start_matches("http://")
-        .trim_start_matches("https://");
-
-    if let Some(pos) = stripped_url.find('/') {
-        let token = &stripped_url[pos + 1..];
-        if !token.is_empty() {
-            secrets.push(token.to_string());
-        }
-    }
-
+    let secrets: Vec<String> = match extract_rpc_url_token(&cli.rpc_url) {
+        Some(token) => vec![token],
+        None => vec![],
+    };
     init_tracing(cli.global_args.log_format, secrets);
 
     let mode = cli.mode;
