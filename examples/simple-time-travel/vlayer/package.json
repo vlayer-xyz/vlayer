@@ -3,6 +3,7 @@
   "module": "prove.ts",
   "type": "module",
   "scripts": {
+    "lint": "eslint .",
     "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
     "lint:solidity": "solhint '../src/**/*.sol'",
@@ -16,17 +17,21 @@
     "test-web:testnet": "VLAYER_ENV=testnet bun run playwright test"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@noble/hashes": "^1.4.0",
     "@sentry/react": "^8.54.0",
+    "@tanstack/react-query": "^5.72.0",
     "@vercel/analytics": "^1.4.1",
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
     "debug": "^4.4.0",
+    "eslint-plugin-import": "^2.31.0",
     "react": "^18.3.1",
     "react-daisyui": "^5.0.5",
     "react-dom": "^18.3.1",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.5",
+    "viem": "^2.26.2",
     "wagmi": "^2.14.6",
     "zod": "^3.24.2"
   },
