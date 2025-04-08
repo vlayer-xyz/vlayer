@@ -22,8 +22,7 @@ export const useProver = () => {
 
   useEffect(() => {
     if (result && Array.isArray(result)) {
-      const [proof, owner, balance] = result;
-      setProverResult(JSON.stringify([proof, owner, String(balance)]));
+      setProverResult(JSON.stringify(result));
     }
   }, [result]);
 

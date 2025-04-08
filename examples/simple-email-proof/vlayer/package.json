@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
-    "@reown/appkit": "1.6.9",
-    "@reown/appkit-adapter-wagmi": "1.6.9",
+    "@reown/appkit": "^1.7.2",
+    "@reown/appkit-adapter-wagmi": "^1.7.2",
     "@sentry/react": "^8.54.0",
     "@vercel/analytics": "^1.4.1",
     "@vlayer/react": "workspace:*",
@@ -30,8 +30,9 @@
     "react-dom": "^18.3.1",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.5",
-    "wagmi": "^2.14.6",
-    "@heroicons/react": "^2.2.0"
+    "@heroicons/react": "^2.2.0",
+    "viem" : "^2.26.1",
+    "wagmi": "^2.14.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

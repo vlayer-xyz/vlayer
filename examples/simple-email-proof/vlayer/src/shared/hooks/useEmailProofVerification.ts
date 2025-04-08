@@ -56,7 +56,7 @@ export const useEmailProofVerification = () => {
   const { data: proof, error: provingError } =
     useWaitForProvingResult(proofHash);
 
-  const verifyProofOnChain = async () => {
+  const verifyProofOnChain = () => {
     setCurrentStep(ProofVerificationStep.VERIFYING_ON_CHAIN);
 
     if (!proof) {
@@ -74,7 +74,7 @@ export const useEmailProofVerification = () => {
       >,
     };
 
-    await writeContract(contractArgs);
+    writeContract(contractArgs);
   };
 
   const startProving = async (emlContent: string) => {
@@ -92,7 +92,7 @@ export const useEmailProofVerification = () => {
   useEffect(() => {
     if (proof) {
       log("proof", proof);
-      verifyProofOnChain();
+      void verifyProofOnChain();
     }
   }, [proof]);
 
@@ -100,7 +100,7 @@ export const useEmailProofVerification = () => {
     if (status === "success" && proof) {
       setCurrentStep(ProofVerificationStep.DONE);
       const proofArray = proof as unknown[];
-      navigate(
+      void navigate(
         `/success?txHash=${txHash}&domain=${String(proofArray[3])}&recipient=${String(proofArray[2])}`,
       );
     }

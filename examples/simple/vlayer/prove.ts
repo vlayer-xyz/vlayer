@@ -1,7 +1,6 @@
 import { createVlayerClient } from "@vlayer/sdk";
 import nftSpec from "../out/ExampleNFT.sol/ExampleNFT";
 import tokenSpec from "../out/ExampleToken.sol/ExampleToken";
-import { isAddress } from "viem";
 import {
   getConfig,
   createContext,
@@ -19,7 +18,7 @@ const {
   account: john,
   proverUrl,
   confirmations,
-} = await createContext(config);
+} = createContext(config);
 
 const INITIAL_TOKEN_SUPPLY = BigInt(10_000_000);
 
@@ -69,10 +68,6 @@ const hash = await vlayer.prove({
 });
 const result = await vlayer.waitForProvingResult({ hash });
 const [proof, owner, balance] = result;
-
-if (!isAddress(owner)) {
-  throw new Error(`${owner} is not a valid address`);
-}
 
 console.log("Proof result:", result);
 

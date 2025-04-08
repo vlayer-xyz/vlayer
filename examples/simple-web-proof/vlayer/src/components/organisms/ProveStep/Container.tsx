@@ -15,15 +15,15 @@ export const ProveStep = () => {
 
   useEffect(() => {
     if (webProof) {
-      callProver([webProof, address]);
+      void callProver([webProof, address]);
     }
-  }, [webProof]);
+  }, [webProof, address, callProver]);
 
   useEffect(() => {
     if (result) {
-      navigate("/mint");
+      void navigate("/mint");
     }
-  }, [result]);
+  }, [result, navigate]);
 
   useEffect(() => {
     modalRef.current?.showModal();

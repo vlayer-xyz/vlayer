@@ -20,7 +20,7 @@ if (config.chainName === "anvil") {
 }
 
 const { chain, ethClient, account, proverUrl, confirmations } =
-  await createContext(config);
+  createContext(config);
 const vlayer = createVlayerClient({
   url: proverUrl,
   token: config.token,

@@ -66,8 +66,7 @@ export const loadFixtures = async () => {
 
   const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
   const l2TestClient = createAnvilClient(opL2, env.L2_JSON_RPC_URL);
-
-  const account = privateKeyToAccount(config.privateKey as Address);
+  const account = privateKeyToAccount(config.privateKey);
 
   const hash = await l2TestClient.deployContract({
     abi: MockERC20.abi,
@@ -91,7 +90,7 @@ export const loadFixtures = async () => {
     address: erc20addr,
     abi: MockERC20.abi,
     functionName: "transfer",
-    args: [teleportConfig.tokenHolder as Address, 100n],
+    args: [teleportConfig.tokenHolder, 100n],
     account: opAccount,
   });
 
