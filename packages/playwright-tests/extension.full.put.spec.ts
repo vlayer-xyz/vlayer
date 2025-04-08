@@ -62,7 +62,7 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
   });
 
   await test.step("Click button should generate webproof", async () => {
-    await extension.generateProof();
+    await extension.generateWebProof();
 
     await webpage.expectWebProof();
   });

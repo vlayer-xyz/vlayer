@@ -24,7 +24,7 @@ export class Extension {
     return new Webpage(newPage, this.context);
   }
 
-  async generateProof() {
+  async generateWebProof() {
     const button = this.page.getByRole("button", { name: "Generate proof" });
     await button.click();
   }

@@ -52,7 +52,7 @@ test("Full flow from opening sidepanel to redirection using proveWeb", async ({
     const vlayerResponses: Promise<Response | null>[] = [];
     page.on("requestfinished", (req) => vlayerResponses.push(req.response()));
 
-    await extension.generateProof();
+    await extension.generateWebProof();
 
     await webpage.expectZkProof();
 
