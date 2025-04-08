@@ -1,14 +1,16 @@
 use cfdkim::{header::DKIMHeader, validate_header, DKIMError};
-use mailparse::MailHeader;
+use mailparse::{MailHeader, MailHeaderMap, ParsedMail};
 use verifiable_dns::DNSRecord;
 
 pub use crate::errors::Error;
 
 pub(crate) mod verify_signature;
 
-pub const fn verify_exactly_one_dkim_header<'a>(
-    dkim_headers: &'a [&MailHeader<'a>],
-) -> Result<&'a MailHeader<'a>, Error> {
+const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
+
+pub fn get_dkim_header<'a>(email: &'a ParsedMail) -> Result<&'a MailHeader<'a>, Error> {
+    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
+
     if dkim_headers.len() != 1 {
         return Err(Error::InvalidDkimHeaderCount(dkim_headers.len()));
     }
@@ -84,25 +86,27 @@ mod tests {
     use super::*;
 
     mod verify_exactly_one_dkim_header {
-        use mailparse::parse_header;
+        use mailparse::parse_mail;
 
         use super::*;
 
         #[test]
         fn passes_for_single_dkim_header() {
-            let header = b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From; bh=; b=";
-            let headers = [&parse_header(header).unwrap().0];
+            let email =
+                parse_mail(b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From; bh=; b=").unwrap();
 
-            let result = verify_exactly_one_dkim_header(&headers);
+            let result = get_dkim_header(&email);
             assert!(result.is_ok());
         }
 
         #[test]
         fn fails_for_not_exactly_one_dkim_headers() {
-            let headers: &[&MailHeader] = &[];
+            let email = parse_mail(b"").unwrap();
 
-            let err = verify_exactly_one_dkim_header(headers).unwrap_err();
-            assert_eq!(err, Error::InvalidDkimHeaderCount(headers.len()));
+            assert_eq!(
+                get_dkim_header(&email).unwrap_err(),
+                Error::InvalidDkimHeaderCount(0)
+            );
         }
     }
 

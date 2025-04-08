@@ -8,17 +8,15 @@ mod from_header;
 mod test_utils;
 
 use dkim::{
-    verify_dkim_body_length_tag, verify_dns_consistency, verify_exactly_one_dkim_header,
-    verify_required_headers_signed, verify_signature::verify_signature,
+    get_dkim_header, verify_dkim_body_length_tag, verify_dns_consistency, verify_required_headers_signed, verify_signature::verify_signature
 };
 use dns::extract_public_key;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
-use mailparse::{parse_mail, MailHeaderMap, ParsedMail};
+use mailparse::{parse_mail, ParsedMail};
 use verifiable_dns::DNSRecord;
 
 pub use crate::{email::Email, errors::Error};
 
-const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 const REQUIRED_SIGNED_HEADERS: [&str; 3] = ["from", "to", "subject"];
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
@@ -35,11 +33,10 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
 }
 
 fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Error> {
-    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
     let raw_headers = parse_headers_bytes(email.raw_bytes)?;
+    let dkim_header = get_dkim_header(email)?;
 
     verify_no_fake_separator(raw_headers)?;
-    let dkim_header = verify_exactly_one_dkim_header(&dkim_headers)?;
     verify_dns_consistency(dkim_header, dns_record)?;
     verify_required_headers_signed(dkim_header, &REQUIRED_SIGNED_HEADERS)?;
     verify_dkim_body_length_tag(dkim_header)?;
