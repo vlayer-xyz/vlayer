@@ -65,12 +65,29 @@ pub(crate) struct WebProofArgs {
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
     let server_args: NotarizeParams = args.try_into()?;
 
-    let presentation = generate_web_proof(server_args)
-        .await
-        .map_err(|e| anyhow!("{e}"))?;
+    let presentation = generate_web_proof(
+        server_args.notary_config,
+        &server_args.domain,
+        &server_args.host,
+        server_args.port,
+        &server_args.url,
+        server_args.headers,
+    )
+    .await
+    .map_err(|e| anyhow!("{e}"))?;
     println!("{presentation}");
 
     Ok(())
+}
+
+#[derive(new, Debug)]
+pub struct ServerProvingArgs {
+    domain: String,
+    host: String,
+    port: u16,
+    url: String,
+    notary_config: NotaryConfig,
+    headers: HashMap<String, String>,
 }
 
 struct ValidatedUrl {
@@ -83,7 +100,6 @@ struct ValidatedUrl {
 struct ProvenUrl {
     host: String,
     port: u16,
-    uri: String,
 }
 
 impl ValidatedUrl {
@@ -117,15 +133,10 @@ fn parse_proven_url(url_str: &str) -> Result<ProvenUrl, InputError> {
     //Only https is allowed for proven urls as it does not make sense to prove http urls (not tls => no tlsn)
 
     let ValidatedUrl {
-        url, host, port, ..
+        host, port, ..
     } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https])?;
-    let uri = {
-        let path = url.path();
-        let query = url.query().map(|q| format!("?{q}")).unwrap_or_default();
-        format!("{path}{query}")
-    };
 
-    Ok(ProvenUrl { host, port, uri })
+    Ok(ProvenUrl { host, port })
 }
 
 fn parse_notary_url(url_str: &str) -> Result<NotaryConfig, InputError> {
@@ -153,7 +164,6 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
         let ProvenUrl {
             host: urlhost,
             port,
-            uri,
         } = parse_proven_url(&value.url)?;
         // If host is not provided fallback to host extracted from url
         let host = value.host.unwrap_or(urlhost.clone());
@@ -182,20 +192,7 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
             parse_notary_url(DEFAULT_NOTARY_URL)?
         };
 
-        let mut notarize_params_builder = NotarizeParamsBuilder::default();
-        notarize_params_builder
-            .notary_config(notary_config)
-            .server_domain(urlhost)
-            .server_host(host)
-            .server_port(port)
-            .uri(uri)
-            .headers(headers?);
-
-        if let Some(body) = value.data {
-            notarize_params_builder.body(body);
-        }
-
-        Ok(notarize_params_builder.build()?)
+        Ok(ServerProvingArgs::new(urlhost, host, port, value.url, notary_config, headers?))
     }
 }
 
@@ -214,10 +211,10 @@ mod tests {
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
 
-        assert_eq!(converted.server_domain, "api.x.com");
-        assert_eq!(converted.server_host, "127.0.0.1");
-        assert_eq!(converted.server_port, 8080);
-        assert_eq!(converted.uri, "/v1/followers?token=5daa4f53&uid=245");
+        assert_eq!(converted.domain, "api.x.com");
+        assert_eq!(converted.host, "127.0.0.1");
+        assert_eq!(converted.port, 8080);
+        assert_eq!(converted.url, "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245");
         assert_eq!(converted.notary_config.host, "notary.pse.dev");
         assert_eq!(converted.notary_config.port, 3030);
         assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
@@ -298,7 +295,7 @@ mod tests {
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
 
-        assert_eq!(converted.uri, "/v1/followers");
+        assert_eq!(converted.url, "https://api.x.com:8080/v1/followers");
     }
     #[test]
     fn test_convert_args_no_host_provided() {
