@@ -101,12 +101,13 @@ pub fn get_dkim_header(email: &ParsedMail) -> Result<DKIMHeader, Error> {
     };
     let from_domain = parse_from_domain(&from_header.get_value())?;
 
-    let headers_signing_from_domain: Vec<_> = filter_dkim_headers_by_domain(dkim_headers, &from_domain);
+    let headers_signing_from_domain: Vec<_> =
+        filter_dkim_headers_by_domain(dkim_headers, &from_domain);
 
     let only = headers_signing_from_domain
         .into_iter()
         .exactly_one()
-        // It's possible to have multiple DKIM-Signature headers with the 
+        // It's possible to have multiple DKIM-Signature headers with the
         // same signing domain but we have decided not to support it.
         .map_err(|v| Error::InvalidDkimHeaderCount(v.len()))?;
 
