@@ -49,7 +49,7 @@ export class Extension {
   }
 
   async expectErrorToBeDisplayed(expectedErrorMessage: string) {
-    await this.page.waitForSelector('p[data-testid="error-message"]');
+    await this.page.getByTestId("error-message").waitFor();
     const errorMessage = this.page.getByTestId("error-message");
     await expect(errorMessage).toHaveText(expectedErrorMessage);
   }
