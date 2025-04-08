@@ -1,26 +1,26 @@
-import { ChainConfig } from "./constants";
+import { TimeTravelConfig } from "./constants";
 import { createContext, type VlayerContextConfig } from "@vlayer/sdk/config";
 
 const getStartEndBlock = async ({
   config,
-  chainConfig,
+  timeTravelConfig,
 }: {
   config: VlayerContextConfig;
-  chainConfig: ChainConfig;
+  timeTravelConfig: TimeTravelConfig;
 }) => {
-  if (chainConfig.prover.endBlock === "latest") {
+  if (timeTravelConfig.prover.endBlock === "latest") {
     const { ethClient } = await createContext(config);
     const latestBlock = await ethClient.getBlockNumber();
 
     return {
-      startBlock: latestBlock - chainConfig.prover.travelRange,
+      startBlock: latestBlock - timeTravelConfig.prover.travelRange,
       endBlock: latestBlock,
     };
   }
 
   return {
-    startBlock: chainConfig.prover.startBlock,
-    endBlock: chainConfig.prover.endBlock,
+    startBlock: timeTravelConfig.prover.startBlock,
+    endBlock: timeTravelConfig.prover.endBlock,
   };
 };
 

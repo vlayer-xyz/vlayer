@@ -7,9 +7,9 @@ import {
 } from "@vlayer/sdk/config";
 import { getStartEndBlock } from "./helpers";
 import { loadFixtures } from "./loadFixtures";
-import { getChainConfig } from "./constants";
+import { getTimeTravelConfig } from "./constants";
 const config = getConfig();
-const chainConfig = getChainConfig(config.chainName);
+const timeTravelConfig = getTimeTravelConfig(config.chainName);
 
 if (config.chainName === "anvil") {
   await loadFixtures();
@@ -17,17 +17,17 @@ if (config.chainName === "anvil") {
 
 const { startBlock, endBlock } = await getStartEndBlock({
   config,
-  chainConfig,
+  timeTravelConfig,
 });
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
   proverArgs: [
-    chainConfig.usdcTokenAddr,
+    timeTravelConfig.usdcTokenAddr,
     startBlock,
     endBlock,
-    chainConfig.prover.step,
+    timeTravelConfig.prover.step,
   ],
   verifierArgs: [],
 });
@@ -39,5 +39,5 @@ writeEnvVariables(".env", {
   VITE_PROVER_URL: config.proverUrl,
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
-  VITE_PROVER_ERC20_HOLDER_ADDR: chainConfig.tokenOwner,
+  VITE_PROVER_ERC20_HOLDER_ADDR: timeTravelConfig.tokenOwner,
 });
