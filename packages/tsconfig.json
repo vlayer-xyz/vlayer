@@ -4,7 +4,6 @@
         { "path": "browser-extension/tsconfig.json" },
         { "path": "extension-hooks/tsconfig.json" },
         { "path": "sdk/tsconfig.json" },
-        { "path": "web-components/tsconfig.json" },
         { "path": "playwright-tests/tsconfig.json" }
     ]
 }
