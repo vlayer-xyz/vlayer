@@ -66,8 +66,8 @@ export class Extension {
     await expect(generateProofButton).toBeVisible();
   }
 
-  async expectStepToBeCompleted(stepName: string, nth = 0) {
-    const step = this.page.getByTestId(`step-${stepName}`).nth(nth);
+  async expectStepToBeCompleted(stepName: string, stepIndex = 0) {
+    const step = this.page.getByTestId(`step-${stepName}`).nth(stepIndex);
     const status = await step.getAttribute("data-status");
     expect(status).toEqual("completed");
   }
