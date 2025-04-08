@@ -58,7 +58,7 @@ function computeOutputRoot(
 export const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
 export const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
 
-const account = privateKeyToAccount(config.privateKey as Address);
+const account = privateKeyToAccount(config.privateKey);
 
 const opAccount = privateKeyToAccount(
   process.env.EXAMPLES_TEST_OP_PRIVATE_KEY as Address,

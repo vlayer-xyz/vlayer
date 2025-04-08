@@ -2,8 +2,6 @@ import { FallbackProps } from "react-error-boundary";
 import { AppError } from "../../errors";
 
 export const ErrorBoundaryComponent = ({ error }: FallbackProps) => {
-  console.error(error.message);
-
   const errorMsg =
     error instanceof AppError ? error.message : "Something went wrong";
 

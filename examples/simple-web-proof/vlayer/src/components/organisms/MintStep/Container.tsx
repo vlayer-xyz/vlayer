@@ -6,9 +6,11 @@ import {
   useAccount,
   useBalance,
 } from "wagmi";
+import { z } from "zod";
+
 import { useLocalStorage } from "usehooks-ts";
 
-import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier.json";
+import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier";
 import { MintStepPresentational } from "./Presentational";
 import { ensureBalance } from "../../../utils/ethFaucet";
 import { AlreadyMintedError } from "../../../errors";
@@ -28,10 +30,18 @@ export const MintStep = () => {
     hash: txHash,
   });
 
+  const proofDataSchema = z.tuple([
+    z.string(),
+    z.string(),
+    z
+      .string()
+      .regex(/^0x[0-9a-fA-F]+$/, "Must be a hex string starting with 0x"),
+  ]);
+
   useEffect(() => {
-    console.log("proverResult", proverResult);
     if (proverResult) {
-      setMintedHandle(JSON.parse(proverResult)[1]);
+      const mintedHandle = proverResult[1];
+      setMintedHandle(mintedHandle);
     }
     modalRef.current?.showModal();
   }, [proverResult]);
@@ -42,7 +52,14 @@ export const MintStep = () => {
       return;
     }
 
-    const proofData = JSON.parse(proverResult);
+    let proofData;
+
+    try {
+      proofData = proofDataSchema.parse(JSON.parse(proverResult));
+    } catch {
+      setMintingError(new Error("Invalid proverResult format"));
+      return;
+    }
 
     const writeContractArgs: Parameters<typeof writeContract>[0] = {
       address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
@@ -63,9 +80,9 @@ export const MintStep = () => {
   useEffect(() => {
     if (status === "success") {
       setIsMinting(false);
-      navigate(`/success?tx=${txHash}&handle=${mintedHandle}`);
+      void navigate(`/success?tx=${txHash}&handle=${mintedHandle}`);
     }
-  }, [status]);
+  }, [status, txHash, mintedHandle, navigate]);
 
   useEffect(() => {
     if (error) {
@@ -73,7 +90,7 @@ export const MintStep = () => {
       if (error.message.includes("User has already minted a TwitterNFT")) {
         throw new AlreadyMintedError();
       } else {
-        throw error;
+        throw new Error(error.message);
       }
     }
   }, [error]);
@@ -86,6 +103,9 @@ export const MintStep = () => {
   }, [mintingError]);
 
   return (
-    <MintStepPresentational handleMint={handleMint} isMinting={isMinting} />
+    <MintStepPresentational
+      handleMint={() => void handleMint()}
+      isMinting={isMinting}
+    />
   );
 };

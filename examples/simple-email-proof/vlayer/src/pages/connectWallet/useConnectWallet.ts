@@ -9,9 +9,9 @@ export const useConnectWallet = () => {
 
   useEffect(() => {
     if (address) {
-      navigate("/send-email");
+      void navigate("/send-email");
     }
-  }, [address]);
+  }, [address, navigate]);
 
   const connectWallet = () => {
     connect({

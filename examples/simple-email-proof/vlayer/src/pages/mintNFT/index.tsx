@@ -10,7 +10,7 @@ export const MintNFTContainer = () => {
 
   const handleProving = () => {
     if (emlFile) {
-      startProving(emlFile);
+      void startProving(emlFile);
     }
   };
 

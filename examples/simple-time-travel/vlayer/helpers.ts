@@ -9,7 +9,7 @@ const getStartEndBlock = async ({
   timeTravelConfig: TimeTravelConfig;
 }) => {
   if (timeTravelConfig.prover.endBlock === "latest") {
-    const { ethClient } = await createContext(config);
+    const { ethClient } = createContext(config);
     const latestBlock = await ethClient.getBlockNumber();
 
     return {

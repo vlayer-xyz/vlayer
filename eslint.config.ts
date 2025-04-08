@@ -49,6 +49,7 @@ export default tseslint.config(
       parserOptions: {
         // Always find closest tsconfig.json
         projectService: true,
+        // @ts-ignore
         tsconfigRootDir: import.meta.dirname,
       },
     },
