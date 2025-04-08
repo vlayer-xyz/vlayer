@@ -37,56 +37,56 @@ mod tests {
     #[test]
     fn test_extract_rpc_url_token_with_http() {
         let url = "http://example.com/secret-token";
-        let result = extract_rpc_url_token(&url.to_string());
+        let result = extract_rpc_url_token(url);
         assert_eq!(result, Some("secret-token".to_string()));
     }
 
     #[test]
     fn test_extract_rpc_url_token_with_https() {
         let url = "https://example.com/another-token";
-        let result = extract_rpc_url_token(&url.to_string());
+        let result = extract_rpc_url_token(url);
         assert_eq!(result, Some("another-token".to_string()));
     }
 
     #[test]
     fn test_extract_rpc_url_token_no_token() {
         let url = "https://example.com/";
-        let result = extract_rpc_url_token(&url.to_string());
+        let result = extract_rpc_url_token(url);
         assert_eq!(result, None);
     }
 
     #[test]
     fn test_extract_rpc_url_token_no_path() {
         let url = "https://example.com";
-        let result = extract_rpc_url_token(&url.to_string());
+        let result = extract_rpc_url_token(url);
         assert_eq!(result, None);
     }
 
     #[test]
     fn test_extract_rpc_url_token_empty_url() {
         let url = "";
-        let result = extract_rpc_url_token(&url.to_string());
+        let result = extract_rpc_url_token(url);
         assert_eq!(result, None);
     }
 
     #[test]
     fn test_extract_rpc_url_token_with_port() {
         let url = "https://example.com:8080/port-token";
-        let result = extract_rpc_url_token(&url.to_string());
+        let result = extract_rpc_url_token(url);
         assert_eq!(result, Some("port-token".to_string()));
     }
 
     #[test]
     fn test_extract_rpc_url_token_with_query_params() {
         let url = "https://example.com/token?query=param";
-        let result = extract_rpc_url_token(&url.to_string());
+        let result = extract_rpc_url_token(url);
         assert_eq!(result, Some("token".to_string()));
     }
 
     #[test]
     fn test_extract_rpc_url_token_with_multiple_path_segments() {
         let url = "https://example.com/path1/path2";
-        let result = extract_rpc_url_token(&url.to_string());
+        let result = extract_rpc_url_token(url);
         assert_eq!(result, Some("path1/path2".to_string()));
     }
 }
