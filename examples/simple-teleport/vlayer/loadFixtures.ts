@@ -30,38 +30,38 @@ const opAccount = privateKeyToAccount(
   "0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659" as Address,
 );
 
+function createAnvilClient(chain: Chain, url: string) {
+  return createTestClient({
+    chain,
+    mode: "anvil",
+    transport: http(url),
+  })
+    .extend(publicActions)
+    .extend(walletActions);
+}
+
+function computeOutputRoot(
+  latestBlock: GetBlockReturnType<Chain, false, "latest">,
+): `0x${string}` {
+  console.log(`State root: ${latestBlock.stateRoot}`);
+  console.log(`Withdrawals root: ${latestBlock.withdrawalsRoot}`);
+  console.log(`Block hash: ${latestBlock.hash}`);
+
+  const payload = [
+    "00".repeat(32),
+    latestBlock.stateRoot.slice(2),
+    (latestBlock.withdrawalsRoot ?? `0x`).slice(2),
+    latestBlock.hash.slice(2),
+  ].join("");
+
+  const hash = keccak256(`0x${payload}`);
+  console.log(`Payload hash: ${hash}`);
+  return hash;
+}
+
 export const loadFixtures = async () => {
   const config = getConfig();
   const teleportConfig = getTeleportConfig(config.chainName);
-
-  function createAnvilClient(chain: Chain, url: string) {
-    return createTestClient({
-      chain,
-      mode: "anvil",
-      transport: http(url),
-    })
-      .extend(publicActions)
-      .extend(walletActions);
-  }
-
-  function computeOutputRoot(
-    latestBlock: GetBlockReturnType<Chain, false, "latest">,
-  ): `0x${string}` {
-    console.log(`State root: ${latestBlock.stateRoot}`);
-    console.log(`Withdrawals root: ${latestBlock.withdrawalsRoot}`);
-    console.log(`Block hash: ${latestBlock.hash}`);
-
-    const payload = [
-      "00".repeat(32),
-      latestBlock.stateRoot.slice(2),
-      (latestBlock.withdrawalsRoot ?? `0x`).slice(2),
-      latestBlock.hash.slice(2),
-    ].join("");
-
-    const hash = keccak256(`0x${payload}`);
-    console.log(`Payload hash: ${hash}`);
-    return hash;
-  }
 
   const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
   const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
