@@ -6,8 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { Layout } from "./components/layout/Layout";
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { Chain } from "viem";
-import { anvil, optimismSepolia } from "viem/chains";
+import { anvil, optimismSepolia, Chain } from "wagmi/chains";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
 
@@ -15,6 +14,7 @@ const queryClient = new QueryClient();
 const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
 const chain =
   import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil : optimismSepolia;
+
 const chains: [Chain, ...Chain[]] = [chain];
 const networks = chains;
 
