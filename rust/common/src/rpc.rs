@@ -1,6 +1,6 @@
 use auto_impl::auto_impl;
 use serde::Serialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 #[auto_impl(&)]
 pub trait Method: Serialize {

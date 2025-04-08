@@ -1,5 +1,5 @@
 use alloy_sol_types::SolValue;
-use mailparse::{headers::Headers, DispositionType, MailHeaderMap, MailParseError, ParsedMail};
+use mailparse::{DispositionType, MailHeaderMap, MailParseError, ParsedMail, headers::Headers};
 
 use crate::email_address::EmailAddress;
 

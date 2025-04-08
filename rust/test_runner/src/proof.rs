@@ -1,11 +1,11 @@
-use alloy_primitives::{keccak256, map::HashMap, Address, Bytes, FixedBytes, B256, U256};
+use alloy_primitives::{Address, B256, Bytes, FixedBytes, U256, keccak256, map::HashMap};
 use alloy_rlp::encode;
-use alloy_trie::{proof::ProofRetainer, HashBuilder, Nibbles};
+use alloy_trie::{HashBuilder, Nibbles, proof::ProofRetainer};
 use forge::revm::primitives::{
-    alloy_primitives::private::{alloy_rlp, alloy_rlp::Encodable},
     Account, AccountInfo, EvmState, EvmStorageSlot,
+    alloy_primitives::private::{alloy_rlp, alloy_rlp::Encodable},
 };
-use mpt::{reorder_root_first, Keccak256};
+use mpt::{Keccak256, reorder_root_first};
 use provider::StorageProof;
 
 fn to_nibbles<T: AsRef<[u8]>>(word: T) -> Nibbles {
@@ -116,10 +116,10 @@ pub fn prove_storage(
 mod tests {
     use std::fs;
 
-    use alloy_primitives::{address, b256, hex, U160};
+    use alloy_primitives::{U160, address, b256, hex};
     use alloy_rlp::RlpDecodable;
     use mpt::KeccakMerkleTrie as MerkleTrie;
-    use serde_json::{from_str, from_value, Value};
+    use serde_json::{Value, from_str, from_value};
 
     use super::*;
 
@@ -152,7 +152,9 @@ mod tests {
         let nibbles = to_nibbles(address);
         assert_eq!(
             nibbles.as_slice(),
-            hex!("0f050c070e08090e0c0c080b040d0c0e0d0403000a05010c0e0b060c0a0c010a0f010006070e060a0e0f06000300060400000805030e08080303040e0002030c")
+            hex!(
+                "0f050c070e08090e0c0c080b040d0c0e0d0403000a05010c0e0b060c0a0c010a0f010006070e060a0e0f06000300060400000805030e08080303040e0002030c"
+            )
         );
     }
 

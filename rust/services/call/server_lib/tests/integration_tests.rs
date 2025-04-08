@@ -1,13 +1,13 @@
 use axum::http::StatusCode;
 use ethers::types::U256;
 use serde_json::json;
-use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
+use test_helpers::{API_VERSION, Context, call_guest_elf, chain_guest_elf, mock::GasMeterServer};
 
 mod test_helpers;
 
 use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string};
 use test_helpers::{
-    allocate_gas_body, rpc_body, v_call_body, ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL,
+    ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL, allocate_gas_body, rpc_body, v_call_body,
 };
 
 mod server_tests {
@@ -160,7 +160,7 @@ mod server_tests {
         use call_server_lib::{v_call::CallHash, v_get_proof_receipt::State};
         use ethers::{
             abi::AbiEncode,
-            types::{Bytes, Uint8, H160},
+            types::{Bytes, H160, Uint8},
         };
         use serde_json::Value;
         use server_utils::function_selector;
@@ -455,9 +455,9 @@ mod server_tests {
     mod jwt {
         use assert_json_diff::assert_json_eq;
         use call_server_lib::jwt::Config as JwtConfig;
-        use jsonwebtoken::{encode, get_current_timestamp, DecodingKey, EncodingKey, Header};
+        use jsonwebtoken::{DecodingKey, EncodingKey, Header, encode, get_current_timestamp};
         use server_utils::jwt::Claims;
-        use test_helpers::{mock::Server, JWT_SECRET};
+        use test_helpers::{JWT_SECRET, mock::Server};
 
         use super::*;
 

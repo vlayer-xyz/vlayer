@@ -3,7 +3,7 @@ mod config;
 mod server;
 
 use clap::Parser;
-use common::{init_tracing, LogFormat};
+use common::{LogFormat, init_tracing};
 use config::Config;
 use dotenvy::dotenv;
 use server::serve;

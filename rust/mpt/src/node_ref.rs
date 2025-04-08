@@ -1,12 +1,12 @@
 use std::marker::PhantomData;
 
 use alloy_primitives::B256;
-use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
+use alloy_rlp::{BufMut, EMPTY_STRING_CODE, Encodable};
 use bytes::Bytes;
 use derivative::Derivative;
 
 use super::node::Node;
-use crate::{hash, Digest, Keccak256};
+use crate::{Digest, Keccak256, hash};
 
 /// Represents the way in which a node is referenced from within another node.
 #[derive(Debug, Default, Derivative)]

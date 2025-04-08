@@ -1,6 +1,6 @@
 use derivative::Derivative;
-use host_utils::{proving, ProofMode, Prover};
-use risc0_zkvm::{serde, ExecutorEnv, ProveInfo};
+use host_utils::{ProofMode, Prover, proving};
+use risc0_zkvm::{ExecutorEnv, ProveInfo, serde};
 use tabled::Table;
 use thiserror::Error;
 use zkvm_benchmarks::BenchmarkResult;

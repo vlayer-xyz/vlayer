@@ -2,7 +2,7 @@ mod dns_query;
 
 use std::collections::HashMap;
 
-use axum::routing::{get, MethodRouter};
+use axum::routing::{MethodRouter, get};
 
 use super::AppState;
 

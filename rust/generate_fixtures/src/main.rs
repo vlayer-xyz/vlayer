@@ -1,7 +1,7 @@
 use std::{collections::HashMap, path::Path};
 
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tlsn_core::{presentation::Presentation, transcript::Transcript};
 use tokio::fs::{create_dir_all, write};
 use tracing::{info, level_filters::LevelFilter};
@@ -9,8 +9,8 @@ use tracing_subscriber::EnvFilter;
 use utils::range::RangeSet;
 use web_proof::web_proof::{PresentationJSON, WebProof};
 use web_prover::{
-    generate_web_proof, generate_web_proof_with_redaction, NotaryConfig, RedactionConfig,
-    TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,
+    NotaryConfig, RedactionConfig, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX, generate_web_proof,
+    generate_web_proof_with_redaction,
 };
 
 const PROJECT_DIR: &str = env!("CARGO_MANIFEST_DIR");

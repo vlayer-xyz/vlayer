@@ -1,4 +1,4 @@
-use cfdkim::{validate_header, DKIMError};
+use cfdkim::{DKIMError, validate_header};
 use mailparse::MailHeader;
 use verifiable_dns::DNSRecord;
 

@@ -5,8 +5,8 @@ mod into_input;
 
 pub use call_engine::Call;
 pub use host::{
-    error::preflight::Error as PreflightError, AwaitingChainProofError, BuilderError, Config,
-    Error, Host, PreflightResult, Prover, ProvingError, ProvingInput,
+    AwaitingChainProofError, BuilderError, Config, Error, Host, PreflightResult, Prover,
+    ProvingError, ProvingInput, error::preflight::Error as PreflightError,
 };
 
 #[cfg(test)]

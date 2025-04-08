@@ -2,7 +2,7 @@ use std::convert::Into;
 
 use alloy_primitives::Bytes;
 
-use crate::helpers::{map_to_fatal, Result};
+use crate::helpers::{Result, map_to_fatal};
 
 pub fn verify(input: &Bytes) -> Result<Bytes> {
     email_proof::parse_and_verify(input)

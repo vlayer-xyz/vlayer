@@ -9,7 +9,7 @@ use common::InteriorMutabilityCache;
 use ethers_core::types::BlockNumber as BlockTag;
 use thiserror::Error;
 
-use crate::{factory, BlockingProvider, NullProviderFactory, ProviderFactory};
+use crate::{BlockingProvider, NullProviderFactory, ProviderFactory, factory};
 
 type MultiProvider = HashMap<ChainId, Arc<dyn BlockingProvider>>;
 
@@ -98,7 +98,7 @@ mod get {
     use alloy_chains::Chain;
 
     use super::*;
-    use crate::{cache::CachedProvider, CachedProviderFactory};
+    use crate::{CachedProviderFactory, cache::CachedProvider};
 
     #[test]
     fn gets_cached_provider() -> anyhow::Result<()> {

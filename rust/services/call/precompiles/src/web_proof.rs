@@ -3,7 +3,7 @@ use std::convert::Into;
 use alloy_primitives::Bytes;
 use web_proof::verifier::verify_and_parse;
 
-use crate::helpers::{map_to_fatal, Result};
+use crate::helpers::{Result, map_to_fatal};
 
 pub(super) fn verify(input: &Bytes) -> Result<Bytes> {
     let web_proof_json = std::str::from_utf8(input).map_err(map_to_fatal)?;

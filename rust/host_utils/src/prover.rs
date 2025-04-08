@@ -73,7 +73,9 @@ fn log_stats(stats: &SessionStats, elapsed: &Duration) {
         ..
     } = stats;
     let elapsed_sec = elapsed.as_secs_f32();
-    info!("Prover stats. Segments: {segments}, cycles: {total_cycles}, user cycles: {user_cycles} elapsed: {elapsed_sec:.1} s");
+    info!(
+        "Prover stats. Segments: {segments}, cycles: {total_cycles}, user cycles: {user_cycles} elapsed: {elapsed_sec:.1} s"
+    );
 }
 
 fn prove_bonsai(

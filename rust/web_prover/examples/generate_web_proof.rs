@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use web_prover::{generate_web_proof, NotaryConfig};
+use web_prover::{NotaryConfig, generate_web_proof};
 
 #[tokio::main]
 pub async fn main() {

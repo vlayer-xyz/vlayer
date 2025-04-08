@@ -2,15 +2,15 @@ use std::{collections::HashMap, str};
 
 use derive_new::new;
 use http_body_util::Empty;
-use hyper::{body::Bytes, Request, StatusCode};
+use hyper::{Request, StatusCode, body::Bytes};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
 use tlsn_common::config::ProtocolConfig;
 use tlsn_core::{
+    CryptoProvider, Secrets,
     attestation::Attestation,
     request::RequestConfig,
     transcript::{Transcript, TranscriptCommitConfig},
-    CryptoProvider, Secrets,
 };
 use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};

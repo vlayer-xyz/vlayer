@@ -4,9 +4,10 @@ use alloy_chains::NamedChain::{Mainnet, OptimismSepolia};
 use alloy_primitives::address;
 use call_common::ExecutionLocation;
 use call_engine::{evm::env::cached::CachedEvmEnv, travel_call};
-use provider::{profiling, CachedMultiProvider, CachedProvider};
+use provider::{CachedMultiProvider, CachedProvider, profiling};
 
 use crate::{
+    Call,
     evm_env::factory::HostEvmEnvFactory,
     host::tests::call,
     test_harness::{
@@ -16,7 +17,6 @@ use crate::{
         },
         rpc_cache_path,
     },
-    Call,
 };
 
 fn profile(

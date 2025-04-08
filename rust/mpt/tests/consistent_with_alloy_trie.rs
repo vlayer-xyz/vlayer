@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use alloy_primitives::U256;
 use alloy_trie::{HashBuilder, Nibbles};
 use common::Hashable;
-use mpt::{hash, reorder_root_first, Keccak256, KeccakMerkleTrie as MerkleTrie};
+use mpt::{Keccak256, KeccakMerkleTrie as MerkleTrie, hash, reorder_root_first};
 
 type D = Keccak256;
 

@@ -1,15 +1,15 @@
 /// The code in this module is a skeleton and is not up to our quality standards.
 use std::{fmt::Debug, sync::Arc};
 
-use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
+use alloy_primitives::{B256, BlockHash, BlockNumber, ChainId};
 use async_trait::async_trait;
 use call_common::{ExecutionLocation, RevmDB};
 use common::Hashable;
 use derivative::Derivative;
-use optimism::{anchor_state_registry::AnchorStateRegistry, NumHash};
+use optimism::{NumHash, anchor_state_registry::AnchorStateRegistry};
 use tracing::{debug, info};
 
-use crate::evm::env::{cached::CachedEvmEnv, BlocksByChain};
+use crate::evm::env::{BlocksByChain, cached::CachedEvmEnv};
 
 #[derive(thiserror::Error, Debug, Derivative)]
 #[derivative(PartialEq, Eq)]
@@ -164,7 +164,9 @@ pub fn ensure_latest_teleport_location_is_confirmed(
     if latest_confirmed_block < latest_destination_block {
         return Err(Error::TeleportOnUnconfirmed);
     }
-    info!("Teleport onto block {latest_destination_block} allowed. Latest confirmed {latest_confirmed_block}");
+    info!(
+        "Teleport onto block {latest_destination_block} allowed. Latest confirmed {latest_confirmed_block}"
+    );
 
     Ok(())
 }

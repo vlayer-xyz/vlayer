@@ -13,7 +13,7 @@ use dkim::{
 };
 use dns::extract_public_key;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
-use mailparse::{parse_mail, MailHeaderMap, ParsedMail};
+use mailparse::{MailHeaderMap, ParsedMail, parse_mail};
 use verifiable_dns::DNSRecord;
 
 pub use crate::{email::Email, errors::Error};
@@ -67,12 +67,12 @@ fn verify_no_fake_separator(raw_headers: &[u8]) -> Result<(), Error> {
 
 #[cfg(test)]
 mod test {
-    use alloy_sol_types::{private::bytes, SolValue};
+    use alloy_sol_types::{SolValue, private::bytes};
     use lazy_static::lazy_static;
     use test_utils::read_email_from_file;
     use verifiable_dns::{
-        verifiable_dns::{sign_record::sign_record, signer::Signer},
         DNSRecord, RecordType,
+        verifiable_dns::{sign_record::sign_record, signer::Signer},
     };
 
     use super::*;

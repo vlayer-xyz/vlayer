@@ -6,7 +6,7 @@ use alloy_sol_types::SolCall;
 
 use crate::{
     host::tests::call,
-    test_harness::{run, run_with_teleport, ExecutionLocation},
+    test_harness::{ExecutionLocation, run, run_with_teleport},
 };
 
 #[cfg(test)]
@@ -45,8 +45,9 @@ mod teleport {
     use super::*;
     use crate::test_harness::{
         contracts::teleport::{
+            BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT,
             SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
-            BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT, TOKEN,
+            TOKEN,
         },
         rpc::OP_ANVIL,
     };
