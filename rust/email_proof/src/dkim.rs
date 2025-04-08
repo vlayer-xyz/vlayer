@@ -10,9 +10,7 @@ pub(crate) mod verify_signature;
 const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
 
 #[derive(Debug, Clone)]
-pub struct DKIMHeader {
-    pub header: header::DKIMHeader,
-}
+pub struct DKIMHeader(pub header::DKIMHeader);
 
 impl TryFrom<&MailHeader<'_>> for DKIMHeader {
     type Error = DKIMError;
@@ -20,15 +18,13 @@ impl TryFrom<&MailHeader<'_>> for DKIMHeader {
     fn try_from(dkim_header: &MailHeader) -> Result<Self, Self::Error> {
         let value = String::from_utf8_lossy(dkim_header.get_value_raw());
         let dkim_header = validate_header(&value)?;
-        Ok(Self {
-            header: dkim_header,
-        })
+        Ok(DKIMHeader(dkim_header))
     }
 }
 
 impl DKIMHeader {
     pub fn verify_body_length_tag(&self) -> Result<(), DKIMError> {
-        if self.header.get_tag("l").is_some() {
+        if self.0.get_tag("l").is_some() {
             return Err(DKIMError::SignatureSyntaxError(
                 "DKIM-Signature header contains body length tag (l=)".into(),
             ));
@@ -37,12 +33,12 @@ impl DKIMHeader {
     }
 
     pub fn verify_dns_consistency(&self, record: &DNSRecord) -> Result<(), Error> {
-        let Some(selector) = self.header.get_tag("s") else {
+        let Some(selector) = self.0.get_tag("s") else {
             return Err(Error::DkimVerification(DKIMError::SignatureSyntaxError(
                 "Missing selector tag (s=) in DKIM-Signature".into(),
             )));
         };
-        let Some(domain) = self.header.get_tag("d") else {
+        let Some(domain) = self.0.get_tag("d") else {
             return Err(Error::DkimVerification(DKIMError::SignatureSyntaxError(
                 "Missing domain tag (d=) in DKIM-Signature".into(),
             )));
@@ -75,11 +71,11 @@ impl DKIMHeader {
     }
 
     fn signing_domain(&self) -> Option<String> {
-        self.header.get_tag("d")
+        self.0.get_tag("d")
     }
 
     fn signed_headers(&self) -> Vec<String> {
-        self.header
+        self.0
             .get_required_tag("h")
             .split(':')
             .map(|s| s.trim().to_lowercase())
