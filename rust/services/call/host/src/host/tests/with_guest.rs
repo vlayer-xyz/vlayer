@@ -12,7 +12,9 @@ use crate::{
 #[cfg(test)]
 #[ctor::ctor]
 fn before_all() {
-    set_var("RISC0_DEV_MODE", "1");
+    unsafe {
+        set_var("RISC0_DEV_MODE", "1");
+    }
 }
 
 mod erc20 {

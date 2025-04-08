@@ -228,11 +228,8 @@ mod test {
     #[test]
     fn call_set_block() {
         let block_num = 1;
-        let inspector = inspector_call(
-            CONTRACT_ADDR,
-            &SET_BLOCK_SELECTOR,
-            &U256::from(block_num).to_be_bytes::<32>(),
-        );
+        let block = U256::from(block_num).to_be_bytes::<32>();
+        let inspector = inspector_call(CONTRACT_ADDR, &SET_BLOCK_SELECTOR, &block);
         assert!(
             inspector
                 .location
