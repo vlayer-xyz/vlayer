@@ -223,7 +223,7 @@ startPage("https://x.com/", "Go to start page"),
 // in case of authentication/redirect go to specific page
 expectUrl("https://x.com/home", "Log in"), 
 // Specify which HTTP endpoint made by the browser from the visited website contains the data to be proven.
-// This is typically an asynchronous request — you can inspect it using the Network tab in your browser’s developer tools.
+// This is typically an asynchronous request — you can inspect it using the Network tab in your browser's developer tools.
 notarize(
     "https://api.x.com/1.1/account/settings.json",
     "GET",
@@ -245,21 +245,28 @@ notarize(
     ],
 ),
 ```
+More detailed description on JS SDK is available in [Javascript > Web Proofs](/javascript/web-proofs.html) section.
 
 If you picked any other data source than `api.x.com` you would need to regenerate your local API token that sits in `vlayer/.env.testnet`. 
 
-To configure `https://api.example.com`, use the following command:
+To configure `https://api.example.com`, run the following command:
 ```sh
 vlayer jwt encode -p ./fixtures/jwt-authority.key --subject deadbeef --host "api.example.com" --post 443
 ```
-
-Before further development, generated token should be placed in `.env` file as `VLAYER_API_TOKEN`. Make sure that local web server got reloaded after this change. 
+Explanation of flags:
+- `-p ./fixtures/jwt-authority.key` — Uses a sample private key that generates a valid JWT for the local devnet. **Do not modify.**
+- `--subject deadbeef` — Arbitrary identifier for local devnet use. **Do not modify.**
 
 ### Obtaining Web Proof
 
-Now you can navigate through example app in your browser (by default running on `http://localhost:5137`) and check if [Chrome browser extension](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) correctly redirects your user to data source. 
+Now you can navigate through example app in your browser (by default running on `http://localhost:5137`) and check if [Chrome browser extension](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) correctly redirects your user to data source. Extension supports Chrome and Brave browsers only.
 
 Finding the correct data source HTTP endpoint can be tricky. We recommend using the Network tab in your browser’s Developer Console. To narrow down the results, filter requests by Fetch/XHR, which helps isolate relevant API calls from the rest.  
+
+<div style="text-align: center;">
+  <img src="/images/data-source-network-tab.jpg" alt="Network Tab in browser" />
+  <p><em>Finding the correct data source HTTP endpoint</em></p>
+</div>
 
 A correctly generated web proof is stored in your browser's `localStorage` under the `webProof` key. To inspect `localStorage`: 
 - Open Developer Console (F12 or right-click > Inspect).
