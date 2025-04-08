@@ -1,7 +1,7 @@
-use std::sync::Arc;
+use std::{io::stdout, sync::Arc};
 
 use tracing_subscriber::{
-    fmt::layer, layer::SubscriberExt, registry, util::SubscriberInitExt, EnvFilter,
+    fmt::layer, layer::SubscriberExt, registry, util::SubscriberInitExt, EnvFilter, Layer,
 };
 
 use crate::LogFormat;
@@ -13,20 +13,15 @@ pub fn init_tracing(log_format: LogFormat, secrets: Vec<String>) {
     let registry = registry().with(env_filter);
     let secrets = Arc::new(secrets);
 
-    match log_format {
-        LogFormat::Json => {
-            let formatting_layer = layer()
-                .with_writer(move || RedactingWriter::new(std::io::stdout(), secrets.clone()))
-                .json();
-            registry.with(formatting_layer).init();
-        }
-        LogFormat::Plain => {
-            let formatting_layer = layer()
-                .with_writer(move || RedactingWriter::new(std::io::stdout(), secrets.clone()))
-                .with_ansi(true);
-            registry.with(formatting_layer).init();
-        }
-    }
+    let redacting_writer = move || RedactingWriter::new(stdout(), secrets.clone());
+    let formatting_layer = match log_format {
+        LogFormat::Json => layer().with_writer(redacting_writer).json().boxed(),
+        LogFormat::Plain => layer()
+            .with_writer(redacting_writer)
+            .with_ansi(true)
+            .boxed(),
+    };
+    registry.with(formatting_layer).init();
 }
 
 struct RedactingWriter<W: std::io::Write> {
