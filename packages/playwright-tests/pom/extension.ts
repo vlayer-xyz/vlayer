@@ -68,8 +68,7 @@ export class Extension {
 
   async expectStepToBeCompleted(stepName: string, stepIndex = 0) {
     const step = this.page.getByTestId(`step-${stepName}`).nth(stepIndex);
-    const status = await step.getAttribute("data-status");
-    expect(status).toEqual("completed");
+    await expect(step).toHaveAttribute("data-status", "completed");
   }
 }
 
