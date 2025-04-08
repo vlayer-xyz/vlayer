@@ -1,4 +1,4 @@
-export interface ChainConfig {
+export interface TimeTravelConfig {
   usdcTokenAddr: `0x${string}`;
   tokenOwner: `0x${string}`;
   prover:
@@ -6,7 +6,7 @@ export interface ChainConfig {
     | { startBlock: bigint; endBlock: bigint; step: bigint };
 }
 
-export const chainConfigs: Record<string, ChainConfig> = {
+export const chainToTimeTravelConfig: Record<string, TimeTravelConfig> = {
   anvil: {
     tokenOwner: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     usdcTokenAddr: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
@@ -27,8 +27,9 @@ export const chainConfigs: Record<string, ChainConfig> = {
   },
 };
 
-export const getChainConfig = (chainName: string): ChainConfig => {
-  const config: ChainConfig | undefined = chainConfigs[chainName];
+export const getTimeTravelConfig = (chainName: string): TimeTravelConfig => {
+  const config: TimeTravelConfig | undefined =
+    chainToTimeTravelConfig[chainName];
   if (!config) {
     throw new Error(
       `The "${chainName}" chain is not yet configured in this example.`,
