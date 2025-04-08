@@ -7,7 +7,7 @@ import { Layout } from "./components/layout/Layout";
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { Chain } from "viem";
-import { anvil, optimismSepolia } from "viem/chains";
+import { anvil, optimismSepolia } from "wagmi/chains";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
 
