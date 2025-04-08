@@ -6,7 +6,6 @@ import {
   useAccount,
   useBalance,
 } from "wagmi";
-import { z } from "zod";
 
 import { useLocalStorage } from "usehooks-ts";
 
@@ -30,14 +29,6 @@ export const MintStep = () => {
     hash: txHash,
   });
 
-  const proofDataSchema = z.tuple([
-    z.string(),
-    z.string(),
-    z
-      .string()
-      .regex(/^0x[0-9a-fA-F]+$/, "Must be a hex string starting with 0x"),
-  ]);
-
   useEffect(() => {
     if (proverResult) {
       const mintedHandle = proverResult[1];
@@ -52,15 +43,10 @@ export const MintStep = () => {
       return;
     }
 
-    let proofData;
-
-    try {
-      proofData = proofDataSchema.parse(JSON.parse(proverResult));
-    } catch {
-      setMintingError(new Error("Invalid proverResult format"));
-      return;
-    }
-
+    const proofData = JSON.parse(proverResult) as Parameters<
+      typeof writeContract
+    >[0]["args"];
+    console.log("proofData", proofData);
     const writeContractArgs: Parameters<typeof writeContract>[0] = {
       address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
       abi: webProofProofVerifier.abi,

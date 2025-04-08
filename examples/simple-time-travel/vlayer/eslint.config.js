@@ -26,6 +26,6 @@ export default tseslint.config(
     },
     rules: {
       curly: "error",
-    }
+    },
   },
 );
