@@ -23,6 +23,7 @@ BUN_NO_FROZEN_LOCKFILE=1
 export EXAMPLE_NAME=$EXAMPLE
 
 echo "::group::Running services"
+DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op notary-server"
 source ${VLAYER_HOME}/bash/run-services.sh
 echo "::endgroup::Running services"
 
