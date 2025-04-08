@@ -2686,7 +2686,6 @@ dependencies = [
  "async-trait",
  "auto_impl",
  "axum 0.8.1",
- "axum-extra",
  "block_header",
  "call_common",
  "call_engine",

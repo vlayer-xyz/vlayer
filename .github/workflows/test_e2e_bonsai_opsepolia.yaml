@@ -67,11 +67,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0 # Needed for restoring mtime
-      # For more efficient Cargo target dir reuse
-      - name: Restore timestamps
-        uses: chetan/git-restore-mtime-action@26fb42a93ac0f66e9c0c5ad3bd03079cb9ee5300 # v2.1
-
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
@@ -96,14 +91,14 @@ jobs:
         uses: ./.github/actions/reuse-cargo-target
         with:
           targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
-          target_name: test-e2e-bonsai-opsepolia-mtime
+          target_name: test-e2e-bonsai-opsepolia
       - name: Build binaries
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
-          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server --features jwt
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
           mkdir target_debug
           mv ${CARGO_TARGET_DIR}/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
 
@@ -202,10 +197,3 @@ jobs:
           chain_name: "optimismSepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-        env:
-          # From the example's .env.testnet
-          PROVER_ERC20_HOLDER_ADDR: "0xE6b08c02Dbf3a0a4D3763136285B85A9B492E391"
-          PROVER_ERC20_CONTRACT_ADDR: "0x5fd84259d66Cd46123540766Be93DFE6D43130D7"
-          PROVER_END_BLOCK: latest
-          PROVER_TRAVEL_RANGE: 10
-          PROVER_STEP: 2

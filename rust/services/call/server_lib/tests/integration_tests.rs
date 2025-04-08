@@ -151,73 +151,6 @@ mod server_tests {
             assert_eq!(StatusCode::OK, response.status());
             assert_jrpc_ok(response, EXPECTED_HASH).await;
         }
-
-        #[tokio::test(flavor = "multi_thread")]
-        async fn gasmeter_with_api_key() {
-            const EXPECTED_HASH: &str =
-                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
-            const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
-            const API_KEY: &str = "secret-deadbeef";
-
-            let mut gas_meter_server =
-                GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
-            gas_meter_server
-                .mock_method("v_allocateGas")
-                .with_params(allocate_gas_body(EXPECTED_HASH), false)
-                .with_result(json!({}))
-                .with_expected_header(API_KEY_HEADER_NAME, API_KEY)
-                .add()
-                .await;
-
-            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
-            let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.deploy_contract().await;
-            let call_data = contract
-                .sum(U256::from(1), U256::from(2))
-                .calldata()
-                .unwrap();
-
-            let req = v_call_body(contract.address(), &call_data);
-
-            let response = app.post("/", &req).await;
-
-            assert_eq!(StatusCode::OK, response.status());
-            assert_jrpc_ok(response, EXPECTED_HASH).await;
-
-            ctx.assert_gas_meter();
-        }
-
-        #[tokio::test(flavor = "multi_thread")]
-        async fn gasmeter_with_user_token() {
-            const EXPECTED_HASH: &str =
-                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
-            const USER_TOKEN: &str = "sk_1234567890";
-
-            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
-            gas_meter_server
-                .mock_method("v_allocateGas")
-                .with_bearer_auth(USER_TOKEN)
-                .with_params(allocate_gas_body(EXPECTED_HASH), false)
-                .with_result(json!({}))
-                .add()
-                .await;
-
-            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
-            let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.deploy_contract().await;
-            let call_data = contract
-                .sum(U256::from(1), U256::from(2))
-                .calldata()
-                .unwrap();
-
-            let req = v_call_body(contract.address(), &call_data);
-            let response = app.post_with_bearer_auth("/", &req, USER_TOKEN).await;
-
-            assert_eq!(StatusCode::OK, response.status());
-            assert_jrpc_ok(response, EXPECTED_HASH).await;
-
-            ctx.assert_gas_meter();
-        }
     }
 
     #[allow(non_snake_case)]
@@ -519,10 +452,10 @@ mod server_tests {
         }
     }
 
-    #[cfg(feature = "jwt")]
     mod jwt {
         use assert_json_diff::assert_json_eq;
-        use jsonwebtoken::{encode, get_current_timestamp, EncodingKey, Header};
+        use call_server_lib::jwt::Config as JwtConfig;
+        use jsonwebtoken::{encode, get_current_timestamp, DecodingKey, EncodingKey, Header};
         use server_utils::jwt::Claims;
         use test_helpers::{mock::Server, JWT_SECRET};
 
@@ -538,39 +471,11 @@ mod server_tests {
         }
 
         fn default_app() -> Server {
-            Context::default().server(call_guest_elf(), chain_guest_elf())
-        }
-
-        #[tokio::test(flavor = "multi_thread")]
-        async fn falls_back_to_old_auth() {
-            const EXPECTED_HASH: &str =
-                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
-            const USER_TOKEN: &str = "sk_1234567890";
-
-            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
-            gas_meter_server
-                .mock_method("v_allocateGas")
-                .with_bearer_auth(USER_TOKEN)
-                .with_params(allocate_gas_body(EXPECTED_HASH), false)
-                .with_result(json!({}))
-                .add()
-                .await;
-
-            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
-            let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.deploy_contract().await;
-            let call_data = contract
-                .sum(U256::from(1), U256::from(2))
-                .calldata()
-                .unwrap();
-
-            let req = v_call_body(contract.address(), &call_data);
-            let resp = app.post_with_bearer_auth("/", &req, USER_TOKEN).await;
-
-            assert_eq!(StatusCode::OK, resp.status());
-            assert_jrpc_ok(resp, EXPECTED_HASH).await;
-
-            ctx.assert_gas_meter();
+            let jwt_config =
+                JwtConfig::new(DecodingKey::from_secret(JWT_SECRET), Default::default());
+            Context::default()
+                .with_jwt_auth(jwt_config)
+                .server(call_guest_elf(), chain_guest_elf())
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -619,21 +524,44 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn passes_subject_to_the_gas_meter() {
+        async fn rejects_requests_with_old_token() {
+            const OLD_TOKEN: &str = "sk_1234567890";
+
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post_with_bearer_auth("/", &req, OLD_TOKEN).await;
+
+            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "InvalidToken" })
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn authenticates_with_gas_meter() {
+            const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
+            const API_KEY: &str = "secret-deadbeef";
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
             const SUBJECT: &str = "1234";
 
-            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            let mut gas_meter_server =
+                GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_bearer_auth(SUBJECT)
                 .with_params(allocate_gas_body(EXPECTED_HASH), false)
                 .with_result(json!({}))
+                .with_expected_header(API_KEY_HEADER_NAME, API_KEY)
                 .add()
                 .await;
 
-            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
+            let jwt_config =
+                JwtConfig::new(DecodingKey::from_secret(JWT_SECRET), Default::default());
+            let ctx = Context::default()
+                .with_jwt_auth(jwt_config)
+                .with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract

@@ -9,7 +9,10 @@ use soldeer_commands::{
     run as run_cmd, ConfigLocation,
 };
 
-use crate::{config::Dependency, errors::Result};
+use crate::{
+    config::{self, Dependency, SolDependencies},
+    errors::Result,
+};
 
 pub async fn install(name: &String, version: &String, url: Option<&String>) -> Result<()> {
     let cmd = Install::builder()
@@ -18,6 +21,20 @@ pub async fn install(name: &String, version: &String, url: Option<&String>) -> R
         .config_location(ConfigLocation::Foundry)
         .build();
     run_cmd(Command::Install(cmd)).await?;
+    Ok(())
+}
+
+pub async fn install_solidity_dependencies(dependencies: &SolDependencies) -> Result<()> {
+    for (name, dep) in dependencies.as_ref() {
+        if dep.is_local() {
+            continue;
+        }
+        let version = dep
+            .version()
+            .ok_or(config::Error::RequiredField("version".into()))?;
+        let url = dep.url();
+        install(name, &version, url.as_ref()).await?;
+    }
     Ok(())
 }
 

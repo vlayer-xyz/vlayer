@@ -32,8 +32,8 @@ new Elysia({
   .get("/json_three_bytes_char", () => {
     return { success: true, name: "عبد الله" };
   })
-  .put("/update_resource", ({ request }) => {
-    const { name } = request.body;
+  .put("/update_resource", ({ body }) => {
+    const { name } = body as { name: string };
     return { success: true, updatedName: name };
   })
   .get("/auth_header_require", ({ request, set }) => {

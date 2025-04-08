@@ -123,7 +123,14 @@ export const deployVlayerContracts = async ({
 
   log("Contract deployment completed successfully");
   if (deployConfig.shouldRedeployVerifierRouter) {
-    await swapInternalVerifier(ethClient, chain, account, verifier, proverUrl);
+    await swapInternalVerifier(
+      ethClient,
+      chain,
+      account,
+      verifier,
+      proverUrl,
+      config.token,
+    );
   }
 
   return { prover, verifier };
@@ -135,9 +142,10 @@ const swapInternalVerifier = async (
   account: Account,
   verifierAddress: Address,
   proverUrl: string,
+  token?: string,
 ) => {
   log("Swapping internal verifier");
-  const imageId = await getImageId(proverUrl);
+  const imageId = await getImageId(proverUrl, token);
   const routerDeployerHash = await ethClient.deployContract({
     chain,
     account,
@@ -166,7 +174,7 @@ const swapInternalVerifier = async (
   log("Internal verifier swapped successfully");
 };
 
-async function getImageId(proverUrl: string): Promise<Hex> {
-  const version = await v_versions(proverUrl);
+async function getImageId(proverUrl: string, token?: string): Promise<Hex> {
+  const version = await v_versions(proverUrl, token);
   return version.result.call_guest_id as Hex;
 }
