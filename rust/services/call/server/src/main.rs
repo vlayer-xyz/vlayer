@@ -138,7 +138,7 @@ async fn main() -> anyhow::Result<()> {
             }
         });
 
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain), Some(secrets));
+    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain), secrets);
 
     let config = cli.into_config(api_version)?;
 

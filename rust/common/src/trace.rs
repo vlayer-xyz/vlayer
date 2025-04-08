@@ -8,10 +8,10 @@ use crate::LogFormat;
 
 const DEFAULT_RUST_LOG: &str = "info";
 
-pub fn init_tracing(log_format: LogFormat, secrets: Option<Vec<String>>) {
+pub fn init_tracing(log_format: LogFormat, secrets: Vec<String>) {
     let env_filter = EnvFilter::try_from_default_env().unwrap_or(DEFAULT_RUST_LOG.into());
     let registry = registry().with(env_filter);
-    let secrets = Arc::new(secrets.unwrap_or_default());
+    let secrets = Arc::new(secrets);
 
     match log_format {
         LogFormat::Json => {
