@@ -97,6 +97,6 @@ mkdir -p "${VLAYER_HOME}/vlayer-test-release"
 cp -a "${TEMP_DIR}"/* "${VLAYER_HOME}/vlayer-test-release"
 
 # Exit with 1 if any Playwright test failed
-if [ "$PLAYWRIGHT_FAILED" == true ]; then
+if [ "$PLAYWRIGHT_FAILED" = true ]; then
     exit 1
 fi
