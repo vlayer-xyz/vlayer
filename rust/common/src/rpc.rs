@@ -18,17 +18,75 @@ pub trait Method: Serialize {
 
 // RPC URLs typically contain a secret token in path.
 // Extract it for the purpose of redacting secret values in logs.
-pub fn extract_rpc_url_token(rpc_url: &String) -> Option<String> {
-    let stripped_url = rpc_url
-        .trim_start_matches("http://")
-        .trim_start_matches("https://");
-
-    // Extract the part after the first '/' if it exists
-    if let Some(pos) = stripped_url.find('/') {
-        let token = &stripped_url[pos + 1..];
-        if !token.is_empty() {
-            return Some(token.to_string());
+pub fn extract_rpc_url_token(rpc_url: &str) -> Option<String> {
+    if let Ok(parsed_url) = url::Url::parse(rpc_url) {
+        if let Some(path) = parsed_url.path_segments() {
+            let token = path.collect::<Vec<_>>().join("/");
+            if !token.is_empty() {
+                return Some(token);
+            }
         }
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extract_rpc_url_token_with_http() {
+        let url = "http://example.com/secret-token";
+        let result = extract_rpc_url_token(&url.to_string());
+        assert_eq!(result, Some("secret-token".to_string()));
+    }
+
+    #[test]
+    fn test_extract_rpc_url_token_with_https() {
+        let url = "https://example.com/another-token";
+        let result = extract_rpc_url_token(&url.to_string());
+        assert_eq!(result, Some("another-token".to_string()));
+    }
+
+    #[test]
+    fn test_extract_rpc_url_token_no_token() {
+        let url = "https://example.com/";
+        let result = extract_rpc_url_token(&url.to_string());
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_extract_rpc_url_token_no_path() {
+        let url = "https://example.com";
+        let result = extract_rpc_url_token(&url.to_string());
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_extract_rpc_url_token_empty_url() {
+        let url = "";
+        let result = extract_rpc_url_token(&url.to_string());
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_extract_rpc_url_token_with_port() {
+        let url = "https://example.com:8080/port-token";
+        let result = extract_rpc_url_token(&url.to_string());
+        assert_eq!(result, Some("port-token".to_string()));
+    }
+
+    #[test]
+    fn test_extract_rpc_url_token_with_query_params() {
+        let url = "https://example.com/token?query=param";
+        let result = extract_rpc_url_token(&url.to_string());
+        assert_eq!(result, Some("token".to_string()));
+    }
+
+    #[test]
+    fn test_extract_rpc_url_token_with_multiple_path_segments() {
+        let url = "https://example.com/path1/path2";
+        let result = extract_rpc_url_token(&url.to_string());
+        assert_eq!(result, Some("path1/path2".to_string()));
+    }
 }
