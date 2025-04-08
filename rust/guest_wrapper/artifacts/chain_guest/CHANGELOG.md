@@ -13,3 +13,4 @@
   * `9200b482efbb414ff73203a2a1d4194ab3a9bea7114d5e01a6bf04ab306d7a6d` – Accelerated keccak in alloy-primitives
   * `b79154d432db45e7dd6e4ada75aca99837a8b25844a5041fd28b01f596bee43b` – Accelerated keccak in MPT
   * `3b4d5f70a9fe3cf01638faf6f1a8d6e6079ce5f089f2a3dd875f74c107e643f2` – Risc0 2.0.0
+  * `82d44d66876bf5cc8ff56a3c8fc91270b13c61623d9e6fc3a566ab0a7a126468` – Added functionality and a crate dependency in `common` [#2138] (https://github.com/vlayer-xyz/vlayer/pull/2138)
