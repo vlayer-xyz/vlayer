@@ -14,7 +14,7 @@ use crate::cli::Cli;
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain), vec![]);
+    init_tracing(cli.global_args.log_format, vec![]);
 
     let config = Config::new(cli.listen_addr, cli.private_key.private_key()?);
 

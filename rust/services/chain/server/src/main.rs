@@ -46,7 +46,7 @@ async fn main() {
 async fn run() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain), vec![]);
+    init_tracing(cli.global_args.log_format, vec![]);
 
     let config = ServerConfig::new(cli.listen_addr);
     let db = ChainDb::mdbx(

@@ -169,7 +169,7 @@ async fn main() {
         }
     }
 
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain), secrets);
+    init_tracing(cli.global_args.log_format, secrets);
 
     let mode = cli.mode;
     let config: HostConfig = cli.into();
