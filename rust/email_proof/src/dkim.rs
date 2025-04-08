@@ -1,4 +1,5 @@
 use cfdkim::{header, validate_header, DKIMError};
+use itertools::Itertools;
 use mailparse::{addrparse, MailAddr, MailHeader, MailHeaderMap, ParsedMail};
 use verifiable_dns::DNSRecord;
 
@@ -87,30 +88,37 @@ fn normalize_dns_name(name: &str) -> String {
 }
 
 pub fn get_dkim_header(email: &ParsedMail) -> Result<DKIMHeader, Error> {
-    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
+    let dkim_headers: Vec<_> = email
+        .headers
+        .get_all_headers(DKIM_SIGNATURE_HEADER)
+        .iter()
+        .map(|header| DKIMHeader::new(header))
+        .collect();
     let from_headers = email.headers.get_all_headers("From");
 
     let Some(from_header) = from_headers.last() else {
         return Err(Error::NoFromHeader);
     };
-    let from_value = from_header.get_value();
-    let from_domain = parse_from_domain(&from_value)?;
+    let from_domain = parse_from_domain(&from_header.get_value())?;
 
-    let matching_headers: Vec<_> = dkim_headers
-        .iter()
-        .filter_map(|header| {
-            let dkim = DKIMHeader::new(header);
-            match dkim.signing_domain() {
-                Some(sig_domain) if sig_domain.eq_ignore_ascii_case(&from_domain) => Some(dkim),
-                _ => None,
-            }
+    let matching_headers: Vec<_> = filter_dkim_headers_by_domain(dkim_headers, &from_domain);
+
+    let only = matching_headers
+        .into_iter()
+        .exactly_one()
+        .map_err(|v| Error::InvalidDkimHeaderCount(v.len()))?;
+
+    Ok(only)
+}
+
+fn filter_dkim_headers_by_domain(dkim_headers: Vec<DKIMHeader>, domain: &str) -> Vec<DKIMHeader> {
+    dkim_headers
+        .into_iter()
+        .filter_map(|dkim_header| match dkim_header.signing_domain() {
+            Some(sig_domain) if sig_domain.eq_ignore_ascii_case(domain) => Some(dkim_header),
+            _ => None,
         })
-        .collect();
-
-    match matching_headers.as_slice() {
-        [only] => Ok(only.clone()),
-        _ => Err(Error::InvalidDkimHeaderCount(matching_headers.len())),
-    }
+        .collect()
 }
 
 fn parse_from_domain(from: &str) -> Result<String, Error> {
@@ -174,6 +182,52 @@ mod tests {
             let email = parse_mail(b"From: Alice <alice@example.com>").unwrap();
 
             assert_eq!(get_dkim_header(&email).unwrap_err(), Error::InvalidDkimHeaderCount(0));
+        }
+
+        #[test]
+        fn fails_for_no_from_header() {
+            let email =
+                parse_mail(b"DKIM-Signature: v=1; a=; c=; d=example.com; s=; t=; h=From; bh=; b=")
+                    .unwrap();
+
+            assert_eq!(get_dkim_header(&email).unwrap_err(), Error::NoFromHeader);
+        }
+    }
+
+    #[cfg(test)]
+    mod filter_dkim_headers_by_domain {
+        use super::*;
+
+        const DOMAIN: &str = "example.com";
+
+        fn header_with_domain(domain: &str) -> DKIMHeader {
+            from_raw_data(
+                format!("DKIM-Signature: v=1; a=; c=; d={domain}; s=; t=; h=From; bh=; b=")
+                    .as_bytes(),
+            )
+        }
+
+        #[test]
+        fn returns_matching_headers() {
+            let headers = vec![header_with_domain(DOMAIN), header_with_domain("other.com")];
+
+            let filtered = filter_dkim_headers_by_domain(headers, DOMAIN);
+
+            let domains: Vec<String> = filtered
+                .iter()
+                .filter_map(DKIMHeader::signing_domain)
+                .collect();
+
+            assert!(domains.iter().all(|d| d.eq(DOMAIN)));
+        }
+
+        #[test]
+        fn returns_empty_for_no_matching_headers() {
+            let headers = vec![header_with_domain("other.com")];
+
+            let filtered = filter_dkim_headers_by_domain(headers, DOMAIN);
+
+            assert!(filtered.is_empty());
         }
     }
 

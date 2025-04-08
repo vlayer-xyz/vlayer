@@ -4559,6 +4559,7 @@ dependencies = [
  "cfdkim",
  "derivative",
  "hex-literal",
+ "itertools 0.14.0",
  "lazy_static",
  "mailparse 0.14.1",
  "rsa",
