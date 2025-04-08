@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  L2_JSON_RPC_URL: z.string().url()
+  L2_JSON_RPC_URL: z.string().url(),
 });
 
 type Env = z.infer<typeof envSchema>;
