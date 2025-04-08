@@ -25,7 +25,7 @@ impl TryFrom<ParsedMail<'_>> for Email {
     fn try_from(mail: ParsedMail) -> Result<Self, Self::Error> {
         let headers = mail.get_headers();
 
-        let get_header = header_getter(headers);
+        let get_header = last_header_getter(headers);
 
         let from_raw =
             get_header("From").ok_or(MailParseError::Generic("\"From\" header is missing"))?;
@@ -98,7 +98,7 @@ impl Email {
 }
 
 // Last headers are signed first: https://datatracker.ietf.org/doc/html/rfc6376#section-5.4.2
-fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
+fn last_header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
     move |key: &str| headers.get_all_values(key).pop()
 }
 
