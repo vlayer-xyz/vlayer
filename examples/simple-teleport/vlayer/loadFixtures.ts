@@ -14,6 +14,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import L2State from "../out/L2State.sol/L2State";
 import { type Address } from "viem";
 import { getTeleportConfig } from "./constants";
+import { env } from "./env";
 
 const l1 = {
   ...foundry,
@@ -64,7 +65,7 @@ export const loadFixtures = async () => {
   const teleportConfig = getTeleportConfig(config.chainName);
 
   const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
-  const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
+  const l2TestClient = createAnvilClient(opL2, env.L2_JSON_RPC_URL);
 
   const account = privateKeyToAccount(config.privateKey as Address);
 
