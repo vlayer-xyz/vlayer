@@ -170,3 +170,5 @@ jobs:
         uses: ./.github/actions/test-e2e
         with:
           example: "kraken-web-proof"
+        env:
+          PATH_TO_VLAYER: ${{ github.workspace }}/target/debug/vlayer
