@@ -3496,6 +3496,7 @@ dependencies = [
  "auto_impl",
  "bytes",
  "clap 4.5.26",
+ "derive-new",
  "derive_more 1.0.0",
  "risc0-zkp",
  "risc0-zkvm",

@@ -9,6 +9,7 @@ anyhow = { workspace = true }
 auto_impl = { workspace = true }
 bytes = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
+derive-new = { workspace = true }
 derive_more = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }

@@ -1,5 +1,6 @@
 use std::{io::stdout, sync::Arc};
 
+use derive_new::new;
 use tracing_subscriber::{
     fmt::layer, layer::SubscriberExt, registry, util::SubscriberInitExt, EnvFilter, Layer,
 };
@@ -24,15 +25,10 @@ pub fn init_tracing(log_format: LogFormat, secrets: Vec<String>) {
     registry.with(formatting_layer).init();
 }
 
+#[derive(new)]
 struct RedactingWriter<W: std::io::Write> {
     inner: W,
     secrets: Arc<Vec<String>>,
-}
-
-impl<W: std::io::Write> RedactingWriter<W> {
-    const fn new(inner: W, secrets: Arc<Vec<String>>) -> Self {
-        Self { inner, secrets }
-    }
 }
 
 impl<W: std::io::Write> std::io::Write for RedactingWriter<W> {
