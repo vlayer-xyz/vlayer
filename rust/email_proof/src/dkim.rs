@@ -65,7 +65,7 @@ impl DKIMHeader {
     }
 
     fn signing_domain(&self) -> Option<String> {
-        self.header.get_tag("d").map(|s| s.to_string())
+        self.header.get_tag("d")
     }
 
     fn signed_headers(&self) -> Vec<String> {
