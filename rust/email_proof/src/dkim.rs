@@ -55,10 +55,11 @@ impl DKIMHeader {
     ) -> Result<(), Error> {
         let signed_headers = Self::signed_headers(self);
 
-        for &required_field in required_signed_headers {
-            if !signed_headers.contains(&required_field.to_lowercase()) {
-                return Err(Error::MissingRequiredHeaderTag(required_field.to_string()));
-            }
+        if let Some(missing) = required_signed_headers
+            .iter()
+            .find(|h| !signed_headers.contains(&h.to_lowercase()))
+        {
+            return Err(Error::MissingRequiredHeaderTag((*missing).to_string()));
         }
 
         Ok(())
