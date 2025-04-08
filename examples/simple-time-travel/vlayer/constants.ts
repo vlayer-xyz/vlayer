@@ -28,7 +28,8 @@ export const chainToTimeTravelConfig: Record<string, TimeTravelConfig> = {
 };
 
 export const getTimeTravelConfig = (chainName: string): TimeTravelConfig => {
-  const config: TimeTravelConfig | undefined = chainToTimeTravelConfig[chainName];
+  const config: TimeTravelConfig | undefined =
+    chainToTimeTravelConfig[chainName];
   if (!config) {
     throw new Error(
       `The "${chainName}" chain is not yet configured in this example.`,
