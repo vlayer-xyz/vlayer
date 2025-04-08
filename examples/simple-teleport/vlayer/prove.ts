@@ -10,10 +10,10 @@ import {
 } from "@vlayer/sdk/config";
 import { type Address } from "viem";
 import { loadFixtures } from "./loadFixtures";
-import { getChainConfig } from "./constants";
+import { getTeleportConfig } from "./constants";
 
 const config = getConfig();
-const chainConfig = getChainConfig(config.chainName);
+const teleportConfig = getTeleportConfig(config.chainName);
 
 if (config.chainName === "anvil") {
   await loadFixtures();
@@ -38,10 +38,10 @@ const whaleBadgeNFTAddress = await waitForContractDeploy({
 });
 
 const tokensToCheck: { addr: Address; chainId: bigint; blockNumber: bigint }[] =
-  (chainConfig.prover.erc20Addresses.split(",") || []).map((addr, i) => ({
+  (teleportConfig.prover.erc20Addresses.split(",") || []).map((addr, i) => ({
     addr: addr as Address,
-    chainId: BigInt(chainConfig.prover.erc20ChainIds.split(",")[i]),
-    blockNumber: BigInt(chainConfig.prover.erc20BlockNumbers.split(",")[i]),
+    chainId: BigInt(teleportConfig.prover.erc20ChainIds.split(",")[i]),
+    blockNumber: BigInt(teleportConfig.prover.erc20BlockNumbers.split(",")[i]),
   }));
 
 const { prover, verifier } = await deployVlayerContracts({
@@ -56,7 +56,7 @@ const proofHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "crossChainBalanceOf",
-  args: [chainConfig.tokenHolder as Address, tokensToCheck],
+  args: [teleportConfig.tokenHolder as Address, tokensToCheck],
   chainId: chain.id,
 });
 const result = await vlayer.waitForProvingResult({ hash: proofHash });

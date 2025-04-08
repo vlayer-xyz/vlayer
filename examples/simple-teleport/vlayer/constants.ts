@@ -1,4 +1,4 @@
-export interface ChainConfig {
+export interface TeleportConfig {
   tokenHolder: `0x${string}`;
   prover: {
     erc20Addresses: string;
@@ -7,7 +7,7 @@ export interface ChainConfig {
   };
 }
 
-export const chainConfigs: Record<string, ChainConfig> = {
+export const chainToTeleportConfig: Record<string, TeleportConfig> = {
   anvil: {
     tokenHolder: "0xe2148eE53c0755215Df69b2616E552154EdC584f",
     prover: {
@@ -26,8 +26,8 @@ export const chainConfigs: Record<string, ChainConfig> = {
   },
 };
 
-export const getChainConfig = (chainName: string): ChainConfig => {
-  const config: ChainConfig | undefined = chainConfigs[chainName];
+export const getTeleportConfig = (chainName: string): TeleportConfig => {
+  const config: TeleportConfig | undefined = chainToTeleportConfig[chainName];
   if (!config) {
     throw new Error(
       `The "${chainName}" chain is not yet configured in this example.`,
