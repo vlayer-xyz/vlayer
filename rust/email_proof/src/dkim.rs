@@ -1,5 +1,5 @@
 use cfdkim::{header, validate_header, DKIMError};
-use mailparse::{MailHeader, MailHeaderMap, ParsedMail};
+use mailparse::{addrparse, MailAddr, MailHeader, MailHeaderMap, ParsedMail};
 use verifiable_dns::DNSRecord;
 
 pub use crate::errors::Error;
@@ -53,7 +53,7 @@ impl DKIMHeader {
         &self,
         required_signed_headers: &[&str],
     ) -> Result<(), Error> {
-        let signed_headers = Self::signed_headers(&self);
+        let signed_headers = Self::signed_headers(self);
 
         for &required_field in required_signed_headers {
             if !signed_headers.contains(&required_field.to_lowercase()) {
@@ -62,6 +62,10 @@ impl DKIMHeader {
         }
 
         Ok(())
+    }
+
+    fn signing_domain(&self) -> Option<String> {
+        self.header.get_tag("d").map(|s| s.to_string())
     }
 
     fn signed_headers(&self) -> Vec<String> {
@@ -73,17 +77,63 @@ impl DKIMHeader {
     }
 }
 
-pub fn get_dkim_header(email: &ParsedMail) -> Result<DKIMHeader, Error> {
-    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
-
-    if dkim_headers.len() != 1 {
-        return Err(Error::InvalidDkimHeaderCount(dkim_headers.len()));
-    }
-    Ok(DKIMHeader::new(dkim_headers[0]))
-}
-
 fn normalize_dns_name(name: &str) -> String {
     name.trim().trim_end_matches('.').to_lowercase()
+}
+
+pub fn get_dkim_header(email: &ParsedMail) -> Result<DKIMHeader, Error> {
+    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
+    let from_headers = email.headers.get_all_headers("From");
+
+    let Some(from_header) = from_headers.last() else {
+        return Err(Error::NoFromHeader);
+    };
+    let from_value = from_header.get_value();
+    let from_domain = parse_from_domain(&from_value)?;
+
+    let matching_headers: Vec<_> = dkim_headers
+        .iter()
+        .filter_map(|header| {
+            let dkim = DKIMHeader::new(header);
+            match dkim.signing_domain() {
+                Some(sig_domain) if sig_domain.eq_ignore_ascii_case(&from_domain) => Some(dkim),
+                _ => None,
+            }
+        })
+        .collect();
+
+    match matching_headers.as_slice() {
+        [only] => Ok(only.clone()),
+        _ => Err(Error::InvalidDkimHeaderCount(matching_headers.len())),
+    }
+}
+
+fn parse_from_domain(from: &str) -> Result<String, Error> {
+    let Some(parsed) = addrparse(from).ok() else {
+        return Err(Error::InvalidFromHeader("Could not parse From header".into()));
+    };
+
+    if parsed.len() != 1 {
+        return Err(Error::InvalidFromHeader("Expected exactly one address in From header".into()));
+    }
+
+    let addr = parsed
+        .iter()
+        .next()
+        .expect("Parsed address should be present");
+
+    let MailAddr::Single(single) = addr else {
+        return Err(Error::InvalidFromHeader("Expected single address".into()));
+    };
+
+    let domain = single
+        .addr
+        .split('@')
+        .nth(1)
+        .expect("Addresses without domain are filtered out by `addrparse` function")
+        .to_lowercase();
+
+    Ok(domain)
 }
 
 #[cfg(test)]
@@ -97,15 +147,18 @@ mod tests {
         DKIMHeader::new(&header)
     }
 
-    mod verify_exactly_one_dkim_header {
+    mod get_dkim_header {
         use mailparse::parse_mail;
 
         use super::*;
 
         #[test]
         fn passes_for_single_dkim_header() {
-            let email =
-                parse_mail(b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From; bh=; b=").unwrap();
+            let email = parse_mail(
+                b"From: Alice <alice@example.com>\r\n\
+                DKIM-Signature: v=1; a=; c=; d=example.com; s=; t=; h=From; bh=; b=",
+            )
+            .unwrap();
 
             let result = get_dkim_header(&email);
             assert!(result.is_ok());
@@ -113,7 +166,7 @@ mod tests {
 
         #[test]
         fn fails_for_not_exactly_one_dkim_headers() {
-            let email = parse_mail(b"").unwrap();
+            let email = parse_mail(b"From: Alice <alice@example.com>").unwrap();
 
             assert_eq!(get_dkim_header(&email).unwrap_err(), Error::InvalidDkimHeaderCount(0));
         }
@@ -139,6 +192,36 @@ mod tests {
                 DKIMError::SignatureSyntaxError(
                     "DKIM-Signature header contains body length tag (l=)".into()
                 )
+            );
+        }
+    }
+
+    #[cfg(test)]
+    mod parse_from_domain {
+        use super::*;
+
+        #[test]
+        fn parses_valid_from_address() {
+            let input = "Alice <alice@example.com>";
+            let result = parse_from_domain(input).unwrap();
+            assert_eq!(result, "example.com");
+        }
+
+        #[test]
+        fn returns_error_for_missing_at_symbol() {
+            let input = "invalid-address-without-at-symbol";
+            assert_eq!(
+                parse_from_domain(input).unwrap_err(),
+                Error::InvalidFromHeader("Could not parse From header".into())
+            );
+        }
+
+        #[test]
+        fn returns_error_for_group_address() {
+            let input = "Group: alice@example.com;";
+            assert_eq!(
+                parse_from_domain(input).unwrap_err(),
+                Error::InvalidFromHeader("Expected single address".into())
             );
         }
     }
