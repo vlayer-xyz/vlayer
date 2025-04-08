@@ -23,7 +23,7 @@ impl DKIMHeader {
         }
     }
 
-    pub fn verify_dkim_body_length_tag(&self) -> Result<(), DKIMError> {
+    pub fn verify_body_length_tag(&self) -> Result<(), DKIMError> {
         if self.header.get_tag("l").is_some() {
             return Err(DKIMError::SignatureSyntaxError(
                 "DKIM-Signature header contains body length tag (l=)".into(),
@@ -238,7 +238,7 @@ mod tests {
         fn passes_for_header_without_l_tag() {
             let header = from_raw_data(b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From; bh=; b=");
 
-            assert!(header.verify_dkim_body_length_tag().is_ok());
+            assert!(header.verify_body_length_tag().is_ok());
         }
 
         #[test]
@@ -247,7 +247,7 @@ mod tests {
                 from_raw_data(b"DKIM-Signature: v=1; a=; c=; d=; s=; t=; h=From; bh=; b=; l=100");
 
             assert_eq!(
-                header.verify_dkim_body_length_tag().unwrap_err(),
+                header.verify_body_length_tag().unwrap_err(),
                 DKIMError::SignatureSyntaxError(
                     "DKIM-Signature header contains body length tag (l=)".into()
                 )

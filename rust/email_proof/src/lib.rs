@@ -37,7 +37,7 @@ fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Er
     verify_no_fake_separator(raw_headers)?;
     dkim_header.verify_dns_consistency(dns_record)?;
     dkim_header.verify_required_headers_signed(&REQUIRED_SIGNED_HEADERS)?;
-    dkim_header.verify_dkim_body_length_tag()?;
+    dkim_header.verify_body_length_tag()?;
 
     Ok(())
 }
