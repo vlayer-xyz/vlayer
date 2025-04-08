@@ -18,7 +18,7 @@ async function generateWebProof() {
   try {
     console.log("⏳ Generating web proof...");
     const result =
-      await Bun.$`${process.env.PATH_TO_VLAYER ?? "vlayer"} web-proof-fetch --notary ${notaryUrl} --url ${URL_TO_PROVE}`;
+      await Bun.$`${process.env.PATH_TO_VLAYER_BINARY ?? "vlayer"} web-proof-fetch --notary ${notaryUrl} --url ${URL_TO_PROVE}`;
     return result.stdout.toString();
   } catch (error) {
     console.error("Command failed:", error);
