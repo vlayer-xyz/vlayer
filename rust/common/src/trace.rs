@@ -1,4 +1,7 @@
-use std::{io::stdout, sync::Arc};
+use std::{
+    io::{stdout, Result, Write},
+    sync::Arc,
+};
 
 use derive_new::new;
 use tracing_subscriber::{
@@ -26,13 +29,13 @@ pub fn init_tracing(log_format: LogFormat, secrets: Vec<String>) {
 }
 
 #[derive(new)]
-struct RedactingWriter<W: std::io::Write> {
+struct RedactingWriter<W: Write> {
     inner: W,
     secrets: Arc<Vec<String>>,
 }
 
-impl<W: std::io::Write> std::io::Write for RedactingWriter<W> {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+impl<W: Write> Write for RedactingWriter<W> {
+    fn write(&mut self, buf: &[u8]) -> Result<usize> {
         let mut output = String::from_utf8_lossy(buf).to_string();
         for secret in self.secrets.iter() {
             let placeholder = "*".repeat(secret.len());
@@ -41,7 +44,7 @@ impl<W: std::io::Write> std::io::Write for RedactingWriter<W> {
         self.inner.write(output.as_bytes())
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> Result<()> {
         self.inner.flush()
     }
 }
