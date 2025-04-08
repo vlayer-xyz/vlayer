@@ -8,7 +8,8 @@ mod from_header;
 mod test_utils;
 
 use dkim::{
-    get_dkim_header, verify_dkim_body_length_tag, verify_dns_consistency, verify_required_headers_signed, verify_signature::verify_signature
+    get_dkim_header, verify_dkim_body_length_tag, verify_dns_consistency,
+    verify_required_headers_signed, verify_signature::verify_signature,
 };
 use dns::extract_public_key;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};

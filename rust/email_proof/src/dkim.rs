@@ -103,10 +103,7 @@ mod tests {
         fn fails_for_not_exactly_one_dkim_headers() {
             let email = parse_mail(b"").unwrap();
 
-            assert_eq!(
-                get_dkim_header(&email).unwrap_err(),
-                Error::InvalidDkimHeaderCount(0)
-            );
+            assert_eq!(get_dkim_header(&email).unwrap_err(), Error::InvalidDkimHeaderCount(0));
         }
     }
 
