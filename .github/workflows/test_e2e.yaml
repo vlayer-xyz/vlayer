@@ -85,8 +85,6 @@ jobs:
           mkdir target_debug
           mv ${CARGO_TARGET_DIR}/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
 
-      - name: Set PATH to vlayer binary
-        run: echo "${{ github.workspace }}/target/debug" >> $GITHUB_PATH
 
       - name: Push binaries
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0

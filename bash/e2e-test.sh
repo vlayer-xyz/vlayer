@@ -4,6 +4,8 @@ set -ueo pipefail
 
 # Imports
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+export PATH="${VLAYER_HOME}/target/debug:${PATH}"
+
 [ -f "${VLAYER_HOME}/.env.local" ] && source "${VLAYER_HOME}/.env.local"
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
