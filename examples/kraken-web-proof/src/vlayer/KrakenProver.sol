@@ -14,11 +14,7 @@ contract KrakenProver is Prover {
 
     string public constant DATA_URL = "https://api.kraken.com/0/public/Ticker?pair=ETHUSD";
 
-    function main(WebProof calldata webProof)
-        public
-        view
-        returns (Proof memory, string memory)
-    {
+    function main(WebProof calldata webProof) public view returns (Proof memory, string memory) {
         Web memory web = webProof.verify(DATA_URL);
 
         string memory avgPrice = web.jsonGetString("result.XETHZUSD.p[0]");

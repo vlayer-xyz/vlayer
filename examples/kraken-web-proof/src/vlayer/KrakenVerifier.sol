@@ -15,10 +15,7 @@ contract KrakenVerifier is Verifier {
         prover = _prover;
     }
 
-    function verify(Proof calldata, string memory _avgPrice)
-        public
-        onlyVerified(prover, KrakenProver.main.selector)
-    {
+    function verify(Proof calldata, string memory _avgPrice) public onlyVerified(prover, KrakenProver.main.selector) {
         avgPrice = _avgPrice;
     }
 }
