@@ -11,8 +11,6 @@ use test_helpers::{
 };
 
 mod server_tests {
-    use risc0_zkvm::get_version;
-
     use super::*;
 
     #[cfg(test)]
