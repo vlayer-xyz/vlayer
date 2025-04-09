@@ -28,7 +28,8 @@
     "@types/semver": "^7.5.8",
     "abitype": "^1.0.6",
     "vitest": "^2.1.1",
-    "vitest-fetch-mock": "^0.4.1"
+    "vitest-fetch-mock": "^0.4.1",
+    "vite": "^5.4.1"
   },
   "peerDependencies": {
     "typescript": "^5.6.3"
@@ -38,6 +39,7 @@
     "base64-js": "^1.5.1",
     "debug": "^4.4.0",
     "dotenv-flow": "^4.1.0",
+    "dotenv": "^16.0.0",
     "postal-mime": "^2.3.2",
     "semver": "^7.6.3",
     "ts-pattern": "5.6.0",

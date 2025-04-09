@@ -4,7 +4,7 @@ import globals from "globals";
 import eslintPluginReact from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from 'typescript-eslint';
-
+import importPlugin from "eslint-plugin-import";
 // Unified ESLint configuration for the entire monorepo using flat config
 export default tseslint.config(
   {
@@ -16,6 +16,7 @@ export default tseslint.config(
       "rust/**/*",
       "docker/**/*",
       "**/out/**/*",
+      '**/playwright-report/**/*',
     ],
   },
   eslint.configs.recommended,
@@ -30,6 +31,17 @@ export default tseslint.config(
     // Disable the rule for React in JSX scope as React version >= 18 is used
     rules: {
       "react/react-in-jsx-scope": "off",
+    },
+  },
+  {
+    ignores: [
+      '**/web-proof-commons/**/*',
+    ],
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      "import/no-extraneous-dependencies": "error",
     },
   },
   {
@@ -49,6 +61,7 @@ export default tseslint.config(
       parserOptions: {
         // Always find closest tsconfig.json
         projectService: true,
+        // @ts-ignore
         tsconfigRootDir: import.meta.dirname,
       },
     },
