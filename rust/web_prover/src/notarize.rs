@@ -1,51 +1,38 @@
 use std::{collections::HashMap, str};
 
-use derive_new::new;
-use http_body_util::Empty;
+use http_body_util::Full;
 use hyper::{Request, StatusCode, body::Bytes};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
 use tlsn_common::config::ProtocolConfig;
 use tlsn_core::{
-    CryptoProvider, Secrets,
-    attestation::Attestation,
-    request::RequestConfig,
-    transcript::{Transcript, TranscriptCommitConfig},
+    CryptoProvider, Secrets, attestation::Attestation, request::RequestConfig,
+    transcript::TranscriptCommitConfig,
 };
 use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 use tracing::debug;
 
-use crate::RedactionConfig;
+use crate::{NotarizeParams, RedactionConfig};
 
 const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 const MAX_SENT_DATA: usize = 1 << 12;
 const MAX_RECV_DATA: usize = 1 << 14;
 
-#[derive(Debug, Clone, new)]
-pub struct NotaryConfig {
-    /// Notary host (domain name or IP)
-    pub host: String,
-    /// Notary port
-    pub port: u16,
-    /// Notary API path
-    pub path_prefix: String,
-    /// Whether to use TLS for notary connection
-    pub enable_tls: bool,
-}
+pub async fn notarize(
+    params: NotarizeParams,
+) -> Result<(Attestation, Secrets, RedactionConfig), Box<dyn std::error::Error>> {
+    let NotarizeParams {
+        notary_config,
+        server_domain,
+        server_host,
+        server_port,
+        uri,
+        headers,
+        body,
+        redaction_config_fn,
+    } = params;
 
-pub async fn notarize<RedactionConfigFn>(
-    notary_config: NotaryConfig,
-    server_domain: &str,
-    server_host: &str,
-    server_port: u16,
-    uri: &str,
-    headers: HashMap<String, String>,
-    redaction_config_fn: RedactionConfigFn,
-) -> Result<(Attestation, Secrets, RedactionConfig), Box<dyn std::error::Error>>
-where
-    RedactionConfigFn: Fn(&Transcript) -> RedactionConfig,
-{
     let notary_client = NotaryClient::builder()
         .host(notary_config.host)
         .port(notary_config.port)
@@ -69,7 +56,7 @@ where
         .expect("Could not connect to notary. Make sure it is running.");
 
     let prover_config = ProverConfig::builder()
-        .server_name(server_domain)
+        .server_name(server_domain.as_ref())
         .protocol_config(
             ProtocolConfig::builder()
                 .max_sent_data(MAX_SENT_DATA)
@@ -95,19 +82,7 @@ where
 
     tokio::spawn(connection);
 
-    let mut request_builder = Request::builder()
-        .uri(uri)
-        .header("Host", server_domain)
-        .header("Accept", "*/*")
-        .header("Accept-Encoding", "identity")
-        .header("Connection", "close")
-        .header("User-Agent", USER_AGENT);
-
-    for (k, v) in &headers {
-        request_builder = request_builder.header(k, v);
-    }
-
-    let request = request_builder.body(Empty::<Bytes>::new())?;
+    let request = prepare_request(&server_domain, &uri, &headers, body)?;
 
     debug!("Starting an MPC TLS connection with the server");
 
@@ -140,4 +115,45 @@ where
     let (attestation, secrets) = Box::pin(prover.finalize(&request_config)).await?;
     debug!("Finished notarizing");
     Ok((attestation, secrets, redaction_config))
+}
+
+fn prepare_request(
+    server_domain: &str,
+    uri: &str,
+    headers: &HashMap<String, String>,
+    body: impl AsRef<[u8]>,
+) -> Result<Request<Full<Bytes>>, hyper::http::Error> {
+    let mut request_builder = Request::builder()
+        .uri(uri)
+        .header("Host", server_domain)
+        .header("Accept", "*/*")
+        .header("Accept-Encoding", "identity")
+        .header("Connection", "close")
+        .header("User-Agent", USER_AGENT);
+
+    for (k, v) in headers {
+        request_builder = request_builder.header(k, v);
+    }
+
+    request_builder.body(Full::new(Bytes::from(body.as_ref().to_vec())))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn should_correctly_prepare_request_body() {
+        let request = prepare_request(
+            "lotr-api.online",
+            "/auth_header_require?param1=value1&param2=value2",
+            &HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]),
+            "abc",
+        )
+        .unwrap();
+
+        let body = request.body();
+
+        assert_eq!(r#"Full { data: Some(b"abc") }"#, format!("{body:?}"));
+    }
 }

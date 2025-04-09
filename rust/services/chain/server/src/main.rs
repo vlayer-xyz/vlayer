@@ -3,7 +3,7 @@ use std::{net::SocketAddr, path::PathBuf};
 use chain_db::{ChainDb, Mode};
 use chain_server_lib::{ServerConfig, serve};
 use clap::Parser;
-use common::{GlobalArgs, LogFormat, init_tracing};
+use common::{GlobalArgs, init_tracing};
 use dotenvy::dotenv;
 use guest_wrapper::CHAIN_GUEST_IDS;
 use risc0_zkp::core::digest::Digest;
@@ -46,7 +46,7 @@ async fn main() {
 async fn run() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+    init_tracing(cli.global_args.log_format, vec![]);
 
     let config = ServerConfig::new(cli.listen_addr);
     let db = ChainDb::mdbx(
