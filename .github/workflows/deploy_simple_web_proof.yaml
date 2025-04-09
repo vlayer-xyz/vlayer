@@ -42,7 +42,7 @@ jobs:
           vite_sentry_dsn: "https://1afb2d9efb40a7ac94d0c8737ab8ffc4@o4508754893012992.ingest.de.sentry.io/4508760191795280"
 
   e2e-test-web-apps-vercel:
-    name: E2E web apps test against devnet and vercel deployment
+    name: E2E web apps test against testnet and vercel deployment
     runs-on: aws-linux-medium
     needs: [deploy-simple-web-proof]
 
@@ -87,7 +87,7 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "dev"
-          VLAYER_ENV: dev
+          VLAYER_ENV: testnet
           WEB_SERVER_URL: ${{needs.deploy-simple-web-proof.outputs.deployment_url}}
           VLAYER_TMP_DIR: ./artifacts
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
