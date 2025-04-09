@@ -8,7 +8,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "jsdom": "^25.0.1",
-    "webextension-polyfill": "^0.12.0"
+    "webextension-polyfill": "^0.12.0",
+    "@testing-library/react": "^15.0.6"
   },
   "peerDependencies": {
     "typescript": "^5.0.0",
