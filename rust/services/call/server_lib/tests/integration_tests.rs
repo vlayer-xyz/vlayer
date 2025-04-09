@@ -11,18 +11,14 @@ use test_helpers::{
 };
 
 mod server_tests {
+    use risc0_zkvm::get_version;
+
     use super::*;
 
     #[cfg(test)]
     #[ctor::ctor]
     fn before_all() {
         std::env::set_var("RISC0_DEV_MODE", "1");
-    }
-
-    #[test]
-    fn log_version() {
-        let risc0_version = env!("RISC0_BUILD_VERSION");
-        println!("Using risc0-build version: {}", risc0_version);
     }
 
     #[tokio::test]
