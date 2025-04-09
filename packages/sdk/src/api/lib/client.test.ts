@@ -43,7 +43,7 @@ afterEach(() => {
 
 function generateRandomHash() {
   let hash = "0x";
-  for (let i = 0; i < 40; ++i) {
+  for (let i = 0; i < 64; ++i) {
     hash += Math.floor(Math.random() * 16).toString(16);
   }
   return hash;
