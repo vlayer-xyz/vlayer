@@ -26,7 +26,7 @@ pub fn v_versions(config: &Config) -> Versions {
         chain_guest_id: config.chain_guest_id_hex(),
         api_version: config.semver.clone(),
         risc0_version: get_version()
-            .expect("Risc0 version should be specified")
+            .expect("Failed to parse risc0_zkvm version — CARGO_PKG_VERSION is not valid semver")
             .to_string(),
     }
 }
