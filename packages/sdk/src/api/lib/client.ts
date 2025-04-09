@@ -56,7 +56,7 @@ export const createVlayerClient = (
   const resultHashMap = new Map<string, [Abi, string]>();
 
   if (!webProofProvider) {
-    webProofProvider = createExtensionWebProofProvider({ jwtToken: token });
+    webProofProvider = createExtensionWebProofProvider({ token });
   }
 
   return {
