@@ -104,7 +104,7 @@ test("Full flow from opening sidepanel to redirection", async ({
 
     await page.getByText("Has zk proof").waitFor();
 
-    await webpage.checkProof(vlayerResponses);
+    await webpage.expectValidZkProof(vlayerResponses);
   });
 
   await test.step("Prover returned correctly redacted parts of response body", async () => {

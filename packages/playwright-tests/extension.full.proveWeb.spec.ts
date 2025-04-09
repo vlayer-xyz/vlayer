@@ -56,7 +56,7 @@ test("Full flow from opening sidepanel to redirection using proveWeb", async ({
 
     await webpage.expectZkProof();
 
-    await webpage.checkProof(vlayerResponses);
+    await webpage.expectValidZkProof(vlayerResponses);
   });
 
   await test.step("Prover returned correctly redacted parts of response body", async () => {

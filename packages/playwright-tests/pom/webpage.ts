@@ -81,7 +81,7 @@ export class Webpage {
     expect(await text.textContent()).toContain(expectedText);
   }
 
-  async checkProof(vlayerResponses: Promise<Response | null>[]) {
+  async expectValidZkProof(vlayerResponses: Promise<Response | null>[]) {
     expect(vlayerResponses.length).toBeGreaterThan(1);
 
     const proveResponse = (await vlayerResponses[0])!;
