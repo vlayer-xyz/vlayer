@@ -13,6 +13,8 @@ import MockERC20 from "../out/MockERC20.sol/MockERC20";
 import { privateKeyToAccount } from "viem/accounts";
 import L2State from "../out/L2State.sol/L2State";
 import { type Address } from "viem";
+import { getTeleportConfig } from "./constants";
+import { env } from "./env";
 
 const l1 = {
   ...foundry,
@@ -24,7 +26,10 @@ const opL2 = {
   id: 31_338,
 };
 
-const config = getConfig();
+// Anvil test private key, for the purpose of fixtures only.
+const opAccount = privateKeyToAccount(
+  "0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659" as Address,
+);
 
 function createAnvilClient(chain: Chain, url: string) {
   return createTestClient({
@@ -55,47 +60,48 @@ function computeOutputRoot(
   return hash;
 }
 
-export const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
-export const l2TestClient = createAnvilClient(opL2, config.l2JsonRpcUrl!);
+export const loadFixtures = async () => {
+  const config = getConfig();
+  const teleportConfig = getTeleportConfig(config.chainName);
 
-const account = privateKeyToAccount(config.privateKey as Address);
+  const l1TestClient = createAnvilClient(l1, config.jsonRpcUrl);
+  const l2TestClient = createAnvilClient(opL2, env.L2_JSON_RPC_URL);
 
-const opAccount = privateKeyToAccount(
-  process.env.EXAMPLES_TEST_OP_PRIVATE_KEY as Address,
-);
+  const account = privateKeyToAccount(config.privateKey as Address);
 
-const hash = await l2TestClient.deployContract({
-  abi: MockERC20.abi,
-  bytecode: MockERC20.bytecode.object,
-  account: opAccount,
-  args: ["L2 ERC20 Token", "L2ERC20"],
-});
+  const hash = await l2TestClient.deployContract({
+    abi: MockERC20.abi,
+    bytecode: MockERC20.bytecode.object,
+    account: opAccount,
+    args: ["L2 ERC20 Token", "L2ERC20"],
+  });
 
-const receipt = await l2TestClient.waitForTransactionReceipt({ hash });
+  const receipt = await l2TestClient.waitForTransactionReceipt({ hash });
 
-const erc20addr = receipt.contractAddress as `0x${string}`;
+  const erc20addr = receipt.contractAddress as `0x${string}`;
 
-await l2TestClient.writeContract({
-  address: erc20addr,
-  abi: MockERC20.abi,
-  functionName: "mint",
-  args: [opAccount.address, 1000n],
-  account: opAccount,
-});
-await l2TestClient.writeContract({
-  address: erc20addr,
-  abi: MockERC20.abi,
-  functionName: "transfer",
-  args: [process.env.TOKEN_HOLDER as Address, 100n],
-  account: opAccount,
-});
+  await l2TestClient.writeContract({
+    address: erc20addr,
+    abi: MockERC20.abi,
+    functionName: "mint",
+    args: [opAccount.address, 1000n],
+    account: opAccount,
+  });
+  await l2TestClient.writeContract({
+    address: erc20addr,
+    abi: MockERC20.abi,
+    functionName: "transfer",
+    args: [teleportConfig.tokenHolder as Address, 100n],
+    account: opAccount,
+  });
 
-const latestBlock = await l2TestClient.getBlock({ blockTag: "latest" });
-const outputRoot = computeOutputRoot(latestBlock);
+  const latestBlock = await l2TestClient.getBlock({ blockTag: "latest" });
+  const outputRoot = computeOutputRoot(latestBlock);
 
-await l1TestClient.deployContract({
-  abi: L2State.abi,
-  bytecode: L2State.bytecode.object,
-  account,
-  args: [outputRoot, latestBlock.number],
-});
+  await l1TestClient.deployContract({
+    abi: L2State.abi,
+    bytecode: L2State.bytecode.object,
+    account,
+    args: [outputRoot, latestBlock.number],
+  });
+};
