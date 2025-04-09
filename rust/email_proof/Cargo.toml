@@ -8,6 +8,7 @@ alloy-sol-types = { workspace = true }
 base64 = "0.21.7"
 cfdkim = { git = "https://github.com/vlayer-xyz/dkim", rev = "04668378083e2236489b3749b4112c847972071b", default-features = false }
 derivative = { workspace = true }
+itertools = { workspace = true }
 mailparse = "0.14.1"
 rsa = { workspace = true }
 slog = "2.7.0"

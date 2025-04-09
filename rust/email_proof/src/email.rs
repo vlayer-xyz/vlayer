@@ -25,7 +25,7 @@ impl TryFrom<ParsedMail<'_>> for Email {
     fn try_from(mail: ParsedMail) -> Result<Self, Self::Error> {
         let headers = mail.get_headers();
 
-        let get_header = header_getter(headers);
+        let get_header = last_header_getter(headers);
 
         let from_raw =
             get_header("From").ok_or(MailParseError::Generic("\"From\" header is missing"))?;
@@ -97,8 +97,9 @@ impl Email {
     }
 }
 
-fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
-    move |key: &str| headers.get_first_value(key).map(String::from)
+// Last headers are signed first: https://datatracker.ietf.org/doc/html/rfc6376#section-5.4.2
+fn last_header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
+    move |key: &str| headers.get_all_values(key).pop()
 }
 
 #[cfg(test)]
@@ -270,14 +271,14 @@ ZmlsZSBjb250ZW50Cg==
         }
 
         #[test]
-        fn takes_first_header_if_multiple() {
+        fn takes_last_header_if_multiple() {
             let email = parsed_email(
                 vec![("From", "me@aa.aa"), ("From", "you@aa.aa"), ("To", "you"), ("To", "me")],
                 "body",
             )
             .unwrap();
-            assert_eq!(email.from, "me@aa.aa");
-            assert_eq!(email.to, "you");
+            assert_eq!(email.from, "you@aa.aa");
+            assert_eq!(email.to, "me");
         }
 
         #[test]

@@ -1614,6 +1614,7 @@ dependencies = [
  "base64 0.21.7",
  "cfdkim",
  "derivative",
+ "itertools 0.14.0",
  "mailparse",
  "rsa",
  "slog",
