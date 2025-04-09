@@ -15,8 +15,9 @@ export function handleProverResponseError({
 }: {
   message: string | undefined;
 }): Error {
-  if (message?.startsWith("Unsupported CallGuestID"))
+  if (message?.startsWith("Unsupported CallGuestID")) {
     return new VersionError(message);
+  }
   return new Error(`Error response: ${message ?? "unknown error"}`);
 }
 
