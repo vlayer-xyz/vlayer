@@ -292,4 +292,16 @@ mod test {
         let inspector = inspector_call(other_contract, &[], &[]);
         assert!(inspector.location.is_none());
     }
+
+    #[test]
+    #[should_panic(expected = "DELEGATECALL is not supported in travel calls")]
+    fn delegate_call_panics_in_on_call() {
+        let other_contract = address!("0000000000000000000000000000000000000000");
+        let mut inspector = inspector_call(other_contract, &[], &[]);
+        let mut call_inputs = create_mock_call_inputs(other_contract, [0u8; 4]);
+        call_inputs.scheme = CallScheme::DelegateCall;
+        
+        inspector.set_block(1);
+        inspector.on_call(&call_inputs);
+    }
 }
