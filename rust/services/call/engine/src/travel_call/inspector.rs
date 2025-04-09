@@ -3,7 +3,7 @@ use call_common::{metadata::Metadata, ExecutionLocation, RevmDB, WrappedRevmDBEr
 use call_precompiles::precompile_by_address;
 use revm::{
     db::WrapDatabaseRef,
-    interpreter::{CallInputs, CallOutcome},
+    interpreter::{CallInputs, CallOutcome, CallScheme},
     primitives::ExecutionResult,
     EvmContext, Inspector as IInspector,
 };
@@ -78,6 +78,14 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
         let Some(location) = self.location.take() else {
             return None; // If no setChain/setBlock happened, we don't need to teleport to a new VM, but can continue with the current one.
         };
+
+        // `Call` does not support `DELEGATECALL` semantics, because it only stores a single `to` address.
+        // In contrast, `CallInputs` distinguishes between `target_address` (storage context) and `bytecode_address` (code location).
+        // When converting `CallInputs` to `Call`, we lose this distinction, making it impossible to correctly emulate `DELEGATECALL`.
+        // Therefore, we explicitly reject delegate calls to avoid incorrect execution.
+        if matches!(inputs.scheme, CallScheme::DelegateCall) {
+            panic!("DELEGATECALL is not supported in travel calls");
+        }
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
