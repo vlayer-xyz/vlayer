@@ -108,7 +108,7 @@ test("Full flow from opening sidepanel to redirection", async ({
   });
 
   await test.step("Prover returned correctly redacted parts of response body", async () => {
-    await webpage.expectText("name-from-prover", "Gandalf");
-    await webpage.expectText("greeting-from-prover", "*************");
+    await webpage.expectTextByTextId("name-from-prover", "Gandalf");
+    await webpage.expectTextByTextId("greeting-from-prover", "*************");
   });
 });

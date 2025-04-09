@@ -69,7 +69,7 @@ export class Webpage {
     await this.page.getByText("Has zk proof").waitFor();
   }
 
-  async expectText(id: string, expectedText: string) {
+  async expectTextByTextId(id: string, expectedText: string) {
     const text = this.page.locator("body").getByTestId(id);
     expect(await text.textContent()).toEqual(expectedText);
   }
