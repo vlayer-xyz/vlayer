@@ -83,6 +83,17 @@ jobs:
       - name: Install contracts' dependencies
         working-directory: ./contracts/vlayer
         run: forge soldeer install
+
+      # Stateful GH Runners have a separate testnet private key on disk,
+      # to allow concurrent runs of the workflow avoiding nonce issues.
+      # Here we load the key into a variable from a location on disk.
+      - name: Read testnet private key
+        shell: bash
+        run: |
+          EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
+          echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
+          echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
+
       - name: Run e2e test
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
@@ -92,6 +103,7 @@ jobs:
           VLAYER_TMP_DIR: ./artifacts
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
         run: xvfb-run bash/e2e-web-proof-example-test.sh
+
       - name: Handle Playwright Reports
         uses: ./.github/actions/handle-playwright-reports
         if: ${{ !cancelled() }}
@@ -106,7 +118,7 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           DEPLOY_TYPE: "examples"
           CONTEXT: "deploy-simple-web-proof"
-      # Teardown
+
       - name: Display Logs
         if: always()
         run: |
