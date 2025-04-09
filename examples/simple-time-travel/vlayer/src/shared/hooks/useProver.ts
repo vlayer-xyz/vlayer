@@ -22,12 +22,21 @@ export const useProver = () => {
 
   useEffect(() => {
     if (result && Array.isArray(result)) {
-      setProverResult(JSON.stringify(result));
+      console.log("result", result);
+      setProverResult(
+        JSON.stringify(result, (key, value) => {
+          if (typeof value === "bigint") {
+            return Number(value);
+          }
+          return value;
+        }),
+      );
     }
   }, [result]);
 
   useEffect(() => {
     if (provingError || provingResultError) {
+      console.log("provingError", provingError);
       console.log(
         "error: ",
         provingError?.message || provingResultError?.message,
