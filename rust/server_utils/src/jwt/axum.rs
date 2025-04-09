@@ -22,8 +22,10 @@ pub struct ClaimsExtractor<T: Clone>(pub T);
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("InvalidToken")]
+    #[error("Invalid JWT token")]
     InvalidToken,
+    #[error("Missing JWT token")]
+    MissingToken,
     #[error(transparent)]
     Jwt(JwtError),
 }
@@ -46,10 +48,13 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = State::from_ref(state);
-        let TypedHeader(Authorization(bearer)) = parts
-            .extract::<TypedHeader<Authorization<Bearer>>>()
+        let Some(TypedHeader(Authorization(bearer))) = parts
+            .extract::<Option<TypedHeader<Authorization<Bearer>>>>()
             .await
-            .map_err(|_| Error::InvalidToken)?;
+            .map_err(|_| Error::InvalidToken)?
+        else {
+            return Err(Error::MissingToken);
+        };
 
         let header = decode_header(bearer.token()).map_err(|_| Error::InvalidToken)?;
         if header.typ.is_none_or(|typ| typ != HEADER_TYP) {
@@ -70,6 +75,6 @@ impl IntoResponse for Error {
             "error": self.to_string(),
         });
         error!("authorization error: {body}");
-        (StatusCode::BAD_REQUEST, Json(body)).into_response()
+        (StatusCode::UNAUTHORIZED, Json(body)).into_response()
     }
 }
