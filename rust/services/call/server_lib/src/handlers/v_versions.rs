@@ -1,4 +1,5 @@
 use jsonrpsee::{IntoResponse, ResponsePayload};
+use risc0_zkvm::get_version;
 use serde::{Deserialize, Serialize};
 
 use super::Config;
@@ -8,6 +9,7 @@ pub struct Versions {
     call_guest_id: String,
     chain_guest_id: String,
     api_version: String,
+    risc0_version: String,
 }
 
 impl IntoResponse for Versions {
@@ -23,5 +25,6 @@ pub fn v_versions(config: &Config) -> Versions {
         call_guest_id: config.call_guest_id_hex(),
         chain_guest_id: config.chain_guest_id_hex(),
         api_version: config.semver.clone(),
+        risc0_version: get_version().unwrap().to_string(),
     }
 }

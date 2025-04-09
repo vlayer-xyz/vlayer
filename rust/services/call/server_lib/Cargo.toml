@@ -25,6 +25,7 @@ jsonrpsee = { workspace = true }
 mime = { workspace = true }
 provider = { workspace = true }
 risc0-zkp = { workspace = true }
+risc0-zkvm = { workspace = true }
 seal = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
