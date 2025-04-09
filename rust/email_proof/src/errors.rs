@@ -24,6 +24,16 @@ pub enum Error {
     LoneNewLine(u8),
     #[error("Missing CRLF-CRLF separator between email headers and body")]
     MissingBodySeparator,
+    #[error("Missing From header")]
+    MissingFromHeader,
+    #[error("Missing required header `{0}` in DKIM h= tag")]
+    MissingRequiredHeaderTag(String),
+    #[error("No matching DKIM header found for From domain `{0}`")]
+    NoDkimMatchingFromDomain(String),
+    #[error("No From header found")]
+    NoFromHeader,
+    #[error("Expected exactly one DKIM-Signature header, found {0}")]
+    InvalidDkimHeaderCount(usize),
     #[error("VDNS signature verification failed: {0}")]
     VdnsSignatureVerification(
         #[from]

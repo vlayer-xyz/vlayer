@@ -493,6 +493,19 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
+        async fn rejects_requests_with_missing_token() {
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post("/", &req).await;
+
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "Missing JWT token" })
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
         async fn rejects_requests_with_expired_token() {
             let app = default_app();
             let req = rpc_body("dummy", &json!([]));
@@ -500,7 +513,7 @@ mod server_tests {
                 .post_with_bearer_auth("/", &req, &token(-120, "1234"))
                 .await;
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
                 json!({ "error": "ExpiredSignature" })
@@ -518,7 +531,7 @@ mod server_tests {
             let req = rpc_body("dummy", &json!([]));
             let resp = app.post_with_bearer_auth("/", &req, &token).await;
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
                 json!({ "error": "InvalidSignature" })
@@ -533,10 +546,10 @@ mod server_tests {
             let req = rpc_body("dummy", &json!([]));
             let resp = app.post_with_bearer_auth("/", &req, OLD_TOKEN).await;
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
-                json!({ "error": "InvalidToken" })
+                json!({ "error": "Invalid JWT token" })
             );
         }
 
