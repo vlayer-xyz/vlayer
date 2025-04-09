@@ -19,6 +19,12 @@ mod server_tests {
         std::env::set_var("RISC0_DEV_MODE", "1");
     }
 
+    #[test]
+    fn log_version() {
+        let risc0_version = env!("RISC0_BUILD_VERSION");
+        println!("Using risc0-build version: {}", risc0_version);
+    }
+
     #[tokio::test]
     async fn http_not_found() {
         let ctx = Context::default();
