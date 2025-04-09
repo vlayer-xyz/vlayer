@@ -12,7 +12,6 @@
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts"
   },
   "dependencies": {
-    "@types/node": "^22.5.4",
     "@vlayer/sdk": "workspace:*",
     "chalk": "^5.3.0",
     "debug": "^4.3.7",
@@ -29,6 +28,7 @@
     "@types/debug": "^4.1.12",
     "@types/dotenv-flow": "^3.3.3",
     "@types/eslint__js": "^8.42.3",
+    "@types/node": "^22.14.0",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
     "@typescript-eslint/parser": "^8.25.0",
     "eslint": "^9.9.0",
@@ -36,9 +36,8 @@
     "eslint-plugin-prettier": "^5.2.1",
     "globals": "^15.9.0",
     "prettier": "^3.3.3",
+    "solhint": "^5.0.5",
     "typescript": "^5.5.3",
-    "typescript-eslint": "^8.2.0",
-    "solhint": "^5.0.5"
+    "typescript-eslint": "^8.2.0"
   }
 }
-
