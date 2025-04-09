@@ -7,7 +7,7 @@ inputs:
     required: false
   rust_version:
     description: 'Version of Rust toolchain for building guest images'
-    default: 1.81.0
+    default: 1.85.0
     required: false
 runs:
   using: "composite"
