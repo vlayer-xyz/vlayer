@@ -86,13 +86,14 @@ export const createVlayerClient = (
       sleepDuration?: number;
     }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
       try {
-        const { data } = await waitForProof(
+        const { data, metrics } = await waitForProof(
           hash,
           url,
           token,
           numberOfRetries,
           sleepDuration,
         );
+        console.log("Metrics", metrics);
         const savedProvingData = resultHashMap.get(hash.hash);
         if (!savedProvingData) {
           throw new Error("No result found for hash " + hash.hash);

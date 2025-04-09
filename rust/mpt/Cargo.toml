@@ -9,7 +9,7 @@ alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 alloy-trie = { workspace = true }
 bytes = { workspace = true }
-common = { workspace = true }
+common = { workspace = true, default-features = false }
 derivative = { workspace = true }
 derive-new = { workspace = true }
 digest = { workspace = true }

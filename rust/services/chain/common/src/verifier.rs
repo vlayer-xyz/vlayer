@@ -1,17 +1,17 @@
 use alloy_primitives::B256;
 use block_header::Hashable;
-use common::{sealed_with_test_mock, verifier::zk_proof};
+use common::{sealed_with_test_mock, verifier::zk_proof, Digest};
 use derivative::Derivative;
-use risc0_zkp::verify::VerificationError;
-use risc0_zkvm::sha::Digest;
 
 use super::ChainProofRef;
 
 #[derive(thiserror::Error, Debug, Derivative)]
 #[derivative(PartialEq)]
 pub enum Error {
+    #[cfg(feature = "risc0")]
     #[error("ZK verification error: {0}")]
-    Zk(#[from] VerificationError),
+    Zk(#[from] risc0_zkp::verify::VerificationError),
+    #[cfg(feature = "risc0")]
     #[error("Journal decoding error: {0}")]
     Journal(#[from] risc0_zkvm::serde::Error),
     #[error("ELF ID mismatch: expected={expected:?} got={got}")]
@@ -42,6 +42,8 @@ impl<ZK: zk_proof::IVerifier> Verifier<ZK> {
 }
 
 impl<ZK: zk_proof::IVerifier> seal::Sealed for Verifier<ZK> {}
+
+#[cfg(feature = "risc0")]
 impl<ZK: zk_proof::IVerifier> IVerifier for Verifier<ZK> {
     fn verify(&self, proof_ref: ChainProofRef<'_, '_>) -> Result {
         let (proven_root, elf_id) = proof_ref.receipt.journal.decode()?;
@@ -62,6 +64,13 @@ impl<ZK: zk_proof::IVerifier> IVerifier for Verifier<ZK> {
 
         self.zk_verifier.verify(proof_ref.receipt, elf_id)?;
         Ok(())
+    }
+}
+
+#[cfg(feature = "sp1")]
+impl<ZK: zk_proof::IVerifier> IVerifier for Verifier<ZK> {
+    fn verify(&self, proof_ref: ChainProofRef<'_, '_>) -> Result {
+        unimplemented!("verify")
     }
 }
 

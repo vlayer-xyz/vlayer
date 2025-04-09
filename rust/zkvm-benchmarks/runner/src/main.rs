@@ -1,9 +1,11 @@
 use std::process::exit;
 
 mod cycle;
+#[cfg(feature = "risc0")]
 mod guest;
 mod row;
 mod runner;
+#[cfg(feature = "risc0")]
 mod tolerance;
 
 fn main() {

@@ -1,7 +1,7 @@
 pub use risc0_zkp::verify::VerificationError as Error;
-use risc0_zkvm::{guest, sha::Digest, Receipt};
+use risc0_zkvm::{guest, Receipt};
 
-use super::sealing::sealed_with_test_mock;
+use crate::{sealed_with_test_mock, Digest};
 
 pub type Result = std::result::Result<(), Error>;
 sealed_with_test_mock!(IVerifier (receipt: &Receipt, elf_id: Digest) -> Result);

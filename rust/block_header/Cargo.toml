@@ -9,7 +9,7 @@ alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 as-any = { workspace = true }
 auto_impl = { workspace = true }
-common = { workspace = true }
+common = { workspace = true, default-features = false }
 derive-new = { workspace = true }
 dyn-clone = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }

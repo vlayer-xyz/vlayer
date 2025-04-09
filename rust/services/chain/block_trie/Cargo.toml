@@ -8,7 +8,7 @@ alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true, features = ["arrayvec"] }
 block_header = { workspace = true }
 bytes = { workspace = true }
-common = { workspace = true }
+common = { workspace = true, default-features = false }
 derivative = { workspace = true }
 mpt = { workspace = true }
 serde = { workspace = true }

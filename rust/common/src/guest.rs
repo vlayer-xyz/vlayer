@@ -1,7 +1,8 @@
 use bytes::Bytes;
 use derive_more::AsRef;
-use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
+
+use crate::Digest;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, AsRef, Default)]
 pub struct GuestElf {

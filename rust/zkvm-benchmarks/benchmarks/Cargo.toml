@@ -9,16 +9,20 @@ alloy-sol-types = { workspace = true }
 block_header = { workspace = true, features = ["test-utils"] }
 block_trie = { workspace = true }
 call_precompiles = { workspace = true }
-common = { workspace = true }
+common = { workspace = true, default-features = false }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 
 email_proof = { workspace = true }
 mpt = { workspace = true }
-risc0-zkvm = { workspace = true }
+risc0-zkvm = { workspace = true, optional = true }
 rsa = { workspace = true }
 serde = { workspace = true }
 sha2 = { workspace = true }
+
+[features]
+risc0 = ["dep:risc0-zkvm"]
+sp1 = []
 
 [lints]
 workspace = true

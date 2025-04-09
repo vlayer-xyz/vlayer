@@ -26,6 +26,7 @@ optimism = { workspace = true, features = ["http", "testing"] }
 provider = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 risc0-zkvm = { workspace = true }
+sp1-sdk = { workspace = true }
 seal = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }

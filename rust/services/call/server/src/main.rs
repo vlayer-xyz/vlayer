@@ -12,8 +12,8 @@ use call_server_lib::{
 };
 use clap::{ArgAction, Parser};
 use common::{init_tracing, GlobalArgs, LogFormat};
-use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
-use server_utils::set_risc0_dev_mode;
+use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS, SP1_CALL_GUEST_ELF};
+use server_utils::{set_risc0_dev_mode, ProofProvider};
 use tracing::{info, warn};
 
 #[derive(Parser)]
@@ -24,6 +24,9 @@ struct Cli {
 
     #[arg(long, value_enum)]
     proof: Option<ProofMode>,
+
+    #[arg(long, value_enum)]
+    proof_provider: Option<ProofProvider>,
 
     #[arg(long, default_value = "127.0.0.1")]
     host: Option<String>,
@@ -67,6 +70,11 @@ struct Cli {
 impl Cli {
     fn into_config(self, api_version: String) -> anyhow::Result<Config> {
         let proof_mode = self.proof.unwrap_or_default();
+        let proof_provider = self.proof_provider.unwrap_or_default();
+        let call_guest_elf = match proof_provider {
+            ProofProvider::Risc0 => &CALL_GUEST_ELF,
+            ProofProvider::SP1 => &SP1_CALL_GUEST_ELF,
+        };
         let gas_meter_config = self
             .gas_meter_url
             .zip(Some(self.gas_meter_ttl.unwrap_or_default()))
@@ -99,13 +107,14 @@ impl Cli {
             }
         };
         Ok(ConfigBuilder::default()
-            .with_call_guest_elf(&CALL_GUEST_ELF)
+            .with_call_guest_elf(call_guest_elf)
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
             .with_semver(api_version)
             .with_chain_proof_config(chain_proof_config)
             .with_gas_meter_config(gas_meter_config)
             .with_rpc_mappings(self.rpc_url)
             .with_proof_mode(proof_mode)
+            .with_proof_provider(proof_provider)
             .with_host(self.host)
             .with_port(self.port)
             .with_jwt_config(jwt_config)

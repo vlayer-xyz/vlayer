@@ -20,8 +20,8 @@ call_common = { workspace = true }
 call_precompiles = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
-chain_common = { workspace = true }
-common = { workspace = true }
+chain_common = { workspace = true, default-features = false }
+common = { workspace = true , default-features = false }
 derivative = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
@@ -31,8 +31,8 @@ mpt = { workspace = true }
 once_cell = { workspace = true }
 optimism = { workspace = true }
 revm = { workspace = true, features = ["optimism", "serde", "std"] }
-risc0-zkp = { workspace = true }
-risc0-zkvm = { workspace = true }
+risc0-zkp = { workspace = true, optional = true }
+risc0-zkvm = { workspace = true, optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
@@ -43,14 +43,15 @@ auto_impl = { workspace = true }
 block_trie = { workspace = true, features = ["test-utils"] }
 bytemuck = { workspace = true }
 chain_common = { workspace = true, features = ["testing"] }
+risc0-zkp = { workspace = true }
 common = { workspace = true }
 serde_json = { workspace = true }
 test-log = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }
 
 [features]
+risc0 = ["dep:risc0-zkp", "dep:risc0-zkvm", "common/risc0"]
 testing = ["common/testing"]
 
 [lints]
 workspace = true
-

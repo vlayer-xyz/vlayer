@@ -3,10 +3,9 @@ use std::{collections::HashMap, net::SocketAddr as RawSocketAddr};
 use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
-use common::GuestElf;
+use common::{Digest, GuestElf};
 use derive_more::From;
-use risc0_zkp::core::digest::Digest;
-use server_utils::ProofMode;
+use server_utils::{ProofMode, ProofProvider};
 use thiserror::Error;
 
 use crate::{
@@ -23,6 +22,7 @@ pub struct Config {
     pub socket_addr: RawSocketAddr,
     pub rpc_urls: HashMap<ChainId, String>,
     pub proof_mode: ProofMode,
+    pub proof_provider: ProofProvider,
     pub chain_proof_config: Option<ChainProofConfig>,
     pub max_calldata_size: usize,
     pub call_guest_elf: GuestElf,
@@ -87,6 +87,7 @@ pub struct ConfigBuilder {
     socket_addr: SocketAddr,
     rpc_urls: RpcUrls,
     proof_mode: ProofMode,
+    proof_provider: ProofProvider,
     chain_proof_config: Option<ChainProofConfig>,
     max_calldata_size: MaxCalldataSize,
     call_guest_elf: Option<GuestElf>,
@@ -133,6 +134,12 @@ impl ConfigBuilder {
     #[must_use]
     pub const fn with_proof_mode(mut self, proof_mode: ProofMode) -> Self {
         self.proof_mode = proof_mode;
+        self
+    }
+
+    #[must_use]
+    pub const fn with_proof_provider(mut self, proof_provider: ProofProvider) -> Self {
+        self.proof_provider = proof_provider;
         self
     }
 
@@ -184,6 +191,7 @@ impl ConfigBuilder {
             socket_addr,
             rpc_urls,
             proof_mode,
+            proof_provider,
             chain_proof_config,
             max_calldata_size,
             call_guest_elf,
@@ -201,6 +209,7 @@ impl ConfigBuilder {
             socket_addr: socket_addr.0,
             rpc_urls: rpc_urls.0,
             proof_mode,
+            proof_provider,
             chain_proof_config,
             max_calldata_size: max_calldata_size.0,
             call_guest_elf,
@@ -216,6 +225,7 @@ impl From<&Config> for HostConfig {
     fn from(config: &Config) -> HostConfig {
         HostConfig {
             proof_mode: config.proof_mode.into(),
+            proof_provider: config.proof_provider.into(),
             call_guest_elf: config.call_guest_elf.clone(),
             chain_guest_ids: config.chain_guest_ids.clone(),
             is_vlayer_test: false,

@@ -8,3 +8,11 @@ pub enum ProofMode {
     Groth16,
     Succinct,
 }
+
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, EnumString, Display)]
+#[strum(ascii_case_insensitive)]
+pub enum ProofProvider {
+    #[default]
+    Risc0,
+    SP1,
+}

@@ -8,6 +8,7 @@ alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
 call_engine = { workspace = true }
 risc0-zkvm = { workspace = true }
+sp1-sdk = { workspace = true }
 thiserror = { workspace = true }
 
 [lints]

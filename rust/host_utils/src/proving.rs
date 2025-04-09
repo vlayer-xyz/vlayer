@@ -1,7 +1,7 @@
 use derivative::Derivative;
 use thiserror::Error;
 
-use crate::prover::Error as ProverError;
+use crate::ProverError;
 
 #[derive(Debug, Error, Derivative)]
 #[derivative(PartialEq, Eq)]

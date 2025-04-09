@@ -6,13 +6,13 @@ use alloy_sol_types::{SolCall, SolValue};
 use bytes::Bytes;
 use call_common::ExecutionLocation;
 use chain_client::ChainProofCache;
+use common::Digest;
 use derive_new::new;
 use optimism::client::factory::cached::OpOutputCache;
 use revm::{
     interpreter::CallInputs,
     primitives::{OptimismFields, TxEnv},
 };
-use risc0_zkvm::sha::Digest;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 

@@ -6,6 +6,7 @@ use risc0_zkvm::{
     InnerReceipt::{self, Fake, Groth16},
     Receipt, ReceiptClaim,
 };
+use sp1_sdk::{SP1Proof, SP1ProofMode, SP1ProofWithPublicValues};
 
 const VERIFIER_SELECTOR_LENGTH: usize = 4;
 const GROTH16_PROOF_SIZE: usize = 256;
@@ -110,6 +111,73 @@ impl TryFrom<EncodableReceipt> for Seal {
             .verifier_selector()
             .ok_or(Error::NoVerifierSelector)
             .map(|selector| selector.0.into())?;
+
+        Ok(Seal {
+            verifierSelector: verifier_selector,
+            seal: raw_seal,
+            mode: seal_type,
+        })
+    }
+}
+
+pub struct EncodableProof(Vec<u8>, SP1ProofMode);
+
+impl EncodableProof {
+    const fn proof_mode(&self) -> Option<ProofMode> {
+        match self.1 {
+            SP1ProofMode::Groth16 => Some(ProofMode::GROTH16),
+            _ => None,
+        }
+    }
+
+    fn seal_bytes(&self) -> Option<SealBytesT> {
+        let mut result: SealBytesT = [0; SEAL_BYTES_SIZE];
+        let slice = &self.0[VERIFIER_SELECTOR_LENGTH..];
+
+        if slice.len() != GROTH16_PROOF_SIZE {
+            return None;
+        }
+
+        result.clone_from_slice(slice);
+
+        Some(result)
+    }
+
+    fn verifier_selector(&self) -> VerifierSelector {
+        let mut selector: VerifierSelector = Default::default();
+        let selector_bytes = &self.0[..VERIFIER_SELECTOR_LENGTH];
+        selector.0.clone_from_slice(selector_bytes);
+
+        selector
+    }
+}
+
+impl From<&SP1ProofWithPublicValues> for EncodableProof {
+    fn from(value: &SP1ProofWithPublicValues) -> Self {
+        let mode = match value.proof {
+            SP1Proof::Core(_) => SP1ProofMode::Core,
+            SP1Proof::Compressed(_) => SP1ProofMode::Compressed,
+            SP1Proof::Plonk(_) => SP1ProofMode::Plonk,
+            SP1Proof::Groth16(_) => SP1ProofMode::Groth16,
+        };
+
+        EncodableProof(value.bytes(), mode)
+    }
+}
+
+impl TryFrom<EncodableProof> for Seal {
+    type Error = Error;
+
+    fn try_from(value: EncodableProof) -> Result<Self, Self::Error> {
+        let seal_type = value.proof_mode().ok_or(Error::InvalidProofType)?;
+
+        let raw_seal = value
+            .seal_bytes()
+            .ok_or(Error::NoSealBytes)
+            .map(split_seal_into_bytes)?;
+
+        let verifier_selector: FixedBytes<VERIFIER_SELECTOR_LENGTH> =
+            value.verifier_selector().0.into();
 
         Ok(Seal {
             verifierSelector: verifier_selector,

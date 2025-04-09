@@ -4,8 +4,7 @@ use alloy_primitives::B256;
 use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
 use chain_common::{verifier::IVerifier, ChainProofRef};
-use common::{verifier::zk_proof::GuestVerifier, Hashable};
-use risc0_zkp::core::digest::Digest;
+use common::{verifier::zk_proof::GuestVerifier, Digest, Hashable};
 use risc0_zkvm::Receipt;
 use serde::{Deserialize, Serialize};
 

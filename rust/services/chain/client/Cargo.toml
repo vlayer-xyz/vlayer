@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 async-trait = { workspace = true }
-chain_common = { workspace = true }
+chain_common = { workspace = true, default-features = false }
 derive-new = { workspace = true }
 thiserror = { workspace = true }
 
@@ -14,6 +14,7 @@ thiserror = { workspace = true }
 parking_lot = { workspace = true }
 
 # Fake client dependencies (disabled for guest)
+common = { workspace = true, default-features = false }
 provider = { workspace = true, optional = true }
 risc0-zkp = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
