@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "lint": "eslint .",
+    "lint": "bun run lint:packages && bun run lint:examples",
     "lint:packages": "eslint packages/*",
     "lint:examples": "eslint examples/*"
   },

@@ -20,12 +20,12 @@ export const WelcomePage = () => {
     setIsLoading(true);
     const formData = new FormData(e.target as HTMLFormElement);
     const holderAddress = formData.get("holderAddress") as `0x${string}`;
-    callProver([holderAddress]);
+    void callProver([holderAddress]);
   };
 
   useEffect(() => {
     if (result) {
-      navigate(getStepPath(StepKind.showBalance));
+      void navigate(getStepPath(StepKind.showBalance));
       setIsLoading(false);
     }
   }, [result]);

@@ -7,6 +7,7 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$VLAYER_HOME/bash/lib/colors.sh"
 source "$VLAYER_HOME/bash/lib/examples.sh"
 source "$VLAYER_HOME/bash/lib/build-packages.sh"
+source "$VLAYER_HOME/bash/lib/build-contracts.sh"
 
 usage() {
     echo_color YELLOW "Usage: $0 [OPTIONS]"
@@ -44,20 +45,17 @@ handle_options() {
 handle_options "$@"
 
 if [ "$SKIP_BUILD" = false ]; then
+    echo "::group::Building react sdk with deps"
     build_react_sdk_with_deps
+    echo "::endgroup::Building react sdk with deps"
 fi
 
-echo "::group::Running eslint for examples"
-for example in $(get_examples); do (
-    echo "Running eslint${FIX_FLAG} for: ${example}"
-    pushd "$VLAYER_HOME/examples/$example/vlayer"
-    bun run eslint .$FIX_FLAG
-    popd
-) done
-echo "::endgroup::Running eslint for examples"
+echo "::group::Building contracts"
+build_contracts
+echo "::endgroup::Building contracts"
 
-echo "::group::Running eslint for: $VLAYER_HOME/packages"
+echo "::group::Running eslint "
 pushd "${VLAYER_HOME}"
-bun run lint:packages $FIX_FLAG
+bun run lint $FIX_FLAG
 popd
-echo "::endgroup::Running eslint for: $VLAYER_HOME/packages"
+echo "::endgroup::Running eslint"

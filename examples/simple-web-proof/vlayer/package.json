@@ -7,8 +7,6 @@
     "lint:solidity": "solhint '../src/**/*.sol' --max-warnings 0 && forge fmt ../src --check",
     "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
@@ -23,8 +21,8 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@noble/hashes": "^1.4.0",
-    "@reown/appkit": "1.6.9",
-    "@reown/appkit-adapter-wagmi": "1.6.9",
+    "@reown/appkit": "^1.6.9",
+    "@reown/appkit-adapter-wagmi": "^1.6.9",
     "@sentry/react": "^8.54.0",
     "@tanstack/react-query": "^5.72.1",
     "@types/node": "^22.5.4",
@@ -45,7 +43,7 @@
     "usehooks-ts": "^3.1.0",
     "viem": "^2.22.10",
     "vite-tsconfig-paths": "^5.0.1",
-    "wagmi": "^2.14.8"
+    "wagmi": "^2.14.16"
   },
   "peerDependencies": {
     "typescript": "^5.5.4",

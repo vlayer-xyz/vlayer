@@ -6,9 +6,10 @@ import {
   useAccount,
   useBalance,
 } from "wagmi";
+
 import { useLocalStorage } from "usehooks-ts";
 
-import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier.json";
+import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier";
 import { MintStepPresentational } from "./Presentational";
 import { ensureBalance } from "../../../utils/ethFaucet";
 import { AlreadyMintedError } from "../../../errors";
@@ -29,9 +30,9 @@ export const MintStep = () => {
   });
 
   useEffect(() => {
-    console.log("proverResult", proverResult);
     if (proverResult) {
-      setMintedHandle(JSON.parse(proverResult)[1]);
+      const mintedHandle = proverResult[1];
+      setMintedHandle(mintedHandle);
     }
     modalRef.current?.showModal();
   }, [proverResult]);
@@ -42,8 +43,10 @@ export const MintStep = () => {
       return;
     }
 
-    const proofData = JSON.parse(proverResult);
-
+    const proofData = JSON.parse(proverResult) as Parameters<
+      typeof writeContract
+    >[0]["args"];
+    console.log("proofData", proofData);
     const writeContractArgs: Parameters<typeof writeContract>[0] = {
       address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
       abi: webProofProofVerifier.abi,
@@ -63,9 +66,9 @@ export const MintStep = () => {
   useEffect(() => {
     if (status === "success") {
       setIsMinting(false);
-      navigate(`/success?tx=${txHash}&handle=${mintedHandle}`);
+      void navigate(`/success?tx=${txHash}&handle=${mintedHandle}`);
     }
-  }, [status]);
+  }, [status, txHash, mintedHandle, navigate]);
 
   useEffect(() => {
     if (error) {
@@ -73,7 +76,7 @@ export const MintStep = () => {
       if (error.message.includes("User has already minted a TwitterNFT")) {
         throw new AlreadyMintedError();
       } else {
-        throw error;
+        throw new Error(error.message);
       }
     }
   }, [error]);
@@ -86,6 +89,9 @@ export const MintStep = () => {
   }, [mintingError]);
 
   return (
-    <MintStepPresentational handleMint={handleMint} isMinting={isMinting} />
+    <MintStepPresentational
+      handleMint={() => void handleMint()}
+      isMinting={isMinting}
+    />
   );
 };

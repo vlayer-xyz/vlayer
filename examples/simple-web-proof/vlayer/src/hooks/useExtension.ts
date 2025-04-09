@@ -32,8 +32,11 @@ export const useExtension = () => {
   };
 
   useEffect(() => {
-    isExtensionReady();
-    const interval = setInterval(isExtensionReady, 5000);
+    isExtensionReady().catch(setError);
+    const interval = setInterval(
+      () => void isExtensionReady().catch(setError),
+      5000,
+    );
     return () => clearInterval(interval);
   }, []);
 

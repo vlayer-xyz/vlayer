@@ -18,7 +18,7 @@ if (config.chainName === "anvil") {
   await loadFixtures();
 }
 
-const { ethClient, account, proverUrl } = await createContext(config);
+const { ethClient, account, proverUrl } = createContext(config);
 
 const { startBlock, endBlock } = await getStartEndBlock({
   config,
