@@ -223,7 +223,7 @@ mod tests {
         assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
         assert_eq!(converted.headers.get("Authorization"), Some(&"Basic 1234".to_string()));
         assert_eq!(converted.headers.get("X-Api-Key"), Some(&"5678".to_string()));
-        assert_eq!(converted.body, Some("example body data".into()));
+        assert_eq!(converted.body, "example body data".as_bytes());
     }
 
     #[test]

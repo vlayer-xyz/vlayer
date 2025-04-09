@@ -82,7 +82,7 @@ pub async fn notarize(
 
     tokio::spawn(connection);
 
-    let request = prepare_request(&server_domain, &uri, &headers, body.unwrap_or(Vec::default()))?;
+    let request = prepare_request(&server_domain, &uri, &headers, body)?;
 
     debug!("Starting an MPC TLS connection with the server");
 
@@ -143,7 +143,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_prepare_request() {
+    fn should_correctly_prepare_request_body() {
         let request = prepare_request(
             "lotr-api.online",
             "/auth_header_require?param1=value1&param2=value2",

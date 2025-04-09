@@ -30,8 +30,8 @@ pub struct NotarizeParams {
     pub uri: String,
     #[builder(setter(strip_option), default)]
     pub headers: HashMap<String, String>,
-    #[builder(setter(into, strip_option), default)]
-    pub body: Option<Vec<u8>>,
+    #[builder(setter(into), default)]
+    pub body: Vec<u8>,
     #[builder(
         setter(custom, strip_option),
         default = "default_redaction_config_fn()"
