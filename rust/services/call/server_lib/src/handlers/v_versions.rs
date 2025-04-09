@@ -25,6 +25,8 @@ pub fn v_versions(config: &Config) -> Versions {
         call_guest_id: config.call_guest_id_hex(),
         chain_guest_id: config.chain_guest_id_hex(),
         api_version: config.semver.clone(),
-        risc0_version: get_version().expect("Risc0 version should be specified").to_string(),
+        risc0_version: get_version()
+            .expect("Risc0 version should be specified")
+            .to_string(),
     }
 }
