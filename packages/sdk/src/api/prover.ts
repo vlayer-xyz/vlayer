@@ -5,7 +5,6 @@ import {
   type ContractFunctionArgs,
   type ContractFunctionName,
   encodeFunctionData,
-  type Hex,
 } from "viem";
 import {
   type CallContext,
@@ -14,8 +13,6 @@ import {
   type ProofDataWithMetrics,
   type ProofReceipt,
   ProofState,
-  type VGetProofReceiptParams,
-  type VGetProofReceiptResponse,
 } from "types/vlayer";
 import { match } from "ts-pattern";
 import { v_call } from "./v_call";
@@ -37,7 +34,7 @@ async function preverifyVersions(
 ) {
   if (shouldPreverify) {
     const proverVersions = await v_versions(url, token);
-    checkVersionCompatibility(proverVersions.result.api_version, sdkVersion);
+    checkVersionCompatibility(proverVersions.api_version, sdkVersion);
   }
 }
 
@@ -62,8 +59,8 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   const context: CallContext = {
     chain_id: chainId,
   };
-  const resp = await v_call(call, context, url, token);
-  return { hash: resp.result } as BrandedHash<T, F>;
+  const hash = await v_call(call, context, url, token);
+  return { hash } as BrandedHash<T, F>;
 }
 
 export async function getProofReceipt<
@@ -74,16 +71,12 @@ export async function getProofReceipt<
   url: string = "http://127.0.0.1:3000",
   token?: string,
 ): Promise<ProofReceipt> {
-  const params: VGetProofReceiptParams = {
-    hash: hash.hash as Hex,
-  };
-  const resp = await v_getProofReceipt(params, url, token);
+  const resp = await v_getProofReceipt(hash.hash, url, token);
   handleErrors(resp);
-  return resp.result;
+  return resp;
 }
 
-const handleErrors = (resp: VGetProofReceiptResponse) => {
-  const { status, state, error } = resp.result;
+const handleErrors = ({ status, state, error }: ProofReceipt) => {
   if (status === 0) {
     match(state)
       .with(ProofState.ChainProof, () => {

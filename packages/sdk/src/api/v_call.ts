@@ -1,9 +1,15 @@
 import {
   type CallContext,
   type CallParams,
-  type VCallResponse,
+  type CallHash,
+  callHashSchema,
 } from "types/vlayer";
-import { parseVCallResponseError } from "./lib/errors";
+import {
+  handleProverResponseError,
+  handleAuthErrors,
+} from "./lib/handleErrors";
+import { InvalidProverResponseError } from "./lib/errors";
+import { validateJrpcResponse } from "./lib/jrpc";
 import debug from "debug";
 
 const log = debug("vlayer:v_call");
@@ -24,35 +30,38 @@ export async function v_call(
   context: CallContext,
   url: string = "http://127.0.0.1:3000",
   token?: string,
-): Promise<VCallResponse> {
+): Promise<CallHash> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
   if (token !== undefined) {
     headers["Authorization"] = "Bearer " + token;
   }
-  const response = await fetch(url, {
+
+  const rawResponse = await fetch(url, {
     method: "POST",
     body: JSON.stringify(v_callBody(call, context)),
     headers,
   });
-  log("response", response);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  const response_json = await response.json();
-  log("response_json", response_json);
-  assertObject(response_json);
-  if ("error" in response_json) {
-    throw parseVCallResponseError(
-      response_json.error as { message: string | undefined },
-    );
-  }
-  return response_json as Promise<VCallResponse>;
-}
+  log("raw response: ", rawResponse);
 
-function assertObject(x: unknown): asserts x is object {
-  if (typeof x !== "object") {
-    throw new Error("Expected object");
+  const responseJson = await rawResponse.json();
+  log("response body: ", responseJson);
+
+  if (!rawResponse.ok) {
+    throw handleAuthErrors(rawResponse.status, responseJson);
   }
+
+  const response = validateJrpcResponse(responseJson);
+
+  if (response.error !== undefined) {
+    throw handleProverResponseError(response.error);
+  }
+
+  const result = callHashSchema.safeParse(response.result);
+  if (!result.success) {
+    throw new InvalidProverResponseError("v_call", response.result);
+  }
+
+  return result.data;
 }

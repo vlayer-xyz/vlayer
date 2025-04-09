@@ -43,7 +43,7 @@ afterEach(() => {
 
 function generateRandomHash() {
   let hash = "0x";
-  for (let i = 0; i < 40; ++i) {
+  for (let i = 0; i < 64; ++i) {
     hash += Math.floor(Math.random() * 16).toString(16);
   }
   return hash;
@@ -64,6 +64,8 @@ describe("Success zk-proving", () => {
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
           result: hashStr,
         }),
       };
@@ -85,6 +87,8 @@ describe("Success zk-proving", () => {
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
           result: hashStr,
         }),
       };
@@ -181,6 +185,8 @@ describe("Failed zk-proving", () => {
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
           result: hashStr,
         }),
       };
@@ -236,14 +242,16 @@ describe("Authentication", () => {
       if (token !== undefined && token === userToken) {
         return {
           body: JSON.stringify({
+            id: 1,
+            jsonrpc: "2.0",
             result: hashStr,
           }),
         };
       }
       return {
-        status: 400,
+        status: 401,
         body: JSON.stringify({
-          error: "Invalid token",
+          error: "Invalid JWT token",
         }),
       };
     });
@@ -274,9 +282,9 @@ describe("Authentication", () => {
         };
       }
       return {
-        status: 400,
+        status: 401,
         body: JSON.stringify({
-          error: "Invalid token",
+          error: "Invalid JWT token",
         }),
       };
     });

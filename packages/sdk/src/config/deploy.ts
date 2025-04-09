@@ -176,5 +176,5 @@ const swapInternalVerifier = async (
 
 async function getImageId(proverUrl: string, token?: string): Promise<Hex> {
   const version = await v_versions(proverUrl, token);
-  return version.result.call_guest_id as Hex;
+  return version.call_guest_id as Hex;
 }
