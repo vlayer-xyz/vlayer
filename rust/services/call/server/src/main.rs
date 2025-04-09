@@ -11,7 +11,7 @@ use call_server_lib::{
     serve, Config, ConfigBuilder, ProofMode,
 };
 use clap::{ArgAction, Parser};
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{extract_rpc_url_token, init_tracing, GlobalArgs};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
 use server_utils::set_risc0_dev_mode;
 use tracing::{info, warn};
@@ -118,7 +118,13 @@ async fn main() -> anyhow::Result<()> {
     let api_version = version::version();
     let cli = Cli::parse();
 
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+    let secrets: Vec<String> = cli
+        .rpc_url
+        .iter()
+        .filter_map(|(_chain_id, url)| extract_rpc_url_token(url))
+        .collect();
+
+    init_tracing(cli.global_args.log_format, secrets);
 
     let config = cli.into_config(api_version)?;
 
