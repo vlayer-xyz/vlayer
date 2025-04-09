@@ -56,7 +56,7 @@ const proofHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "crossChainBalanceOf",
-  args: [teleportConfig.tokenHolder as Address, tokensToCheck],
+  args: [teleportConfig.tokenHolder, tokensToCheck],
   chainId: chain.id,
 });
 const result = await vlayer.waitForProvingResult({ hash: proofHash });

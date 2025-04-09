@@ -7,8 +7,6 @@
     "lint:solidity": "solhint '../src/**/*.sol' --max-warnings 0 && forge fmt ../src --check",
     "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",

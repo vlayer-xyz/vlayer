@@ -36,7 +36,6 @@ export const useProver = () => {
 
   useEffect(() => {
     if (provingError || provingResultError) {
-      console.log("provingError", provingError);
       console.log(
         "error: ",
         provingError?.message || provingResultError?.message,

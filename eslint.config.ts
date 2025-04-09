@@ -36,6 +36,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/web-proof-commons/**/*',
+      '**/examples/**/*',
     ],
     plugins: {
       import: importPlugin,
