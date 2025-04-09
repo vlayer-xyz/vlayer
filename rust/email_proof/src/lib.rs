@@ -1,7 +1,6 @@
 mod dkim;
 mod dns;
 mod email;
-mod email_address;
 mod errors;
 mod from_header;
 #[cfg(test)]
