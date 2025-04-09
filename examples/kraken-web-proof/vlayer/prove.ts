@@ -8,28 +8,22 @@ import {
   writeEnvVariables,
 } from "@vlayer/sdk/config";
 
-const config = getConfig();
-const { chain, ethClient, account, proverUrl, confirmations, notaryUrl } =
-  await createContext(config);
-
 const URL_TO_PROVE = "https://api.kraken.com/0/public/Ticker?pair=ETHUSD";
 
+const config = getConfig();
+const { chain, ethClient, account, proverUrl, confirmations, notaryUrl } =
+  createContext(config);
+
+const vlayer = createVlayerClient({
+  url: proverUrl,
+  token: config.token,
+});
+
 async function generateWebProof() {
-  try {
-    console.log("⏳ Generating web proof...");
-    const result =
-      await Bun.$`${process.env.PATH_TO_VLAYER_BINARY ?? "vlayer"} web-proof-fetch --notary ${notaryUrl} --url ${URL_TO_PROVE}`;
-    return result.stdout.toString();
-  } catch (error) {
-    console.error("Command failed:", error);
-    return null;
-  }
-}
-
-const webProof = await generateWebProof();
-
-if (!webProof) {
-  throw new Error("Failed to generate web proof");
+  console.log("⏳ Generating web proof...");
+  const result =
+    await Bun.$`${process.env.PATH_TO_VLAYER_BINARY ?? "vlayer"} web-proof-fetch --notary ${notaryUrl} --url ${URL_TO_PROVE}`;
+  return result.stdout.toString();
 }
 
 console.log("⏳ Deploying contracts...");
@@ -40,17 +34,15 @@ const { prover, verifier } = await deployVlayerContracts({
   proverArgs: [],
   verifierArgs: [],
 });
-writeEnvVariables(".env", {
+
+await writeEnvVariables(".env", {
   VITE_PROVER_ADDRESS: prover,
   VITE_VERIFIER_ADDRESS: verifier,
 });
 
 console.log("✅ Contracts deployed", { prover, verifier });
 
-const vlayer = createVlayerClient({
-  url: proverUrl,
-  token: config.token,
-});
+const webProof = await generateWebProof();
 
 console.log("⏳ Proving...");
 const hash = await vlayer.prove({
