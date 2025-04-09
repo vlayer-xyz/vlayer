@@ -44,8 +44,8 @@ impl DKIMHeader {
             )));
         };
 
-    let expected = normalize_dns_name(&format!("{selector}._domainkey.{domain}"));
-    let actual = normalize_dns_name(&record.name);
+        let expected = normalize_dns_name(&format!("{selector}._domainkey.{domain}"));
+        let actual = normalize_dns_name(&record.name);
 
         if expected != actual {
             return Err(Error::DomainMismatch(expected, actual));
