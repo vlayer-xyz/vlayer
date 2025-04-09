@@ -26,9 +26,9 @@ export const useProver = () => {
       setProverResult(
         JSON.stringify(result, (key, value) => {
           if (typeof value === "bigint") {
-            return Number(value);
+            return String(value);
           }
-          return value;
+          return value as string;
         }),
       );
     }

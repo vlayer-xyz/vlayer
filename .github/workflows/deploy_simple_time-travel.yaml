@@ -104,7 +104,7 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           DEPLOY_TYPE: "examples"
           CONTEXT: "test-e2e-web-apps-devnet"
-
+          
       # Teardown
       - name: Display Logs
         if: always()
