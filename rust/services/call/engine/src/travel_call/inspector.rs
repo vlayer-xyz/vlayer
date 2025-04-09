@@ -300,7 +300,7 @@ mod test {
         let mut inspector = inspector_call(other_contract, &[], &[]);
         let mut call_inputs = create_mock_call_inputs(other_contract, [0u8; 4]);
         call_inputs.scheme = CallScheme::DelegateCall;
-        
+
         inspector.set_block(1);
         inspector.on_call(&call_inputs);
     }
