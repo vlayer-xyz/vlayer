@@ -82,7 +82,6 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
         // `Call` does not support `DELEGATECALL` semantics, because it only stores a single `to` address.
         // In contrast, `CallInputs` distinguishes between `target_address` (storage context) and `bytecode_address` (code location).
         // When converting `CallInputs` to `Call`, we lose this distinction, making it impossible to correctly emulate `DELEGATECALL`.
-        // Therefore, we explicitly reject delegate calls to avoid incorrect execution.
         if matches!(inputs.scheme, CallScheme::DelegateCall) {
             panic!("DELEGATECALL is not supported in travel calls");
         }
