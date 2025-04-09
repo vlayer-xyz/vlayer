@@ -9,10 +9,11 @@ import {
 } from "vitest";
 
 import { createExtensionWebProofProvider } from "../webProof";
-import { createVlayerClient } from "./client";
+import { createVlayerClient, VLAYER_ERROR_NOTES } from "./client";
 import { type BrandedHash, type VlayerClient } from "types/vlayer";
 import { ZkProvingStatus } from "../../web-proof-commons";
 import createFetchMock from "vitest-fetch-mock";
+import { HttpAuthorizationError } from "./errors";
 
 declare const global: {
   chrome: object;
@@ -230,9 +231,14 @@ describe("Failed zk-proving", () => {
 });
 
 describe("Authentication", () => {
+  let hashStr: string;
+
+  beforeEach(() => {
+    hashStr = generateRandomHash();
+  });
+
   it("requires passing a token", async () => {
     const userToken = "deadbeef";
-    const hashStr = generateRandomHash();
     const vlayer = createVlayerClient({ token: userToken });
 
     fetchMocker.mockResponseOnce((req) => {
@@ -291,5 +297,67 @@ describe("Authentication", () => {
     await vlayer.waitForProvingResult({ hash });
 
     expect(hash.hash).toBe(hashStr);
+  });
+
+  describe("fails with a readable error if", () => {
+    beforeEach(() => {
+      fetchMocker.mockResponseOnce((req) => {
+        const token = (req.headers.get("authorization") || "")
+          .split("Bearer ")
+          .at(1);
+        if (token === undefined) {
+          return {
+            status: 401,
+            body: JSON.stringify({
+              error: "Missing JWT token",
+            }),
+          };
+        }
+        if (token !== "deadbeef") {
+          return {
+            status: 401,
+            body: JSON.stringify({
+              error: "Invalid JWT token",
+            }),
+          };
+        }
+        return {
+          status: 200,
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: "2.0",
+            result: hashStr,
+          }),
+        };
+      });
+    });
+
+    it("token is missing", async () => {
+      await expect(
+        createVlayerClient().prove({
+          address: `0x${"a".repeat(40)}`,
+          functionName: "main",
+          proverAbi: [],
+          args: [],
+          chainId: 42,
+        }),
+      ).rejects.toThrowError(
+        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
+      );
+    });
+
+    it("token is invalid", async () => {
+      await expect(
+        createVlayerClient({ token: "beefdead " }).prove({
+          address: `0x${"a".repeat(40)}`,
+          functionName: "main",
+          proverAbi: [],
+          args: [],
+          chainId: 42,
+        }),
+      ).rejects.toThrowError(
+        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
+      );
+    });
   });
 });
