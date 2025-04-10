@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
-derivative = { workspace = true }
 derive_more = { workspace = true }
 email_proof = { workspace = true }
 lazy_static = { workspace = true }

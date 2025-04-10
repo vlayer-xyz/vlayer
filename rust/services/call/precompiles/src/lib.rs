@@ -8,7 +8,6 @@ pub mod url_pattern;
 mod web_proof;
 
 use alloy_primitives::{Address, Bytes};
-use derivative::Derivative;
 use email_proof::verify as email_proof;
 use helpers::generate_precompile;
 use json::{
@@ -51,26 +50,20 @@ pub fn precompile_by_address(address: &Address, is_vlayer_test: bool) -> Option<
         .find(|precomp| precomp.address() == address)
 }
 
-#[derive(Error, Debug, Derivative)]
-#[derivative(PartialEq, Eq)]
-pub enum Error {
-    #[error("Precompile not found for address: {0}")]
-    PrecompileNotFound(Address),
-    #[error("Precompile not allowed for travel calls: {0}")]
-    PrecompileNotAllowed(Tag),
-}
+#[derive(Debug, Error, PartialEq, Eq)]
+#[error("Precompile not allowed for travel calls: {0}")]
+pub struct PrecompileNotAllowedError(pub Tag);
 
-pub fn verify_precompile_allowed_in_travel_call(address: &Address) -> Result<(), Error> {
-    precompile_by_address(address, false)
-        .ok_or(Error::PrecompileNotFound(*address))
-        .and_then(|precompile| {
-            let tag = precompile.tag();
-            if matches!(tag, Tag::WebProof | Tag::EmailProof) {
-                Err(Error::PrecompileNotAllowed(tag))
-            } else {
-                Ok(())
-            }
-        })
+pub fn verify_precompile_allowed_in_travel_call(
+    address: &Address,
+) -> Result<(), PrecompileNotAllowedError> {
+    if let Some(precompile) = precompile_by_address(address, false) {
+        let tag = precompile.tag();
+        if matches!(tag, Tag::WebProof | Tag::EmailProof) {
+            return Err(PrecompileNotAllowedError(tag));
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -98,19 +91,11 @@ mod tests {
         fn rejects_invalid_precompile() {
             assert_eq!(
                 verify_precompile_allowed_in_travel_call(&WEB_PROOF).unwrap_err(),
-                Error::PrecompileNotAllowed(Tag::WebProof)
+                PrecompileNotAllowedError(Tag::WebProof)
             );
             assert_eq!(
                 verify_precompile_allowed_in_travel_call(&EMAIL_PROOF).unwrap_err(),
-                Error::PrecompileNotAllowed(Tag::EmailProof)
-            );
-        }
-
-        #[test]
-        fn rejects_nonexistent_precompile() {
-            assert_eq!(
-                verify_precompile_allowed_in_travel_call(&NON_EXISTENT_ADDRESS).unwrap_err(),
-                Error::PrecompileNotFound(*NON_EXISTENT_ADDRESS)
+                PrecompileNotAllowedError(Tag::EmailProof)
             );
         }
     }
