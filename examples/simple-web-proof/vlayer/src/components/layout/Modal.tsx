@@ -67,34 +67,34 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
           <AnimatePresence>
             {!isWelcome && !isSuccessStep && <ProgressBar />}
           </AnimatePresence>
-          {/* Header Icon */}
-          <AnimatePresence>
-            {currentStep?.headerIcon && (
-              <motion.img
-                initial={{ opacity: 0, scale: 0.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.1 }}
-                transition={{ ease: "easeOut", duration: 0.3 }}
-                src={currentStep?.headerIcon}
-                alt="Success Icon"
-                className="w-[282px] h-[150px]"
-              />
-            )}
-          </AnimatePresence>
-          <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
-            {/* Title */}
-            {currentStep?.title && (
-              <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
-            )}
-            <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+          <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+            {/* Header Icon */}
+            <AnimatePresence>
+              {currentStep?.headerIcon && (
+                <motion.img
+                  initial={{ opacity: 0, scale: 0.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.1 }}
+                  transition={{ ease: "easeOut", duration: 0.3 }}
+                  src={currentStep?.headerIcon}
+                  alt="Success Icon"
+                  className="w-[282px] h-[150px]"
+                />
+              )}
+            </AnimatePresence>
+            <div className="flex-col flex gap-4 justify-between h-[284px] mb-2">
+              {/* Title */}
+              {currentStep?.title && (
+                <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
+              )}
               {/* Description */}
               <p className={`h-[116px] desc ${descClass}`}>{description}</p>
               {/* Content */}
               <modalContext.Provider value={{ showModal, closeModal }}>
                 {children}
               </modalContext.Provider>
-            </ErrorBoundary>
-          </div>
+            </div>
+          </ErrorBoundary>
         </motion.div>
       </div>
     </dialog>
