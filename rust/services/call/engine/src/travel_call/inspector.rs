@@ -146,10 +146,12 @@ mod test {
     use std::convert::Infallible;
 
     use alloy_primitives::{Address, BlockNumber, Bytes, U256, address};
+    use lazy_static::lazy_static;
     use revm::{
         EvmContext, InMemoryDB, Inspector as IInspector,
         db::{EmptyDB, WrapDatabaseRef},
         interpreter::{CallInputs, CallScheme, CallValue},
+        precompile::u64_to_address,
         primitives::{AccountInfo, Output, SuccessReason},
     };
 
@@ -161,6 +163,10 @@ mod test {
     const SEPOLIA_ID: ChainId = 11_155_111;
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
+
+    lazy_static! {
+        static ref JSON_GET_STRING_PRECOMPILE: Address = u64_to_address(0x102);
+    }
 
     type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<TxResultWithMetadata, Error<Infallible>>
         + Send
@@ -256,7 +262,7 @@ mod test {
         inspector.set_block(block_num);
         assert_eq!(inspector.location, Some((MAINNET_ID, block_num).into()));
 
-        let call_inputs = create_mock_call_inputs(CONTRACT_ADDR, []);
+        let call_inputs = create_mock_call_inputs(*JSON_GET_STRING_PRECOMPILE, []);
         inspector.on_call(&call_inputs);
         assert_eq!(inspector.location, None);
     }
@@ -305,7 +311,7 @@ mod test {
         fn delegate_call_panics_in_travel_call() {
             let other_contract = address!("0000000000000000000000000000000000000000");
             let mut inspector = inspector_call(other_contract, &[], &[]);
-            let mut call_inputs = create_mock_call_inputs(other_contract, [0_u8; 4]);
+            let mut call_inputs = create_mock_call_inputs(other_contract, []);
             call_inputs.scheme = CallScheme::DelegateCall;
 
             inspector.set_block(1);
@@ -317,7 +323,7 @@ mod test {
         fn panics_for_precompile_not_allowed_in_travel_call() {
             let web_proof_precompile = address!("0000000000000000000000000000000000000100");
             let mut inspector = inspector_call(web_proof_precompile, &[], &[]);
-            let call_inputs = create_mock_call_inputs(web_proof_precompile, [0_u8; 4]);
+            let call_inputs = create_mock_call_inputs(web_proof_precompile, []);
 
             inspector.set_block(1);
             inspector.on_call(&call_inputs);

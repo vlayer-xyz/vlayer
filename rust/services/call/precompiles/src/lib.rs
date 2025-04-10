@@ -78,39 +78,39 @@ mod tests {
     use super::*;
 
     mod verify_precompile_allowed_in_travel_call {
+        use lazy_static::lazy_static;
+
         use super::*;
 
-        const WEB_PROOF_ADDRESS: u64 = 0x100;
-        const EMAIL_PROOF_ADDRESS: u64 = 0x101;
-        const JSON_GET_STRING_ADDRESS: u64 = 0x102;
-        const NON_EXISTENT_ADDRESS: u64 = 0x999;
+        lazy_static! {
+            static ref WEB_PROOF: Address = u64_to_address(0x100);
+            static ref EMAIL_PROOF: Address = u64_to_address(0x101);
+            static ref JSON_GET_STRING: Address = u64_to_address(0x102);
+            static ref NON_EXISTENT_ADDRESS: Address = u64_to_address(0x999);
+        }
 
         #[test]
         fn accepts_valid_precompile() {
-            let address = u64_to_address(JSON_GET_STRING_ADDRESS);
-            assert!(verify_precompile_allowed_in_travel_call(&address).is_ok());
+            assert!(verify_precompile_allowed_in_travel_call(&JSON_GET_STRING).is_ok());
         }
 
         #[test]
         fn rejects_invalid_precompile() {
             assert_eq!(
-                verify_precompile_allowed_in_travel_call(&u64_to_address(WEB_PROOF_ADDRESS))
-                    .unwrap_err(),
+                verify_precompile_allowed_in_travel_call(&WEB_PROOF).unwrap_err(),
                 Error::PrecompileNotAllowed(Tag::WebProof)
             );
             assert_eq!(
-                verify_precompile_allowed_in_travel_call(&u64_to_address(EMAIL_PROOF_ADDRESS))
-                    .unwrap_err(),
+                verify_precompile_allowed_in_travel_call(&EMAIL_PROOF).unwrap_err(),
                 Error::PrecompileNotAllowed(Tag::EmailProof)
             );
         }
 
         #[test]
         fn rejects_nonexistent_precompile() {
-            let address = u64_to_address(NON_EXISTENT_ADDRESS);
             assert_eq!(
-                verify_precompile_allowed_in_travel_call(&address).unwrap_err(),
-                Error::PrecompileNotFound(address)
+                verify_precompile_allowed_in_travel_call(&NON_EXISTENT_ADDRESS).unwrap_err(),
+                Error::PrecompileNotFound(*NON_EXISTENT_ADDRESS)
             );
         }
     }

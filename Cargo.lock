@@ -2646,6 +2646,7 @@ dependencies = [
  "derivative",
  "derive_more 1.0.0",
  "email_proof",
+ "lazy_static",
  "regex",
  "revm",
  "serde",
