@@ -42,7 +42,7 @@ jobs:
 
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
-          compose-file: docker/web-proof/docker-compose-notary-v8.yaml
+          compose-file: docker/web-proof/docker-compose-release.yaml
           up-flags: "--build"
 
       - name: Run web_prover rust tests
