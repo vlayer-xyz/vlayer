@@ -1,6 +1,6 @@
 use cfdkim::{DKIMError, DKIMResult, DkimPublicKey};
 use mailparse::ParsedMail;
-use slog::{o, Discard, Logger};
+use slog::{Discard, Logger, o};
 
 pub use crate::errors::Error;
 use crate::from_header;
@@ -31,7 +31,7 @@ fn interpret_dkim_verification_result(result: &DKIMResult) -> Result<(), Error> 
 mod tests {
     use super::*;
     mod interpret_dkim_verification_result {
-        use cfdkim::{canonicalization::Type, DKIMError, DKIMResult};
+        use cfdkim::{DKIMError, DKIMResult, canonicalization::Type};
         use lazy_static::lazy_static;
 
         use super::*;

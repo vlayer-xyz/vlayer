@@ -1,10 +1,10 @@
 use alloy_primitives::Bytes;
-use alloy_sol_types::{sol_data, SolType, SolValue};
+use alloy_sol_types::{SolType, SolValue, sol_data};
 use regex::Regex;
 use url::Url;
 use urlpattern::{UrlPattern, UrlPatternInit, UrlPatternMatchInput, UrlPatternOptions};
 
-use crate::helpers::{map_to_fatal, Result};
+use crate::helpers::{Result, map_to_fatal};
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 

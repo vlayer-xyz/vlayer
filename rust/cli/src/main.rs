@@ -1,8 +1,8 @@
 use clap::{Parser, Subcommand};
 use commands::{
-    init::{run_init, InitArgs},
-    jwt::{run as run_jwt, Args as JwtArgs},
-    web_proof::{webproof_fetch, WebProofArgs},
+    init::{InitArgs, run_init},
+    jwt::{Args as JwtArgs, run as run_jwt},
+    web_proof::{WebProofArgs, webproof_fetch},
 };
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
 use tracing::{debug, error, info, level_filters::LevelFilter, trace, warn};

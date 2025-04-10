@@ -1,5 +1,5 @@
 use mpt::KeccakMerkleTrie as MerkleTrie;
-use rand::{rngs::StdRng, SeedableRng};
+use rand::{SeedableRng, rngs::StdRng};
 use utils::generate_entries_with_unique_keys;
 
 mod utils;

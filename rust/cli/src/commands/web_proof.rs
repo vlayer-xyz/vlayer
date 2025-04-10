@@ -6,8 +6,8 @@ use reqwest::Url;
 use strum::EnumString;
 use thiserror::Error;
 use web_prover::{
-    generate_web_proof, NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError,
-    NotaryConfig,
+    NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
+    generate_web_proof,
 };
 
 #[derive(Debug, PartialEq, Eq, EnumString)]

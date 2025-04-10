@@ -4,7 +4,7 @@ use ethers_core::types::BlockNumber as BlockTag;
 
 use crate::{
     host::tests::call,
-    test_harness::{preflight, ExecutionLocation},
+    test_harness::{ExecutionLocation, preflight},
 };
 
 mod usdt {
@@ -78,11 +78,11 @@ mod view {
 
     use super::*;
     use crate::test_harness::contracts::view::{
+        BLOCK_NO, VIEW_CALL,
         ViewCallTest::{
             testBlockhashCall, testChainidCall, testEoaAccountCall, testMuliContractCallsCall,
             testNonexistentAccountCall, testPrecompileCall,
         },
-        BLOCK_NO, VIEW_CALL,
     };
 
     lazy_static! {
@@ -177,8 +177,9 @@ mod teleport {
     use super::*;
     use crate::test_harness::{
         contracts::teleport::{
+            BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT,
             SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
-            BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT, TOKEN,
+            TOKEN,
         },
         preflight_with_teleport,
         rpc::OP_ANVIL,
@@ -233,9 +234,11 @@ mod teleport {
 
         let wrong_chain_id = wrong_token.chainId.to_string();
 
-        assert!(error
-            .to_string()
-            .contains(&format!("No rpc cache for chain: {wrong_chain_id}")));
+        assert!(
+            error
+                .to_string()
+                .contains(&format!("No rpc cache for chain: {wrong_chain_id}"))
+        );
 
         Ok(())
     }
@@ -247,8 +250,9 @@ mod teleport {
 mod time_travel {
     use super::*;
     use crate::test_harness::contracts::time_travel::{
+        AVERAGE_BALANCE_OF_CALL,
         AverageBalance::{averageBalanceOfCall, averageBalanceOfReturn},
-        AVERAGE_BALANCE_OF_CALL, BLOCK_NO, SIMPLE_TIME_TRAVEL,
+        BLOCK_NO, SIMPLE_TIME_TRAVEL,
     };
 
     #[tokio::test(flavor = "multi_thread")]
@@ -270,8 +274,8 @@ mod time_travel {
 mod simple {
     use super::*;
     use crate::test_harness::contracts::simple::{
-        SimpleProver::{balanceCall, balanceReturn},
         BLOCK_NO, SIMPLE,
+        SimpleProver::{balanceCall, balanceReturn},
     };
 
     #[tokio::test(flavor = "multi_thread")]

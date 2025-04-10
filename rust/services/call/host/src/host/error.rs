@@ -1,5 +1,5 @@
-use call_engine::{evm::env::factory::Error as EvmEnvFactoryError, GuestOutputError};
-use host_utils::{proving, ProverError};
+use call_engine::{GuestOutputError, evm::env::factory::Error as EvmEnvFactoryError};
+use host_utils::{ProverError, proving};
 use thiserror::Error;
 
 pub mod preflight;

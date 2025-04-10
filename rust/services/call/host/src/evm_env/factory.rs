@@ -4,8 +4,8 @@ use anyhow::anyhow;
 use call_common::ExecutionLocation;
 use call_engine::{
     evm::env::{
-        factory::{EvmEnvFactory, Result},
         EvmEnv,
+        factory::{EvmEnvFactory, Result},
     },
     seed_cache_db_with_trusted_data,
 };
@@ -13,7 +13,7 @@ use derive_new::new;
 use provider::CachedMultiProvider;
 use revm::db::CacheDB;
 
-use crate::db::{proof::ProofDb, HostDb};
+use crate::db::{HostDb, proof::ProofDb};
 
 #[derive(new)]
 pub(crate) struct HostEvmEnvFactory {

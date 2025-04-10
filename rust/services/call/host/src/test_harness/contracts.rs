@@ -1,4 +1,4 @@
-use alloy_primitives::{address, Address};
+use alloy_primitives::{Address, address};
 use alloy_sol_types::sol;
 
 pub mod usdt {
@@ -122,9 +122,9 @@ pub mod simple {
 }
 
 pub mod teleport {
-    use alloy_primitives::{hex, uint, Uint, B256};
+    use alloy_primitives::{B256, Uint, hex, uint};
     use lazy_static::lazy_static;
-    use optimism::{types::SequencerOutput, NumHash};
+    use optimism::{NumHash, types::SequencerOutput};
 
     use super::*;
 

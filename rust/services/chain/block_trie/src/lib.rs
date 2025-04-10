@@ -1,4 +1,4 @@
-use alloy_primitives::{BlockNumber, B256};
+use alloy_primitives::{B256, BlockNumber};
 use alloy_rlp::encode_fixed_size;
 use block_header::EvmBlockHeader;
 use bytes::Bytes;
@@ -126,7 +126,7 @@ impl BlockTrie {
     }
 
     pub fn into_root(self) -> Sha2Node {
-        self.0 .0
+        self.0.0
     }
 }
 

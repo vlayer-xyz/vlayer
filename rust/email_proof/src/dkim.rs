@@ -1,6 +1,6 @@
-use cfdkim::{header, validate_header, DKIMError};
+use cfdkim::{DKIMError, header, validate_header};
 use itertools::Itertools;
-use mailparse::{addrparse, MailAddr, MailHeader, MailHeaderMap, ParsedMail};
+use mailparse::{MailAddr, MailHeader, MailHeaderMap, ParsedMail, addrparse};
 use verifiable_dns::DNSRecord;
 
 pub use crate::errors::Error;

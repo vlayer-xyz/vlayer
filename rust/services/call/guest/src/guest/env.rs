@@ -3,14 +3,14 @@ use std::sync::{Arc, RwLock};
 use call_common::ExecutionLocation;
 use call_engine::{
     evm::{
-        env::{cached::MultiEvmEnv, EvmEnv},
+        env::{EvmEnv, cached::MultiEvmEnv},
         input::{EvmInput, MultiEvmInput},
     },
     seed_cache_db_with_trusted_data,
 };
 use revm::db::CacheDB;
 
-use crate::db::{wrap_state::WrapStateDb, GuestDb};
+use crate::db::{GuestDb, wrap_state::WrapStateDb};
 
 fn create_env(location: ExecutionLocation, input: EvmInput) -> Arc<EvmEnv<GuestDb>> {
     let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");

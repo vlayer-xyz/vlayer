@@ -2,7 +2,7 @@ use ethers::{
     providers::{MockProvider, Provider},
     types::{Block, U64},
 };
-use provider::{to_eth_block_header, to_ethers_h256, BlockNumber, EvmBlockHeader};
+use provider::{BlockNumber, EvmBlockHeader, to_eth_block_header, to_ethers_h256};
 use serde_json::{from_value, json};
 
 fn fake_rpc_block(number: BlockNumber) -> Block<()> {

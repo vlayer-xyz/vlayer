@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock};
 
 use alloy_primitives::BlockNumber;
 
-use crate::{types::SequencerOutput, ClientError, IClient};
+use crate::{ClientError, IClient, types::SequencerOutput};
 
 #[derive(Clone)]
 pub struct Client {

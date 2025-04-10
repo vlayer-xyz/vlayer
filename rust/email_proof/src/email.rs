@@ -1,7 +1,7 @@
 use alloy_sol_types::SolValue;
 use mailparse::{
-    addrparse, headers::Headers, DispositionType, MailAddr, MailHeaderMap, MailParseError,
-    ParsedMail,
+    DispositionType, MailAddr, MailHeaderMap, MailParseError, ParsedMail, addrparse,
+    headers::Headers,
 };
 
 pub(crate) mod sol;

@@ -1,10 +1,10 @@
 use std::error::Error;
 
 use tlsn_core::{
+    CryptoProvider,
     connection::ServerName,
     presentation::{Presentation, PresentationOutput},
     signing::VerifyingKey,
-    CryptoProvider,
 };
 
 pub fn verify_presentation(

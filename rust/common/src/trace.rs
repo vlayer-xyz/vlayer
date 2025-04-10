@@ -1,11 +1,11 @@
 use std::{
-    io::{stdout, Result, Write},
+    io::{Result, Write, stdout},
     sync::Arc,
 };
 
 use derive_new::new;
 use tracing_subscriber::{
-    fmt::layer, layer::SubscriberExt, registry, util::SubscriberInitExt, EnvFilter, Layer,
+    EnvFilter, Layer, fmt::layer, layer::SubscriberExt, registry, util::SubscriberInitExt,
 };
 
 use crate::LogFormat;

@@ -5,9 +5,9 @@ use derive_new::new;
 use thiserror::Error;
 
 use crate::{
-    client::{cached, FactoryError, IFactory},
-    types::SequencerOutput,
     IClient,
+    client::{FactoryError, IFactory, cached},
+    types::SequencerOutput,
 };
 
 #[derive(Debug, Error, PartialEq, Eq)]

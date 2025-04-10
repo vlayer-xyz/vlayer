@@ -3,12 +3,12 @@ mod types;
 use axum::{
     extract::{Query, State},
     response::IntoResponse,
-    routing::{get, MethodRouter},
+    routing::{MethodRouter, get},
 };
 use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::debug;
 use types::{Params, ServerResponse};
-use verifiable_dns::{Provider, MIME_DNS_JSON_CONTENT_TYPE};
+use verifiable_dns::{MIME_DNS_JSON_CONTENT_TYPE, Provider};
 
 use crate::server::AppState;
 
@@ -31,7 +31,7 @@ async fn dns_query_handler(
 mod tests {
     use axum::{
         body::Body,
-        http::{header::ACCEPT, HeaderName, Response, StatusCode},
+        http::{HeaderName, Response, StatusCode, header::ACCEPT},
     };
     use server_utils::get;
 
@@ -102,15 +102,19 @@ mod tests {
 
         #[tokio::test]
         async fn fails_for_invalid_params() {
-            assert!(dns_query_with_params(&DEFAULT_PARAMS[0..1])
-                .await
-                .status()
-                .is_client_error());
+            assert!(
+                dns_query_with_params(&DEFAULT_PARAMS[0..1])
+                    .await
+                    .status()
+                    .is_client_error()
+            );
 
-            assert!(dns_query_with_params(&DEFAULT_PARAMS[1..])
-                .await
-                .status()
-                .is_client_error());
+            assert!(
+                dns_query_with_params(&DEFAULT_PARAMS[1..])
+                    .await
+                    .status()
+                    .is_client_error()
+            );
         }
     }
 }

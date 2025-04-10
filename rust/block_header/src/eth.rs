@@ -1,5 +1,5 @@
 //! Type aliases for Ethereum.
-use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
+use alloy_primitives::{Address, B64, B256, BlockHash, BlockNumber, Bloom, Bytes, U256, keccak256};
 use alloy_rlp_derive::RlpEncodable;
 use common::Hashable;
 use revm::primitives::BlockEnv;

@@ -1,4 +1,4 @@
-use crate::{common::types::Timestamp, verifiable_dns::time::Now, Provider, Query, Response};
+use crate::{Provider, Query, Response, common::types::Timestamp, verifiable_dns::time::Now};
 
 #[derive(Default)]
 pub struct MockProvider(Option<Response>);
