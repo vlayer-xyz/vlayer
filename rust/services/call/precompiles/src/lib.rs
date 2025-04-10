@@ -54,6 +54,16 @@ pub fn precompile_by_address(address: &Address, is_vlayer_test: bool) -> Option<
 #[error("Precompile not allowed for travel calls: {0}")]
 pub struct PrecompileNotAllowedError(pub Tag);
 
+// Prevents use of WebProof and EmailProof precompiles during travel calls.
+//
+// These precompiles allow validation of proofs tied to real-world data (e.g., emails, web content),
+// but their security depends on the current block timestamp and registered DNS signing keys.
+//
+// When combined with Time Travel, users can:
+//   - Rewind to a block where an expired `validUntil` is still valid
+//   - Exploit previously registered but now-revoked DNS keys
+//
+// For this reason, these precompiles are forbidden during travel calls.
 pub fn verify_precompile_allowed_in_travel_call(
     address: &Address,
 ) -> Result<(), PrecompileNotAllowedError> {
