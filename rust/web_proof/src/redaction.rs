@@ -67,7 +67,9 @@ pub(crate) fn validate_name_value_redaction(
     }
 
     let partially_redacted_value = zipped_pairs.clone().find(|(l, r)| {
-        !all_match(&l.value, REDACTION_REPLACEMENT_CHAR_PRIMARY as u8) && l.value != r.value
+        !all_match(&l.value, REDACTION_REPLACEMENT_CHAR_PRIMARY as u8)
+            || !all_match(&r.value, REDACTION_REPLACEMENT_CHAR_SECONDARY as u8)
+                && l.value != r.value
     });
 
     if let Some(pair) = partially_redacted_value {
@@ -168,6 +170,23 @@ mod test_validate_name_value_redaction {
         assert!(matches!(
             err,
             ParsingError::PartiallyRedactedValue(RedactionElementType::RequestHeader, err_string) if err_string == "name1: value*"
+        ));
+    }
+
+    #[test]
+    fn fail_partial_value_redaction_using_primary_redaction_character() {
+        let primary = vec![("name1", "**").into()];
+        let secondary = vec![("name1", "*+").into()];
+
+        let err = validate_name_value_redaction(
+            &primary,
+            &secondary,
+            RedactionElementType::RequestHeader,
+        )
+        .unwrap_err();
+        assert!(matches!(
+            err,
+            ParsingError::PartiallyRedactedValue(RedactionElementType::RequestHeader, err_string) if err_string == "name1: **"
         ));
     }
 }
