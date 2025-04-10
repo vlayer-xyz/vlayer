@@ -11,7 +11,7 @@ import { STEP_KIND } from "../../utils/steps";
 import { ProgressBar } from "../molecules/ProgressBar";
 import { Navigation } from "./Navigation";
 import { ErrorBoundary } from "react-error-boundary";
-import { ErrorBoundaryComponent } from "./ErrorBoundary";
+import { StepErrorBoundaryComponent } from "./ErrorBoundary";
 
 export const modalContext = createContext({
   showModal: () => {},
@@ -67,7 +67,7 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
           <AnimatePresence>
             {!isWelcome && !isSuccessStep && <ProgressBar />}
           </AnimatePresence>
-          <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+          <ErrorBoundary FallbackComponent={StepErrorBoundaryComponent}>
             {/* Header Icon */}
             <AnimatePresence>
               {currentStep?.headerIcon && (

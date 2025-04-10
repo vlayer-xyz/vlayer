@@ -2,7 +2,7 @@ import { FallbackProps } from "react-error-boundary";
 import { AppError } from "../../errors";
 import styles from "./ErrorBoundary.module.css";
 
-export const ErrorBoundaryComponent = ({ error }: FallbackProps) => {
+export const StepErrorBoundaryComponent = ({ error }: FallbackProps) => {
   const errorMsg =
     error instanceof AppError ? error.message : "Something went wrong";
 
