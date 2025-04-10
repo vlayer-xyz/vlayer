@@ -1,6 +1,6 @@
 use alloy_primitives::{Address, ChainId, address};
 use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
-use call_precompiles::{precompile_by_address, verify_precompile_allowed_in_travel_call};
+use call_precompiles::{is_time_dependent, precompile_by_address};
 use revm::{
     EvmContext, Inspector as IInspector,
     db::WrapDatabaseRef,
@@ -29,6 +29,7 @@ pub struct Inspector<'a, D: RevmDB> {
     transaction_callback: Box<TransactionCallback<'a, WrappedRevmDBError<D>>>,
     metadata: Vec<Metadata>,
     is_vlayer_test: bool,
+    is_on_historic_block: bool,
 }
 
 impl<'a, D: RevmDB> Inspector<'a, D> {
@@ -41,6 +42,7 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
             -> Result<TxResultWithMetadata, Error<WrappedRevmDBError<D>>>
         + 'a,
         is_vlayer_test: bool,
+        is_on_historic_block: bool,
     ) -> Self {
         Self {
             start_chain_id,
@@ -48,6 +50,7 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
             transaction_callback: Box::new(transaction_callback),
             metadata: vec![Metadata::start_chain(start_chain_id)],
             is_vlayer_test,
+            is_on_historic_block,
         }
     }
 
@@ -86,8 +89,6 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
         if matches!(inputs.scheme, CallScheme::DelegateCall) {
             panic!("DELEGATECALL is not supported in travel calls");
         }
-        verify_precompile_allowed_in_travel_call(&inputs.bytecode_address)
-            .unwrap_or_else(|err| panic!("Precompile not allowed for travel calls: {err}"));
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
@@ -128,6 +129,12 @@ where
         if let Some(precompile) =
             precompile_by_address(&inputs.bytecode_address, self.is_vlayer_test)
         {
+            if self.is_on_historic_block {
+                let tag = precompile.tag();
+                if is_time_dependent(&precompile) {
+                    panic!("Precompile `{tag:?}` is not allowed for travel calls");
+                }
+            }
             debug!("Calling PRECOMPILE {:?}", precompile.tag());
             self.metadata
                 .push(Metadata::precompile(precompile.tag(), inputs.input.len()));
@@ -166,6 +173,7 @@ mod test {
 
     lazy_static! {
         static ref JSON_GET_STRING_PRECOMPILE: Address = u64_to_address(0x102);
+        static ref WEB_PROOF_PRECOMPILE: Address = u64_to_address(0x100);
     }
 
     type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<TxResultWithMetadata, Error<Infallible>>
@@ -213,7 +221,7 @@ mod test {
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
         let mut set_block_inspector =
-            Inspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location), true);
+            Inspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location), true, false);
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
@@ -231,6 +239,7 @@ mod test {
             locations[0].chain_id,
             |call, location| (TRANSACTION_CALLBACK)(call, location),
             true,
+            false,
         );
 
         inspector.set_chain(locations[1].chain_id, locations[1].block_number);
@@ -256,7 +265,7 @@ mod test {
     fn set_block_resets_after_one_call() {
         let block_num = 1;
         let mut inspector: Inspector<'_, InMemoryDB> =
-            Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK, true);
+            Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK, true, false);
         assert_eq!(inspector.location, None);
 
         inspector.set_block(block_num);
@@ -303,30 +312,30 @@ mod test {
         assert!(inspector.location.is_none());
     }
 
-    mod on_call {
-        use super::*;
+    #[test]
+    #[should_panic(expected = "DELEGATECALL is not supported in travel calls")]
+    fn delegate_call_panics_in_travel_call() {
+        let other_contract = address!("0000000000000000000000000000000000000000");
+        let mut inspector = inspector_call(other_contract, &[], &[]);
+        let mut call_inputs = create_mock_call_inputs(other_contract, []);
+        call_inputs.scheme = CallScheme::DelegateCall;
 
-        #[test]
-        #[should_panic(expected = "DELEGATECALL is not supported in travel calls")]
-        fn delegate_call_panics_in_travel_call() {
-            let other_contract = address!("0000000000000000000000000000000000000000");
-            let mut inspector = inspector_call(other_contract, &[], &[]);
-            let mut call_inputs = create_mock_call_inputs(other_contract, []);
-            call_inputs.scheme = CallScheme::DelegateCall;
+        inspector.set_block(1);
+        inspector.on_call(&call_inputs);
+    }
 
-            inspector.set_block(1);
-            inspector.on_call(&call_inputs);
-        }
+    #[test]
+    #[should_panic(expected = "Precompile `WebProof` is not allowed for travel calls")]
+    fn panics_for_precompile_not_allowed_in_travel_call() {
+        let precompile_address = *WEB_PROOF_PRECOMPILE;
+        let mut mock_db = InMemoryDB::default();
+        mock_db.insert_account_info(precompile_address, AccountInfo::default());
 
-        #[test]
-        #[should_panic(expected = "Precompile not allowed for travel calls: WebProof")]
-        fn panics_for_precompile_not_allowed_in_travel_call() {
-            let web_proof_precompile = address!("0000000000000000000000000000000000000100");
-            let mut inspector = inspector_call(web_proof_precompile, &[], &[]);
-            let call_inputs = create_mock_call_inputs(web_proof_precompile, []);
+        let mut evm_context = EvmContext::new(WrapDatabaseRef::from(&mock_db));
+        let mut call_inputs = create_mock_call_inputs(precompile_address, []);
 
-            inspector.set_block(1);
-            inspector.on_call(&call_inputs);
-        }
+        let mut inspector = Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK, true, true);
+
+        inspector.call(&mut evm_context, &mut call_inputs);
     }
 }

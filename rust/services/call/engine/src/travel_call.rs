@@ -50,8 +50,12 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         self.ensure_no_forward_jump(location)?;
         let env = self.envs.get(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
-        let inspector =
-            Inspector::new(env.cfg_env.chain_id, transaction_callback, self.is_vlayer_test);
+        let inspector = Inspector::new(
+            env.cfg_env.chain_id,
+            transaction_callback,
+            self.is_vlayer_test,
+            self.is_on_historic_block(location),
+        );
         let mut evm = build_evm(&env, tx, inspector, self.is_vlayer_test);
         // Can panic because EVM is unable to propagate errors on intercepted calls
         let ResultAndState { result, .. } = evm.transact_preverified()?;
@@ -74,6 +78,10 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
             });
         }
         Ok(())
+    }
+
+    const fn is_on_historic_block(&self, location: ExecutionLocation) -> bool {
+        location.block_number < self.start.block_number || location.chain_id != self.start.chain_id
     }
 }
 

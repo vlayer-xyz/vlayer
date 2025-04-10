@@ -54,26 +54,16 @@ pub fn precompile_by_address(address: &Address, is_vlayer_test: bool) -> Option<
 #[error("Precompile not allowed for travel calls: {0}")]
 pub struct PrecompileNotAllowedError(pub Tag);
 
-// Prevents use of WebProof and EmailProof precompiles during travel calls.
-//
-// These precompiles allow validation of proofs tied to real-world data (e.g., emails, web content),
-// but their security depends on the current block timestamp and registered DNS signing keys.
-//
-// When combined with Time Travel, users can:
-//   - Rewind to a block where an expired `validUntil` is still valid
-//   - Exploit previously registered but now-revoked DNS keys
-//
-// For this reason, these precompiles are forbidden during travel calls.
-pub fn verify_precompile_allowed_in_travel_call(
-    address: &Address,
-) -> Result<(), PrecompileNotAllowedError> {
-    if let Some(precompile) = precompile_by_address(address, false) {
-        let tag = precompile.tag();
-        if matches!(tag, Tag::WebProof | Tag::EmailProof) {
-            return Err(PrecompileNotAllowedError(tag));
-        }
-    }
-    Ok(())
+/// Returns `true` if the precompile is time-dependent and must not be used in travel calls.
+///
+/// Specifically, `WebProof` and `EmailProof` rely on real-world data (e.g., DNS records, timestamps)
+/// that can be manipulated when paired with Time Travel:
+/// - A user may jump to a block where an expired `validUntil` timestamp is still valid.
+/// - Or abuse a DNS key that was valid in the past but has since been revoked.
+///
+/// To preserve integrity, these precompiles are considered unsafe in historical locations.
+pub const fn is_time_dependent(precompile: &Precompile) -> bool {
+    matches!(precompile.tag(), Tag::WebProof | Tag::EmailProof)
 }
 
 #[cfg(test)]
@@ -86,26 +76,23 @@ mod tests {
         use super::*;
 
         lazy_static! {
-            static ref WEB_PROOF: Address = u64_to_address(0x100);
-            static ref EMAIL_PROOF: Address = u64_to_address(0x101);
-            static ref JSON_GET_STRING: Address = u64_to_address(0x102);
+            static ref WEB_PROOF: Precompile =
+                precompile_by_address(&u64_to_address(0x100), false).unwrap();
+            static ref EMAIL_PROOF: Precompile =
+                precompile_by_address(&u64_to_address(0x101), false).unwrap();
+            static ref JSON_GET_STRING: Precompile =
+                precompile_by_address(&u64_to_address(0x102), false).unwrap();
         }
 
         #[test]
         fn accepts_valid_precompile() {
-            assert!(verify_precompile_allowed_in_travel_call(&JSON_GET_STRING).is_ok());
+            assert!(!is_time_dependent(&JSON_GET_STRING));
         }
 
         #[test]
         fn rejects_invalid_precompile() {
-            assert_eq!(
-                verify_precompile_allowed_in_travel_call(&WEB_PROOF).unwrap_err(),
-                PrecompileNotAllowedError(Tag::WebProof)
-            );
-            assert_eq!(
-                verify_precompile_allowed_in_travel_call(&EMAIL_PROOF).unwrap_err(),
-                PrecompileNotAllowedError(Tag::EmailProof)
-            );
+            assert!(is_time_dependent(&WEB_PROOF));
+            assert!(is_time_dependent(&EMAIL_PROOF));
         }
     }
 }
