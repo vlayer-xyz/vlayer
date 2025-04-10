@@ -38,6 +38,7 @@ DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy notary-server"
 source ${VLAYER_HOME}/bash/run-services.sh
 
 install_deps
+build_core_contracts
 build_example_contracts simple-web-proof
 run_web_app
 run_browser_extension
