@@ -1,5 +1,5 @@
-use alloy_primitives::{address, Address, ChainId};
-use call_common::{metadata::Metadata, ExecutionLocation, RevmDB, WrappedRevmDBError};
+use alloy_primitives::{Address, ChainId, address};
+use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
 use call_precompiles::{precompile_by_address, verify_precompile_allowed_in_travel_call};
 use revm::{
     EvmContext, Inspector as IInspector,

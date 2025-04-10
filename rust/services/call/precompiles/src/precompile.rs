@@ -1,4 +1,4 @@
-use derive_more::{derive::Display, Deref, Into};
+use derive_more::{Deref, Into, derive::Display};
 use revm::precompile::{
     Error::OutOfGas, PrecompileErrors::Error, PrecompileWithAddress, calc_linear_cost_u32,
 };
