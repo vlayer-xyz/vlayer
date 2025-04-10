@@ -10,7 +10,7 @@ export const StepErrorBoundaryComponent = ({ error }: FallbackProps) => {
   return (
     <div className={styles.container}>
       <div className={styles.image}>
-        <img src="../../../error-illustration.png" />
+        <img src="/error-illustration.png" />
       </div>
       <div className={styles.errorMsg}>{errorMsg}</div>
       <div className={styles.additionalText}>
@@ -27,15 +27,13 @@ export const StepErrorBoundaryComponent = ({ error }: FallbackProps) => {
 };
 
 export const AppErrorBoundaryComponent = ({ error }: FallbackProps) => {
-  console.error(error.message);
-
   const errorMsg =
     error instanceof AppError ? error.message : "Something went wrong";
 
   const navigate = useNavigate();
 
   const handleStartAgain = () => {
-    navigate("/");
+    void navigate("/");
     window.location.reload();
   };
 
