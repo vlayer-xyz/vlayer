@@ -3,14 +3,15 @@ import { waitForExtension } from "./pom/extension";
 import { Webpage } from "./pom/webpage";
 import { dappUrl, dashboardUrl, loginUrl } from "./urls";
 
-// For now to remove flakyness of tests we need to delay messages
+// For now to remove flakiness of tests we need to delay messages
 const delayMessage = async () => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 };
+
 test("Cleanup of storage on extension close", async ({ page, context }) => {
   await page.goto(dappUrl);
   const webpage = new Webpage(page, context);
-  await webpage.clickButton("Request proof of beeing a wizard");
+  await webpage.clickButton("Request proof of being a wizard");
 
   let extension = await waitForExtension(context);
 
