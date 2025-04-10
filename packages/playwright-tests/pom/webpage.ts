@@ -109,49 +109,4 @@ export class Webpage {
       },
     });
   }
-
-  async expectZkProof() {
-    await this.page.getByText("Has zk proof").waitFor();
-  }
-
-  async expectText(id: string, expectedText: string) {
-    const text = this.page.locator("body").getByTestId(id);
-    expect(await text.textContent()).toEqual(expectedText);
-  }
-
-  async expectContainText(id: string, expectedText: string) {
-    const text = this.page.locator("body").getByTestId(id);
-    await expect(text).toBeVisible();
-
-    expect(await text.textContent()).toContain(expectedText);
-  }
-
-  async checkProof(vlayerResponses: Promise<Response | null>[]) {
-    expect(vlayerResponses.length).toBeGreaterThan(1);
-
-    const proveResponse = (await vlayerResponses[0])!;
-    expect(proveResponse.ok()).toBeTruthy();
-
-    const proveJson = (await proveResponse.json())! as object;
-    expect(proveJson).toHaveProperty("result");
-
-    const hash = (proveJson as { result: string }).result;
-    expect(hash).toBeValidHash();
-
-    const waitForProvingResultResponse = (await vlayerResponses.pop())!;
-    expect(waitForProvingResultResponse.ok()).toBeTruthy();
-
-    const proofJson = (await waitForProvingResultResponse.json()) as object;
-    expect(proofJson).toMatchObject({
-      result: {
-        state: "done",
-        status: 1,
-        metrics: {},
-        data: {
-          evm_call_result: {},
-          proof: {},
-        },
-      },
-    });
-  }
 }

@@ -28,7 +28,7 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
   await appPage.clickButton("Go to profile failed auth");
   await appPage.waitForURL(profileFailedAuthUrl);
 
-  await extension.generateProof();
+  await extension.generateWebProof();
   await extension.expectErrorToBeDisplayed(
     "Authentication failed. Please restart the process.",
   );
