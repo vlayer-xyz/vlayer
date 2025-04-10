@@ -24,6 +24,6 @@
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
       "types/*": ["../../../packages/sdk/src/api/lib/types/*"]
-    }
+    },
   }
 }
