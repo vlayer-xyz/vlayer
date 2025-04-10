@@ -1,6 +1,6 @@
 use alloy_primitives::{Address, ChainId, address};
 use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
-use call_precompiles::precompile_by_address;
+use call_precompiles::{precompile_by_address, verify_precompile_allowed_for_travel_call};
 use revm::{
     EvmContext, Inspector as IInspector,
     db::WrapDatabaseRef,
@@ -86,6 +86,8 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
         if matches!(inputs.scheme, CallScheme::DelegateCall) {
             panic!("DELEGATECALL is not supported in travel calls");
         }
+        verify_precompile_allowed_for_travel_call(&inputs.bytecode_address)
+            .unwrap_or_else(|err| panic!("Precompile not allowed for travel calls: {err}"));
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
