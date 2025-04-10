@@ -297,26 +297,30 @@ mod test {
         assert!(inspector.location.is_none());
     }
 
-    #[test]
-    #[should_panic(expected = "DELEGATECALL is not supported in travel calls")]
-    fn delegate_call_panics_in_travel_call() {
-        let other_contract = address!("0000000000000000000000000000000000000000");
-        let mut inspector = inspector_call(other_contract, &[], &[]);
-        let mut call_inputs = create_mock_call_inputs(other_contract, [0_u8; 4]);
-        call_inputs.scheme = CallScheme::DelegateCall;
+    mod on_call {
+        use super::*;
 
-        inspector.set_block(1);
-        inspector.on_call(&call_inputs);
-    }
+        #[test]
+        #[should_panic(expected = "DELEGATECALL is not supported in travel calls")]
+        fn delegate_call_panics_in_travel_call() {
+            let other_contract = address!("0000000000000000000000000000000000000000");
+            let mut inspector = inspector_call(other_contract, &[], &[]);
+            let mut call_inputs = create_mock_call_inputs(other_contract, [0_u8; 4]);
+            call_inputs.scheme = CallScheme::DelegateCall;
 
-    #[test]
-    #[should_panic(expected = "Precompile not allowed for travel calls: WebProof")]
-    fn panics_for_precompile_not_allowed_in_travel_call() {
-        let web_proof_precompile = address!("0000000000000000000000000000000000000100");
-        let mut inspector = inspector_call(web_proof_precompile, &[], &[]);
-        let call_inputs = create_mock_call_inputs(web_proof_precompile, [0_u8; 4]);
+            inspector.set_block(1);
+            inspector.on_call(&call_inputs);
+        }
 
-        inspector.set_block(1);
-        inspector.on_call(&call_inputs);
+        #[test]
+        #[should_panic(expected = "Precompile not allowed for travel calls: WebProof")]
+        fn panics_for_precompile_not_allowed_in_travel_call() {
+            let web_proof_precompile = address!("0000000000000000000000000000000000000100");
+            let mut inspector = inspector_call(web_proof_precompile, &[], &[]);
+            let call_inputs = create_mock_call_inputs(web_proof_precompile, [0_u8; 4]);
+
+            inspector.set_block(1);
+            inspector.on_call(&call_inputs);
+        }
     }
 }
