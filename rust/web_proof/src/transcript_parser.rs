@@ -3,7 +3,7 @@ use std::{io::Read, string::ToString};
 use chunked_transfer::Decoder;
 use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
 use mime::Mime;
-use url::Url;
+use url::{Host, Url};
 
 use crate::{
     errors::ParsingError,
@@ -24,11 +24,17 @@ const CONTENT_TYPE: &str = "Content-Type";
 pub(crate) fn parse_request_and_validate_redaction(request: &[u8]) -> Result<String, ParsingError> {
     let request_primary_replacement =
         replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_PRIMARY);
-    let (path_primary, headers_primary) = parse_request(&request_primary_replacement)?;
+    let (host_primary, path_primary, headers_primary) =
+        parse_request(&request_primary_replacement)?;
 
     let request_secondary_replacement =
         replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_SECONDARY);
-    let (path_secondary, headers_secondary) = parse_request(&request_secondary_replacement)?;
+    let (host_secondary, path_secondary, headers_secondary) =
+        parse_request(&request_secondary_replacement)?;
+
+    if host_primary != host_secondary {
+        return Err(ParsingError::RedactedHost(host_primary));
+    }
 
     validate_name_value_redaction(
         &convert_headers(&headers_primary),
@@ -45,14 +51,27 @@ pub(crate) fn parse_request_and_validate_redaction(request: &[u8]) -> Result<Str
     Ok(path_primary)
 }
 
-fn parse_request(request: &[u8]) -> Result<(String, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
+fn parse_request(
+    request: &[u8],
+) -> Result<(String, String, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
     let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
     let mut req = Request::new(&mut headers);
     req.parse(request)?;
 
+    let method = req.method.ok_or(ParsingError::NoMethodInRequest)?;
+    if !(method == "GET" || method == "POST") {
+        return Err(ParsingError::WrongMethodInRequest(method.to_string()));
+    }
     let path = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
+    let url = Url::parse(&path)?;
+    let Some(host) = url.host() else {
+        return Err(ParsingError::NoHostInRequest);
+    };
+    let Host::Domain(host) = host else {
+        return Err(ParsingError::HostIsNotADomainName);
+    };
 
-    Ok((path, headers))
+    Ok((host.to_string(), path, headers))
 }
 
 pub(crate) fn parse_response_and_validate_redaction(
@@ -303,6 +322,13 @@ mod tests {
                             url,
                             "https://example.com/test.json?param1=*****&param2=value2&param3=***"
                         );
+                    }
+
+                    #[test]
+                    fn fully_redacted_url_path_item() {
+                        let request = b"GET https://example.com/\0 HTTP/1.1\r\n\r\n";
+                        let url = parse_request_and_validate_redaction(request).unwrap();
+                        assert_eq!(url, "https://example.com/*");
                     }
                 }
             }
@@ -568,6 +594,30 @@ mod tests {
                             err,
                             ParsingError::RedactedName(RedactionElementType::RequestUrlParam, err_string) if err_string == "************: "
                         ));
+                    }
+
+                    #[test]
+                    fn partially_redacted_url_domain() {
+                        let request = b"GET https://ex\0mple/ HTTP/1.1\r\n\r\n";
+                        let err = parse_request_and_validate_redaction(request).unwrap_err();
+                        assert_eq!(err, ParsingError::RedactedHost("ex*mple".to_string()));
+                    }
+
+                    #[test]
+                    fn fully_redacted_url_domain() {
+                        let request = b"GET https://\0/ HTTP/1.1\r\n\r\n";
+                        let err = parse_request_and_validate_redaction(request).unwrap_err();
+                        assert_eq!(err, ParsingError::RedactedHost("*".to_string()));
+                    }
+
+                    #[test]
+                    fn fully_redacted_first_line() {
+                        let request = b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0 https://urlinbody.com HTTP/1.1\r\nHeader-in-body: true\r\n";
+                        let err = parse_request_and_validate_redaction(request).unwrap_err();
+                        assert_eq!(
+                            err,
+                            ParsingError::WrongMethodInRequest("*******************".to_string())
+                        );
                     }
                 }
             }

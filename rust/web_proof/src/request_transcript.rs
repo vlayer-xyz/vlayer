@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn fail_empty_transcript() {
         let transcript = RequestTranscript::new(vec![]);
-        assert!(matches!(transcript.parse_url(), Err(ParsingError::NoPathInRequest)));
+        assert_eq!(transcript.parse_url(), Err(ParsingError::NoMethodInRequest));
     }
 
     #[test]

@@ -38,7 +38,7 @@ impl From<(String, String)> for RedactedTranscriptNameValue {
     }
 }
 
-#[derive(Debug, Display)]
+#[derive(Debug, Display, PartialEq)]
 pub enum RedactionElementType {
     #[strum(to_string = "request header")]
     RequestHeader,

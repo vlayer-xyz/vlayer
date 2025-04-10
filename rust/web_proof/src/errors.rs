@@ -1,11 +1,25 @@
 use std::string::FromUtf8Error;
 
+use derivative::Derivative;
 use thiserror::Error;
 
 use crate::redaction::RedactionElementType;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Derivative)]
+#[derivative(PartialEq)]
 pub enum ParsingError {
+    #[error("No method in request")]
+    NoMethodInRequest,
+
+    #[error("Wrong method in request {0}")]
+    WrongMethodInRequest(String),
+
+    #[error("No host in request")]
+    NoHostInRequest,
+
+    #[error("Host is not a domain name")]
+    HostIsNotADomainName,
+
     #[error("No path in request")]
     NoPathInRequest,
 
@@ -22,7 +36,14 @@ pub enum ParsingError {
     UnsupportedTransferEncoding(String),
 
     #[error("IO error: {0}")]
-    StdIoError(#[from] std::io::Error),
+    StdIoError(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        std::io::Error,
+    ),
+
+    #[error("Host name is redacted: {0}")]
+    RedactedHost(String),
 
     #[error("{0} name is redacted: {1}")]
     RedactedName(RedactionElementType, String),
@@ -34,7 +55,11 @@ pub enum ParsingError {
     UrlParse(#[from] url::ParseError),
 
     #[error("Json parsing error: {0}")]
-    Json(#[from] serde_json::Error),
+    Json(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        serde_json::Error,
+    ),
 
     #[error("Invalid content-type: {0}")]
     InvalidContentType(String),
@@ -43,5 +68,9 @@ pub enum ParsingError {
     InvalidCharset(String),
 
     #[error("Invalid mime type: {0}")]
-    MimeParsing(#[from] mime::FromStrError),
+    MimeParsing(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        mime::FromStrError,
+    ),
 }
