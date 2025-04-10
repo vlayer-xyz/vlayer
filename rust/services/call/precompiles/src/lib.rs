@@ -60,7 +60,7 @@ pub enum Error {
     PrecompileNotAllowed(Tag),
 }
 
-pub fn verify_precompile_allowed_for_travel_call(address: &Address) -> Result<(), Error> {
+pub fn verify_precompile_allowed_in_travel_call(address: &Address) -> Result<(), Error> {
     precompile_by_address(address, false)
         .ok_or(Error::PrecompileNotFound(*address))
         .and_then(|precompile| {
@@ -77,37 +77,41 @@ pub fn verify_precompile_allowed_for_travel_call(address: &Address) -> Result<()
 mod tests {
     use super::*;
 
-    const WEB_PROOF_ADDRESS: u64 = 0x100;
-    const EMAIL_PROOF_ADDRESS: u64 = 0x101;
-    const JSON_GET_STRING_ADDRESS: u64 = 0x102;
-    const NON_EXISTENT_ADDRESS: u64 = 0x999;
+    mod verify_precompile_allowed_in_travel_call {
+        use super::*;
 
-    #[test]
-    fn accepts_valid_precompile() {
-        let address = u64_to_address(JSON_GET_STRING_ADDRESS);
-        assert!(verify_precompile_allowed_for_travel_call(&address).is_ok());
-    }
+        const WEB_PROOF_ADDRESS: u64 = 0x100;
+        const EMAIL_PROOF_ADDRESS: u64 = 0x101;
+        const JSON_GET_STRING_ADDRESS: u64 = 0x102;
+        const NON_EXISTENT_ADDRESS: u64 = 0x999;
 
-    #[test]
-    fn rejects_invalid_precompile() {
-        assert_eq!(
-            verify_precompile_allowed_for_travel_call(&u64_to_address(WEB_PROOF_ADDRESS))
-                .unwrap_err(),
-            Error::PrecompileNotAllowed(Tag::WebProof)
-        );
-        assert_eq!(
-            verify_precompile_allowed_for_travel_call(&u64_to_address(EMAIL_PROOF_ADDRESS))
-                .unwrap_err(),
-            Error::PrecompileNotAllowed(Tag::EmailProof)
-        );
-    }
+        #[test]
+        fn accepts_valid_precompile() {
+            let address = u64_to_address(JSON_GET_STRING_ADDRESS);
+            assert!(verify_precompile_allowed_in_travel_call(&address).is_ok());
+        }
 
-    #[test]
-    fn rejects_nonexistent_precompile() {
-        let address = u64_to_address(NON_EXISTENT_ADDRESS);
-        assert_eq!(
-            verify_precompile_allowed_for_travel_call(&address).unwrap_err(),
-            Error::PrecompileNotFound(address)
-        );
+        #[test]
+        fn rejects_invalid_precompile() {
+            assert_eq!(
+                verify_precompile_allowed_in_travel_call(&u64_to_address(WEB_PROOF_ADDRESS))
+                    .unwrap_err(),
+                Error::PrecompileNotAllowed(Tag::WebProof)
+            );
+            assert_eq!(
+                verify_precompile_allowed_in_travel_call(&u64_to_address(EMAIL_PROOF_ADDRESS))
+                    .unwrap_err(),
+                Error::PrecompileNotAllowed(Tag::EmailProof)
+            );
+        }
+
+        #[test]
+        fn rejects_nonexistent_precompile() {
+            let address = u64_to_address(NON_EXISTENT_ADDRESS);
+            assert_eq!(
+                verify_precompile_allowed_in_travel_call(&address).unwrap_err(),
+                Error::PrecompileNotFound(address)
+            );
+        }
     }
 }

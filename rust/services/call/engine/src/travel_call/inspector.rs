@@ -1,6 +1,6 @@
-use alloy_primitives::{Address, ChainId, address};
-use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
-use call_precompiles::{precompile_by_address, verify_precompile_allowed_for_travel_call};
+use alloy_primitives::{address, Address, ChainId};
+use call_common::{metadata::Metadata, ExecutionLocation, RevmDB, WrappedRevmDBError};
+use call_precompiles::{precompile_by_address, verify_precompile_allowed_in_travel_call};
 use revm::{
     EvmContext, Inspector as IInspector,
     db::WrapDatabaseRef,
@@ -86,7 +86,7 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
         if matches!(inputs.scheme, CallScheme::DelegateCall) {
             panic!("DELEGATECALL is not supported in travel calls");
         }
-        verify_precompile_allowed_for_travel_call(&inputs.bytecode_address)
+        verify_precompile_allowed_in_travel_call(&inputs.bytecode_address)
             .unwrap_or_else(|err| panic!("Precompile not allowed for travel calls: {err}"));
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
@@ -299,11 +299,22 @@ mod test {
 
     #[test]
     #[should_panic(expected = "DELEGATECALL is not supported in travel calls")]
-    fn delegate_call_panics_in_on_call() {
+    fn delegate_call_panics_in_travel_call() {
         let other_contract = address!("0000000000000000000000000000000000000000");
         let mut inspector = inspector_call(other_contract, &[], &[]);
         let mut call_inputs = create_mock_call_inputs(other_contract, [0_u8; 4]);
         call_inputs.scheme = CallScheme::DelegateCall;
+
+        inspector.set_block(1);
+        inspector.on_call(&call_inputs);
+    }
+
+    #[test]
+    #[should_panic(expected = "Precompile not allowed for travel calls: WebProof")]
+    fn panics_for_precompile_not_allowed_in_travel_call() {
+        let web_proof_precompile = address!("0000000000000000000000000000000000000100");
+        let mut inspector = inspector_call(web_proof_precompile, &[], &[]);
+        let call_inputs = create_mock_call_inputs(web_proof_precompile, [0_u8; 4]);
 
         inspector.set_block(1);
         inspector.on_call(&call_inputs);
