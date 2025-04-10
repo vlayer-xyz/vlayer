@@ -170,6 +170,7 @@ pub enum Template {
     SimpleTeleport,
     SimpleTimeTravel,
     SimpleWebProof,
+    KrakenWebProof,
 }
 
 impl fmt::Display for Template {
