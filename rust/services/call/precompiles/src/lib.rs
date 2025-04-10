@@ -103,7 +103,7 @@ mod tests {
     }
 
     #[test]
-    fn rejects_non_existent_precompile() {
+    fn rejects_nonexistent_precompile() {
         let address = u64_to_address(NON_EXISTENT_ADDRESS);
         assert_eq!(
             verify_precompile_allowed_for_travel_call(&address).unwrap_err(),
