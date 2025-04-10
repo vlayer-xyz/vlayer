@@ -154,6 +154,7 @@ The TLSN protocol allows for redacting (hiding) parts of the HTTPS transcript fr
 
 vlayer allows for the following parts of the HTTPS transcript to be redacted:
 * HTTP request:
+  * Path items.
   * URL query param values.
   * header values.
 * HTTP response:
@@ -161,6 +162,27 @@ vlayer allows for the following parts of the HTTPS transcript to be redacted:
   * string values in JSON body.
 
 Each value must be redacted fully or not at all. No other part of HTTP request or response can be redacted. The Solidity method `webProof.verify()` validates that these conditions are met. This way we ensure that the structure of the transcript cannot be altered by a malicious client. After redacting JSON string value for a given `"key"`, `web.jsonGetString("key")` returns a string with each byte replaced by `*` character.
+
+#### Security implications of redaction
+
+Vlayer sees only redacted transcript and not the plaintext one. Therefore - sometimes we have no way to correctly parse the request body. One notable case that you should be aware of is when redacted header spills into the body.
+```
+GET https://host.com HTTP 1.1
+X-Header: Value
+
+Body Chunk 1
+
+Body Chunk 2
+```
+can be redacted into:
+```
+GET https://host.com HTTP 1.1
+X-Header: *******************
+
+Body Chunk 2
+```
+
+This should not be an issue for JSON payloads as they don't contain double newlines, but you should be aware that you could get partial body in non-JSON payloads.
 
 In order to learn how to enable and configure redaction using vlayer SDK, see [Redaction](../javascript/web-proofs.md#redaction) section in our Javascript documentation.
 
