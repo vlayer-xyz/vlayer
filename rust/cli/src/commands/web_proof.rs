@@ -83,7 +83,6 @@ struct ValidatedUrl {
 struct ProvenUrl {
     host: String,
     port: u16,
-    uri: String,
 }
 
 impl ValidatedUrl {
@@ -119,13 +118,8 @@ fn parse_proven_url(url_str: &str) -> Result<ProvenUrl, InputError> {
     let ValidatedUrl {
         url, host, port, ..
     } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https])?;
-    let uri = {
-        let path = url.path();
-        let query = url.query().map(|q| format!("?{q}")).unwrap_or_default();
-        format!("{path}{query}")
-    };
 
-    Ok(ProvenUrl { host, port, uri })
+    Ok(ProvenUrl { host, port })
 }
 
 fn parse_notary_url(url_str: &str) -> Result<NotaryConfig, InputError> {
@@ -153,7 +147,6 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
         let ProvenUrl {
             host: urlhost,
             port,
-            uri,
         } = parse_proven_url(&value.url)?;
         // If host is not provided fallback to host extracted from url
         let host = value.host.unwrap_or(urlhost.clone());
@@ -188,7 +181,7 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
             .server_domain(urlhost)
             .server_host(host)
             .server_port(port)
-            .uri(uri)
+            .uri(value.url)
             .headers(headers?);
 
         if let Some(body) = value.data {
@@ -217,7 +210,7 @@ mod tests {
         assert_eq!(converted.server_domain, "api.x.com");
         assert_eq!(converted.server_host, "127.0.0.1");
         assert_eq!(converted.server_port, 8080);
-        assert_eq!(converted.uri, "/v1/followers?token=5daa4f53&uid=245");
+        assert_eq!(converted.uri, "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245");
         assert_eq!(converted.notary_config.host, "notary.pse.dev");
         assert_eq!(converted.notary_config.port, 3030);
         assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
@@ -298,7 +291,7 @@ mod tests {
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
 
-        assert_eq!(converted.uri, "/v1/followers");
+        assert_eq!(converted.uri, "https://api.x.com:8080/v1/followers");
     }
     #[test]
     fn test_convert_args_no_host_provided() {
