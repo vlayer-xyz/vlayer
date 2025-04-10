@@ -6,6 +6,7 @@ members = [
     "rust/cli",
     "rust/common",
     "rust/email_proof",
+    "rust/generate_fixtures",
     "rust/guest_wrapper",
     "rust/guest_wrapper/build_utils",
     "rust/host_utils",
@@ -61,6 +62,7 @@ alloy-sol-types = "=0.8.20"
 alloy-trie = "=0.7.8"
 anyhow = "1.0.91"
 as-any = "0.3.1"
+assert_cmd = "2.0"
 assert-json-diff = "2.0.2"
 async-trait = "0.1.85"
 auto_impl = "1.2.0"
@@ -78,10 +80,13 @@ sha3 = "0.10.8"
 colored = "3.0.0"
 comfy-table = "7.1.1"
 digest = "0.10.7"
+cfg-if = "1.0.0"
 criterion = "0.5.1"
+constcat = "0.6.0"
 ctor = "0.2.8"
 dashmap = "6.1.0"
 delegate = "0.13.1"
+derive_builder = "0.12"
 derive_more = { version = "1.0.0", features = ["debug", "into", "from", "into_iterator", "deref"] }
 derive-new = "0.7.0"
 derivative = "2.2.0"
@@ -127,6 +132,7 @@ opener = "0.7.2"
 k256 = { version = "0.13.4", features = ["ecdsa"] }
 parking_lot = "0.12.3"
 pkcs8 = "0.10.2"
+predicates = "3.1.3"
 tabled = "0.17.0"
 proptest = "1.5.0"
 rand = "0.8.5"
@@ -134,11 +140,11 @@ rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
 revm = { version = "=19.4.0", default-features = false, features = ["optimism"] }
-risc0-build = { git = "https://github.com/vlayer-xyz/risc0.git", rev = "45465177d126f38ccb0096682de164af8520951a" }
-risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "12f4a76616bdc31108fc585c4a0ce7ebd97059fd" }
-risc0-zkp = { version = "=1.2.4", default-features = false }
-risc0-zkvm = "=1.2.4"
-bonsai-sdk = "=1.2.4"
+risc0-build = "=2.0.1"
+risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "cf3d1381f076f1094455a0fc6ebd5bd172424d09" }
+risc0-zkp = { version = "=2.0.0", default-features = false }
+risc0-zkvm = "=2.0.0"
+bonsai-sdk = "=1.4.0"
 rlp = "0.6.1"
 rsa = "=0.9.6" # Locked because of RSA acceleration (see https://github.com/vlayer-xyz/vlayer/pull/1444)
 semver = "1.0.24"
@@ -160,7 +166,8 @@ maplit = "1.0.2"
 test-log = "0.2.16"
 thiserror = "2.0.11"
 insta = "1.42.0"
-tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.7" }
+tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.8" }
+tlsn-utils = { git = "https://github.com/tlsnotary/tlsn-utils", rev = "425614e" }
 tokio = { version = "1.43.0", default-features = false, features = ["rt-multi-thread"] }
 tokio-util = "0.7.13"
 toml = "0.8.19"
@@ -211,6 +218,7 @@ u64_range = { path = "rust/range" }
 verifiable_dns = { path = "rust/verifiable_dns", default-features = false }
 version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
+web_prover = { path = "rust/web_prover" }
 zkvm-benchmarks = { path = "rust/zkvm-benchmarks/benchmarks" }
 
 [workspace.lints.clippy]
@@ -277,3 +285,6 @@ zero_sized_map_values = "warn"
 [profile.dev.package] # https://insta.rs/docs/quickstart/#optional-faster-runs
 insta = { opt-level = 3 }
 similar = { opt-level = 3 }
+
+[workspace.metadata.scripts]
+lint = "bash/lint/rust.sh"

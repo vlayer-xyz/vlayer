@@ -14,6 +14,7 @@ import lotrApiProver from "../../../contracts/fixtures/out/LotrApiProver.sol/Lot
 
 const PROVER_ADDRESS = import.meta.env
   .VITE_LOTR_API_PROVER_ADDRESS as `0x${string}`;
+const TOKEN = import.meta.env.VITE_VLAYER_API_TOKEN;
 
 function DappProveWeb() {
   const [zkProof, setZkProof] = useState<boolean>();
@@ -23,13 +24,15 @@ function DappProveWeb() {
   const webProofProvider = useMemo(() => {
     return createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
-      wsProxyUrl: "ws://localhost:55688",
+      wsProxyUrl: "ws://localhost:3003",
+      jwtToken: TOKEN,
     });
   }, []);
 
   const vlayerClient = useMemo(() => {
     return createVlayerClient({
       webProofProvider,
+      token: TOKEN,
     });
   }, [webProofProvider]);
 

@@ -1,16 +1,17 @@
 mod version;
 
-use std::time::Duration;
+use std::{path::PathBuf, time::Duration};
 
 use alloy_primitives::ChainId;
-#[cfg(feature = "jwt")]
-use call_server_lib::jwt::Algorithm;
+use anyhow::Context;
 use call_server_lib::{
-    chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
-    ConfigBuilder, ProofMode,
+    chain_proof::Config as ChainProofConfig,
+    gas_meter::Config as GasMeterConfig,
+    jwt::{Algorithm, Config as JwtConfig, DecodingKey},
+    serve, Config, ConfigBuilder, ProofMode,
 };
 use clap::{ArgAction, Parser};
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{extract_rpc_url_token, init_tracing, GlobalArgs};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
 use server_utils::set_risc0_dev_mode;
 use tracing::{info, warn};
@@ -36,10 +37,21 @@ struct Cli {
     #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "5s")]
     chain_proof_poll_interval: Option<Duration>,
 
-    #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "120s")]
+    #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "240s")]
     chain_proof_timeout: Option<Duration>,
 
-    #[arg(long, group = "gas_meter", env)]
+    #[arg(long, group = "auth")]
+    jwt_public_key: Option<PathBuf>,
+
+    #[arg(long, requires = "auth", default_value = "RS256")]
+    jwt_algorithm: Option<Algorithm>,
+
+    #[arg(
+        long,
+        group = "gas_meter",
+        requires_all = ["auth", "gas_meter_api_key"],
+        env
+    )]
     gas_meter_url: Option<String>,
 
     #[arg(long, requires = "gas_meter", value_parser = humantime::parse_duration, default_value = "1h")]
@@ -48,20 +60,11 @@ struct Cli {
     #[arg(long, requires = "gas_meter", env)]
     gas_meter_api_key: Option<String>,
 
-    #[cfg(feature = "jwt")]
-    #[arg(long, group = "jwt")]
-    public_key: std::path::PathBuf,
-
-    #[cfg(feature = "jwt")]
-    #[arg(long, group = "jwt", default_value = "RS256")]
-    algorithm: Option<Algorithm>,
-
     #[clap(flatten)]
     global_args: GlobalArgs,
 }
 
 impl Cli {
-    #[allow(unused_mut)]
     fn into_config(self, api_version: String) -> anyhow::Result<Config> {
         let proof_mode = self.proof.unwrap_or_default();
         let gas_meter_config = self
@@ -77,7 +80,25 @@ impl Cli {
             .map(|(url, (poll_interval, timeout))| {
                 ChainProofConfig::new(url, poll_interval, timeout)
             });
-        let mut builder = ConfigBuilder::default()
+        let jwt_config = match self.jwt_public_key {
+            Some(public_key) => {
+                let key = std::fs::read_to_string(&public_key).with_context(|| {
+                    format!("Failed to open file '{}' for reading", public_key.display())
+                })?;
+                let key = DecodingKey::from_rsa_pem(key.as_bytes())?;
+                let algorithm = self.jwt_algorithm.unwrap_or_default();
+                info!(
+                    "Using JWT-based authorization with public key '{}' and algorithm '{algorithm:#?}'.",
+                    public_key.display()
+                );
+                Some(JwtConfig::new(key, algorithm))
+            }
+            None => {
+                warn!("Running without authorization.");
+                None
+            }
+        };
+        Ok(ConfigBuilder::default()
             .with_call_guest_elf(&CALL_GUEST_ELF)
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
             .with_semver(api_version)
@@ -86,32 +107,10 @@ impl Cli {
             .with_rpc_mappings(self.rpc_url)
             .with_proof_mode(proof_mode)
             .with_host(self.host)
-            .with_port(self.port);
-
-        #[cfg(feature = "jwt")]
-        {
-            builder =
-                with_jwt_config(builder, self.public_key, self.algorithm.unwrap_or_default())?;
-        }
-
-        Ok(builder.build()?)
+            .with_port(self.port)
+            .with_jwt_config(jwt_config)
+            .build()?)
     }
-}
-
-#[cfg(feature = "jwt")]
-fn with_jwt_config(
-    mut builder: ConfigBuilder,
-    public_key: impl AsRef<std::path::Path>,
-    alg: Algorithm,
-) -> anyhow::Result<ConfigBuilder> {
-    use anyhow::Context;
-    use call_server_lib::jwt::{Config as JwtConfig, DecodingKey};
-    let public_key = std::fs::read_to_string(public_key.as_ref()).with_context(|| {
-        format!("Failed to open file '{}' for reading", public_key.as_ref().display())
-    })?;
-    let key = DecodingKey::from_rsa_pem(public_key.as_bytes())?;
-    builder = builder.with_jwt_config(JwtConfig::new(key, alg));
-    Ok(builder)
 }
 
 #[tokio::main]
@@ -119,7 +118,13 @@ async fn main() -> anyhow::Result<()> {
     let api_version = version::version();
     let cli = Cli::parse();
 
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+    let secrets: Vec<String> = cli
+        .rpc_url
+        .iter()
+        .filter_map(|(_chain_id, url)| extract_rpc_url_token(url))
+        .collect();
+
+    init_tracing(cli.global_args.log_format, secrets);
 
     let config = cli.into_config(api_version)?;
 

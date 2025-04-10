@@ -154,7 +154,7 @@ mod test {
 
     // stable, expected selector by solidity groth16 verifiers
     // must be kept in sync with value from `contracts/vlayer/test/helpers/Groth16VerifierSelector.sol`
-    const GROTH16_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0xc1, 0x01, 0xb4, 0x2b]);
+    const GROTH16_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0x9f, 0x39, 0x69, 0x6c]);
 
     fn mock_journal() -> Vec<u8> {
         let call_assumptions = call_engine::CallAssumptions {

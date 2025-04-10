@@ -37,4 +37,6 @@ jobs:
       - name: Build abi types
         run: ./bash/build-ts-types.sh
       - name: Run ESLint
-        run: bash/lint-ts.sh
+        run: bash/lint/ts.sh
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096

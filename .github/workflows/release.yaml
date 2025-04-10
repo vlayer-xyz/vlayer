@@ -42,6 +42,8 @@ jobs:
         uses: ./.github/actions/build-extension
         with:
           version_name: ${{ needs.build-release.outputs.vlayer_build }}
+        env:
+          VITE_SENTRY_DSN: "https://24fb8a36179103a1aafd60401c006505@o4508754893012992.ingest.de.sentry.io/4509004636422224"
 
   push-contracts:
     if: github.repository == 'vlayer-xyz/vlayer'

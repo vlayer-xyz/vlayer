@@ -4,8 +4,10 @@ import {
   isSupportedBrowser,
   checkExtensionInstalled,
 } from "../utils";
+import { UseExtensionError } from "../errors";
 export const useExtension = () => {
   const [hasExtensionInstalled, setHasExtensionInstalled] = useState(false);
+  // Using error state to throw error in useEffect because ErrorBoundary does not catch errors from async functions like isExtensionReady
   const [error, setError] = useState<string | undefined>(undefined);
 
   const isExtensionReady = async () => {
@@ -22,7 +24,6 @@ export const useExtension = () => {
 
     const isInstalled = await checkExtensionInstalled();
     if (!isInstalled) {
-      setError("Please install vlayer extension and try again");
       setHasExtensionInstalled(false);
       return;
     }
@@ -31,9 +32,19 @@ export const useExtension = () => {
   };
 
   useEffect(() => {
-    isExtensionReady();
-    const interval = setInterval(isExtensionReady, 5000);
+    isExtensionReady().catch(setError);
+    const interval = setInterval(
+      () => void isExtensionReady().catch(setError),
+      5000,
+    );
     return () => clearInterval(interval);
   }, []);
-  return { hasExtensionInstalled, error };
+
+  useEffect(() => {
+    if (error) {
+      throw new UseExtensionError(error);
+    }
+  }, [error]);
+
+  return { hasExtensionInstalled };
 };

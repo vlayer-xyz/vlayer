@@ -5,7 +5,7 @@ use chain_host::{
     set_risc0_dev_mode, AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode,
 };
 use clap::Parser;
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{extract_rpc_url_token, init_tracing, GlobalArgs};
 use dotenvy::dotenv;
 use ethers::{providers::Http, types::BlockNumber as BlockTag};
 use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
@@ -153,7 +153,12 @@ async fn run(mode: Mode, config: HostConfig) -> anyhow::Result<()> {
 async fn main() {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+
+    let secrets: Vec<String> = match extract_rpc_url_token(&cli.rpc_url) {
+        Some(token) => vec![token],
+        None => vec![],
+    };
+    init_tracing(cli.global_args.log_format, secrets);
 
     let mode = cli.mode;
     let config: HostConfig = cli.into();

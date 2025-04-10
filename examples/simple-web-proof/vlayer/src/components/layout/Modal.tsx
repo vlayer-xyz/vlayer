@@ -10,6 +10,8 @@ import { useCurrentStep } from "../../hooks/useCurentStep";
 import { STEP_KIND } from "../../utils/steps";
 import { ProgressBar } from "../molecules/ProgressBar";
 import { Navigation } from "./Navigation";
+import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundaryComponent } from "./ErrorBoundary";
 
 export const modalContext = createContext({
   showModal: () => {},
@@ -84,12 +86,14 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
             {currentStep?.title && (
               <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
             )}
-            {/* Description */}
-            <p className={`h-[116px] desc ${descClass}`}>{description}</p>
-            {/* Content */}
-            <modalContext.Provider value={{ showModal, closeModal }}>
-              {children}
-            </modalContext.Provider>
+            <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+              {/* Description */}
+              <p className={`h-[116px] desc ${descClass}`}>{description}</p>
+              {/* Content */}
+              <modalContext.Provider value={{ showModal, closeModal }}>
+                {children}
+              </modalContext.Provider>
+            </ErrorBoundary>
           </div>
         </motion.div>
       </div>

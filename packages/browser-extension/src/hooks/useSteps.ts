@@ -41,16 +41,21 @@ const isExpectUrlStepCompleted = isUrlVisited;
 const isNotarizeStepReady = isUrlRequestCompleted;
 const isNotarizeStepCompleted = hasProof;
 
+const isFetchAndNotarizeStepReady = isUrlRequestCompleted;
+const isFetchAndNotarizeStepCompleted = hasProof;
+
 const checkStepCompletion = {
   startPage: isStartPageStepCompleted,
   expectUrl: isExpectUrlStepCompleted,
   notarize: isNotarizeStepCompleted,
+  fetchAndNotarize: isFetchAndNotarizeStepCompleted,
 };
 
 const checkStepReadiness = {
   startPage: isStartPageStepReady,
   expectUrl: isExpectUrlStepReady,
   notarize: isNotarizeStepReady,
+  fetchAndNotarize: isFetchAndNotarizeStepReady,
 };
 
 const calculateStepStatus = ({

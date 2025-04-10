@@ -14,6 +14,7 @@ generate_ts_bindings
 
 echo "::group::Running services"
 DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy notary-server"
+
 source ${VLAYER_HOME}/bash/run-services.sh
 echo "::endgroup::Running services"
 

@@ -13,7 +13,7 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
 });
 
-writeEnvVariables(".env", {
+await writeEnvVariables(".env", {
   VITE_PROVER_ADDRESS: prover,
   VITE_VERIFIER_ADDRESS: verifier,
   VITE_CHAIN_NAME: config.chainName,

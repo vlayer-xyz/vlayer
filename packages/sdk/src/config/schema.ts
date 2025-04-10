@@ -15,7 +15,6 @@ export const envSchema = z.object({
   PROVER_URL: z.string().url(),
   VLAYER_ENV: z.enum(POSSIBLE_VLAYER_ENVS),
   DNS_SERVICE_URL: z.string().url().optional(),
-  L2_JSON_RPC_URL: z.string().url().optional(),
   NOTARY_URL: z.string().url().optional(),
   SHOULD_DEPLOY_VERIFIER_ROUTER: stringBoolean.optional(),
   VLAYER_API_TOKEN: z.string().optional(),

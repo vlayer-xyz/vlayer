@@ -16,7 +16,7 @@ export const InputWithCopy = ({ label, value }: InputWithCopyProps) => {
         <span
           className="label-text-alt"
           onClick={() => {
-            navigator.clipboard.writeText(value);
+            void navigator.clipboard.writeText(value);
           }}
         >
           <DocumentDuplicateIcon className="w-4 h-4" />

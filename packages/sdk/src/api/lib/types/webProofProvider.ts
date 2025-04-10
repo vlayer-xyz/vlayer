@@ -4,7 +4,6 @@ import {
   type Branded,
   type ExtensionMessageType,
   type ExtensionMessage,
-  type PresentationJSON,
   type WebProofStep,
   type ZkProvingStatus,
 } from "../../../web-proof-commons";
@@ -32,26 +31,13 @@ export type ProverCallCommitment<
   chainId: number;
 };
 
-export type GetWebProofArgs<
-  T extends Abi,
-  F extends ContractFunctionName<T>,
-> = {
+export type WebProofConfig<T extends Abi, F extends ContractFunctionName<T>> = {
   proverCallCommitment: ProverCallCommitment<T, F>;
 } & WebProofRequestInput;
 
 export type WebProofProvider = {
-  getWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
-    args: GetWebProofArgs<T, F>,
-  ) => Promise<{
-    presentationJson: PresentationJSON;
-    decodedTranscript: {
-      sent: string;
-      recv: string;
-    };
-  }>;
-
   requestWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
-    args: GetWebProofArgs<T, F>,
+    args: WebProofConfig<T, F>,
   ) => void;
 
   notifyZkProvingStatus: (status: ZkProvingStatus) => void;
@@ -65,4 +51,5 @@ export type WebProofProvider = {
 export type WebProofProviderSetup = {
   notaryUrl?: string;
   wsProxyUrl?: string;
+  jwtToken?: string | null;
 };

@@ -6,15 +6,15 @@
     },
     {
       "contractName": "FakeProofVerifier",
-      "contractAddress": "0x1737776d145af312f24f51fff1f0b22f2f7b9082"
+      "contractAddress": "0x913649a62807b2b8144a1e4d41a0e1aee10a3985"
     },
     {
       "contractName": "Groth16ProofVerifier",
-      "contractAddress": "0x39599ac412c14f9635f5b5bf8f4d4c1aeecf6307"
+      "contractAddress": "0x41f78ef6625e119f328ec8a88d54f9da1c227e6a"
     },
     {
       "contractName": "ProofVerifierRouter",
-      "contractAddress": "0xe3443ab33ba5c406056fe10715da20c8619d4137"
+      "contractAddress": "0x17c9793523c11eb0b6da1daed53839146277ab4e"
     }
   ]
 }

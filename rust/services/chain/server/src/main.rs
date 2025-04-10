@@ -3,10 +3,11 @@ use std::{net::SocketAddr, path::PathBuf};
 use chain_db::{ChainDb, Mode};
 use chain_server_lib::{serve, ServerConfig};
 use clap::Parser;
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{init_tracing, GlobalArgs};
 use dotenvy::dotenv;
 use guest_wrapper::CHAIN_GUEST_IDS;
 use risc0_zkp::core::digest::Digest;
+use tracing::error;
 use version::version;
 
 #[derive(Parser)]
@@ -35,10 +36,17 @@ struct Cli {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() {
+    if let Err(e) = run().await {
+        error!("{}", e.to_string());
+        std::process::exit(1)
+    }
+}
+
+async fn run() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+    init_tracing(cli.global_args.log_format, vec![]);
 
     let config = ServerConfig::new(cli.listen_addr);
     let db = ChainDb::mdbx(

@@ -1,0 +1,199 @@
+name: E2E test with Bonsai and OP Sepolia
+
+# This workflow has additional constraints to run on `main`,
+# because it uses external API resources.
+
+on:
+  push:
+    branches:
+      - main
+    # If any path names do not match patterns in paths-ignore,
+    # even if some path names match the patterns,
+    # the workflow will run.
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      code-changes: ${{ steps.filter.outputs.code-changes }}
+      workflow-changes: ${{ steps.filter.outputs.workflow-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # We detect code changes, and run the workflow only if relevant code or workflow changes are detected.
+      # Because the workflow is resource heavy (in time/compilation, in testnet ETH usage, and in Bonsai API usage),
+      # we also skip running the workflow on every commit of PRs (unless the workflow configuration is changed)
+      # Red PR cannot be merged because even though PR commits are skipped, the workflow will still run in the merge queue.
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code-changes:
+              - 'rust/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'bash/**'
+              - 'contracts/**'
+              - 'examples/**'
+              - 'packages/**'
+              - 'docker/**'
+              - 'ansible/**'
+              - 'bun.lock'
+            workflow-changes:
+              - '.github/workflows/test_e2e_testnet.yaml'
+              - '.github/actions/test-e2e/**'
+
+  build-binaries:
+    name: Build binaries
+    needs: changes
+    runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: bash/check-llvm-clang.sh
+
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
+
+      - name: Create reusable Cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: test-e2e-bonsai-opsepolia
+      - name: Build binaries
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RISC0_USE_DOCKER: 1
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+          mkdir target_debug
+          mv ${CARGO_TARGET_DIR}/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
+
+      - name: Push binaries
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: target-debug
+          path: target_debug
+          if-no-files-found: error
+          retention-days: 3
+
+  test-e2e-bonsai-opsepolia-simple:
+    name: E2E test (simple) with Bonsai and OP Sepolia
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple"
+
+          # Proving related
+          proving_mode: "prod"
+          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+  test-e2e-bonsai-opsepolia-simple-web-proof:
+    name: E2E test (simple-web-proof) with Bonsai and OP Sepolia
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-web-proof"
+
+          # Proving related
+          proving_mode: "prod"
+          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+  test-e2e-bonsai-opsepolia-simple-email-proof:
+    name: E2E test (simple-email-proof) with Bonsai and OP Sepolia
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-email-proof"
+
+          # Proving related
+          proving_mode: "prod"
+          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+  test-e2e-bonsai-opsepolia-simple-time-travel:
+    name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-time-travel"
+
+          # Proving related
+          proving_mode: "prod"
+          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}

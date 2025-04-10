@@ -8,6 +8,7 @@ export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
   startPage: "startPage",
   notarize: "notarize",
+  fetchAndNotarize: "fetchAndNotarize",
 } as const;
 
 export type ExtensionStep =
@@ -53,6 +54,7 @@ export enum ExtensionMessageType {
   ProofProcessing = "ProofProcessing",
   CleanProvingSessionStorageOnClose = "CleanProvingSessionStorageOnClose",
   CloseSidePanel = "CloseSidePanel",
+  SidePanelClosed = "SidePanelClosed",
 }
 
 export type PresentationJSON = TLSNPresentationJSON;
@@ -77,12 +79,15 @@ export type ExtensionMessage =
         // as we dont have progress yet from tlsn this is optional
         progress?: number;
       };
-    };
+    }
+  | { type: ExtensionMessageType.SidePanelClosed }
+  | { type: ExtensionMessageType.CloseSidePanel };
 
 export type EmptyWebProverSessionConfig = {
   notaryUrl: null;
   wsProxyUrl: null;
   logoUrl: null;
+  jwtToken: null;
   steps: never[];
 };
 
@@ -91,6 +96,7 @@ export type WebProverSessionConfig =
       notaryUrl: string;
       wsProxyUrl: string;
       logoUrl: string;
+      jwtToken: string | null;
       steps: WebProofStep[];
     }
   | EmptyWebProverSessionConfig;
@@ -110,40 +116,55 @@ export function isEmptyWebProverSessionConfig(
 export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
-  | WebProofStepStartPage;
+  | WebProofStepStartPage
+  | WebProofStepFetchAndNotarize;
 
 export type UrlPattern = Branded<string, "UrlPattern">;
 
 export type Url = Branded<UrlPattern, "Url">;
 
-export type WebProofStepNotarize = Branded<
+type BrandedStep<S extends ExtensionStep, T> = Branded<T & { step: S }, S>;
+
+export type WebProofStepNotarize = BrandedStep<
+  typeof EXTENSION_STEP.notarize,
   {
     url: UrlPattern;
     method: string;
     label: string;
     redact: RedactionConfig;
-    step: typeof EXTENSION_STEP.notarize;
-  },
-  "notarize"
+  }
 >;
 
-export type WebProofStepStartPage = Branded<
+export type WebProofStepStartPage = BrandedStep<
+  typeof EXTENSION_STEP.startPage,
   {
     url: Url;
     label: string;
-    step: typeof EXTENSION_STEP.startPage;
-  },
-  "startPage"
+  }
 >;
 
-export type WebProofStepExpectUrl = Branded<
+export type WebProofStepExpectUrl = BrandedStep<
+  typeof EXTENSION_STEP.expectUrl,
   {
     url: UrlPattern;
     label: string;
-    step: typeof EXTENSION_STEP.expectUrl;
-  },
-  "expectUrl"
+  }
 >;
+
+export type WebProofStepFetchAndNotarize = BrandedStep<
+  typeof EXTENSION_STEP.fetchAndNotarize,
+  {
+    url: UrlPattern;
+    method: string;
+    body: string;
+    headers: Headers;
+    label: string;
+    redact: RedactionConfig;
+  }
+>;
+
+type Header = [string, string];
+export type Headers = Header[];
 
 export enum StepValidationErrors {
   InvalidUrl = "InvalidUrl",

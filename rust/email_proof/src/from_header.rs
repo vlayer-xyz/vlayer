@@ -1,6 +1,6 @@
 use mailparse::{MailHeaderMap, ParsedMail};
 
-use crate::{Email, Error};
+use crate::{email::extract_address_from_header, Error};
 
 pub fn extract_from_domain(p0: &ParsedMail) -> Result<String, Error> {
     let from_header = p0
@@ -8,7 +8,7 @@ pub fn extract_from_domain(p0: &ParsedMail) -> Result<String, Error> {
         .get_first_value("From")
         .ok_or(Error::InvalidFromHeader("Missing".into()))?;
 
-    let email = Email::extract_address_from_header(&from_header).map_err(Error::EmailParse)?;
+    let email = extract_address_from_header(&from_header).map_err(Error::EmailParse)?;
 
     let (_, domain) = email
         .rsplit_once('@')
@@ -39,20 +39,20 @@ mod test {
                 (
                     r#""John Doe" <user@example.com>, "Jane Smith" <jane@example.com>"#,
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
-                        "Unexpected \"From\" format",
+                        "Expected exactly one address in the \"From\" header",
                     ))),
                 ),
                 (r#"John Doe <"user.name"@example.com>"#, Ok("example.com")),
                 (
                     "@routing:user@example.com",
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
-                        "Unexpected \"From\" format",
+                        "Found unterminated group address",
                     ))),
                 ),
                 (
                     "Recipients: John Doe <john@example.com>, Jane Smith <jane@example.com>;",
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
-                        "Unexpected \"From\" format",
+                        "Group addresses are not supported in the \"From\" header",
                     ))),
                 ),
                 ("=?UTF-8?B?SsO2cmc=?= <joerg@example.com>", Ok("example.com")),

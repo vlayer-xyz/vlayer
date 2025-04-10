@@ -17,6 +17,8 @@ import {
 } from "../../web-proof-commons";
 import { type ContractFunctionArgsWithout } from "types/viem";
 import { type ProveArgs } from "types/vlayer";
+import { HttpAuthorizationError } from "./errors";
+import { match, P } from "ts-pattern";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
@@ -25,10 +27,23 @@ function dropEmptyProofFromArgs(args: unknown) {
   return [];
 }
 
+export const VLAYER_ERROR_NOTES = {
+  [HttpAuthorizationError.name]:
+    ", go to https://dashboard.vlayer.xyz to generate a JWT token and save it to VLAYER_API_TOKEN env var",
+};
+
+function httpAuthorizationErrorWithNote(
+  error: HttpAuthorizationError,
+): HttpAuthorizationError {
+  return new HttpAuthorizationError(
+    `${error.message}${VLAYER_ERROR_NOTES[error.name]}`,
+  );
+}
+
 export const createVlayerClient = (
   {
     url = "http://127.0.0.1:3000",
-    webProofProvider = createExtensionWebProofProvider(),
+    webProofProvider,
     token,
   }: {
     url?: string;
@@ -36,10 +51,13 @@ export const createVlayerClient = (
     token?: string;
   } = {
     url: "http://127.0.0.1:3000",
-    webProofProvider: createExtensionWebProofProvider(),
   },
 ): VlayerClient => {
   const resultHashMap = new Map<string, [Abi, string]>();
+
+  if (!webProofProvider) {
+    webProofProvider = createExtensionWebProofProvider({ jwtToken: token });
+  }
 
   return {
     prove: async <T extends Abi, F extends ContractFunctionName<T>>({
@@ -52,22 +70,30 @@ export const createVlayerClient = (
     }: ProveArgs<T, F>) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
 
-      const hash = await prove(
-        address,
-        proverAbi,
-        functionName,
-        args,
-        chainId,
-        url,
-        gasLimit,
-        token,
-      ).catch((e) => {
-        webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
-        throw e;
-      });
+      try {
+        const hash = await prove(
+          address,
+          proverAbi,
+          functionName,
+          args,
+          chainId,
+          url,
+          gasLimit,
+          token,
+        );
 
-      resultHashMap.set(hash.hash, [proverAbi, functionName]);
-      return hash;
+        resultHashMap.set(hash.hash, [proverAbi, functionName]);
+        return hash;
+      } catch (error) {
+        webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
+
+        const errorWithNote = match(error)
+          .with(P.instanceOf(HttpAuthorizationError), (error) =>
+            httpAuthorizationErrorWithNote(error),
+          )
+          .otherwise((error) => error);
+        throw errorWithNote;
+      }
     },
 
     waitForProvingResult: async <
@@ -111,9 +137,15 @@ export const createVlayerClient = (
           AbiStateMutability,
           F
         >;
-      } catch (e) {
+      } catch (error) {
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
-        throw e;
+
+        const errorWithNote = match(error)
+          .with(P.instanceOf(HttpAuthorizationError), (error) =>
+            httpAuthorizationErrorWithNote(error),
+          )
+          .otherwise((error) => error);
+        throw errorWithNote;
       }
     },
 

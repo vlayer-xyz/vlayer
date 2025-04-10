@@ -28,12 +28,12 @@ library WebProofLib {
 
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         Web memory web = recover(webProof);
-        if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
+        if (ChainIdLibrary.isTestEnv()) {
+            require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
+        } else {
             require(
                 TestnetStableDeployment.repository().isNotaryKeyValid(web.notaryPubKey), "Invalid notary public key"
             );
-        } else {
-            require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
         }
 
         require(web.url.test(dataUrl), "Incorrect URL");

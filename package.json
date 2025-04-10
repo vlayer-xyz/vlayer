@@ -1,10 +1,19 @@
 {
+  "scripts": {
+    "lint": "bun run lint:packages && bun run lint:examples",
+    "lint:packages": "eslint packages/*",
+    "lint:examples": "eslint examples/*"
+  },
   "workspaces": [
     "packages/*",
     "examples/*/vlayer"
   ],
-  "dependencies": {
-    "@heroicons/react": "^2.2.0",
-    "react-error-boundary": "^5.0.0"
+  "devDependencies": {
+    "@eslint/js": "9.23.0",
+    "eslint": "9.23.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "jiti": "2.4.2",
+    "typescript-eslint": "8.28.0"
   }
 }

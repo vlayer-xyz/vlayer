@@ -28,6 +28,7 @@ pub struct Inspector<'a, D: RevmDB> {
     pub location: Option<ExecutionLocation>,
     transaction_callback: Box<TransactionCallback<'a, WrappedRevmDBError<D>>>,
     metadata: Vec<Metadata>,
+    is_vlayer_test: bool,
 }
 
 impl<'a, D: RevmDB> Inspector<'a, D> {
@@ -38,12 +39,14 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
                 ExecutionLocation,
             ) -> Result<TxResultWithMetadata, Error<WrappedRevmDBError<D>>>
             + 'a,
+        is_vlayer_test: bool,
     ) -> Self {
         Self {
             start_chain_id,
             location: None,
             transaction_callback: Box::new(transaction_callback),
             metadata: vec![Metadata::start_chain(start_chain_id)],
+            is_vlayer_test,
         }
     }
 
@@ -112,7 +115,9 @@ where
         info!("Call: {:?} -> {:?}", inputs.caller, inputs.bytecode_address);
         debug!("Input: {:?}", inputs.input);
 
-        if let Some(precompile) = precompile_by_address(&inputs.bytecode_address) {
+        if let Some(precompile) =
+            precompile_by_address(&inputs.bytecode_address, self.is_vlayer_test)
+        {
             debug!("Calling PRECOMPILE {:?}", precompile.tag());
             self.metadata
                 .push(Metadata::precompile(precompile.tag(), inputs.input.len()));
@@ -192,7 +197,7 @@ mod test {
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
         let mut set_block_inspector =
-            Inspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location));
+            Inspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location), true);
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
@@ -206,10 +211,11 @@ mod test {
             (SEPOLIA_ID, SEPOLIA_BLOCK - 1).into(),
         ];
 
-        let mut inspector: Inspector<'_, EmptyDB> =
-            Inspector::new(locations[0].chain_id, |call, location| {
-                (TRANSACTION_CALLBACK)(call, location)
-            });
+        let mut inspector: Inspector<'_, EmptyDB> = Inspector::new(
+            locations[0].chain_id,
+            |call, location| (TRANSACTION_CALLBACK)(call, location),
+            true,
+        );
 
         inspector.set_chain(locations[1].chain_id, locations[1].block_number);
         assert_eq!(inspector.location, Some(locations[1]));
@@ -235,7 +241,7 @@ mod test {
     fn set_block_resets_after_one_call() {
         let block_num = 1;
         let mut inspector: Inspector<'_, InMemoryDB> =
-            Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK);
+            Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK, true);
         assert_eq!(inspector.location, None);
 
         inspector.set_block(block_num);

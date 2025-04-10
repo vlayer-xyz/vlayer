@@ -15,14 +15,17 @@ pub use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
+use tracing::error;
 
 #[derive(Deref, Clone, Deserialize)]
 pub struct ClaimsExtractor<T: Clone>(pub T);
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("InvalidToken")]
+    #[error("Invalid JWT token")]
     InvalidToken,
+    #[error("Missing JWT token")]
+    MissingToken,
     #[error(transparent)]
     Jwt(JwtError),
 }
@@ -45,10 +48,13 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = State::from_ref(state);
-        let TypedHeader(Authorization(bearer)) = parts
-            .extract::<TypedHeader<Authorization<Bearer>>>()
+        let Some(TypedHeader(Authorization(bearer))) = parts
+            .extract::<Option<TypedHeader<Authorization<Bearer>>>>()
             .await
-            .map_err(|_| Error::InvalidToken)?;
+            .map_err(|_| Error::InvalidToken)?
+        else {
+            return Err(Error::MissingToken);
+        };
 
         let header = decode_header(bearer.token()).map_err(|_| Error::InvalidToken)?;
         if header.typ.is_none_or(|typ| typ != HEADER_TYP) {
@@ -65,9 +71,10 @@ where
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        let body = Json(json!({
+        let body = json!({
             "error": self.to_string(),
-        }));
-        (StatusCode::BAD_REQUEST, body).into_response()
+        });
+        error!("authorization error: {body}");
+        (StatusCode::UNAUTHORIZED, Json(body)).into_response()
     }
 }

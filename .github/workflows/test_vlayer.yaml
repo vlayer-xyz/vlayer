@@ -2,13 +2,6 @@ name: Test vlayer
 
 on:
   pull_request:
-    paths:
-      - "bash/**"
-      - "contracts/**"
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - ".github/workflows/test_vlayer.yaml"
   merge_group:
   push:
     branches:
@@ -19,9 +12,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'bash/**'
+              - 'contracts/**'
+              - 'rust-toolchain.toml'
+              - 'rust/**'
+              - 'examples/**'
+              - '.github/workflows/test_vlayer.yaml'
+
   test-vlayer:
     name: Test vlayer
+    needs: changes
     runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
 
     steps:
       - name: Checkout repository
@@ -31,6 +47,10 @@ jobs:
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
+
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
@@ -39,13 +59,28 @@ jobs:
         run: |
           forge soldeer install
 
+      - name: Create reusable Cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: test-vlayer
+      - name: Build CLI
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          cargo build --package cli
+
       - name: Run vlayer tests for contracts
         working-directory: ./contracts/vlayer
         env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          FOUNDRY_PROFILE: vlayer
         run: |
-          # vlayer test
-          cargo run --locked --manifest-path ../../Cargo.toml --package cli -- test -vvv
+          ${CARGO_TARGET_DIR}/debug/vlayer test -vvv
 
       - name: Run vlayer tests for examples
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
         run: bash/vlayer-test-examples.sh

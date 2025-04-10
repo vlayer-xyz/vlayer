@@ -2,7 +2,10 @@
   "name": "@vlayer/react",
   "version": "0.1.0",
   "exports": {
-    ".": "./dist/index.js"
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "type": "module",
   "devDependencies": {

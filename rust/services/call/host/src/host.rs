@@ -55,6 +55,7 @@ pub struct Host {
     op_client_factory: recording::Factory,
     travel_call_verifier: HostTravelCallVerifier,
     guest_elf: GuestElf,
+    is_vlayer_test: bool,
 }
 
 impl Host {
@@ -118,6 +119,7 @@ impl Host {
             op_client_factory: recording_op_client_factory,
             travel_call_verifier,
             guest_elf: config.call_guest_elf,
+            is_vlayer_test: config.is_vlayer_test,
         })
     }
 
@@ -153,7 +155,8 @@ impl Host {
             output: host_output,
             gas_used,
             metadata,
-        } = TravelCallExecutor::new(&self.envs, self.start_execution_location).call(&call)?;
+        } = TravelCallExecutor::new(&self.envs, self.start_execution_location, self.is_vlayer_test)
+            .call(&call)?;
 
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
@@ -184,6 +187,7 @@ impl Host {
             chain_proofs,
             call,
             op_output_cache,
+            is_vlayer_test: self.is_vlayer_test,
         })
     }
 
@@ -242,7 +246,7 @@ struct EncodedProofWithStats {
 #[instrument(skip_all)]
 fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
     let now = Instant::now();
-    let ProveInfo { receipt, stats } = prover.prove(input)?;
+    let ProveInfo { receipt, stats, .. } = prover.prove(input)?;
     let elapsed_time = now.elapsed();
 
     let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
