@@ -14,3 +14,4 @@
   * `b79154d432db45e7dd6e4ada75aca99837a8b25844a5041fd28b01f596bee43b` – Accelerated keccak in MPT
   * `3b4d5f70a9fe3cf01638faf6f1a8d6e6079ce5f089f2a3dd875f74c107e643f2` – Risc0 2.0.0
   * `82d44d66876bf5cc8ff56a3c8fc91270b13c61623d9e6fc3a566ab0a7a126468` – Added functionality and a crate dependency in `common` [#2138] (https://github.com/vlayer-xyz/vlayer/pull/2138)
+  * `43ba4b3cc218e6211f5c347c36cea539d6fc40e0e8c6086a95b348834af1a6f5` – hashbrown 0.15.0 -> 0.15.1

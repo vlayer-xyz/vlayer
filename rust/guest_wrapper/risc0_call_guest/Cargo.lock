@@ -403,7 +403,7 @@ dependencies = [
  "ark-std 0.5.0",
  "educe",
  "fnv",
- "hashbrown 0.15.0",
+ "hashbrown 0.15.1",
  "itertools 0.13.0",
  "num-bigint",
  "num-integer",
@@ -564,7 +564,7 @@ dependencies = [
  "ark-std 0.5.0",
  "educe",
  "fnv",
- "hashbrown 0.15.0",
+ "hashbrown 0.15.1",
 ]
 
 [[package]]
