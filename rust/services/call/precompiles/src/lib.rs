@@ -89,7 +89,6 @@ mod tests {
             static ref WEB_PROOF: Address = u64_to_address(0x100);
             static ref EMAIL_PROOF: Address = u64_to_address(0x101);
             static ref JSON_GET_STRING: Address = u64_to_address(0x102);
-            static ref NON_EXISTENT_ADDRESS: Address = u64_to_address(0x999);
         }
 
         #[test]
