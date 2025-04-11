@@ -20,6 +20,7 @@ use revm::precompile::{
     Precompile as RawPrecompile, PrecompileOutput, PrecompileResult, PrecompileWithAddress,
     u64_to_address,
 };
+use thiserror::Error;
 use url_pattern::test as url_pattern_test;
 use web_proof::verify as web_proof;
 
@@ -47,4 +48,51 @@ pub fn precompile_by_address(address: &Address, is_vlayer_test: bool) -> Option<
     precompiles(is_vlayer_test)
         .into_iter()
         .find(|precomp| precomp.address() == address)
+}
+
+#[derive(Debug, Error, PartialEq, Eq)]
+#[error("Precompile not allowed for travel calls: {0}")]
+pub struct PrecompileNotAllowedError(pub Tag);
+
+/// Returns `true` if the precompile is time-dependent and must not be used in travel calls.
+///
+/// Specifically, `WebProof` and `EmailProof` rely on real-world data (e.g., DNS records, timestamps)
+/// that can be manipulated when paired with Time Travel:
+/// - A user may jump to a block where an expired `validUntil` timestamp is still valid.
+/// - Or abuse a DNS key that was valid in the past but has since been revoked.
+///
+/// To preserve integrity, these precompiles are considered unsafe in historical locations.
+pub const fn is_time_dependent(precompile: &Precompile) -> bool {
+    matches!(precompile.tag(), Tag::WebProof | Tag::EmailProof)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod verify_precompile_allowed_in_travel_call {
+        use lazy_static::lazy_static;
+
+        use super::*;
+
+        lazy_static! {
+            static ref WEB_PROOF: Precompile =
+                precompile_by_address(&u64_to_address(0x100), false).unwrap();
+            static ref EMAIL_PROOF: Precompile =
+                precompile_by_address(&u64_to_address(0x101), false).unwrap();
+            static ref JSON_GET_STRING: Precompile =
+                precompile_by_address(&u64_to_address(0x102), false).unwrap();
+        }
+
+        #[test]
+        fn accepts_valid_precompile() {
+            assert!(!is_time_dependent(&JSON_GET_STRING));
+        }
+
+        #[test]
+        fn rejects_invalid_precompile() {
+            assert!(is_time_dependent(&WEB_PROOF));
+            assert!(is_time_dependent(&EMAIL_PROOF));
+        }
+    }
 }
