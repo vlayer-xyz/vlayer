@@ -25,5 +25,6 @@
     "paths": {
       "types/*": ["../../../packages/sdk/src/api/lib/types/*"]
     }
-  }
+  },
+  "types": [ "jest", "@testing-library/jest-dom"],
 }
