@@ -210,11 +210,12 @@ pub mod web_proof {
     use super::*;
 
     pub const WEB_PROOF_PROVER: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
+    // Required to be passed to the `main` function, but not utilized within it, as the code panics beforehand
+    pub const ACCOUNT_ADDRESS: Address = address!("0000000000000000000000000000000000000000");
+    
     lazy_static! {
         pub static ref WEB_PROOF: String = "web_proof".to_string();
     }
-    // Required to be passed to the `main` function, but not utilized within it, as the code panics beforehand
-    pub const ACCOUNT_ADDRESS: Address = address!("0000000000000000000000000000000000000000");
 
     sol!(
         #[derive(Debug)]
