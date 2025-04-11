@@ -9,7 +9,7 @@ import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { Chain } from "viem";
 import { anvil, optimismSepolia } from "wagmi/chains";
 import { ErrorBoundary } from "react-error-boundary";
-import { ErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
+import { AppErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
 
 const queryClient = new QueryClient();
 const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
@@ -43,19 +43,19 @@ createAppKit({
 
 const App = () => {
   return (
-    <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
-      <div id="app">
-        <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-          <QueryClientProvider client={queryClient}>
-            <ProofProvider
-              config={{
-                proverUrl: import.meta.env.VITE_PROVER_URL,
-                wsProxyUrl: import.meta.env.VITE_WS_PROXY_URL,
-                notaryUrl: import.meta.env.VITE_NOTARY_URL,
-                token: import.meta.env.VITE_VLAYER_API_TOKEN,
-              }}
-            >
-              <BrowserRouter>
+    <div id="app">
+      <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <ProofProvider
+            config={{
+              proverUrl: import.meta.env.VITE_PROVER_URL,
+              wsProxyUrl: import.meta.env.VITE_WS_PROXY_URL,
+              notaryUrl: import.meta.env.VITE_NOTARY_URL,
+              token: import.meta.env.VITE_VLAYER_API_TOKEN,
+            }}
+          >
+            <BrowserRouter>
+              <ErrorBoundary FallbackComponent={AppErrorBoundaryComponent}>
                 <Routes>
                   <Route path="/" element={<Layout />}>
                     {steps.map((step) => (
@@ -67,12 +67,12 @@ const App = () => {
                     ))}
                   </Route>
                 </Routes>
-              </BrowserRouter>
-            </ProofProvider>
-          </QueryClientProvider>
-        </WagmiProvider>
-      </div>
-    </ErrorBoundary>
+              </ErrorBoundary>
+            </BrowserRouter>
+          </ProofProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </div>
   );
 };
 
