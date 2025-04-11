@@ -22,30 +22,30 @@ const MAX_HEADERS_NUMBER: usize = 40;
 const CONTENT_TYPE: &str = "Content-Type";
 
 pub(crate) fn parse_request_and_validate_redaction(request: &[u8]) -> Result<String, ParsingError> {
-    let request_primary_replacement =
+    let request_redacted_with_primary_replacement =
         replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_PRIMARY);
-    let (host_primary, path_primary, headers_primary) =
-        parse_request(&request_primary_replacement)?;
-
-    let request_secondary_replacement =
+    let request_redacted_with_secondary_replacement =
         replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_SECONDARY);
+
+    let (host_primary, path_primary, headers_primary) =
+        parse_request(&request_redacted_with_primary_replacement)?;
     let (host_secondary, path_secondary, headers_secondary) =
-        parse_request(&request_secondary_replacement)?;
+        parse_request(&request_redacted_with_secondary_replacement)?;
 
     if host_primary != host_secondary {
         return Err(ParsingError::RedactedHost(host_primary));
     }
 
     validate_name_value_redaction(
-        &convert_headers(&headers_primary),
-        &convert_headers(&headers_secondary),
-        RedactionElementType::RequestHeader,
-    )?;
-
-    validate_name_value_redaction(
         &convert_path(&path_primary)?,
         &convert_path(&path_secondary)?,
         RedactionElementType::RequestUrlParam,
+    )?;
+
+    validate_name_value_redaction(
+        &convert_headers(&headers_primary),
+        &convert_headers(&headers_secondary),
+        RedactionElementType::RequestHeader,
     )?;
 
     Ok(path_primary)
