@@ -4,15 +4,19 @@ import styles from "./ErrorBoundary.module.css";
 import { useNavigate } from "react-router";
 
 export const StepErrorBoundaryComponent = ({ error }: FallbackProps) => {
+  console.error("Step error: ", error);
+
   const errorMsg =
     error instanceof AppError ? error.message : "Something went wrong";
 
   return (
     <div className={styles.container}>
       <div className={styles.image}>
-        <img src="/error-illustration.png" />
+        <img src="/error-illustration.png" alt="Error illustration" />
       </div>
-      <div className={styles.errorMsg}>{errorMsg}</div>
+      <div className={styles.errorMsg} data-testid="Error display">
+        {errorMsg}
+      </div>
       <div className={styles.additionalText}>
         Click the button below to refresh.
       </div>
@@ -27,6 +31,8 @@ export const StepErrorBoundaryComponent = ({ error }: FallbackProps) => {
 };
 
 export const AppErrorBoundaryComponent = ({ error }: FallbackProps) => {
+  console.error("App error: ", error);
+
   const errorMsg =
     error instanceof AppError ? error.message : "Something went wrong";
 
@@ -42,9 +48,11 @@ export const AppErrorBoundaryComponent = ({ error }: FallbackProps) => {
       <div className="modal-box bg-white rounded-2xl items-center justify-center">
         <div className={styles.errorScreen}>
           <div className={styles.image}>
-            <img src="../../../error-illustration.png" />
+            <img src="/error-illustration.png" alt="Error illustration" />
           </div>
-          <div className={styles.errorMsg}>{errorMsg}</div>
+          <div className={styles.errorMsg} data-testid="Error display">
+            {errorMsg}
+          </div>
           <div className={styles.additionalText}>
             Click the button below or try again later.
           </div>
