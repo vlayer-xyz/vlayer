@@ -129,12 +129,10 @@ where
         if let Some(precompile) =
             precompile_by_address(&inputs.bytecode_address, self.is_vlayer_test)
         {
-            if self.is_on_historic_block {
-                let tag = precompile.tag();
-                if is_time_dependent(&precompile) {
-                    panic!("Precompile `{tag:?}` is not allowed for travel calls");
-                }
+            if self.is_on_historic_block && is_time_dependent(&precompile) {
+                panic!("Precompile `{:?}` is not allowed for travel calls", precompile.tag());
             }
+
             debug!("Calling PRECOMPILE {:?}", precompile.tag());
             self.metadata
                 .push(Metadata::precompile(precompile.tag(), inputs.input.len()));
