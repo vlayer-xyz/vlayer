@@ -1,5 +1,6 @@
 use alloy_primitives::{Address, address};
 use alloy_sol_types::sol;
+use lazy_static::lazy_static;
 
 pub mod usdt {
     use super::*;
@@ -123,7 +124,6 @@ pub mod simple {
 
 pub mod teleport {
     use alloy_primitives::{B256, Uint, hex, uint};
-    use lazy_static::lazy_static;
     use optimism::{NumHash, types::SequencerOutput};
 
     use super::*;
@@ -202,4 +202,39 @@ pub mod time_travel {
         AverageBalance::averageBalanceOfCall {
             _owner: TOKEN_OWNER,
         };
+}
+
+pub mod web_proof {
+    use alloy_primitives::address;
+
+    use super::*;
+
+    // Address of the deployed contract
+    pub const WEB_PROOF_PROVER: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
+    lazy_static! {
+        pub static ref WEB_PROOF: String = "web_proof".to_string();
+    }
+
+    sol!(
+        #[derive(Debug)]
+        struct Proof {
+            Seal seal;
+            bytes32 callGuestId;
+            uint256 length;
+            CallAssumptions callAssumptions;
+        }
+
+        #[derive(Debug)]
+        struct WebProof {
+            string webProofJson;
+        }
+
+        #[sol(all_derives = true)]
+        contract WebProofProver {
+            #[sol(all_derives = true)]
+            function main(WebProof webProof, address account)
+                public
+                returns (Proof memory, string memory, address);
+        }
+    );
 }

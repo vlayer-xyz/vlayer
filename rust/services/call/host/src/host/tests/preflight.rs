@@ -291,3 +291,28 @@ mod simple {
         Ok(())
     }
 }
+
+mod travel_call_with_time_dep_precompile {
+    use super::*;
+    use crate::test_harness::contracts::web_proof::{
+        WEB_PROOF, WEB_PROOF_PROVER, WebProof, WebProofProver::mainCall,
+    };
+
+    #[tokio::test(flavor = "multi_thread")]
+    #[should_panic(expected = "Precompile `WebProof` is not allowed for travel calls")]
+    async fn fails_after_travel_call() {
+        let location: ExecutionLocation = (AnvilHardhat, BlockTag::Latest).into();
+
+        let call_data = mainCall {
+            webProof: WebProof {
+                webProofJson: WEB_PROOF.clone(),
+            },
+            account: address!("5FbDB2315678afecb367f032d93F642f64180aa3"),
+        };
+        let call = call(WEB_PROOF_PROVER, &call_data);
+
+        let _ = preflight::<mainCall>("travel_call_with_time_dep_precompile", call, &location)
+            .await
+            .unwrap();
+    }
+}
