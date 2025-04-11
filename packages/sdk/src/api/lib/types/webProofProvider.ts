@@ -51,5 +51,5 @@ export type WebProofProvider = {
 export type WebProofProviderSetup = {
   notaryUrl?: string;
   wsProxyUrl?: string;
-  token?: string | null;
+  token?: string;
 };

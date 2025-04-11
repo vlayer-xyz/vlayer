@@ -64,9 +64,9 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     const getWsProxyUrl = (
       baseUrl: string,
       hostname: string,
-      token: string | null,
+      token?: string,
     ): string => {
-      if (token === null) {
+      if (token === undefined) {
         // If no token is specified, we hope for the best, and pass the hostname as token.
         return baseUrl + `?token=${hostname}`;
       }

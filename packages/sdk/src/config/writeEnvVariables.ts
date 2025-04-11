@@ -4,9 +4,23 @@ import debug from "debug";
 
 const log = debug("vlayer:config");
 
+type Overrides = { [key: string]: string | undefined };
+type DefinedOverrides = { [key: string]: string };
+
+export function filterOverrides(overrides: Overrides): DefinedOverrides {
+  const defined: DefinedOverrides = {};
+  for (const key in overrides) {
+    const value = overrides[key as keyof Overrides];
+    if (value !== undefined) {
+      defined[key] = value;
+    }
+  }
+  return defined;
+}
+
 export const writeEnvVariables = async (
   envPath: string,
-  overrides: { [key: string]: string | undefined },
+  overrides: Overrides,
 ) => {
   fs.appendFileSync(envPath, "");
   const envFile = Bun.file(envPath);
@@ -16,7 +30,10 @@ export const writeEnvVariables = async (
     envContent = "";
   }
 
-  const newEnvs = Object.assign(dotenv.parse(envContent), overrides);
+  const newEnvs = Object.assign(
+    dotenv.parse(envContent),
+    filterOverrides(overrides),
+  );
 
   const envLines = Object.entries(newEnvs)
     .map(([key, value]) => `${key}=${value}`)

@@ -87,7 +87,7 @@ export type EmptyWebProverSessionConfig = {
   notaryUrl: null;
   wsProxyUrl: null;
   logoUrl: null;
-  token: null;
+  token: undefined;
   steps: never[];
 };
 
@@ -96,7 +96,7 @@ export type WebProverSessionConfig =
       notaryUrl: string;
       wsProxyUrl: string;
       logoUrl: string;
-      token: string | null;
+      token: string | undefined;
       steps: WebProofStep[];
     }
   | EmptyWebProverSessionConfig;
