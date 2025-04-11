@@ -1,6 +1,7 @@
 import { describe, test, vi, expect, afterEach } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { ErrorBoundary } from "react-error-boundary";
+import "@testing-library/jest-dom/vitest";
 import { ErrorBoundaryComponent } from "../src/components/layout/ErrorBoundary";
 import { AlreadyMintedError } from "../src/errors";
 
