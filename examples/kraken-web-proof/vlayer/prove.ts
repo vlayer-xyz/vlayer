@@ -1,3 +1,5 @@
+/// <reference types="bun" />
+
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/KrakenProver.sol/KrakenProver";
 import verifierSpec from "../out/KrakenVerifier.sol/KrakenVerifier";

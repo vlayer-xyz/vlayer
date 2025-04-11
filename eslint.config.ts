@@ -17,6 +17,7 @@ export default tseslint.config(
       "docker/**/*",
       "**/out/**/*",
       '**/playwright-report/**/*',
+      "eslint.config.ts",
     ],
   },
   eslint.configs.recommended,
@@ -36,7 +37,6 @@ export default tseslint.config(
   {
     ignores: [
       '**/web-proof-commons/**/*',
-      '**/examples/**/*',
     ],
     plugins: {
       import: importPlugin,

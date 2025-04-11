@@ -1,3 +1,5 @@
+/// <reference types="@testing-library/jest-dom" />
+
 import { describe, test, vi, expect, afterEach } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { ErrorBoundary } from "react-error-boundary";
