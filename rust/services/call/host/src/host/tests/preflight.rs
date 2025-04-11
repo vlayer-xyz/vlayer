@@ -295,7 +295,7 @@ mod simple {
 mod travel_call_with_time_dep_precompile {
     use super::*;
     use crate::test_harness::contracts::web_proof::{
-        WEB_PROOF, WEB_PROOF_PROVER, WebProof, WebProofProver::mainCall,
+        ACCOUNT_ADDRESS, WEB_PROOF, WEB_PROOF_PROVER, WebProof, WebProofProver::mainCall,
     };
 
     #[tokio::test(flavor = "multi_thread")]
@@ -307,7 +307,7 @@ mod travel_call_with_time_dep_precompile {
             webProof: WebProof {
                 webProofJson: WEB_PROOF.clone(),
             },
-            account: address!("5FbDB2315678afecb367f032d93F642f64180aa3"),
+            account: ACCOUNT_ADDRESS,
         };
         let call = call(WEB_PROOF_PROVER, &call_data);
 
