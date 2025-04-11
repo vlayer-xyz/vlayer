@@ -142,6 +142,7 @@ export const versionsSchema = z.object({
   call_guest_id: z.string(),
   chain_guest_id: z.string(),
   api_version: z.string(),
+  risc0_version: z.string(),
 });
 
 export type Versions = z.infer<typeof versionsSchema>;

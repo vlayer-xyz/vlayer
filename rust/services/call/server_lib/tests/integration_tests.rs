@@ -45,6 +45,7 @@ mod server_tests {
 
     mod v_versions {
         use common::GuestElf;
+        use risc0_zkvm::get_version;
 
         use super::*;
 
@@ -64,7 +65,8 @@ mod server_tests {
                 json!({
                     "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
                     "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                    "api_version": API_VERSION
+                    "api_version": API_VERSION,
+                    "risc0_version": get_version().unwrap().to_string(),
                 }),
             ).await;
         }
