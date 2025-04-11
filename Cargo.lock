@@ -6312,11 +6312,12 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "hex",
+ "rangeset",
  "reqwest 0.12.12",
  "serde",
  "serde_json",
- "tlsn-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
- "tlsn-utils",
+ "tlsn-core",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95)",
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.19",
@@ -8766,7 +8767,7 @@ dependencies = [
  "serde",
  "serio",
  "thiserror 1.0.69",
- "tlsn-utils",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
  "tokio",
  "tracing",
 ]
@@ -8798,7 +8799,7 @@ dependencies = [
  "serde",
  "serde_arrays",
  "thiserror 1.0.69",
- "tlsn-utils",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
  "tokio",
 ]
 
@@ -8814,7 +8815,7 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "thiserror 1.0.69",
- "tlsn-utils",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
 ]
 
 [[package]]
@@ -8902,7 +8903,7 @@ dependencies = [
  "rayon",
  "serde",
  "thiserror 1.0.69",
- "tlsn-utils",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
  "tokio",
  "zerocopy 0.8.23",
 ]
@@ -8948,7 +8949,7 @@ dependencies = [
  "mpz-common",
  "mpz-memory-core",
  "thiserror 1.0.69",
- "tlsn-utils",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
 ]
 
 [[package]]
@@ -8966,7 +8967,7 @@ dependencies = [
  "mpz-zk-core",
  "serio",
  "thiserror 1.0.69",
- "tlsn-utils",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
 ]
 
 [[package]]
@@ -8984,7 +8985,7 @@ dependencies = [
  "rayon",
  "serde",
  "thiserror 1.0.69",
- "tlsn-utils",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=425614e)",
  "zerocopy 0.8.23",
 ]
 
@@ -9111,8 +9112,8 @@ dependencies = [
 
 [[package]]
 name = "notary-client"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -9130,8 +9131,8 @@ dependencies = [
 
 [[package]]
 name = "notary-server"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "async-tungstenite 0.28.2",
  "axum 0.8.1",
@@ -9160,7 +9161,7 @@ dependencies = [
  "structopt",
  "thiserror 1.0.69",
  "tlsn-common",
- "tlsn-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-core",
  "tlsn-verifier",
  "tokio",
  "tokio-rustls 0.24.1",
@@ -10589,6 +10590,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rand06-compat"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0372da64e922a0b6979b115eb60d3c4ca7b2ef2b7565f039e3c6ee13bf6d5d38"
+dependencies = [
+ "rand_core 0.6.4",
+ "rand_core 0.9.3",
+]
+
+[[package]]
 name = "rand_chacha"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10633,6 +10644,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d25bf25ec5ae4a3f1b92f929810509a2f53d7dca2f50b794ff57e3face536c8f"
 dependencies = [
  "rand_core 0.6.4",
+]
+
+[[package]]
+name = "rangeset"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45cdc7f1ad5ef57b2fbb140c170c9d32ed93ea7a9a1e3d0cf67a248912aeaf12"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -13216,8 +13236,8 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tlsn-cipher"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "aes 0.8.4",
  "async-trait",
@@ -13229,8 +13249,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-common"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "async-trait",
  "derive_builder 0.12.0",
@@ -13242,23 +13262,24 @@ dependencies = [
  "mpz-zk",
  "once_cell",
  "opaque-debug",
+ "rangeset",
  "semver 1.0.24",
  "serde",
  "serio",
  "thiserror 1.0.69",
  "tlsn-cipher",
- "tlsn-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
- "tlsn-tls-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
- "tlsn-utils",
+ "tlsn-core",
+ "tlsn-tls-core",
  "tracing",
  "uid-mux",
  "wasm-bindgen",
+ "web-spawn",
 ]
 
 [[package]]
 name = "tlsn-core"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.8#d8747d49e304fa7a39a682c4a78745fb325efd6c"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "bcs",
  "bimap",
@@ -13267,67 +13288,42 @@ dependencies = [
  "k256",
  "opaque-debug",
  "p256",
- "rand 0.8.5",
- "rand_chacha 0.3.1",
- "rand_core 0.6.4",
+ "rand 0.9.0",
+ "rand_chacha 0.9.0",
+ "rand_core 0.9.3",
+ "rangeset",
  "rs_merkle",
  "serde",
  "sha2",
  "thiserror 1.0.69",
  "tiny-keccak",
- "tlsn-tls-core 0.1.0-alpha.8 (git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.8)",
- "tlsn-utils",
- "web-time 0.2.4",
- "webpki-roots 0.26.7",
-]
-
-[[package]]
-name = "tlsn-core"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
-dependencies = [
- "bcs",
- "bimap",
- "blake3",
- "itybity",
- "k256",
- "opaque-debug",
- "p256",
- "rand 0.8.5",
- "rand_chacha 0.3.1",
- "rand_core 0.6.4",
- "rs_merkle",
- "serde",
- "sha2",
- "thiserror 1.0.69",
- "tiny-keccak",
- "tlsn-tls-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
- "tlsn-utils",
+ "tlsn-tls-core",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95)",
  "web-time 0.2.4",
  "webpki-roots 0.26.7",
 ]
 
 [[package]]
 name = "tlsn-deap"
-version = "0.1.0"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "async-trait",
  "futures",
  "mpz-common",
  "mpz-core",
  "mpz-vm-core",
+ "rangeset",
  "serde",
  "serio",
  "thiserror 1.0.69",
- "tlsn-utils",
  "tokio",
 ]
 
 [[package]]
 name = "tlsn-hmac-sha256"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -13341,8 +13337,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-hmac-sha256-circuits"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "mpz-circuits",
  "tracing",
@@ -13350,8 +13346,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-key-exchange"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "async-trait",
  "derive_builder 0.12.0",
@@ -13363,7 +13359,8 @@ dependencies = [
  "mpz-share-conversion",
  "mpz-vm-core",
  "p256",
- "rand 0.8.5",
+ "rand 0.9.0",
+ "rand06-compat",
  "serio",
  "thiserror 1.0.69",
  "tokio",
@@ -13372,8 +13369,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-mpc-tls"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "aes 0.8.4",
  "aes-gcm",
@@ -13397,7 +13394,8 @@ dependencies = [
  "opaque-debug",
  "p256",
  "pin-project-lite",
- "rand 0.8.5",
+ "rand 0.9.0",
+ "rand06-compat",
  "serde",
  "serio",
  "thiserror 1.0.69",
@@ -13406,7 +13404,7 @@ dependencies = [
  "tlsn-hmac-sha256",
  "tlsn-key-exchange",
  "tlsn-tls-backend",
- "tlsn-tls-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-tls-core",
  "tlsn-utils-aio",
  "tokio",
  "tracing",
@@ -13414,8 +13412,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-prover"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -13429,16 +13427,17 @@ dependencies = [
  "mpz-vm-core",
  "mpz-zk",
  "opaque-debug",
- "rand 0.8.5",
+ "rand 0.9.0",
+ "rand06-compat",
  "serio",
  "thiserror 1.0.69",
  "tlsn-common",
- "tlsn-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-core",
  "tlsn-deap",
  "tlsn-mpc-tls",
  "tlsn-tls-client",
  "tlsn-tls-client-async",
- "tlsn-tls-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-tls-core",
  "tokio",
  "tracing",
  "uid-mux",
@@ -13447,19 +13446,19 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-backend"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "async-trait",
  "futures",
  "thiserror 1.0.69",
- "tlsn-tls-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-tls-core",
 ]
 
 [[package]]
 name = "tlsn-tls-client"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "aes-gcm",
  "async-trait",
@@ -13468,20 +13467,21 @@ dependencies = [
  "hmac",
  "log",
  "p256",
- "rand 0.8.5",
+ "rand 0.9.0",
+ "rand06-compat",
  "ring 0.17.8",
  "sct",
  "sha2",
  "tlsn-tls-backend",
- "tlsn-tls-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-tls-core",
  "web-time 0.2.4",
  "webpki",
 ]
 
 [[package]]
 name = "tlsn-tls-client-async"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "bytes",
  "futures",
@@ -13493,31 +13493,12 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-core"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.8#d8747d49e304fa7a39a682c4a78745fb325efd6c"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "futures",
  "hmac",
- "rand 0.8.5",
- "ring 0.17.8",
- "rustls-pemfile 1.0.4",
- "sct",
- "serde",
- "sha2",
- "thiserror 1.0.69",
- "tracing",
- "web-time 0.2.4",
- "webpki",
-]
-
-[[package]]
-name = "tlsn-tls-core"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
-dependencies = [
- "futures",
- "hmac",
- "rand 0.8.5",
+ "rand 0.9.0",
  "ring 0.17.8",
  "rustls-pemfile 1.0.4",
  "sct",
@@ -13538,9 +13519,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tlsn-utils"
+version = "0.1.0"
+source = "git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95#6650a956d3597d3a662fd9c15a64a1651afac399"
+
+[[package]]
 name = "tlsn-utils-aio"
 version = "0.1.0"
-source = "git+https://github.com/tlsnotary/tlsn-utils?rev=425614e#425614e45783946d1636ff629ffade549e4e1426"
+source = "git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95#6650a956d3597d3a662fd9c15a64a1651afac399"
 dependencies = [
  "async-std",
  "async-trait",
@@ -13559,8 +13545,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-verifier"
-version = "0.1.0-alpha.8"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6#febf4d080469892cebde57bd3b98ae269d44abe6"
+version = "0.1.0-alpha.9"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -13574,14 +13560,15 @@ dependencies = [
  "mpz-vm-core",
  "mpz-zk",
  "opaque-debug",
- "rand 0.8.5",
+ "rand 0.9.0",
+ "rand06-compat",
  "serio",
  "thiserror 1.0.69",
  "tlsn-common",
- "tlsn-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-core",
  "tlsn-deap",
  "tlsn-mpc-tls",
- "tlsn-tls-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-tls-core",
  "tokio",
  "tracing",
  "uid-mux",
@@ -14763,6 +14750,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "web-spawn"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "976783d79ca4a9e2e42567652fb4771b912d02534488acb3175a673c01d0687d"
+dependencies = [
+ "crossbeam-channel",
+ "futures",
+ "js-sys",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "web-sys"
 version = "0.3.76"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -14811,7 +14812,7 @@ dependencies = [
  "serde_json",
  "strum",
  "thiserror 2.0.11",
- "tlsn-core 0.1.0-alpha.8 (git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.8)",
+ "tlsn-core",
  "url",
 ]
 
@@ -14830,12 +14831,13 @@ dependencies = [
  "hyper 1.5.2",
  "hyper-util",
  "notary-client",
+ "rangeset",
  "regex",
  "serde_json",
  "tlsn-common",
- "tlsn-core 0.1.0-alpha.8 (git+https://github.com/vlayer-xyz/tlsn.git?rev=febf4d080469892cebde57bd3b98ae269d44abe6)",
+ "tlsn-core",
  "tlsn-prover",
- "tlsn-utils",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95)",
  "tokio",
  "tokio-util",
  "tracing",

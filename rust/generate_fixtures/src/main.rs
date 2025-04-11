@@ -2,13 +2,13 @@
 
 use std::{collections::HashMap, path::Path};
 
+use rangeset::RangeSet;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use tlsn_core::{presentation::Presentation, transcript::Transcript};
 use tokio::fs::{create_dir_all, write};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
-use utils::range::RangeSet;
 use web_proof::web_proof::{PresentationJSON, WebProof};
 use web_prover::{
     NotarizeParamsBuilder, NotaryConfig, RedactionConfig, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,

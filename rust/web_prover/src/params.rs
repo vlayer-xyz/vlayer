@@ -3,8 +3,8 @@ use std::{collections::HashMap, str, sync::Arc};
 use derive_builder::Builder;
 use derive_more::derive::Debug;
 use derive_new::new;
+use rangeset::RangeSet;
 use tlsn_core::transcript::Transcript;
-use utils::range::RangeSet;
 
 use crate::RedactionConfig;
 
