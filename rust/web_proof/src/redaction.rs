@@ -6,11 +6,11 @@ use crate::{errors::ParsingError, utils::bytes::all_match};
 
 pub(crate) const REDACTED_BYTE_CODE: u8 = 0;
 
-// Both '*' and '+' are valid header characters. Replacing redacted '\0' bytes with
+// Both '*' and 'X' are valid header characters. Replacing redacted '\0' bytes with
 // two different characters ensures the request is parsable and allows analysis
 // of redacted content via diffs.
 pub(crate) const REDACTION_REPLACEMENT_CHAR_PRIMARY: char = '*';
-pub(crate) const REDACTION_REPLACEMENT_CHAR_SECONDARY: char = '+';
+pub(crate) const REDACTION_REPLACEMENT_CHAR_SECONDARY: char = 'X';
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct RedactedTranscriptNameValue {
