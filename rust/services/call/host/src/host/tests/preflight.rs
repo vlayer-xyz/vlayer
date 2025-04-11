@@ -292,7 +292,7 @@ mod simple {
     }
 }
 
-mod travel_call_with_time_dep_precompile {
+mod travel_call_with_time_dependent_precompile {
     use super::*;
     use crate::test_harness::contracts::web_proof::{
         ACCOUNT_ADDRESS, WEB_PROOF, WEB_PROOF_PROVER, WebProof, WebProofProver::mainCall,
