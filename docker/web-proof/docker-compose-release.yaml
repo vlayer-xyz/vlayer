@@ -1,7 +1,10 @@
-include:
-  - ../websockify/service.yaml
-
 services:
+  wsproxy:
+    image: jwnmulder/websockify
+    platform: linux/amd64
+    ports:
+      - "3003:80"
+    command: "80 lotr-api.online:3011"
   notary-server:
     image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.8
     ports:

@@ -5,8 +5,6 @@ import {
 
 import React, { useEffect } from "react";
 
-const TOKEN = import.meta.env.VITE_VLAYER_API_TOKEN;
-
 declare global {
   interface Window {
     _vlayer: {
@@ -20,12 +18,11 @@ declare global {
 
 const SdkPlayground = () => {
   useEffect(() => {
-    const provider = createExtensionWebProofProvider({ token: TOKEN });
+    const provider = createExtensionWebProofProvider();
     window._vlayer = {
       extensionWebProofProvider: provider,
       vlayerClient: createVlayerClient({
         webProofProvider: provider,
-        token: TOKEN,
       }),
     };
   }, []);

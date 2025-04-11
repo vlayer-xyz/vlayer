@@ -120,6 +120,7 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
   test-e2e-web-apps-opsepolia-simple-time-travel:
     name: E2E web apps test (simple-time-travel) with OP Sepolia
@@ -141,3 +142,4 @@ jobs:
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}

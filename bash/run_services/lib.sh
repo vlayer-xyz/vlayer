@@ -85,8 +85,12 @@ function startup_vlayer() {
         "--proof" "${proof_arg}"
         "--rpc-url" "31337:http://localhost:8545" # L1
         "--rpc-url" "31338:http://localhost:8546" # L2 OP
-        "--jwt-public-key" "docker/fixtures/jwt-authority.key.pub"    # JWT public key
     )
+
+    if [[ "${JWT_AUTH}" == "on" ]]; then
+        args+=("--jwt-public-key" "./docker/fixtures/jwt-authority.key.pub") # JWT public key
+    fi
+
     if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
         args+=("--chain-proof-url" "http://localhost:3001")
     fi

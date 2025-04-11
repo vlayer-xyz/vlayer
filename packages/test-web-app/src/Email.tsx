@@ -4,7 +4,7 @@ import React, { useCallback, ChangeEvent } from "react";
 import { foundry } from "viem/chains";
 
 const PROVER_ADDRESS = import.meta.env.VITE_EMAIL_PROVER_ADDRESS;
-const TOKEN = import.meta.env.VITE_VLAYER_API_TOKEN;
+
 const getStrFromFile = (file: File): Promise<string> => {
   const reader = new FileReader();
 
@@ -21,7 +21,7 @@ const useEmailFileUpload = () => {
     if (!file) {
       return;
     }
-    const vlayer = createVlayerClient({ token: TOKEN });
+    const vlayer = createVlayerClient();
     const str = await getStrFromFile(file);
     const unverifiedEmail = await preverifyEmail(
       str,
