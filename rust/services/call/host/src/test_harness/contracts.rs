@@ -213,7 +213,7 @@ pub mod web_proof {
     lazy_static! {
         pub static ref WEB_PROOF: String = "web_proof".to_string();
     }
-    // Required to be passed to the `main`` function, but not utilized within it, as the code panics beforehand
+    // Required to be passed to the `main` function, but not utilized within it, as the code panics beforehand
     pub const ACCOUNT_ADDRESS: Address = address!("0000000000000000000000000000000000000000");
 
     sol!(
