@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { z } from "zod";
 import { getConfig } from "@vlayer/sdk/config";
 

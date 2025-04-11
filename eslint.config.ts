@@ -17,6 +17,7 @@ export default tseslint.config(
       "docker/**/*",
       "**/out/**/*",
       '**/playwright-report/**/*',
+      "eslint.config.ts",
     ],
   },
   eslint.configs.recommended,
