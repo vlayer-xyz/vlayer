@@ -39,7 +39,7 @@ fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
         })?
         .write(&input)?
         // Workaround for r0vm bug reproed in: https://github.com/vlayer-xyz/risc0-r0vm-fake-repro
-        .segment_limit_po2(21)
+        .segment_limit_po2(22)
         .build()
 }
 

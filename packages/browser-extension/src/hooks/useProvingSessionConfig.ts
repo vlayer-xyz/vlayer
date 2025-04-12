@@ -7,7 +7,7 @@ export const useProvingSessionConfig = () => {
     notaryUrl: null,
     wsProxyUrl: null,
     logoUrl: null,
-    jwtToken: null,
+    token: null,
   };
   const [config] = useSessionStorage<WebProverSessionConfig>(
     "webProverSessionConfig",

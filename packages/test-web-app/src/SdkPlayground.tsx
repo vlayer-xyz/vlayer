@@ -20,7 +20,7 @@ declare global {
 
 const SdkPlayground = () => {
   useEffect(() => {
-    const provider = createExtensionWebProofProvider({ jwtToken: TOKEN });
+    const provider = createExtensionWebProofProvider({ token: TOKEN });
     window._vlayer = {
       extensionWebProofProvider: provider,
       vlayerClient: createVlayerClient({

@@ -8,10 +8,12 @@ alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
 derive_more = { workspace = true }
 email_proof = { workspace = true }
+lazy_static = { workspace = true }
 regex = { workspace = true }
 revm = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+thiserror = { workspace = true }
 url = { workspace = true }
 urlpattern = { workspace = true }
 web_proof = { workspace = true }
