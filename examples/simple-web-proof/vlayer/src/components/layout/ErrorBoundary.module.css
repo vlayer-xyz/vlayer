@@ -11,6 +11,11 @@
     font-style: normal;
     font-weight: var(--t-font-weight-bold, 700);
     line-height: var(--t-font-lineHeight-leading-9, 36px);
+    max-width: 400px;
+    max-height: 72px;
+    overflow: auto;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 .additionalText {
@@ -50,10 +55,12 @@
     align-items: center;
     gap: var(--Spacing-5, 24px);
 }
+
 .image {
     width: 282px;
     height: 156px;
 }
+
 .background {
     display: flex;
     width: 1413px;
