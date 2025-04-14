@@ -1,12 +1,12 @@
 use std::{collections::HashMap, fs, io};
 
 use risc0_build::{
-    embed_methods_with_options, DockerOptionsBuilder, GuestListEntry, GuestOptions,
-    GuestOptionsBuilder,
+    DockerOptionsBuilder, GuestListEntry, GuestOptions, GuestOptionsBuilder,
+    embed_methods_with_options,
 };
 
 use crate::{
-    chain_guest_id, data_layout, path_from_env, remove_file_if_exists, use_bool_var, PROJECT_ROOT,
+    PROJECT_ROOT, chain_guest_id, data_layout, path_from_env, remove_file_if_exists, use_bool_var,
 };
 
 data_layout!(DataLayout {

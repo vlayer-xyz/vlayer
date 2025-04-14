@@ -1,5 +1,6 @@
-use alloy_primitives::{address, Address};
+use alloy_primitives::{Address, address};
 use alloy_sol_types::sol;
+use lazy_static::lazy_static;
 
 pub mod usdt {
     use super::*;
@@ -122,9 +123,8 @@ pub mod simple {
 }
 
 pub mod teleport {
-    use alloy_primitives::{hex, uint, Uint, B256};
-    use lazy_static::lazy_static;
-    use optimism::{types::SequencerOutput, NumHash};
+    use alloy_primitives::{B256, Uint, hex, uint};
+    use optimism::{NumHash, types::SequencerOutput};
 
     use super::*;
 
@@ -202,4 +202,41 @@ pub mod time_travel {
         AverageBalance::averageBalanceOfCall {
             _owner: TOKEN_OWNER,
         };
+}
+
+pub mod web_proof {
+    use alloy_primitives::address;
+
+    use super::*;
+
+    pub const WEB_PROOF_PROVER: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
+    // Required to be passed to the `main` function, but not utilized within it, as the code panics beforehand
+    pub const ACCOUNT_ADDRESS: Address = address!("0000000000000000000000000000000000000000");
+
+    lazy_static! {
+        pub static ref WEB_PROOF: String = "web_proof".to_string();
+    }
+
+    sol!(
+        #[derive(Debug)]
+        struct Proof {
+            Seal seal;
+            bytes32 callGuestId;
+            uint256 length;
+            CallAssumptions callAssumptions;
+        }
+
+        #[derive(Debug)]
+        struct WebProof {
+            string webProofJson;
+        }
+
+        #[sol(all_derives = true)]
+        contract WebProofProver {
+            #[sol(all_derives = true)]
+            function main(WebProof webProof, address account)
+                public
+                returns (Proof memory, string memory, address);
+        }
+    );
 }

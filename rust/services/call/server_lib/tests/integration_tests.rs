@@ -1,13 +1,13 @@
 use axum::http::StatusCode;
 use ethers::types::U256;
 use serde_json::json;
-use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
+use test_helpers::{API_VERSION, Context, call_guest_elf, chain_guest_elf, mock::GasMeterServer};
 
 mod test_helpers;
 
 use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string};
 use test_helpers::{
-    allocate_gas_body, rpc_body, v_call_body, ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL,
+    ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL, allocate_gas_body, rpc_body, v_call_body,
 };
 
 mod server_tests {
@@ -16,7 +16,9 @@ mod server_tests {
     #[cfg(test)]
     #[ctor::ctor]
     fn before_all() {
-        std::env::set_var("RISC0_DEV_MODE", "1");
+        unsafe {
+            std::env::set_var("RISC0_DEV_MODE", "1");
+        }
     }
 
     #[tokio::test]
@@ -43,6 +45,7 @@ mod server_tests {
 
     mod v_versions {
         use common::GuestElf;
+        use risc0_zkvm::get_version;
 
         use super::*;
 
@@ -62,7 +65,8 @@ mod server_tests {
                 json!({
                     "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
                     "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                    "api_version": API_VERSION
+                    "api_version": API_VERSION,
+                    "risc0_version": get_version().unwrap().to_string(),
                 }),
             ).await;
         }
@@ -160,7 +164,7 @@ mod server_tests {
         use call_server_lib::{v_call::CallHash, v_get_proof_receipt::State};
         use ethers::{
             abi::AbiEncode,
-            types::{Bytes, Uint8, H160},
+            types::{Bytes, H160, Uint8},
         };
         use serde_json::Value;
         use server_utils::function_selector;
@@ -454,27 +458,29 @@ mod server_tests {
 
     mod jwt {
         use assert_json_diff::assert_json_eq;
-        use call_server_lib::jwt::Config as JwtConfig;
-        use jsonwebtoken::{encode, get_current_timestamp, DecodingKey, EncodingKey, Header};
-        use server_utils::jwt::Claims;
-        use test_helpers::{mock::Server, JWT_SECRET};
+        use server_utils::jwt::{
+            Claims, EncodingKey, Header, encode, get_current_timestamp,
+            test_helpers::{
+                JWT_SECRET, TokenArgs, default_config as default_jwt_config, token as test_token,
+            },
+        };
+        use test_helpers::mock::Server;
 
         use super::*;
 
-        #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
-        fn token(expires_in: i64, subject: &str) -> String {
-            let key = EncodingKey::from_secret(JWT_SECRET);
-            let ts = get_current_timestamp() as i64 + expires_in;
-            let claims =
-                Claims::new("api.vlayer.xyz".to_string(), 443, ts as u64, subject.to_string());
-            encode(&Header::default(), &claims, &key).unwrap()
+        fn token(invalid_after: i64, subject: &str) -> String {
+            test_token(&TokenArgs {
+                secret: JWT_SECRET,
+                host: "api.vlayer.xyz",
+                port: 443,
+                invalid_after,
+                subject,
+            })
         }
 
         fn default_app() -> Server {
-            let jwt_config =
-                JwtConfig::new(DecodingKey::from_secret(JWT_SECRET), Default::default());
             Context::default()
-                .with_jwt_auth(jwt_config)
+                .with_jwt_auth(default_jwt_config())
                 .server(call_guest_elf(), chain_guest_elf())
         }
 
@@ -570,8 +576,7 @@ mod server_tests {
                 .add()
                 .await;
 
-            let jwt_config =
-                JwtConfig::new(DecodingKey::from_secret(JWT_SECRET), Default::default());
+            let jwt_config = default_jwt_config();
             let ctx = Context::default()
                 .with_jwt_auth(jwt_config)
                 .with_gas_meter_server(gas_meter_server);

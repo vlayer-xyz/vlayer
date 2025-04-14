@@ -5,8 +5,9 @@ use std::{
 };
 
 use soldeer_commands::{
-    commands::{install::Install, Command},
-    run as run_cmd, ConfigLocation,
+    ConfigLocation,
+    commands::{Command, install::Install},
+    run as run_cmd,
 };
 
 use crate::{

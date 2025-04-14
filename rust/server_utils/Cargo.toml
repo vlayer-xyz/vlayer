@@ -1,7 +1,7 @@
 [package]
 name = "server_utils"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 alloy-primitives = { workspace = true }
@@ -10,6 +10,7 @@ assert-json-diff = { workspace = true }
 axum = { workspace = true }
 axum-extra = { workspace = true, features = ["typed-header"] }
 axum-jrpc = { workspace = true }
+clap = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }

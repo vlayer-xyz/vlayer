@@ -1,13 +1,13 @@
 use std::{collections::HashMap, str};
 
 use http_body_util::Full;
-use hyper::{body::Bytes, Request, StatusCode};
+use hyper::{Request, StatusCode, body::Bytes};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
 use tlsn_common::config::ProtocolConfig;
 use tlsn_core::{
-    attestation::Attestation, request::RequestConfig, transcript::TranscriptCommitConfig,
-    CryptoProvider, Secrets,
+    CryptoProvider, Secrets, attestation::Attestation, request::RequestConfig,
+    transcript::TranscriptCommitConfig,
 };
 use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};

@@ -3,7 +3,7 @@ mod ensure_latest_teleport_location_is_confirmed {
     use alloy_primitives::B256;
     use anyhow::Result;
 
-    use crate::verifier::teleport::{ensure_latest_teleport_location_is_confirmed, Error};
+    use crate::verifier::teleport::{Error, ensure_latest_teleport_location_is_confirmed};
 
     #[test]
     fn success() -> Result<()> {
@@ -29,7 +29,7 @@ mod ensure_latest_teleport_location_is_confirmed {
 mod get_destinations {
     use std::collections::HashMap;
 
-    use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
+    use alloy_primitives::{B256, BlockHash, BlockNumber, ChainId};
 
     use crate::{evm::env::BlocksByChain, verifier::teleport::get_destinations};
 

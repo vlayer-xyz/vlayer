@@ -18,15 +18,10 @@ import { useTrackHistory } from "hooks/useTrackHistory";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { LOADING } from "@vlayer/extension-hooks";
 import { tlsnProve } from "./tlsnProve/tlsnProve";
-import { z } from "zod";
-
-const claimsSchema = z.object({
-  host: z.string(),
-  port: z.number(),
-  sub: z.string(),
-});
-
-type Claims = z.infer<typeof claimsSchema>;
+import { type Claims } from "lib/types/jwt";
+import { validateJwtHostname } from "lib/validateJwtHostname";
+import { pipe } from "fp-ts/lib/function";
+import { decodeJwt } from "jose";
 
 const TlsnProofContext = createContext({
   prove: async () => {},
@@ -66,38 +61,21 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
     }, 1000);
 
-    const getJwtClaims = (token: string): Claims | null => {
-      const payload = token.split(".")[1] ?? "";
-      const rawClaims = Buffer.from(payload, "base64").toString("utf8");
-      try {
-        const parsed = claimsSchema.safeParse(JSON.parse(rawClaims));
-        if (parsed.success) {
-          return parsed.data;
-        }
-        return null;
-      } catch {
-        return null;
-      }
-    };
-
     const getWsProxyUrl = (
       baseUrl: string,
       hostname: string,
-      jwtToken: string | null,
+      token?: string,
     ): string => {
-      if (jwtToken === null) {
-        return baseUrl + `?token=${hostname}`;
+      if (token === undefined) {
+        // If no token is specified, we hope for the best, and pass the hostname as token.
+        return `${baseUrl}?token=${hostname}`;
       }
-      const claims = getJwtClaims(jwtToken);
-      if (claims === null) {
-        return baseUrl + `?token=${hostname}`;
-      }
-      if (claims.host === hostname) {
-        return baseUrl + `?token=${jwtToken}`;
-      }
-      throw Error(
-        `Invalid JWT token: token valid for hostname ${claims.host}, but needs ${hostname}`,
+
+      pipe(token, decodeJwt<Claims>, (claims) =>
+        validateJwtHostname(claims, hostname),
       );
+
+      return `${baseUrl}?token=${token}`;
     };
 
     try {
@@ -113,7 +91,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
           ? getWsProxyUrl(
               provingSessionConfig.wsProxyUrl || "",
               hostname,
-              provingSessionConfig.jwtToken,
+              provingSessionConfig.token,
             )
           : "";
 

@@ -1,4 +1,4 @@
-use alloy_primitives::{hex::ToHexExt, U256};
+use alloy_primitives::{U256, hex::ToHexExt};
 use alloy_sol_types::SolValue;
 use call_engine::{CallGuestId, HostOutput, Proof, Seal};
 use call_host::{Host, Prover, ProvingError, ProvingInput};

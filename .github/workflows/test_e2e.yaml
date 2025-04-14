@@ -157,3 +157,16 @@ jobs:
         uses: ./.github/actions/test-e2e
         with:
           example: "simple-time-travel"
+
+  test-e2e-kraken-web-proof:
+    name: E2E test (kraken-web-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "kraken-web-proof"

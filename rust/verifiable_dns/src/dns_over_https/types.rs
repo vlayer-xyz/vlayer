@@ -1,7 +1,7 @@
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_repr::Serialize_repr;
 
-use crate::{verifier::verify_signature, RecordVerifierError, VerificationData};
+use crate::{RecordVerifierError, VerificationData, verifier::verify_signature};
 
 #[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]
 pub struct Query {

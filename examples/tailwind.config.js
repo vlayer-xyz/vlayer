@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import daisyui from "daisyui";
 
 /** @type {import('tailwindcss').Config} */

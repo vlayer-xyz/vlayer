@@ -12,7 +12,9 @@ pub struct SuccessfulExecutionResult {
 
 #[derive(Debug, Error, PartialEq)]
 pub enum TransactError {
-    #[error("contract execution stopped ({0:?}): No data was returned. Please check that your prover contract address is correct and the prover contract method is returning data")]
+    #[error(
+        "contract execution stopped ({0:?}): No data was returned. Please check that your prover contract address is correct and the prover contract method is returning data"
+    )]
     Stop(SuccessReason),
     #[error("{0}")]
     Revert(Bytes),

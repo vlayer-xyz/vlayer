@@ -3,10 +3,10 @@ use std::convert::TryFrom;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tlsn_core::{
+    CryptoProvider,
     connection::ServerName,
     presentation::{Presentation, PresentationError, PresentationOutput},
     signing::VerifyingKey,
-    CryptoProvider,
 };
 
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
@@ -108,7 +108,7 @@ mod tests {
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+    use crate::fixtures::{NOTARY_PUB_KEY_PEM_EXAMPLE, load_web_proof_fixture};
 
     const WEB_PROOF_BAD_SIGNATURE: &str =
         include_str!(".././testdata/0.1.0-alpha.8/web_proof_bad_signature.json");

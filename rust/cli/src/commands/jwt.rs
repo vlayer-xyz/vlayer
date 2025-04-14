@@ -3,8 +3,8 @@ use std::{fs, path::PathBuf};
 use anyhow::Context;
 use clap::{Args as ClapArgs, Parser, Subcommand};
 use jsonwebtoken::{
-    decode, decode_header, encode, errors::Error as JwtError, get_current_timestamp, Algorithm,
-    DecodingKey, EncodingKey, Header, TokenData, Validation,
+    Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation, decode, decode_header,
+    encode, errors::Error as JwtError, get_current_timestamp,
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

@@ -3,9 +3,9 @@ use anyhow::Result;
 use block_trie::BlockTrie;
 use common::GuestElf;
 use key_value::InMemoryDatabase;
-use mpt::{keccak256, Sha2Node as Node, Sha2Trie as MerkleTrie};
-use rand::{rngs::StdRng, RngCore, SeedableRng};
-use risc0_zkvm::{sha::Digest, FakeReceipt, InnerReceipt, MaybePruned, Receipt};
+use mpt::{Sha2Node as Node, Sha2Trie as MerkleTrie, keccak256};
+use rand::{RngCore, SeedableRng, rngs::StdRng};
+use risc0_zkvm::{FakeReceipt, InnerReceipt, MaybePruned, Receipt, sha::Digest};
 
 use super::*;
 

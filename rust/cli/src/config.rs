@@ -170,6 +170,7 @@ pub enum Template {
     SimpleTeleport,
     SimpleTimeTravel,
     SimpleWebProof,
+    KrakenWebProof,
 }
 
 impl fmt::Display for Template {
@@ -360,12 +361,14 @@ vlayer = { path='../vlayer', remappings = [['abc/', 'dependencies/abc/']] }
         let dep = config.sol_dependencies.get("vlayer").unwrap();
         assert!(dep.path().unwrap().contains(vlayer.to_str().unwrap()));
 
-        assert!(config
-            .js_dependencies
-            .get("@vlayer/sdk")
-            .unwrap()
-            .path()
-            .unwrap()
-            .contains(vlayer.to_str().unwrap()));
+        assert!(
+            config
+                .js_dependencies
+                .get("@vlayer/sdk")
+                .unwrap()
+                .path()
+                .unwrap()
+                .contains(vlayer.to_str().unwrap())
+        );
     }
 }

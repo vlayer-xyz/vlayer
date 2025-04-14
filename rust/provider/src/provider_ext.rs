@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use async_trait::async_trait;
 use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
-use futures::{stream::FuturesOrdered, TryStreamExt};
+use futures::{TryStreamExt, stream::FuturesOrdered};
 
 use crate::BlockingProvider;
 

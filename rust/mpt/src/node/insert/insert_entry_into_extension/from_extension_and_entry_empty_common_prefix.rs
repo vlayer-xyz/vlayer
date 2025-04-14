@@ -1,4 +1,4 @@
-use crate::node::{insert::entry::Entry, Node, NodeError};
+use crate::node::{Node, NodeError, insert::entry::Entry};
 
 #[allow(unused)]
 pub(crate) fn from_extension_and_entry_empty_common_prefix<D>(

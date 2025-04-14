@@ -1,7 +1,7 @@
 use super::{entry::Entry, utils::extract_common_prefix};
 use crate::node::{
-    insert::insert_entry_into_extension::from_extension_and_entry_empty_common_prefix::from_extension_and_entry_empty_common_prefix,
     Node, NodeError,
+    insert::insert_entry_into_extension::from_extension_and_entry_empty_common_prefix::from_extension_and_entry_empty_common_prefix,
 };
 
 mod from_extension_and_entry_empty_common_prefix;

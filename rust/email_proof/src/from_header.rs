@@ -1,6 +1,6 @@
 use mailparse::{MailHeaderMap, ParsedMail};
 
-use crate::{email::extract_address_from_header, Error};
+use crate::{Error, email::extract_address_from_header};
 
 pub fn extract_from_domain(p0: &ParsedMail) -> Result<String, Error> {
     let from_header = p0

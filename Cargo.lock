@@ -2645,10 +2645,12 @@ dependencies = [
  "alloy-sol-types",
  "derive_more 1.0.0",
  "email_proof",
+ "lazy_static",
  "regex",
  "revm",
  "serde",
  "serde_json",
+ "thiserror 2.0.11",
  "url",
  "urlpattern",
  "web_proof",
@@ -2700,12 +2702,12 @@ dependencies = [
  "guest_wrapper",
  "hex",
  "jsonrpsee",
- "jsonwebtoken 9.3.1",
  "lazy_static",
  "mime",
  "provider",
  "reqwest 0.12.12",
  "risc0-zkp",
+ "risc0-zkvm",
  "seal",
  "serde",
  "serde_json",
@@ -11079,9 +11081,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.0.1"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8f4a3e21f17465e618cd3ed755b121627f2c188d1416be1cec2757cffe1adf8"
+checksum = "eb85162c19a2ba2151c02f1f157804cd89e163ca694afda399fc3f415c03a3de"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.19.1",
@@ -12116,6 +12118,7 @@ dependencies = [
  "axum 0.8.1",
  "axum-extra",
  "axum-jrpc",
+ "clap 4.5.26",
  "common",
  "derive-new",
  "derive_more 1.0.0",

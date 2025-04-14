@@ -1,17 +1,18 @@
 use axum::{
-    extract::{FromRef, FromRequestParts},
-    http::{request::Parts, StatusCode},
-    response::{IntoResponse, Response},
     Json, RequestPartsExt,
+    extract::{FromRef, FromRequestParts},
+    http::{StatusCode, request::Parts},
+    response::{IntoResponse, Response},
 };
 use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
     TypedHeader,
+    headers::{Authorization, authorization::Bearer},
 };
 use derive_more::Deref;
 use derive_new::new;
-use jsonwebtoken::{decode, decode_header, errors::Error as JwtError, Validation};
-pub use jsonwebtoken::{Algorithm, DecodingKey};
+use jsonwebtoken::{
+    Algorithm, DecodingKey, Validation, decode, decode_header, errors::Error as JwtError,
+};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;

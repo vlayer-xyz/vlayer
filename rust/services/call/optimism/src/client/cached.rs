@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use derive_new::new;
 use thiserror::Error;
 
-use crate::{types::SequencerOutput, ClientError, IClient};
+use crate::{ClientError, IClient, types::SequencerOutput};
 
 #[derive(Debug, Error, PartialEq, Eq)]
 #[non_exhaustive]

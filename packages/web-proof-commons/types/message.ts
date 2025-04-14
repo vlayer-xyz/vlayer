@@ -83,35 +83,13 @@ export type ExtensionMessage =
   | { type: ExtensionMessageType.SidePanelClosed }
   | { type: ExtensionMessageType.CloseSidePanel };
 
-export type EmptyWebProverSessionConfig = {
-  notaryUrl: null;
-  wsProxyUrl: null;
-  logoUrl: null;
-  jwtToken: null;
-  steps: never[];
+export type WebProverSessionConfig = {
+  notaryUrl: string;
+  wsProxyUrl: string;
+  logoUrl: string;
+  token?: string;
+  steps: WebProofStep[];
 };
-
-export type WebProverSessionConfig =
-  | {
-      notaryUrl: string;
-      wsProxyUrl: string;
-      logoUrl: string;
-      jwtToken: string | null;
-      steps: WebProofStep[];
-    }
-  | EmptyWebProverSessionConfig;
-
-export function isEmptyWebProverSessionConfig(
-  config: WebProverSessionConfig,
-): config is EmptyWebProverSessionConfig {
-  return (
-    !config ||
-    (!config.notaryUrl &&
-      !config.wsProxyUrl &&
-      !config.logoUrl &&
-      config.steps.length === 0)
-  );
-}
 
 export type WebProofStep =
   | WebProofStepNotarize

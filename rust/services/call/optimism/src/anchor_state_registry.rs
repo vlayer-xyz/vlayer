@@ -1,4 +1,4 @@
-use alloy_primitives::{Address, BlockNumber, B256};
+use alloy_primitives::{Address, B256, BlockNumber};
 use anyhow::anyhow;
 use call_common::RevmDB;
 use derive_new::new;

@@ -10,8 +10,8 @@ use common::InteriorMutabilityCache;
 use itertools::Itertools;
 
 use super::{
-    factory::{Error, EvmEnvFactory, Result},
     BlocksByChain, EvmEnv,
+    factory::{Error, EvmEnvFactory, Result},
 };
 
 pub struct NullEvmEnvFactory;

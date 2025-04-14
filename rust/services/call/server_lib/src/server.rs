@@ -1,18 +1,17 @@
 use std::iter::once;
 
 use axum::{
+    Extension, Router,
     body::Bytes,
     extract::State as AxumState,
     http::header::AUTHORIZATION,
     response::IntoResponse,
     routing::{get, post},
-    Extension, Router,
 };
 use derive_new::new;
 use server_utils::{
-    cors, init_trace_layer,
-    jwt::{Claims, ClaimsExtractor},
-    RequestId, RequestIdLayer, Router as JrpcRouter,
+    RequestId, RequestIdLayer, Router as JrpcRouter, cors, init_trace_layer,
+    jwt::{Claims, axum::ClaimsExtractor},
 };
 use tokio::net::TcpListener;
 use tower_http::{

@@ -7,11 +7,11 @@ use responses_validation::{responses_match, validate_response};
 
 use super::{sign_record, signer::Signer, time::Now};
 use crate::{
-    dns_over_https::{
-        types::{Record as DNSRecord, Record, RecordType},
-        Provider as DoHProvider, Query, Response,
-    },
     VerificationData,
+    dns_over_https::{
+        Provider as DoHProvider, Query, Response,
+        types::{Record as DNSRecord, Record, RecordType},
+    },
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -183,8 +183,10 @@ mod tests {
             let mut responses = [response(), response(), response()];
             responses[1].answer = Some(vec![]);
 
-            assert!(validate_responses::<()>(&responses_to_validate_responses_args(&responses))
-                .is_err());
+            assert!(
+                validate_responses::<()>(&responses_to_validate_responses_args(&responses))
+                    .is_err()
+            );
         }
 
         #[test]

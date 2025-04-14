@@ -1,8 +1,10 @@
+/// <reference types="@testing-library/jest-dom" />
+
 import { describe, test, vi, expect, afterEach } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { ErrorBoundary } from "react-error-boundary";
 import "@testing-library/jest-dom/vitest";
-import { ErrorBoundaryComponent } from "../src/components/layout/ErrorBoundary";
+import { StepErrorBoundaryComponent } from "../src/components/layout/ErrorBoundary";
 import { AlreadyMintedError } from "../src/errors";
 
 const ThrowError = () => {
@@ -23,7 +25,7 @@ describe("ErrorBoundary", () => {
 
   test("should render error boundary component when there is an error", () => {
     render(
-      <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+      <ErrorBoundary FallbackComponent={StepErrorBoundaryComponent}>
         <ThrowError />
       </ErrorBoundary>,
     );
@@ -33,7 +35,7 @@ describe("ErrorBoundary", () => {
 
   test("should not render error boundary component when there is no error", () => {
     render(
-      <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+      <ErrorBoundary FallbackComponent={StepErrorBoundaryComponent}>
         <h1>OK</h1>
       </ErrorBoundary>,
     );
@@ -43,7 +45,7 @@ describe("ErrorBoundary", () => {
 
   test("should display default error message when unknown error", () => {
     render(
-      <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+      <ErrorBoundary FallbackComponent={StepErrorBoundaryComponent}>
         <ThrowError />
       </ErrorBoundary>,
     );
@@ -53,7 +55,7 @@ describe("ErrorBoundary", () => {
 
   test("should display custom error message when known error", () => {
     render(
-      <ErrorBoundary FallbackComponent={ErrorBoundaryComponent}>
+      <ErrorBoundary FallbackComponent={StepErrorBoundaryComponent}>
         <ThrowAlreadyMintedError />
       </ErrorBoundary>,
     );
