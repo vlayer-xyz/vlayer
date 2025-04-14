@@ -18,7 +18,6 @@ use precompile::{Precompile, Tag, gas_used};
 use regex::{capture as regex_capture, is_match as regex_is_match};
 use revm::precompile::{
     Precompile as RawPrecompile, PrecompileOutput, PrecompileResult, PrecompileWithAddress,
-    u64_to_address,
 };
 use thiserror::Error;
 use url_pattern::test as url_pattern_test;
@@ -26,19 +25,31 @@ use web_proof::verify as web_proof;
 
 pub fn precompiles(is_vlayer_test: bool) -> Vec<Precompile> {
     let mut list = vec![
-        generate_precompile!(0x100, web_proof, 1000, 10, Tag::WebProof),
-        generate_precompile!(0x101, email_proof, 1000, 10, Tag::EmailProof),
-        generate_precompile!(0x102, json_get_string, 1000, 10, Tag::JsonGetString),
-        generate_precompile!(0x103, json_get_int, 1000, 10, Tag::JsonGetInt),
-        generate_precompile!(0x104, json_get_bool, 1000, 10, Tag::JsonGetBool),
-        generate_precompile!(0x105, json_get_array_length, 1000, 10, Tag::JsonGetArrayLength),
-        generate_precompile!(0x110, regex_is_match, 1000, 10, Tag::RegexIsMatch),
-        generate_precompile!(0x111, regex_capture, 1000, 10, Tag::RegexCapture),
-        generate_precompile!(0x120, url_pattern_test, 1000, 10, Tag::UrlPatternTest),
+        generate_precompile!("web_proof", web_proof, 1000, 10, Tag::WebProof),
+        generate_precompile!("email_proof", email_proof, 1000, 10, Tag::EmailProof),
+        generate_precompile!("json_get_string", json_get_string, 1000, 10, Tag::JsonGetString),
+        generate_precompile!("json_get_int", json_get_int, 1000, 10, Tag::JsonGetInt),
+        generate_precompile!("json_get_bool", json_get_bool, 1000, 10, Tag::JsonGetBool),
+        generate_precompile!(
+            "json_get_array_length",
+            json_get_array_length,
+            1000,
+            10,
+            Tag::JsonGetArrayLength
+        ),
+        generate_precompile!("regex_is_match", regex_is_match, 1000, 10, Tag::RegexIsMatch),
+        generate_precompile!("regex_capture", regex_capture, 1000, 10, Tag::RegexCapture),
+        generate_precompile!("url_pattern_test", url_pattern_test, 1000, 10, Tag::UrlPatternTest),
     ];
 
     if is_vlayer_test {
-        list.push(generate_precompile!(0x130, system::is_vlayer_test, 1000, 10, Tag::IsVlayerTest));
+        list.push(generate_precompile!(
+            "is_vlayer_test",
+            system::is_vlayer_test,
+            1000,
+            10,
+            Tag::IsVlayerTest
+        ));
     }
 
     list
@@ -68,10 +79,13 @@ pub const fn is_time_dependent(precompile: &Precompile) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use alloy_primitives::hex;
+
     use super::*;
 
     mod verify_precompile_allowed_in_travel_call {
         use lazy_static::lazy_static;
+        use revm::precompile::u64_to_address;
 
         use super::*;
 
@@ -93,6 +107,18 @@ mod tests {
         fn rejects_invalid_precompile() {
             assert!(is_time_dependent(&WEB_PROOF));
             assert!(is_time_dependent(&EMAIL_PROOF));
+        }
+    }
+
+    #[test]
+    fn log_all_precompile_addresses() {
+        let precompiles = super::precompiles(true); // include `is_vlayer_test`
+
+        println!("\nPrecompile Addresses:");
+        for precompile in precompiles {
+            let address = precompile.address();
+            let tag = format!("{:?}", precompile.tag());
+            println!("  {:<25} => 0x{}", tag, hex::encode(address.as_slice()));
         }
     }
 }
