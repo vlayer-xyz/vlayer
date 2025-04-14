@@ -15,3 +15,4 @@
   * `3b4d5f70a9fe3cf01638faf6f1a8d6e6079ce5f089f2a3dd875f74c107e643f2` – Risc0 2.0.0
   * `82d44d66876bf5cc8ff56a3c8fc91270b13c61623d9e6fc3a566ab0a7a126468` – Added functionality and a crate dependency in `common` [#2138] (https://github.com/vlayer-xyz/vlayer/pull/2138)
   * `4af5b2998ca397f906dc0cffbe13937dde04c1cdd833fb460dd81d2815468896` – Rust 1.85.0 - [#2150] (https://github.com/vlayer-xyz/vlayer/pull/2150)
+  * `605a504383da17012e2af35e674bb0fb8b4d9ceb2714217d3618f43c3d4c6ded` – hashbrown 0.15.0 -> 0.15.1 - [#2011] (https://github.com/vlayer-xyz/vlayer/pull/2011)
