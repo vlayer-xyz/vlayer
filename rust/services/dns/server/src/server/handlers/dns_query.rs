@@ -1,20 +1,42 @@
 mod types;
 
+use std::iter::once;
+
 use axum::{
     extract::{Query, State},
+    http::header::AUTHORIZATION,
     response::IntoResponse,
     routing::{MethodRouter, get},
 };
-use tower_http::validate_request::ValidateRequestHeaderLayer;
+use server_utils::jwt::{Claims, axum::ClaimsExtractor};
+use tower_http::{
+    sensitive_headers::SetSensitiveRequestHeadersLayer,
+    validate_request::ValidateRequestHeaderLayer,
+};
 use tracing::debug;
 use types::{Params, ServerResponse};
 use verifiable_dns::{MIME_DNS_JSON_CONTENT_TYPE, Provider};
 
-use crate::server::AppState;
+use crate::server::{AppState, Config};
 
-pub fn handler() -> MethodRouter<AppState> {
-    get(dns_query_handler)
+#[allow(clippy::needless_pass_by_value)]
+pub fn handler(config: Config) -> MethodRouter<AppState> {
+    let handler = if config.jwt_config.is_some() {
+        get(dns_query_handler_with_auth)
+    } else {
+        get(dns_query_handler)
+    };
+    get(handler)
         .route_layer(ValidateRequestHeaderLayer::accept(MIME_DNS_JSON_CONTENT_TYPE))
+        .route_layer(SetSensitiveRequestHeadersLayer::new(once(AUTHORIZATION)))
+}
+
+async fn dns_query_handler_with_auth(
+    _claims: ClaimsExtractor<Claims>,
+    state: State<AppState>,
+    params: Query<Params>,
+) -> impl IntoResponse {
+    dns_query_handler(state, params).await
 }
 
 async fn dns_query_handler(
@@ -30,6 +52,7 @@ async fn dns_query_handler(
 #[cfg(test)]
 mod tests {
     use axum::{
+        Router,
         body::Body,
         http::{HeaderName, Response, StatusCode, header::ACCEPT},
     };
@@ -42,23 +65,22 @@ mod tests {
         [("name", "google._domainkey.vlayer.xyz"), ("type", "txt")];
 
     async fn dns_query() -> Response<Body> {
-        run_dns_query(None, None).await
+        run_dns_query(app(), None, None).await
     }
 
     async fn dns_query_with_headers(headers: &[(&HeaderName, &str)]) -> Response<Body> {
-        run_dns_query(Some(headers), None).await
+        run_dns_query(app(), Some(headers), None).await
     }
 
     async fn dns_query_with_params(params: &[(&str, &str)]) -> Response<Body> {
-        run_dns_query(None, Some(params)).await
+        run_dns_query(app(), None, Some(params)).await
     }
 
     async fn run_dns_query(
+        app: Router,
         headers: Option<&[(&HeaderName, &str)]>,
         params: Option<&[(&str, &str)]>,
     ) -> Response<Body> {
-        let app = app();
-
         let headers = headers.unwrap_or(&[(&ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)]);
         let params = params.unwrap_or(&DEFAULT_PARAMS);
 
@@ -115,6 +137,68 @@ mod tests {
                     .status()
                     .is_client_error()
             );
+        }
+    }
+
+    mod jwt {
+        use server_utils::jwt::test_helpers::{JWT_SECRET, TokenArgs, token as test_token};
+
+        use super::*;
+        use crate::server::test_helpers::app_with_jwt_auth;
+
+        fn token(invalid_after: i64, subject: &str) -> String {
+            test_token(&TokenArgs {
+                secret: JWT_SECRET,
+                host: "api.vlayer.xyz",
+                port: 443,
+                invalid_after,
+                subject,
+            })
+        }
+
+        async fn run_dns_query_with_token(token: String) -> Response<Body> {
+            let auth = format!("Bearer {token}");
+            let headers = &[(&AUTHORIZATION, auth.as_str()), (&ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)];
+            run_dns_query(app_with_jwt_auth(), Some(headers), None).await
+        }
+
+        #[tokio::test]
+        async fn accepts_requests_with_valid_token() {
+            assert_eq!(run_dns_query_with_token(token(60, "1234")).await.status(), StatusCode::OK)
+        }
+
+        #[tokio::test]
+        async fn rejects_requests_with_missing_token() {
+            assert_eq!(
+                run_dns_query(app_with_jwt_auth(), None, None)
+                    .await
+                    .status(),
+                StatusCode::UNAUTHORIZED
+            )
+        }
+
+        #[tokio::test]
+        async fn rejects_requests_with_expired_token() {
+            assert_eq!(
+                run_dns_query_with_token(token(-120, "1234")).await.status(),
+                StatusCode::UNAUTHORIZED
+            )
+        }
+
+        #[tokio::test]
+        async fn rejects_requests_with_tampered_with_token() {
+            assert_eq!(
+                run_dns_query_with_token(test_token(&TokenArgs {
+                    secret: "beefdead",
+                    host: "localhost",
+                    port: 123,
+                    invalid_after: 60,
+                    subject: "1234",
+                }))
+                .await
+                .status(),
+                StatusCode::UNAUTHORIZED
+            )
         }
     }
 }

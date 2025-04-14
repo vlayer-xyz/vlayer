@@ -2,6 +2,7 @@ use std::{net::SocketAddr, path::PathBuf};
 
 use clap::Parser;
 use common::GlobalArgs;
+use server_utils::jwt::cli::Args as JwtArgs;
 
 #[derive(Debug, clap::Args)]
 #[group(required = false, multiple = false)]
@@ -31,6 +32,9 @@ pub(crate) struct Cli {
 
     #[clap(flatten)]
     pub(crate) private_key: PrivateKeyArgs,
+
+    #[clap(flatten)]
+    pub(crate) jwt_args: JwtArgs,
 
     #[clap(flatten)]
     pub(crate) global_args: GlobalArgs,
