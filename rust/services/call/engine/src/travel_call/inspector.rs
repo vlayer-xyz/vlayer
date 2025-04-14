@@ -170,12 +170,10 @@ mod test {
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
     lazy_static! {
-        static ref JSON_GET_STRING_PRECOMPILE: Address = precompile_by_name("JsonGetString")
-            .unwrap()
-            .address()
-            .clone();
+        static ref JSON_GET_STRING_PRECOMPILE: Address =
+            *precompile_by_name("JsonGetString").unwrap().address();
         static ref WEB_PROOF_PRECOMPILE: Address =
-            precompile_by_name("WebProof").unwrap().address().clone();
+            *precompile_by_name("WebProof").unwrap().address();
     }
 
     type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<TxResultWithMetadata, Error<Infallible>>
