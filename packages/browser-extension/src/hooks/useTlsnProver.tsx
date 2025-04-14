@@ -68,14 +68,14 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     ): string => {
       if (token === undefined) {
         // If no token is specified, we hope for the best, and pass the hostname as token.
-        return baseUrl + `?token=${hostname}`;
+        return `${baseUrl}?token=${hostname}`;
       }
 
       pipe(token, decodeJwt<Claims>, (claims) =>
         validateJwtHostname(claims, hostname),
       );
 
-      return baseUrl + `?token=${token}`;
+      return `${baseUrl}?token=${token}`;
     };
 
     try {

@@ -1,22 +1,10 @@
 import fs from "fs";
 import dotenv from "dotenv";
 import debug from "debug";
+import { filterOverrides } from "./filterOverrides";
+import { type Overrides } from "./types";
 
 const log = debug("vlayer:config");
-
-type Overrides = { [key: string]: string | undefined };
-type DefinedOverrides = { [key: string]: string };
-
-export function filterOverrides(overrides: Overrides): DefinedOverrides {
-  const defined: DefinedOverrides = {};
-  for (const key in overrides) {
-    const value = overrides[key as keyof Overrides];
-    if (value !== undefined) {
-      defined[key] = value;
-    }
-  }
-  return defined;
-}
 
 export const writeEnvVariables = async (
   envPath: string,
