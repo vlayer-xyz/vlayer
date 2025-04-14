@@ -61,6 +61,13 @@ pub fn precompile_by_address(address: &Address, is_vlayer_test: bool) -> Option<
         .find(|precomp| precomp.address() == address)
 }
 
+pub fn precompile_by_name(name: &str) -> Option<Precompile> {
+    let name_snake = name.trim().to_ascii_lowercase();
+    precompiles(false)
+        .into_iter()
+        .find(|precomp| precomp.tag().to_string().to_ascii_lowercase() == name_snake)
+}
+
 #[derive(Debug, Error, PartialEq, Eq)]
 #[error("Precompile not allowed for travel calls: {0}")]
 pub struct PrecompileNotAllowedError(pub Tag);
@@ -119,6 +126,50 @@ mod tests {
             let address = precompile.address();
             let tag = format!("{:?}", precompile.tag());
             println!("  {:<25} => 0x{}", tag, hex::encode(address.as_slice()));
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn finds_existing_precompile_by_name() {
+            let precompile = precompile_by_name("web_proof");
+            assert!(precompile.is_some(), "Expected 'web_proof' precompile to exist");
+
+            let tag = precompile.unwrap().tag();
+            assert_eq!(tag, Tag::WebProof);
+        }
+
+        #[test]
+        fn returns_none_for_nonexistent_precompile() {
+            let precompile = precompile_by_name("not_a_real_precompile");
+            assert!(precompile.is_none(), "Expected None for an invalid precompile name");
+        }
+
+        #[test]
+        fn matches_case_sensitive_name() {
+            let correct_case = precompile_by_name("web_proof");
+            let wrong_case = precompile_by_name("Web_Proof");
+
+            assert!(correct_case.is_some(), "Expected correct casing to match");
+            assert!(wrong_case.is_none(), "Expected wrong casing to return None");
+        }
+
+        #[test]
+        fn all_tags_are_accessible_by_name() {
+            for precompile in precompiles(false) {
+                let name = precompile.tag().to_string();
+                let found = precompile_by_name(&name);
+                assert!(found.is_some(), "Expected precompile '{}' to be found by name", name);
+                assert_eq!(
+                    found.unwrap().tag(),
+                    precompile.tag(),
+                    "Mismatched tags for '{}'",
+                    name
+                );
+            }
         }
     }
 }

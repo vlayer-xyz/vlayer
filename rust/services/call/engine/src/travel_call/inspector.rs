@@ -151,12 +151,12 @@ mod test {
     use std::convert::Infallible;
 
     use alloy_primitives::{Address, BlockNumber, Bytes, U256, address};
+    use call_precompiles::precompile_by_name;
     use lazy_static::lazy_static;
     use revm::{
         EvmContext, InMemoryDB, Inspector as IInspector,
         db::{EmptyDB, WrapDatabaseRef},
         interpreter::{CallInputs, CallScheme, CallValue},
-        precompile::u64_to_address,
         primitives::{AccountInfo, Output, SuccessReason},
     };
 
@@ -170,8 +170,12 @@ mod test {
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
     lazy_static! {
-        static ref JSON_GET_STRING_PRECOMPILE: Address = u64_to_address(0x102);
-        static ref WEB_PROOF_PRECOMPILE: Address = u64_to_address(0x100);
+        static ref JSON_GET_STRING_PRECOMPILE: Address = precompile_by_name("JsonGetString")
+            .unwrap()
+            .address()
+            .clone();
+        static ref WEB_PROOF_PRECOMPILE: Address =
+            precompile_by_name("WebProof").unwrap().address().clone();
     }
 
     type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<TxResultWithMetadata, Error<Infallible>>
