@@ -56,7 +56,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
   constructor(
     private notaryUrl: string,
     private wsProxyUrl: string,
-    private token: string | null,
+    private token: string | undefined,
   ) {}
 
   public notifyZkProvingStatus(status: ZkProvingStatus) {
@@ -159,7 +159,7 @@ export const validateWebProofRequest = (
 export const createExtensionWebProofProvider = ({
   notaryUrl = "https://test-notary.vlayer.xyz",
   wsProxyUrl = "wss://test-wsproxy.vlayer.xyz",
-  token = null,
+  token,
 }: WebProofProviderSetup = {}): WebProofProvider => {
   return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl, token);
 };
