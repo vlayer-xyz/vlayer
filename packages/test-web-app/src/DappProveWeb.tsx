@@ -25,7 +25,7 @@ function DappProveWeb() {
     return createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
       wsProxyUrl: "ws://localhost:3003",
-      jwtToken: TOKEN,
+      token: TOKEN,
     });
   }, []);
 

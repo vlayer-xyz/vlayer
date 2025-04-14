@@ -17,5 +17,5 @@ pub struct GlobalArgs {
         env = "VLAYER_LOG_FORMAT",
         default_value = "plain"
     )]
-    pub log_format: Option<LogFormat>,
+    pub log_format: LogFormat,
 }

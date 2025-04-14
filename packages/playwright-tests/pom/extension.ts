@@ -23,6 +23,12 @@ export class Extension {
     ]);
     return new Webpage(newPage, this.context);
   }
+
+  async generateWebProof() {
+    const button = this.page.getByRole("button", { name: "Generate proof" });
+    await button.click();
+  }
+
   async startPageStepShouldBeCompleted() {
     const startPageStep = this.page.getByTestId("step-startPage");
     const status = await startPageStep.getAttribute("data-status");
@@ -34,11 +40,35 @@ export class Extension {
     const status = await expectUrlStep.getAttribute("data-status");
     expect(status).toEqual("completed");
   }
+
   async expectSessionStorageToBeCleaned() {
     const sessionStorage = await this.page.evaluate(() =>
       chrome.storage.session.get(),
     );
     expect(sessionStorage).toEqual({});
+  }
+
+  async expectErrorToBeDisplayed(expectedErrorMessage: string) {
+    await this.page.getByTestId("error-message").waitFor();
+    const errorMessage = this.page.getByTestId("error-message");
+    await expect(errorMessage).toHaveText(expectedErrorMessage);
+  }
+
+  async expectRequestWebProofButtonToBeVisible() {
+    const redirectButton = this.page.getByTestId("start-page-button");
+    await expect(redirectButton).toBeVisible();
+  }
+
+  async expectGenerateProofButtonToBeVisible() {
+    const generateProofButton = this.page.getByRole("button", {
+      name: "Generate proof",
+    });
+    await expect(generateProofButton).toBeVisible();
+  }
+
+  async expectStepToBeCompleted(stepName: string, stepIndex = 0) {
+    const step = this.page.getByTestId(`step-${stepName}`).nth(stepIndex);
+    await expect(step).toHaveAttribute("data-status", "completed");
   }
 }
 

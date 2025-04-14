@@ -2,8 +2,8 @@ use block_header::{EvmBlockHeader, ForgeBlockHeader, Hashable};
 use call_host::db::proof::ProofDb;
 use ethers_core::types::BlockNumber as BlockTag;
 use forge::revm::primitives::{
+    Account, Address, B256, Bytes, EvmState, U256,
     alloy_primitives::{BlockNumber, ChainId, StorageKey, StorageValue, TxNumber},
-    Account, Address, Bytes, EvmState, B256, U256,
 };
 use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, Result};
 
@@ -123,7 +123,7 @@ mod test {
 
     use forge::revm::primitives::{address, b256};
     use mpt::KeccakMerkleTrie as MerkleTrie;
-    use serde_json::{from_str, from_value, Value};
+    use serde_json::{Value, from_str, from_value};
 
     use super::*;
 

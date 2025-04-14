@@ -22,8 +22,15 @@ export const useProver = () => {
 
   useEffect(() => {
     if (result && Array.isArray(result)) {
-      const [proof, owner, balance] = result;
-      setProverResult(JSON.stringify([proof, owner, String(balance)]));
+      console.log("result", result);
+      setProverResult(
+        JSON.stringify(result, (key, value) => {
+          if (typeof value === "bigint") {
+            return String(value);
+          }
+          return value as string;
+        }),
+      );
     }
   }, [result]);
 

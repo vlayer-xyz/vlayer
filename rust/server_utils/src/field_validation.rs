@@ -1,4 +1,4 @@
-use alloy_primitives::{hex::FromHexError as AlloyFromHexError, Address, BlockHash};
+use alloy_primitives::{Address, BlockHash, hex::FromHexError as AlloyFromHexError};
 use hex::FromHexError;
 use thiserror::Error;
 

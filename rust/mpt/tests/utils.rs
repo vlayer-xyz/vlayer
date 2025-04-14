@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use rand::{distributions::Uniform, rngs::StdRng, Rng};
+use rand::{Rng, distributions::Uniform, rngs::StdRng};
 
 const MAX_KEY_LENGTH: usize = 8;
 const MAX_VALUE_PER_BYTE: u8 = 5;
@@ -15,7 +15,7 @@ fn generate_key(rng: &mut StdRng) -> Vec<u8> {
 
 fn generate_entry(rng: &mut StdRng) -> Entry {
     let key = generate_key(rng);
-    let value = rng.gen();
+    let value = rng.r#gen();
     (key, value)
 }
 

@@ -17,7 +17,7 @@ export const loadFixtures = async () => {
 
   const [john] = await testClient.getAddresses();
 
-  const account = privateKeyToAccount(config.privateKey as `0x${string}`);
+  const account = privateKeyToAccount(config.privateKey);
 
   const hash = await testClient.deployContract({
     abi: MockERC20.abi,

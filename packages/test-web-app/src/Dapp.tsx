@@ -40,7 +40,7 @@ function DappWithProfile(profile: string) {
     return createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
       wsProxyUrl: "ws://localhost:3003",
-      jwtToken: TOKEN,
+      token: TOKEN,
     });
   }, []);
 
@@ -152,11 +152,8 @@ function DappWithProfile(profile: string) {
 
   return (
     <div className="container">
-      <button
-        data-testid="request-webproof-button"
-        onClick={handleWebProofRequestClick}
-      >
-        Request proof of beeing a wizard
+      <button onClick={handleWebProofRequestClick}>
+        Request proof of being a wizard
       </button>
 
       <div>

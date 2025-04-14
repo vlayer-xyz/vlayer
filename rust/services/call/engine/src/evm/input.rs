@@ -1,6 +1,6 @@
 use std::{collections::HashMap, iter::once};
 
-use alloy_primitives::{Bytes, B256};
+use alloy_primitives::{B256, Bytes};
 use block_header::{EthBlockHeader, EvmBlockHeader, Hashable};
 use call_common::ExecutionLocation;
 use derivative::Derivative;

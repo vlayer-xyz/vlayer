@@ -16,7 +16,7 @@ export const test = base.extend<{
   page: Page;
 }>({
   // eslint-disable-next-line
-  context: async ({ }, use) => {
+  context: async ({ }, load) => {
     const pathToExtension = path.join(
       __dirname,
       "../../../packages/browser-extension/dist",
@@ -42,7 +42,7 @@ export const test = base.extend<{
           },
     );
 
-    await use(context);
+    await load(context);
     await context.close();
   },
 });

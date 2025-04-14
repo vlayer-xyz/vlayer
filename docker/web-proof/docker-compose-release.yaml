@@ -7,7 +7,7 @@ services:
     ports:
       - "7047:7047"
     volumes:
-      - ../notary-config-v8:/root/.notary-server/config
+      - ../notary-config:/root/.notary-server/config
   json-server:
     build:
       context: ../../

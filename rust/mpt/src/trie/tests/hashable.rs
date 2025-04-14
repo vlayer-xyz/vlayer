@@ -1,10 +1,10 @@
-use alloy_primitives::{b256, B256};
+use alloy_primitives::{B256, b256};
 use alloy_trie::EMPTY_ROOT_HASH;
 use common::Hashable;
 use lazy_static::lazy_static;
 use nybbles::Nibbles;
 
-use crate::{node::Node, KeccakMerkleTrie, MerkleTrie};
+use crate::{KeccakMerkleTrie, MerkleTrie, node::Node};
 
 lazy_static! {
     static ref MPT_BRANCH_WITH_TWO_CHILDREN: KeccakMerkleTrie = {

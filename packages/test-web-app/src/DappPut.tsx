@@ -54,10 +54,8 @@ function DappPutContent() {
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
     >
-      <button onClick={requestWebProof} data-testid="request-webproof-button">
-        Request Web Proof
-      </button>
-      {webProof && <h1 data-testid="has-webproof">Web Proof is ready</h1>}
+      <button onClick={requestWebProof}>Request Web Proof</button>
+      {webProof && <h1>Has web proof</h1>}
     </div>
   );
 }

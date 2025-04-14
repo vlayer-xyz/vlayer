@@ -5,10 +5,10 @@ use rlp as legacy_rlp;
 
 use super::Node;
 use crate::{
+    Digest,
     node::constructors::empty_children,
     node_ref::NodeRef,
     path::{Path, PathKind},
-    Digest,
 };
 
 impl<D: Digest> Encodable for Node<D> {

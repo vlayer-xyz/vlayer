@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod insert {
-    use crate::node::{insert::entry::Entry, KeccakNode as Node, NodeError};
+    use crate::node::{KeccakNode as Node, NodeError, insert::entry::Entry};
 
     #[test]
     #[should_panic(expected = "Cannot insert into a digest node")]

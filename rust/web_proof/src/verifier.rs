@@ -86,7 +86,7 @@ mod tests {
         use serde_json::Value;
 
         use super::*;
-        use crate::fixtures::{read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+        use crate::fixtures::{NOTARY_PUB_KEY_PEM_EXAMPLE, read_fixture};
 
         const WEB_PROOF_IDENTITY_NAME_CHANGED: &str =
             include_str!(".././testdata/0.1.0-alpha.8/web_proof_identity_name_changed.json");

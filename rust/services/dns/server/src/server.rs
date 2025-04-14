@@ -1,7 +1,7 @@
 mod handlers;
 
 use axum::Router;
-use server_utils::{cors, init_trace_layer, RequestIdLayer};
+use server_utils::{RequestIdLayer, cors, init_trace_layer};
 use tokio::net::TcpListener;
 use tracing::{info, warn};
 use verifiable_dns::{ExternalProvider, VerifiableDNSResolver};

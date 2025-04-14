@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use chain_db::ChainDb;
 use chain_server_lib::server;
 use common::GuestElf;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use server_utils::{body_to_json, post};
 
 fn test_app() -> axum::Router {
@@ -58,12 +58,14 @@ async fn method_missing() {
     assert_eq!(*body.get("id").unwrap(), Value::Null);
     let error = body.get("error").unwrap();
     assert_eq!(*error.get("code").unwrap(), json!(-32600));
-    assert!(error
-        .get("message")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .starts_with("missing field `method`"));
+    assert!(
+        error
+            .get("message")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .starts_with("missing field `method`")
+    );
 }
 
 mod chain_proof {
@@ -149,11 +151,13 @@ mod chain_proof {
         let error = body.get("error").unwrap();
         assert_eq!(*error.get("code").unwrap(), json!(-32602));
         assert_eq!(*error.get("message").unwrap(), json!("Invalid params"));
-        assert!(error
-            .get("data")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .starts_with("invalid type: string \"\", expected u64"));
+        assert!(
+            error
+                .get("data")
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .starts_with("invalid type: string \"\", expected u64")
+        );
     }
 }

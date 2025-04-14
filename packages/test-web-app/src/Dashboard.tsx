@@ -17,7 +17,6 @@ function Dashboard() {
         Go to profile failed auth
       </button>
       <button
-        data-testid="update-resource-button"
         onClick={() => {
           fetch("https://lotr-api.online:3011/update_resource", {
             method: "PUT",

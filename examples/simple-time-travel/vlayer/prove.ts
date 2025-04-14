@@ -9,30 +9,30 @@ import {
 } from "@vlayer/sdk/config";
 import { getStartEndBlock } from "./helpers";
 import { loadFixtures } from "./loadFixtures";
-import { getChainConfig } from "./constants";
+import { getTimeTravelConfig } from "./constants";
 
 const config = getConfig();
-const chainConfig = getChainConfig(config.chainName);
+const timeTravelConfig = getTimeTravelConfig(config.chainName);
 
 if (config.chainName === "anvil") {
   await loadFixtures();
 }
 
-const { ethClient, account, proverUrl } = await createContext(config);
+const { ethClient, account, proverUrl } = createContext(config);
 
 const { startBlock, endBlock } = await getStartEndBlock({
   config,
-  chainConfig,
+  timeTravelConfig,
 });
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
   proverArgs: [
-    chainConfig.usdcTokenAddr,
+    timeTravelConfig.usdcTokenAddr,
     startBlock,
     endBlock,
-    chainConfig.prover.step,
+    timeTravelConfig.prover.step,
   ],
   verifierArgs: [],
 });
@@ -46,7 +46,7 @@ const provingHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
-  args: [chainConfig.tokenOwner],
+  args: [timeTravelConfig.tokenOwner],
   chainId: ethClient.chain.id,
 });
 

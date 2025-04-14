@@ -1,5 +1,5 @@
 use alloy_chains::Chain;
-use alloy_primitives::{hex::ToHexExt, keccak256, ChainId, B256};
+use alloy_primitives::{B256, ChainId, hex::ToHexExt, keccak256};
 use alloy_rlp::RlpEncodable;
 use call_common::ExecutionLocation;
 use call_engine::Call as EngineCall;
@@ -9,7 +9,7 @@ use derive_more::From;
 use derive_new::new;
 use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use serde::{Deserialize, Serialize};
-use server_utils::{parse_address_field, parse_hex_field, FieldValidationError};
+use server_utils::{FieldValidationError, parse_address_field, parse_hex_field};
 
 use crate::gas_meter::Error as GasMeterError;
 

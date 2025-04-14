@@ -1,5 +1,5 @@
 use alloy_eips::NumHash;
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::{B256, keccak256};
 use common::Hashable;
 use rpc::OutputResponse;
 use serde::{Deserialize, Serialize};

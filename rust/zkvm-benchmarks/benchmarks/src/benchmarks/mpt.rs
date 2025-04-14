@@ -1,7 +1,7 @@
 use common::Hashable;
 use mpt::KeccakMerkleTrie as MerkleTrie;
 
-use crate::{benchmarks::merge, with_fixture, Benchmark};
+use crate::{Benchmark, benchmarks::merge, with_fixture};
 
 mod empty {
     use super::*;

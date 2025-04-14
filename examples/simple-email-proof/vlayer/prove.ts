@@ -19,7 +19,7 @@ const {
   proverUrl,
   dnsServiceUrl,
   confirmations,
-} = await createContext(config);
+} = createContext(config);
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,

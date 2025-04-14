@@ -26,13 +26,17 @@ export const ShowBalancePage = () => {
   useEffect(() => {
     if (txHash && status === "success") {
       console.log("Claimed", txHash);
-      navigate(`/success?txHash=${txHash}`);
+      void navigate(`/success?txHash=${txHash}`);
     }
   }, [txHash, status]);
 
   useEffect(() => {
     if (proverResult) {
-      const [, owner, balance] = JSON.parse(proverResult);
+      const [, owner, balance] = JSON.parse(proverResult) as [
+        unknown,
+        `0x${string}`,
+        string,
+      ];
       setHolderAddress(owner);
       setBalance(balance);
     }
@@ -46,12 +50,17 @@ export const ShowBalancePage = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const [proof, owner, balance] = JSON.parse(proverResult);
+    const [proof, owner, balance] = JSON.parse(proverResult) as [
+      unknown,
+      `0x${string}`,
+      string,
+    ];
     setIsLoading(true);
     writeContract({
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
       abi: verifierSpec.abi,
       functionName: "claim",
+      //@ts-expect-error proof is unknown @Artur fix this
       args: [proof, owner, BigInt(balance)],
     });
   };

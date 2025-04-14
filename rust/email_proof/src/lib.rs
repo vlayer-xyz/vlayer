@@ -1,24 +1,20 @@
 mod dkim;
 mod dns;
 mod email;
-mod email_address;
 mod errors;
 mod from_header;
 #[cfg(test)]
 mod test_utils;
 
-use dkim::{
-    verify_dkim_body_length_tag, verify_dns_consistency, verify_email_contains_dkim_headers,
-    verify_signature::verify_signature,
-};
+use dkim::{get_dkim_header, verify_signature::verify_signature};
 use dns::extract_public_key;
 pub use email::sol::{SolDnsRecord, SolVerificationData, UnverifiedEmail};
-use mailparse::{parse_mail, MailHeaderMap, ParsedMail};
+use mailparse::{ParsedMail, parse_mail};
 use verifiable_dns::DNSRecord;
 
 pub use crate::{email::Email, errors::Error};
 
-const DKIM_SIGNATURE_HEADER: &str = "DKIM-Signature";
+const REQUIRED_SIGNED_HEADERS: [&str; 3] = ["from", "to", "subject"];
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_record, verification_data) = UnverifiedEmail::parse_calldata(calldata)?;
@@ -34,13 +30,13 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
 }
 
 fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Error> {
-    let dkim_headers = email.headers.get_all_headers(DKIM_SIGNATURE_HEADER);
     let raw_headers = parse_headers_bytes(email.raw_bytes)?;
+    let dkim_header = get_dkim_header(email)?;
 
-    verify_email_contains_dkim_headers(&dkim_headers)?;
-    verify_dns_consistency(&dkim_headers, dns_record)?;
     verify_no_fake_separator(raw_headers)?;
-    verify_dkim_body_length_tag(&dkim_headers)?;
+    dkim_header.verify_dns_consistency(dns_record)?;
+    dkim_header.verify_required_headers_signed(&REQUIRED_SIGNED_HEADERS)?;
+    dkim_header.verify_body_length_tag()?;
 
     Ok(())
 }
@@ -67,12 +63,12 @@ fn verify_no_fake_separator(raw_headers: &[u8]) -> Result<(), Error> {
 
 #[cfg(test)]
 mod test {
-    use alloy_sol_types::{private::bytes, SolValue};
+    use alloy_sol_types::{SolValue, private::bytes};
     use lazy_static::lazy_static;
     use test_utils::read_email_from_file;
     use verifiable_dns::{
-        verifiable_dns::{sign_record::sign_record, signer::Signer},
         DNSRecord, RecordType,
+        verifiable_dns::{sign_record::sign_record, signer::Signer},
     };
 
     use super::*;

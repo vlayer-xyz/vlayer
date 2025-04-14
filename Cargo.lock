@@ -2645,10 +2645,12 @@ dependencies = [
  "alloy-sol-types",
  "derive_more 1.0.0",
  "email_proof",
+ "lazy_static",
  "regex",
  "revm",
  "serde",
  "serde_json",
+ "thiserror 2.0.11",
  "url",
  "urlpattern",
  "web_proof",
@@ -2706,6 +2708,7 @@ dependencies = [
  "provider",
  "reqwest 0.12.12",
  "risc0-zkp",
+ "risc0-zkvm",
  "seal",
  "serde",
  "serde_json",
@@ -3496,12 +3499,14 @@ dependencies = [
  "auto_impl",
  "bytes",
  "clap 4.5.26",
+ "derive-new",
  "derive_more 1.0.0",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
  "serde_json",
  "tracing-subscriber 0.3.19",
+ "url",
 ]
 
 [[package]]
@@ -4558,6 +4563,7 @@ dependencies = [
  "cfdkim",
  "derivative",
  "hex-literal",
+ "itertools 0.14.0",
  "lazy_static",
  "mailparse 0.14.1",
  "rsa",
@@ -11076,9 +11082,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "2.0.1"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8f4a3e21f17465e618cd3ed755b121627f2c188d1416be1cec2757cffe1adf8"
+checksum = "eb85162c19a2ba2151c02f1f157804cd89e163ca694afda399fc3f415c03a3de"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.19.1",
@@ -14816,6 +14822,8 @@ dependencies = [
  "bincode",
  "constcat",
  "derive-new",
+ "derive_builder 0.12.0",
+ "derive_more 1.0.0",
  "hex",
  "http-body-util",
  "hyper 1.5.2",

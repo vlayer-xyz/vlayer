@@ -6,7 +6,7 @@ use std::{
 use lazy_static::lazy_static;
 use risc0_zkp::core::digest::Digest;
 
-use crate::{data_layout, decode_hex_id, path_from_env, PROJECT_ROOT};
+use crate::{PROJECT_ROOT, data_layout, decode_hex_id, path_from_env};
 
 data_layout!(Layout {
     project_root: PROJECT_ROOT.into(),

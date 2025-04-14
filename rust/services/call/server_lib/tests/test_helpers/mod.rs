@@ -1,11 +1,11 @@
 use std::time::Duration;
 
-use call_server_lib::{jwt::Config as JwtConfig, ConfigBuilder, ProofMode};
+use call_server_lib::{ConfigBuilder, ProofMode, jwt::Config as JwtConfig};
 use common::GuestElf;
 use derive_new::new;
 use ethers::types::{Bytes, H160};
 use mock::{Anvil, Client, Contract, GasMeterServer, Server};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 pub const GAS_LIMIT: u64 = 1_000_000;
 pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;
@@ -113,8 +113,8 @@ impl Context {
 pub(crate) mod mock {
     use std::{sync::Arc, time::Duration};
 
-    use axum::{body::Body, http::Response, Router};
-    use call_server_lib::{gas_meter::Config as GasMeterConfig, server, Config};
+    use axum::{Router, body::Body, http::Response};
+    use call_server_lib::{Config, gas_meter::Config as GasMeterConfig, server};
     use derive_more::{Deref, DerefMut};
     use ethers::{
         contract::abigen,

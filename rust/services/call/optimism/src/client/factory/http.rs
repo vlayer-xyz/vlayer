@@ -6,8 +6,8 @@ use jsonrpsee::http_client::HttpClientBuilder;
 use thiserror::Error;
 
 use crate::{
-    client::{http, FactoryError, IFactory},
     IClient,
+    client::{FactoryError, IFactory, http},
 };
 
 #[derive(Debug, Error, PartialEq, Eq)]

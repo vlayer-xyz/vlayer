@@ -1,13 +1,13 @@
 use axum::http::StatusCode;
 use ethers::types::U256;
 use serde_json::json;
-use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
+use test_helpers::{API_VERSION, Context, call_guest_elf, chain_guest_elf, mock::GasMeterServer};
 
 mod test_helpers;
 
 use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string};
 use test_helpers::{
-    allocate_gas_body, rpc_body, v_call_body, ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL,
+    ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL, allocate_gas_body, rpc_body, v_call_body,
 };
 
 mod server_tests {
@@ -16,7 +16,9 @@ mod server_tests {
     #[cfg(test)]
     #[ctor::ctor]
     fn before_all() {
-        std::env::set_var("RISC0_DEV_MODE", "1");
+        unsafe {
+            std::env::set_var("RISC0_DEV_MODE", "1");
+        }
     }
 
     #[tokio::test]
@@ -43,6 +45,7 @@ mod server_tests {
 
     mod v_versions {
         use common::GuestElf;
+        use risc0_zkvm::get_version;
 
         use super::*;
 
@@ -62,7 +65,8 @@ mod server_tests {
                 json!({
                     "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
                     "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                    "api_version": API_VERSION
+                    "api_version": API_VERSION,
+                    "risc0_version": get_version().unwrap().to_string(),
                 }),
             ).await;
         }
@@ -160,7 +164,7 @@ mod server_tests {
         use call_server_lib::{v_call::CallHash, v_get_proof_receipt::State};
         use ethers::{
             abi::AbiEncode,
-            types::{Bytes, Uint8, H160},
+            types::{Bytes, H160, Uint8},
         };
         use serde_json::Value;
         use server_utils::function_selector;
@@ -455,9 +459,9 @@ mod server_tests {
     mod jwt {
         use assert_json_diff::assert_json_eq;
         use call_server_lib::jwt::Config as JwtConfig;
-        use jsonwebtoken::{encode, get_current_timestamp, DecodingKey, EncodingKey, Header};
+        use jsonwebtoken::{DecodingKey, EncodingKey, Header, encode, get_current_timestamp};
         use server_utils::jwt::Claims;
-        use test_helpers::{mock::Server, JWT_SECRET};
+        use test_helpers::{JWT_SECRET, mock::Server};
 
         use super::*;
 
@@ -491,6 +495,19 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
+        async fn rejects_requests_with_missing_token() {
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post("/", &req).await;
+
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "Missing JWT token" })
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
         async fn rejects_requests_with_expired_token() {
             let app = default_app();
             let req = rpc_body("dummy", &json!([]));
@@ -498,7 +515,7 @@ mod server_tests {
                 .post_with_bearer_auth("/", &req, &token(-120, "1234"))
                 .await;
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
                 json!({ "error": "ExpiredSignature" })
@@ -516,7 +533,7 @@ mod server_tests {
             let req = rpc_body("dummy", &json!([]));
             let resp = app.post_with_bearer_auth("/", &req, &token).await;
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
                 json!({ "error": "InvalidSignature" })
@@ -531,10 +548,10 @@ mod server_tests {
             let req = rpc_body("dummy", &json!([]));
             let resp = app.post_with_bearer_auth("/", &req, OLD_TOKEN).await;
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
-                json!({ "error": "InvalidToken" })
+                json!({ "error": "Invalid JWT token" })
             );
         }
 

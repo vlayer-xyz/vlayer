@@ -1,7 +1,8 @@
 use alloy_sol_types::SolValue;
-use mailparse::{headers::Headers, DispositionType, MailHeaderMap, MailParseError, ParsedMail};
-
-use crate::email_address::EmailAddress;
+use mailparse::{
+    DispositionType, MailAddr, MailHeaderMap, MailParseError, ParsedMail, addrparse,
+    headers::Headers,
+};
 
 pub(crate) mod sol;
 
@@ -25,11 +26,11 @@ impl TryFrom<ParsedMail<'_>> for Email {
     fn try_from(mail: ParsedMail) -> Result<Self, Self::Error> {
         let headers = mail.get_headers();
 
-        let get_header = header_getter(headers);
+        let get_header = last_header_getter(headers);
 
         let from_raw =
             get_header("From").ok_or(MailParseError::Generic("\"From\" header is missing"))?;
-        let from_email = Self::extract_address_from_header(&from_raw)?;
+        let from_email = extract_address_from_header(&from_raw)?;
         let to = get_header("To").ok_or(MailParseError::Generic("\"To\" header is missing"))?;
         let subject = get_header("Subject");
 
@@ -68,37 +69,30 @@ fn is_inlined_body_content(part: &ParsedMail) -> bool {
     part.get_content_disposition().disposition == DispositionType::Inline
 }
 
-impl Email {
-    pub fn extract_address_from_header(header: &str) -> Result<String, MailParseError> {
-        let Some(start) = header.find('<') else {
-            return Self::validate_email(header);
-        };
-        let maybe_end = header.rfind('>');
+pub fn extract_address_from_header(raw_from_header: &str) -> Result<String, MailParseError> {
+    let addresses = addrparse(raw_from_header)?;
 
-        match maybe_end {
-            None => Err(Self::invalid_from_header()),
-            Some(end) if end <= start => Err(Self::invalid_from_header()),
-            Some(end) => Self::validate_email(&header[start + 1..end]),
-        }
+    if addresses.len() != 1 {
+        return Err(MailParseError::Generic("Expected exactly one address in the \"From\" header"));
     }
 
-    const fn invalid_from_header() -> MailParseError {
-        MailParseError::Generic("Unexpected \"From\" format")
+    let MailAddr::Single(ref info) = addresses[0] else {
+        return Err(MailParseError::Generic(
+            "Group addresses are not supported in the \"From\" header",
+        ));
+    };
+    let trimmed_address = info.addr.trim();
+    if trimmed_address.chars().any(char::is_whitespace) {
+        return Err(MailParseError::Generic(
+            "Email address must not contain whitespace characters",
+        ));
     }
-
-    fn validate_email(email: &str) -> Result<String, MailParseError> {
-        let email = email.trim();
-
-        if !EmailAddress::is_valid(email) {
-            return Err(Self::invalid_from_header());
-        }
-
-        Ok(email.to_string())
-    }
+    Ok(trimmed_address.to_string())
 }
 
-fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
-    move |key: &str| headers.get_first_value(key).map(String::from)
+// Last headers are signed first: https://datatracker.ietf.org/doc/html/rfc6376#section-5.4.2
+fn last_header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
+    move |key: &str| headers.get_all_values(key).pop()
 }
 
 #[cfg(test)]
@@ -270,14 +264,14 @@ ZmlsZSBjb250ZW50Cg==
         }
 
         #[test]
-        fn takes_first_header_if_multiple() {
+        fn takes_last_header_if_multiple() {
             let email = parsed_email(
                 vec![("From", "me@aa.aa"), ("From", "you@aa.aa"), ("To", "you"), ("To", "me")],
                 "body",
             )
             .unwrap();
-            assert_eq!(email.from, "me@aa.aa");
-            assert_eq!(email.to, "you");
+            assert_eq!(email.from, "you@aa.aa");
+            assert_eq!(email.to, "me");
         }
 
         #[test]
@@ -316,82 +310,64 @@ ZmlsZSBjb250ZW50Cg==
         }
     }
 
-    mod validate_email {
-        use super::*;
-
-        #[test]
-        fn validates_email_with_spaces() {
-            assert_eq!(
-                Email::validate_email(" hello@aa.aa   ").unwrap(),
-                "hello@aa.aa".to_string()
-            );
-        }
-
-        #[test]
-        fn returns_error_for_invalid_email() {
-            let email = Email::validate_email("hello@aa");
-            assert_eq!(email.unwrap_err().to_string(), Email::invalid_from_header().to_string());
-        }
-    }
-
     mod extract_address_from_header {
         use super::*;
 
         #[test]
         fn extracts_email_from_header() {
             let extracted_email =
-                Email::extract_address_from_header("  Name (comment) <hello@aa.aa >  ").unwrap();
+                extract_address_from_header("  Name (comment) <hello@aa.aa >  ").unwrap();
             assert_eq!(extracted_email, "hello@aa.aa");
         }
 
         #[test]
         fn works_for_not_named_field() {
-            let extracted_email = Email::extract_address_from_header(" hello@aa.aa ").unwrap();
+            let extracted_email = extract_address_from_header(" hello@aa.aa ").unwrap();
             assert_eq!(extracted_email, "hello@aa.aa");
         }
 
         #[test]
         fn error_for_missing_brackets() {
-            let email = Email::extract_address_from_header("Name hello@aa.aa");
-            assert_eq!(email.unwrap_err().to_string(), Email::invalid_from_header().to_string());
-        }
-
-        #[test]
-        fn error_if_email_is_missing() {
-            let email = Email::extract_address_from_header("Name (comment)");
-            assert_eq!(email.unwrap_err().to_string(), Email::invalid_from_header().to_string());
+            let email = extract_address_from_header("Name hello@aa.aa");
+            assert_eq!(
+                email.unwrap_err().to_string(),
+                "Email address must not contain whitespace characters"
+            );
         }
 
         #[test]
         fn error_if_incorrect_email_inside_brackets() {
-            let email = Email::extract_address_from_header("Name <aaa>");
-            assert_eq!(email.unwrap_err().to_string(), Email::invalid_from_header().to_string());
+            let email = extract_address_from_header("Name <aaa>");
+            assert_eq!(
+                email.unwrap_err().to_string(),
+                "Invalid address found: must contain a '@' symbol"
+            );
         }
 
         #[test]
         fn error_if_brackets_misaligned() {
-            let extract = |from: &str| {
-                Email::extract_address_from_header(from)
-                    .unwrap_err()
-                    .to_string()
-            };
-            assert_eq!(extract("Name <hello@aa.aa>>"), Email::invalid_from_header().to_string());
-            assert_eq!(extract("Name hello@aa.aa>"), Email::invalid_from_header().to_string());
-            assert_eq!(extract("Name <<hello@aa.aa>"), Email::invalid_from_header().to_string());
-            assert_eq!(extract("Name <hello@aa.aa"), Email::invalid_from_header().to_string());
-            assert_eq!(extract("Name <<hello@aa.aa>>"), Email::invalid_from_header().to_string());
+            let extract = |from: &str| extract_address_from_header(from).unwrap_err().to_string();
+            assert_eq!(
+                extract("Name <hello@aa.aa>>"),
+                "Unexpected char found after bracketed address"
+            );
+            assert_eq!(
+                extract("Name hello@aa.aa>"),
+                "Email address must not contain whitespace characters"
+            );
+            assert_eq!(extract("Name <hello@aa.aa"), "Address string unexpectedly terminated");
+            assert_eq!(
+                extract("Name <<hello@aa.aa>>"),
+                "Unexpected char found after bracketed address"
+            );
         }
 
         #[test]
         fn error_if_several_emails() {
-            let extract = |from: &str| {
-                Email::extract_address_from_header(from)
-                    .unwrap_err()
-                    .to_string()
-            };
+            let extract = |from: &str| extract_address_from_header(from).unwrap_err().to_string();
             assert_eq!(
                 extract("Name <hello@aa.aa>, Name2 <hello2@aa.aa>"),
-                Email::invalid_from_header().to_string()
+                "Expected exactly one address in the \"From\" header"
             );
         }
     }
