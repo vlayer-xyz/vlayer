@@ -1,11 +1,12 @@
 use std::time::Duration;
 
-use call_server_lib::{ConfigBuilder, ProofMode, jwt::Config as JwtConfig};
+use call_server_lib::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
 use ethers::types::{Bytes, H160};
 use mock::{Anvil, Client, Contract, GasMeterServer, Server};
 use serde_json::{Value, json};
+use server_utils::jwt::cli::Config as JwtConfig;
 
 pub const GAS_LIMIT: u64 = 1_000_000;
 pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;
@@ -52,7 +53,6 @@ pub(crate) fn chain_guest_elf() -> &'static GuestElf {
 }
 
 pub(crate) const API_VERSION: &str = "1.2.3";
-pub(crate) const JWT_SECRET: &[u8] = b"deadbeef";
 
 #[derive(new)]
 pub(crate) struct Context {

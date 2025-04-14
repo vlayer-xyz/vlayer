@@ -11,7 +11,7 @@ use axum::{
 use derive_new::new;
 use server_utils::{
     RequestId, RequestIdLayer, Router as JrpcRouter, cors, init_trace_layer,
-    jwt::{Claims, ClaimsExtractor},
+    jwt::{Claims, axum::ClaimsExtractor},
 };
 use tokio::net::TcpListener;
 use tower_http::{

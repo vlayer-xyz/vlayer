@@ -42,7 +42,6 @@ block_header = { workspace = true }
 ctor = { workspace = true }
 ethers = { workspace = true }
 guest_wrapper = { workspace = true }
-jsonwebtoken = { workspace = true }
 lazy_static = { workspace = true }
 provider = { workspace = true }
 reqwest = { workspace = true }

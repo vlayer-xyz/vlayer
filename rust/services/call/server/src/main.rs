@@ -1,20 +1,19 @@
 mod version;
 
-use std::{path::PathBuf, time::Duration};
+use std::time::Duration;
 
 use alloy_primitives::ChainId;
-use anyhow::Context;
 use call_server_lib::{
-    Config, ConfigBuilder, ProofMode,
-    chain_proof::Config as ChainProofConfig,
-    gas_meter::Config as GasMeterConfig,
-    jwt::{Algorithm, Config as JwtConfig, DecodingKey},
-    serve,
+    Config, ConfigBuilder, ProofMode, chain_proof::Config as ChainProofConfig,
+    gas_meter::Config as GasMeterConfig, serve,
 };
 use clap::{ArgAction, Parser};
 use common::{GlobalArgs, extract_rpc_url_token, init_tracing};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
-use server_utils::set_risc0_dev_mode;
+use server_utils::{
+    jwt::cli::{Args as JwtArgs, Config as JwtConfig},
+    set_risc0_dev_mode,
+};
 use tracing::{info, warn};
 
 #[derive(Parser)]
@@ -41,11 +40,8 @@ struct Cli {
     #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "240s")]
     chain_proof_timeout: Option<Duration>,
 
-    #[arg(long, group = "auth")]
-    jwt_public_key: Option<PathBuf>,
-
-    #[arg(long, requires = "auth", default_value = "RS256")]
-    jwt_algorithm: Option<Algorithm>,
+    #[clap(flatten)]
+    jwt_args: JwtArgs,
 
     #[arg(
         long,
@@ -81,24 +77,7 @@ impl Cli {
             .map(|(url, (poll_interval, timeout))| {
                 ChainProofConfig::new(url, poll_interval, timeout)
             });
-        let jwt_config = match self.jwt_public_key {
-            Some(public_key) => {
-                let key = std::fs::read_to_string(&public_key).with_context(|| {
-                    format!("Failed to open file '{}' for reading", public_key.display())
-                })?;
-                let key = DecodingKey::from_rsa_pem(key.as_bytes())?;
-                let algorithm = self.jwt_algorithm.unwrap_or_default();
-                info!(
-                    "Using JWT-based authorization with public key '{}' and algorithm '{algorithm:#?}'.",
-                    public_key.display()
-                );
-                Some(JwtConfig::new(key, algorithm))
-            }
-            None => {
-                warn!("Running without authorization.");
-                None
-            }
-        };
+        let jwt_config: Option<JwtConfig> = self.jwt_args.try_into()?;
         Ok(ConfigBuilder::default()
             .with_call_guest_elf(&CALL_GUEST_ELF)
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
