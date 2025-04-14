@@ -3,6 +3,7 @@ import { URLPattern } from "urlpattern-polyfill";
 import { type RedactionConfig } from "./redaction";
 import urlRegex from "url-regex";
 import type { PresentationJSON as TLSNPresentationJSON } from "tlsn-js/src/types";
+import type { OutputsConfig } from "./notarizeOutput";
 
 export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
@@ -134,6 +135,7 @@ export type WebProofStepNotarize = BrandedStep<
     method: string;
     label: string;
     redact: RedactionConfig;
+    outputs: OutputsConfig;
   }
 >;
 
