@@ -1,8 +1,7 @@
 use crate::{
-    common,
+    VerificationData, common,
     dns_over_https::types::Record as DNSRecord,
     verifiable_dns::{signer::Signer, time::Timestamp},
-    VerificationData,
 };
 
 pub fn sign_record(

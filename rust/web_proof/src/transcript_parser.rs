@@ -1,16 +1,16 @@
 use std::{io::Read, string::ToString};
 
 use chunked_transfer::Decoder;
-use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
+use httparse::{EMPTY_HEADER, Header, Request, Response, Status};
 use mime::Mime;
 use url::Url;
 
 use crate::{
     errors::ParsingError,
     redaction::{
-        validate_name_value_redaction, RedactedTranscriptNameValue, RedactionElementType,
         REDACTED_BYTE_CODE, REDACTION_REPLACEMENT_CHAR_PRIMARY,
-        REDACTION_REPLACEMENT_CHAR_SECONDARY,
+        REDACTION_REPLACEMENT_CHAR_SECONDARY, RedactedTranscriptNameValue, RedactionElementType,
+        validate_name_value_redaction,
     },
     utils::{
         bytes::{all_match, replace_bytes},
@@ -235,28 +235,36 @@ mod tests {
 
                     #[test]
                     fn header_name_with_replacement_character_1() {
-                        let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{REDACTION_REPLACEMENT_CHAR_PRIMARY}: application/json\r\n\r\n");
+                        let request = format!(
+                            "GET https://example.com/test.json HTTP/1.1\r\ncontent-type{REDACTION_REPLACEMENT_CHAR_PRIMARY}: application/json\r\n\r\n"
+                        );
                         let url = parse_request_and_validate_redaction(request.as_bytes()).unwrap();
                         assert_eq!(url, "https://example.com/test.json");
                     }
 
                     #[test]
                     fn header_name_with_replacement_character_2() {
-                        let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type{REDACTION_REPLACEMENT_CHAR_SECONDARY}: application/json\r\n\r\n");
+                        let request = format!(
+                            "GET https://example.com/test.json HTTP/1.1\r\ncontent-type{REDACTION_REPLACEMENT_CHAR_SECONDARY}: application/json\r\n\r\n"
+                        );
                         let url = parse_request_and_validate_redaction(request.as_bytes()).unwrap();
                         assert_eq!(url, "https://example.com/test.json");
                     }
 
                     #[test]
                     fn header_value_with_replacement_character_1() {
-                        let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{REDACTION_REPLACEMENT_CHAR_PRIMARY}\r\n\r\n");
+                        let request = format!(
+                            "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{REDACTION_REPLACEMENT_CHAR_PRIMARY}\r\n\r\n"
+                        );
                         let url = parse_request_and_validate_redaction(request.as_bytes()).unwrap();
                         assert_eq!(url, "https://example.com/test.json");
                     }
 
                     #[test]
                     fn header_value_with_replacement_character_2() {
-                        let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{REDACTION_REPLACEMENT_CHAR_SECONDARY}\r\n\r\n");
+                        let request = format!(
+                            "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{REDACTION_REPLACEMENT_CHAR_SECONDARY}\r\n\r\n"
+                        );
                         let url = parse_request_and_validate_redaction(request.as_bytes()).unwrap();
                         assert_eq!(url, "https://example.com/test.json");
                     }

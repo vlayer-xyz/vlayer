@@ -49,7 +49,7 @@ mod tests {
 
     mod two_consecutive_block_hashes {
         use ::chain_db::{ChainInfo, ChainUpdate};
-        use alloy_primitives::{bytes, fixed_bytes, FixedBytes};
+        use alloy_primitives::{FixedBytes, bytes, fixed_bytes};
         use anyhow::Result;
         use bytes::Bytes;
         use common::Hashable;

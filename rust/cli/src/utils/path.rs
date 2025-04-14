@@ -116,6 +116,20 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf> {
     Ok(PathBuf::from(path))
 }
 
+pub fn find_file_up_tree(name: &str) -> anyhow::Result<Option<PathBuf>> {
+    let mut path = std::env::current_dir()?;
+    loop {
+        path.push(name);
+        if path.exists() {
+            return Ok(Some(path));
+        }
+        path.pop();
+        if !path.pop() {
+            return Ok(None);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use tempfile::tempdir;
@@ -276,11 +290,13 @@ mod tests {
             let dst_link = dst_dir.join("link");
             assert!(dst_link.is_symlink());
             // On macOS, /var/tmp may be a symlink to /private/var/tmp, so we fuzzy match.
-            assert!(fs::read_link(&dst_link)
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .contains(target.to_str().unwrap()));
+            assert!(
+                fs::read_link(&dst_link)
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .contains(target.to_str().unwrap())
+            );
             assert_eq!("dummy", fs::read_to_string(dst_link).unwrap());
         }
 

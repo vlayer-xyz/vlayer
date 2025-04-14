@@ -1,13 +1,9 @@
+include:
+  - ../websockify/service.yaml
+
 services:
-  websockify:
-    image: jwnmulder/websockify
-    platform: linux/amd64
-    ports:
-      - "55688:80" 
-    command: "80 lotr-api.online:3011"
-      
   notary-server:
-    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
+    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.8
     ports:
       - "7047:7047"
     volumes:
@@ -22,5 +18,3 @@ services:
       default:
         aliases:
           - lotr-api.online
-
-

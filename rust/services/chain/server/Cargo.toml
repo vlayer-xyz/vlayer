@@ -1,7 +1,7 @@
 [package]
 name = "chain_server"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 anyhow = { workspace = true }
@@ -13,6 +13,7 @@ dotenvy = { workspace = true }
 guest_wrapper = { workspace = true }
 risc0-zkp = { workspace = true }
 tokio = { workspace = true }
+tracing = { workspace = true }
 version = { workspace = true }
 
 [lints]

@@ -5,15 +5,32 @@
 To start working with [this repository](https://github.com/vlayer-xyz/vlayer), you will need to install following software:
 
 - [Rust](https://www.rust-lang.org/tools/install) compiler
-- Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart) version v1.2.4
+- [Risc-0 toolchain](https://dev.risczero.com/api/zkvm/quickstart) with VM version v2.0.1 and Rust toolchain version v1.81.0
   ```
-  rzup install cargo-risczero 1.2.4
-  cargo risczero install
+  curl -L https://risczero.com/install | bash
+  export PATH=$PATH:~/.risc/bin
+  rzup install r0vm 2.0.1
+  rzup install rust 1.81.0
   ```
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - [Bun](https://bun.sh) and [Node.js](https://nodejs.org)
 - [LLVM Clang](https://clang.llvm.org/) compiler version which supports [RISC-V build target](https://llvm.org/docs/RISCVUsage.html) available on the `PATH`
-- `timeout` terminal command (`brew install coreutils` on macOS)
+- `timeout` terminal command
+
+### Homebrew
+
+If you're on macOS, you can use [Homebrew](https://brew.sh/) to install some of the dependencies:
+
+#### LLVM
+```
+brew install llvm
+```
+After installation, make sure to follow the instructions to update your `PATH`.
+
+#### coretils
+```
+brew install coreutils
+```
 
 ## Building vlayer
  

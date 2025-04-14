@@ -1,10 +1,10 @@
 use std::time::Duration;
 
-use reqwest::{header::ACCEPT, Client};
+use reqwest::{Client, header::ACCEPT};
 use reqwest_middleware::{ClientBuilder, RequestBuilder};
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 
-use super::{Query, Response, MIME_DNS_JSON_CONTENT_TYPE};
+use super::{MIME_DNS_JSON_CONTENT_TYPE, Query, Response};
 use crate::Provider;
 
 const GOOGLE_BASE_URL: &str = "https://8.8.8.8/resolve";

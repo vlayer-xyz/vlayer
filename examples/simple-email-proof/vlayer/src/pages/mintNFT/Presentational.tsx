@@ -1,9 +1,11 @@
 export const MintNFT = ({
   currentStep,
   handleProving,
+  verificationError,
 }: {
   currentStep: string;
   handleProving: () => void;
+  verificationError: string | null;
 }) => {
   return (
     <>
@@ -17,6 +19,11 @@ export const MintNFT = ({
           {currentStep}
         </button>
       </div>
+      {verificationError && (
+        <div className="mt-5 flex justify-center">
+          <p className="text-red-500">{verificationError}</p>
+        </div>
+      )}
     </>
   );
 };

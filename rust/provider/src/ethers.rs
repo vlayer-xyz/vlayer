@@ -1,7 +1,7 @@
 use core::future::Future;
 
-use alloy_primitives::{BlockNumber, B256, U256};
-use anyhow::{anyhow, Context};
+use alloy_primitives::{B256, BlockNumber, U256};
+use anyhow::{Context, anyhow};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use derive_new::new;
 use ethers_core::types::{Block, BlockNumber as BlockTag};

@@ -6,21 +6,21 @@ import {
   useAccount,
   useBalance,
 } from "wagmi";
+
 import { useLocalStorage } from "usehooks-ts";
 
-import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier.json";
+import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier";
 import { MintStepPresentational } from "./Presentational";
-import {
-  getAddressFromPrivateKey,
-  useEnvPrivateKey,
-} from "../../../utils/clientAuthMode";
 import { ensureBalance } from "../../../utils/ethFaucet";
+import { AlreadyMintedError } from "../../../errors";
 
 export const MintStep = () => {
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null);
   const [mintedHandle, setMintedHandle] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  // Using mintingError state to throw error in useEffect because ErrorBoundary does not catch errors from async functions like handleMint
+  const [mintingError, setMintingError] = useState<Error | null>(null);
   const [proverResult] = useLocalStorage("proverResult", "");
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
@@ -30,9 +30,9 @@ export const MintStep = () => {
   });
 
   useEffect(() => {
-    console.log("proverResult", proverResult);
     if (proverResult) {
-      setMintedHandle(JSON.parse(proverResult)[1]);
+      const mintedHandle = proverResult[1];
+      setMintedHandle(mintedHandle);
     }
     modalRef.current?.showModal();
   }, [proverResult]);
@@ -43,8 +43,10 @@ export const MintStep = () => {
       return;
     }
 
-    const proofData = JSON.parse(proverResult);
-
+    const proofData = JSON.parse(proverResult) as Parameters<
+      typeof writeContract
+    >[0]["args"];
+    console.log("proofData", proofData);
     const writeContractArgs: Parameters<typeof writeContract>[0] = {
       address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
       abi: webProofProofVerifier.abi,
@@ -52,36 +54,44 @@ export const MintStep = () => {
       args: proofData,
     };
 
-    if (useEnvPrivateKey()) {
-      writeContract({
-        ...writeContractArgs,
-        account: getAddressFromPrivateKey(),
-      });
-    } else {
+    try {
       await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
-      writeContract(writeContractArgs);
+    } catch (error) {
+      setMintingError(error as Error);
     }
+
+    writeContract(writeContractArgs);
   };
 
   useEffect(() => {
     if (status === "success") {
       setIsMinting(false);
-      navigate(`/success?tx=${txHash}&handle=${mintedHandle}`);
+      void navigate(`/success?tx=${txHash}&handle=${mintedHandle}`);
     }
-  }, [status]);
+  }, [status, txHash, mintedHandle, navigate]);
 
   useEffect(() => {
     if (error) {
-      console.error("error minting", error);
       setIsMinting(false);
+      if (error.message.includes("User has already minted a TwitterNFT")) {
+        throw new AlreadyMintedError();
+      } else {
+        throw new Error(error.message);
+      }
     }
   }, [error]);
 
+  useEffect(() => {
+    if (mintingError) {
+      setIsMinting(false);
+      throw mintingError;
+    }
+  }, [mintingError]);
+
   return (
     <MintStepPresentational
-      handleMint={handleMint}
+      handleMint={() => void handleMint()}
       isMinting={isMinting}
-      errorMsg={error?.message}
     />
   );
 };

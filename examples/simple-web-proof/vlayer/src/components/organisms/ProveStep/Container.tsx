@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { useSimpleWebProof } from "../../../hooks/useSimpleWebProof";
+import { useTwitterAccountProof } from "../../../hooks/useTwitterAccountProof";
 import { ProveStepPresentational } from "./Presentational";
 import { useAccount } from "wagmi";
 
@@ -10,20 +10,20 @@ export const ProveStep = () => {
   const [disabled, setDisabled] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { requestWebProof, webProof, callProver, isPending, result, error } =
-    useSimpleWebProof();
+  const { requestWebProof, webProof, callProver, isPending, result } =
+    useTwitterAccountProof();
 
   useEffect(() => {
     if (webProof) {
-      callProver([webProof, address]);
+      void callProver([webProof, address]);
     }
-  }, [webProof]);
+  }, [webProof, address, callProver]);
 
   useEffect(() => {
     if (result) {
-      navigate("/mint");
+      void navigate("/mint");
     }
-  }, [result]);
+  }, [result, navigate]);
 
   useEffect(() => {
     modalRef.current?.showModal();
@@ -35,7 +35,6 @@ export const ProveStep = () => {
       isPending={isPending}
       disabled={disabled}
       setDisabled={setDisabled}
-      errorMsg={error?.message}
     />
   );
 };

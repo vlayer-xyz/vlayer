@@ -10,7 +10,6 @@ import {
   type ExtensionMessage,
   ExtensionMessageType,
   type WebProofStep,
-  type PresentationJSON,
   ZkProvingStatus,
   assertUrl,
   assertUrlPattern,
@@ -22,7 +21,6 @@ import {
 import debug from "debug";
 
 const log = debug("vlayer:WebProof:provider");
-
 const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 declare let chrome: {
@@ -58,6 +56,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
   constructor(
     private notaryUrl: string,
     private wsProxyUrl: string,
+    private token: string | undefined,
   ) {}
 
   public notifyZkProvingStatus(status: ZkProvingStatus) {
@@ -87,16 +86,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
         this.connectToExtension();
       });
       this.port.onMessage.addListener((message: ExtensionMessage) => {
-        if (message.type === ExtensionMessageType.ProofDone) {
-          this.listeners[ExtensionMessageType.ProofDone]?.forEach((cb) => {
-            cb(message);
-          });
-        }
-        if (message.type === ExtensionMessageType.ProofError) {
-          this.listeners[ExtensionMessageType.ProofError]?.forEach((cb) => {
-            cb(message);
-          });
-        }
+        this.listeners[message.type]?.forEach((cb) => cb(message));
       });
     }
     return this.port;
@@ -115,6 +105,19 @@ class ExtensionWebProofProvider implements WebProofProvider {
     );
   }
 
+  public closeSidePanel() {
+    const port = this.connectToExtension();
+    port.postMessage({
+      action: ExtensionAction.CloseSidePanel,
+    });
+  }
+
+  public openSidePanel() {
+    this.connectToExtension().postMessage({
+      action: ExtensionAction.OpenSidePanel,
+    });
+  }
+
   public requestWebProof(webProofRequest: WebProofRequestInput) {
     validateWebProofRequest(webProofRequest);
     this.connectToExtension().postMessage({
@@ -122,46 +125,10 @@ class ExtensionWebProofProvider implements WebProofProvider {
       payload: {
         notaryUrl: this.notaryUrl,
         wsProxyUrl: this.wsProxyUrl,
+        token: this.token,
         logoUrl: webProofRequest.logoUrl,
         steps: webProofRequest.steps,
       },
-    });
-  }
-
-  public async getWebProof(webProofRequest: WebProofRequestInput): Promise<{
-    presentationJson: PresentationJSON;
-    decodedTranscript: {
-      sent: string;
-      recv: string;
-    };
-  }> {
-    return new Promise<{
-      presentationJson: PresentationJSON;
-      decodedTranscript: {
-        sent: string;
-        recv: string;
-      };
-    }>((resolve, reject) => {
-      chrome.runtime.sendMessage(EXTENSION_ID, {
-        action: ExtensionAction.RequestWebProof,
-        payload: {
-          notaryUrl: this.notaryUrl,
-          wsProxyUrl: this.wsProxyUrl,
-          logoUrl: webProofRequest.logoUrl,
-          steps: webProofRequest.steps,
-        },
-      });
-
-      this.connectToExtension().onMessage.addListener(
-        (message: ExtensionMessage) => {
-          if (message.type === ExtensionMessageType.ProofDone) {
-            resolve(message.payload);
-          }
-          if (message.type === ExtensionMessageType.ProofError) {
-            reject(new Error(message.payload.error));
-          }
-        },
-      );
     });
   }
 }
@@ -192,6 +159,7 @@ export const validateWebProofRequest = (
 export const createExtensionWebProofProvider = ({
   notaryUrl = "https://test-notary.vlayer.xyz",
   wsProxyUrl = "wss://test-wsproxy.vlayer.xyz",
+  token,
 }: WebProofProviderSetup = {}): WebProofProvider => {
-  return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);
+  return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl, token);
 };

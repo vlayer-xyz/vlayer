@@ -1,13 +1,13 @@
 use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post};
 use chain_db::ChainDb;
-use server_utils::{cors, init_trace_layer, RequestIdLayer, Router as JrpcRouter};
+use server_utils::{RequestIdLayer, Router as JrpcRouter, cors, init_trace_layer};
 use tokio::net::TcpListener;
 use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::info;
 
 use crate::{
-    handlers::{RpcServer, State as AppState},
     ServerConfig,
+    handlers::{RpcServer, State as AppState},
 };
 
 async fn handle_jrpc(State(router): State<JrpcRouter<AppState>>, body: Bytes) -> impl IntoResponse {

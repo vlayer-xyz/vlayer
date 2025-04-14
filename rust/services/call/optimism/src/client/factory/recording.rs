@@ -8,8 +8,8 @@ use thiserror::Error;
 
 use super::cached::OpOutputCache;
 use crate::{
-    client::{self, FactoryError, IFactory},
     IClient,
+    client::{self, FactoryError, IFactory},
 };
 
 #[derive(Debug, Error, PartialEq, Eq)]

@@ -11,8 +11,8 @@ use thiserror::Error;
 use utils::{parse_node, resolve_trie};
 
 use crate::{
-    node::{Node, NodeError},
     Digest, Keccak256,
+    node::{Node, NodeError},
 };
 
 mod utils;

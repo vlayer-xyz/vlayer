@@ -7,40 +7,33 @@ import {
   getConfig,
   waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
-import { type Address } from "viem";
+import { getStartEndBlock } from "./helpers";
+import { loadFixtures } from "./loadFixtures";
+import { getTimeTravelConfig } from "./constants";
 
 const config = getConfig();
-const { ethClient, account, proverUrl } = await createContext(config);
+const timeTravelConfig = getTimeTravelConfig(config.chainName);
 
-declare const process: {
-  env: {
-    PROVER_START_BLOCK: bigint;
-    PROVER_END_BLOCK: bigint | "latest";
-    PROVER_TRAVEL_RANGE: bigint;
-    PROVER_ERC20_CONTRACT_ADDR: string;
-    PROVER_ERC20_HOLDER_ADDR: string;
-    PROVER_STEP: bigint;
-  };
-};
+if (config.chainName === "anvil") {
+  await loadFixtures();
+}
 
-const useLatestBlock = process.env.PROVER_END_BLOCK === "latest";
-const endBlock = useLatestBlock
-  ? await ethClient.getBlockNumber()
-  : BigInt(process.env.PROVER_END_BLOCK);
+const { ethClient, account, proverUrl } = createContext(config);
 
-const startBlock = useLatestBlock
-  ? endBlock - BigInt(process.env.PROVER_TRAVEL_RANGE)
-  : BigInt(process.env.PROVER_START_BLOCK);
-
-const tokenOwner = process.env.PROVER_ERC20_HOLDER_ADDR as Address;
-const usdcTokenAddr = process.env.PROVER_ERC20_CONTRACT_ADDR as Address;
-
-const step = BigInt(process.env.PROVER_STEP);
+const { startBlock, endBlock } = await getStartEndBlock({
+  config,
+  timeTravelConfig,
+});
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [usdcTokenAddr, startBlock, endBlock, step],
+  proverArgs: [
+    timeTravelConfig.usdcTokenAddr,
+    startBlock,
+    endBlock,
+    timeTravelConfig.prover.step,
+  ],
   verifierArgs: [],
 });
 
@@ -53,7 +46,7 @@ const provingHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
-  args: [tokenOwner],
+  args: [timeTravelConfig.tokenOwner],
   chainId: ethClient.chain.id,
 });
 

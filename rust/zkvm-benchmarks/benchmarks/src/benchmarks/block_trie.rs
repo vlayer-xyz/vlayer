@@ -1,7 +1,7 @@
 use ::block_trie::BlockTrie;
-use block_header::{test_utils::mock_block_headers, EvmBlockHeader};
+use block_header::{EvmBlockHeader, test_utils::mock_block_headers};
 
-use crate::{with_fixture, Benchmark};
+use crate::{Benchmark, with_fixture};
 
 mod append_single {
     use super::*;

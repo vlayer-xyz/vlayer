@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { type Abi, type ContractFunctionName } from "viem";
 import { useProofContext } from "../context";
 import { WebProofRequestStatus } from "../types";
-import { ExtensionMessageType, type GetWebProofArgs } from "@vlayer/sdk";
+import { ExtensionMessageType, type WebProofConfig } from "@vlayer/sdk";
 
 export const useWebProof = (
-  webProofRequest: GetWebProofArgs<Abi, ContractFunctionName>,
+  webProofRequest: WebProofConfig<Abi, ContractFunctionName>,
 ) => {
   const { webProofProvider } = useProofContext();
   const [webProof, setWebProof] = useState<{

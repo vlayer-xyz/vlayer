@@ -11,4 +11,5 @@ library Precompiles {
     address public constant REGEX_MATCH = address(0x110);
     address public constant REGEX_CAPTURE = address(0x111);
     address public constant URL_PATTERN_TEST = address(0x120);
+    address public constant IS_VLAYER_TEST = address(0x130);
 }

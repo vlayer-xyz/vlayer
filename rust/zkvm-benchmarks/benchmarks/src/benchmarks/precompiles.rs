@@ -1,4 +1,4 @@
-use crate::{benchmarks::merge, Benchmark};
+use crate::{Benchmark, benchmarks::merge};
 #[allow(dead_code)]
 mod email;
 mod url_pattern;

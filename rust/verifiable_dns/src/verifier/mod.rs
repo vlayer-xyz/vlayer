@@ -1,14 +1,14 @@
 use rsa::{
     pkcs1v15,
     pkcs1v15::VerifyingKey,
-    pkcs8::{spki, DecodePublicKey},
+    pkcs8::{DecodePublicKey, spki},
     sha2::Sha256,
     signature::{self, Verifier},
 };
 
 use crate::{
-    common, common::to_payload::ToPayload, dns_over_https::types::Record as DNSRecord, PublicKey,
-    Signature,
+    PublicKey, Signature, common, common::to_payload::ToPayload,
+    dns_over_https::types::Record as DNSRecord,
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -43,8 +43,8 @@ mod test {
 
     use super::*;
     use crate::{
-        verifiable_dns::{sign_record::sign_record, signer::Signer},
         VerificationData,
+        verifiable_dns::{sign_record::sign_record, signer::Signer},
     };
 
     lazy_static! {

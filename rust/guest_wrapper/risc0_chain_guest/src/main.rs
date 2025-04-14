@@ -2,7 +2,7 @@
 
 risc0_zkvm::guest::entry!(main);
 
-use chain_guest::{main as guest_main, Input};
+use chain_guest::{Input, main as guest_main};
 use risc0_zkvm::guest::env;
 
 include!(concat!(env!("OUT_DIR"), "/guest_id.rs"));

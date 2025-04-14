@@ -18,6 +18,10 @@ import { useTrackHistory } from "hooks/useTrackHistory";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { LOADING } from "@vlayer/extension-hooks";
 import { tlsnProve } from "./tlsnProve/tlsnProve";
+import { type Claims } from "lib/types/jwt";
+import { validateJwtHostname } from "lib/validateJwtHostname";
+import { pipe } from "fp-ts/lib/function";
+import { decodeJwt } from "jose";
 
 const TlsnProofContext = createContext({
   prove: async () => {},
@@ -57,6 +61,23 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
     }, 1000);
 
+    const getWsProxyUrl = (
+      baseUrl: string,
+      hostname: string,
+      token?: string,
+    ): string => {
+      if (token === undefined) {
+        // If no token is specified, we hope for the best, and pass the hostname as token.
+        return `${baseUrl}?token=${hostname}`;
+      }
+
+      pipe(token, decodeJwt<Claims>, (claims) =>
+        validateJwtHostname(claims, hostname),
+      );
+
+      return `${baseUrl}?token=${token}`;
+    };
+
     try {
       isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
@@ -67,7 +88,11 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
           : "";
       const wsProxyUrl =
         provingSessionConfig !== LOADING
-          ? provingSessionConfig.wsProxyUrl + `?token=${hostname}`
+          ? getWsProxyUrl(
+              provingSessionConfig.wsProxyUrl || "",
+              hostname,
+              provingSessionConfig.token,
+            )
           : "";
 
       const redactionConfig =

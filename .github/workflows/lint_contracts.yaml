@@ -27,4 +27,4 @@ jobs:
         working-directory: contracts
         run: bun install --frozen-lockfile
       - name: lint Solidity
-        run: ./bash/lint-solidity.sh
+        run: ./bash/lint/solidity.sh

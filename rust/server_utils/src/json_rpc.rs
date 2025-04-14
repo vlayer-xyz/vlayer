@@ -5,13 +5,14 @@ use axum::{
 };
 use derive_new::new;
 use jsonrpsee::{
-    types::{
-        error::{self as jrpcerror, ErrorObjectOwned},
-        Id, Request,
-    },
     ConnectionId, Extensions, MethodCallback, MethodResponse, RpcModule,
+    types::{
+        Id, Request,
+        error::{self as jrpcerror, ErrorObjectOwned},
+    },
 };
 use mime::APPLICATION_JSON;
+use tracing::{error, info};
 
 #[derive(new, Clone)]
 pub struct Router<T: Send + Sync + Clone + 'static>(RpcModule<T>);
@@ -43,6 +44,7 @@ where
             Ok(request) => self.handle_inner(request, extensions).await,
             Err(err) => MethodResponse::error(Id::Null, Error::InvalidRequest(err)),
         };
+        log_response(&response);
         (
             StatusCode::OK,
             [(CONTENT_TYPE, APPLICATION_JSON.to_string())],
@@ -86,5 +88,17 @@ impl From<Error> for ErrorObjectOwned {
                 None,
             ),
         }
+    }
+}
+
+fn log_response(response: &MethodResponse) {
+    if response.is_success() {
+        info!(result = response.as_result(), "JsonRpc request success")
+    } else {
+        error!(
+            code = response.as_error_code().unwrap(),
+            result = response.as_result(),
+            "JsonRpc request failed"
+        );
     }
 }

@@ -15,12 +15,14 @@ contract VlayerDeployer is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         address admin = vm.envAddress("REPOSITORY_CONTRACT_ADMIN_ADDRESS");
+        address owner = vm.envAddress("REPOSITORY_CONTRACT_OWNER_ADDRESS");
 
         console.log("REPOSITORY_CONTRACT_ADMIN_ADDRESS=%s", admin);
+        console.log("REPOSITORY_CONTRACT_OWNER_ADDRESS=%s", owner);
 
         vm.startBroadcast(deployerPrivateKey);
 
-        Repository repository = deployKeyRegistry(admin);
+        Repository repository = deployKeyRegistry(admin, owner);
 
         FakeProofVerifier fakeProofVerifier = deployFakeProofVerifier(repository);
         Groth16ProofVerifier groth16ProofVerifier = deployGroth16ProofVerifier(repository);
@@ -34,8 +36,8 @@ contract VlayerDeployer is Script {
         console.log("PROOF_VERIFIER_ROUTER_ADDRESS=%s", address(proofVerifierRouter));
     }
 
-    function deployKeyRegistry(address admin) internal returns (Repository) {
-        return new Repository{salt: VLAYER_STABLE_SALT}(admin, admin);
+    function deployKeyRegistry(address admin, address owner) internal returns (Repository) {
+        return new Repository{salt: VLAYER_STABLE_SALT}(admin, owner);
     }
 
     function deployFakeProofVerifier(Repository repository) internal returns (FakeProofVerifier) {

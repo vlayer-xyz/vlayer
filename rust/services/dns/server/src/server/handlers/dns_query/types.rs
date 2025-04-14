@@ -1,9 +1,9 @@
 use axum::{
-    http::{header::CONTENT_TYPE, HeaderValue},
+    http::{HeaderValue, header::CONTENT_TYPE},
     response::IntoResponse,
 };
 use serde::{Deserialize, Serialize};
-use verifiable_dns::{Query, Response, MIME_DNS_JSON_CONTENT_TYPE};
+use verifiable_dns::{MIME_DNS_JSON_CONTENT_TYPE, Query, Response};
 
 #[derive(Deserialize, Debug)]
 pub(super) struct Params {

@@ -1,22 +1,27 @@
 use std::sync::Arc;
 
 use call_common::RevmDB;
-use call_precompiles::PRECOMPILES;
+use call_precompiles::precompiles as generate_precompiles;
 use revm::{
-    db::WrapDatabaseRef, inspector_handle_register, precompile::PrecompileWithAddress, Evm, Handler,
+    Evm, Handler, db::WrapDatabaseRef, inspector_handle_register, precompile::PrecompileWithAddress,
 };
 
 use super::inspector::Inspector;
-use crate::{evm::env::EvmEnv, Call};
+use crate::{Call, evm::env::EvmEnv};
 
 pub fn build_evm<'inspector, 'envs, D: RevmDB>(
     env: &'envs EvmEnv<D>,
     tx: &Call,
     inspector: Inspector<'inspector, D>,
+    is_vlayer_test: bool,
 ) -> Evm<'inspector, Inspector<'inspector, D>, WrapDatabaseRef<&'envs D>> {
-    let precompiles_handle_register = |handler: &mut Handler<_, _, _>| {
+    let precompiles_handle_register = move |handler: &mut Handler<_, _, _>| {
         let mut precompiles = handler.pre_execution.load_precompiles();
-        precompiles.extend(PRECOMPILES.map(PrecompileWithAddress::from));
+        precompiles.extend(
+            generate_precompiles(is_vlayer_test)
+                .into_iter()
+                .map(PrecompileWithAddress::from),
+        );
         handler.pre_execution.load_precompiles = Arc::new(move || precompiles.clone());
     };
 
@@ -25,7 +30,7 @@ pub fn build_evm<'inspector, 'envs, D: RevmDB>(
         .with_external_context(inspector)
         .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
         .with_tx_env(tx.clone().into())
-        .append_handler_register(precompiles_handle_register)
+        .append_handler_register_box(Box::new(precompiles_handle_register))
         .append_handler_register(inspector_handle_register)
         .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
         .build();

@@ -2,10 +2,10 @@ use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use alloy_primitives::ChainId;
 use chain_host::{
-    set_risc0_dev_mode, AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode,
+    AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode, set_risc0_dev_mode,
 };
 use clap::Parser;
-use common::{init_tracing, GlobalArgs, LogFormat};
+use common::{GlobalArgs, extract_rpc_url_token, init_tracing};
 use dotenvy::dotenv;
 use ethers::{providers::Http, types::BlockNumber as BlockTag};
 use guest_wrapper::{CHAIN_GUEST_ELF, CHAIN_GUEST_IDS};
@@ -13,7 +13,7 @@ use retry::HostErrorFilter;
 use risc0_zkp::core::digest::Digest;
 use strum::{Display, EnumString};
 use tokio::sync::Mutex;
-use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};
+use tower::{Service, ServiceBuilder, retry::budget::TpsBudget};
 use tracing::error;
 use version::version;
 
@@ -153,7 +153,12 @@ async fn run(mode: Mode, config: HostConfig) -> anyhow::Result<()> {
 async fn main() {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
+
+    let secrets: Vec<String> = match extract_rpc_url_token(&cli.rpc_url) {
+        Some(token) => vec![token],
+        None => vec![],
+    };
+    init_tracing(cli.global_args.log_format, secrets);
 
     let mode = cli.mode;
     let config: HostConfig = cli.into();

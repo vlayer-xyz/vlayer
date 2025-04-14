@@ -5,9 +5,13 @@ import { ExpectUrlStepActions } from "./ExpectUrl";
 import { NotarizeStepActions } from "./Notarize";
 import { StartPageStepActions } from "./StartPage";
 import { StepStatus } from "constants/step";
+import {
+  EXTENSION_STEP,
+  ExtensionStep,
+} from "src/web-proof-commons/types/message.ts";
 
 export const StepActions: React.FC<{
-  kind: "notarize" | "expectUrl" | "startPage";
+  kind: ExtensionStep;
   index: number;
   link?: string;
   label: string;
@@ -17,8 +21,10 @@ export const StepActions: React.FC<{
   return (
     <>
       {match(kind)
-        .with("expectUrl", () => <ExpectUrlStepActions status={status} />)
-        .with("notarize", () => (
+        .with(EXTENSION_STEP.expectUrl, () => (
+          <ExpectUrlStepActions status={status} />
+        ))
+        .with(EXTENSION_STEP.notarize, () => (
           <NotarizeStepActions
             isVisited={false}
             link={link || ""}
@@ -26,7 +32,7 @@ export const StepActions: React.FC<{
             status={status}
           />
         ))
-        .with("startPage", () => (
+        .with(EXTENSION_STEP.startPage, () => (
           <StartPageStepActions
             isVisited={false}
             link={link || ""}
@@ -34,6 +40,10 @@ export const StepActions: React.FC<{
             status={status}
           />
         ))
+        .with(EXTENSION_STEP.fetchAndNotarize, () => {
+          console.warn("Unsupported step type:", kind);
+          return <></>;
+        })
         .exhaustive()}
     </>
   );

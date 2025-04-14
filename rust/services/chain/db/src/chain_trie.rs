@@ -1,5 +1,5 @@
 use block_trie::BlockTrie;
-use chain_common::{verifier::IVerifier, ChainProofReceipt, ChainProofRef};
+use chain_common::{ChainProofReceipt, ChainProofRef, verifier::IVerifier};
 use common::verifier::zk_proof::HostVerifier;
 use derive_new::new;
 use mpt::Sha2Trie as MerkleTrie;

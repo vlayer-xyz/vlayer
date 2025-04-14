@@ -1,12 +1,12 @@
 use alloy_primitives::hex::ToHexExt;
 use assert_json_diff::assert_json_include;
 use axum::{
+    Router,
     body::Body,
     http::{
-        header::{AUTHORIZATION, CONTENT_TYPE},
         HeaderName, Request, Response,
+        header::{AUTHORIZATION, CONTENT_TYPE},
     },
-    Router,
 };
 use axum_jrpc::Value;
 use ethers::types::Bytes;

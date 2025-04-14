@@ -1,3 +1,4 @@
+/// <reference types="chrome" />
 const vlayerPovingExtensionId = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 const isMobile =

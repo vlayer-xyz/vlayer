@@ -1,10 +1,10 @@
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
-import web_proof from "./web_proof.json";
-import web_proof_invalid_signature from "./web_proof_invalid_signature.json";
+import web_proof from "../testdata/0.1.0-alpha.8/web_proof.json";
+import web_proof_invalid_signature from "../testdata/0.1.0-alpha.8/web_proof_invalid_notary_pub_key.json";
 import * as assert from "assert";
-import { encodePacked, isAddress, keccak256 } from "viem";
+import { encodePacked, keccak256 } from "viem";
 
 import {
   getConfig,
@@ -20,14 +20,14 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierSpec,
 });
 
-writeEnvVariables(".env", {
+await writeEnvVariables(".env", {
   VITE_PROVER_ADDRESS: prover,
   VITE_VERIFIER_ADDRESS: verifier,
 });
 
 config = getConfig();
 const { chain, ethClient, account, proverUrl, confirmations } =
-  await createContext(config);
+  createContext(config);
 
 const twitterUserAddress = account.address;
 const vlayer = createVlayerClient({
@@ -55,11 +55,6 @@ async function testSuccessProvingAndVerification() {
   });
   const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
-  console.log("Has Proof");
-
-  if (!isAddress(address)) {
-    throw new Error(`${address} is not a valid address`);
-  }
 
   console.log("Verifying...");
 
@@ -131,10 +126,13 @@ async function testFailedProving() {
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
   } catch (error) {
-    assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
+    assert.ok(
+      error instanceof Error,
+      `Invalid error returned: ${error as string}`,
+    );
     assert.equal(
       error.message,
-      "Preflight failed with error: Preflight error: Execution error: EVM error: Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature",
+      'Preflight failed with error: Preflight error: Execution error: EVM transact error: revert: ContractError(Revert(Revert("Invalid notary public key")))',
       `Error with wrong message returned: ${error.message}`,
     );
     console.log("✅ Done");

@@ -2,3 +2,4 @@
 vlayer_rust_log:
   - info
   - call_engine=debug
+vlayer_jwt_public_key_location: /home/{{ ansible_user }}/.vlayer/jwt.key.pub

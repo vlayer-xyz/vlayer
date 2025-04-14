@@ -1,9 +1,9 @@
 use ::regex::Regex;
 use alloy_primitives::Bytes;
-use alloy_sol_types::{sol_data, SolType, SolValue};
+use alloy_sol_types::{SolType, SolValue, sol_data};
 use regex::{Captures, Match, RegexBuilder};
 
-use crate::helpers::{map_to_fatal, Result};
+use crate::helpers::{Result, map_to_fatal};
 
 const REGEX_SIZE_LIMIT: usize = 1_000_000;
 

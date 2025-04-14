@@ -1,7 +1,6 @@
 pub mod chain_proof;
 pub mod config;
 pub mod gas_meter;
-#[cfg(feature = "jwt")]
 pub mod jwt;
 pub mod server;
 pub mod token;

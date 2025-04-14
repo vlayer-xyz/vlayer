@@ -1,4 +1,4 @@
-use alloy_primitives::{Bytes, B256};
+use alloy_primitives::{B256, Bytes};
 use nybbles::Nibbles;
 
 use super::Node;

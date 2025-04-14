@@ -38,15 +38,15 @@ bytes32 constant TEST_DNS_PUBLIC_KEY_HASH = 0xc16646301c7615357b8f8ee125956b0e5f
 library EmailProofLib {
     function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory) {
         require(unverifiedEmail.verificationData.validUntil > block.timestamp, "EmailProof: expired DNS verification");
-        if (ChainIdLibrary.isMainnet() || ChainIdLibrary.isTestnet()) {
-            require(
-                TestnetStableDeployment.repository().isDnsKeyValid(unverifiedEmail.verificationData.pubKey),
-                "Not a valid VDNS public key"
-            );
-        } else {
+        if (ChainIdLibrary.isTestEnv()) {
             require(
                 keccak256(unverifiedEmail.verificationData.pubKey) == TEST_DNS_PUBLIC_KEY_HASH,
                 "Not a valid VDNS hardcoded key"
+            );
+        } else {
+            require(
+                TestnetStableDeployment.repository().isDnsKeyValid(unverifiedEmail.verificationData.pubKey),
+                "Not a valid VDNS public key"
             );
         }
 

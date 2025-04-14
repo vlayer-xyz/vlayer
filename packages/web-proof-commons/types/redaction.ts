@@ -193,9 +193,6 @@ export function getRedactionConfig(
   const notarizeStep = provingSessionConfig.steps.find(
     (step): step is WebProofStepNotarize => step.step === "notarize",
   );
-  const redactionConfig =
-    notarizeStep !== undefined
-      ? (notarizeStep as WebProofStepNotarize).redact
-      : [];
+  const redactionConfig = notarizeStep !== undefined ? notarizeStep.redact : [];
   return redactionConfig;
 }

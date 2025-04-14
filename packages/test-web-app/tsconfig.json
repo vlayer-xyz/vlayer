@@ -14,7 +14,8 @@
   "include": [
     "src/**/*",
     "../../contracts/fixtures/out/**/*.ts",
-    "deploy.ts"
+    "deploy.ts",
+    "vite.env.d.ts"
   ],
   "exclude": ["node_modules/**/*"]
 }

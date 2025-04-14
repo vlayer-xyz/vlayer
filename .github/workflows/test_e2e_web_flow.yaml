@@ -13,6 +13,7 @@ on:
       - main
 jobs:
   test-e2e-web-flow:
+    name: E2E Web Flow Test
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
     steps:
@@ -49,22 +50,27 @@ jobs:
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
 
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
+      # A separate docker-compose file is used
+      # because we need a json-server for these playwright tests,
+      # and a modified configuration of websockify.
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose-release.yaml
           up-flags: "--build"
           services: |
-            websockify
+            wsproxy
             notary-server
             json-server
 
       - name: Run playwright tests
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          VLAYER_ENV: dev
         run: bash/playwright-test.sh
 
       - name: Handle Playwright Reports

@@ -1,0 +1,30 @@
+name: Risc0 tools
+description: Installs risc0 tools
+inputs:
+  r0vm_version:
+    description: 'Version of r0vm to install'
+    default: 2.0.1
+    required: false
+  cargo_risczero_version:
+    description: 'Version of cargo risczero to install'
+    default: 2.0.1
+    required: false
+  rust_version:
+    description: 'Version of Rust toolchain for building guest images'
+    default: 1.85.0
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        curl -L https://risczero.com/install | bash
+        export PATH=$PATH:"$HOME/.risc0/bin"
+        echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        rzup install rust ${{ inputs.rust_version }}
+        rzup install r0vm ${{ inputs.r0vm_version }}
+        rzup install cargo-risczero ${{ inputs.cargo_risczero_version }}
+        rzup show

@@ -1,5 +1,5 @@
 [alias]
-lint = "clippy --workspace --all-targets --all-features"
+lint = "run-script --workspace -- lint"
 zkvm-bench = "run --bin zkvm-benchmarks-runner"
 
 [env]

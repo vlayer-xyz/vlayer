@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.steps .step:after, .steps .step:before{
+  background-color: #f4f7fb;
+  color: #000;
+}
+
+.steps .step-primary + .step-primary:before, .steps .step-primary:after {
+  background-color: #3d1efe;
+  color: #fff;
+}
+
+.btn:disabled {
+  color: #333;
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#nextButton {
+  @apply btn w-[188px] px-4 bg-[#915bf8] rounded-lg border-none text-white hover:bg-[#915bf8]/80 hover:text-white
+}
+
+.header {
+  @apply text-center text-black text-3xl font-bold mt-7;
+  transition: all 0.3s ease-in-out;
+}
+
+.desc {
+  @apply text-center font-normal text-lg text-gray-500 py-4;
+  transition: all 0.3s ease-in-out;
+}
+
+.header.in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.header.out {
+  opacity: 0;
+  transform: translateX(-10%);
+}
+
+.desc.in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.desc.out {
+  opacity: 0;
+  transform: translateX(-10%);
+}
+
+.steps .step:before {
+  transition: all 0.3s ease-in-out;
+}
+
+.steps .step::after {
+  transition: all 0.3s ease-in-out;
+}

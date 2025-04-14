@@ -43,17 +43,8 @@ export type Proof = {
   };
 };
 
-export type VCallResult = Hex;
-
-export interface VCallResponse {
-  jsonrpc: string;
-  result: VCallResult;
-  id: number;
-}
-
-export type VGetProofReceiptParams = {
-  hash: Hex;
-};
+export const callHashSchema = z.string().startsWith("0x").length(66);
+export type CallHash = z.infer<typeof callHashSchema>;
 
 export enum ProofState {
   Queued = "queued",
@@ -145,11 +136,13 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
   }),
 ]);
 
-export const vGetProofReceiptSchema = z.object({
-  jsonrpc: z.string(),
-  result: proofReceiptSchema,
-  id: z.number(),
+export type ProofReceipt = z.infer<typeof proofReceiptSchema>;
+
+export const versionsSchema = z.object({
+  call_guest_id: z.string(),
+  chain_guest_id: z.string(),
+  api_version: z.string(),
+  risc0_version: z.string(),
 });
 
-export type ProofReceipt = z.infer<typeof proofReceiptSchema>;
-export type VGetProofReceiptResponse = z.infer<typeof vGetProofReceiptSchema>;
+export type Versions = z.infer<typeof versionsSchema>;
