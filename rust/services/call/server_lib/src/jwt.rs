@@ -1,6 +1,5 @@
 use axum::extract::FromRef;
-use derive_new::new;
-use server_utils::jwt::State as JwtState;
+use server_utils::jwt::axum::State as JwtState;
 pub use server_utils::jwt::{Algorithm, DecodingKey};
 
 use crate::server::State;
@@ -13,10 +12,4 @@ impl FromRef<State> for JwtState {
             .expect("public key and algorithm must be specified at the config level");
         Self::new(config.public_key.clone(), config.algorithm)
     }
-}
-
-#[derive(new, Clone)]
-pub struct Config {
-    public_key: DecodingKey,
-    algorithm: Algorithm,
 }

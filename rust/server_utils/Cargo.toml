@@ -10,6 +10,7 @@ assert-json-diff = { workspace = true }
 axum = { workspace = true }
 axum-extra = { workspace = true, features = ["typed-header"] }
 axum-jrpc = { workspace = true }
+clap = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }

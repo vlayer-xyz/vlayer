@@ -458,27 +458,29 @@ mod server_tests {
 
     mod jwt {
         use assert_json_diff::assert_json_eq;
-        use call_server_lib::jwt::Config as JwtConfig;
-        use jsonwebtoken::{DecodingKey, EncodingKey, Header, encode, get_current_timestamp};
-        use server_utils::jwt::Claims;
-        use test_helpers::{JWT_SECRET, mock::Server};
+        use server_utils::jwt::{
+            Claims, EncodingKey, Header, encode, get_current_timestamp,
+            test_helpers::{
+                JWT_SECRET, TokenArgs, default_config as default_jwt_config, token as test_token,
+            },
+        };
+        use test_helpers::mock::Server;
 
         use super::*;
 
-        #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
-        fn token(expires_in: i64, subject: &str) -> String {
-            let key = EncodingKey::from_secret(JWT_SECRET);
-            let ts = get_current_timestamp() as i64 + expires_in;
-            let claims =
-                Claims::new("api.vlayer.xyz".to_string(), 443, ts as u64, subject.to_string());
-            encode(&Header::default(), &claims, &key).unwrap()
+        fn token(invalid_after: i64, subject: &str) -> String {
+            test_token(&TokenArgs {
+                secret: JWT_SECRET,
+                host: "api.vlayer.xyz",
+                port: 443,
+                invalid_after,
+                subject,
+            })
         }
 
         fn default_app() -> Server {
-            let jwt_config =
-                JwtConfig::new(DecodingKey::from_secret(JWT_SECRET), Default::default());
             Context::default()
-                .with_jwt_auth(jwt_config)
+                .with_jwt_auth(default_jwt_config())
                 .server(call_guest_elf(), chain_guest_elf())
         }
 
@@ -574,8 +576,7 @@ mod server_tests {
                 .add()
                 .await;
 
-            let jwt_config =
-                JwtConfig::new(DecodingKey::from_secret(JWT_SECRET), Default::default());
+            let jwt_config = default_jwt_config();
             let ctx = Context::default()
                 .with_jwt_auth(jwt_config)
                 .with_gas_meter_server(gas_meter_server);

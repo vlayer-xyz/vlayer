@@ -6,13 +6,10 @@ use chain::TEST_CHAIN_ID;
 use common::GuestElf;
 use derive_more::From;
 use risc0_zkp::core::digest::Digest;
-use server_utils::ProofMode;
+use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
 use thiserror::Error;
 
-use crate::{
-    chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig,
-    jwt::Config as JwtConfig,
-};
+use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
 
 #[derive(Debug, Error)]
 #[error("Missing required config field: {0}")]
