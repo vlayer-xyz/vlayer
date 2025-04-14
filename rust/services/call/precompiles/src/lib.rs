@@ -92,17 +92,13 @@ mod tests {
 
     mod verify_precompile_allowed_in_travel_call {
         use lazy_static::lazy_static;
-        use revm::precompile::u64_to_address;
 
         use super::*;
 
         lazy_static! {
-            static ref WEB_PROOF: Precompile =
-                precompile_by_address(&u64_to_address(0x100), false).unwrap();
-            static ref EMAIL_PROOF: Precompile =
-                precompile_by_address(&u64_to_address(0x101), false).unwrap();
-            static ref JSON_GET_STRING: Precompile =
-                precompile_by_address(&u64_to_address(0x102), false).unwrap();
+            static ref WEB_PROOF: Precompile = precompile_by_name("WebProof").unwrap();
+            static ref EMAIL_PROOF: Precompile = precompile_by_name("EmailProof").unwrap();
+            static ref JSON_GET_STRING: Precompile = precompile_by_name("JsonGetString").unwrap();
         }
 
         #[test]
