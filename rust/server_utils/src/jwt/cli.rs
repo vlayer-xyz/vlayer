@@ -6,7 +6,7 @@ use jsonwebtoken::{Algorithm, DecodingKey, errors::Error as JwtError};
 use thiserror::Error;
 use tracing::{info, warn};
 
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 pub struct Args {
     #[arg(long, group = "auth")]
     pub jwt_public_key: Option<PathBuf>,
