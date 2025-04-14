@@ -186,7 +186,6 @@ const validateProofRequest = (
         .with(
           {
             step: P.union(
-              EXTENSION_STEP.fetchAndNotarize,
               EXTENSION_STEP.extractVariables,
               EXTENSION_STEP.clickButton,
             ),

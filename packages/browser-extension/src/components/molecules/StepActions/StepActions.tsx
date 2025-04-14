@@ -41,11 +41,7 @@ export const StepActions: React.FC<{
           />
         ))
         .with(
-          P.union(
-            EXTENSION_STEP.fetchAndNotarize,
-            EXTENSION_STEP.extractVariables,
-            EXTENSION_STEP.clickButton,
-          ),
+          P.union(EXTENSION_STEP.extractVariables, EXTENSION_STEP.clickButton),
           () => {
             console.warn("Unsupported step type:", kind);
             return <></>;
