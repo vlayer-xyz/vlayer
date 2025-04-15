@@ -112,16 +112,4 @@ mod tests {
             assert!(is_time_dependent(&EMAIL_PROOF));
         }
     }
-
-    #[test]
-    fn log_all_precompile_addresses() {
-        let precompiles = super::precompiles(true); // include `is_vlayer_test`
-
-        println!("\nPrecompile Addresses:");
-        for precompile in precompiles {
-            let address = precompile.address();
-            let tag = format!("{:?}", precompile.tag());
-            println!("  {:<25} => 0x{}", tag, hex::encode(address.as_slice()));
-        }
-    }
 }
