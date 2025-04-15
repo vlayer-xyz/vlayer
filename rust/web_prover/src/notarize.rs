@@ -1,5 +1,6 @@
 use std::{collections::HashMap, str};
 
+use anyhow::{Context, Result};
 use http_body_util::Full;
 use hyper::{Request, StatusCode, body::Bytes};
 use hyper_util::rt::TokioIo;
@@ -19,9 +20,7 @@ const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KH
 const MAX_SENT_DATA: usize = 1 << 12;
 const MAX_RECV_DATA: usize = 1 << 14;
 
-pub async fn notarize(
-    params: NotarizeParams,
-) -> Result<(Attestation, Secrets, RedactionConfig), Box<dyn std::error::Error>> {
+pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, RedactionConfig)> {
     let NotarizeParams {
         notary_config,
         server_domain,
@@ -38,8 +37,7 @@ pub async fn notarize(
         .port(notary_config.port)
         .path_prefix(notary_config.path_prefix)
         .enable_tls(notary_config.enable_tls)
-        .build()
-        .unwrap();
+        .build()?;
 
     let notarization_request = NotarizationRequest::builder()
         .max_sent_data(MAX_SENT_DATA)
@@ -53,7 +51,7 @@ pub async fn notarize(
     } = notary_client
         .request_notarization(notarization_request)
         .await
-        .expect("Could not connect to notary. Make sure it is running.");
+        .context("Could not connect to notary. Make sure it is running.")?;
 
     let prover_config = ProverConfig::builder()
         .server_name(server_domain.as_ref())
