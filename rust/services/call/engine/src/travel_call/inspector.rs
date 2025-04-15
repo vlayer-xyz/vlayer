@@ -151,7 +151,7 @@ mod test {
     use std::convert::Infallible;
 
     use alloy_primitives::{Address, BlockNumber, Bytes, U256, address};
-    use call_precompiles::precompile_by_name;
+    use call_precompiles::{precompile::Tag, precompile_by_tag};
     use lazy_static::lazy_static;
     use revm::{
         EvmContext, InMemoryDB, Inspector as IInspector,
@@ -171,9 +171,9 @@ mod test {
 
     lazy_static! {
         static ref JSON_GET_STRING_PRECOMPILE: Address =
-            *precompile_by_name("JsonGetString").unwrap().address();
+            *precompile_by_tag(&Tag::JsonGetString).unwrap().address();
         static ref WEB_PROOF_PRECOMPILE: Address =
-            *precompile_by_name("WebProof").unwrap().address();
+            *precompile_by_tag(&Tag::WebProof).unwrap().address();
     }
 
     type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<TxResultWithMetadata, Error<Infallible>>

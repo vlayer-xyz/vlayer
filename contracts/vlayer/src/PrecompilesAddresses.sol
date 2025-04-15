@@ -8,32 +8,32 @@ pragma solidity ^0.8.21;
 ///      `keccak256("vlayer.precompiles.{name}".as_bytes())[..20]`
 library Precompiles {
     // vlayer.precompiles.web_proof
-    address public constant VERIFY_AND_PARSE = 0x95c8504add469381E88aEa9Db3BAB9a9BDFf857b;
+    address public constant VERIFY_AND_PARSE = 0x7eBd4FaE7a485A9D198C8c3b2e7c7F593A130100;
 
     // vlayer.precompiles.email_proof
-    address public constant VERIFY_EMAIL = 0x73d0Db8dE43551380021cbbAddeE85B385A6B0dD;
+    address public constant VERIFY_EMAIL = 0x7EBD4fAE7a485a9d198C8c3b2e7c7f593A130101;
 
     // vlayer.precompiles.json_get_string
-    address public constant JSON_GET_STRING = 0x6d07A0585656d3CC8106cF095F54aEf4E4F6Ca3A;
+    address public constant JSON_GET_STRING = 0x7Ebd4FaE7A485A9d198c8c3b2e7c7f593A130102;
 
     // vlayer.precompiles.json_get_int
-    address public constant JSON_GET_INT = 0xd8AAA782188aCcA9A773ff08FA7bb996059DCa41;
+    address public constant JSON_GET_INT = 0x7eBD4FaE7a485a9D198c8c3b2E7c7f593A130103;
 
     // vlayer.precompiles.json_get_bool
-    address public constant JSON_GET_BOOL = 0x527ea1cfF79264A4a1d7522C57550DEd36Ea6679;
+    address public constant JSON_GET_BOOL = 0x7EBd4faE7a485a9d198c8C3B2e7c7F593A130104;
 
     // vlayer.precompiles.json_get_array_length
-    address public constant JSON_GET_ARRAY_LENGTH = 0x858AFe9948f30E463CaE2a3FFf28C687f326D81A;
+    address public constant JSON_GET_ARRAY_LENGTH = 0x7Ebd4Fae7a485A9d198C8c3b2E7c7F593A130105;
 
     // vlayer.precompiles.regex_is_match
-    address public constant REGEX_MATCH = 0xb33b6A2c6974Caf72FC5E2412011c77AE6A1aB56;
+    address public constant REGEX_MATCH = 0x7EBd4FAE7A485a9d198c8c3B2e7c7f593A130110;
 
     // vlayer.precompiles.regex_capture
-    address public constant REGEX_CAPTURE = 0x1B6700095D2191b5DFAEBeE63B45e992d6bdAd10;
+    address public constant REGEX_CAPTURE = 0x7ebd4fae7a485A9d198C8c3b2E7C7F593A130111;
 
     // vlayer.precompiles.url_pattern_test
-    address public constant URL_PATTERN_TEST = 0x0dBfb79Dc9520274891c1ff7EdbC6Aa76D998348;
+    address public constant URL_PATTERN_TEST = 0x7EBD4fAe7a485a9d198c8c3B2E7c7f593A130120;
 
     // vlayer.precompiles.is_vlayer_test
-    address public constant IS_VLAYER_TEST = 0x0C64EcBf8e8444ED3dC6d09F4dA812DB20c182A1;
+    address public constant IS_VLAYER_TEST = 0x7eBD4Fae7a485A9d198c8c3b2e7C7f593a130130;
 }

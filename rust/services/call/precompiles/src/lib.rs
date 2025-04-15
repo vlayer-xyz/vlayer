@@ -25,31 +25,19 @@ use web_proof::verify as web_proof;
 
 pub fn precompiles(is_vlayer_test: bool) -> Vec<Precompile> {
     let mut list = vec![
-        generate_precompile!("web_proof", web_proof, 1000, 10, Tag::WebProof),
-        generate_precompile!("email_proof", email_proof, 1000, 10, Tag::EmailProof),
-        generate_precompile!("json_get_string", json_get_string, 1000, 10, Tag::JsonGetString),
-        generate_precompile!("json_get_int", json_get_int, 1000, 10, Tag::JsonGetInt),
-        generate_precompile!("json_get_bool", json_get_bool, 1000, 10, Tag::JsonGetBool),
-        generate_precompile!(
-            "json_get_array_length",
-            json_get_array_length,
-            1000,
-            10,
-            Tag::JsonGetArrayLength
-        ),
-        generate_precompile!("regex_is_match", regex_is_match, 1000, 10, Tag::RegexIsMatch),
-        generate_precompile!("regex_capture", regex_capture, 1000, 10, Tag::RegexCapture),
-        generate_precompile!("url_pattern_test", url_pattern_test, 1000, 10, Tag::UrlPatternTest),
+        generate_precompile!(0x100, web_proof, 1000, 10, Tag::WebProof),
+        generate_precompile!(0x101, email_proof, 1000, 10, Tag::EmailProof),
+        generate_precompile!(0x102, json_get_string, 1000, 10, Tag::JsonGetString),
+        generate_precompile!(0x103, json_get_int, 1000, 10, Tag::JsonGetInt),
+        generate_precompile!(0x104, json_get_bool, 1000, 10, Tag::JsonGetBool),
+        generate_precompile!(0x105, json_get_array_length, 1000, 10, Tag::JsonGetArrayLength),
+        generate_precompile!(0x110, regex_is_match, 1000, 10, Tag::RegexIsMatch),
+        generate_precompile!(0x111, regex_capture, 1000, 10, Tag::RegexCapture),
+        generate_precompile!(0x120, url_pattern_test, 1000, 10, Tag::UrlPatternTest),
     ];
 
     if is_vlayer_test {
-        list.push(generate_precompile!(
-            "is_vlayer_test",
-            system::is_vlayer_test,
-            1000,
-            10,
-            Tag::IsVlayerTest
-        ));
+        list.push(generate_precompile!(0x130, system::is_vlayer_test, 1000, 10, Tag::IsVlayerTest));
     }
 
     list
@@ -61,11 +49,10 @@ pub fn precompile_by_address(address: &Address, is_vlayer_test: bool) -> Option<
         .find(|precomp| precomp.address() == address)
 }
 
-pub fn precompile_by_name(name: &str) -> Option<Precompile> {
-    let name_snake = name.trim().to_ascii_lowercase();
+pub fn precompile_by_tag(tag: &Tag) -> Option<Precompile> {
     precompiles(false)
         .into_iter()
-        .find(|precomp| precomp.tag().to_string().to_ascii_lowercase() == name_snake)
+        .find(|precomp| precomp.tag() == *tag)
 }
 
 #[derive(Debug, Error, PartialEq, Eq)]
@@ -94,9 +81,10 @@ mod tests {
         use super::*;
 
         lazy_static! {
-            static ref WEB_PROOF: Precompile = precompile_by_name("WebProof").unwrap();
-            static ref EMAIL_PROOF: Precompile = precompile_by_name("EmailProof").unwrap();
-            static ref JSON_GET_STRING: Precompile = precompile_by_name("JsonGetString").unwrap();
+            static ref WEB_PROOF: Precompile = precompile_by_tag(&Tag::WebProof).unwrap();
+            static ref EMAIL_PROOF: Precompile = precompile_by_tag(&Tag::EmailProof).unwrap();
+            static ref JSON_GET_STRING: Precompile =
+                precompile_by_tag(&Tag::JsonGetString).unwrap();
         }
 
         #[test]

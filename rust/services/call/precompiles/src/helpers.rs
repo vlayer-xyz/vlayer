@@ -10,24 +10,22 @@ pub(super) fn map_to_fatal<E: ToString>(err: E) -> PrecompileErrors {
 }
 
 macro_rules! generate_precompile {
-    ($name:literal, $func:path, $base_cost:literal, $byte_cost:literal, $category:expr) => {{
+    ($suffix:literal, $func:path, $base_cost:literal, $byte_cost:literal, $category:expr) => {{
         use alloy_primitives::{Address, keccak256};
 
         fn run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
             let gas_used = gas_used(input.len(), gas_limit, $base_cost, $byte_cost)?;
-            let bytes = $func(input)?;
-            Ok(PrecompileOutput::new(gas_used, bytes))
+            $func(input).map(|out| PrecompileOutput::new(gas_used, out))
         }
 
-        fn hash_address(name: &str) -> Address {
-            let full_name = format!("vlayer.precompiles.{}", name);
-            let hash = keccak256(full_name.as_bytes());
-            Address::from_slice(&hash[..20])
-        }
+        let mut addr = [0_u8; 20];
+        addr[..18].copy_from_slice(&keccak256(b"vlayer.precompiles")[..18]);
+        addr[18..].copy_from_slice(&(($suffix as u16).to_be_bytes()));
 
-        let address = hash_address($name);
-        let inner = PrecompileWithAddress(address, RawPrecompile::Standard(run));
-        Precompile::new(inner, $category)
+        Precompile::new(
+            PrecompileWithAddress(Address::from(addr), RawPrecompile::Standard(run)),
+            $category,
+        )
     }};
 }
 
