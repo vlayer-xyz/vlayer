@@ -6,8 +6,6 @@
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
     "lint:solidity": "solhint '../src/**/*.sol' --max-warnings 0 && forge fmt ../src --check",
     "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "test-web:dev": "echo \"No tests specified yet\"",
