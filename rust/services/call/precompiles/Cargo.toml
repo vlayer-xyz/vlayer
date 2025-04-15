@@ -8,6 +8,7 @@ alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
 derive_more = { workspace = true }
 email_proof = { workspace = true }
+jmespath = { workspace = true, features = ["sync"] }
 lazy_static = { workspace = true }
 regex = { workspace = true }
 revm = { workspace = true }
