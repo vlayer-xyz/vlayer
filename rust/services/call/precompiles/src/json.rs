@@ -50,14 +50,14 @@ pub(super) fn get_array_length(input: &Bytes) -> Result<Bytes> {
 }
 
 fn process_input(input: &Bytes) -> Result<(Value, String)> {
-    let (body, json_path) = pre_process_input(input)?;
+    let (body, json_path) = decode_args(input)?;
     let value_by_path = get_value_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
     Ok((value_by_path.clone(), json_path))
 }
 
 fn process_input_arr(input: &Bytes) -> Result<u64> {
-    let (body, json_path) = pre_process_input(input)?;
+    let (body, json_path) = decode_args(input)?;
     let value_by_path = get_array_length_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
     Ok(value_by_path.try_into().unwrap())
@@ -71,7 +71,7 @@ fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
     }
 }
 
-fn pre_process_input(input: &Bytes) -> Result<(Value, String)> {
+fn decode_args(input: &Bytes) -> Result<(Value, String)> {
     let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let body = serde_json::from_str(body.as_str())
         .map_err(|err| map_to_fatal(format!("Error converting string body to json: {err}")))?;
