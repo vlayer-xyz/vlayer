@@ -1,10 +1,8 @@
-use std::convert::Into;
-
 use alloy_primitives::Bytes;
-use alloy_sol_types::{SolValue, sol_data};
+use alloy_sol_types::sol_data;
 use args::decode_args;
+use jmespath::Variable;
 use path::get_value_by_path;
-use serde_json::Value;
 
 use crate::helpers::{Result, abi_encode, map_to_fatal};
 
@@ -16,7 +14,7 @@ type InputType = sol_data::FixedArray<sol_data::String, 2>;
 pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
     value
-        .as_str()
+        .as_string()
         .map(abi_encode)
         .ok_or(map_to_fatal(format!("Expected type 'String' at {path}, but found {value:?}")))
 }
@@ -24,8 +22,11 @@ pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
 #[allow(clippy::unwrap_used)]
 pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
-    value
-        .as_i64()
+    let numeric_value = match value {
+        Variable::Number(ref num) => num.as_i64(),
+        _ => None,
+    };
+    numeric_value
         .map(abi_encode)
         .ok_or(map_to_fatal(format!("Expected type 'Number' at {path}, but found {value:?}")))
 }
@@ -33,35 +34,15 @@ pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
 pub(super) fn get_bool(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
     value
-        .as_bool()
+        .as_boolean()
         .map(abi_encode)
         .ok_or(map_to_fatal(format!("Expected type 'Bool' at {path}, but found {value:?}")))
 }
 
-pub(super) fn get_array_length(input: &Bytes) -> Result<Bytes> {
-    get_array_len(input).map(|len| len.abi_encode().into())
-}
-
-fn get_value(input: &Bytes) -> Result<(Value, String)> {
+fn get_value(input: &Bytes) -> Result<(Variable, String)> {
     let (body, path) = decode_args(input)?;
-    let value_by_path = get_value_by_path(&body, path.as_str())
-        .ok_or(map_to_fatal(format!("Missing value at path {path}")))?;
-    Ok((value_by_path.clone(), path))
-}
-
-fn get_array_len(input: &Bytes) -> Result<u64> {
-    let (body, path) = decode_args(input)?;
-    let value_by_path = get_array_length_by_path(&body, path.as_str())
-        .ok_or(map_to_fatal(format!("Missing value at path {path}")))?;
-    Ok(value_by_path.try_into().unwrap())
-}
-
-fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
-    if path.is_empty() {
-        value.as_array().map(std::vec::Vec::len)
-    } else {
-        get_value_by_path(value, path).and_then(|v| v.as_array().map(std::vec::Vec::len))
-    }
+    let value_by_path = get_value_by_path(&body, path.as_str()).map_err(map_to_fatal)?;
+    Ok((value_by_path, path))
 }
 
 #[cfg(test)]
@@ -107,19 +88,25 @@ mod tests {
         let abi_encoded_body_and_json_path =
             abi_encode(&[TEST_JSON, "root.nested_level.field_missing"]);
 
-        assert!(matches!(get_value(&abi_encoded_body_and_json_path.into()),
-            Err(Fatal { msg: message }) if message == "Missing value at path root.nested_level.field_missing"));
+        let result = get_value(&abi_encoded_body_and_json_path.into());
+        assert_eq!(result, Ok((Variable::Null, "root.nested_level.field_missing".to_string())));
     }
 
     mod string_tests {
         use super::*;
+
         #[test]
         fn fail_string_number() {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_number, but found Number(12)"));
+            let result = get_string(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'String' at root.nested_level.field_number, but found Number(Number(12))".into()
+                })
+            );
         }
 
         #[test]
@@ -127,8 +114,13 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)"));
+            let result = get_string(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)".into()
+                })
+            );
         }
 
         #[test]
@@ -136,20 +128,31 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}"));
+            let result = get_string(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'String' at root.nested_level.field_object, but found Object({})".into()
+                })
+            );
         }
     }
 
     mod number_tests {
         use super::*;
+
         #[test]
         fn fail_number_bool() {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_boolean, but found Bool(true)"));
+            let result = get_int(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'Number' at root.nested_level.field_boolean, but found Bool(true)".into()
+                })
+            );
         }
 
         #[test]
@@ -157,8 +160,13 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_string, but found String(\"field_string_value\")"));
+            let result = get_int(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'Number' at root.nested_level.field_string, but found String(\"field_string_value\")".into()
+                })
+            );
         }
 
         #[test]
@@ -166,8 +174,13 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_object, but found Object {}"));
+            let result = get_int(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'Number' at root.nested_level.field_object, but found Object({})".into()
+                })
+            );
         }
     }
 
@@ -178,16 +191,27 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_string, but found String(\"field_string_value\")"));
+            let result = get_bool(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'Bool' at root.nested_level.field_string, but found String(\"field_string_value\")".into()
+                })
+            );
         }
+
         #[test]
         fn fail_bool_number() {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_number, but found Number(12)"));
+            let result = get_bool(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'Bool' at root.nested_level.field_number, but found Number(Number(12))".into()
+                })
+            );
         }
 
         #[test]
@@ -195,8 +219,13 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into()),
-                Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_object, but found Object {}"));
+            let result = get_bool(&abi_encoded_body_and_json_path.into());
+            assert_eq!(
+                result,
+                Err(Fatal {
+                    msg: "Expected type 'Bool' at root.nested_level.field_object, but found Object({})".into()
+                })
+            );
         }
     }
 
@@ -204,7 +233,9 @@ mod tests {
     fn fail_empty_json_body() {
         let abi_encoded_body_and_json_path = abi_encode(&["{}", "field"]);
 
-        assert!(matches!(get_value(&abi_encoded_body_and_json_path.into()),
-            Err(Fatal { msg: message }) if message == "Missing value at path field"))
+        assert_eq!(
+            get_value(&abi_encoded_body_and_json_path.into()),
+            Ok((Variable::Null, "field".to_string()))
+        );
     }
 }
