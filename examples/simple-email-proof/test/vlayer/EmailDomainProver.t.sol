@@ -29,7 +29,7 @@ contract EmailDomainProverTest is VTest {
         UnverifiedEmail memory email = getTestEmail("testdata/verify_vlayer.eml");
         VerifiedEmail memory verifiedEmail = wrapper.verify(email);
         callProver();
-        (, bytes32 emailHash, address registeredWallet, string memory emailDomain) = prover.main(email, johnDoe);
+        (, bytes32 emailHash, address registeredWallet, string memory emailDomain) = prover.main(email);
 
         assertEq(emailHash, sha256(abi.encodePacked(verifiedEmail.from)));
         assertEq(registeredWallet, johnDoe);
