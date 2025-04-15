@@ -1,10 +1,10 @@
 use alloy_primitives::FixedBytes;
 use call_engine::{ProofMode, Seal};
 use risc0_zkvm::{
-    sha::Digestible,
     FakeReceipt, Groth16Receipt,
     InnerReceipt::{self, Fake, Groth16},
     Receipt, ReceiptClaim,
+    sha::Digestible,
 };
 
 const VERIFIER_SELECTOR_LENGTH: usize = 4;
@@ -137,10 +137,10 @@ fn split_seal_into_bytes(bytes: SealBytesT) -> [FixedBytes<32>; 8] {
 
 #[cfg(test)]
 mod test {
-    use alloy_primitives::{hex::FromHex, Address, Uint};
+    use alloy_primitives::{Address, Uint, hex::FromHex};
     use alloy_sol_types::SolValue;
     use risc0_zkvm::{
-        sha::Digestible, Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim,
+        Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim, sha::Digestible,
     };
 
     use super::*;
@@ -154,7 +154,7 @@ mod test {
 
     // stable, expected selector by solidity groth16 verifiers
     // must be kept in sync with value from `contracts/vlayer/test/helpers/Groth16VerifierSelector.sol`
-    const GROTH16_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0xc1, 0x01, 0xb4, 0x2b]);
+    const GROTH16_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0x9f, 0x39, 0x69, 0x6c]);
 
     fn mock_journal() -> Vec<u8> {
         let call_assumptions = call_engine::CallAssumptions {

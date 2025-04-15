@@ -1,9 +1,11 @@
-import { WelcomePage } from "../../pages";
 import { Step, StepKind, stepsMeta, StepComponentMap } from "./types";
+import { WelcomePage, ShowBalancePage, SuccessPage } from "../../pages";
 
 // Map step kinds to their respective components
 export const stepComponents: StepComponentMap = {
   [StepKind.welcome]: WelcomePage,
+  [StepKind.showBalance]: ShowBalancePage,
+  [StepKind.success]: SuccessPage,
 };
 
 // Get complete step data with component

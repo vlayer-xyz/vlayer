@@ -26,6 +26,7 @@ pub use inspector::Inspector;
 pub struct Executor<'envs, D: RevmDB> {
     envs: &'envs CachedEvmEnv<D>,
     start: ExecutionLocation,
+    is_vlayer_test: bool,
 }
 
 impl<'envs, D: RevmDB> Executor<'envs, D> {
@@ -49,8 +50,13 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         self.ensure_no_forward_jump(location)?;
         let env = self.envs.get(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
-        let inspector = Inspector::new(env.cfg_env.chain_id, transaction_callback);
-        let mut evm = build_evm(&env, tx, inspector);
+        let inspector = Inspector::new(
+            env.cfg_env.chain_id,
+            transaction_callback,
+            self.is_vlayer_test,
+            self.is_on_historic_block(location),
+        );
+        let mut evm = build_evm(&env, tx, inspector, self.is_vlayer_test);
         // Can panic because EVM is unable to propagate errors on intercepted calls
         let ResultAndState { result, .. } = evm.transact_preverified()?;
         debug!("EVM call result: {result:?}");
@@ -73,6 +79,10 @@ impl<'envs, D: RevmDB> Executor<'envs, D> {
         }
         Ok(())
     }
+
+    const fn is_on_historic_block(&self, location: ExecutionLocation) -> bool {
+        location.block_number < self.start.block_number || location.chain_id != self.start.chain_id
+    }
 }
 
 #[cfg(test)]
@@ -86,7 +96,7 @@ mod tests {
         let start = ExecutionLocation::new(1, 1);
         let target = ExecutionLocation::new(1, 0);
         let envs = CachedEvmEnv::<InMemoryDB>::from_envs(Default::default());
-        let executor = Executor::new(&envs, start);
+        let executor = Executor::new(&envs, start, true);
         executor.ensure_no_forward_jump(target).unwrap();
     }
 
@@ -95,7 +105,7 @@ mod tests {
         let start = ExecutionLocation::new(1, 0);
         let target = ExecutionLocation::new(1, 1);
         let envs = CachedEvmEnv::<InMemoryDB>::from_envs(Default::default());
-        let executor = Executor::new(&envs, start);
+        let executor = Executor::new(&envs, start, true);
         assert_eq!(
             executor.ensure_no_forward_jump(target).unwrap_err(),
             Error::TimeTravelIntoFuture {

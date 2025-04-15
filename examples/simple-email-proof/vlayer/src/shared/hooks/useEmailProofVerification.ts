@@ -6,11 +6,9 @@ import {
 } from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
-import { usePrivateKey } from "../lib/utils";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
-import { privateKeyToAccount } from "viem/accounts";
-import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
+import { AbiStateMutability, ContractFunctionArgs } from "viem";
 import { useNavigate } from "react-router";
 import debug from "debug";
 
@@ -58,7 +56,7 @@ export const useEmailProofVerification = () => {
   const { data: proof, error: provingError } =
     useWaitForProvingResult(proofHash);
 
-  const verifyProofOnChain = async () => {
+  const verifyProofOnChain = () => {
     setCurrentStep(ProofVerificationStep.VERIFYING_ON_CHAIN);
 
     if (!proof) {
@@ -76,24 +74,12 @@ export const useEmailProofVerification = () => {
       >,
     };
 
-    if (usePrivateKey) {
-      await writeContract({
-        ...contractArgs,
-        account: privateKeyToAccount(
-          import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
-        ),
-      });
-    } else {
-      await writeContract(contractArgs);
-    }
+    writeContract(contractArgs);
   };
 
   const startProving = async (emlContent: string) => {
     setCurrentStep(ProofVerificationStep.SENDING_TO_PROVER);
-    const claimerAddr = usePrivateKey
-      ? privateKeyToAccount(import.meta.env.VITE_PRIVATE_KEY as `0x${string}`)
-          .address
-      : (connectedAddr as Address);
+    const claimerAddr = connectedAddr;
 
     const email = await preverifyEmail(
       emlContent,
@@ -106,7 +92,7 @@ export const useEmailProofVerification = () => {
   useEffect(() => {
     if (proof) {
       log("proof", proof);
-      verifyProofOnChain();
+      void verifyProofOnChain();
     }
   }, [proof]);
 
@@ -114,7 +100,7 @@ export const useEmailProofVerification = () => {
     if (status === "success" && proof) {
       setCurrentStep(ProofVerificationStep.DONE);
       const proofArray = proof as unknown[];
-      navigate(
+      void navigate(
         `/success?txHash=${txHash}&domain=${String(proofArray[3])}&recipient=${String(proofArray[2])}`,
       );
     }

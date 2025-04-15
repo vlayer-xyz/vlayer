@@ -77,7 +77,8 @@ mod tests {
     use super::*;
     use crate::{fixtures::load_web_proof_fixture, redaction::RedactionElementType};
 
-    const X_TEST_URL: &str = "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
+    const TEST_URL: &str =
+        "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken";
 
     mod verify_and_parse {
         use k256::PublicKey;
@@ -85,11 +86,10 @@ mod tests {
         use serde_json::Value;
 
         use super::*;
-        use crate::fixtures::{
-            read_fixture,
-            utils::{change_server_name, load_web_proof_fixture_and_modify},
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        };
+        use crate::fixtures::{NOTARY_PUB_KEY_PEM_EXAMPLE, read_fixture};
+
+        const WEB_PROOF_IDENTITY_NAME_CHANGED: &str =
+            include_str!(".././testdata/0.1.0-alpha.8/web_proof_identity_name_changed.json");
 
         #[test]
         fn correct_url_extracted() {
@@ -97,12 +97,13 @@ mod tests {
 
             let web = verify_and_parse(web_proof).unwrap();
 
-            assert_eq!(web.url, "https://api.x.com/1.1/account/settings.json");
+            assert_eq!(web.url, TEST_URL);
         }
 
         #[test]
         fn invalid_server_name() {
-            let web_proof = load_web_proof_fixture_and_modify(change_server_name);
+            let web_proof: WebProof =
+                serde_json::from_str(WEB_PROOF_IDENTITY_NAME_CHANGED).unwrap();
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
@@ -116,7 +117,7 @@ mod tests {
 
             let web = verify_and_parse(web_proof).unwrap();
 
-            assert_eq!(web.server_name, "api.x.com");
+            assert_eq!(web.server_name, "lotr-api.online");
         }
 
         #[test]
@@ -125,7 +126,10 @@ mod tests {
 
             let web = verify_and_parse(web_proof).unwrap();
 
-            assert_eq!(web.body, "{\"protected\":false,\"screen_name\":\"wktr0\",\"always_use_https\":true,\"use_cookie_personalization\":false,\"sleep_time\":{\"enabled\":false,\"end_time\":null,\"start_time\":null},\"geo_enabled\":false,\"language\":\"en\",\"discoverable_by_email\":false,\"discoverable_by_mobile_phone\":false,\"display_sensitive_media\":false,\"personalized_trends\":true,\"allow_media_tagging\":\"all\",\"allow_contributor_request\":\"none\",\"allow_ads_personalization\":false,\"allow_logged_out_device_personalization\":false,\"allow_location_history_personalization\":false,\"allow_sharing_data_for_third_party_personalization\":false,\"allow_dms_from\":\"following\",\"always_allow_dms_from_subscribers\":null,\"allow_dm_groups_from\":\"following\",\"translator_type\":\"none\",\"country_code\":\"pl\",\"address_book_live_sync_enabled\":false,\"universal_quality_filtering_enabled\":\"enabled\",\"dm_receipt_setting\":\"all_enabled\",\"allow_authenticated_periscope_requests\":true,\"protect_password_reset\":false,\"require_password_login\":false,\"requires_login_verification\":false,\"dm_quality_filter\":\"enabled\",\"autoplay_disabled\":false,\"settings_metadata\":{\"is_eu\":\"true\"}}");
+            assert_eq!(
+                web.body,
+                "{\"success\":true,\"name\":\"Gandalf\",\"greeting\":\"Hello, Frodo!\"}"
+            );
         }
 
         #[test]
@@ -141,7 +145,8 @@ mod tests {
 
         #[test]
         fn success_all_redaction_turned_on() {
-            let web_proof = read_fixture("./testdata/web_proof_all_redaction_types.json");
+            let web_proof =
+                read_fixture("./testdata/0.1.0-alpha.8/web_proof_all_redaction_types.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             let web = verify_and_parse(web_proof).unwrap();
@@ -150,29 +155,35 @@ mod tests {
             let parsed: Value = serde_json::from_str(body).unwrap();
 
             let name = parsed.get("name").unwrap().as_str().unwrap();
-            let eye_color = parsed.get("eye_color").unwrap().as_str().unwrap();
+            let greeting = parsed.get("greeting").unwrap().as_str().unwrap();
 
-            assert_eq!(name, "Luke Skywalker");
-            assert_eq!(eye_color, "****");
+            assert_eq!(name, "************");
+            assert_eq!(greeting, "Old Tom Bombadil is a merry fellow!");
 
             let url = &web.url;
-            assert_eq!(url, "https://swapi.dev/api/people/1?format=****");
+            assert_eq!(
+                url,
+                "https://lotr-api.online/auth_header_require?param1=******&param2=value2"
+            );
         }
 
         #[test]
         fn fail_request_url_partial_redaction() {
-            let web_proof = read_fixture("./testdata/web_proof_request_url_partial_redaction.json");
+            let web_proof = read_fixture(
+                "./testdata/0.1.0-alpha.8/web_proof_request_url_partial_redaction.json",
+            );
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
-                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestUrlParam, err)) if err == "format: j***"
-            ));
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestUrlParam, err)) if err == "param1: v*****"
+            ),);
         }
         #[test]
         fn fail_request_header_partial_redaction() {
-            let web_proof =
-                read_fixture("./testdata/web_proof_request_header_partial_redaction.json");
+            let web_proof = read_fixture(
+                "./testdata/0.1.0-alpha.8/web_proof_request_header_partial_redaction.json",
+            );
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
@@ -182,24 +193,26 @@ mod tests {
         }
         #[test]
         fn fail_response_header_partial_redaction() {
-            let web_proof =
-                read_fixture("./testdata/web_proof_response_header_partial_redaction.json");
+            let web_proof = read_fixture(
+                "./testdata/0.1.0-alpha.8/web_proof_response_header_partial_redaction.json",
+            );
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
-                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseHeader, err)) if err == "Server: n***********"
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseHeader, err)) if err == "Date: ****************************T"
             ));
         }
         #[test]
         fn fail_response_body_json_value_partial_redaction() {
-            let web_proof =
-                read_fixture("./testdata/web_proof_response_json_partial_redaction.json");
+            let web_proof = read_fixture(
+                "./testdata/0.1.0-alpha.8/web_proof_response_json_partial_redaction.json",
+            );
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
-                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseBody, err)) if err == "$.eye_color: b***"
+                WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseBody, err)) if err == "$.name: T***********"
             ));
         }
     }
@@ -209,14 +222,14 @@ mod tests {
 
         #[test]
         fn server_name_verification_success() {
-            assert!(verify_server_name("api.x.com", X_TEST_URL).is_ok());
+            assert!(verify_server_name("lotr-api.online", TEST_URL).is_ok());
         }
 
         #[test]
         fn server_name_verification_fail_host_name_mismatch() {
             assert!(matches!(
-                verify_server_name("x.com", X_TEST_URL).unwrap_err(),
-                WebProofError::HostNameMismatch(host, server_name) if host == "api.x.com" && server_name == "x.com"
+                verify_server_name("example.com", TEST_URL).unwrap_err(),
+                WebProofError::HostNameMismatch(host, server_name) if host == "lotr-api.online" && server_name == "example.com"
             ));
         }
 

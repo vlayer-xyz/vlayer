@@ -2,9 +2,17 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
-
+import importPlugin from "eslint-plugin-import";
 export default tseslint.config(
   { ignores: ["dist"] },
+  {
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      "import/no-extraneous-dependencies": "error",
+    },
+  },
   {
     extends: [
       js.configs.recommended,
@@ -18,6 +26,6 @@ export default tseslint.config(
     },
     rules: {
       curly: "error",
-    }
+    },
   },
 );

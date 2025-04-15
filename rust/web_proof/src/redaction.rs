@@ -95,12 +95,14 @@ mod test_validate_name_value_redaction {
         let name_values_primary = vec![("name1", "value1").into(), ("name2", "value2").into()];
         let name_values_secondary = vec![("name1", "value1").into(), ("name2", "value2").into()];
 
-        assert!(validate_name_value_redaction(
-            &name_values_primary,
-            &name_values_secondary,
-            RedactionElementType::RequestHeader
-        )
-        .is_ok());
+        assert!(
+            validate_name_value_redaction(
+                &name_values_primary,
+                &name_values_secondary,
+                RedactionElementType::RequestHeader
+            )
+            .is_ok()
+        );
     }
 
     #[test]
@@ -108,12 +110,14 @@ mod test_validate_name_value_redaction {
         let name_values_primary = vec![("name1", "******").into(), ("name2", "value2").into()];
         let name_values_secondary = vec![("name1", "++++++").into(), ("name2", "value2").into()];
 
-        assert!(validate_name_value_redaction(
-            &name_values_primary,
-            &name_values_secondary,
-            RedactionElementType::RequestHeader
-        )
-        .is_ok());
+        assert!(
+            validate_name_value_redaction(
+                &name_values_primary,
+                &name_values_secondary,
+                RedactionElementType::RequestHeader
+            )
+            .is_ok()
+        );
     }
 
     #[test]

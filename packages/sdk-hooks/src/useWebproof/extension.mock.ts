@@ -71,30 +71,4 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
       }
     }, this.mockBehavior.delayMs);
   }
-
-  public async getWebProof(): Promise<{
-    presentationJson: PresentationJSON;
-    decodedTranscript: {
-      sent: string;
-      recv: string;
-    };
-  }> {
-    await new Promise((resolve) =>
-      setTimeout(resolve, this.mockBehavior.delayMs),
-    );
-
-    if (this.mockBehavior.shouldSucceed) {
-      return {
-        presentationJson:
-          this.mockBehavior.mockProof ||
-          ({ mock: "proof" } as unknown as PresentationJSON),
-        decodedTranscript: {
-          sent: "mock sent",
-          recv: "mock recv",
-        },
-      };
-    } else {
-      throw new Error(this.mockBehavior.mockError || "Mock error occurred");
-    }
-  }
 }

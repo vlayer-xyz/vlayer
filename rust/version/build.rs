@@ -5,6 +5,8 @@ use vergen_gitcl::{
 };
 
 fn main() {
+    println!("cargo:rerun-if-env-changed=VLAYER_RELEASE");
+
     if env::var("VLAYER_RELEASE").is_err() {
         println!("cargo:rustc-env=VLAYER_RELEASE=dev");
     }
@@ -14,7 +16,7 @@ fn main() {
 
 fn emit_version_from_git_sha() -> anyhow::Result<()> {
     let mut git_cl_builder = GitclBuilder::default();
-    git_cl_builder.all().sha(true);
+    git_cl_builder.all().sha(false);
 
     Emitter::default()
         .add_instructions(&BuildBuilder::all_build()?)?

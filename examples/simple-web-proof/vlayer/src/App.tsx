@@ -1,15 +1,15 @@
 import { steps } from "./utils/steps";
-import { createConfig, WagmiProvider } from "wagmi";
+import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { Layout } from "./components/layout/Layout";
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { Chain, http } from "viem";
-import { anvil, optimismSepolia } from "viem/chains";
-import { useEnvPrivateKey } from "./utils/clientAuthMode";
-import { mockConnector } from "./utils/mockConnector";
+import { Chain } from "viem";
+import { anvil, optimismSepolia } from "wagmi/chains";
+import { ErrorBoundary } from "react-error-boundary";
+import { AppErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
 
 const queryClient = new QueryClient();
 const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
@@ -41,22 +41,10 @@ createAppKit({
   },
 });
 
-const config = () => {
-  return useEnvPrivateKey()
-    ? createConfig({
-        connectors: [mockConnector(chain)],
-        chains,
-        transports: {
-          [anvil.id]: http(),
-        },
-      })
-    : wagmiAdapter.wagmiConfig;
-};
-
 const App = () => {
   return (
     <div id="app">
-      <WagmiProvider config={config()}>
+      <WagmiProvider config={wagmiAdapter.wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <ProofProvider
             config={{
@@ -67,17 +55,19 @@ const App = () => {
             }}
           >
             <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Layout />}>
-                  {steps.map((step) => (
-                    <Route
-                      key={step.path}
-                      path={step.path}
-                      element={<step.component />}
-                    />
-                  ))}
-                </Route>
-              </Routes>
+              <ErrorBoundary FallbackComponent={AppErrorBoundaryComponent}>
+                <Routes>
+                  <Route path="/" element={<Layout />}>
+                    {steps.map((step) => (
+                      <Route
+                        key={step.path}
+                        path={step.path}
+                        element={<step.component />}
+                      />
+                    ))}
+                  </Route>
+                </Routes>
+              </ErrorBoundary>
             </BrowserRouter>
           </ProofProvider>
         </QueryClientProvider>

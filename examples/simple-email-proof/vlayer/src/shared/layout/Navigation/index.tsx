@@ -34,7 +34,7 @@ export const BackButton: React.FC = () => {
     <button
       onClick={() => {
         if (currentStep?.backUrl) {
-          navigate(currentStep.backUrl);
+          void navigate(currentStep.backUrl);
         }
       }}
       className="flex gap-1.5 justify-center items-center px-2 py-0 my-auto h-8 text-xs leading-3 text-center text-gray-800 whitespace-nowrap rounded-lg shadow-sm min-h-[32px]"

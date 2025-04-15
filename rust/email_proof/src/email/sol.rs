@@ -126,4 +126,28 @@ mod test {
             assert_eq!(result, Err(Error::Overrun));
         }
     }
+
+    mod parse_record_type {
+        use super::*;
+
+        const TXT_RECORD_TYPE: u8 = 16;
+        const UNSUPPORTED_RECORD_TYPE: u8 = 1;
+
+        #[test]
+        fn test_parse_record_type() {
+            let result = parse_record_type(TXT_RECORD_TYPE);
+            assert_eq!(result, Ok(RecordType::TXT));
+        }
+
+        #[test]
+        fn test_parse_record_type_invalid() {
+            let result = parse_record_type(UNSUPPORTED_RECORD_TYPE);
+            assert_eq!(
+                result,
+                Err(Error::custom(format!(
+                    "Unexpected DNS record type: {UNSUPPORTED_RECORD_TYPE}. Supported types: TXT(16)"
+                )))
+            );
+        }
+    }
 }

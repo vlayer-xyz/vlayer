@@ -1,4 +1,4 @@
-use alloy_primitives::{BlockHash, BlockNumber, ChainId, B256};
+use alloy_primitives::{B256, BlockHash, BlockNumber, ChainId};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use call_common::ExecutionLocation;
 use call_engine::{

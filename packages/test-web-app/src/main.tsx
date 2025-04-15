@@ -1,6 +1,6 @@
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Dapp, DappNewWay, DappFailedAuth } from "./Dapp";
+import { Dapp, DappFailedAuth } from "./Dapp";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Profile, ProfileFailedAuth } from "./Profile";
@@ -10,16 +10,13 @@ import "./main.css";
 import Email from "./Email";
 import { DappProveWeb } from "./DappProveWeb";
 import { DappPut } from "./DappPut";
+import SdkPlayground from "./SdkPlayground";
 
 const router = createBrowserRouter([
   // dapp is the app developer used and launched using the sdk
   {
     path: "/dapp",
     element: <Dapp />,
-  },
-  {
-    path: "/dapp-new-way",
-    element: <DappNewWay />,
   },
   {
     path: "/dapp-prove-web",
@@ -61,6 +58,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <div></div>,
+  },
+  {
+    path: "/sdk-playground",
+    element: <SdkPlayground />,
   },
 ]);
 

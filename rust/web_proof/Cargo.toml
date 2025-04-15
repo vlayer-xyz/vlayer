@@ -1,7 +1,7 @@
 [package]
 name = "web_proof"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 alloy-dyn-abi = { workspace = true }
@@ -22,6 +22,7 @@ url = { workspace = true }
 
 [dev-dependencies]
 alloy-primitives = { workspace = true }
+insta = { workspace = true }
 
 [features]
 fixtures = []

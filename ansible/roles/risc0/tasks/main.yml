@@ -6,6 +6,7 @@
   args:
     creates: ~/.foundry/bin/foundryup
     executable: /bin/bash
+
 - name: Install Foundry
   ansible.builtin.shell: ~/.foundry/bin/foundryup
   args:
@@ -19,30 +20,27 @@
   args:
     executable: /bin/bash
     creates: .cargo/bin/rustup
-- name: Install Cargo binstall
+
+# rzup itself does not yet have a stable version, install most-recent.
+- name: Install rzup  # noqa: no-changed-when
   ansible.builtin.shell: |
     set -ueo pipefail
-    curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+    export PATH=$PATH:"$HOME/.cargo/bin/"
+    curl -L https://risczero.com/install | bash
   args:
     executable: /bin/bash
-    creates: ~/.cargo/bin/cargo-binstall
-- name: Check installed version of risc0
+  async: 600  # 10 minutes to complete
+  poll: 10  # check every 10 seconds
+
+- name: Install r0vm with specified version
   ansible.builtin.shell: |
     set -ueo pipefail
-    # Exit early if risc0 not installed at all
-    ~/.cargo/bin/cargo install --list | grep -q cargo-risczero || exit 0
-    # Capture installed version
-    ~/.cargo/bin/cargo install --list | grep -oP 'cargo-risczero v\d+\.\d+\.\d+' | grep -oP '\d+\.\d+\.\d+'
-  register: installed_risc0
-  changed_when: false
+    export PATH=$PATH:"$HOME/.cargo/bin/"
+    export PATH=$PATH:"$HOME/.risc0/bin"
+    rzup install r0vm {{ vlayer_risc0_version }}
   args:
     executable: /bin/bash
-- name: Install risc0
-  ansible.builtin.shell: |
-    set -ueo pipefail
-    ~/.cargo/bin/cargo binstall -y cargo-risczero@{{ vlayer_risc0_version }} --force
-    ~/.cargo/bin/cargo risczero install
-  when: vlayer_risc0_version != installed_risc0.stdout
-  changed_when: vlayer_risc0_version != installed_risc0.stdout
-  args:
-    executable: /bin/bash
+  register: r0vm_install_result
+  changed_when: "'is already installed' not in r0vm_install_result.stdout"
+  async: 600  # 10 minutes to complete
+  poll: 10  # check every 10 seconds

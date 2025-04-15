@@ -15,22 +15,21 @@ import {TestnetStableDeployment} from "../../src/TestnetStableDeployment.sol";
 
 contract StableTestDeployment_Tests is Test {
     address public constant INITIAL_ADMIN = address(0xAeb4F991499dDC040d28653b42209e1eA6E8c151);
+    address public constant INITIAL_OWNER = address(0xF52c0F73B4BceA4a13125197Eba625Dc65996441);
     address public constant CREATE2_DEPLOYER_CONTRACT = address(0x4e59b44847b379578588920cA78FbF26c0B4956C);
 
-    function test_repositoryAddressIsStable() public {
-        vm.skip(true);
+    function test_repositoryAddressIsStable() public pure {
         Repository repository = TestnetStableDeployment.repository();
 
         bytes memory bytecode =
-            abi.encodePacked(type(Repository).creationCode, abi.encode(INITIAL_ADMIN, INITIAL_ADMIN));
+            abi.encodePacked(type(Repository).creationCode, abi.encode(INITIAL_ADMIN, INITIAL_OWNER));
         bytes32 bytecodeHash = keccak256(bytecode);
 
         address computedAddress = Create2.computeAddress(VLAYER_STABLE_SALT, bytecodeHash, CREATE2_DEPLOYER_CONTRACT);
         assertEq(computedAddress, address(repository));
     }
 
-    function test_FakeProofVerifierAddressIsStable() public {
-        vm.skip(true);
+    function test_FakeProofVerifierAddressIsStable() public pure {
         Repository repository = TestnetStableDeployment.repository();
         (FakeProofVerifier fakeProofVerifier,,) = TestnetStableDeployment.verifiers();
 
@@ -41,8 +40,7 @@ contract StableTestDeployment_Tests is Test {
         assertEq(computedAddress, address(fakeProofVerifier));
     }
 
-    function test_groth16ProofVerifierAddressIsStable() public {
-        vm.skip(true);
+    function test_groth16ProofVerifierAddressIsStable() public pure {
         Repository repository = TestnetStableDeployment.repository();
         (, Groth16ProofVerifier groth16ProofVerifier,) = TestnetStableDeployment.verifiers();
 
@@ -53,8 +51,7 @@ contract StableTestDeployment_Tests is Test {
         assertEq(computedAddress, address(groth16ProofVerifier));
     }
 
-    function test_proofVerifiierRouterIsStable() public {
-        vm.skip(true);
+    function test_proofVerifiierRouterIsStable() public pure {
         (FakeProofVerifier fakeProofVerifier, Groth16ProofVerifier groth16ProofVerifier, ProofVerifierRouter router) =
             TestnetStableDeployment.verifiers();
 

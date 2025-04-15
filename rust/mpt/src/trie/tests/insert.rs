@@ -1,4 +1,4 @@
-use crate::{node::Node, trie::MptError, KeccakMerkleTrie as MerkleTrie};
+use crate::{KeccakMerkleTrie as MerkleTrie, node::Node, trie::MptError};
 
 #[test]
 pub fn empty_key() -> anyhow::Result<()> {

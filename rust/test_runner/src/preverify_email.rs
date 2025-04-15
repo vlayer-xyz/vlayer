@@ -1,17 +1,17 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolCall;
 use hickory_resolver::{
-    config::{ResolverConfig, ResolverOpts},
     Resolver,
+    config::{ResolverConfig, ResolverOpts},
 };
 use mailparse::MailHeaderMap;
 use thiserror::Error;
 use verifiable_dns::{
-    verifiable_dns::{sign_record::sign_record, signer::Signer},
     DNSRecord, RecordType,
+    verifiable_dns::{sign_record::sign_record, signer::Signer},
 };
 
-use crate::cheatcodes::{preverifyEmailCall, DnsRecord, UnverifiedEmail};
+use crate::cheatcodes::{DnsRecord, UnverifiedEmail, preverifyEmailCall};
 
 #[derive(Error, Debug)]
 pub enum EnhanceEmailError {
@@ -142,7 +142,9 @@ Hello
 
         #[test]
         fn decodes_input() {
-            let input = bytes!("64646ba00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000");
+            let input = bytes!(
+                "64646ba00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000"
+            );
             let result = decode_input(&input).unwrap();
             assert_eq!(result, "hello");
         }

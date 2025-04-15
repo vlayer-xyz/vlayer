@@ -78,7 +78,7 @@ docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
 | Prover             | `http://127.0.0.1:3000`        | zkEVM prover for vlayer contracts           |
 | Indexer            | `http://127.0.0.1:3001`        | Storage proof indexer                       |
 | Notary             | `http://127.0.0.1:7047`        | TLS Notary server                           |
-| WebSocket Proxy    | `http://127.0.0.1:55688`       | Proxying websocket connections              |
+| WebSocket Proxy    | `http://127.0.0.1:3003`       | Proxying websocket connections              |
 
 ### Stopping Devnet
 

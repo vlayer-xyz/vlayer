@@ -5,8 +5,8 @@ use jsonrpsee::{core::RpcResult, http_client::HttpClient, proc_macros::rpc};
 use thiserror::Error;
 
 use crate::{
-    types::{rpc::OutputResponse, SequencerOutput},
     ClientError, IClient,
+    types::{SequencerOutput, rpc::OutputResponse},
 };
 
 #[rpc(server, client, namespace = "optimism")]
@@ -14,7 +14,7 @@ pub trait RollupNode {
     /// Get the output root at a specific block.
     #[method(name = "outputAtBlock")]
     async fn op_output_at_block(&self, block_number: BlockNumberOrTag)
-        -> RpcResult<OutputResponse>;
+    -> RpcResult<OutputResponse>;
 }
 
 #[derive(Debug, Error, Derivative)]

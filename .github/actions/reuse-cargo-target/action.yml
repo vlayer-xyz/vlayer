@@ -1,0 +1,26 @@
+name: Create reusable Cargo target dir
+description: Creates a reusable Cargo target directory in a custom subdirectory.
+inputs:
+# We cannot use a global variable/secret in an action,
+# so it has to come from a workflow outside.
+  targets_path:
+    description: 'Path to a directory containing all unique target names.'
+    required: true
+  target_name:
+    description: 'Unique name for separating the target from others.'
+    required: true
+outputs:
+  CARGO_TARGET_DIR:
+    description: "The variable to use to override the target dir."
+    value: ${{ steps.configure_cargo_target.outputs.CARGO_TARGET_DIR }}
+runs:
+  using: "composite"
+  steps:
+    - name: Configure the CARGO_TARGET_DIR variable
+      id: configure_cargo_target
+      run: |
+        FULL_PATH="${{ inputs.targets_path }}/${{ inputs.target_name }}"
+        sudo mkdir -p "$FULL_PATH"
+        sudo chown "$(whoami):$(whoami)" "$FULL_PATH"
+        echo "CARGO_TARGET_DIR=$FULL_PATH" >> $GITHUB_OUTPUT
+      shell: bash

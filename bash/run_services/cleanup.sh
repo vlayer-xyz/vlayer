@@ -15,7 +15,7 @@ function cleanup() {
     done < "${CHAIN_WORKER_PIDS}"
 
     if [[ $VLAYER_ENV == "dev" ]]; then
-        docker compose -f $DOCKER_COMPOSE_FILE down
+        docker compose ${DOCKER_COMPOSE_FILES[@]} down
     fi
 
     echo "Artifacts saved to: ${VLAYER_TMP_DIR}"

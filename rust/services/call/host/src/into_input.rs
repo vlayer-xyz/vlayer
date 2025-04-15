@@ -6,12 +6,12 @@ use call_engine::evm::{
     input::{EvmInput, MultiEvmInput},
 };
 use common::Hashable;
-use mpt::{MerkleTrie, Node, EMPTY_ROOT_HASH};
+use mpt::{EMPTY_ROOT_HASH, MerkleTrie, Node};
 use thiserror::Error;
 
 use crate::db::{
-    proof::{self, ProofDb},
     HostDb,
+    proof::{self, ProofDb},
 };
 
 #[derive(Debug, Error)]

@@ -1,12 +1,17 @@
 use std::path::PathBuf;
 
 use soldeer_core::errors::SoldeerError;
+use thiserror::Error;
 
-use crate::config::Error as ConfigError;
+use crate::{
+    cli_wrappers::{base, js, vlayer},
+    commands::{jwt::Error as JwtError, update},
+    config::Error as ConfigError,
+};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
     #[error("Command execution failed: {0}")]
     CommandExecution(#[from] std::io::Error),
@@ -40,6 +45,16 @@ pub enum Error {
     Soldeer(#[from] SoldeerError),
     #[error(transparent)]
     Config(#[from] ConfigError),
+    #[error(transparent)]
+    Vlayer(#[from] vlayer::Error),
+    #[error(transparent)]
+    JsPm(#[from] js::Error),
+    #[error(transparent)]
+    Cli(#[from] base::Error),
+    #[error(transparent)]
+    UpdateDocker(#[from] update::docker::Error),
+    #[error(transparent)]
+    Jwt(#[from] JwtError),
 }
 
 impl Error {

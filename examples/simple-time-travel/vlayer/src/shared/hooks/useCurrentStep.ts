@@ -9,7 +9,7 @@ export const useCurrentStep = () => {
 
   useEffect(() => {
     setCurrentStep(getAllSteps().find(byPath(location)));
-  }, [location.pathname]);
+  }, [location.pathname, setCurrentStep]);
   return { currentStep };
 };
 

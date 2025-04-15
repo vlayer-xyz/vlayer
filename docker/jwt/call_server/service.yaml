@@ -1,0 +1,5 @@
+services:
+  vlayer-call-server:
+    volumes:
+      - ../../fixtures/jwt-authority.key.pub:/jwt-authority.key.pub
+    command: "--proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-l1:8545 --rpc-url 31338:http://anvil-l2-op:8545 --jwt-public-key /jwt-authority.key.pub"

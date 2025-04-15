@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use alloy_primitives::{Address, Bytes, StorageKey, StorageValue, TxNumber, B256, U256};
+use alloy_primitives::{Address, B256, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use ethers_core::types::StorageProof as EthersStorageProof;
 use serde::{Deserialize, Serialize};
 

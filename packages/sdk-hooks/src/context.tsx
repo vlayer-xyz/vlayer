@@ -27,7 +27,7 @@ export const ProofProvider = ({
   const webProofProvider = createExtensionWebProofProvider({
     notaryUrl: notaryUrl,
     wsProxyUrl: wsProxyUrl,
-    jwtToken: token,
+    token,
   });
 
   const vlayerClient = createVlayerClient({

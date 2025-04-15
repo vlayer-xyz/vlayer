@@ -67,9 +67,9 @@ impl<ZK: zk_proof::IVerifier> IVerifier for Verifier<ZK> {
 
 #[cfg(test)]
 mod tests {
-    use block_trie::{mock_block_trie, BlockTrie};
+    use block_trie::{BlockTrie, mock_block_trie};
     use common::verifier::zk_proof;
-    use risc0_zkvm::{serde::to_vec, FakeReceipt, InnerReceipt, Receipt, ReceiptClaim};
+    use risc0_zkvm::{FakeReceipt, InnerReceipt, Receipt, ReceiptClaim, serde::to_vec};
 
     use super::*;
     use crate::{ChainProof, ChainProofReceipt};

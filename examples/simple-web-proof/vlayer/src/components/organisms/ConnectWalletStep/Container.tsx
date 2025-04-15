@@ -17,19 +17,21 @@ const useConnectWallet = () => {
 
   const next = useCallback(() => {
     if (hasExtensionInstalled) {
-      navigate("/start-proving");
+      void navigate("/start-proving");
     } else {
-      navigate("/install-extension");
+      void navigate("/install-extension");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasExtensionInstalled]);
 
-  const connectWallet = () => {
-    openWallet();
+  const connectWallet = async () => {
+    await openWallet();
     closeModal();
   };
 
   useEffect(() => {
     showModal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWalletConnected]);
 
   return {
@@ -45,7 +47,7 @@ export const ConnectWalletStep = () => {
     <ConnectWalletStepPresentational
       isWalletConnected={isWalletConnected}
       next={next}
-      connectWallet={connectWallet}
+      connectWallet={() => void connectWallet()}
     />
   );
 };

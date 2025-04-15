@@ -1,7 +1,7 @@
 #![allow(clippy::disallowed_types)]
 use std::fmt;
 
-use revm::{db::WrapDatabaseRef, Database, DatabaseRef};
+use revm::{Database, DatabaseRef, db::WrapDatabaseRef};
 
 pub trait RevmDBError: fmt::Debug + Send + Sync + 'static + Into<anyhow::Error> {}
 impl<T> RevmDBError for T where T: fmt::Debug + Send + Sync + 'static + Into<anyhow::Error> {}

@@ -4,7 +4,7 @@ use alloy_primitives::Address;
 use call_common::RevmDB;
 use revm::db::CacheDB;
 
-use crate::config::{Storage, ACCOUNT_TO_STORAGE, EMPTY_ACCOUNTS};
+use crate::config::{ACCOUNT_TO_STORAGE, EMPTY_ACCOUNTS, Storage};
 
 /// Preloads trusted data into the CacheDB to reduce preflight network requests.
 ///

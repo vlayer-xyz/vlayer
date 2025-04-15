@@ -1,13 +1,13 @@
 use std::marker::PhantomData;
 
-use alloy_primitives::{Bytes, B256};
+use alloy_primitives::{B256, Bytes};
 use common::Hashable;
 use derivative::Derivative;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{hash, Digest, Keccak256};
+use crate::{Digest, Keccak256, hash};
 
 pub mod constructors;
 pub mod insert;

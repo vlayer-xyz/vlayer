@@ -4,9 +4,7 @@
   "scripts": {
     "deploy_test_contracts": "cd test-web-app && bun run deploy.ts",
     "test-web:headed": "bun run deploy_test_contracts && TEST_MODE=headed bunx playwright test --ui",
-    "test-web:headless": "bun run deploy_test_contracts && TEST_MODE=headless bunx playwright test",
-    "lint": "eslint ./*/src/** ",
-    "lint:fix": "eslint ./*/src/** --fix"
+    "test-web:headless": "bun run deploy_test_contracts && TEST_MODE=headless bunx playwright test"
   },
   "devDependencies": {
     "@playwright/test": "1.48.0",

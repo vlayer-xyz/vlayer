@@ -6,6 +6,7 @@ fs_permissions = [
     { access = "read", path = "./deployed_contracts.json" }
 ]
 
+solc_version = "0.8.28"
 optimizer = true
 optimizer_runs = 200
 
@@ -20,7 +21,7 @@ match-path = "test/vlayer/*"
 [dependencies]
 forge-std = "1.9.4"
 "@openzeppelin-contracts" = "5.0.1"
-risc0-ethereum = { version = "1.2.0", url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip" }
+risc0-ethereum = { version = "2.0.0", url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v2.0.0-soldeer/contracts.zip" }
 
 [rpc_endpoints]
 base = "https://mainnet.base.org"

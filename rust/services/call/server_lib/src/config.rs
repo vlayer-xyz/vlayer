@@ -1,16 +1,14 @@
 use std::{collections::HashMap, net::SocketAddr as RawSocketAddr};
 
-use alloy_primitives::{hex::ToHexExt, ChainId};
+use alloy_primitives::{ChainId, hex::ToHexExt};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
 use derive_more::From;
 use risc0_zkp::core::digest::Digest;
-use server_utils::ProofMode;
+use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
 use thiserror::Error;
 
-#[cfg(feature = "jwt")]
-use crate::jwt::Config as JwtConfig;
 use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
 
 #[derive(Debug, Error)]
@@ -28,7 +26,6 @@ pub struct Config {
     pub chain_guest_ids: Box<[Digest]>,
     pub semver: String,
     pub gas_meter_config: Option<GasMeterConfig>,
-    #[cfg(feature = "jwt")]
     pub jwt_config: Option<JwtConfig>,
 }
 
@@ -93,7 +90,6 @@ pub struct ConfigBuilder {
     chain_guest_ids: Option<Box<[Digest]>>,
     semver: Option<String>,
     gas_meter_config: Option<GasMeterConfig>,
-    #[cfg(feature = "jwt")]
     jwt_config: Option<JwtConfig>,
 }
 
@@ -175,7 +171,6 @@ impl ConfigBuilder {
     }
 
     #[must_use]
-    #[cfg(feature = "jwt")]
     pub fn with_jwt_config(mut self, jwt_config: impl Into<Option<JwtConfig>>) -> Self {
         self.jwt_config = jwt_config.into();
         self
@@ -192,7 +187,6 @@ impl ConfigBuilder {
             chain_guest_ids,
             semver,
             gas_meter_config,
-            #[cfg(feature = "jwt")]
             jwt_config,
         } = self;
 
@@ -210,7 +204,6 @@ impl ConfigBuilder {
             chain_guest_ids,
             semver,
             gas_meter_config,
-            #[cfg(feature = "jwt")]
             jwt_config,
         })
     }
@@ -222,6 +215,7 @@ impl From<&Config> for HostConfig {
             proof_mode: config.proof_mode.into(),
             call_guest_elf: config.call_guest_elf.clone(),
             chain_guest_ids: config.chain_guest_ids.clone(),
+            is_vlayer_test: false,
         }
     }
 }

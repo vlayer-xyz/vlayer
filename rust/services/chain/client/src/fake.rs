@@ -1,6 +1,6 @@
 use alloy_primitives::ChainId;
 use async_trait::async_trait;
-use chain_common::{fake_proof_result, ChainProof, SyncStatus};
+use chain_common::{ChainProof, SyncStatus, fake_proof_result};
 use derive_new::new;
 use provider::{BlockNumber, BlockingProviderExt, CachedMultiProvider};
 use risc0_zkp::core::digest::Digest;

@@ -3,13 +3,13 @@
 [package]
 name = "risc0_call_guest"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 alloy-sol-types = { version = "=0.8.20", default-features = false }
 call_guest = { path = "../../services/call/guest" }
-risc0-zkvm = { version = "=1.2.4", default-features = false, features = ["std", "unstable"] }
-risc0-zkvm-platform = { version = "=1.2.4", features = [ "rust-runtime", "export-getrandom", "sys-getenv" ] }
+risc0-zkvm = { version = "=2.0.0", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm-platform = { version = "=2.0.1", features = [ "rust-runtime", "export-getrandom", "sys-getenv" ] }
 tokio = { version = "1.41.0", features = ["rt", "macros"] }
 
 [build-dependencies]

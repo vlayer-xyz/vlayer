@@ -2,14 +2,6 @@ name: Test contracts
 
 on:
   pull_request:
-    paths:
-      - "bash/**"
-      - "contracts/**"
-      - "examples/**"
-      - ".github/workflows/foundry.yaml"
-      - ".github/workflows/test_contracts.yaml"
-    branches:
-      - "**"
   merge_group:
   push:
     branches:
@@ -23,9 +15,31 @@ env:
   FOUNDRY_PROFILE: ci
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'bash/**'
+              - 'contracts/**'
+              - 'examples/**'
+              - '.github/actions/contracts-prerequisites/action.yml'
+              - '.github/workflows/test_contracts.yaml'
+
   test-contracts:
     name: Test contracts
+    needs: changes
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - uses: actions/checkout@v4
         with:

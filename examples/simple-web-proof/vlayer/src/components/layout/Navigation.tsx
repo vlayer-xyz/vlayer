@@ -14,7 +14,7 @@ export const Navigation: React.FC = () => {
       <BackButton
         back={() => {
           if (currentStep?.backUrl) {
-            navigate(currentStep.backUrl);
+            void navigate(currentStep.backUrl);
           }
         }}
       />

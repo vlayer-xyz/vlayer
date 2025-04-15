@@ -1,25 +1,26 @@
-import { env } from "./env";
+import { TimeTravelConfig } from "./constants";
 import { createContext, type VlayerContextConfig } from "@vlayer/sdk/config";
 
-const getStartEndBlock = async (config: VlayerContextConfig) => {
-  if (env.PROVER_END_BLOCK === "latest") {
-    const { ethClient } = await createContext(config);
+const getStartEndBlock = async ({
+  config,
+  timeTravelConfig,
+}: {
+  config: VlayerContextConfig;
+  timeTravelConfig: TimeTravelConfig;
+}) => {
+  if (timeTravelConfig.prover.endBlock === "latest") {
+    const { ethClient } = createContext(config);
     const latestBlock = await ethClient.getBlockNumber();
 
-    if (!env.PROVER_TRAVEL_RANGE) {
-      throw new Error(
-        "PROVER_TRAVEL_RANGE must be set if PROVER_END_BLOCK is set to 'latest'",
-      );
-    }
     return {
-      startBlock: latestBlock - env.PROVER_TRAVEL_RANGE,
+      startBlock: latestBlock - timeTravelConfig.prover.travelRange,
       endBlock: latestBlock,
     };
   }
 
   return {
-    startBlock: env.PROVER_START_BLOCK,
-    endBlock: env.PROVER_END_BLOCK,
+    startBlock: timeTravelConfig.prover.startBlock,
+    endBlock: timeTravelConfig.prover.endBlock,
   };
 };
 

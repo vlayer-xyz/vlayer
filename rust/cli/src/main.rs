@@ -1,10 +1,11 @@
 use clap::{Parser, Subcommand};
 use commands::{
-    init::{run_init, InitArgs},
-    web_proof::{webproof_fetch, WebProofArgs},
+    init::{InitArgs, run_init},
+    jwt::{Args as JwtArgs, run as run_jwt},
+    web_proof::{WebProofArgs, webproof_fetch},
 };
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
-use tracing::error;
+use tracing::{debug, error, info, level_filters::LevelFilter, trace, warn};
 use tracing_subscriber::EnvFilter;
 pub use version::version;
 
@@ -13,6 +14,7 @@ use crate::{
     errors::Result,
 };
 
+mod cli_wrappers;
 mod commands;
 mod config;
 pub mod errors;
@@ -36,13 +38,20 @@ enum Commands {
     Test(Box<TestArgs>),
     Update,
     WebProofFetch(WebProofArgs),
+    #[command(hide = true)]
+    TestLoggingConfiguration,
+    Jwt(JwtArgs),
 }
 
 #[tokio::main]
 async fn main() {
-    // In order to view logs, run `RUST_LOG=info cargo run`
-    let filter = EnvFilter::try_from_env("RUST_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    let filter = EnvFilter::builder()
+        .with_default_directive(LevelFilter::INFO.into())
+        .from_env_lossy();
+    tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .with_writer(std::io::stderr)
+        .init();
 
     if let Err(e) = Box::pin(run()).await {
         error!("Error: {:#}", e);
@@ -61,5 +70,17 @@ async fn run() -> Result<()> {
         Commands::WebProofFetch(args) => {
             webproof_fetch(args).await.map_err(derive_more::Into::into)
         }
+        Commands::TestLoggingConfiguration => run_logging_test(),
+        Commands::Jwt(args) => run_jwt(args).map_err(crate::errors::Error::Jwt),
     }
+}
+
+fn run_logging_test() -> Result<()> {
+    println!("printed");
+    error!("error");
+    warn!("warn");
+    info!("info");
+    debug!("debug");
+    trace!("trace");
+    Ok(())
 }

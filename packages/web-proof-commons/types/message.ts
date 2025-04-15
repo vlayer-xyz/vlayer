@@ -54,6 +54,7 @@ export enum ExtensionMessageType {
   ProofProcessing = "ProofProcessing",
   CleanProvingSessionStorageOnClose = "CleanProvingSessionStorageOnClose",
   CloseSidePanel = "CloseSidePanel",
+  SidePanelClosed = "SidePanelClosed",
 }
 
 export type PresentationJSON = TLSNPresentationJSON;
@@ -78,37 +79,17 @@ export type ExtensionMessage =
         // as we dont have progress yet from tlsn this is optional
         progress?: number;
       };
-    };
-
-export type EmptyWebProverSessionConfig = {
-  notaryUrl: null;
-  wsProxyUrl: null;
-  logoUrl: null;
-  jwtToken: null;
-  steps: never[];
-};
-
-export type WebProverSessionConfig =
-  | {
-      notaryUrl: string;
-      wsProxyUrl: string;
-      logoUrl: string;
-      jwtToken: string | null;
-      steps: WebProofStep[];
     }
-  | EmptyWebProverSessionConfig;
+  | { type: ExtensionMessageType.SidePanelClosed }
+  | { type: ExtensionMessageType.CloseSidePanel };
 
-export function isEmptyWebProverSessionConfig(
-  config: WebProverSessionConfig,
-): config is EmptyWebProverSessionConfig {
-  return (
-    !config ||
-    (!config.notaryUrl &&
-      !config.wsProxyUrl &&
-      !config.logoUrl &&
-      config.steps.length === 0)
-  );
-}
+export type WebProverSessionConfig = {
+  notaryUrl: string;
+  wsProxyUrl: string;
+  logoUrl: string;
+  token?: string;
+  steps: WebProofStep[];
+};
 
 export type WebProofStep =
   | WebProofStepNotarize

@@ -1,12 +1,12 @@
 use rsa::{
+    RsaPrivateKey,
     pkcs1v15::{self, SigningKey},
     pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePublicKey},
     sha2::Sha256,
     signature::{Keypair, RandomizedSigner, SignatureEncoding},
-    RsaPrivateKey,
 };
 
-use crate::{common::to_payload::ToPayload, PublicKey, Signature};
+use crate::{PublicKey, Signature, common::to_payload::ToPayload};
 
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 

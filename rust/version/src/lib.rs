@@ -1,4 +1,7 @@
 pub fn version() -> String {
+    if env!("VLAYER_RELEASE") == "stable" {
+        return env!("CARGO_PKG_VERSION").to_string();
+    }
     let build_date = env!("VERGEN_BUILD_DATE").replace("-", "");
     [
         env!("CARGO_PKG_VERSION"),
@@ -45,8 +48,8 @@ mod tests {
 
     #[test]
     fn has_build_commit() {
-        // ex "14d8bb4" - default result of `git rev-parse --short` has length of 7
-        let commit_regex = Regex::new(r"[0-9a-f]{7}").unwrap();
+        // ex "dd603d4c45d469a6e46bb47ea0677c0a5d757a4d" - default result of `git rev-parse` has length of 40
+        let commit_regex = Regex::new(r"[0-9a-f]{40}").unwrap();
 
         let version = version();
         let build_commit = version.split('-').nth(3).unwrap();

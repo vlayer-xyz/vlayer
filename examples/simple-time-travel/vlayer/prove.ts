@@ -7,22 +7,33 @@ import {
   getConfig,
   waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
-import { env } from "./env";
 import { getStartEndBlock } from "./helpers";
+import { loadFixtures } from "./loadFixtures";
+import { getTimeTravelConfig } from "./constants";
 
 const config = getConfig();
-const { ethClient, account, proverUrl } = await createContext(config);
+const timeTravelConfig = getTimeTravelConfig(config.chainName);
 
-const { startBlock, endBlock } = await getStartEndBlock(config);
+if (config.chainName === "anvil") {
+  await loadFixtures();
+}
 
-const tokenOwner = env.PROVER_ERC20_HOLDER_ADDR;
-const usdcTokenAddr = env.PROVER_ERC20_CONTRACT_ADDR;
+const { ethClient, account, proverUrl } = createContext(config);
 
-const step = env.PROVER_STEP;
+const { startBlock, endBlock } = await getStartEndBlock({
+  config,
+  timeTravelConfig,
+});
+
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [usdcTokenAddr, startBlock, endBlock, step],
+  proverArgs: [
+    timeTravelConfig.usdcTokenAddr,
+    startBlock,
+    endBlock,
+    timeTravelConfig.prover.step,
+  ],
   verifierArgs: [],
 });
 
@@ -35,7 +46,7 @@ const provingHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
-  args: [tokenOwner],
+  args: [timeTravelConfig.tokenOwner],
   chainId: ethClient.chain.id,
 });
 

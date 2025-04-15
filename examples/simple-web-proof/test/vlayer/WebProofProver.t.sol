@@ -12,34 +12,42 @@ contract WebProverTest is VTest {
     using Strings for string;
 
     function test_verifiesWebProofAndRetrievesScreenName() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
+        WebProof memory webProof = WebProof(
+            vm.readFile("testdata/0.1.0-alpha.8/web_proof.json")
+        );
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
 
         callProver();
-        (, string memory screenName, address addr) = prover.main(webProof, account);
+        (, string memory screenName, address addr) = prover.main(
+            webProof,
+            account
+        );
 
-        assert(screenName.equal("g_p_vlayer"));
+        assert(screenName.equal("wktr0"));
         assertEq(addr, account);
     }
 
-    function test_failedVerificationBecauseOfBadWebProofSignature() public {
-        /* bad_web_proof_signature.json is a valid web proof with a bad signature.
-        Signature was changed manually by replacing one character.
-        Signature's bytes can be found in the data field of the web proof by running verify method
-        on the correct Presentation, displaying the signature of the PresentationOutput, changing
-        it from decimal vector to hex and finding it in the web_proof fixture. */
-        WebProof memory webProof = WebProof(vm.readFile("testdata/bad_web_proof_signature.json"));
+    function test_failedVerificationBecauseOfInvlidNotaryPublicKey() public {
+        WebProof memory webProof = WebProof(
+            vm.readFile(
+                "testdata/0.1.0-alpha.8/web_proof_invalid_notary_pub_key.json"
+            )
+        );
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
 
         callProver();
-        try prover.main(webProof, account) returns (Proof memory, string memory, address) {
+        try prover.main(webProof, account) returns (
+            Proof memory,
+            string memory,
+            address
+        ) {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight: Execution error: EVM error: Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: secp256k1 signature verification failed"
+                'Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert("Invalid notary public key")))'
             );
         }
     }
