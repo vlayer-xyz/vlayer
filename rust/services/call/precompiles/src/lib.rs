@@ -86,8 +86,6 @@ pub const fn is_time_dependent(precompile: &Precompile) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use alloy_primitives::hex;
-
     use super::*;
 
     mod verify_precompile_allowed_in_travel_call {
