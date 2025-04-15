@@ -12,36 +12,30 @@ mod path;
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
 pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
-    let (value_by_path, json_path) = get_value(input)?;
-    match value_by_path {
+    let (value, path) = get_value(input)?;
+    match value {
         Value::String(result) => Ok(result.abi_encode().into()),
-        _ => Err(map_to_fatal(format!(
-            "Expected type 'String' at {json_path}, but found {value_by_path:?}"
-        ))),
+        _ => Err(map_to_fatal(format!("Expected type 'String' at {path}, but found {value:?}"))),
     }
 }
 
 #[allow(clippy::unwrap_used)]
 pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
-    let (value_by_path, json_path) = get_value(input)?;
-    match value_by_path {
+    let (value, path) = get_value(input)?;
+    match value {
         Value::Number(num) if num.is_i64() => {
             let result = num.as_i64().unwrap();
             Ok(result.abi_encode().into())
         }
-        _ => Err(map_to_fatal(format!(
-            "Expected type 'Number' at {json_path}, but found {value_by_path:?}"
-        ))),
+        _ => Err(map_to_fatal(format!("Expected type 'Number' at {path}, but found {value:?}"))),
     }
 }
 
 pub(super) fn get_bool(input: &Bytes) -> Result<Bytes> {
-    let (value_by_path, json_path) = get_value(input)?;
-    match value_by_path {
+    let (value, path) = get_value(input)?;
+    match value {
         Value::Bool(result) => Ok(result.abi_encode().into()),
-        _ => Err(map_to_fatal(format!(
-            "Expected type 'Bool' at {json_path}, but found {value_by_path:?}"
-        ))),
+        _ => Err(map_to_fatal(format!("Expected type 'Bool' at {path}, but found {value:?}"))),
     }
 }
 
