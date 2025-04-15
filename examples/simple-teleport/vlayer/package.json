@@ -15,12 +15,15 @@
   "dependencies": {
     "@types/node": "^22.14.0",
     "@vlayer/sdk": "workspace:*",
-    "viem": "^2.17.5",
+    "viem": "2.27.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "typescript": "^5.5.4",
     "@types/bun": "^1.1.6",
     "solhint": "^5.0.5"
+  },
+  "overrides": {
+    "viem": "2.27.0"
   }
 }

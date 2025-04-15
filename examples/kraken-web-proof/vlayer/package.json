@@ -12,7 +12,8 @@
     "test-web:testnet": "echo \"No tests specified yet\""
   },
   "dependencies": {
-    "@vlayer/sdk": "workspace:*"
+    "@vlayer/sdk": "workspace:*",
+    "viem": "2.27.0"
   },
   "peerDependencies": {
     "typescript": "^5.5.4"
@@ -20,5 +21,8 @@
   "devDependencies": {
     "solhint": "^5.0.5",
     "typescript": "^5.5.3"
+  },
+  "overrides": {
+    "viem": "2.27.0"
   }
 }
