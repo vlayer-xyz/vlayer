@@ -97,13 +97,6 @@ mod tests {
                 }
             }
             "#;
-    const TEST_JSON_ARRAY: &str = r#"
-            [
-                {"key": 1},
-                {"key": 2},
-                {"key": 3}
-            ]
-            "#;
 
     #[test]
     fn success_integer() {
