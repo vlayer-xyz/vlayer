@@ -11,32 +11,34 @@ mod path;
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
+#[allow(clippy::needless_pass_by_value)]
+fn abi_encode(value: impl SolValue) -> Bytes {
+    value.abi_encode().into()
+}
+
 pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
-    match value {
-        Value::String(result) => Ok(result.abi_encode().into()),
-        _ => Err(map_to_fatal(format!("Expected type 'String' at {path}, but found {value:?}"))),
-    }
+    value
+        .as_str()
+        .map(abi_encode)
+        .ok_or(map_to_fatal(format!("Expected type 'String' at {path}, but found {value:?}")))
 }
 
 #[allow(clippy::unwrap_used)]
 pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
-    match value {
-        Value::Number(num) if num.is_i64() => {
-            let result = num.as_i64().unwrap();
-            Ok(result.abi_encode().into())
-        }
-        _ => Err(map_to_fatal(format!("Expected type 'Number' at {path}, but found {value:?}"))),
-    }
+    value
+        .as_i64()
+        .map(abi_encode)
+        .ok_or(map_to_fatal(format!("Expected type 'Number' at {path}, but found {value:?}")))
 }
 
 pub(super) fn get_bool(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
-    match value {
-        Value::Bool(result) => Ok(result.abi_encode().into()),
-        _ => Err(map_to_fatal(format!("Expected type 'Bool' at {path}, but found {value:?}"))),
-    }
+    value
+        .as_bool()
+        .map(abi_encode)
+        .ok_or(map_to_fatal(format!("Expected type 'Bool' at {path}, but found {value:?}")))
 }
 
 pub(super) fn get_array_length(input: &Bytes) -> Result<Bytes> {
@@ -44,16 +46,16 @@ pub(super) fn get_array_length(input: &Bytes) -> Result<Bytes> {
 }
 
 fn get_value(input: &Bytes) -> Result<(Value, String)> {
-    let (body, json_path) = decode_args(input)?;
-    let value_by_path = get_value_by_path(&body, json_path.as_str())
-        .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
-    Ok((value_by_path.clone(), json_path))
+    let (body, path) = decode_args(input)?;
+    let value_by_path = get_value_by_path(&body, path.as_str())
+        .ok_or(map_to_fatal(format!("Missing value at path {path}")))?;
+    Ok((value_by_path.clone(), path))
 }
 
 fn get_array_len(input: &Bytes) -> Result<u64> {
-    let (body, json_path) = decode_args(input)?;
-    let value_by_path = get_array_length_by_path(&body, json_path.as_str())
-        .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
+    let (body, path) = decode_args(input)?;
+    let value_by_path = get_array_length_by_path(&body, path.as_str())
+        .ok_or(map_to_fatal(format!("Missing value at path {path}")))?;
     Ok(value_by_path.try_into().unwrap())
 }
 
@@ -66,10 +68,10 @@ fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
 }
 
 fn decode_args(input: &Bytes) -> Result<(Value, String)> {
-    let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
+    let [body, path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let body = serde_json::from_str(body.as_str())
         .map_err(|err| map_to_fatal(format!("Error converting string body to json: {err}")))?;
-    Ok((body, json_path))
+    Ok((body, path))
 }
 
 #[cfg(test)]
