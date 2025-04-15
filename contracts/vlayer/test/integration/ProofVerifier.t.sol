@@ -35,6 +35,8 @@ contract Groth16ProofVerifierUnderTest is Groth16ProofVerifier {
 }
 
 contract PinnedProofVerifer_Tests is Test {
+    bytes32 internal fuzzingSeed;
+
     function setUp() public {
         // Proof has been generated with anvil, whereas we are checking against forge chain,
         // therefore blockhashes do not match.
@@ -57,6 +59,87 @@ contract PinnedProofVerifer_Tests is Test {
         (Proof memory proof, bytes32 journalHash) = ProofFixtures.groth16ProofFixture();
 
         verifier.verify(proof, journalHash, ProofFixtures.FIXED_PROVER_ADDRESS, ProofFixtures.FIXED_SELECTOR);
+    }
+
+    function _randomBool() internal returns (bool) {
+        fuzzingSeed = keccak256(abi.encode(fuzzingSeed));
+        return uint256(fuzzingSeed) % 2 == 1;
+    }
+
+    // Enums can't be fuzzed https://github.com/foundry-rs/foundry/issues/871
+    struct FuzzableProof {
+        FuzzableSeal seal;
+        bytes32 callGuestId;
+        uint256 length;
+        CallAssumptions callAssumptions;
+    }
+
+    struct FuzzableSeal {
+        bytes4 verifierSelector;
+        bytes32[8] seal;
+        uint256 mode;
+    }
+
+    function _fromFuzzable(FuzzableProof memory proof) internal pure returns (Proof memory) {
+        return Proof(_fromFuzzable(proof.seal), proof.callGuestId, proof.length, proof.callAssumptions);
+    }
+
+    function _fromFuzzable(FuzzableSeal memory seal) internal pure returns (Seal memory) {
+        return Seal(seal.verifierSelector, seal.seal, ProofMode(seal.mode % uint256(type(ProofMode).max)));
+    }
+
+    function _arbitraryProof(Proof memory originalProof, Proof memory randomProof)
+        internal
+        returns (Proof memory, bytes32)
+    {
+        Proof memory arbitraryProof;
+        arbitraryProof.seal.verifierSelector =
+            _randomBool() ? randomProof.seal.verifierSelector : originalProof.seal.verifierSelector;
+        arbitraryProof.seal.seal = _randomBool() ? randomProof.seal.seal : originalProof.seal.seal;
+        arbitraryProof.seal.mode = _randomBool() ? randomProof.seal.mode : originalProof.seal.mode;
+        arbitraryProof.callGuestId = _randomBool() ? randomProof.callGuestId : originalProof.callGuestId;
+        arbitraryProof.length = originalProof.length; // Not actually verified
+        arbitraryProof.callAssumptions.proverContractAddress = _randomBool()
+            ? randomProof.callAssumptions.proverContractAddress
+            : originalProof.callAssumptions.proverContractAddress;
+        arbitraryProof.callAssumptions.functionSelector = _randomBool()
+            ? randomProof.callAssumptions.functionSelector
+            : originalProof.callAssumptions.functionSelector;
+        arbitraryProof.callAssumptions.settleChainId =
+            _randomBool() ? randomProof.callAssumptions.settleChainId : originalProof.callAssumptions.settleChainId;
+        arbitraryProof.callAssumptions.settleBlockNumber = _randomBool()
+            ? randomProof.callAssumptions.settleBlockNumber
+            : originalProof.callAssumptions.settleBlockNumber;
+        arbitraryProof.callAssumptions.settleBlockHash =
+            _randomBool() ? randomProof.callAssumptions.settleBlockHash : originalProof.callAssumptions.settleBlockHash;
+        return (
+            arbitraryProof,
+            ProofFixtures.journalHash(
+                randomProof.callAssumptions, ProofFixtures.FIXED_OWNER, ProofFixtures.FIXED_BALANCE
+            )
+        );
+    }
+
+    function testFuzz_cannotVerifyManipulatedGroth16Proof(
+        FuzzableProof calldata randomFuzzableProof,
+        bytes32 _fuzzingSeed
+    ) public {
+        fuzzingSeed = _fuzzingSeed;
+        Proof memory randomProof = _fromFuzzable(randomFuzzableProof);
+
+        vm.setBlockhash(ProofFixtures.FIXED_SETTLE_BLOCK_NUMBER, ProofFixtures.FIXED_GROTH16_SETTLE_BLOCK_HASH);
+        vm.chainId(ProofFixtures.FIXED_SETTLE_CHAIN_ID);
+        IProofVerifier verifier = new Groth16ProofVerifierUnderTest();
+        (Proof memory proof,) = ProofFixtures.groth16ProofFixture();
+
+        (Proof memory arbitraryProof, bytes32 arbitraryJournalHash) = _arbitraryProof(proof, randomProof);
+        vm.assume(keccak256(abi.encode(arbitraryProof)) != keccak256(abi.encode(proof)));
+
+        try verifier.verify(
+            arbitraryProof, arbitraryJournalHash, ProofFixtures.FIXED_PROVER_ADDRESS, ProofFixtures.FIXED_SELECTOR
+        ) {
+            revert("Should fail");
+        } catch {}
     }
 }
 
@@ -121,7 +204,7 @@ library ProofFixtures {
     }
 
     function journalHash(CallAssumptions memory callAssumptions, address owner, uint256 balance)
-        private
+        public
         pure
         returns (bytes32)
     {
