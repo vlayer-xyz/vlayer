@@ -13,6 +13,7 @@ import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
 import { v_versions } from "../api/v_versions";
 import type { VlayerContextConfig } from "./types";
+import { AccountNotSetError } from "./errors";
 
 const log = debug("vlayer:prover");
 
@@ -58,7 +59,9 @@ export const deployProver = async ({
 }) => {
   const config = getConfig();
   const { ethClient, account, chain } = createContext(config);
-
+  if (!account) {
+    throw new AccountNotSetError();
+  }
   const proverHash = await ethClient.deployContract({
     chain,
     account,
@@ -91,7 +94,9 @@ export const deployVlayerContracts = async ({
   const config = getConfig(configOverride);
   const { chain, ethClient, account, deployConfig, proverUrl } =
     createContext(config);
-
+  if (!account) {
+    throw new AccountNotSetError();
+  }
   log("Deploying prover contract...");
   const proverHash = await ethClient.deployContract({
     chain,
