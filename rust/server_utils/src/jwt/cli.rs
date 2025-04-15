@@ -11,7 +11,7 @@ pub struct Args {
     #[arg(long, group = "auth")]
     pub jwt_public_key: Option<PathBuf>,
 
-    #[arg(long, group = "auth", default_value = "RS256")]
+    #[arg(long, requires = "auth", default_value = "RS256")]
     pub jwt_algorithm: Option<Algorithm>,
 }
 
