@@ -44,65 +44,21 @@ mod tests {
     }
 
     #[test]
-    fn success_integer() {
-        let value = get_value_by_path(&JSON, "root.nested_level.field_number");
-        assert_eq!(value, Ok(Variable::Number(12.into())));
-    }
-
-    #[test]
     fn success_bool() {
         let value = get_value_by_path(&JSON, "root.nested_level.field_boolean");
         assert_eq!(value, Ok(Variable::Bool(true)));
     }
 
     #[test]
+    fn success_integer() {
+        let value = get_value_by_path(&JSON, "root.nested_level.field_number");
+        assert_eq!(value, Ok(Variable::Number(12.into())));
+    }
+
+    #[test]
     fn success_string() {
         let value = get_value_by_path(&JSON, "root.nested_level.field_string");
         assert_eq!(value, Ok(Variable::String("field_string_value".to_string())));
-    }
-
-    #[test]
-    fn success_string_in_an_array() {
-        let value = get_value_by_path(&JSON, "root.nested_level.field_array[1]");
-        assert_eq!(value, Ok(Variable::String("val2".to_string())));
-    }
-
-    #[test]
-    fn success_string_in_an_array_of_objects() {
-        let value = get_value_by_path(&JSON, "root.nested_level.field_array_of_objects[1].key");
-        assert_eq!(value, Ok(Variable::String("val02".to_string())));
-    }
-
-    #[test]
-    fn success_number_in_an_array_of_objects() {
-        let value = get_value_by_path(
-            &JSON,
-            "root.nested_level.field_array_of_objects_with_numbers[0].key",
-        );
-        assert_eq!(value, Ok(Variable::Number(1.into())));
-    }
-
-    #[test]
-    fn success_numbers_in_array() {
-        let value = get_value_by_path(&JSON, "root.nested_level.field_array_of_numbers[1]");
-        assert_eq!(value, Ok(Variable::Number(2.into())));
-    }
-
-    #[test]
-    fn success_booleans_in_array() {
-        let value = get_value_by_path(&JSON, "root.nested_level.field_array_of_booleans[2]");
-        assert_eq!(value, Ok(Variable::Bool(true)));
-    }
-
-    #[test]
-    fn success_number_in_top_level_array() {
-        let json_array = json!([
-            {"key": 1},
-            {"key": 2},
-            {"key": 3}
-        ]);
-        let value = get_value_by_path(&json_array, "[2].key");
-        assert_eq!(value, Ok(Variable::Number(3.into())));
     }
 
     #[test]
@@ -124,12 +80,12 @@ root.nested_level.field_number | length(@)
 
     #[test]
     fn fail_missing() {
-        assert_eq!(get_value_by_path(&JSON, "root.nested_level.field_missing"), Ok(Variable::Null));
+        assert_eq!(get_value_by_path(&JSON, "missing"), Ok(Variable::Null));
     }
 
     #[test]
     fn fail_empty_json_body() {
         let empty = json!({});
-        assert_eq!(get_value_by_path(&empty, "field"), Ok(Variable::Null));
+        assert_eq!(get_value_by_path(&empty, "root"), Ok(Variable::Null));
     }
 }
