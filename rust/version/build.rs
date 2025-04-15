@@ -5,6 +5,8 @@ use vergen_gitcl::{
 };
 
 fn main() {
+    println!("cargo:rerun-if-env-changed=VLAYER_RELEASE");
+
     if env::var("VLAYER_RELEASE").is_err() {
         println!("cargo:rustc-env=VLAYER_RELEASE=dev");
     }

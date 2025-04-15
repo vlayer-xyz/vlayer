@@ -1,4 +1,7 @@
 pub fn version() -> String {
+    if env!("VLAYER_RELEASE") == "stable" {
+        return env!("CARGO_PKG_VERSION").to_string();
+    }
     let build_date = env!("VERGEN_BUILD_DATE").replace("-", "");
     [
         env!("CARGO_PKG_VERSION"),
