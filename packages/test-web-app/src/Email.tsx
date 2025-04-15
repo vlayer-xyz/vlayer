@@ -23,10 +23,10 @@ const useEmailFileUpload = () => {
     }
     const vlayer = createVlayerClient();
     const str = await getStrFromFile(file);
-    const unverifiedEmail = await preverifyEmail(
-      str,
-      "http://127.0.0.1:3002/dns-query",
-    );
+    const unverifiedEmail = await preverifyEmail({
+      mimeEmail: str,
+      dnsResolverUrl: "http://127.0.0.1:3002/dns-query",
+    });
     await vlayer.prove({
       address: PROVER_ADDRESS,
       proverAbi: proverSpec.abi,
