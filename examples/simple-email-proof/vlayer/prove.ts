@@ -43,7 +43,11 @@ const hash = await vlayer.prove({
   functionName: "main",
   chainId: chain.id,
   args: [
-    await preverifyEmail(mimeEmail, dnsServiceUrl, config.token),
+    await preverifyEmail({
+      mimeEmail,
+      dnsResolverUrl: dnsServiceUrl,
+      token: config.token,
+    }),
     john.address,
   ],
 });

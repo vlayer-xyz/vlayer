@@ -47,11 +47,15 @@ function requireSameOrigin(
   ] as const;
 }
 
-export async function preverifyEmail(
-  mimeEmail: string,
-  dnsResolverUrl: string,
-  token?: string,
-) {
+export async function preverifyEmail({
+  mimeEmail,
+  dnsResolverUrl,
+  token,
+}: {
+  mimeEmail: string;
+  dnsResolverUrl: string;
+  token?: string;
+}) {
   const parsedEmail = await parseEmail(mimeEmail);
   let signers = getDkimSigners(parsedEmail);
   const fromAddress = parsedEmail.from.address;
