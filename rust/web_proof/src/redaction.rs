@@ -67,9 +67,15 @@ pub(crate) fn validate_name_value_redaction(
     }
 
     let partially_redacted_value = zipped_pairs.clone().find(|(l, r)| {
-        !all_match(&l.value, REDACTION_REPLACEMENT_CHAR_PRIMARY as u8)
-            || !all_match(&r.value, REDACTION_REPLACEMENT_CHAR_SECONDARY as u8)
-                && l.value != r.value
+        if l.value == r.value {
+            return false;
+        }
+        if all_match(&l.value, REDACTION_REPLACEMENT_CHAR_PRIMARY as u8)
+            && all_match(&r.value, REDACTION_REPLACEMENT_CHAR_SECONDARY as u8)
+        {
+            return false;
+        }
+        true
     });
 
     if let Some(pair) = partially_redacted_value {
