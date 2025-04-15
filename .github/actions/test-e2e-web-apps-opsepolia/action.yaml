@@ -28,6 +28,10 @@ inputs:
     description: "Number of days to retain artifacts"
     required: false
     default: "30"
+  vlayer_api_token:
+    description: "Vlayer API token"
+    required: true
+
 
 runs:
   using: composite
@@ -111,6 +115,8 @@ runs:
         BUILD_CLI: 0
         EXAMPLE: ${{ inputs.example }}
         PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
+        JWT_AUTH: "on"
+        VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
 
         # OP Sepolia
         CHAIN_NAME: "optimismSepolia"

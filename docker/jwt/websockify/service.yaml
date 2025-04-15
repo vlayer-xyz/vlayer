@@ -1,0 +1,5 @@
+services:
+  wsproxy:
+    volumes:
+      - ../../fixtures/jwt-authority.key.pub:/jwt-authority.key.pub
+    command: "80 --token-plugin JWTTokenApi --token-source /jwt-authority.key.pub"

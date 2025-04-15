@@ -6,6 +6,15 @@ inputs:
     description: "The E2E test example to run"
     required: true
 
+# Auth token related
+  jwt_auth:
+    description: "JWT auth - 'on' or 'off'"
+    required: false
+    default: 'off'
+  vlayer_api_token:
+    description: "Required if jwt_auth is 'on'"
+    required: false
+
 # Proving related - fake or prod (Bonsai)
   proving_mode:
     description: "Proving mode - 'prod' (Bonsai) or 'dev' (fake)"
@@ -88,6 +97,10 @@ runs:
         BUILD_SERVICES: 0
         BUILD_CLI: 0
         EXAMPLE: ${{ inputs.example }}
+
+        # JWT auth related
+        JWT_AUTH: ${{ inputs.jwt_auth }}
+        VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
 
         # Proving related
         PROVING_MODE: ${{ inputs.proving_mode }}

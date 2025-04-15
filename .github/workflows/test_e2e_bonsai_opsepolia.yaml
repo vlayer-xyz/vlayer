@@ -122,6 +122,10 @@ jobs:
         with:
           example: "simple"
 
+          # JWT auth related
+          jwt_auth: "on"
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+
           # Proving related
           proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
@@ -143,6 +147,10 @@ jobs:
         uses: ./.github/actions/test-e2e
         with:
           example: "simple-web-proof"
+
+          # JWT auth related
+          jwt_auth: "on"
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
           # Proving related
           proving_mode: "prod"
@@ -166,6 +174,10 @@ jobs:
         with:
           example: "simple-email-proof"
 
+          # JWT auth related
+          jwt_auth: "on"
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+
           # Proving related
           proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
@@ -187,6 +199,10 @@ jobs:
         uses: ./.github/actions/test-e2e
         with:
           example: "simple-time-travel"
+
+          # JWT auth related
+          jwt_auth: "on"
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
 
           # Proving related
           proving_mode: "prod"
