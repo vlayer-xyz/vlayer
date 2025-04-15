@@ -7,8 +7,6 @@ import React, {
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCurrentStep } from "../../hooks/useCurrentStep";
-import { StepKind } from "../../../app/router/types";
-import { ProgressBar } from "../ProgressBar";
 import { Navigation } from "../Navigation";
 import { motionConfig } from "./Modal.animations";
 
@@ -32,15 +30,10 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
     showModal();
   }, [showModal]);
   const { currentStep } = useCurrentStep();
-  const [isWelcome, setIsWelcome] = useState(false);
-  const [isSuccessStep, setIsSuccessStep] = useState(false);
-  useEffect(() => {
-    setIsWelcome(currentStep?.kind === StepKind.welcome);
-    setIsSuccessStep(currentStep?.kind === StepKind.welcome);
-  }, [currentStep?.kind]);
 
   const [descClass, setDescClass] = useState("");
   const [description, setDescription] = useState("");
+
   useEffect(() => {
     setDescClass("out");
 
@@ -58,9 +51,6 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
           {...motionConfig}
         >
           <Navigation />
-          <AnimatePresence>
-            {!isWelcome && !isSuccessStep && <ProgressBar />}
-          </AnimatePresence>
           <AnimatePresence>
             {currentStep?.headerIcon && (
               <motion.img

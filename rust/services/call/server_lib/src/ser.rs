@@ -1,4 +1,4 @@
-use alloy_primitives::{Address, Selector, B256, U256};
+use alloy_primitives::{Address, B256, Selector, U256};
 use call_engine::{CallAssumptions, Proof, ProofMode, Seal};
 use serde::{Serialize, Serializer};
 

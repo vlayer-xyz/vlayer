@@ -15,10 +15,9 @@ import {
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
-import debug from "debug";
 import { initSentry } from "./helpers/sentry.ts";
+import { SIDE_PANEL_CONNECTION_NAME } from "constants/messaging.ts";
 
-const log = debug("extension:background");
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
@@ -39,7 +38,7 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
         void handleProvingStatusNotification(msg);
       })
       .with({ action: ExtensionAction.OpenSidePanel }, () => {
-        void handleOpenSidePanel();
+        void handleOpenSidePanel(connectedPort.sender);
       })
       .with({ action: ExtensionAction.CloseSidePanel }, () => {
         void handleCloseSidePanel();
@@ -58,7 +57,6 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         ),
       },
       () => {
-        log("sending message to webpage", message);
         try {
           port?.postMessage(message);
         } catch (e) {
@@ -81,7 +79,9 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         payload: {},
       });
     })
-    .exhaustive();
+    .otherwise((message) => {
+      console.error("No handler for message", message);
+    });
 });
 
 browser.runtime.onMessageExternal.addListener(
@@ -193,3 +193,17 @@ const validateProofRequest = (
     throw e;
   }
 };
+
+// this monitors the sidepanel connection
+// when the sidepanel is closed, it sends a message to the browser
+
+browser.runtime.onConnect.addListener((sidePanelPort) => {
+  if (sidePanelPort.name === SIDE_PANEL_CONNECTION_NAME) {
+    sidePanelPort.onDisconnect.addListener(() => {
+      port?.postMessage({
+        type: ExtensionMessageType.SidePanelClosed,
+        payload: {},
+      });
+    });
+  }
+});

@@ -2,16 +2,16 @@ use alloy_sol_types::private::{Address, U256};
 use delegate::delegate;
 use derive_new::new;
 use forge::revm::{
+    Database, EvmContext, Inspector,
     interpreter::{
         CallInputs, CallOutcome, CreateInputs, CreateOutcome, Gas, InstructionResult, Interpreter,
         InterpreterResult,
     },
     precompile::{Log, PrecompileWithAddress},
     primitives::Env,
-    Database, EvmContext, Inspector,
 };
 use foundry_evm::{inspectors::InspectorStack, revm::primitives::PrecompileOutput};
-use foundry_evm_core::{backend::DatabaseExt, InspectorExt};
+use foundry_evm_core::{InspectorExt, backend::DatabaseExt};
 
 use crate::cheatcode_inspector::CheatcodeInspector;
 
@@ -58,7 +58,7 @@ fn find_and_call_precompiles<DB: Database + DatabaseExt>(
     context: &EvmContext<DB>,
     inputs: &CallInputs,
 ) -> Option<CallOutcome> {
-    call_precompiles::PRECOMPILES
+    call_precompiles::precompiles(true)
         .iter()
         .find(|precompile| precompile.address() == &inputs.target_address)
         .and_then(|precompile| call_precompile(precompile, inputs, &context.env))

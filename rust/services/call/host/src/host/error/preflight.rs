@@ -68,7 +68,9 @@ impl From<GuestExecutionError> for Error {
 
 #[derive(Debug, Error, PartialEq)]
 pub enum TransactError {
-    #[error("contract execution stopped ({0:?}): No data was returned. Please check that your prover contract address is correct and the prover contract method is returning data")]
+    #[error(
+        "contract execution stopped ({0:?}): No data was returned. Please check that your prover contract address is correct and the prover contract method is returning data"
+    )]
     Stop(SuccessReason),
     #[error("{0}")]
     Revert(RevertError),
@@ -141,7 +143,9 @@ mod revert {
 
     #[test]
     fn revert() -> anyhow::Result<()> {
-        let raw = Bytes::from_hex("08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d496e636f72726563742055524c00000000000000000000000000000000000000")?;
+        let raw = Bytes::from_hex(
+            "08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d496e636f72726563742055524c00000000000000000000000000000000000000",
+        )?;
         let revert = RevertError::from(raw);
         assert_eq!(
             revert,

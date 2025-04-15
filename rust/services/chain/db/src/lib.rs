@@ -5,16 +5,16 @@ use std::{
     path::Path,
 };
 
-use alloy_primitives::{BlockNumber, ChainId, B256};
+use alloy_primitives::{B256, BlockNumber, ChainId};
 use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
 use chain_common::{ChainProofReceipt, RpcChainProof, SyncStatus};
-use chain_trie::{verify_chain_trie, UnverifiedChainTrie};
+use chain_trie::{UnverifiedChainTrie, verify_chain_trie};
 use derive_more::Debug;
 use derive_new::new;
 use key_value::{Database, DbError, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
-use mpt::{reorder_root_first, sha2, Sha256};
-use proof_builder::{mpt_from_proofs, MerkleProofBuilder, ProofResult};
+use mpt::{Sha256, reorder_root_first, sha2};
+use proof_builder::{MerkleProofBuilder, ProofResult, mpt_from_proofs};
 
 mod chain_trie;
 mod db_node;
@@ -40,9 +40,9 @@ const CHAINS: &str = "chains";
 
 #[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default, Debug)]
 pub struct ChainInfo {
-    first_block: BlockNumber,
-    last_block: BlockNumber,
-    root_hash: B256,
+    pub first_block: BlockNumber,
+    pub last_block: BlockNumber,
+    pub root_hash: B256,
     #[debug(skip)] // These proofs are really big and make logs unreadable
     zk_proof: Bytes,
 }

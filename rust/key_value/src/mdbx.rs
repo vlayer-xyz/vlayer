@@ -1,8 +1,8 @@
 use std::{f32::consts::E, io::Read, path::Path};
 
 use libmdbx::{
-    DatabaseOptions, ReadWriteOptions, Table, TableFlags, Transaction, TransactionKind, WriteFlags,
-    WriteMap, RO, RW,
+    DatabaseOptions, RO, RW, ReadWriteOptions, Table, TableFlags, Transaction, TransactionKind,
+    WriteFlags, WriteMap,
 };
 
 use super::{DbError, DbResult, ReadTx, WriteTx};

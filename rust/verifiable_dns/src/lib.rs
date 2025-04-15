@@ -11,8 +11,8 @@ mod verifier;
 
 pub use common::types::{PublicKey, Signature, VerificationData};
 pub use dns_over_https::{
+    MIME_DNS_JSON_CONTENT_TYPE, Provider, Query, Response,
     types::{Record as DNSRecord, RecordType},
-    Provider, Query, Response, MIME_DNS_JSON_CONTENT_TYPE,
 };
 #[cfg(feature = "http")]
 pub use verifiable_dns::VerifiableDNSResolver;

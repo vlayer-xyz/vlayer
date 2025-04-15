@@ -1,13 +1,13 @@
 [package]
 name = "worker"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 chain_host = { workspace = true }
-clap = { workspace = true, features = ["derive", "env"] }
+clap = { workspace = true, features = ["derive", "env", "string"] }
 common = { workspace = true }
 derivative = { workspace = true }
 dotenvy = { workspace = true }

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use alloy_primitives::{b256, keccak256, Address, Bytes, TxNumber, B256, U256};
+use alloy_primitives::{Address, B256, Bytes, TxNumber, U256, b256, keccak256};
 use alloy_rlp_derive::{RlpDecodable, RlpEncodable};
 use block_header::Hashable;
 use mpt::KeccakMerkleTrie as MerkleTrie;

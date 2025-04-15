@@ -2,7 +2,7 @@
 import {
   useWebProof,
   expectUrl,
-  GetWebProofArgs,
+  WebProofConfig,
   notarize,
   ProofProvider,
   startPage,
@@ -11,7 +11,7 @@ import {
 import React from "react";
 import { Abi } from "viem";
 
-const webProofConfig: GetWebProofArgs<Abi, string> = {
+const webProofConfig: WebProofConfig<Abi, string> = {
   proverCallCommitment: {
     address: "0x0000000000000000000000000000000000000000",
     proverAbi: [],
@@ -52,10 +52,8 @@ function DappPutContent() {
     <div
       style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
     >
-      <button onClick={requestWebProof} data-testid="request-webproof-button">
-        Request Web Proof
-      </button>
-      {webProof && <h1 data-testid="has-webproof">Web Proof is ready</h1>}
+      <button onClick={requestWebProof}>Request Web Proof</button>
+      {webProof && <h1>Has web proof</h1>}
     </div>
   );
 }
@@ -65,7 +63,7 @@ function DappPut() {
     <ProofProvider
       config={{
         notaryUrl: "http://localhost:7047",
-        wsProxyUrl: "ws://localhost:55688",
+        wsProxyUrl: "ws://localhost:3003",
       }}
     >
       <DappPutContent />

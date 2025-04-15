@@ -1,8 +1,5 @@
 import { useProvingSessionConfig } from "hooks/useProvingSessionConfig";
-import {
-  isEmptyWebProverSessionConfig,
-  WebProverSessionConfig,
-} from "../../web-proof-commons";
+import { WebProverSessionConfig } from "../../web-proof-commons";
 
 import React, { useEffect } from "react";
 import * as Sentry from "@sentry/react";
@@ -13,16 +10,17 @@ import { Steps } from "components/organisms";
 import { ErrorCallout } from "components/organisms/ErrorCallout";
 import { useCleanStorageOnClose } from "hooks/useCleanStorageOnClose";
 import { useCloseSidePanelOnRequest } from "hooks/useCloseSidePanelOnRequest";
+import { useConnectToBackground } from "hooks/useConnectToBackground";
 import { match } from "ts-pattern";
 
 export const SidePanelContent = ({
   config,
 }: {
-  config: WebProverSessionConfig | typeof LOADING;
+  config?: WebProverSessionConfig | typeof LOADING;
 }) => {
   return match(config)
     .with(LOADING, () => <div>Loading...</div>)
-    .when(isEmptyWebProverSessionConfig, () => <EmptyFlowCard />)
+    .with(undefined, () => <EmptyFlowCard />)
     .otherwise(() => (
       <>
         <Steps />
@@ -35,6 +33,7 @@ export const SidePanelContent = ({
 export const SidePanelContainer = () => {
   useCleanStorageOnClose();
   useCloseSidePanelOnRequest();
+  useConnectToBackground();
   const [config] = useProvingSessionConfig();
   useEffect(() => {
     if (config !== LOADING && Sentry.isInitialized()) {

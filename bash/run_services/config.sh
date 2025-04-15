@@ -1,4 +1,5 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
+CHAIN_NAME=${CHAIN_NAME:-anvil}
 
 # Set the SERVER_PROOF_MODE variable based on the mode
 function set_proof_mode() {
@@ -18,7 +19,12 @@ function set_proof_mode() {
 }
 
 function set_external_rpc_urls() {
-    if [[ -n "${QUICKNODE_API_KEY:-}" && -n "${QUICKNODE_ENDPOINT:-}" ]]; then
+    if [[ "${CHAIN_NAME}" != "anvil" ]]; then
+        # Check that QUICKNODE_API_KEY and QUICKNODE_ENDPOINT are not empty
+        if [[ -z "$QUICKNODE_API_KEY" || -z "$QUICKNODE_ENDPOINT" ]]; then
+            echo "Error: QUICKNODE_API_KEY and QUICKNODE_ENDPOINT must be set in prod mode."
+            usage
+        fi
         EXTERNAL_RPC_URLS=(
             "--rpc-url" "1:https://${QUICKNODE_ENDPOINT}.quiknode.pro/${QUICKNODE_API_KEY}"
             "--rpc-url" "11155111:https://${QUICKNODE_ENDPOINT}.ethereum-sepolia.quiknode.pro/${QUICKNODE_API_KEY}"
@@ -61,11 +67,11 @@ function set_testnet_chain_worker_args() {
 }
 
 function set_chain_worker_args() {
-    if [[ -z "${QUICKNODE_API_KEY:-}" || -z "${QUICKNODE_ENDPOINT:-}" ]]; then
-        echo QUICKNODE_API_KEY is not configured. Starting devnet chain workers. >&2
+    if [[ "${CHAIN_NAME}" == "anvil" ]]; then
+        CONFIRMATIONS=${CONFIRMATIONS:-1}
         set_devnet_chain_worker_args
     else
-        echo QUICKNODE_API_KEY is configured. Starting testnet chain workers. >&2
+        CONFIRMATIONS=${CONFIRMATIONS:-1}
         set_testnet_chain_worker_args
     fi
 }

@@ -14,13 +14,13 @@ on:
     branches:
       - main
 concurrency:
-  # Same group for all jobs using EXAMPLES_DEPLOY_PRIVATE_KEY key.
-  group: examples-deployment
-  cancel-in-progress: false
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   deploy-simple-time-travel:
     name: Deploy simple-time-travel example
-    runs-on: ubuntu-24.04
+    runs-on: aws-linux-medium
     outputs:
       deployment_url: ${{ steps.deploy.outputs.deployment_url }}
     steps:
@@ -31,7 +31,7 @@ jobs:
         uses: ./.github/actions/example-deploy
         with:
           example_name: simple-time-travel
-          examples_test_private_key: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           vercel_project_id: ${{ secrets.VERCEL_SIMPLE_TIME_TRAVEL_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
@@ -52,6 +52,8 @@ jobs:
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Install TypeScript prerequisites

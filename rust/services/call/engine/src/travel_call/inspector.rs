@@ -1,11 +1,11 @@
-use alloy_primitives::{address, Address, ChainId};
-use call_common::{metadata::Metadata, ExecutionLocation, RevmDB, WrappedRevmDBError};
-use call_precompiles::precompile_by_address;
+use alloy_primitives::{Address, ChainId, address};
+use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
+use call_precompiles::{is_time_dependent, precompile_by_address};
 use revm::{
-    db::WrapDatabaseRef,
-    interpreter::{CallInputs, CallOutcome},
-    primitives::ExecutionResult,
     EvmContext, Inspector as IInspector,
+    db::WrapDatabaseRef,
+    interpreter::{CallInputs, CallOutcome, CallScheme},
+    primitives::ExecutionResult,
 };
 use tracing::{debug, info};
 
@@ -28,22 +28,29 @@ pub struct Inspector<'a, D: RevmDB> {
     pub location: Option<ExecutionLocation>,
     transaction_callback: Box<TransactionCallback<'a, WrappedRevmDBError<D>>>,
     metadata: Vec<Metadata>,
+    is_vlayer_test: bool,
+    is_on_historic_block: bool,
 }
 
 impl<'a, D: RevmDB> Inspector<'a, D> {
     pub fn new(
         start_chain_id: ChainId,
         transaction_callback: impl Fn(
-                &Call,
-                ExecutionLocation,
-            ) -> Result<TxResultWithMetadata, Error<WrappedRevmDBError<D>>>
-            + 'a,
+            &Call,
+            ExecutionLocation,
+        )
+            -> Result<TxResultWithMetadata, Error<WrappedRevmDBError<D>>>
+        + 'a,
+        is_vlayer_test: bool,
+        is_on_historic_block: bool,
     ) -> Self {
         Self {
             start_chain_id,
             location: None,
             transaction_callback: Box::new(transaction_callback),
             metadata: vec![Metadata::start_chain(start_chain_id)],
+            is_vlayer_test,
+            is_on_historic_block,
         }
     }
 
@@ -75,6 +82,13 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
         let Some(location) = self.location.take() else {
             return None; // If no setChain/setBlock happened, we don't need to teleport to a new VM, but can continue with the current one.
         };
+
+        // `Call` does not support `DELEGATECALL` semantics, because it only stores a single `to` address.
+        // In contrast, `CallInputs` distinguishes between `target_address` (storage context) and `bytecode_address` (code location).
+        // When converting `CallInputs` to `Call`, we lose this distinction, making it impossible to correctly emulate `DELEGATECALL`.
+        if matches!(inputs.scheme, CallScheme::DelegateCall) {
+            panic!("DELEGATECALL is not supported in travel calls");
+        }
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
@@ -112,7 +126,13 @@ where
         info!("Call: {:?} -> {:?}", inputs.caller, inputs.bytecode_address);
         debug!("Input: {:?}", inputs.input);
 
-        if let Some(precompile) = precompile_by_address(&inputs.bytecode_address) {
+        if let Some(precompile) =
+            precompile_by_address(&inputs.bytecode_address, self.is_vlayer_test)
+        {
+            if self.is_on_historic_block && is_time_dependent(&precompile) {
+                panic!("Precompile `{:?}` is not allowed for travel calls", precompile.tag());
+            }
+
             debug!("Calling PRECOMPILE {:?}", precompile.tag());
             self.metadata
                 .push(Metadata::precompile(precompile.tag(), inputs.input.len()));
@@ -130,12 +150,14 @@ mod test {
 
     use std::convert::Infallible;
 
-    use alloy_primitives::{address, Address, BlockNumber, Bytes, U256};
+    use alloy_primitives::{Address, BlockNumber, Bytes, U256, address};
+    use lazy_static::lazy_static;
     use revm::{
+        EvmContext, InMemoryDB, Inspector as IInspector,
         db::{EmptyDB, WrapDatabaseRef},
         interpreter::{CallInputs, CallScheme, CallValue},
+        precompile::u64_to_address,
         primitives::{AccountInfo, Output, SuccessReason},
-        EvmContext, InMemoryDB, Inspector as IInspector,
     };
 
     use super::*;
@@ -146,6 +168,11 @@ mod test {
     const SEPOLIA_ID: ChainId = 11_155_111;
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
+
+    lazy_static! {
+        static ref JSON_GET_STRING_PRECOMPILE: Address = u64_to_address(0x102);
+        static ref WEB_PROOF_PRECOMPILE: Address = u64_to_address(0x100);
+    }
 
     type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<TxResultWithMetadata, Error<Infallible>>
         + Send
@@ -192,7 +219,7 @@ mod test {
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
         let mut set_block_inspector =
-            Inspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location));
+            Inspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location), true, false);
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
@@ -206,10 +233,12 @@ mod test {
             (SEPOLIA_ID, SEPOLIA_BLOCK - 1).into(),
         ];
 
-        let mut inspector: Inspector<'_, EmptyDB> =
-            Inspector::new(locations[0].chain_id, |call, location| {
-                (TRANSACTION_CALLBACK)(call, location)
-            });
+        let mut inspector: Inspector<'_, EmptyDB> = Inspector::new(
+            locations[0].chain_id,
+            |call, location| (TRANSACTION_CALLBACK)(call, location),
+            true,
+            false,
+        );
 
         inspector.set_chain(locations[1].chain_id, locations[1].block_number);
         assert_eq!(inspector.location, Some(locations[1]));
@@ -221,27 +250,26 @@ mod test {
     #[test]
     fn call_set_block() {
         let block_num = 1;
-        let inspector = inspector_call(
-            CONTRACT_ADDR,
-            &SET_BLOCK_SELECTOR,
-            &U256::from(block_num).to_be_bytes::<32>(),
+        let block = U256::from(block_num).to_be_bytes::<32>();
+        let inspector = inspector_call(CONTRACT_ADDR, &SET_BLOCK_SELECTOR, &block);
+        assert!(
+            inspector
+                .location
+                .is_some_and(|loc| loc.block_number == block_num)
         );
-        assert!(inspector
-            .location
-            .is_some_and(|loc| loc.block_number == block_num));
     }
 
     #[test]
     fn set_block_resets_after_one_call() {
         let block_num = 1;
         let mut inspector: Inspector<'_, InMemoryDB> =
-            Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK);
+            Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK, true, false);
         assert_eq!(inspector.location, None);
 
         inspector.set_block(block_num);
         assert_eq!(inspector.location, Some((MAINNET_ID, block_num).into()));
 
-        let call_inputs = create_mock_call_inputs(CONTRACT_ADDR, []);
+        let call_inputs = create_mock_call_inputs(*JSON_GET_STRING_PRECOMPILE, []);
         inspector.on_call(&call_inputs);
         assert_eq!(inspector.location, None);
     }
@@ -256,9 +284,11 @@ mod test {
         ]
         .concat();
         let inspector = inspector_call(CONTRACT_ADDR, &SET_CHAIN_SELECTOR, &args);
-        assert!(inspector
-            .location
-            .is_some_and(|loc| loc.block_number == block_num && loc.chain_id == chain_id));
+        assert!(
+            inspector
+                .location
+                .is_some_and(|loc| loc.block_number == block_num && loc.chain_id == chain_id)
+        );
     }
 
     #[test]
@@ -278,5 +308,32 @@ mod test {
         let other_contract = address!("0000000000000000000000000000000000000000");
         let inspector = inspector_call(other_contract, &[], &[]);
         assert!(inspector.location.is_none());
+    }
+
+    #[test]
+    #[should_panic(expected = "DELEGATECALL is not supported in travel calls")]
+    fn delegate_call_panics_in_travel_call() {
+        let other_contract = address!("0000000000000000000000000000000000000000");
+        let mut inspector = inspector_call(other_contract, &[], &[]);
+        let mut call_inputs = create_mock_call_inputs(other_contract, []);
+        call_inputs.scheme = CallScheme::DelegateCall;
+
+        inspector.set_block(1);
+        inspector.on_call(&call_inputs);
+    }
+
+    #[test]
+    #[should_panic(expected = "Precompile `WebProof` is not allowed for travel calls")]
+    fn panics_for_precompile_not_allowed_in_travel_call() {
+        let precompile_address = *WEB_PROOF_PRECOMPILE;
+        let mut mock_db = InMemoryDB::default();
+        mock_db.insert_account_info(precompile_address, AccountInfo::default());
+
+        let mut evm_context = EvmContext::new(WrapDatabaseRef::from(&mock_db));
+        let mut call_inputs = create_mock_call_inputs(precompile_address, []);
+
+        let mut inspector = Inspector::new(MAINNET_ID, TRANSACTION_CALLBACK, true, true);
+
+        inspector.call(&mut evm_context, &mut call_inputs);
     }
 }

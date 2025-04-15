@@ -15,7 +15,7 @@ export const test = base.extend<{
   page: Page;
 }>({
   // eslint-disable-next-line
-  context: async ({}, use) => {
+  context: async ({}, load) => {
     const pathToExtension = path.join(__dirname, "browser-extension/dist");
 
     const context = await chromium.launchPersistentContext(
@@ -40,7 +40,7 @@ export const test = base.extend<{
           },
     );
 
-    await use(context);
+    await load(context);
     await context.close();
   },
 });
@@ -58,3 +58,5 @@ export const expect = test.expect.extend({
     };
   },
 });
+
+export const extensionId = "jbchhcgphfokabmfacnkafoeeeppjmpl";

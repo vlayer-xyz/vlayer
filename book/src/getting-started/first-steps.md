@@ -60,21 +60,19 @@ In order to use the testnet, you will need to provide a couple of secrets.
 
 Firstly, create `vlayer/.env.testnet.local` - this is where you will put all your secret keys in.
 
-Log in to your [vlayer account](https://accounts.vlayer.xyz/sign-in) next (if you don't yet have a vlayer account, see below) and in the vlayer dashboard, generate a new secret
-API key and save it in `vlayer/.env.testnet.local` as
+Log in to your [vlayer account](https://accounts.vlayer.xyz/sign-in) next (if you don't yet have a vlayer account, see below) and in the vlayer dashboard, generate a new Json Web Token (JWT)
+and save it in `vlayer/.env.testnet.local` as
 
 ```sh
-VLAYER_API_TOKEN=sk_...
+VLAYER_API_TOKEN=...
 ```
 
-> ❗️ We will be inviting new users periodically to our testnet. You can join the waitlist at [accounts.vlayer.xyz/waitlist](https://accounts.vlayer.xyz/waitlist).
->
-> There are two steps to joining the waitlist:
->   * specify your email address
->   * fill in our typeform with some additional info about yourself
->
-> We want to invite folks who are really driven members of our community and would really like to test our products and help us make them even better, therefore
-> filling in the typeform will be a proof of your determination and a necessary ingredient to get you in through the door.
+> ❗️ It is important to note that the JWT token is valid for 1 year after which you will need to
+>    generate a new token to continue developing using vlayer.
+
+> ❗️ We are currently rolling out JWT-based authentication in all of our services,
+>    and while the old API tokens are still valid, we will be phasing them out over the next few weeks.
+>    Therefore, we encourage you to migrate to JWT tokens as soon as possible.
 
 Next provide a private key for deploying example contracts and sending transactions to the verifier in the `vlayer/.env.testnet.local` file as
 

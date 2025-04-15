@@ -4,7 +4,7 @@ use alloy_primitives::B256;
 use alloy_rlp::Decodable;
 
 use super::ParseNodeError;
-use crate::{hash, node::Node, Digest};
+use crate::{Digest, hash, node::Node};
 
 /// Returns the decoded node and its RLP hash.
 pub(crate) fn parse_node<D: Digest>(
@@ -40,7 +40,7 @@ pub(crate) fn resolve_trie<D>(root: Node<D>, nodes_by_hash: &HashMap<B256, Node<
 
 #[cfg(test)]
 mod parse_node {
-    use alloy_primitives::{b256, B256};
+    use alloy_primitives::{B256, b256};
     use alloy_trie::Nibbles;
 
     use super::parse_node;

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_repr::Serialize_repr;
 
-use crate::VerificationData;
+use crate::{RecordVerifierError, VerificationData, verifier::verify_signature};
 
 #[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]
 pub struct Query {
@@ -86,6 +86,17 @@ pub struct Record {
     #[serde(rename = "TTL")]
     pub ttl: u64,
     pub data: String,
+}
+
+impl Record {
+    pub fn verify(&self, verification_data: &VerificationData) -> Result<(), RecordVerifierError> {
+        verify_signature(
+            self,
+            verification_data.valid_until,
+            &verification_data.pub_key,
+            &verification_data.signature,
+        )
+    }
 }
 
 impl Response {

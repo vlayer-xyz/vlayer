@@ -1,0 +1,122 @@
+# This action depends on built and uploaded Rust binaries; hence, the step 'Download binaries'.
+name: "Run E2E Test"
+description: "Runs E2E tests for a given example"
+inputs:
+  example:
+    description: "The E2E test example to run"
+    required: true
+
+# Auth token related
+  jwt_auth:
+    description: "JWT auth - 'on' or 'off'"
+    required: false
+    default: 'off'
+  vlayer_api_token:
+    description: "Required if jwt_auth is 'on'"
+    required: false
+
+# Proving related - fake or prod (Bonsai)
+  proving_mode:
+    description: "Proving mode - 'prod' (Bonsai) or 'dev' (fake)"
+    required: true
+    default: 'dev'
+  bonsai_api_url:
+    description: "Required if proving_mode is 'prod'"
+    required: false
+  bonsai_api_key:
+    description: "Required if proving_mode is 'prod'"
+    required: false
+
+# Chain related - anvil or testnet.
+  chain_name:
+    description: "'anvil' or testnet like 'optimismSepolia'"
+    required: true
+    default: 'anvil'
+  testnet_private_key_location:
+    description: "Required for chain testnets."
+    required: false
+  quicknode_api_key:
+    description: "Required for chain testnets."
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Install Rust prerequisites
+      id: rust_pre
+      uses: ./.github/actions/rust-prerequisites
+
+    - name: Install Risc0 prerequisites
+      uses: ./.github/actions/risc0
+
+    - name: Download binaries
+      uses: actions/download-artifact@v4
+      with:
+        name: target-debug
+        path: target/debug
+
+    - name: Make downloaded binaries executable
+      run: sudo chmod +x target/debug/*
+      shell: bash
+
+    - name: Install TypeScript prerequisites
+      uses: ./.github/actions/ts-prerequisites
+
+    - name: Install contracts prerequisites
+      uses: ./.github/actions/contracts-prerequisites
+
+    - name: Mock ImageId.sol
+      run: ./bash/mock-imageid.sh
+      shell: bash
+
+    - name: Install contracts' dependencies
+      working-directory: ./contracts/vlayer
+      run: forge soldeer install
+      shell: bash
+
+    # Load testnet private key for testnets
+    - name: Read testnet private key
+      if: ${{ inputs.testnet_private_key_location != '' }}
+      run: |
+        EXAMPLES_TEST_PRIVATE_KEY=$(cat "${{ inputs.testnet_private_key_location }}")
+        echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
+        echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
+      shell: bash
+
+    # Configure RPC endpoints
+    - name: Configure RPC endpoints
+      if: ${{ inputs.quicknode_api_key != '' }}
+      run: |
+        echo "QUICKNODE_ENDPOINT=dry-alpha-tab" >> $GITHUB_ENV
+        echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+        echo "JSON_RPC_URL=https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Run e2e test for ${{ inputs.example }}
+      env:
+        VLAYER_TMP_DIR: ./artifacts
+        BUILD_SERVICES: 0
+        BUILD_CLI: 0
+        EXAMPLE: ${{ inputs.example }}
+
+        # JWT auth related
+        JWT_AUTH: ${{ inputs.jwt_auth }}
+        VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
+
+        # Proving related
+        PROVING_MODE: ${{ inputs.proving_mode }}
+        BONSAI_API_URL: ${{ inputs.bonsai_api_url }}
+        BONSAI_API_KEY: ${{ inputs.bonsai_api_key }}
+
+        # Chain related
+        CHAIN_NAME: ${{ inputs.chain_name }}
+      run: bash/e2e-test.sh
+      shell: bash
+
+    - name: Upload logs for previewing
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: logs-e2e-${{ inputs.example }}
+        path: ./artifacts/logs/
+        if-no-files-found: error
+        retention-days: 1

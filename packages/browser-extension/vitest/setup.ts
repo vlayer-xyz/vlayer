@@ -70,6 +70,10 @@ vi.doMock("webextension-polyfill", () => {
         setPanelBehavior: vi.fn().mockImplementation(() => {}),
       },
       runtime: {
+        connect: vi.fn().mockImplementation(() => {}),
+        onConnect: {
+          addListener: vi.fn().mockImplementation(() => {}),
+        },
         onInstalled: {
           addListener: vi.fn().mockImplementation(() => {}),
         },

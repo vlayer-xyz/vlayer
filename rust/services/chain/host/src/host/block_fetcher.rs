@@ -7,8 +7,8 @@ use ethers::{
     providers::{Http, JsonRpcClient, Provider},
     types::BlockNumber as BlockTag,
 };
-use futures::{stream, StreamExt, TryStreamExt};
-use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
+use futures::{StreamExt, TryStreamExt, stream};
+use provider::{BlockNumber, EvmBlockHeader, to_eth_block_header};
 use thiserror::Error;
 use tracing::{debug, instrument};
 use u64_range::Range;

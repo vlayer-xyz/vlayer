@@ -1,11 +1,11 @@
 use call_engine::{
+    CallAssumptions, GuestOutput, Input,
     evm::env::cached::CachedEvmEnv,
     travel_call::Executor as TravelCallExecutor,
     verifier::{
         teleport, time_travel,
         travel_call::{self, IVerifier},
     },
-    CallAssumptions, GuestOutput, Input,
 };
 use chain_client::{CachedClient, ChainProofCache};
 use common::verifier::zk_proof;
@@ -32,6 +32,7 @@ pub async fn main(
         chain_proofs,
         call,
         op_output_cache,
+        is_vlayer_test,
     }: Input,
     chain_guest_ids: impl IntoIterator<Item = Digest>,
 ) -> GuestOutput {
@@ -47,10 +48,11 @@ pub async fn main(
         .await
         .expect("travel call verification failed");
 
-    let evm_call_result = TravelCallExecutor::new(&cached_envs, start_execution_location)
-        .call(&call)
-        .expect("travel call execution failed")
-        .output;
+    let evm_call_result =
+        TravelCallExecutor::new(&cached_envs, start_execution_location, is_vlayer_test)
+            .call(&call)
+            .expect("travel call execution failed")
+            .output;
 
     let start_env = cached_envs
         .get(start_execution_location)

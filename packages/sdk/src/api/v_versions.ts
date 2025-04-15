@@ -1,3 +1,10 @@
+import {
+  handleProverResponseError,
+  handleAuthErrors,
+} from "./lib/handleErrors";
+import { InvalidProverResponseError } from "./lib/errors";
+import { validateJrpcResponse } from "./lib/jrpc";
+import { versionsSchema, type Versions } from "types/vlayer";
 import debug from "debug";
 
 const log = debug("vlayer:v_versions");
@@ -9,67 +16,40 @@ const v_versionsBody = {
   jsonrpc: "2.0",
 };
 
-interface VVersionsResponseResult {
-  call_guest_id: string;
-  chain_guest_id: string;
-  api_version: string;
-}
-
-export interface VVersionsResponse {
-  jsonrpc: string;
-  result: VVersionsResponseResult;
-  id: number;
-}
-
 export async function v_versions(
   url: string = "http://127.0.0.1:3000",
   token?: string,
-): Promise<VVersionsResponse> {
+): Promise<Versions> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
   if (token !== undefined) {
     headers["Authorization"] = "Bearer " + token;
   }
-  const response = await fetch(url, {
+  const rawResponse = await fetch(url, {
     method: "POST",
     body: JSON.stringify(v_versionsBody),
     headers,
   });
-  log("response", response);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  const response_json = await response.json();
-  assertResponseObject(response_json);
-  return response_json;
-}
+  log("raw response: ", rawResponse);
 
-function isFieldAString(
-  x: object,
-  field: keyof VVersionsResponseResult,
-): boolean {
-  return (
-    field in x && typeof (x as VVersionsResponseResult)[field] === "string"
-  );
-}
+  const responseJson = await rawResponse.json();
+  log("response body: ", responseJson);
 
-function assertResponseObject(x: unknown): asserts x is VVersionsResponse {
-  if (!x || typeof x !== "object") {
-    throw new Error("Expected object");
+  if (!rawResponse.ok) {
+    throw handleAuthErrors(rawResponse.status, responseJson);
   }
-  if (!("result" in x) || !x.result || typeof x.result !== "object") {
-    throw new Error(
-      `Unexpected \`v_versions\` response: ${JSON.stringify(x, null, 2)}`,
-    );
+
+  const response = validateJrpcResponse(responseJson);
+
+  if (response.error !== undefined) {
+    throw handleProverResponseError(response.error);
   }
-  if (
-    !isFieldAString(x.result, "call_guest_id") ||
-    !isFieldAString(x.result, "chain_guest_id") ||
-    !isFieldAString(x.result, "api_version")
-  ) {
-    throw new Error(
-      `Unexpected \`v_versions\` response: ${JSON.stringify(x, null, 2)}`,
-    );
+
+  const result = versionsSchema.safeParse(response.result);
+  if (!result.success) {
+    throw new InvalidProverResponseError("v_versions", response.result);
   }
+
+  return result.data;
 }

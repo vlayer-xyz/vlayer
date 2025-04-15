@@ -5,29 +5,39 @@ import {
   getConfig,
   writeEnvVariables,
 } from "@vlayer/sdk/config";
-import { env } from "./env";
 import { getStartEndBlock } from "./helpers";
+import { loadFixtures } from "./loadFixtures";
+import { getTimeTravelConfig } from "./constants";
 const config = getConfig();
+const timeTravelConfig = getTimeTravelConfig(config.chainName);
 
-const usdcTokenAddr = env.PROVER_ERC20_CONTRACT_ADDR;
+if (config.chainName === "anvil") {
+  await loadFixtures();
+}
 
-const step = env.PROVER_STEP;
-
-const { startBlock, endBlock } = await getStartEndBlock(config);
+const { startBlock, endBlock } = await getStartEndBlock({
+  config,
+  timeTravelConfig,
+});
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [usdcTokenAddr, startBlock, endBlock, step],
+  proverArgs: [
+    timeTravelConfig.usdcTokenAddr,
+    startBlock,
+    endBlock,
+    timeTravelConfig.prover.step,
+  ],
   verifierArgs: [],
 });
 
-writeEnvVariables(".env", {
+await writeEnvVariables(".env", {
   VITE_PROVER_ADDRESS: prover,
   VITE_VERIFIER_ADDRESS: verifier,
   VITE_CHAIN_NAME: config.chainName,
   VITE_PROVER_URL: config.proverUrl,
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
-  VITE_USE_WINDOW_ETHEREUM_TRANSPORT: env.USE_WINDOW_ETHEREUM_TRANSPORT || "",
+  VITE_PROVER_ERC20_HOLDER_ADDR: timeTravelConfig.tokenOwner,
 });

@@ -1,24 +1,24 @@
 use alloy_primitives::U256;
 use alloy_sol_types::{SolCall, SolType};
 use call_engine::{
+    Call, HostOutput, Proof, Seal,
     utils::evm_call::{
         create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
     },
-    Call, HostOutput, Proof, Seal,
 };
 use call_host::{Config as HostConfig, Host};
 use chain::TEST_CHAIN_ID;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
-    interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
+    interpreter::{CallInputs, CallOutcome},
 };
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use optimism::client::factory::cached;
 use provider::CachedMultiProvider;
 
 use crate::{
-    cheatcodes::{callProverCall, getProofCall, preverifyEmailCall, CHEATCODE_CALL_ADDR},
+    cheatcodes::{CHEATCODE_CALL_ADDR, callProverCall, getProofCall, preverifyEmailCall},
     preverify_email,
     providers::{
         pending_state_provider::PendingStateProviderFactory, test_provider::TestProviderFactory,

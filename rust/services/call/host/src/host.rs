@@ -7,16 +7,16 @@ use alloy_sol_types::SolValue;
 use bytes::Bytes;
 use call_common::{ExecutionLocation, Metadata};
 use call_engine::{
+    Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
     evm::{env::cached::CachedEvmEnv, execution_result::SuccessfulExecutionResult},
     travel_call::Executor as TravelCallExecutor,
     verifier::{
         teleport, time_travel,
         travel_call::{self, IVerifier},
     },
-    Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
 use chain_client::Client as ChainClient;
-use common::{verifier::zk_proof, GuestElf};
+use common::{GuestElf, verifier::zk_proof};
 pub use config::Config;
 use derive_new::new;
 use error::preflight;
@@ -24,7 +24,7 @@ pub use error::{AwaitingChainProofError, BuilderError, Error, ProvingError};
 use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;
-use risc0_zkvm::{sha::Digest, ProveInfo, SessionStats};
+use risc0_zkvm::{ProveInfo, SessionStats, sha::Digest};
 use seal::EncodableReceipt;
 use tracing::instrument;
 
@@ -55,6 +55,7 @@ pub struct Host {
     op_client_factory: recording::Factory,
     travel_call_verifier: HostTravelCallVerifier,
     guest_elf: GuestElf,
+    is_vlayer_test: bool,
 }
 
 impl Host {
@@ -118,6 +119,7 @@ impl Host {
             op_client_factory: recording_op_client_factory,
             travel_call_verifier,
             guest_elf: config.call_guest_elf,
+            is_vlayer_test: config.is_vlayer_test,
         })
     }
 
@@ -153,7 +155,8 @@ impl Host {
             output: host_output,
             gas_used,
             metadata,
-        } = TravelCallExecutor::new(&self.envs, self.start_execution_location).call(&call)?;
+        } = TravelCallExecutor::new(&self.envs, self.start_execution_location, self.is_vlayer_test)
+            .call(&call)?;
 
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
@@ -184,6 +187,7 @@ impl Host {
             chain_proofs,
             call,
             op_output_cache,
+            is_vlayer_test: self.is_vlayer_test,
         })
     }
 
@@ -242,7 +246,7 @@ struct EncodedProofWithStats {
 #[instrument(skip_all)]
 fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
     let now = Instant::now();
-    let ProveInfo { receipt, stats } = prover.prove(input)?;
+    let ProveInfo { receipt, stats, .. } = prover.prove(input)?;
     let elapsed_time = now.elapsed();
 
     let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;

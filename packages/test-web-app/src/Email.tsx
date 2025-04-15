@@ -4,6 +4,7 @@ import React, { useCallback, ChangeEvent } from "react";
 import { foundry } from "viem/chains";
 
 const PROVER_ADDRESS = import.meta.env.VITE_EMAIL_PROVER_ADDRESS;
+
 const getStrFromFile = (file: File): Promise<string> => {
   const reader = new FileReader();
 

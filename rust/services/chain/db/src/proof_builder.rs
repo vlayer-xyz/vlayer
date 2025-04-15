@@ -1,4 +1,4 @@
-use alloy_primitives::{BlockNumber, B256};
+use alloy_primitives::{B256, BlockNumber};
 use mpt::{Sha2Node as Node, Sha2NodeRef as NodeRef, Sha2Trie as MerkleTrie};
 use nybbles::Nibbles;
 

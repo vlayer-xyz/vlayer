@@ -6,13 +6,9 @@ function install_chromium() {
 
 function run_playwright_tests() {
   pushd vlayer
-  # this is temp till next release of examples currently it is testing published version which has old test: script  
-  if grep -q "test:${VLAYER_ENV}" package.json; then
-    echo "Using test:${VLAYER_ENV}"
-    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test:"${VLAYER_ENV}"
-  elif grep -q "test-web:${VLAYER_ENV}" package.json; then
+  if grep -q "test-web:${VLAYER_ENV}" package.json; then
     echo "Using test-web:${VLAYER_ENV}"
-    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test-web:"${VLAYER_ENV}"
+    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test-web:"${VLAYER_ENV}" || exit 1 
   else
     echo "Skipping playwright tests as neither test-web:${VLAYER_ENV} nor test-web:${VLAYER_ENV} script exists in package.json"
   fi
@@ -64,9 +60,9 @@ remappings = [
   ["forge-std-1.9.4/src/", "dependencies/forge-std-1.9.4/src/"]
 ]
 [sol-dependencies.risc0-ethereum]
-version = '1.2.0'
-url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip"
-remappings = [["risc0-ethereum-1.2.0/", "dependencies/risc0-ethereum-1.2.0/"]]
+version = '2.0.0'
+url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v2.0.0-soldeer/contracts.zip"
+remappings = [["risc0-ethereum-2.0.0/", "dependencies/risc0-ethereum-2.0.0/"]]
 [js-dependencies]
 "@vlayer/sdk" = { path = "$VLAYER_HOME/packages/sdk" }
 "@vlayer/react" = { path = "$VLAYER_HOME/packages/sdk-hooks" }
@@ -95,6 +91,14 @@ function init_template() {
   echo "::endgroup::Initializing from template $EXAMPLE"
 }
 
+function ensure_cli_built() {
+  if [[ "${BUILD_CLI}" == "1" ]] ; then
+    pushd "${VLAYER_HOME}"
+    silent_unless_fails cargo build --bin vlayer
+    popd
+  fi
+}
+
 function run_web_tests() {
   echo "::group::Running playwright tests for ${1} example"
 
@@ -105,7 +109,7 @@ function run_web_tests() {
   cd vlayer
 
   bun install --frozen-lockfile
-  bun run test-web:"${VLAYER_ENV}"
+  SHOULD_DEPLOY_VERIFIER_ROUTER=true bun run test-web:"${VLAYER_ENV}"
   
   popd
   echo "::endgroup::Running playwright tests for ${1} example"

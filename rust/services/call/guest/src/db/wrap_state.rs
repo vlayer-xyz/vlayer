@@ -4,13 +4,13 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use alloy_primitives::{keccak256, Address, B256, U256};
+use alloy_primitives::{Address, B256, U256, keccak256};
 use call_engine::evm::input::EvmInput;
 use mpt::KeccakMerkleTrie as MerkleTrie;
 #[allow(clippy::disallowed_types)]
 use revm::{
-    primitives::{AccountInfo, Bytecode},
     DatabaseRef,
+    primitives::{AccountInfo, Bytecode},
 };
 
 use super::state::StateDb;

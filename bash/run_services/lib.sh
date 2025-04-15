@@ -86,6 +86,11 @@ function startup_vlayer() {
         "--rpc-url" "31337:http://localhost:8545" # L1
         "--rpc-url" "31338:http://localhost:8546" # L2 OP
     )
+
+    if [[ "${JWT_AUTH}" == "on" ]]; then
+        args+=("--jwt-public-key" "./docker/fixtures/jwt-authority.key.pub") # JWT public key
+    fi
+
     if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
         args+=("--chain-proof-url" "http://localhost:3001")
     fi
@@ -106,8 +111,8 @@ function startup_vlayer() {
     popd
 }
 
-function ensure_binaries_built() {
-    if [[ "${BUILD_BINARIES}" == "1" ]] ; then
+function ensure_services_built() {
+    if [[ "${BUILD_SERVICES}" == "1" ]] ; then
         pushd "${VLAYER_HOME}"
         silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker --bin dns_server
         popd

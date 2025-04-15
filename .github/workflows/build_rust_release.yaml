@@ -55,6 +55,8 @@ jobs:
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Replace guest artifacts
@@ -100,6 +102,8 @@ jobs:
         uses: ./.github/actions/rust-prerequisites
         with:
           target: x86_64-unknown-linux-musl
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Replace guest artifacts
@@ -156,21 +160,10 @@ jobs:
       - name: Darwin prerequisites
         uses: ./.github/actions/darwin-prerequisites
 
-      # Shared risc0 installation using `cache-cargo-install-action` did not work on darwin,
-      # so installing separately.
       - name: Install Rust prerequisites
         uses: ./.github/actions/rust-prerequisites
-        with:
-          include_risc0: false
-      - name: Install risc0 installer
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cargo binstall -y cargo-risczero@1.2.4 --force
-      - name: Install risc0 toolchain
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: cargo risczero install
-
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Replace guest artifacts

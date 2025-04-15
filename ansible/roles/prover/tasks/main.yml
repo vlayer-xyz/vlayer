@@ -14,6 +14,13 @@
 - name: Install log configuration
   ansible.builtin.import_tasks: logs.yml
 
+- name: Install JWT public key
+  ansible.builtin.copy:
+    src: jwt.key.pub
+    dest: "{{ vlayer_jwt_public_key_location }}"
+    mode: '644'
+  notify: "Restart vlayer"
+
 # We're installing a most-recent nightly version every time.
 - name: Install vlayer # noqa: no-changed-when
   ansible.builtin.shell: |
