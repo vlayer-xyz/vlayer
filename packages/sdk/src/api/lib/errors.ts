@@ -41,3 +41,16 @@ ${JSON.stringify(error.format(), null, 2)}`,
     this.name = "JrpcInvalidResponseError";
   }
 }
+
+export const VLAYER_ERROR_NOTES = {
+  [HttpAuthorizationError.name]:
+    ", go to https://dashboard.vlayer.xyz to generate a JWT token and save it to VLAYER_API_TOKEN env var",
+};
+
+export function httpAuthorizationErrorWithNote(
+  error: HttpAuthorizationError,
+): HttpAuthorizationError {
+  return new HttpAuthorizationError(
+    `${error.message}${VLAYER_ERROR_NOTES[error.name]}`,
+  );
+}

@@ -1,15 +1,19 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, it, vi, beforeEach } from "vitest";
 import { readFile } from "testHelpers/readFile";
 import { findIndicesOfMatchingDomains, preverifyEmail } from "./preverify";
+import createFetchMock from "vitest-fetch-mock";
+import { HttpAuthorizationError, VLAYER_ERROR_NOTES } from "../lib/errors";
+
+const fetchMocker = createFetchMock(vi);
 
 const rawEmail = readFile("./src/api/email/testdata/test_email.txt");
 
 describe("Preverify email: integration", () => {
   test("adds dns record to email mime", async () => {
-    const preverifiedEmail = await preverifyEmail(
-      rawEmail,
-      "https://dns.google/resolve",
-    );
+    const preverifiedEmail = await preverifyEmail({
+      mimeEmail: rawEmail,
+      dnsResolverUrl: "https://dns.google/resolve",
+    });
     expect(preverifiedEmail.email).toBe(rawEmail);
     expect(preverifiedEmail.dnsRecord).toMatchObject({
       name: "20230601._domainkey.google.com.",
@@ -23,7 +27,10 @@ describe("Preverify email: integration", () => {
   test("throws error if DKIM not found", async () => {
     const emailWithNoDkimHeader = 'From: "Alice"\n\nBody';
     await expect(
-      preverifyEmail(emailWithNoDkimHeader, "https://dns.google/resolve"),
+      preverifyEmail({
+        mimeEmail: emailWithNoDkimHeader,
+        dnsResolverUrl: "https://dns.google/resolve",
+      }),
     ).rejects.toThrow("No DKIM header found");
   });
 
@@ -32,7 +39,10 @@ describe("Preverify email: integration", () => {
       "./src/api/email/testdata/test_email_unknown_domain.txt",
     );
     await expect(
-      preverifyEmail(emailWithNoDkimHeader, "https://dns.google/resolve"),
+      preverifyEmail({
+        mimeEmail: emailWithNoDkimHeader,
+        dnsResolverUrl: "https://dns.google/resolve",
+      }),
     ).rejects.toThrow();
   });
 
@@ -52,10 +62,10 @@ ${email}`;
         (email, domain) => addDkimWithDomain(domain, email),
         rawEmail,
       );
-      const email = await preverifyEmail(
-        emailWithAddedHeaders,
-        "https://dns.google/resolve",
-      );
+      const email = await preverifyEmail({
+        mimeEmail: emailWithAddedHeaders,
+        dnsResolverUrl: "https://dns.google/resolve",
+      });
       expect(
         email.email
           .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=hello.kitty;
@@ -79,15 +89,18 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
         emailWithOneDkimHeader,
       );
       await expect(
-        preverifyEmail(emailWithAddedHeaders, "https://dns.google/resolve"),
+        preverifyEmail({
+          mimeEmail: emailWithAddedHeaders,
+          dnsResolverUrl: "https://dns.google/resolve",
+        }),
       ).rejects.toThrow("Found 0 DKIM headers matching the sender domain");
     });
 
     test("removes signatures from subdomain signers", async () => {
-      const email = await preverifyEmail(
-        addDkimWithDomain("subdomain.google.com", rawEmail),
-        "https://dns.google/resolve",
-      );
+      const email = await preverifyEmail({
+        mimeEmail: addDkimWithDomain("subdomain.google.com", rawEmail),
+        dnsResolverUrl: "https://dns.google/resolve",
+      });
       expect(
         email.email
           .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=subdomain.google.com;
@@ -103,7 +116,10 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
         readFile("./src/api/email/testdata/test_email_subdomain.txt"),
       );
       await expect(
-        preverifyEmail(emailWithAddedHeaders, "https://dns.google/resolve"),
+        preverifyEmail({
+          mimeEmail: emailWithAddedHeaders,
+          dnsResolverUrl: "https://dns.google/resolve",
+        }),
       ).rejects.toThrow("Found 0 DKIM headers matching the sender domain");
     });
 
@@ -114,7 +130,10 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
         emailWithAddedHeaders,
       );
       await expect(
-        preverifyEmail(emailWithAddedHeaders, "https://dns.google/resolve"),
+        preverifyEmail({
+          mimeEmail: emailWithAddedHeaders,
+          dnsResolverUrl: "https://dns.google/resolve",
+        }),
       ).rejects.toThrow("Found 3 DKIM headers matching the sender domain");
     });
 
@@ -123,10 +142,10 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
         "example.com",
         addFakeDkimWithDomain("example.com", rawEmail),
       );
-      const email = await preverifyEmail(
-        emailWithPrefixedDkim,
-        "https://dns.google/resolve",
-      );
+      const email = await preverifyEmail({
+        mimeEmail: emailWithPrefixedDkim,
+        dnsResolverUrl: "https://dns.google/resolve",
+      });
       expect(
         email.email
           .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=example.com;
@@ -141,10 +160,10 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
     test("ignores dkim-signature somewhere inside a header", async () => {
       const headerWithDkim = `WTF-IS-THIS-HEADER: DKIM-SIGNATURE;`;
       const emailWithDkimInHeader = `${headerWithDkim}\n${addDkimWithDomain("example.com", rawEmail)}`;
-      const email = await preverifyEmail(
-        emailWithDkimInHeader,
-        "https://dns.google/resolve",
-      );
+      const email = await preverifyEmail({
+        mimeEmail: emailWithDkimInHeader,
+        dnsResolverUrl: "https://dns.google/resolve",
+      });
       expect(
         email.email.startsWith(`WTF-IS-THIS-HEADER: DKIM-SIGNATURE;
 X-DKIM-Signature: v=1; a=rsa-sha256; d=example.com;
@@ -157,10 +176,10 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
     test("ignores dkim-signature somewhere inside a body", async () => {
       const emailWithAddedDkim = addDkimWithDomain("example.com", rawEmail);
       const emailWithDkimsInBody = `${emailWithAddedDkim}\ndkim-signature   dkim-signature\r\ndkim-signature`;
-      const email = await preverifyEmail(
-        emailWithDkimsInBody,
-        "https://dns.google/resolve",
-      );
+      const email = await preverifyEmail({
+        mimeEmail: emailWithDkimsInBody,
+        dnsResolverUrl: "https://dns.google/resolve",
+      });
       expect(
         email.email
           .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=example.com;
@@ -196,6 +215,60 @@ describe("findIndicesOfMatchingDomains", () => {
     ];
     expect(findIndicesOfMatchingDomains(signers, "other.other")).toStrictEqual(
       [],
+    );
+  });
+});
+
+describe("fails with readable error if", () => {
+  beforeEach(() => {
+    fetchMocker.enableMocks();
+    fetchMocker.mockResponseOnce((req) => {
+      const token = (req.headers.get("authorization") || "")
+        .split("Bearer ")
+        .at(1);
+      if (token === undefined) {
+        return {
+          status: 401,
+          body: JSON.stringify({
+            error: "Missing JWT token",
+          }),
+        };
+      }
+      if (token !== "deadbeef") {
+        return {
+          status: 401,
+          body: JSON.stringify({
+            error: "Invalid JWT token",
+          }),
+        };
+      }
+      return {
+        status: 200,
+        body: JSON.stringify({}),
+      };
+    });
+  });
+
+  it("token is missing", async () => {
+    await expect(
+      preverifyEmail({
+        mimeEmail: rawEmail,
+        dnsResolverUrl: "https://dns.google/resolve",
+      }),
+    ).rejects.toThrowError(
+      `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
+    );
+  });
+
+  it("token is invalid", async () => {
+    await expect(
+      preverifyEmail({
+        mimeEmail: rawEmail,
+        dnsResolverUrl: "https://dns.google/resolve",
+        token: "beefdead",
+      }),
+    ).rejects.toThrowError(
+      `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
     );
   });
 });

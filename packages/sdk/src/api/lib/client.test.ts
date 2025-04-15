@@ -9,11 +9,11 @@ import {
 } from "vitest";
 
 import { createExtensionWebProofProvider } from "../webProof";
-import { createVlayerClient, VLAYER_ERROR_NOTES } from "./client";
+import { createVlayerClient } from "./client";
 import { type BrandedHash, type VlayerClient } from "types/vlayer";
 import { ZkProvingStatus } from "../../web-proof-commons";
 import createFetchMock from "vitest-fetch-mock";
-import { HttpAuthorizationError } from "./errors";
+import { HttpAuthorizationError, VLAYER_ERROR_NOTES } from "./errors";
 
 declare const global: {
   chrome: object;

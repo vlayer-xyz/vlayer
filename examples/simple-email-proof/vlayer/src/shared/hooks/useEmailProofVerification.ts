@@ -81,10 +81,11 @@ export const useEmailProofVerification = () => {
     setCurrentStep(ProofVerificationStep.SENDING_TO_PROVER);
     const claimerAddr = connectedAddr;
 
-    const email = await preverifyEmail(
-      emlContent,
-      import.meta.env.VITE_DNS_SERVICE_URL,
-    );
+    const email = await preverifyEmail({
+      mimeEmail: emlContent,
+      dnsResolverUrl: import.meta.env.VITE_DNS_SERVICE_URL,
+      token: import.meta.env.VITE_VLAYER_API_TOKEN,
+    });
     await callProver([email, claimerAddr]);
     setCurrentStep(ProofVerificationStep.WAITING_FOR_PROOF);
   };

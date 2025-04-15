@@ -1,5 +1,6 @@
 import { toByteArray } from "base64-js";
 import { toHex } from "viem";
+import { handleAuthErrors } from "../lib/handleErrors";
 
 interface DnsResponse {
   Status: number;
@@ -65,19 +66,32 @@ function takeLastAnswer(response: DnsResponse) {
 }
 
 export class DnsResolver {
-  constructor(private host: string) {}
+  constructor(
+    private host: string,
+    private token?: string,
+  ) {}
 
   async resolveDkimDns(selector: string, domain: string) {
-    const response = (await (
-      await fetch(
-        `${this.host}?name=${selector}._domainkey.${domain}&type=TXT`,
-        {
-          headers: {
-            accept: "application/dns-json",
-          },
-        },
-      )
-    ).json()) as DnsResponse;
+    const headers: Record<string, string> = {
+      Accept: "application/dns-json",
+    };
+    if (this.token !== undefined) {
+      headers["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const rawResponse = await fetch(
+      `${this.host}?name=${selector}._domainkey.${domain}&type=TXT`,
+      {
+        headers,
+      },
+    );
+    const responseJson = await rawResponse.json();
+
+    if (!rawResponse.ok) {
+      throw handleAuthErrors(rawResponse.status, responseJson);
+    }
+
+    const response = responseJson as DnsResponse;
 
     return {
       dnsRecord: takeLastAnswer(response),

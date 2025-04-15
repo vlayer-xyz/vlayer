@@ -5,6 +5,11 @@ import {
 } from "./parseEmail";
 import { DnsResolver } from "./dnsResolver";
 import { prefixAllButNthSubstring } from "../utils/prefixAllButNthSubstring";
+import {
+  HttpAuthorizationError,
+  httpAuthorizationErrorWithNote,
+} from "../lib/errors";
+import { match, P } from "ts-pattern";
 
 export function findIndicesOfMatchingDomains(
   signers: DkimDomainSelector[],
@@ -42,10 +47,15 @@ function requireSameOrigin(
   ] as const;
 }
 
-export async function preverifyEmail(
-  mimeEmail: string,
-  dnsResolverUrl: string,
-) {
+export async function preverifyEmail({
+  mimeEmail,
+  dnsResolverUrl,
+  token,
+}: {
+  mimeEmail: string;
+  dnsResolverUrl: string;
+  token?: string;
+}) {
   const parsedEmail = await parseEmail(mimeEmail);
   let signers = getDkimSigners(parsedEmail);
   const fromAddress = parsedEmail.from.address;
@@ -59,12 +69,21 @@ export async function preverifyEmail(
   [mimeEmail, signers] = requireSameOrigin(mimeEmail, signers, fromAddress);
 
   const [{ domain, selector }] = signers;
-  const resolver = new DnsResolver(dnsResolverUrl);
+  const resolver = new DnsResolver(dnsResolverUrl, token);
 
-  const dnsResponse = await resolver.resolveDkimDns(selector, domain);
+  try {
+    const dnsResponse = await resolver.resolveDkimDns(selector, domain);
 
-  return {
-    email: mimeEmail,
-    ...dnsResponse,
-  };
+    return {
+      email: mimeEmail,
+      ...dnsResponse,
+    };
+  } catch (error) {
+    const errorWithNote = match(error)
+      .with(P.instanceOf(HttpAuthorizationError), (error) =>
+        httpAuthorizationErrorWithNote(error),
+      )
+      .otherwise((error) => error);
+    throw errorWithNote;
+  }
 }
