@@ -25,8 +25,16 @@ function startup_vdns_server() {
     echo "Starting VDNS server"
     pushd "${VLAYER_HOME}"
 
+    local args=()
+
+    if [[ "${JWT_AUTH}" == "on" ]]; then
+        args+=("--jwt-public-key" "./docker/fixtures/jwt-authority.key.pub") # JWT public key
+    fi
+
     RUST_LOG=info \
-    ./target/debug/dns_server >>"${LOGS_DIR}/dns_server.out" &
+    ./target/debug/dns_server \
+        ${args[@]} \
+        >>"${LOGS_DIR}/dns_server.out" &
 
     DNS_SERVER=$!
     

@@ -16,7 +16,7 @@
 
 - name: Install JWT public key
   ansible.builtin.copy:
-    src: jwt.key.pub
+    src: ../files/jwt.key.pub
     dest: "{{ vlayer_jwt_public_key_location }}"
     mode: '644'
   notify: "Restart vlayer"

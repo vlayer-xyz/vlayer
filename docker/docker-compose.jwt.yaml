@@ -1,5 +1,6 @@
 include:
   # vlayer
+  - jwt/vdns_server/service.yaml
   - jwt/call_server/service.yaml
   # webproofs 
   - jwt/websockify/service.yaml

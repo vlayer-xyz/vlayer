@@ -1,0 +1,5 @@
+services:
+  vdns_server:
+    volumes:
+      - ../../fixtures/jwt-authority.key.pub:/jwt-authority.key.pub
+    command: ["-l", "0.0.0.0:3002", "--jwt-public-key", "/jwt-authority.key.pub"]
