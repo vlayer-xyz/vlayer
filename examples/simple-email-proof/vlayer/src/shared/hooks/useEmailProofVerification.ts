@@ -84,6 +84,7 @@ export const useEmailProofVerification = () => {
     const email = await preverifyEmail(
       emlContent,
       import.meta.env.VITE_DNS_SERVICE_URL,
+      import.meta.env.VITE_VLAYER_API_TOKEN,
     );
     await callProver([email, claimerAddr]);
     setCurrentStep(ProofVerificationStep.WAITING_FOR_PROOF);

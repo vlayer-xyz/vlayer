@@ -1,6 +1,10 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, it, vi, beforeEach } from "vitest";
 import { readFile } from "testHelpers/readFile";
 import { findIndicesOfMatchingDomains, preverifyEmail } from "./preverify";
+import createFetchMock from "vitest-fetch-mock";
+import { HttpAuthorizationError, VLAYER_ERROR_NOTES } from "../lib/errors";
+
+const fetchMocker = createFetchMock(vi);
 
 const rawEmail = readFile("./src/api/email/testdata/test_email.txt");
 
@@ -196,6 +200,53 @@ describe("findIndicesOfMatchingDomains", () => {
     ];
     expect(findIndicesOfMatchingDomains(signers, "other.other")).toStrictEqual(
       [],
+    );
+  });
+});
+
+describe("fails with readable error if", () => {
+  beforeEach(() => {
+    fetchMocker.enableMocks();
+    fetchMocker.mockResponseOnce((req) => {
+      const token = (req.headers.get("authorization") || "")
+        .split("Bearer ")
+        .at(1);
+      if (token === undefined) {
+        return {
+          status: 401,
+          body: JSON.stringify({
+            error: "Missing JWT token",
+          }),
+        };
+      }
+      if (token !== "deadbeef") {
+        return {
+          status: 401,
+          body: JSON.stringify({
+            error: "Invalid JWT token",
+          }),
+        };
+      }
+      return {
+        status: 200,
+        body: JSON.stringify({}),
+      };
+    });
+  });
+
+  it("token is missing", async () => {
+    await expect(
+      preverifyEmail(rawEmail, "https://dns.google/resolve"),
+    ).rejects.toThrowError(
+      `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
+    );
+  });
+
+  it("token is invalid", async () => {
+    await expect(
+      preverifyEmail(rawEmail, "https://dns.google/resolve", "beefdead"),
+    ).rejects.toThrowError(
+      `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
     );
   });
 });
