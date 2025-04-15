@@ -5,7 +5,7 @@ pragma solidity ^0.8.21;
 /// @dev Each address is derived by hashing the string `vlayer.precompiles.{name}` using keccak256,
 ///      then taking the first 20 bytes of the result.
 ///      This hashing is done in the Rust macro `generate_precompile!` using:
-///      `keccak256("vlayer.precompiles.{name}".as_bytes())[..20]`. 
+///      `keccak256("vlayer.precompiles.{name}".as_bytes())[..20]`
 library Precompiles {
     // vlayer.precompiles.web_proof
     address public constant VERIFY_AND_PARSE = 0x95c8504add469381E88aEa9Db3BAB9a9BDFf857b;
