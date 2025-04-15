@@ -12,7 +12,7 @@ mod path;
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
 pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
-    let (value_by_path, json_path) = process_input(input)?;
+    let (value_by_path, json_path) = get_value(input)?;
     match value_by_path {
         Value::String(result) => Ok(result.abi_encode().into()),
         _ => Err(map_to_fatal(format!(
@@ -23,7 +23,7 @@ pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
 
 #[allow(clippy::unwrap_used)]
 pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
-    let (value_by_path, json_path) = process_input(input)?;
+    let (value_by_path, json_path) = get_value(input)?;
     match value_by_path {
         Value::Number(num) if num.is_i64() => {
             let result = num.as_i64().unwrap();
@@ -36,7 +36,7 @@ pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
 }
 
 pub(super) fn get_bool(input: &Bytes) -> Result<Bytes> {
-    let (value_by_path, json_path) = process_input(input)?;
+    let (value_by_path, json_path) = get_value(input)?;
     match value_by_path {
         Value::Bool(result) => Ok(result.abi_encode().into()),
         _ => Err(map_to_fatal(format!(
@@ -46,17 +46,17 @@ pub(super) fn get_bool(input: &Bytes) -> Result<Bytes> {
 }
 
 pub(super) fn get_array_length(input: &Bytes) -> Result<Bytes> {
-    process_input_arr(input).map(|len| len.abi_encode().into())
+    get_array_len(input).map(|len| len.abi_encode().into())
 }
 
-fn process_input(input: &Bytes) -> Result<(Value, String)> {
+fn get_value(input: &Bytes) -> Result<(Value, String)> {
     let (body, json_path) = decode_args(input)?;
     let value_by_path = get_value_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
     Ok((value_by_path.clone(), json_path))
 }
 
-fn process_input_arr(input: &Bytes) -> Result<u64> {
+fn get_array_len(input: &Bytes) -> Result<u64> {
     let (body, json_path) = decode_args(input)?;
     let value_by_path = get_array_length_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
@@ -127,7 +127,7 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_missing"]);
 
-        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into()),
+        assert!(matches!(get_value(&abi_encoded_body_and_json_path.into()),
             Err(Fatal { msg: message }) if message == "Missing value at path root.nested_level.field_missing"));
     }
 
@@ -224,7 +224,7 @@ mod tests {
     fn fail_empty_json_string() {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["", "field"]);
 
-        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into()),
+        assert!(matches!(get_value(&abi_encoded_body_and_json_path.into()),
             Err(Fatal { msg: message }) if message == "Error converting string body to json: EOF while parsing a value at line 1 column 0"));
     }
 
@@ -232,7 +232,7 @@ mod tests {
     fn fail_empty_json_body() {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["{}", "field"]);
 
-        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into()),
+        assert!(matches!(get_value(&abi_encoded_body_and_json_path.into()),
             Err(Fatal { msg: message }) if message == "Missing value at path field"))
     }
 
@@ -240,7 +240,7 @@ mod tests {
     fn fail_string_as_json() {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["a string", "field"]);
 
-        assert!(matches!(process_input(&abi_encoded_body_and_json_path.into()),
+        assert!(matches!(get_value(&abi_encoded_body_and_json_path.into()),
             Err(Fatal { msg: message }) if message == "Error converting string body to json: expected value at line 1 column 1"))
     }
 }
