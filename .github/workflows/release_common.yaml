@@ -2,7 +2,9 @@ name: Release artifacts
 on:
   workflow_call:
 concurrency:
-  group: ${{ github.workflow }}
+  # Cannot use github.workflow variable here as it refers
+  # to the outside workflow calling this one.
+  group: "Release artifacts"
   cancel-in-progress: false
 jobs:
   build-release:
