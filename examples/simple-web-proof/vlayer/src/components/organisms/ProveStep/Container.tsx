@@ -10,14 +10,20 @@ export const ProveStep = () => {
   const [disabled, setDisabled] = useState(false);
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { requestWebProof, webProof, callProver, isPending, result } =
-    useTwitterAccountProof();
+  const {
+    requestWebProof,
+    webProof,
+    callProver,
+    isPending,
+    isCallProverPending,
+    result,
+  } = useTwitterAccountProof();
 
   useEffect(() => {
-    if (webProof) {
+    if (webProof && !isCallProverPending) {
       void callProver([webProof, address]);
     }
-  }, [webProof, address, callProver]);
+  }, [webProof, address, callProver, isCallProverPending]);
 
   useEffect(() => {
     if (result) {

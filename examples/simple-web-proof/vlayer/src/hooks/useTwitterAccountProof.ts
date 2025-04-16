@@ -96,23 +96,26 @@ export const useTwitterAccountProof = () => {
 
   useEffect(() => {
     if (webProof) {
-      console.log("webProof ready", webProof);
+      console.log("webProof", webProof);
       setWebProof(JSON.stringify(webProof));
     }
-  }, [webProof]);
+  }, [JSON.stringify(webProof)]);
 
   useEffect(() => {
     if (result) {
       console.log("proverResult", result);
       setProverResult(JSON.stringify(result));
     }
-  }, [result]);
+  }, [JSON.stringify(result)]);
 
   return {
     requestWebProof,
     webProof,
     isPending:
       isWebProofPending || isCallProverPending || isWaitingForProvingResult,
+    isCallProverPending,
+    isWaitingForProvingResult,
+    isWebProofPending,
     callProver,
     result,
   };
