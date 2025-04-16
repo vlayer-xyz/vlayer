@@ -1,6 +1,11 @@
 name: Release artifacts
 on:
   workflow_call:
+    inputs:
+      vlayer_release:
+        description: "Release type (nightly or stable)"
+        required: true
+        type: string
 concurrency:
   # Cannot use github.workflow variable here as it refers
   # to the outside workflow calling this one.
@@ -10,6 +15,8 @@ jobs:
   build-release:
     if: github.repository == 'vlayer-xyz/vlayer'
     uses: ./.github/workflows/build_rust_release.yaml
+    with:
+      vlayer_release: ${{ inputs.vlayer_release }}
 
   # build-examples:
   #   if: github.repository == 'vlayer-xyz/vlayer'

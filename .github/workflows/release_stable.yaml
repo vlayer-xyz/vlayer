@@ -10,3 +10,5 @@ jobs:
   release:
     if: github.repository == 'vlayer-xyz/vlayer'
     uses: ./.github/workflows/release_common.yaml
+    with:
+      vlayer_release: stable
