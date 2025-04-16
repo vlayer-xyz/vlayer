@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used)]
+
 use std::{collections::HashMap, path::Path};
 
 use serde::Deserialize;

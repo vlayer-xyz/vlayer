@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used)]
+
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use key_value::{Database, Mdbx};
 use rand::{RngCore, SeedableRng, rngs::StdRng};

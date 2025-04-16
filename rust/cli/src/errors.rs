@@ -58,6 +58,7 @@ pub enum Error {
 }
 
 impl Error {
+    #[allow(clippy::expect_used)]
     pub fn error_code(&self) -> i32 {
         match self {
             Error::TestsFailed(failed) => {

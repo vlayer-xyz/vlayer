@@ -31,6 +31,7 @@ impl WrapStateDb {
     }
 }
 
+#[allow(clippy::expect_used)]
 impl DatabaseRef for WrapStateDb {
     /// The database does not return any errors.
     type Error = Infallible;
@@ -73,6 +74,7 @@ impl DatabaseRef for WrapStateDb {
     }
 
     /// Get storage value of address at index.
+    #[allow(clippy::panic)]
     fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
         let account_storage = self.account_storage.read().expect("poisoned lock");
         let storage = account_storage

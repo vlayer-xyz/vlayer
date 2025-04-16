@@ -66,6 +66,7 @@ impl<D> Node<D> {
     }
 
     // `child_key` passed cannot be empty
+    #[allow(clippy::expect_used)]
     pub(crate) fn branch_with_child_node(
         child_key: &Nibbles,
         child_node: impl Into<Node<D>>,

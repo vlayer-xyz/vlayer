@@ -42,6 +42,7 @@ pub struct Proofs(DashMap<CallHash, ProofStatus>);
 pub type State = Arc<Proofs>;
 
 #[async_trait]
+#[allow(clippy::expect_used)]
 impl RpcServer for State {
     async fn v_call(
         &self,

@@ -4,6 +4,7 @@ use vergen_gitcl::{
     BuildBuilder, CargoBuilder, Emitter, GitclBuilder, RustcBuilder, SysinfoBuilder,
 };
 
+#[allow(clippy::expect_used)]
 fn main() {
     println!("cargo:rerun-if-env-changed=VLAYER_RELEASE");
 

@@ -43,6 +43,7 @@ impl NonEmptyRange {
         self.end
     }
 
+    #[allow(clippy::panic)]
     pub fn len(&self) -> u64 {
         if self.end - self.start == u64::MAX {
             panic!("Range length overflow");

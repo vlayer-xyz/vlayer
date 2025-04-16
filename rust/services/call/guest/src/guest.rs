@@ -25,6 +25,7 @@ type GuestTravelCallVerifier = travel_call::Verifier<
     teleport::Verifier,
 >;
 
+#[allow(clippy::expect_used)]
 pub async fn main(
     Input {
         multi_evm_input,

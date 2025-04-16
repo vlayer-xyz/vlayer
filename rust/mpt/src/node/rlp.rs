@@ -19,6 +19,7 @@ impl<D: Digest> Encodable for Node<D> {
         0
     }
 
+    #[allow(clippy::panic)]
     fn encode(&self, out: &mut dyn BufMut) {
         match self {
             Node::Null => "".encode(out),

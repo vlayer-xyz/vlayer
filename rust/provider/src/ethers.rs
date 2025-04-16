@@ -18,6 +18,7 @@ pub struct EthersProvider<T: JsonRpcClient> {
 }
 
 // Blocks current runtime to execute the future. Panics if called outside of the runtime
+#[allow(clippy::expect_used)]
 fn block_on<F: Future>(f: F) -> F::Output {
     let handle = Handle::try_current().expect("no tokio runtime");
     tokio::task::block_in_place(|| handle.block_on(f))
@@ -121,6 +122,7 @@ impl<T: JsonRpcClient> BlockingProvider for EthersProvider<T> {
     }
 }
 
+#[allow(clippy::expect_used)]
 pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
     let requests_hash = block.other.get("requestsHash").map(|v| {
         let requests_hash = v.as_str().expect("requestsHash should be a string");

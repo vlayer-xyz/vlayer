@@ -4,6 +4,7 @@ use server_utils::jwt::axum::State as JwtState;
 use super::AppState;
 
 impl FromRef<AppState> for JwtState {
+    #[allow(clippy::expect_used)]
     fn from_ref(AppState { config, .. }: &AppState) -> Self {
         let config = config
             .jwt_config

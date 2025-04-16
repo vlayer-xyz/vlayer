@@ -49,6 +49,7 @@ impl ProviderDb {
 impl DatabaseRef for ProviderDb {
     type Error = Error;
 
+    #[allow(clippy::expect_used)]
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>> {
         // use `eth_getProof` to get all the account info with a single call
         let proof = self
@@ -73,6 +74,7 @@ impl DatabaseRef for ProviderDb {
         }))
     }
 
+    #[allow(clippy::expect_used)]
     fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode> {
         // avoid querying the RPC if the code hash is empty
         if code_hash == KECCAK_EMPTY {

@@ -5,6 +5,7 @@ pub(crate) trait ToPayload {
 }
 
 impl<T: Serialize> ToPayload for T {
+    #[allow(clippy::expect_used)]
     fn to_payload(&self) -> Vec<u8> {
         let mut buf = Vec::new();
         let formattter = olpc_cjson::CanonicalFormatter::new();

@@ -16,6 +16,7 @@ pub struct Signer {
 }
 
 impl Signer {
+    #[allow(clippy::expect_used)]
     pub fn new(priv_key: &str) -> Self {
         let key = RsaPrivateKey::from_pkcs8_pem(priv_key).expect("Failed to decode private key");
         let key = SigningKey::<_>::new(key);
@@ -37,6 +38,7 @@ impl Signer {
         Signature(signature.to_bytes().into())
     }
 
+    #[allow(clippy::expect_used)]
     pub fn public_key(&self) -> PublicKey {
         let pub_key = self
             .key
@@ -48,6 +50,7 @@ impl Signer {
 }
 
 impl From<PublicKey> for pkcs1v15::VerifyingKey<Sha256> {
+    #[allow(clippy::expect_used)]
     fn from(value: PublicKey) -> Self {
         Self::from_public_key_der(&value.0).expect("Failed to decode public key")
     }

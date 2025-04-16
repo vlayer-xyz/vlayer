@@ -67,6 +67,7 @@ impl Config {
 }
 
 impl Default for Config {
+    #![allow(clippy::expect_used)]
     fn default() -> Self {
         Self::from_str(DEFAULT_CONFIG.replace("{{VERSION}}", &version()))
             .expect("default config cannot be malformed")
@@ -174,6 +175,7 @@ pub enum Template {
 }
 
 impl fmt::Display for Template {
+    #[allow(clippy::expect_used)]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let as_value = self
             .to_possible_value()

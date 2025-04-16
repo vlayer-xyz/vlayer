@@ -39,6 +39,7 @@ async fn dns_query_handler_with_auth(
     dns_query_handler(state, params).await
 }
 
+#[allow(clippy::unwrap_used)]
 async fn dns_query_handler(
     State(state): State<AppState>,
     Query(params): Query<Params>,

@@ -36,7 +36,7 @@ pub struct ProofDTO {
     callAssumptions: CallAssumptions,
 }
 
-#[allow(clippy::trivially_copy_pass_by_ref)]
+#[allow(clippy::trivially_copy_pass_by_ref, clippy::panic)]
 fn ser_proof_mode<S>(mode: &ProofMode, state: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -49,6 +49,7 @@ where
     state.serialize_u8(as_u8)
 }
 
+#[allow(clippy::expect_used)]
 fn ser_length<S>(length: &U256, state: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,

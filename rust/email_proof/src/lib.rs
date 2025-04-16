@@ -41,6 +41,7 @@ fn validate_headers(email: &ParsedMail, dns_record: &DNSRecord) -> Result<(), Er
     Ok(())
 }
 
+#[allow(clippy::expect_used)]
 fn parse_headers_bytes(raw_email: &[u8]) -> Result<&[u8], Error> {
     let email_str = std::str::from_utf8(raw_email).expect("Email already verified");
 

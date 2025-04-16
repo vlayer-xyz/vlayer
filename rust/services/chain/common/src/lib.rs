@@ -39,6 +39,7 @@ impl PartialEq for ChainProof {
 }
 
 #[cfg(feature = "testing")]
+#[allow(clippy::expect_used)]
 /// Mock chain proof with arbitrary block numbers. Does **not** generate valid block hashes.
 pub fn mock_chain_proof(block_numbers: impl IntoIterator<Item = BlockNumber>) -> ChainProof {
     use alloy_primitives::BlockHash;
@@ -163,6 +164,7 @@ impl TryFrom<RpcChainProof> for ChainProof {
     }
 }
 
+#[allow(clippy::expect_used, clippy::unwrap_used)]
 pub fn fake_proof_result(
     guest_id: Digest,
     block_headers: impl IntoIterator<Item = Box<dyn EvmBlockHeader>>,

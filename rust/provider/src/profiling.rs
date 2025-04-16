@@ -59,6 +59,7 @@ impl Provider {
         }
     }
 
+    #[allow(clippy::expect_used)]
     pub fn state(&self) -> State {
         self.state.read().expect("poisoned lock").clone()
     }
@@ -115,6 +116,7 @@ impl BlockingProvider for Provider {
         self.inner.get_transaction_count(address, block)
     }
 
+    #[allow(clippy::expect_used)]
     fn get_latest_block_number(&self) -> Result<BlockNumber> {
         self.state.write().expect("poisoned lock").latest_block += 1;
         self.inner.get_latest_block_number()

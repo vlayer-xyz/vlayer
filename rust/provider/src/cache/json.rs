@@ -20,6 +20,7 @@ pub(crate) enum SerializableBlockTag {
 }
 
 impl From<BlockTag> for SerializableBlockTag {
+    #[allow(clippy::panic)]
     fn from(ethers_block_number: BlockTag) -> Self {
         match ethers_block_number {
             BlockTag::Number(num) => SerializableBlockTag::Number(num.as_u64()),
@@ -130,6 +131,7 @@ impl JsonCache {
 }
 
 impl Drop for JsonCache {
+    #[allow(clippy::expect_used)]
     fn drop(&mut self) {
         self.save().expect("failed to save cache");
     }

@@ -145,6 +145,7 @@ where
     V: AsRef<[u8]>,
     D: Digest,
 {
+    #[allow(clippy::expect_used)]
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
         let mut trie = MerkleTrie::<D>::new();
         for (key, value) in iter {

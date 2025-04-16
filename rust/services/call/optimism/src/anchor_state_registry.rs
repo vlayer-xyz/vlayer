@@ -16,9 +16,10 @@ mod layout {
     use alloy_primitives::U256;
     use lazy_static::lazy_static;
     lazy_static! {
-        pub static ref OUTPUT_HASH_SLOT: U256 = U256::from_str_radix(
+        pub static ref OUTPUT_HASH_SLOT: U256 = #[allow(clippy::unwrap_used)]
+        U256::from_str_radix(
             "a6eef7e35abe7026729641147f7915573c7e97b47efa546f5f6e3230263bcb49",
-            16
+            16,
         )
         .unwrap();
         pub static ref BLOCK_NUMBER_SLOT: U256 = *OUTPUT_HASH_SLOT + U256::from(1);

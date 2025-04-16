@@ -1,3 +1,5 @@
+#![allow(clippy::expect_used, clippy::unwrap_used, clippy::panic)]
+
 use alloy_primitives::hex::ToHexExt;
 use assert_json_diff::assert_json_include;
 use axum::{

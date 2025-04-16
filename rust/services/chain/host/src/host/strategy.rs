@@ -13,11 +13,13 @@ pub struct PrependStrategy {
 }
 
 impl PrependStrategy {
+    #[allow(clippy::expect_used)]
     pub fn compute_prepend_range(&self, range: NonEmptyRange) -> (NonEmptyRange, Range) {
         let prepend_count = self.prepend_count(range);
         range.add_left(prepend_count).expect("Prepend overflow")
     }
 
+    #[allow(clippy::unwrap_used)]
     fn prepend_count(&self, range: NonEmptyRange) -> u64 {
         if range.start() == GENESIS {
             return 0;
@@ -34,6 +36,7 @@ pub struct AppendStrategy {
 }
 
 impl AppendStrategy {
+    #[allow(clippy::expect_used)]
     pub fn compute_append_range(
         &self,
         range: NonEmptyRange,

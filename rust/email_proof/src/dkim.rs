@@ -124,6 +124,7 @@ fn filter_dkim_headers_by_domain(dkim_headers: Vec<DKIMHeader>, domain: &str) ->
         .collect()
 }
 
+#[allow(clippy::expect_used)]
 fn parse_from_domain(from: &str) -> Result<String, Error> {
     let Some(parsed) = addrparse(from).ok() else {
         return Err(Error::InvalidFromHeader("Could not parse From header".into()));

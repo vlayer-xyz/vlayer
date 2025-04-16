@@ -24,6 +24,7 @@ lazy_static! {
 
     static ref CHAIN_SPECS: ChainSpecs = {
         // `include_str!` includes the file contents at compile time
+        #[expect(clippy::expect_used)]
         let specs: ChainSpecs = from_str(include_str!("../chain_specs.toml"))
             .expect("failed to parse chain specs");
         specs.assert_no_duplicates();
@@ -37,6 +38,7 @@ struct ChainSpecs {
 }
 
 impl ChainSpecs {
+    #[allow(clippy::panic)]
     pub fn assert_no_duplicates(&self) {
         let mut chain_ids = HashSet::new();
         let mut chain_names = HashSet::new();

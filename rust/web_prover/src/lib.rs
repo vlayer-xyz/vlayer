@@ -1,5 +1,3 @@
-#![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
-
 mod notarize;
 mod params;
 mod presentation;

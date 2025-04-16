@@ -15,6 +15,7 @@ where
         F: FnOnce() -> Result<RV, E>;
 }
 
+#[allow(clippy::expect_used)]
 impl<K, V: ?Sized> InteriorMutabilityCache<K, V> for RwLock<HashMap<K, Arc<V>>>
 where
     K: Hash + Eq,

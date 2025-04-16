@@ -81,6 +81,7 @@ impl RecordingClient {
         }
     }
 
+    #[allow(clippy::expect_used)]
     pub fn into_cache(self) -> ChainProofCache {
         let cache =
             Arc::try_unwrap(self.cache).expect("Trying to access cache while it's still in use");
@@ -140,6 +141,7 @@ impl Client for CachedClient {
         }
     }
 
+    #[allow(clippy::unwrap_used)]
     async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, Error> {
         match self.cache.get(&chain_id) {
             Some((blocks, _)) if !blocks.is_empty() => {

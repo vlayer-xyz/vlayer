@@ -12,6 +12,7 @@ use revm::db::CacheDB;
 
 use crate::db::{GuestDb, wrap_state::WrapStateDb};
 
+#[allow(clippy::expect_used)]
 fn create_env(location: ExecutionLocation, input: EvmInput) -> Arc<EvmEnv<GuestDb>> {
     let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
     let header = input.header.clone();

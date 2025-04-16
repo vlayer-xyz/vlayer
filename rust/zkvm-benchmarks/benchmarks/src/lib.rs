@@ -1,4 +1,8 @@
-#![allow(clippy::needless_pass_by_value)]
+#![allow(
+    clippy::needless_pass_by_value,
+    clippy::expect_used,
+    clippy::unwrap_used
+)]
 
 use std::fmt::Display;
 
