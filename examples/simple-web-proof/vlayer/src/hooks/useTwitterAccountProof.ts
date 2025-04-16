@@ -73,6 +73,7 @@ export const useTwitterAccountProof = () => {
   const {
     callProver,
     isPending: isCallProverPending,
+    isIdle: isCallProverIdle,
     data: hash,
     error: callProverError,
   } = useCallProver(vlayerProverConfig);
@@ -113,7 +114,7 @@ export const useTwitterAccountProof = () => {
     webProof,
     isPending:
       isWebProofPending || isCallProverPending || isWaitingForProvingResult,
-    isCallProverPending,
+    isCallProverIdle,
     isWaitingForProvingResult,
     isWebProofPending,
     callProver,

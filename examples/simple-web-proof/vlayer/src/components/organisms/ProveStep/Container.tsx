@@ -15,15 +15,15 @@ export const ProveStep = () => {
     webProof,
     callProver,
     isPending,
-    isCallProverPending,
+    isCallProverIdle,
     result,
   } = useTwitterAccountProof();
 
   useEffect(() => {
-    if (webProof && !isCallProverPending) {
+    if (webProof && isCallProverIdle) {
       void callProver([webProof, address]);
     }
-  }, [webProof, address, callProver, isCallProverPending]);
+  }, [webProof, address, callProver, isCallProverIdle]);
 
   useEffect(() => {
     if (result) {
