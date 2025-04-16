@@ -275,7 +275,7 @@ jobs:
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: "vlayer-xyz/${{ matrix.docker_image }}"
-      VLAYER_BUILD: "2.0.0"
+      VLAYER_BUILD: "0.2.0"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -352,5 +352,5 @@ jobs:
       - name: Release latest stable version
         uses: ncipollo/release-action@v1
         with:
-          tag: "v2.0.0"
+          tag: "v0.2.0"
           body: "Latest vlayer stable release"
