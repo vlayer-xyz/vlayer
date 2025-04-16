@@ -11,6 +11,7 @@
   - [Time travel](./features/time-travel.md)
   - [Teleport](./features/teleport.md)
   - [Web proof](./features/web.md)
+    - [Quickstart guide](./web-proof/quickstart-guide.md)
   - [Email proof](./features/email.md)
   - [JSON and Regex](./features/json-and-regex.md)
 
