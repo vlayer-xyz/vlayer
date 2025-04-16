@@ -105,7 +105,7 @@ Your section on configuring `ProofProvider` is well-structured and clear. Here a
 
 ## Configuring `ProofProvider`
 
-The `ProofProvider` component in vlayer is pre-configured for the [testnet environment](/advanced/dev-and-production.html#public-testnet-services) by default, requiring no additional props for basic usage:
+The `ProofProvider` component in vlayer is pre-configured for the [testnet environment](/getting-started/dev-and-production.html#public-testnet-services) by default, requiring no additional props for basic usage:
 
 ```javascript
 <ProofProvider>
@@ -115,7 +115,7 @@ The `ProofProvider` component in vlayer is pre-configured for the [testnet envir
 
 ### Using the `config` Prop
 
-The `ProofProvider` also accepts an optional `config` prop, enabling you to select the desired `env`. Based on the chosen environment, the provider is automatically configured with the [default and pre-configured URLs](/advanced/dev-and-production.html#public-testnet-services) necessary to access vlayer network services:
+The `ProofProvider` also accepts an optional `config` prop, enabling you to select the desired `env`. Based on the chosen environment, the provider is automatically configured with the [default and pre-configured URLs](/getting-started/dev-and-production.html#public-testnet-services) necessary to access vlayer network services:
 
 ```javascript
 <ProofProvider
@@ -128,7 +128,7 @@ The `ProofProvider` also accepts an optional `config` prop, enabling you to sele
 ```
 
 ### Customizing Service URLs
-In addition to selecting an environment, the `config` prop allows you to specify custom URLs for [vlayer network services](/advanced/dev-and-production.html). These include services like `proverUrl`, `notaryUrl`, and `wsProxyUrl`:
+In addition to selecting an environment, the `config` prop allows you to specify custom URLs for [vlayer network services](/getting-started/dev-and-production.html). These include services like `proverUrl`, `notaryUrl`, and `wsProxyUrl`:
 
 ```javascript
 <ProofProvider

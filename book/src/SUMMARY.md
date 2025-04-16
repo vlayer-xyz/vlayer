@@ -5,6 +5,7 @@
   - [Installation](./getting-started/installation.md)
   - [First Steps](./getting-started/first-steps.md)
   - [How it works](./getting-started/how-it-works.md)
+  - [Devnet & Testnet](./getting-started/dev-and-production.md)
 
 - [Features]()
   - [Time travel](./features/time-travel.md)
@@ -18,7 +19,6 @@
   - [Verifier](./advanced/verifier.md)
   - [Global variables](./advanced/prover-global-variables.md)
   - [Tests](./advanced/tests.md)
-  - [Devnet & Testnet](./advanced/dev-and-production.md)
   - [JWT](./advanced/jwt.md)
 
 - [From JavaScript]()

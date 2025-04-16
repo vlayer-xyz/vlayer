@@ -80,7 +80,7 @@ Next provide a private key for deploying example contracts and sending transacti
 EXAMPLES_TEST_PRIVATE_KEY=0x....
 ```
 
-By default, `optimismSepolia` is configured in the `vlayer/.env.testnet` file. However, you can override this setting to use [other testnets](/advanced/dev-and-production.html#testnet).
+By default, `optimismSepolia` is configured in the `vlayer/.env.testnet` file. However, you can override this setting to use [other testnets](/getting-started/dev-and-production.html#testnet).
 
 To change the desired network, set the `CHAIN_NAME` and `JSON_RPC_URL` environment variables in `vlayer/.env.testnet.local`.
 
@@ -92,7 +92,7 @@ bun run prove:testnet
 
 ### Local devnet
 Running examples on a local devnet requires deploying a local instance of the prover and anvil.
-If you want to run on local environment, use [Docker](/advanced/dev-and-production.html#devnet): 
+If you want to run on local environment, use [Docker](/getting-started/dev-and-production.html#devnet): 
 
 ```bash
 $ bun run devnet:up

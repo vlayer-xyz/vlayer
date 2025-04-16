@@ -9,7 +9,7 @@ vlayer allows smart contracts to be executed [off-chain](/advanced/prover.html).
 ### Sections
 **Getting Started**
 
-To get started with vlayer, [install vlayer](/getting-started/installation.html), set up your [first project](/getting-started/first-steps.html) and check out the explainer section to learn [how vlayer works](/getting-started/how-it-works.html).
+To get started with vlayer, [install vlayer](/getting-started/installation.html), set up your [first project](/getting-started/first-steps.html) and check out the explainer section to learn [how vlayer works](/getting-started/how-it-works.html). Finally take a look into [devnet & testnet](/getting-started/dev-and-production.html) to learn about vlayer environments. 
 
 **Features**
 
@@ -25,6 +25,5 @@ Learn in-depth how:
  * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working.
  * [Global Variables](./advanced/prover-global-variables.md) are set.
  * [Tests](/advanced/tests.html) are run.
- * [Devnet and Testnet](/advanced/dev-and-production.md)
  * [JSON Web Tokens](/advanced/jwt.html) used for authentication across vlayer network
    can be generated and validated.
