@@ -1,3 +1,4 @@
+import { getChainSpecs } from "@vlayer/sdk/config";
 import { useEffect, useState } from "react";
 import { useChainId, useChains } from "wagmi";
 
@@ -20,12 +21,27 @@ export const useChain = () => {
       setError(`Env chain ${configChain} not found`);
       return;
     }
-    if (wagmiChain === configChain) {
-      setChain(wagmiChain);
-      setError(undefined);
-    } else {
+
+    try {
+      const chain = getChainSpecs(configChain);
+
+      if (!chain) {
+        setChain(undefined);
+        setError(`Chain ${configChain} is not suported`);
+        return;
+      }
+
+      if (wagmiChain === configChain) {
+        setChain(wagmiChain);
+        setError(undefined);
+      } else {
+        setChain(undefined);
+        setError(`Chains mismatched. Wallet chain: ${wagmiChain} is not equal to env chain: ${configChain}`);
+      }
+
+    } catch (e) {
       setChain(undefined);
-      setError(`Chains mismatched. Wallet chain: ${wagmiChain} is not equal to env chain: ${configChain}`);
+      setError(`Chain ${configChain} is not suported`);
     }
   }, [wagmiChain, configChain]);
 

@@ -48,4 +48,17 @@ describe("useChain", () => {
       "Env chain undefined not found"
     );
   });
+
+  it("should fail when chain is not supported", () => {
+    vi.stubEnv("VITE_VLAYER_CHAIN_ID", "unsupported-chain");
+
+    const { result } = renderHook(() => useChain());
+    const error = result.current.error;
+
+    expect(result.current.chain).toBeUndefined();
+    expect(error).toBeDefined();
+    expect(error).toBe(
+      "Chain unsupported-chain is not suported",
+    );
+  });
 });
