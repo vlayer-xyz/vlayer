@@ -8,15 +8,15 @@ import {ProofVerifierRouter} from "./proof_verifier/ProofVerifierRouter.sol";
 
 library TestnetStableDeployment {
     function repository() internal pure returns (Repository) {
-        return Repository(address(0xc4E4dC291A5C4dEbe9Ff5a3372F3FdD2e42Bac86));
+        return Repository(address(0xE9a0bF69c4A73A3Be20cb83159F9202ffFeA75dB));
     }
 
     function verifiers() internal pure returns (FakeProofVerifier, Groth16ProofVerifier, ProofVerifierRouter) {
-        FakeProofVerifier fakeProofVerifier = FakeProofVerifier(address(0x2a1e28c0B20fd17004c0BB773E445C3016bdc18b));
+        FakeProofVerifier fakeProofVerifier = FakeProofVerifier(address(0x344a9d8F3aE191ad5B4aC7DF9b9EcdA59360EF71));
         Groth16ProofVerifier groth16ProofVerifier =
-            Groth16ProofVerifier(address(0x7E231CfC3e3B549633D5AD61C30f07Dd4d408ad3));
+            Groth16ProofVerifier(address(0xDBaE93E682F615E4AB099F64aEB3f60Dc0396803));
         ProofVerifierRouter proofVerifierRouter =
-            ProofVerifierRouter(address(0x88E86dfC00ACcDbD80BDDa272cd13a9dC137Dcd6));
+            ProofVerifierRouter(address(0x2e3DCe3ac3DE5aac6d78aa57a19Ac5f2Df9E2922));
 
         return (fakeProofVerifier, groth16ProofVerifier, proofVerifierRouter);
     }
