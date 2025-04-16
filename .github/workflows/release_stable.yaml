@@ -12,3 +12,4 @@ jobs:
     uses: ./.github/workflows/release_common.yaml
     with:
       vlayer_release: stable
+    secrets: inherit
