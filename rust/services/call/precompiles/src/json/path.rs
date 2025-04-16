@@ -1,11 +1,10 @@
 use std::sync::Arc;
 
-use jmespath::{JmespathError, Variable, create_default_runtime};
+use jmespath::{JmespathError, Variable, compile};
 use serde_json::Value;
 
 pub fn get_value_by_path(value: &Value, path: &str) -> Result<Variable, JmespathError> {
-    let runtime = create_default_runtime();
-    let expression = runtime.compile(path)?;
+    let expression = compile(path)?;
     let value = expression.search(value)?;
     let value = Arc::try_unwrap(value).expect("Failed to unwrap value");
     Ok(value)

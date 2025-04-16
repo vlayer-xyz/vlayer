@@ -7761,7 +7761,7 @@ dependencies = [
 [[package]]
 name = "jmespath"
 version = "0.3.0"
-source = "git+https://github.com/Casuso/jmespath.rs?rev=43efaa30c59c729a55348a19612ce0e71889ba6a#43efaa30c59c729a55348a19612ce0e71889ba6a"
+source = "git+https://github.com/vlayer-xyz/jmespath.rs?rev=5e7070f563bd4a81f242d51b648f2c677898b75d#5e7070f563bd4a81f242d51b648f2c677898b75d"
 dependencies = [
  "lazy_static",
  "serde",
