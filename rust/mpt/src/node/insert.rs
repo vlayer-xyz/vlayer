@@ -9,6 +9,7 @@ mod tests;
 mod utils;
 
 impl<D> Node<D> {
+    #[allow(clippy::panic)]
     pub(crate) fn insert(
         self,
         key: impl AsRef<[u8]>,

@@ -1,3 +1,5 @@
+#![allow(clippy::expect_used, clippy::unwrap_used, clippy::panic)]
+
 pub(crate) mod cheatcode_inspector;
 mod cheatcodes;
 pub(crate) mod composite_inspector;

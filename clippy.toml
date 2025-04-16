@@ -1,4 +1,6 @@
+allow-expect-in-tests = true
 allow-unwrap-in-tests = true
+allow-panic-in-tests = true
 
 disallowed-methods = [
     # we use tracing with the log feature instead of the log crate

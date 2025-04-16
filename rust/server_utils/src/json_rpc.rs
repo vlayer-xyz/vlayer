@@ -91,6 +91,7 @@ impl From<Error> for ErrorObjectOwned {
     }
 }
 
+#[allow(clippy::unwrap_used)]
 fn log_response(response: &MethodResponse) {
     if response.is_success() {
         info!(result = response.as_result(), "JsonRpc request success")

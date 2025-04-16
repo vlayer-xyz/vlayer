@@ -60,6 +60,7 @@ impl<F: Fn(B256) -> ChainDbResult<DbNode>> MerkleProofBuilder<F> {
         self.visit_node(node)
     }
 
+    #[allow(clippy::expect_used)]
     fn visit_node(mut self, node: DbNode) -> ProofResult {
         self.nodes.push(node);
         match &self.nodes.last().expect("just pushed").node {

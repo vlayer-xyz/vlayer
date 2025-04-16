@@ -64,6 +64,7 @@ impl<Req: Clone, EF: ErrorFilter> retry::Policy<Req, (), Error> for Policy<EF> {
 pub struct HostErrorFilter;
 
 impl ErrorFilter for HostErrorFilter {
+    #[allow(clippy::expect_used)]
     fn is_retriable(err: &Error) -> bool {
         if err.downcast_ref::<Elapsed>().is_some() {
             return true;

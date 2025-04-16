@@ -1,3 +1,5 @@
+#![allow(clippy::expect_used, clippy::unwrap_used, clippy::panic)]
+
 use std::time::Duration;
 
 use call_server_lib::{ConfigBuilder, ProofMode};

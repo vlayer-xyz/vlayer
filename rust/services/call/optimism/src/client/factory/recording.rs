@@ -32,6 +32,7 @@ impl Factory {
         }
     }
 
+    #[allow(clippy::expect_used)]
     pub fn into_cache(self) -> OpOutputCache {
         let clients = Arc::try_unwrap(self.clients)
             .map_err(|_| ())
@@ -46,6 +47,7 @@ impl Factory {
 }
 
 impl IFactory for Factory {
+    #[allow(clippy::expect_used)]
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError> {
         let client: Box<dyn IClient> = self.inner.create(chain_id)?;
         let recording_client = client::recording::Client::new(client);

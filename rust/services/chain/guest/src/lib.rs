@@ -25,11 +25,13 @@ pub enum Input {
     },
 }
 
+#[allow(clippy::expect_used)]
 fn initialize(elf_id: Digest, block: impl AsRef<dyn EvmBlockHeader>) -> (B256, Digest) {
     let trie = BlockTrie::init(block).expect("init failed");
     (trie.hash_slow(), elf_id)
 }
 
+#[allow(clippy::expect_used)]
 fn verify_previous_proof(
     prev_zk_proof: &Receipt,
     block_trie: &BlockTrie,
@@ -45,6 +47,7 @@ fn verify_previous_proof(
         .expect("previous proof verification failed");
 }
 
+#[allow(clippy::expect_used)]
 fn append_prepend(
     elf_id: Digest,
     prepend_blocks: impl DoubleEndedIterator<Item = Box<dyn EvmBlockHeader>>,

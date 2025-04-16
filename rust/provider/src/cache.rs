@@ -68,6 +68,7 @@ impl CachedProvider {
     }
 }
 
+#[allow(clippy::expect_used)]
 impl BlockingProvider for CachedProvider {
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         let mut cache = self.cache.write().expect("poisoned RwLock");

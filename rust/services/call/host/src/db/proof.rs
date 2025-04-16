@@ -28,6 +28,7 @@ pub struct ProofDb {
     state: RwLock<State>,
 }
 
+#[allow(clippy::expect_used)]
 impl DatabaseRef for ProofDb {
     type Error = super::provider::Error;
 
@@ -76,6 +77,7 @@ pub enum Error {
     BlockNotFound(BlockNumber),
 }
 
+#[allow(clippy::expect_used)]
 impl ProofDb {
     pub(crate) fn new(provider: Arc<dyn BlockingProvider>, block_number: u64) -> Self {
         let state = RwLock::new(State::default());

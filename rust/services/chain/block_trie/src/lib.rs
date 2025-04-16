@@ -146,6 +146,7 @@ impl IntoIterator for &BlockTrie {
 }
 
 #[cfg(feature = "test-utils")]
+#[allow(clippy::unwrap_used)]
 pub fn mock_block_trie(blocks: std::ops::RangeInclusive<BlockNumber>) -> BlockTrie {
     let mut trie = BlockTrie::default();
     for header in block_header::test_utils::mock_block_headers(blocks) {

@@ -72,6 +72,7 @@ fn update_sdk() -> Result<()> {
     Ok(())
 }
 
+#[allow(clippy::unwrap_used)]
 async fn update_contracts() -> Result<()> {
     let logger = UpdateLogger::new(format!("Contracts to {}", &Vlayer::version()?));
     let foundry_toml = find_file_up_tree("foundry.toml")?;

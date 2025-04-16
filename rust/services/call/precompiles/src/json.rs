@@ -18,6 +18,7 @@ pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
     }
 }
 
+#[allow(clippy::unwrap_used)]
 pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
     let (value_by_path, json_path) = process_input(input)?;
     match value_by_path {
@@ -69,6 +70,7 @@ fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
     })
 }
 
+#[allow(clippy::unwrap_used)]
 fn process_input_arr(input: &Bytes) -> Result<u64> {
     let (body, json_path) = pre_process_input(input)?;
     let value_by_path = get_array_length_by_path(&body, json_path.as_str())

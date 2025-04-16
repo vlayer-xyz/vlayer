@@ -18,6 +18,7 @@ impl Client {
         }
     }
 
+    #[allow(clippy::expect_used)]
     pub fn into_cache(self) -> SequencerOutput {
         let cache =
             Arc::try_unwrap(self.cache).expect("Trying to access cache while it's still in use");
@@ -26,6 +27,7 @@ impl Client {
 }
 
 #[async_trait::async_trait]
+#[allow(clippy::expect_used)]
 impl IClient for Client {
     async fn get_output_at_block(
         &self,

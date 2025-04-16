@@ -10,6 +10,7 @@ use super::{BlockingProvider, EIP1186Proof, Result};
 #[derive(Debug, PartialEq)]
 pub struct NeverProvider(pub PhantomData<Box<dyn EvmBlockHeader>>);
 
+#[allow(clippy::panic)]
 impl BlockingProvider for NeverProvider {
     fn get_block_header(&self, _: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         panic!("Unexpected provider call")

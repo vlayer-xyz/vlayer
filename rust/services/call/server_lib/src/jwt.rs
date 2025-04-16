@@ -5,6 +5,7 @@ pub use server_utils::jwt::{Algorithm, DecodingKey};
 use crate::server::State;
 
 impl FromRef<State> for JwtState {
+    #[allow(clippy::expect_used)]
     fn from_ref(State { config, .. }: &State) -> Self {
         let config = config
             .jwt_config

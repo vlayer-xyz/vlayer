@@ -70,18 +70,21 @@ impl StateDb {
         }
     }
 
+    #[allow(clippy::expect_used)]
     pub fn account(&self, address: Address) -> Option<StateAccount> {
         self.state_trie
             .get_rlp(keccak256(address))
             .expect("invalid state value")
     }
 
+    #[allow(clippy::panic)]
     pub fn code_by_hash(&self, hash: B256) -> &Bytes {
         self.contracts
             .get(&hash)
             .unwrap_or_else(|| panic!("code not found: {hash}"))
     }
 
+    #[allow(clippy::panic)]
     pub fn block_hash(&self, number: u64) -> B256 {
         let hash = self
             .block_hashes

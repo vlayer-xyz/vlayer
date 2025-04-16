@@ -1,3 +1,5 @@
+#![allow(clippy::expect_used, clippy::panic)]
+
 pub mod config;
 pub mod consts;
 mod db;

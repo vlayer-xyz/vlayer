@@ -20,6 +20,7 @@ impl IntoResponse for Versions {
     }
 }
 
+#[allow(clippy::expect_used)]
 pub fn v_versions(config: &Config) -> Versions {
     Versions {
         call_guest_id: config.call_guest_id_hex(),

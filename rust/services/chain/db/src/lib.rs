@@ -61,6 +61,7 @@ impl ChainInfo {
         (self.block_range(), self.root_hash, self.zk_proof)
     }
 
+    #[allow(clippy::unwrap_used)]
     pub fn block_range(&self) -> NonEmptyRange {
         // SAFETY: was created from `NonEmptyRange`
         NonEmptyRange::try_from_range(self.first_block..=self.last_block).unwrap()

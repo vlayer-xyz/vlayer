@@ -10,7 +10,7 @@ pub trait Now {
 pub struct RTClock;
 
 impl Now for RTClock {
-    #[allow(clippy::cast_sign_loss)]
+    #[allow(clippy::cast_sign_loss, clippy::panic)]
     fn now() -> Timestamp {
         let now = Utc::now();
         if now.timestamp() < 0 {

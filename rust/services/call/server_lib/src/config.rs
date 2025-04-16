@@ -38,6 +38,7 @@ impl Config {
         self.call_guest_elf.id.encode_hex_with_prefix()
     }
 
+    #[allow(clippy::expect_used)]
     pub const fn chain_guest_id(&self) -> Digest {
         *self
             .chain_guest_ids
@@ -53,6 +54,7 @@ impl Config {
 pub struct SocketAddr(RawSocketAddr);
 
 impl Default for SocketAddr {
+    #[allow(clippy::expect_used)]
     fn default() -> Self {
         Self(
             "127.0.0.1:3000"
@@ -134,6 +136,7 @@ impl ConfigBuilder {
     }
 
     #[must_use]
+    #[allow(clippy::unwrap_used)]
     pub fn with_host(mut self, host: Option<String>) -> Self {
         if let Some(host) = host {
             self.socket_addr.0.set_ip(host.parse().unwrap());

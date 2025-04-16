@@ -32,6 +32,7 @@ pub(super) fn responses_match(l: &Response, r: &Response) -> bool {
     (l.status == r.status) && (l.question == r.question) && compare_answers(&l.answer, &r.answer)
 }
 
+#[allow(clippy::unwrap_used)]
 fn compare_answers(l: &Option<Vec<Record>>, r: &Option<Vec<Record>>) -> bool {
     if l.is_none() || r.is_none() {
         return l.is_none() && r.is_none();

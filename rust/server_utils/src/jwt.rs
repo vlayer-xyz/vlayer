@@ -15,6 +15,7 @@ pub struct Claims {
     pub sub: String,
 }
 
+#[allow(clippy::unwrap_used)]
 pub mod test_helpers {
     use cli::Config;
 

@@ -118,6 +118,7 @@ impl<D> IInspector<WrapDatabaseRef<&D>> for Inspector<'_, D>
 where
     D: RevmDB,
 {
+    #[allow(clippy::panic)]
     fn call(
         &mut self,
         _context: &mut EvmContext<WrapDatabaseRef<&D>>,

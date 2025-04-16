@@ -14,6 +14,7 @@ impl ServerConfig {
 }
 
 impl Default for ServerConfig {
+    #[allow(clippy::unwrap_used)]
     fn default() -> Self {
         Self {
             listen_addr: "0.0.0.0:3001".parse().unwrap(),

@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+
 use ethers::{
     providers::{MockProvider, Provider},
     types::{Block, U64},

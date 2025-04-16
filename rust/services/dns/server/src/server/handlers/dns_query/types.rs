@@ -30,6 +30,7 @@ pub(super) enum DNSQueryType {
 pub(super) struct ServerResponse(pub(super) Response);
 
 impl IntoResponse for ServerResponse {
+    #[allow(clippy::expect_used)]
     fn into_response(self) -> axum::response::Response {
         let mut response = serde_json::to_string(&self)
             .expect("Failed to serialize DNS response")

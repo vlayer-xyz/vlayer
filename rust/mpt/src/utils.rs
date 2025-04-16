@@ -4,6 +4,7 @@ use itertools::Itertools;
 use crate::{Digest, hash};
 
 // Alloy does not return node as first element in the proof, so we need to reorder it
+#[allow(clippy::expect_used)]
 pub fn reorder_root_first<T, D>(nodes: impl Iterator<Item = T>, root_hash: B256) -> Vec<T>
 where
     T: AsRef<[u8]>,

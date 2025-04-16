@@ -1,3 +1,5 @@
+#![allow(clippy::expect_used, clippy::unwrap_used, clippy::panic)]
+
 use axum::http::StatusCode;
 use ethers::types::U256;
 use serde_json::json;

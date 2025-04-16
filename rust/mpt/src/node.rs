@@ -33,6 +33,7 @@ where
 {
     /// Returns a reference to the value corresponding to the key.
     /// It panics when neither inclusion nor exclusion of the key can be shown in the sparse trie.
+    #[allow(clippy::panic)]
     pub(crate) fn get(&self, key_nibs: impl AsRef<[u8]>) -> Option<&[u8]> {
         let key_nibs = key_nibs.as_ref();
         match self {
