@@ -1,7 +1,7 @@
 #[cfg(test)]
 #[cfg(feature = "integration-tests")]
 mod integration_tests {
-    use std::{collections::HashMap, error::Error};
+    use std::collections::HashMap;
 
     use regex::Regex;
     use tlsn_core::{connection::ServerName, presentation::Presentation};
@@ -33,7 +33,8 @@ mod integration_tests {
             web_proof_result.unwrap_err()
         );
 
-        let verification_result = verify_presentation(to_presentation(&web_proof_result)).unwrap();
+        let verification_result =
+            verify_presentation(to_presentation(&web_proof_result.unwrap())).unwrap();
 
         assert_eq!(
             verification_result.sent,
@@ -79,7 +80,8 @@ mod integration_tests {
             web_proof_result.unwrap_err()
         );
 
-        let verification_result = verify_presentation(to_presentation(&web_proof_result)).unwrap();
+        let verification_result =
+            verify_presentation(to_presentation(&web_proof_result.unwrap())).unwrap();
 
         assert_eq!(
             verification_result.sent,
@@ -91,9 +93,8 @@ mod integration_tests {
         );
     }
 
-    fn to_presentation(web_proof_result: &Result<String, Box<dyn Error>>) -> Presentation {
-        let json_str = web_proof_result.as_ref().unwrap();
-        let parsed: serde_json::Value = serde_json::from_str(json_str).unwrap();
+    fn to_presentation(web_proof_result: &str) -> Presentation {
+        let parsed: serde_json::Value = serde_json::from_str(web_proof_result).unwrap();
         let hex_data = parsed["presentationJson"]["data"].as_str().unwrap();
         bincode::deserialize(&hex::decode(hex_data).unwrap()).unwrap()
     }

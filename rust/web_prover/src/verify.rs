@@ -1,5 +1,4 @@
-use std::error::Error;
-
+use anyhow::{Result, anyhow};
 use tlsn_core::{
     CryptoProvider,
     connection::ServerName,
@@ -7,9 +6,7 @@ use tlsn_core::{
     signing::VerifyingKey,
 };
 
-pub fn verify_presentation(
-    presentation: Presentation,
-) -> Result<VerificationResult, Box<dyn Error>> {
+pub fn verify_presentation(presentation: Presentation) -> Result<VerificationResult> {
     let provider = CryptoProvider::default();
 
     let VerifyingKey { data: key_data, .. } = presentation.verifying_key();
@@ -20,10 +17,10 @@ pub fn verify_presentation(
         server_name,
         transcript,
         ..
-    } = presentation.verify(&provider).unwrap();
+    } = presentation.verify(&provider)?;
 
-    let server_name = server_name.unwrap();
-    let mut partial_transcript = transcript.unwrap();
+    let server_name = server_name.ok_or_else(|| anyhow!("server_name is missing"))?;
+    let mut partial_transcript = transcript.ok_or_else(|| anyhow!("transcript is missing"))?;
 
     partial_transcript.set_unauthed(b'X');
 

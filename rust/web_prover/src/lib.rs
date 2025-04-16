@@ -1,8 +1,11 @@
+#![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+
 mod notarize;
 mod params;
 mod presentation;
 mod verify;
 
+use anyhow::Result;
 use constcat::concat;
 pub use notarize::notarize;
 pub use params::{
@@ -30,13 +33,11 @@ pub fn no_redaction_config(transcript: &Transcript) -> RedactionConfig {
     }
 }
 
-pub async fn generate_web_proof(
-    notarize_params: NotarizeParams,
-) -> Result<String, Box<dyn std::error::Error>> {
+pub async fn generate_web_proof(notarize_params: NotarizeParams) -> Result<String> {
     let (attestation, secrets, redaction_config) = notarize(notarize_params.clone()).await?;
     let presentation =
         create_presentation_with_redaction(&attestation, &secrets, &redaction_config)?;
-    let encoded_presentation = hex::encode(bincode::serialize(&presentation).unwrap());
+    let encoded_presentation = hex::encode(bincode::serialize(&presentation)?);
 
     let notary_config = notarize_params.notary_config;
 

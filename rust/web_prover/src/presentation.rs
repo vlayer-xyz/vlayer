@@ -1,3 +1,4 @@
+use anyhow::Result;
 use tlsn_core::{CryptoProvider, Secrets, attestation::Attestation, presentation::Presentation};
 use tracing::debug;
 
@@ -7,7 +8,7 @@ pub fn create_presentation_with_redaction(
     attestation: &Attestation,
     secrets: &Secrets,
     redaction_config: &RedactionConfig,
-) -> Result<Presentation, Box<dyn std::error::Error>> {
+) -> Result<Presentation> {
     debug!("Creating presentation");
 
     let mut builder = secrets.transcript_proof_builder();

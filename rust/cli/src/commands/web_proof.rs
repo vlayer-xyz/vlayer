@@ -1,6 +1,5 @@
 use std::{collections::HashMap, str::FromStr};
 
-use anyhow::anyhow;
 use clap::Parser;
 use reqwest::Url;
 use strum::EnumString;
@@ -65,9 +64,8 @@ pub(crate) struct WebProofArgs {
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
     let server_args: NotarizeParams = args.try_into()?;
 
-    let presentation = generate_web_proof(server_args)
-        .await
-        .map_err(|e| anyhow!("{e}"))?;
+    let presentation = generate_web_proof(server_args).await?;
+
     println!("{presentation}");
 
     Ok(())
