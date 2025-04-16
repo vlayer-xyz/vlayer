@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  useWriteContract,
-  useWaitForTransactionReceipt,
-  useAccount,
-} from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
@@ -34,7 +30,6 @@ export const useEmailProofVerification = () => {
   const [currentStep, setCurrentStep] = useState<ProofVerificationStep>(
     ProofVerificationStep.MINT,
   );
-  const { address: connectedAddr } = useAccount();
 
   const {
     writeContract,
@@ -79,14 +74,13 @@ export const useEmailProofVerification = () => {
 
   const startProving = async (emlContent: string) => {
     setCurrentStep(ProofVerificationStep.SENDING_TO_PROVER);
-    const claimerAddr = connectedAddr;
 
     const email = await preverifyEmail({
       mimeEmail: emlContent,
       dnsResolverUrl: import.meta.env.VITE_DNS_SERVICE_URL,
       token: import.meta.env.VITE_VLAYER_API_TOKEN,
     });
-    await callProver([email, claimerAddr]);
+    await callProver([email]);
     setCurrentStep(ProofVerificationStep.WAITING_FOR_PROOF);
   };
 

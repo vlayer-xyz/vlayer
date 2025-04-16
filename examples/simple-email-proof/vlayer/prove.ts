@@ -48,7 +48,6 @@ const hash = await vlayer.prove({
       dnsResolverUrl: dnsServiceUrl,
       token: config.token,
     }),
-    john.address,
   ],
 });
 const result = await vlayer.waitForProvingResult({ hash });
