@@ -6,11 +6,11 @@ use crate::{errors::ParsingError, utils::bytes::all_match};
 
 pub(crate) const REDACTED_BYTE_CODE: u8 = 0;
 
-// Both '*' and '+' are valid header characters. Replacing redacted '\0' bytes with
+// Both '*' and 'X' are valid header characters. Replacing redacted '\0' bytes with
 // two different characters ensures the request is parsable and allows analysis
 // of redacted content via diffs.
 pub(crate) const REDACTION_REPLACEMENT_CHAR_PRIMARY: char = '*';
-pub(crate) const REDACTION_REPLACEMENT_CHAR_SECONDARY: char = '+';
+pub(crate) const REDACTION_REPLACEMENT_CHAR_SECONDARY: char = 'X';
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) struct RedactedTranscriptNameValue {
@@ -67,7 +67,15 @@ pub(crate) fn validate_name_value_redaction(
     }
 
     let partially_redacted_value = zipped_pairs.clone().find(|(l, r)| {
-        !all_match(&l.value, REDACTION_REPLACEMENT_CHAR_PRIMARY as u8) && l.value != r.value
+        if l.value == r.value {
+            return false;
+        }
+        if all_match(&l.value, REDACTION_REPLACEMENT_CHAR_PRIMARY as u8)
+            && all_match(&r.value, REDACTION_REPLACEMENT_CHAR_SECONDARY as u8)
+        {
+            return false;
+        }
+        true
     });
 
     if let Some(pair) = partially_redacted_value {
@@ -108,7 +116,7 @@ mod test_validate_name_value_redaction {
     #[test]
     fn success_value_full_redaction() {
         let name_values_primary = vec![("name1", "******").into(), ("name2", "value2").into()];
-        let name_values_secondary = vec![("name1", "++++++").into(), ("name2", "value2").into()];
+        let name_values_secondary = vec![("name1", "XXXXX").into(), ("name2", "value2").into()];
 
         assert!(
             validate_name_value_redaction(
@@ -123,7 +131,7 @@ mod test_validate_name_value_redaction {
     #[test]
     fn fail_partial_name_redaction() {
         let primary = vec![("name*", "value1").into(), ("name2", "value2").into()];
-        let secondary = vec![("name+", "value1").into(), ("name2", "value2").into()];
+        let secondary = vec![("nameX", "value1").into(), ("name2", "value2").into()];
 
         let err = validate_name_value_redaction(
             &primary,
@@ -140,7 +148,7 @@ mod test_validate_name_value_redaction {
     #[test]
     fn fail_full_name_redaction() {
         let primary = vec![("*****", "value1").into(), ("name2", "value2").into()];
-        let secondary = vec![("+++++", "value1").into(), ("name2", "value2").into()];
+        let secondary = vec![("XXXXX", "value1").into(), ("name2", "value2").into()];
 
         let err = validate_name_value_redaction(
             &primary,
@@ -157,7 +165,7 @@ mod test_validate_name_value_redaction {
     #[test]
     fn fail_partial_value_redaction() {
         let primary = vec![("name1", "value*").into(), ("name2", "value2").into()];
-        let secondary = vec![("name1", "value+").into(), ("name2", "value2").into()];
+        let secondary = vec![("name1", "valueX").into(), ("name2", "value2").into()];
 
         let err = validate_name_value_redaction(
             &primary,
@@ -168,6 +176,23 @@ mod test_validate_name_value_redaction {
         assert!(matches!(
             err,
             ParsingError::PartiallyRedactedValue(RedactionElementType::RequestHeader, err_string) if err_string == "name1: value*"
+        ));
+    }
+
+    #[test]
+    fn fail_partial_value_redaction_using_primary_redaction_character() {
+        let primary = vec![("name1", "**").into()];
+        let secondary = vec![("name1", "*X").into()];
+
+        let err = validate_name_value_redaction(
+            &primary,
+            &secondary,
+            RedactionElementType::RequestHeader,
+        )
+        .unwrap_err();
+        assert!(matches!(
+            err,
+            ParsingError::PartiallyRedactedValue(RedactionElementType::RequestHeader, err_string) if err_string == "name1: **"
         ));
     }
 }
