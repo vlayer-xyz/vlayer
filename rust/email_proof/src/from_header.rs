@@ -2,17 +2,16 @@ use mailparse::{MailHeaderMap, ParsedMail};
 
 use crate::{Error, email::extract_address_from_header};
 
-pub fn extract_from_domain(p0: &ParsedMail) -> Result<String, Error> {
-    let from_header = p0
-        .get_headers()
-        .get_first_value("From")
-        .ok_or(Error::InvalidFromHeader("Missing".into()))?;
+pub fn extract_from_domain(email: &ParsedMail) -> Result<String, Error> {
+    let all_headers = email.get_headers();
+    let from_headers = all_headers.get_all_headers("From");
+    let last_from_header = from_headers.last().unwrap();
 
-    let email = extract_address_from_header(&from_header).map_err(Error::EmailParse)?;
+    let from_address = extract_address_from_header(last_from_header).map_err(Error::EmailParse)?;
 
-    let (_, domain) = email
+    let (_, domain) = from_address
         .rsplit_once('@')
-        .ok_or(Error::InvalidFromHeader(from_header))?;
+        .ok_or(Error::InvalidFromHeader(last_from_header.get_value()))?;
 
     Ok(domain.into())
 }
