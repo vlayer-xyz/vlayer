@@ -13,12 +13,18 @@ import type { VlayerContextConfig } from "./types";
 
 export type EthClient = ReturnType<typeof createContext>["ethClient"];
 
-const getChainSpecs = (chainName: string): Chain => {
+export const getChainSpecs = (chainName: string): Chain => {
+  let chain = undefined;
   try {
-    return chains[chainName as keyof typeof chains] as Chain;
+    chain = chains[chainName as keyof typeof chains];
   } catch {
     throw Error(`Cannot import ${chainName} from viem/chains`);
   }
+
+  if (!chain) {
+    throw new Error(`Chain ${chainName} is not supported by viem`);
+  }
+  return chain as Chain;
 };
 
 export const customTransport = custom;
