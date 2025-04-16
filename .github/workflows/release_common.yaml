@@ -354,3 +354,4 @@ jobs:
         with:
           tag: "v0.2.0"
           body: "Latest vlayer stable release"
+          commit: af95e692e07531199b04db8cc88dfdcfd4bcbf49

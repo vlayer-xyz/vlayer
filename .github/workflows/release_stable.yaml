@@ -2,7 +2,7 @@ name: Release stable
 on:
   push:
     branches:
-      - rzadp/publish-2.0.0
+      - rzadp/publish-0.2.0
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
