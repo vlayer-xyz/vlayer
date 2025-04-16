@@ -2,11 +2,7 @@
   "name": "simple",
   "module": "prove.ts",
   "type": "module",
-  "dependencies": {
-    "@noble/hashes": "^1.4.0",
-    "@vlayer/sdk": "workspace:*",
-    "viem": "2.22.10"
-  },
+
   "scripts": {
     "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
@@ -17,20 +13,15 @@
     "test-web:dev": "echo \"No tests specified yet\"",
     "test-web:testnet": "echo \"No tests specified yet\""
   },
-  "peerDependencies": {
-    "typescript": "^5.5.4"
+  "dependencies": {
+    "@vlayer/sdk": "workspace:*",
+    "viem": "2.22.10"
   },
   "devDependencies": {
+    "typescript": "^5.5.4",
     "@types/bun": "^1.1.6",
     "@types/eslint__js": "^8.42.3",
     "@types/react-dom": "^18.3.1",
-    "@typescript-eslint/eslint-plugin": "^8.25.0",
-    "@typescript-eslint/parser": "^8.25.0",
-    "eslint": "^9.7.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "prettier": "^3.3.3",
-    "typescript-eslint": "^8.2.0",
     "solhint": "^5.0.5"
   }
 }
