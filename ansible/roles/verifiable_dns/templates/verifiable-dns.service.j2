@@ -23,6 +23,7 @@ ExecStart=/home/{{ ansible_user }}/.vlayer/bin/dns_server
 {{- verifiable_dns_host if verifiable_dns_host is defined else '127.0.0.1' }}
 {{- ':' }}
 {{- verifiable_dns_port if verifiable_dns_port is defined else '3002' }}
+{{- ' --jwt-public-key ' ~ vlayer_jwt_public_key_location }}
 
 [Install]
 WantedBy=multi-user.target

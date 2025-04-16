@@ -3,3 +3,4 @@ verifiable_dns_port: 3002
 verifiable_dns_rust_log:
   - info
   - dns_server=debug
+vlayer_jwt_public_key_location: /home/{{ ansible_user }}/.vlayer/jwt.key.pub
