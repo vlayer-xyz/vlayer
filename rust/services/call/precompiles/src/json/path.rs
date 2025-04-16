@@ -6,6 +6,7 @@ use serde_json::Value;
 pub fn get_value_by_path(value: &Value, path: &str) -> Result<Variable, JmespathError> {
     let expression = compile(path)?;
     let value = expression.search(value)?;
+    #[expect(clippy::expect_used)]
     let value = Arc::try_unwrap(value).expect("Failed to unwrap value");
     Ok(value)
 }
