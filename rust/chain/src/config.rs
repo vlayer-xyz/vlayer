@@ -24,7 +24,7 @@ lazy_static! {
 
     static ref CHAIN_SPECS: ChainSpecs = {
         // `include_str!` includes the file contents at compile time
-        #[allow(clippy::expect_used)]
+        #[expect(clippy::expect_used)]
         let specs: ChainSpecs = from_str(include_str!("../chain_specs.toml"))
             .expect("failed to parse chain specs");
         specs.assert_no_duplicates();
