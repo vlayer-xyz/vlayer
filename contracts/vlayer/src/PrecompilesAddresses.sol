@@ -9,7 +9,7 @@ pragma solidity ^0.8.21;
 ///      This address generation logic is implemented in the Rust macro `generate_precompile!`.
 library Precompiles {
     /// @dev Base precompile prefix address: first 18 bytes of `keccak256("vlayer.precompiles")` + `0x0100`
-    address public constant PRECOMPILES = 0x7eBd4FaE7a485A9D198C8c3b2e7c7F593A130100;
+    address public constant PRECOMPILES = 0xF4E4FdcA9d5D55e64525e314391996a15f7EC600;
     address public constant VERIFY_AND_PARSE = address(uint160(PRECOMPILES) + 0);
     address public constant VERIFY_EMAIL = address(uint160(PRECOMPILES) + 1);
     address public constant JSON_GET_STRING = address(uint160(PRECOMPILES) + 2);
