@@ -41,21 +41,26 @@ const isExpectUrlStepCompleted = isUrlVisited;
 const isNotarizeStepReady = isUrlRequestCompleted;
 const isNotarizeStepCompleted = hasProof;
 
-const isFetchAndNotarizeStepReady = isUrlRequestCompleted;
-const isFetchAndNotarizeStepCompleted = hasProof;
+const isExtractVariablesStepReady = () => true;
+const isExtractVariablesStepCompleted = () => true;
+
+const isClickButtonStepReady = () => true;
+const isClickButtonStepCompleted = () => true;
 
 const checkStepCompletion = {
   startPage: isStartPageStepCompleted,
   expectUrl: isExpectUrlStepCompleted,
   notarize: isNotarizeStepCompleted,
-  fetchAndNotarize: isFetchAndNotarizeStepCompleted,
+  extractVariables: isExtractVariablesStepCompleted,
+  clickButton: isClickButtonStepCompleted,
 };
 
 const checkStepReadiness = {
   startPage: isStartPageStepReady,
   expectUrl: isExpectUrlStepReady,
   notarize: isNotarizeStepReady,
-  fetchAndNotarize: isFetchAndNotarizeStepReady,
+  extractVariables: isExtractVariablesStepReady,
+  clickButton: isClickButtonStepReady,
 };
 
 const calculateStepStatus = ({

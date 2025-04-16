@@ -183,9 +183,17 @@ const validateProofRequest = (
           },
           ({ url }) => assertUrlPattern(url),
         )
-        .with({ step: EXTENSION_STEP.fetchAndNotarize }, () => {
-          console.warn("Unsupported step type: ", step);
-        })
+        .with(
+          {
+            step: P.union(
+              EXTENSION_STEP.extractVariables,
+              EXTENSION_STEP.clickButton,
+            ),
+          },
+          () => {
+            console.warn("Unsupported step type: ", step);
+          },
+        )
         .exhaustive();
     });
   } catch (e) {

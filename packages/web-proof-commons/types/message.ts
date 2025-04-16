@@ -3,12 +3,14 @@ import { URLPattern } from "urlpattern-polyfill";
 import { type RedactionConfig } from "./redaction";
 import urlRegex from "url-regex";
 import type { PresentationJSON as TLSNPresentationJSON } from "tlsn-js/src/types";
+import type { OutputsConfig } from "./notarizeOutput";
 
 export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
   startPage: "startPage",
   notarize: "notarize",
-  fetchAndNotarize: "fetchAndNotarize",
+  extractVariables: "extractVariables",
+  clickButton: "clickButton",
 } as const;
 
 export type ExtensionStep =
@@ -95,7 +97,8 @@ export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
   | WebProofStepStartPage
-  | WebProofStepFetchAndNotarize;
+  | WebProofStepExtractVariables
+  | WebProofStepClickButton;
 
 export type UrlPattern = Branded<string, "UrlPattern">;
 
@@ -110,6 +113,7 @@ export type WebProofStepNotarize = BrandedStep<
     method: string;
     label: string;
     redact: RedactionConfig;
+    outputs: OutputsConfig;
   }
 >;
 
@@ -129,20 +133,39 @@ export type WebProofStepExpectUrl = BrandedStep<
   }
 >;
 
-export type WebProofStepFetchAndNotarize = BrandedStep<
-  typeof EXTENSION_STEP.fetchAndNotarize,
+export type WebProofStepExtractVariables = BrandedStep<
+  typeof EXTENSION_STEP.extractVariables,
   {
-    url: UrlPattern;
-    method: string;
-    body: string;
-    headers: Headers;
     label: string;
-    redact: RedactionConfig;
+    url: UrlPattern;
+    variables: Variables;
+  }
+>;
+
+export type WebProofStepClickButton = BrandedStep<
+  typeof EXTENSION_STEP.clickButton,
+  {
+    label: string;
+    url: UrlPattern;
+    selector: string;
   }
 >;
 
 type Header = [string, string];
 export type Headers = Header[];
+
+type Variables = Variable[];
+export type Variable = {
+  name: string;
+  path: string;
+  source: VariableSource;
+};
+
+export enum VariableSource {
+  ResponseBody = "ResponseBody",
+  RequestBody = "RequestBody",
+  Headers = "Headers",
+}
 
 export enum StepValidationErrors {
   InvalidUrl = "InvalidUrl",
