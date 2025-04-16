@@ -23,4 +23,4 @@ additional-css = ["theme/tabs.css", "theme/asidev2.css", "theme/menuv3.css"]
 
 [output.html.fold]
 enable = true    # whether or not to enable section folding
-level = 1        # the depth to start folding
+level = 2        # the depth to start folding
