@@ -20,7 +20,6 @@
   - [Verifier](./advanced/verifier.md)
   - [Global variables](./advanced/prover-global-variables.md)
   - [Tests](./advanced/tests.md)
-  - [JWT](./advanced/jwt.md)
 
 - [From JavaScript]()
   - [Vanilla JS/TS](./javascript/javascript.md)

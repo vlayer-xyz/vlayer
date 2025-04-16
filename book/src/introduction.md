@@ -25,5 +25,3 @@ Learn in-depth how:
  * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working.
  * [Global Variables](./advanced/prover-global-variables.md) are set.
  * [Tests](/advanced/tests.html) are run.
- * [JSON Web Tokens](/advanced/jwt.html) used for authentication across vlayer network
-   can be generated and validated.
