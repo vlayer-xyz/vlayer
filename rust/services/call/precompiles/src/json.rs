@@ -75,7 +75,7 @@ mod tests {
         let abi_encoded_body_and_json_path =
             abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-        let precompile_output = get_int(&abi_encoded_body_and_json_path.into()).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path).unwrap();
 
         let result = sol_data::Int::<256>::abi_decode(precompile_output.as_ref(), false).unwrap();
         let parsed: alloy_primitives::I256 = "12".parse().unwrap();
@@ -88,7 +88,7 @@ mod tests {
         let abi_encoded_body_and_json_path =
             abi_encode(&[TEST_JSON, "root.nested_level.field_missing"]);
 
-        let result = get_value(&abi_encoded_body_and_json_path.into());
+        let result = get_value(&abi_encoded_body_and_json_path);
         assert_eq!(result, Ok((Variable::Null, "root.nested_level.field_missing".to_string())));
     }
 
@@ -100,7 +100,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-            let result = get_string(&abi_encoded_body_and_json_path.into());
+            let result = get_string(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -114,7 +114,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-            let result = get_string(&abi_encoded_body_and_json_path.into());
+            let result = get_string(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -128,7 +128,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            let result = get_string(&abi_encoded_body_and_json_path.into());
+            let result = get_string(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -146,7 +146,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-            let result = get_int(&abi_encoded_body_and_json_path.into());
+            let result = get_int(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -160,7 +160,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-            let result = get_int(&abi_encoded_body_and_json_path.into());
+            let result = get_int(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -174,7 +174,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            let result = get_int(&abi_encoded_body_and_json_path.into());
+            let result = get_int(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -191,7 +191,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-            let result = get_bool(&abi_encoded_body_and_json_path.into());
+            let result = get_bool(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -205,7 +205,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-            let result = get_bool(&abi_encoded_body_and_json_path.into());
+            let result = get_bool(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -219,7 +219,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            let result = get_bool(&abi_encoded_body_and_json_path.into());
+            let result = get_bool(&abi_encoded_body_and_json_path);
             assert_eq!(
                 result,
                 Err(Fatal {
@@ -234,7 +234,7 @@ mod tests {
         let abi_encoded_body_and_json_path = abi_encode(&["{}", "field"]);
 
         assert_eq!(
-            get_value(&abi_encoded_body_and_json_path.into()),
+            get_value(&abi_encoded_body_and_json_path),
             Ok((Variable::Null, "field".to_string()))
         );
     }
