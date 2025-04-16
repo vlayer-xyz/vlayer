@@ -4,7 +4,7 @@ Authentication into vlayer services is done using JSON Web Tokens (JWTs). JWTs a
 encoded by default which may be difficult to simply eye-ball when searching for the reason
 that your request failed to authenticate.
 
-This is particulary important when developing with [vlayer's devnet](/advanced/dev-and-production.html)
+This is particulary important when developing with [vlayer's devnet](/getting-started/dev-and-production.html)
 and you would like to generate/validate different JWT combinations.
 
 For that reason, we have provided a tool that's integrated with the vlayer CLI which allows

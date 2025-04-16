@@ -198,7 +198,7 @@ struct VerifiedEmail {
 
 ## Two Proving Modes
 
-To support two [proving modes](advanced/dev-and-production.html), vlayer provides a set of smart contracts connected to the `Verifier` contract, one for each mode:
+To support two [proving modes](/getting-started/dev-and-production.html), vlayer provides a set of smart contracts connected to the `Verifier` contract, one for each mode:
 
 - `DEVELOPMENT` - Automatically deployed with each `Prover` contract, but only on development and test networks. This mode will be used if the `ProofMode` decoded from `SEAL` is `FAKE`.
 - `PRODUCTION` - This requires infrastructure deployed ahead of time that performs actual verification. This mode will be used if the `ProofMode` decoded from `SEAL` is `GROTH16`.
