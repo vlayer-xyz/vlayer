@@ -994,6 +994,7 @@ dependencies = [
  "alloy-sol-types",
  "derive_more 1.0.0",
  "email_proof",
+ "jmespath",
  "lazy_static",
  "regex",
  "revm",
@@ -1449,6 +1450,12 @@ dependencies = [
  "syn 2.0.96",
  "unicode-xid",
 ]
+
+[[package]]
+name = "deunicode"
+version = "1.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc55fe0d1f6c107595572ec8b107c0999bb1a2e0b75e37429a4fb0d6474a0e7d"
 
 [[package]]
 name = "digest"
@@ -2248,6 +2255,17 @@ name = "itybity"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f242558c18a6d4ec99bc1eaf1603ab49e857ab36b4c1b911ebd0028cb8165e79"
+
+[[package]]
+name = "jmespath"
+version = "0.3.0"
+source = "git+https://github.com/vlayer-xyz/jmespath.rs?rev=5e7070f563bd4a81f242d51b648f2c677898b75d#5e7070f563bd4a81f242d51b648f2c677898b75d"
+dependencies = [
+ "lazy_static",
+ "serde",
+ "serde_json",
+ "slug",
+]
 
 [[package]]
 name = "js-sys"
@@ -3993,6 +4011,16 @@ name = "slog"
 version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8347046d4ebd943127157b94d63abb990fcf729dc4e9978927fdf4ac3c998d06"
+
+[[package]]
+name = "slug"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "882a80f72ee45de3cc9a5afeb2da0331d58df69e4e7d8eeb5d3c7784ae67e724"
+dependencies = [
+ "deunicode",
+ "wasm-bindgen",
+]
 
 [[package]]
 name = "smallvec"

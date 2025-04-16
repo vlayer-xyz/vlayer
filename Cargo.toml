@@ -117,7 +117,7 @@ hyper = "1.5.2"
 indicatif = "0.17.8"
 inferno = "0.12.1"
 itertools = { version = "0.14.0" }
-jmespath = { git = "https://github.com/Casuso/jmespath.rs", rev = "43efaa30c59c729a55348a19612ce0e71889ba6a", features = ["sync"] }
+jmespath = { git = "https://github.com/vlayer-xyz/jmespath.rs", rev = "5e7070f563bd4a81f242d51b648f2c677898b75d" }
 jsonrpsee = { version = "0.24.8", features = ["server-core", "macros", "http-client"] }
 jsonwebtoken = { version = "9.3.1", features = ["use_pem"] }
 lazy_static = "1.5.0"
