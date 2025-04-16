@@ -395,7 +395,7 @@ mod server_tests {
         async fn simple_with_gas_meter() {
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
-            const EXPECTED_GAS_USED: u64 = 21_724;
+            const EXPECTED_GAS_USED: u64 = 22_292;
 
             let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
             gas_meter_server

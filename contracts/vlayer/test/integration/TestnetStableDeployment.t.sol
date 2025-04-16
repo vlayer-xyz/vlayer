@@ -51,7 +51,7 @@ contract StableTestDeployment_Tests is Test {
         assertEq(computedAddress, address(groth16ProofVerifier));
     }
 
-    function test_proofVerifiierRouterIsStable() public pure {
+    function test_proofVerifierRouterIsStable() public pure {
         (FakeProofVerifier fakeProofVerifier, Groth16ProofVerifier groth16ProofVerifier, ProofVerifierRouter router) =
             TestnetStableDeployment.verifiers();
 
