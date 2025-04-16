@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
 import { useChainId, useChains } from "wagmi";
 
 export const useChain = () => {
-  let error: string | undefined = undefined;
-  let chain: string | undefined = undefined;
+  const [chain, setChain] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const wagmiChainId = useChainId();
   const wagmiChains = useChains();
@@ -13,11 +14,15 @@ export const useChain = () => {
 
   const configChain = import.meta.env.VITE_VLAYER_CHAIN_ID;
 
-  if (wagmiChain === configChain) {
-    chain = wagmiChain;
-  } else {
-    error = `Chains mismatched. Wallet chain: ${wagmiChain} is not equal to env chain: ${configChain}`;
-  }
+  useEffect(() => {
+    if (wagmiChain === configChain) {
+      setChain(wagmiChain);
+      setError(undefined);
+    } else {
+      setChain(undefined);
+      setError(`Chains mismatched. Wallet chain: ${wagmiChain} is not equal to env chain: ${configChain}`);
+    }
+  }, [wagmiChain, configChain]);
 
   return { chain, error };
 };
