@@ -1,0 +1,12 @@
+name: Release stable
+on:
+  push:
+    branches:
+      - rzadp/publish-2.0.0
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.repository == 'vlayer-xyz/vlayer'
+    uses: ./.github/workflows/release_common.yaml
