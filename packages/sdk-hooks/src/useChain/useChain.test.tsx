@@ -35,4 +35,17 @@ describe("useChain", () => {
       "Chains mismatched. Wallet chain: anvil is not equal to env chain: sepolia",
     );
   });
+
+  it("should fail when env chain is undefined", () => {
+    vi.unstubAllEnvs();
+
+    const { result } = renderHook(() => useChain());
+    const error = result.current.error;
+
+    expect(result.current.chain).toBeUndefined();
+    expect(error).toBeDefined();
+    expect(error).toBe(
+      "Env chain undefined not found"
+    );
+  });
 });

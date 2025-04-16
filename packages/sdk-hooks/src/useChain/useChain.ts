@@ -15,6 +15,11 @@ export const useChain = () => {
   const configChain = import.meta.env.VITE_VLAYER_CHAIN_ID;
 
   useEffect(() => {
+    if (!configChain) {
+      setChain(undefined);
+      setError(`Env chain ${configChain} not found`);
+      return;
+    }
     if (wagmiChain === configChain) {
       setChain(wagmiChain);
       setError(undefined);
