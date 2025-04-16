@@ -79,14 +79,17 @@ export async function getProofReceipt<
 const handleErrors = ({ status, state, error }: ProofReceipt) => {
   if (status === 0) {
     match(state)
+      .with(ProofState.AllocateGas, () => {
+        throw new Error(`Allocating gas failed with error: ${error}`);
+      })
       .with(ProofState.ChainProof, () => {
-        throw new Error("Waiting for chain proof failed with error: " + error);
+        throw new Error(`Waiting for chain proof failed with error: ${error}`);
       })
       .with(ProofState.Preflight, () => {
-        throw new Error("Preflight failed with error: " + error);
+        throw new Error(`Preflight failed with error: ${error}`);
       })
       .with(ProofState.Proving, () => {
-        throw new Error("Proving failed with error: " + error);
+        throw new Error(`Proving failed with error: ${error}`);
       })
       .exhaustive();
   }

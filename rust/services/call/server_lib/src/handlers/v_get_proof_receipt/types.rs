@@ -12,6 +12,7 @@ use crate::{
 #[serde(rename_all = "snake_case")]
 pub enum State {
     Queued,
+    AllocateGas,
     ChainProof,
     Preflight,
     Proving,
@@ -48,6 +49,7 @@ impl From<&ProofState> for State {
     fn from(value: &ProofState) -> Self {
         match value {
             ProofState::Queued => Self::Queued,
+            ProofState::AllocateGasPending | ProofState::AllocateGasError(..) => Self::AllocateGas,
             ProofState::ChainProofPending | ProofState::ChainProofError(..) => Self::ChainProof,
             ProofState::PreflightPending | ProofState::PreflightError(..) => Self::Preflight,
             ProofState::ProvingPending | ProofState::ProvingError(..) => Self::Proving,

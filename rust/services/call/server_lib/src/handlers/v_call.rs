@@ -31,8 +31,7 @@ pub async fn v_call(
 
     info!(hash = tracing::field::display(call_hash), "Call");
 
-    let gas_meter_client =
-        gas_meter::init(config.gas_meter_config.clone(), call_hash, token, call.gas_limit).await?;
+    let gas_meter_client = gas_meter::init(config.gas_meter_config.clone(), call_hash, token);
 
     let mut found_existing = true;
     state.entry(call_hash).or_insert_with(|| {
