@@ -349,7 +349,7 @@ ZmlsZSBjb250ZW50Cg==
             let email = extract_address_from_header(&header);
             assert_eq!(
                 email.unwrap_err().to_string(),
-                "Invalid address found: must contain a '@' symbol"
+                "Expected exactly one address in the \"From\" header"
             );
         }
 
