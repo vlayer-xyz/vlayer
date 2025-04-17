@@ -131,10 +131,10 @@ jobs:
           merge-multiple: true
       - run: rm ./dist/latest/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
       - run: cp ./docker/docker-compose.devnet.yaml ./dist/latest/
+
       - env:
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: cp -r "./dist/latest" "./dist/${VLAYER_BUILD}"
-
       - name: Push tagged binaries to AWS S3
         uses: mostlytyped/s3-put-action@v1.0.0
         with:
@@ -148,6 +148,7 @@ jobs:
           LOCAL_FILE: ./dist/${{ needs.build-release.outputs.vlayer_build }}
           REMOTE_FILE: ""
 
+      - run: cp -r "./dist/latest" "./dist/latest-${{ inputs.vlayer_release }}"
       - name: Push latest binaries to AWS S3
         uses: mostlytyped/s3-put-action@v1.0.0
         with:
@@ -158,7 +159,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-          LOCAL_FILE: ./dist/latest
+          LOCAL_FILE: ./dist/latest-${{ inputs.vlayer_release }}
           REMOTE_FILE: ""
 
       - name: Push vlayerup scripts to AWS S3
@@ -285,9 +286,11 @@ jobs:
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
-          file: "docker/${{ matrix.docker_image }}/Dockerfile.nightly"
+          file: "docker/${{ matrix.docker_image }}/Dockerfile"
           push: true
           tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
+          build-args: |
+            VLAYER_RELEASE=${{ inputs.vlayer_release }}
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
