@@ -288,7 +288,7 @@ jobs:
           context: .
           file: "docker/${{ matrix.docker_image }}/Dockerfile"
           push: true
-          tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
+          tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
           build-args: |
             VLAYER_RELEASE=${{ inputs.vlayer_release }}
       - name: Generate artifact attestation
