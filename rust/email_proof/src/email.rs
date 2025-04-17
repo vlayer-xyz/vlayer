@@ -74,8 +74,6 @@ fn is_inlined_body_content(part: &ParsedMail) -> bool {
 pub fn extract_address_from_header(from_header: &MailHeader<'_>) -> Result<String, MailParseError> {
     let addresses = addrparse_header(from_header)?;
 
-    dbg!(&addresses);
-
     if addresses.len() != 1 {
         return Err(MailParseError::Generic("Expected exactly one address in the \"From\" header"));
     }
