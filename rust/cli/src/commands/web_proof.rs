@@ -18,6 +18,8 @@ pub enum Scheme {
 }
 
 const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/v0.1.0-alpha.8";
+const DEFAULT_MAX_SENT_DATA: usize = 1 << 12;
+const DEFAULT_MAX_RECV_DATA: usize = 1 << 14;
 
 #[derive(Debug, Error)]
 pub enum InputError {
@@ -59,6 +61,12 @@ pub(crate) struct WebProofArgs {
     /// HTTP data to be sent with the request
     #[arg(short = 'd', long, value_name = "DATA")]
     data: Option<String>,
+
+    #[arg(short = 'm', long, value_name = "MAX_SENT_DATA")]
+    max_sent_data: Option<usize>,
+
+    #[arg(short = 'M', long, value_name = "MAX_RECV_DATA")]
+    max_recv_data: Option<usize>,
 }
 
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
@@ -145,6 +153,8 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
         } = parse_proven_url(&value.url)?;
         // If host is not provided fallback to host extracted from url
         let host = value.host.unwrap_or(urlhost.clone());
+        let max_sent_data = value.max_sent_data.unwrap_or(DEFAULT_MAX_SENT_DATA);
+        let max_recv_data = value.max_recv_data.unwrap_or(DEFAULT_MAX_RECV_DATA);
         let headers: Result<HashMap<String, String>, InputError> = value
             .headers
             .iter()
@@ -176,6 +186,8 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
             .server_domain(urlhost)
             .server_host(host)
             .server_port(port)
+            .max_sent_data(max_sent_data)
+            .max_recv_data(max_recv_data)
             .uri(value.url)
             .headers(headers?);
 
@@ -198,6 +210,8 @@ mod tests {
             notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.8".into()),
             headers: vec!["Authorization: Basic 1234".into(), "X-Api-Key: 5678".into()],
             data: Some("example body data".into()),
+            max_sent_data: Some(100),
+            max_recv_data: Some(100),
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -212,6 +226,8 @@ mod tests {
         assert_eq!(converted.headers.get("Authorization"), Some(&"Basic 1234".to_string()));
         assert_eq!(converted.headers.get("X-Api-Key"), Some(&"5678".to_string()));
         assert_eq!(converted.body, "example body data".as_bytes());
+        assert_eq!(converted.max_sent_data, 100);
+        assert_eq!(converted.max_recv_data, 100);
     }
 
     #[test]
@@ -237,6 +253,8 @@ mod tests {
         assert_eq!(converted.notary_config.host, "test-notary.vlayer.xyz");
         assert_eq!(converted.notary_config.port, 443);
         assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
+        assert_eq!(converted.max_sent_data, DEFAULT_MAX_SENT_DATA);
+        assert_eq!(converted.max_recv_data, DEFAULT_MAX_RECV_DATA);
         assert!(converted.notary_config.enable_tls);
     }
 
@@ -379,6 +397,8 @@ mod tests {
                 notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.8".into()),
                 headers: vec![],
                 data: None,
+                max_sent_data: Some(DEFAULT_MAX_SENT_DATA),
+                max_recv_data: Some(DEFAULT_MAX_RECV_DATA),
             }
         }
     }

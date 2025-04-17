@@ -11,6 +11,30 @@ mod integration_tests {
         verify_presentation,
     };
 
+    const MAX_SENT_DATA_TOO_LOW: usize = 100;
+    const MAX_RECV_DATA_TOO_LOW: usize = 100;
+
+    #[tokio::test]
+    async fn test_limits_too_low() {
+        let web_proof_result = Box::pin(generate_web_proof(
+            NotarizeParamsBuilder::default()
+                .notary_config(NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false))
+                .server_domain("lotr-api.online")
+                .server_host("127.0.0.1")
+                .server_port(3011_u16)
+                .uri("/auth_header_require")
+                .headers(HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]))
+                .body("body content")
+                .max_sent_data(MAX_SENT_DATA_TOO_LOW)
+                .max_recv_data(MAX_RECV_DATA_TOO_LOW)
+                .build()
+                .unwrap(),
+        ))
+        .await;
+
+        assert!(web_proof_result.is_err(), "Generate web proof should fail");
+    }
+
     #[tokio::test]
     async fn test_full_roundtrip() {
         let web_proof_result = Box::pin(generate_web_proof(

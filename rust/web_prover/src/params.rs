@@ -38,6 +38,10 @@ pub struct NotarizeParams {
     )]
     #[debug(skip)]
     pub redaction_config_fn: RedactionConfigFn,
+    #[builder(default = "1 << 12")]
+    pub max_sent_data: usize,
+    #[builder(default = "1 << 14")]
+    pub max_recv_data: usize,
 }
 
 pub type RedactionConfigFn = Arc<dyn Fn(&Transcript) -> RedactionConfig + Send + Sync>;
