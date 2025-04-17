@@ -315,7 +315,6 @@ jobs:
           path: ./dist
           merge-multiple: true
       - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
-      - run: cp ./docker/docker-compose.devnet.yaml ./dist/
 
       - name: Release tagged nightly
         uses: ncipollo/release-action@v1
@@ -347,7 +346,6 @@ jobs:
           path: ./dist
           merge-multiple: true
       - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
-      - run: cp ./docker/docker-compose.devnet.yaml ./dist/
 
       - name: Release latest stable version
         uses: ncipollo/release-action@v1
