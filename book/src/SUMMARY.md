@@ -34,6 +34,7 @@
     - [Book](./appendix/contributing/book.md)
     - [Extension](./appendix/contributing/extension.md)
     - [Upgrading Risc0](./appendix/contributing/upgrading_risc0.md)
+    - [JWT](./appendix/contributing/jwt.md)
   - [Architecture](./appendix/architecture/overview.md)
     - [Prover](./appendix/architecture/prover.md)
     - [Time Travel & Teleport](./appendix/architecture/time_travel_teleport.md)
