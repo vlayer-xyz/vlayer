@@ -50,7 +50,7 @@ main() {
     fi
 
   if [ "$CHANNEL" = "nightly" ]; then
-    RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+    RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest-nightly/binaries-${PLATFORM}-${ARCHITECTURE}.${EXT}"
   elif [ "$CHANNEL" = "stable" ]; then
     RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest-stable/binaries-${PLATFORM}-${ARCHITECTURE}.${EXT}"
   else
