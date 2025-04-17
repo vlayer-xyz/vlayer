@@ -12,10 +12,10 @@ forks = [
 
 # https://github.com/base-org/op-geth/blob/78436b6ae2a45a9c8449a9b0c93b062a37bd20da/core/forkid/forkid_test.go#L103
 [[chains]]
-# https://docs.base.org/docs/base-contracts/#ethereum-testnet-sepolia
+# https://docs.base.org/chain/base-contracts#ethereum-testnet-sepolia
 name = "base-sepolia"
 id = 84532
-op_spec = { anchor_chain = 11155111, anchor_state_registry = "0x4C8BA32A5DAC2A720bb35CeDB51D6B067D104205" }
+op_spec = { anchor_chain = 11155111, anchor_state_registry = "0x0729957c92A1F50590A84cb2D65D761093f3f8eB" }
 forks = [
     { spec = "CANYON", activation = { Block = 0 } },
     { spec = "ECOTONE", activation = { Timestamp = 1706634000 } },
@@ -27,7 +27,7 @@ forks = [
 [[chains]]
 name = "optimism-sepolia"
 id = 11155420
-op_spec = { anchor_chain = 11155111, anchor_state_registry = "0x218CD9489199F321E1177b56385d333c5B598629" }
+op_spec = { anchor_chain = 11155111, anchor_state_registry = "0xDB2727Fc71176Bf8ED630F4142e0439733588e85" }
 forks = [
     { spec = "BEDROCK", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1699981200 } },
@@ -119,7 +119,7 @@ forks = [
 ]
 
 # https://github.com/base-org/optimism/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
-# https://docs.base.org/docs/base-contracts/#ethereum-mainnet
+# https://docs.base.org/chain/base-contracts/#ethereum-mainnet
 [[chains]]
 name = "base"
 id = 8453
@@ -136,7 +136,7 @@ forks = [
 [[chains]]
 name = "optimism"
 id = 10
-op_spec = { anchor_chain = 1, anchor_state_registry = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
+op_spec = { anchor_chain = 1, anchor_state_registry = "0x1c68ECfbf9C8B1E6C0677965b3B9Ecf9A104305b" }
 forks = [
     { spec = "MERGE", activation = { Block = 0 } },
     { spec = "BEDROCK", activation = { Timestamp = 1686079703 } },
