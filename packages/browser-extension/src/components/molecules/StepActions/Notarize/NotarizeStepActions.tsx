@@ -16,6 +16,7 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = (props) => {
     isRedirectCalloutVisible,
     isVisible,
     provingStatus,
+    redirectTimeout,
   } = useNotarizeStepActions(props);
   return (
     <>
@@ -25,7 +26,10 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = (props) => {
             onClick={onButtonClick}
             isVisible={isButtonVisible}
           />
-          <RedirectCallout isVisible={isRedirectCalloutVisible} />
+          <RedirectCallout
+            show={isRedirectCalloutVisible}
+            timeout={redirectTimeout}
+          />
           <ProvingProgress
             isVisible={isProvingProgressVisible}
             provingStatus={provingStatus}

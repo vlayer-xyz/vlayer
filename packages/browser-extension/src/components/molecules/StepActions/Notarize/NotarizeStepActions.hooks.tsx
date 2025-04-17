@@ -1,11 +1,14 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StepStatus } from "constants/step";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import { useZkProvingState } from "hooks/useZkProvingState";
 import { ProvingStatus, type NotarizeStepActionProps } from "./types";
-import { useDebounceValue } from "usehooks-ts";
+import { useDebounceValue, useInterval } from "usehooks-ts";
+import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
+import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
+import { ExtensionInternalMessageType } from "src/web-proof-commons";
 
-export const CALLOUT_DEBOUNCE_TIME = 1500;
+export const CALLOUT_DEBOUNCE_TIME = 1000;
 
 const useProveButton = () => {
   const { prove, isProving: isWebProving, proof } = useTlsnProver();
@@ -26,20 +29,25 @@ const useFinishCallout = () => {
   );
   const { isDone: isZkProvingDone } = useZkProvingState();
   const { error } = useTlsnProver();
+
+  // hide the finish callout if there is an error
   useEffect(() => {
     if (error) {
       setIsFinishCalloutVisible(false);
     }
-  }, [error]);
+  }, [error, setIsFinishCalloutVisible]);
+
   useEffect(() => {
     if (isZkProvingDone) {
       setIsFinishCalloutVisible(true);
       setTimeout(() => {
         setIsFinishCalloutVisible(false);
       }, 2000);
+    } else {
+      setIsFinishCalloutVisible(false);
     }
     return () => {};
-  }, [isZkProvingDone]);
+  }, [isZkProvingDone, setIsFinishCalloutVisible]);
 
   return {
     isFinishCalloutVisible,
@@ -80,6 +88,7 @@ const useProgress = () => {
     isZkProving,
     isWebProvingError,
     isZkProvingError,
+    setIsProvingProgressVisible,
   ]);
 
   return {
@@ -111,22 +120,65 @@ const useProvingStatus = () => {
 };
 
 const useRedirectCallout = () => {
-  const { isProving: isWebProving, error: isWebProvingError } = useTlsnProver();
+  const {
+    isProving: isWebProving,
+    error: isWebProvingError,
+    proof,
+  } = useTlsnProver();
   const { error: isZkProvingError } = useZkProvingState();
   const [isRedirectCalloutVisible, setIsRedirectCalloutVisible] =
     useDebounceValue(false, CALLOUT_DEBOUNCE_TIME);
+  const redirectDelay =
+    import.meta.env.REDIRECT_DELAY_SECONDS || DEFAULT_REDIRECT_DELAY_SECONDS;
+  const [timeout, setTimeout] = useState(redirectDelay);
 
+  // reset timeout when web proving stops
   useEffect(() => {
-    const isError = isWebProvingError || isZkProvingError;
-    if (isWebProving && !isError) {
+    if (!isWebProving) {
+      setTimeout(redirectDelay);
+    }
+  }, [isWebProving, redirectDelay]);
+
+  // redirection callout should be visible when web proving starts
+  // aand stay till
+  useEffect(() => {
+    if (isWebProving) {
       setIsRedirectCalloutVisible(true);
-    } else if (isError) {
+    }
+    if (!isWebProving && !proof) {
       setIsRedirectCalloutVisible(false);
     }
-  }, [isWebProving, isWebProvingError, isZkProvingError]);
+    if (timeout === 0) {
+      setIsRedirectCalloutVisible(false);
+    }
+    if (isWebProvingError || isZkProvingError) {
+      setIsRedirectCalloutVisible(false);
+    }
+  }, [
+    isWebProving,
+    JSON.stringify(proof),
+    timeout,
+    setIsRedirectCalloutVisible,
+    isWebProvingError,
+    isZkProvingError,
+  ]);
+
+  // start countdown when web proving starts
+  useInterval(
+    () => {
+      setTimeout(Math.max(timeout - 1, 0));
+      if (timeout === 0) {
+        sendMessageToServiceWorker({
+          type: ExtensionInternalMessageType.RedirectBack,
+        }).catch(console.error);
+      }
+    },
+    isWebProving ? 1000 : null,
+  );
 
   return {
     isRedirectCalloutVisible,
+    timeout,
   };
 };
 
@@ -135,7 +187,8 @@ const useNotarizeStepActions = (props: NotarizeStepActionProps) => {
   const { isFinishCalloutVisible } = useFinishCallout();
   const { isProvingProgressVisible } = useProgress();
   const { provingStatus } = useProvingStatus();
-  const { isRedirectCalloutVisible } = useRedirectCallout();
+  const { isRedirectCalloutVisible, timeout: redirectTimeout } =
+    useRedirectCallout();
   const { error } = useTlsnProver();
 
   return {
@@ -145,6 +198,7 @@ const useNotarizeStepActions = (props: NotarizeStepActionProps) => {
     isFinishCalloutVisible,
     isProvingProgressVisible,
     isRedirectCalloutVisible,
+    redirectTimeout,
     errorMessage: error,
     isVisible: !props.isVisited && props.status === StepStatus.Current,
   };

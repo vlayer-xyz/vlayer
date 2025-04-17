@@ -258,9 +258,6 @@ describe("NotarizeStepActions", () => {
         link: "https://example.com",
       }),
     );
-    act(() => {
-      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
-    });
     render(
       <NotarizeStepActions
         buttonText={"click me "}
@@ -351,6 +348,7 @@ describe("NotarizeStepActions", () => {
     mocks.useTlsnProver.mockReturnValue({
       isProving: false,
       error: null,
+      proof: "Some proof",
     });
     rerender();
     act(() => {
