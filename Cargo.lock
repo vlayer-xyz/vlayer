@@ -2586,15 +2586,18 @@ dependencies = [
  "alloy-rlp",
  "alloy-rlp-derive",
  "block_header",
+ "bytemuck",
  "call_common",
  "call_engine",
  "chain_client",
  "chain_common",
  "common",
+ "getrandom 0.3.1",
  "mpt",
  "optimism",
  "revm",
  "risc0-zkvm",
+ "risc0-zkvm-platform",
  "tokio",
 ]
 

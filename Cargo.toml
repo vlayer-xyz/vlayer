@@ -108,6 +108,7 @@ foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "082104867c
 foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "082104867cc0d587196eec715a75736d61dbd9fa" }
 foundry-test-utils = { git = "https://github.com/foundry-rs/foundry", rev = "082104867cc0d587196eec715a75736d61dbd9fa" }
 futures = { version = "0.3.31", default-features = false }
+getrandom = "0.3"
 hex = "0.4.3"
 hickory-resolver = "0.24.2"
 humantime = "2.1.0"
@@ -145,6 +146,7 @@ risc0-build = "=2.1.0"
 risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "cf3d1381f076f1094455a0fc6ebd5bd172424d09" }
 risc0-zkp = { version = "=2.0.0", default-features = false }
 risc0-zkvm = "=2.0.0"
+risc0-zkvm-platform = "=2.0.1"
 bonsai-sdk = "=1.4.0"
 rlp = "0.6.1"
 rsa = "=0.9.6" # Locked because of RSA acceleration (see https://github.com/vlayer-xyz/vlayer/pull/1444)
