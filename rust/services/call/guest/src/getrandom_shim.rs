@@ -13,17 +13,17 @@ unsafe extern "Rust" fn __getrandom_v03_custom(
     let (head, aligned, tail) = bytemuck::pod_align_to_mut::<_, u32>(dest);
     // Fill the aligned portion of the dest buffer with random words.
     // sys_rand uses copy-in to fill the buffer at 4-words per cycle.
-    if aligned.len() > 0 {
+    if !aligned.is_empty() {
         unsafe {
             sys_rand(aligned.as_mut_ptr(), aligned.len());
         }
     }
     // Up to 4 bytes may be split between the head and tail.
     // Sample an additional word and do an unaligned write to fill the last parts.
-    if head.len() > 0 || tail.len() > 0 {
+    if !head.is_empty() | !tail.is_empty() {
         assert!(head.len() < WORD_SIZE);
         assert!(tail.len() < WORD_SIZE);
-        let mut words = [0u32; 2];
+        let mut words = [0_u32; 2];
         unsafe {
             sys_rand(words.as_mut_ptr(), 2);
         }
