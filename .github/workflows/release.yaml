@@ -373,3 +373,5 @@ jobs:
         with:
           tag: "v${{ needs.build-release.outputs.vlayer_build }}"
           body: "Latest vlayer stable release"
+          allowUpdates: false
+          artifacts: "./dist/*"
