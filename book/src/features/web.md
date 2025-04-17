@@ -67,16 +67,44 @@ What happens in the above code?
 
 If there are no errors and the proof is valid, the data is ready for on-chain verification. 
 
+## Obtaining Web Proofs
+
+vlayer provides two ways to obtain Web Proofs:
+
+- **Client-side** (via browser extension)  
+- **Server-side** (via the vlayer CLI)
+
+### Client-side
+
+The client-side method is intended for scenarios where the target data is authenticated using browser cookies (e.g., logged-in user sessions). It uses the [vlayer browser extension](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) to capture and notarize HTTP requests directly from the user’s browsing context.
+
+This approach is ideal for proving access to **social media activity**, **personal or banking data**, **Web2 loyalty points**, **reputation scores**, or any other cookie-protected content.
+
 > 💡 **Try it Now**
-> 
-> To run the above example on your computer, type the following command in your terminal:
-> 
+>
+> To run an example that proves ownership of an X/Twitter handle on your computer, enter the following command in your terminal:
+>
 > ```bash
 > vlayer init --template simple-web-proof
 > ```
-> 
-> This command will download all the necessary artifacts to your project.  
-> The next steps are explained in [Running example](../getting-started/first-steps.md#running-examples-locally)
+>
+> This command will download all the necessary artifacts for your project.  
+> The next steps are explained in the [Running Examples](../getting-started/first-steps.md#running-examples-locally) and [Quickstart Guide](/web-proof/quickstart-guide.html).
+
+### Server-side
+
+The server-side method is intended for proving data retrieved from HTTP requests that are either public or authenticated via token. It’s a great fit for APIs such as AI models, fintech services, or any backend integration where browser cookie is not required.
+
+> 💡 **Try it Now**
+>
+> To run an example that proves data returned by the Kraken API, enter the following command in your terminal:
+>
+> ```bash
+> vlayer init --template kraken-web-proof
+> ```
+>
+> This will download all necessary artifacts to your project.  
+> The next steps are detailed in [Running Examples](../getting-started/first-steps.md#running-examples-locally).
 
 ## Example Verifier
 The contract below verifies provided Web Proof and mints a unique NFT for the Twitter/X handle owner’s wallet address.
