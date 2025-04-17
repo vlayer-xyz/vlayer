@@ -9,8 +9,11 @@ set -ueo pipefail
 BASE_DIR=${XDG_CONFIG_HOME:-$HOME}
 VLAYER_DIR=${VLAYER_DIR:-"$BASE_DIR/.vlayer"}
 VLAYER_BIN_DIR="$VLAYER_DIR/bin"
+CHANNEL="nightly" # Default channel.
 
 main() {
+  parse_args "$@"
+
   need_cmd git
   need_cmd curl
   need_cmd forge
@@ -46,7 +49,13 @@ main() {
       ARCHITECTURE="amd64" # Amd.
     fi
 
-  RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+  if [ "$CHANNEL" = "nightly" ]; then
+    RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+  elif [ "$CHANNEL" = "stable" ]; then
+    RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest-stable/binaries-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+  else
+    err "unsupported channel: $CHANNEL. Supported channels are: nightly, stable"
+  fi
 
   say "Downloading vlayer..."
   ensure download "$RELEASE_URL" | ensure tar -xzC "$VLAYER_DIR"
@@ -55,6 +64,25 @@ main() {
   say "Unpacking"
   chmod +x "$BIN_PATH" 
   say "done!"
+}
+
+parse_args() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --channel)
+        if [ -n "${2:-}" ]; then
+          CHANNEL="$2"
+          shift
+        else
+          err "missing argument for --channel"
+        fi
+        ;;
+      *)
+        err "unknown argument: $1"
+        ;;
+    esac
+    shift
+  done
 }
 
 need_cmd() {
