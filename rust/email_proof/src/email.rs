@@ -355,28 +355,25 @@ ZmlsZSBjb250ZW50Cg==
 
         #[test]
         fn error_if_brackets_misaligned() {
-            let (header, _) = parse_header(b"From: Name <hello@aa.aa>>").unwrap();
-            let email = extract_address_from_header(&header);
+            let extract = |from: &str| {
+                let formatted_from = format!("From: {from}");
+                let (header, _) = parse_header(formatted_from.as_bytes()).unwrap();
+                extract_address_from_header(&header)
+                    .unwrap_err()
+                    .to_string()
+            };
+
             assert_eq!(
-                email.unwrap_err().to_string(),
+                extract("Name <hello@aa.aa>>"),
                 "Unexpected char found after bracketed address"
             );
-
-            let (header, _) = parse_header(b"From: Name hello@aa.aa>").unwrap();
-            let email = extract_address_from_header(&header);
             assert_eq!(
-                email.unwrap_err().to_string(),
+                extract("Name hello@aa.aa>"),
                 "Email address must not contain whitespace characters"
             );
-
-            let (header, _) = parse_header(b"From: Name <hello@aa.aa").unwrap();
-            let email = extract_address_from_header(&header);
-            assert_eq!(email.unwrap_err().to_string(), "Address string unexpectedly terminated");
-
-            let (header, _) = parse_header(b"From: Name <<hello@aa.aa>>").unwrap();
-            let email = extract_address_from_header(&header);
+            assert_eq!(extract("Name <hello@aa.aa"), "Address string unexpectedly terminated");
             assert_eq!(
-                email.unwrap_err().to_string(),
+                extract("Name <<hello@aa.aa>>"),
                 "Unexpected char found after bracketed address"
             );
         }
