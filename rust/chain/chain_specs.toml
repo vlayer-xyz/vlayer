@@ -22,10 +22,10 @@ forks = [
     { spec = "FJORD", activation = { Timestamp = 1715961600 } },
 ]
 
-# https://github.com/ethereum-op_spec/op_spec/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
-# https://docs.op_spec.io/chain/addresses#sepolia-l1
+# https://github.com/ethereum-optimism/optimism/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
+# https://docs.optimism.io/chain/addresses#sepolia-l1
 [[chains]]
-name = "op_spec-sepolia"
+name = "optimism-sepolia"
 id = 11155420
 op_spec = { anchor_chain = 11155111, anchor_state_registry = "0x218CD9489199F321E1177b56385d333c5B598629" }
 forks = [
@@ -118,7 +118,7 @@ forks = [
     { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
-# https://github.com/base-org/op_spec/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
+# https://github.com/base-org/optimism/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
 # https://docs.base.org/docs/base-contracts/#ethereum-mainnet
 [[chains]]
 name = "base"
@@ -131,10 +131,10 @@ forks = [
     { spec = "FJORD", activation = { Timestamp = 1720627201 } },
 ]
 
-# https://docs.op_spec.io/builders/node-operators/network-upgrades
-# https://docs.op_spec.io/chain/addresses#ethereum-l1
+# https://docs.optimism.io/builders/node-operators/network-upgrades
+# https://docs.optimism.io/chain/addresses#ethereum-l1
 [[chains]]
-name = "op_spec"
+name = "optimism"
 id = 10
 op_spec = { anchor_chain = 1, anchor_state_registry = "0x18DAc71c228D1C32c99489B7323d441E1175e443" }
 forks = [
@@ -215,7 +215,7 @@ forks = [
 ]
 
 [[chains]]
-name = "local-testnet-op_spec"
+name = "local-testnet-optimism"
 is_local_testnet = true
 id = 31338
 op_spec = { anchor_chain = 31_337, anchor_state_registry = "0x5FbDB2315678afecb367f032d93F642f64180aa3" }
