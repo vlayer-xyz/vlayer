@@ -21,7 +21,7 @@ pub enum Error {
     #[error("Header hash mismatch")]
     HeaderHashMismatch,
     #[error(
-        "Teleport to unconfirmed block {target_block} on {chain_id}. Latest confirmed block: {latest_confirmed_block}. Time to confirm is 7 days."
+        "Teleport to unconfirmed block: {target_block} on chain id: {chain_id}. Latest confirmed block: {latest_confirmed_block}. Time to confirm is 7 days."
     )]
     TeleportOnUnconfirmed {
         target_block: BlockNumber,
