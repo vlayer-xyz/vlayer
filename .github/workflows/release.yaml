@@ -284,10 +284,11 @@ jobs:
       - name: Set up tags
         id: tags
         run: |
-          echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}" >> $GITHUB_ENV
+          tags="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
           if [ "${{ inputs.vlayer_release }}" = "nightly" ]; then
-            echo "TAGS=${TAGS},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
+            tags="${tags},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           fi
+          echo "TAGS=$tags" >> $GITHUB_ENV
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
