@@ -305,7 +305,15 @@ jobs:
     if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'nightly'
     name: Create GH releases
     runs-on: ubuntu-latest
-    needs: [build-examples, build-extension, push-contracts, publish-react-hooks-to-npm, push-docker-image]
+    needs:
+      [
+        build-release,
+        build-examples,
+        build-extension,
+        push-contracts,
+        publish-react-hooks-to-npm,
+        push-docker-image,
+      ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -336,7 +344,15 @@ jobs:
     if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'stable'
     name: Create GH releases
     runs-on: ubuntu-latest
-    needs: [build-examples, build-extension, push-contracts, publish-react-hooks-to-npm, push-docker-image]
+    needs:
+      [
+        build-release,
+        build-examples,
+        build-extension,
+        push-contracts,
+        publish-react-hooks-to-npm,
+        push-docker-image,
+      ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -350,5 +366,5 @@ jobs:
       - name: Release latest stable version
         uses: ncipollo/release-action@v1
         with:
-          tag: v${{ needs.build-release.outputs.vlayer_build }}
+          tag: "v${{ needs.build-release.outputs.vlayer_build }}"
           body: "Latest vlayer stable release"

@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build --no-cache -f docker/vlayer/Dockerfile.nightly .
+        run: docker build --no-cache -f docker/vlayer/Dockerfile .
   build-call-server-nightly-docker:
     name: Build nightly docker image of call server
     runs-on: aws-linux-medium
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build --no-cache -f docker/call_server/Dockerfile.nightly .
+        run: docker build --no-cache -f docker/call_server/Dockerfile .
   build-chain-worker-nightly-docker:
     name: Build nightly docker image of chain worker
     runs-on: aws-linux-medium
@@ -32,7 +32,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build --no-cache -f docker/chain_worker/Dockerfile.nightly .
+        run: docker build --no-cache -f docker/chain_worker/Dockerfile .
   build-chain-server-nightly-docker:
     name: Build nightly docker image of chain server
     runs-on: aws-linux-medium
@@ -40,7 +40,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build --no-cache -f docker/chain_server/Dockerfile.nightly .
+        run: docker build --no-cache -f docker/chain_server/Dockerfile .
   build-vdns-server-nightly-docker:
     name: Build nightly docker image of vdns server
     runs-on: aws-linux-medium
@@ -48,4 +48,4 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build --no-cache -f docker/vdns_server/Dockerfile.nightly .
+        run: docker build --no-cache -f docker/vdns_server/Dockerfile .
