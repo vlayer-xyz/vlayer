@@ -1,11 +1,12 @@
-name: Release vlayer artifacts
+name: Release
 on:
-  schedule:
-    - cron: "0 6 * * 1-5" # Mon-Fri at 06:00 UTC (07:00 CET / 08:00 CEST)
-  workflow_dispatch:
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: false
+  workflow_call:
+    inputs:
+      vlayer_release:
+        # Only nightly supported for now.
+        description: "Release type (nightly or stable)"
+        required: true
+        type: string
 jobs:
   build-release:
     if: github.repository == 'vlayer-xyz/vlayer'

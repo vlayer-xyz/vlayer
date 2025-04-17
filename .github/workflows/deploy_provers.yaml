@@ -3,7 +3,7 @@
 name: Deploy Provers
 on:
   workflow_run:
-    workflows: ["Release vlayer artifacts"]
+    workflows: ["Release nightly"]
     types: [completed]
   workflow_dispatch:
 concurrency:
