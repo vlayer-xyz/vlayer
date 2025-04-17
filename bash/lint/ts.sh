@@ -56,6 +56,7 @@ echo "::endgroup::Building contracts"
 
 echo "::group::Running eslint "
 pushd "${VLAYER_HOME}"
-bun run lint $FIX_FLAG
+bun run lint:packages $FIX_FLAG
+bun run lint:examples $FIX_FLAG
 popd
 echo "::endgroup::Running eslint"
