@@ -1,7 +1,7 @@
 use alloy_sol_types::SolValue;
 use mailparse::{
-    DispositionType, MailAddr, MailHeaderMap, MailParseError, ParsedMail, addrparse,
-    headers::Headers,
+    DispositionType, MailAddr, MailHeader, MailHeaderMap, MailParseError, ParsedMail,
+    addrparse_header, headers::Headers,
 };
 
 pub(crate) mod sol;
@@ -26,13 +26,15 @@ impl TryFrom<ParsedMail<'_>> for Email {
     fn try_from(mail: ParsedMail) -> Result<Self, Self::Error> {
         let headers = mail.get_headers();
 
-        let get_header = last_header_getter(headers);
+        let get_header = last_header_getter(&headers);
 
-        let from_raw =
+        let from_header =
             get_header("From").ok_or(MailParseError::Generic("\"From\" header is missing"))?;
-        let from_email = extract_address_from_header(&from_raw)?;
-        let to = get_header("To").ok_or(MailParseError::Generic("\"To\" header is missing"))?;
-        let subject = get_header("Subject");
+        let from_email = extract_address_from_header(from_header)?;
+        let to = get_header("To")
+            .ok_or(MailParseError::Generic("\"To\" header is missing"))?
+            .get_value();
+        let subject = get_header("Subject").map(MailHeader::get_value);
 
         Ok(Email {
             from: from_email,
@@ -69,8 +71,8 @@ fn is_inlined_body_content(part: &ParsedMail) -> bool {
     part.get_content_disposition().disposition == DispositionType::Inline
 }
 
-pub fn extract_address_from_header(raw_from_header: &str) -> Result<String, MailParseError> {
-    let addresses = addrparse(raw_from_header)?;
+pub fn extract_address_from_header(from_header: &MailHeader<'_>) -> Result<String, MailParseError> {
+    let addresses = addrparse_header(from_header)?;
 
     if addresses.len() != 1 {
         return Err(MailParseError::Generic("Expected exactly one address in the \"From\" header"));
@@ -91,8 +93,10 @@ pub fn extract_address_from_header(raw_from_header: &str) -> Result<String, Mail
 }
 
 // Last headers are signed first: https://datatracker.ietf.org/doc/html/rfc6376#section-5.4.2
-fn last_header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
-    move |key: &str| headers.get_all_values(key).pop()
+fn last_header_getter<'a>(
+    headers: &'a Headers,
+) -> impl Fn(&str) -> Option<&'a mailparse::MailHeader<'a>> {
+    move |key: &str| headers.get_all_headers(key).pop()
 }
 
 #[cfg(test)]
@@ -311,42 +315,54 @@ ZmlsZSBjb250ZW50Cg==
     }
 
     mod extract_address_from_header {
+        use mailparse::parse_header;
+
         use super::*;
 
         #[test]
         fn extracts_email_from_header() {
-            let extracted_email =
-                extract_address_from_header("  Name (comment) <hello@aa.aa >  ").unwrap();
+            let (header, _) = parse_header(b"From:   Name (comment) <hello@aa.aa >  ").unwrap();
+            let extracted_email = extract_address_from_header(&header).unwrap();
             assert_eq!(extracted_email, "hello@aa.aa");
         }
 
         #[test]
         fn works_for_not_named_field() {
-            let extracted_email = extract_address_from_header(" hello@aa.aa ").unwrap();
+            let (header, _) = parse_header(b"From: hello@aa.aa ").unwrap();
+            let extracted_email = extract_address_from_header(&header).unwrap();
             assert_eq!(extracted_email, "hello@aa.aa");
         }
 
         #[test]
         fn error_for_missing_brackets() {
-            let email = extract_address_from_header("Name hello@aa.aa");
+            let (header, _) = parse_header(b"Name hello@aa.aa").unwrap();
+            let email = extract_address_from_header(&header);
             assert_eq!(
                 email.unwrap_err().to_string(),
-                "Email address must not contain whitespace characters"
+                "Expected exactly one address in the \"From\" header"
             );
         }
 
         #[test]
         fn error_if_incorrect_email_inside_brackets() {
-            let email = extract_address_from_header("Name <aaa>");
+            let (header, _) = parse_header(b"Name <aaa>").unwrap();
+            let email = extract_address_from_header(&header);
             assert_eq!(
                 email.unwrap_err().to_string(),
-                "Invalid address found: must contain a '@' symbol"
+                "Expected exactly one address in the \"From\" header"
             );
         }
 
         #[test]
         fn error_if_brackets_misaligned() {
-            let extract = |from: &str| extract_address_from_header(from).unwrap_err().to_string();
+            let extract = |from: &str| {
+                let formatted_from = format!("From: {from}");
+                let (header, _) = parse_header(formatted_from.as_bytes()).unwrap();
+                extract_address_from_header(&header)
+                    .unwrap_err()
+                    .to_string()
+            };
+
             assert_eq!(
                 extract("Name <hello@aa.aa>>"),
                 "Unexpected char found after bracketed address"
@@ -364,11 +380,12 @@ ZmlsZSBjb250ZW50Cg==
 
         #[test]
         fn error_if_several_emails() {
-            let extract = |from: &str| extract_address_from_header(from).unwrap_err().to_string();
-            assert_eq!(
-                extract("Name <hello@aa.aa>, Name2 <hello2@aa.aa>"),
-                "Expected exactly one address in the \"From\" header"
-            );
+            let (header, _) =
+                parse_header(b"From: Name <hello@aa.aa>, Name2 <hello2@aa.aa>").unwrap();
+            let error = extract_address_from_header(&header)
+                .unwrap_err()
+                .to_string();
+            assert_eq!(error, "Expected exactly one address in the \"From\" header");
         }
     }
 }
