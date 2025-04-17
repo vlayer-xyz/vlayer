@@ -179,179 +179,178 @@ jobs:
           LOCAL_FILE: ./bash/vlayerup
           REMOTE_FILE: ""
 
-  # publish-sdk-to-npm:
-  #   if: github.repository == 'vlayer-xyz/vlayer'
-  #   name: Publish SDK to NPM
-  #   needs: [build-release, build-examples, build-extension, push-contracts]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Install TypeScript prerequisites
-  #       uses: ./.github/actions/ts-prerequisites
-  #     - name: Update SDK version
-  #       working-directory: packages/sdk
-  #       env:
-  #         VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-  #       run: ../../bash/bump-npm-version.sh --update-peer-deps=@vlayer/sdk
-  #     - name: Install dependencies
-  #       working-directory: packages/sdk
-  #       run: bun install
-  #     - name: replace symlinks
-  #       working-directory: packages/sdk
-  #       run: bun run replaceCommonsSymlink
-  #     - name: Build
-  #       working-directory: packages/sdk
-  #       run: bun run build
-  #     - name: Publish to NPM
-  #       working-directory: packages/sdk
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  #         VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-  #       run: |
-  #         PACKAGE_TARBALL_NAME=$(npm pack)
-  #         if npm show "@vlayer/sdk@${VLAYER_BUILD}" > /dev/null 2>&1; then
-  #           echo "Version $VLAYER_BUILD already exists. Skipping publish."
-  #         else
-  #           npm publish --access public ${PACKAGE_TARBALL_NAME}
-  #         fi
+  publish-sdk-to-npm:
+    if: github.repository == 'vlayer-xyz/vlayer'
+    name: Publish SDK to NPM
+    needs: [build-release, build-examples, build-extension, push-contracts]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - name: Update SDK version
+        working-directory: packages/sdk
+        env:
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: ../../bash/bump-npm-version.sh --update-peer-deps=@vlayer/sdk
+      - name: Install dependencies
+        working-directory: packages/sdk
+        run: bun install
+      - name: replace symlinks
+        working-directory: packages/sdk
+        run: bun run replaceCommonsSymlink
+      - name: Build
+        working-directory: packages/sdk
+        run: bun run build
+      - name: Publish to NPM
+        working-directory: packages/sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: |
+          PACKAGE_TARBALL_NAME=$(npm pack)
+          if npm show "@vlayer/sdk@${VLAYER_BUILD}" > /dev/null 2>&1; then
+            echo "Version $VLAYER_BUILD already exists. Skipping publish."
+          else
+            npm publish --access public ${PACKAGE_TARBALL_NAME}
+          fi
 
-  # publish-react-hooks-to-npm:
-  #   if: github.repository == 'vlayer-xyz/vlayer'
-  #   name: Publish React hooks to NPM
-  #   needs: [build-release, publish-sdk-to-npm]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Install TypeScript prerequisites
-  #       uses: ./.github/actions/ts-prerequisites
-  #     - name: Update React hooks version
-  #       working-directory: packages/sdk-hooks
-  #       env:
-  #         VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-  #       run: ../../bash/bump-npm-version.sh --update-peer-deps=@vlayer/sdk
-  #     - name: Install dependencies
-  #       working-directory: packages/sdk-hooks
-  #       run: bun install
-  #     - name: Install released SDK version
-  #       env:
-  #         VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-  #       run: bun add @vlayer/sdk@"${VLAYER_BUILD}"
-  #     - name: Build
-  #       working-directory: packages/sdk-hooks
-  #       run: bun run build
-  #     - name: Publish to NPM
-  #       working-directory: packages/sdk-hooks
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  #         VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-  #       run: |
-  #         PACKAGE_TARBALL_NAME=$(npm pack)
-  #         if npm show "@vlayer/react@${VLAYER_BUILD}" > /dev/null 2>&1; then
-  #           echo "Version $VLAYER_BUILD already exists. Skipping publish."
-  #         else
-  #           npm publish --access public ${PACKAGE_TARBALL_NAME}
-  #         fi
+  publish-react-hooks-to-npm:
+    if: github.repository == 'vlayer-xyz/vlayer'
+    name: Publish React hooks to NPM
+    needs: [build-release, publish-sdk-to-npm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - name: Update React hooks version
+        working-directory: packages/sdk-hooks
+        env:
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: ../../bash/bump-npm-version.sh --update-peer-deps=@vlayer/sdk
+      - name: Install dependencies
+        working-directory: packages/sdk-hooks
+        run: bun install
+      - name: Install released SDK version
+        env:
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: bun add @vlayer/sdk@"${VLAYER_BUILD}"
+      - name: Build
+        working-directory: packages/sdk-hooks
+        run: bun run build
+      - name: Publish to NPM
+        working-directory: packages/sdk-hooks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: |
+          PACKAGE_TARBALL_NAME=$(npm pack)
+          if npm show "@vlayer/react@${VLAYER_BUILD}" > /dev/null 2>&1; then
+            echo "Version $VLAYER_BUILD already exists. Skipping publish."
+          else
+            npm publish --access public ${PACKAGE_TARBALL_NAME}
+          fi
 
-  # push-docker-image:
-  #   if: github.repository == 'vlayer-xyz/vlayer'
-  #   name: Push docker image to github registry
-  #   # needs: [build-release, push-artifacts-to-s3]
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       docker_image:
-  #         [
-  #           "vlayer",
-  #           "call_server",
-  #           "chain_server",
-  #           "chain_worker",
-  #           "vdns_server",
-  #         ]
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #     attestations: write
-  #     id-token: write
-  #   env:
-  #     REGISTRY: ghcr.io
-  #     IMAGE_NAME: "vlayer-xyz/${{ matrix.docker_image }}"
-  #     VLAYER_BUILD: "0.2.0"
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #     - name: Log in to the Container registry
-  #       uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-  #       with:
-  #         registry: ${{ env.REGISTRY }}
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Build and push Docker image
-  #       id: push
-  #       uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
-  #       with:
-  #         context: .
-  #         file: "docker/${{ matrix.docker_image }}/Dockerfile"
-  #         push: true
-  #         build-args: |
-  #           VLAYER_RELEASE=${{ inputs.vlayer_release }}
-  #         tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
-  #     - name: Generate artifact attestation
-  #       uses: actions/attest-build-provenance@v1
-  #       with:
-  #         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-  #         subject-digest: ${{ steps.push.outputs.digest }}
-  #         push-to-registry: true
+  push-docker-image:
+    if: github.repository == 'vlayer-xyz/vlayer'
+    name: Push docker image to github registry
+    needs: [build-release, push-artifacts-to-s3]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        docker_image:
+          [
+            "vlayer",
+            "call_server",
+            "chain_server",
+            "chain_worker",
+            "vdns_server",
+          ]
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: "vlayer-xyz/${{ matrix.docker_image }}"
+      VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          file: "docker/${{ matrix.docker_image }}/Dockerfile"
+          push: true
+          build-args: |
+            VLAYER_RELEASE=${{ inputs.vlayer_release }}
+          tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
 
-  # create-nightly-release:
-  #   if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'nightly'
-  #   name: Create GH releases
-  #   runs-on: ubuntu-latest
-  #   needs: [build-examples, build-extension, push-contracts, publish-react-hooks-to-npm, push-docker-image]
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #     - run: mkdir -p dist
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         path: ./dist
-  #         merge-multiple: true
-  #     - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
-  #     - run: cp ./docker/docker-compose.devnet.yaml ./dist/
+  create-nightly-release:
+    if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'nightly'
+    name: Create GH releases
+    runs-on: ubuntu-latest
+    needs: [build-examples, build-extension, push-contracts, publish-react-hooks-to-npm, push-docker-image]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - run: mkdir -p dist
+      - uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          merge-multiple: true
+      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
+      - run: cp ./docker/docker-compose.devnet.yaml ./dist/
 
-  #     - name: Release tagged nightly
-  #       uses: ncipollo/release-action@v1
-  #       with:
-  #         tag: nightly-${{ github.sha }}
-  #         allowUpdates: true
-  #         artifacts: "./dist/*"
+      - name: Release tagged nightly
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly-${{ github.sha }}
+          allowUpdates: true
+          artifacts: "./dist/*"
 
-  #     - name: Release nightly-latest
-  #       uses: ncipollo/release-action@v1
-  #       with:
-  #         tag: nightly-latest
-  #         makeLatest: true
-  #         allowUpdates: true
-  #         artifacts: "./dist/*"
+      - name: Release nightly-latest
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly-latest
+          makeLatest: true
+          allowUpdates: true
+          artifacts: "./dist/*"
 
-  # create-stable-release:
-  #   if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'stable'
-  #   name: Create GH releases
-  #   runs-on: ubuntu-latest
-  #   needs: [push-docker-image]
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #     - run: mkdir -p dist
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         path: ./dist
-  #         merge-multiple: true
-  #     - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
-  #     - run: cp ./docker/docker-compose.devnet.yaml ./dist/
+  create-stable-release:
+    if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'stable'
+    name: Create GH releases
+    runs-on: ubuntu-latest
+    needs: [build-examples, build-extension, push-contracts, publish-react-hooks-to-npm, push-docker-image]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - run: mkdir -p dist
+      - uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          merge-multiple: true
+      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
+      - run: cp ./docker/docker-compose.devnet.yaml ./dist/
 
-  #     - name: Release latest stable version
-  #       uses: ncipollo/release-action@v1
-  #       with:
-  #         tag: "v0.2.0"
-  #         body: "Latest vlayer stable release"
-  #         commit: af95e692e07531199b04db8cc88dfdcfd4bcbf49
+      - name: Release latest stable version
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ needs.build-release.outputs.vlayer_build }}
+          body: "Latest vlayer stable release"
