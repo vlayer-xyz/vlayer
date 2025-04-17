@@ -2,6 +2,11 @@ name: Build Rust binaries for releasing
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      vlayer_release:
+        description: "Release type (nightly or stable)"
+        required: true
+        type: string
     outputs:
       vlayer_build:
         value: ${{ jobs.build-x86_64-unknown-linux-gnu-release.outputs.vlayer_build }}
@@ -65,15 +70,13 @@ jobs:
       - name: "Build binaries"
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          VLAYER_RELEASE: "nightly"
+          VLAYER_RELEASE: ${{ inputs.vlayer_release || 'dev' }}
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
           cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server
 
       - name: "Print build version"
         id: vlayer_build
-        env:
-          VLAYER_RELEASE: "nightly"
         run: |
           BUILD=$(./target/${{ env.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
           echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
@@ -124,15 +127,13 @@ jobs:
 
       - name: "Build binaries"
         env:
-          VLAYER_RELEASE: "nightly"
+          VLAYER_RELEASE: ${{ inputs.vlayer_release || 'dev' }}
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
           nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server -p dns_server"
 
       - name: "Print build version"
         id: vlayer_build
-        env:
-          VLAYER_RELEASE: "nightly"
         run: |
           BUILD=$(./target/${{ env.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
           echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
@@ -171,15 +172,13 @@ jobs:
 
       - name: "Build binaries"
         env:
-          VLAYER_RELEASE: "nightly"
+          VLAYER_RELEASE: ${{ inputs.vlayer_release || 'dev' }}
           RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
           cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server
 
       - name: "Print build version"
         id: vlayer_build
-        env:
-          VLAYER_RELEASE: "nightly"
         run: |
           BUILD=$(./target/${{ env.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
           echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}

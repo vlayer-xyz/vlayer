@@ -11,6 +11,8 @@ jobs:
   build-release:
     if: github.repository == 'vlayer-xyz/vlayer'
     uses: ./.github/workflows/build_rust_release.yaml
+    with:
+      vlayer_release: ${{ inputs.vlayer_release }}
 
   build-examples:
     if: github.repository == 'vlayer-xyz/vlayer'
