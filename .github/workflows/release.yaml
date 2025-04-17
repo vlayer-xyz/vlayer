@@ -281,6 +281,13 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up tags
+        id: tags
+        run: |
+          echo "TAGS=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}" >> $GITHUB_ENV
+          if [ "${{ inputs.vlayer_release }}" = "nightly" ]; then
+            echo "TAGS=${TAGS},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
+          fi
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
@@ -288,10 +295,7 @@ jobs:
           context: .
           file: "docker/${{ matrix.docker_image }}/Dockerfile"
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}
-            ${{ inputs.vlayer_release == 'nightly' && env.REGISTRY + '/' + env.IMAGE_NAME + ':latest' || '' }}
+          tags: ${{ env.TAGS }}
           build-args: |
             VLAYER_RELEASE=${{ inputs.vlayer_release }}
       - name: Generate artifact attestation
