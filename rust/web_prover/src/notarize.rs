@@ -17,8 +17,6 @@ use tracing::debug;
 use crate::{NotarizeParams, RedactionConfig};
 
 const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
-const MAX_SENT_DATA: usize = 1 << 12;
-const MAX_RECV_DATA: usize = 1 << 14;
 
 pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, RedactionConfig)> {
     let NotarizeParams {
@@ -30,6 +28,8 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
         headers,
         body,
         redaction_config_fn,
+        max_sent_data,
+        max_recv_data,
     } = params;
 
     let notary_client = NotaryClient::builder()
@@ -40,8 +40,8 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
         .build()?;
 
     let notarization_request = NotarizationRequest::builder()
-        .max_sent_data(MAX_SENT_DATA)
-        .max_recv_data(MAX_RECV_DATA)
+        .max_sent_data(max_sent_data)
+        .max_recv_data(max_recv_data)
         .build()?;
 
     let Accepted {
@@ -57,8 +57,8 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
         .server_name(server_domain.as_ref())
         .protocol_config(
             ProtocolConfig::builder()
-                .max_sent_data(MAX_SENT_DATA)
-                .max_recv_data(MAX_RECV_DATA)
+                .max_sent_data(max_sent_data)
+                .max_recv_data(max_recv_data)
                 .build()?,
         )
         .crypto_provider(CryptoProvider::default())
