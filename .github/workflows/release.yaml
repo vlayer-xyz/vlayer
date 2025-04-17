@@ -332,3 +332,25 @@ jobs:
           makeLatest: true
           allowUpdates: true
           artifacts: "./dist/*"
+
+  create-stable-release:
+    if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'stable'
+    name: Create GH releases
+    runs-on: ubuntu-latest
+    needs: [build-examples, build-extension, push-contracts, publish-react-hooks-to-npm, push-docker-image]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - run: mkdir -p dist
+      - uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          merge-multiple: true
+      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
+      - run: cp ./docker/docker-compose.devnet.yaml ./dist/
+
+      - name: Release latest stable version
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ needs.build-release.outputs.vlayer_build }}
+          body: "Latest vlayer stable release"
