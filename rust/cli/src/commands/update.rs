@@ -6,10 +6,7 @@ use logger::UpdateLogger;
 use serde_json::Value;
 
 use crate::{
-    cli_wrappers::{
-        base, js,
-        vlayer::{self, Cli as Vlayer},
-    },
+    cli_wrappers::{base, js, vlayer},
     config::{Config, DEFAULT_CONFIG},
     errors::{Error, Result},
     soldeer::{add_remappings, install_solidity_dependencies},
@@ -54,7 +51,7 @@ fn update_cli() -> Result<()> {
 
 fn update_sdk() -> Result<()> {
     let version = vlayer::Cli::version()?;
-    let logger = UpdateLogger::new(format!("SDK to {}", version));
+    let logger = UpdateLogger::new(format!("SDK to {version}"));
     let Some((path, package_json)) = find_package_json()? else {
         logger.warn(format!("{} not found. Skipping SDK update.", "package.json".bold()));
         return Ok(());
@@ -87,8 +84,7 @@ async fn update_contracts() -> Result<()> {
     };
     let foundry_root = foundry_toml_path.parent().unwrap();
 
-    let config = Config::from_str(DEFAULT_CONFIG.replace("{{VERSION}}", version.as_str()))
-        .expect("Could not construct an internal foundry config");
+    let config = Config::from_str(DEFAULT_CONFIG.replace("{{VERSION}}", version.as_str()))?;
     install_solidity_dependencies(&config.sol_dependencies).await?;
     add_remappings(foundry_root, config.sol_dependencies.values())?;
     logger.success();
