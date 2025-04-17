@@ -20,8 +20,14 @@ pub enum Error {
     L2OutputHashMismatch,
     #[error("Header hash mismatch")]
     HeaderHashMismatch,
-    #[error("Teleport on unconfirmed")]
-    TeleportOnUnconfirmed,
+    #[error(
+        "Teleport to unconfirmed block {target_block} on {chain_id}. Latest confirmed block: {latest_confirmed_block}."
+    )]
+    TeleportOnUnconfirmed {
+        target_block: BlockNumber,
+        chain_id: ChainId,
+        latest_confirmed_block: BlockNumber,
+    },
     #[error("Anchor state registry: {0}")]
     AnchorStateRegistry(
         #[from]
@@ -126,7 +132,7 @@ impl<D: RevmDB> IVerifier<D> for Verifier {
             if latest_confirmed_evm_env.header.hash_slow() != l2_block.hash {
                 return Err(Error::HeaderHashMismatch);
             }
-            ensure_latest_teleport_location_is_confirmed(&blocks, l2_block.number)?;
+            ensure_latest_teleport_location_is_confirmed(&blocks, l2_block.number, chain_id)?;
             info!("Teleport to chain {chain_id} verified");
         }
         Ok(())
@@ -154,6 +160,7 @@ async fn fetch_latest_confirmed_l2_block<D: RevmDB>(
 pub fn ensure_latest_teleport_location_is_confirmed(
     destination_blocks: &[(u64, B256)],
     latest_confirmed_block: BlockNumber,
+    chain_id: ChainId,
 ) -> Result<()> {
     let latest_destination_block = destination_blocks
         .iter()
@@ -162,7 +169,11 @@ pub fn ensure_latest_teleport_location_is_confirmed(
         .0;
 
     if latest_confirmed_block < latest_destination_block {
-        return Err(Error::TeleportOnUnconfirmed);
+        return Err(Error::TeleportOnUnconfirmed {
+            target_block: latest_destination_block,
+            chain_id,
+            latest_confirmed_block,
+        });
     }
     info!(
         "Teleport onto block {latest_destination_block} allowed. Latest confirmed {latest_confirmed_block}"

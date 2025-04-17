@@ -4,13 +4,14 @@ mod ensure_latest_teleport_location_is_confirmed {
     use anyhow::Result;
 
     use crate::verifier::teleport::{Error, ensure_latest_teleport_location_is_confirmed};
+    const CHAIN_ID: ChainId = 1;
 
     #[test]
     fn success() -> Result<()> {
         let hash = B256::ZERO;
         let blocks = &[(1, hash), (2, hash)];
 
-        ensure_latest_teleport_location_is_confirmed(blocks, 2)?;
+        ensure_latest_teleport_location_is_confirmed(blocks, 2, CHAIN_ID)?;
         Ok(())
     }
 
@@ -19,7 +20,7 @@ mod ensure_latest_teleport_location_is_confirmed {
         let hash = B256::ZERO;
         let blocks = &[(1, hash), (2, hash)];
 
-        let err = ensure_latest_teleport_location_is_confirmed(blocks, 1).unwrap_err();
+        let err = ensure_latest_teleport_location_is_confirmed(blocks, 1, CHAIN_ID).unwrap_err();
         assert_eq!(err, Error::TeleportOnUnconfirmed);
         Ok(())
     }
