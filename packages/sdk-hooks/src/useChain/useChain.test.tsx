@@ -44,9 +44,7 @@ describe("useChain", () => {
 
     expect(result.current.chain).toBeUndefined();
     expect(error).toBeDefined();
-    expect(error).toBe(
-      "Env chain undefined not found"
-    );
+    expect(error).toBe("Env chain undefined not found");
   });
 
   it("should fail when chain is not supported", () => {
@@ -57,8 +55,6 @@ describe("useChain", () => {
 
     expect(result.current.chain).toBeUndefined();
     expect(error).toBeDefined();
-    expect(error).toBe(
-      "Chain unsupported-chain is not suported",
-    );
+    expect(error).toBe("Chain unsupported-chain is not suported");
   });
 });

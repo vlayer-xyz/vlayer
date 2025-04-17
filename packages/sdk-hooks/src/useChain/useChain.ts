@@ -36,10 +36,11 @@ export const useChain = () => {
         setError(undefined);
       } else {
         setChain(undefined);
-        setError(`Chains mismatched. Wallet chain: ${wagmiChain} is not equal to env chain: ${configChain}`);
+        setError(
+          `Chains mismatched. Wallet chain: ${wagmiChain} is not equal to env chain: ${configChain}`,
+        );
       }
-
-    } catch (e) {
+    } catch {
       setChain(undefined);
       setError(`Chain ${configChain} is not suported`);
     }
