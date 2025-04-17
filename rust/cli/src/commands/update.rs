@@ -6,11 +6,8 @@ use logger::UpdateLogger;
 use serde_json::Value;
 
 use crate::{
-    cli_wrappers::{
-        base, js,
-        vlayer::{self, Cli as Vlayer},
-    },
-    config::Config,
+    cli_wrappers::{base, js, vlayer},
+    config::{Config, DEFAULT_CONFIG},
     errors::{Error, Result},
     soldeer::{add_remappings, install_solidity_dependencies},
     utils::path::find_file_up_tree,
@@ -53,28 +50,33 @@ fn update_cli() -> Result<()> {
 }
 
 fn update_sdk() -> Result<()> {
-    let logger = UpdateLogger::new("SDK");
+    let version = vlayer::Cli::version()?;
+    let logger = UpdateLogger::new(format!("SDK to {version}"));
     let Some((path, package_json)) = find_package_json()? else {
         logger.warn(format!("{} not found. Skipping SDK update.", "package.json".bold()));
         return Ok(());
     };
-    if package_json["dependencies"]["@vlayer/sdk"].is_null() {
-        logger.warn(format!("{} not found in {}", "@vlayer/sdk".bold(), "package.json".bold()));
-        return Ok(());
-    }
 
     let Some(js_pm) = js::PackageManager::guess(&path) else {
         return Err(Error::Upgrade("Failed to guess which JS package manager is used".to_string()));
     };
-    js::Cli::new(js_pm).install("@vlayer/sdk")?;
-    logger.success();
+    let js_pm_cli = js::Cli::new(js_pm);
 
+    if !package_json["dependencies"]["@vlayer/sdk"].is_null() {
+        js_pm_cli.install("@vlayer/sdk", version.as_str())?;
+    }
+    if !package_json["dependencies"]["@vlayer/react"].is_null() {
+        js_pm_cli.install("@vlayer/react", version.as_str())?;
+    }
+
+    logger.success();
     Ok(())
 }
 
 #[allow(clippy::unwrap_used)]
 async fn update_contracts() -> Result<()> {
-    let logger = UpdateLogger::new(format!("Contracts to {}", &Vlayer::version()?));
+    let version = vlayer::Cli::version()?;
+    let logger = UpdateLogger::new(format!("Contracts to {}", &version));
     let foundry_toml = find_file_up_tree("foundry.toml")?;
     let Some(foundry_toml_path) = foundry_toml else {
         logger.warn(format!("{} not found. Skipping Soldeer update.", "foundry.toml".bold()));
@@ -82,7 +84,7 @@ async fn update_contracts() -> Result<()> {
     };
     let foundry_root = foundry_toml_path.parent().unwrap();
 
-    let config = Config::default();
+    let config = Config::from_str(DEFAULT_CONFIG.replace("{{VERSION}}", version.as_str()))?;
     install_solidity_dependencies(&config.sol_dependencies).await?;
     add_remappings(foundry_root, config.sol_dependencies.values())?;
     logger.success();

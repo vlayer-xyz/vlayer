@@ -55,8 +55,11 @@ pub enum Error {
 pub struct Cli(PackageManager);
 
 impl Cli {
-    pub fn install(&self, name: &str) -> Result<(), Error> {
-        base::Cli::run(self.0.name(), &[self.0.install_command(), name])?;
+    pub fn install(&self, name: &str, version: &str) -> Result<(), Error> {
+        base::Cli::run(
+            self.0.name(),
+            &[self.0.install_command(), format!("{name}@{version}").as_str()],
+        )?;
         println!("{} {} updated {}\n", "✔".green().bold(), name.bold(), "successfully".green());
         Ok(())
     }
