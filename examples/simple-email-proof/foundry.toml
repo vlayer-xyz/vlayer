@@ -10,6 +10,7 @@ libs = [
 fs_permissions = [{ access = "read", path = "./testdata" }]
 
 [dependencies]
+forge-std = "1.9.4"
 "@openzeppelin-contracts" = "5.0.1"
 
 [soldeer]
