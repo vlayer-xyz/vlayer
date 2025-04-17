@@ -197,6 +197,8 @@ const handleProofRequest = async (
     message.payload,
   );
 
+  await browser.runtime.sendMessage(ExtensionMessageType.ResetTlsnProving);
+
   if (Sentry.isInitialized()) {
     Sentry.setContext("WebProverSessionConfig", {
       notaryUrl: message.payload.notaryUrl,
