@@ -1,9 +1,12 @@
 use std::path::PathBuf;
 
+use clap::{Parser, ValueEnum};
 use colored::Colorize;
 use docker::update_docker;
 use logger::UpdateLogger;
+use serde::Deserialize;
 use serde_json::Value;
+use strum::Display;
 
 use crate::{
     cli_wrappers::{base, js, vlayer},
@@ -16,9 +19,29 @@ use crate::{
 pub mod docker;
 mod logger;
 
-pub async fn run_update() -> Result<()> {
+#[derive(Clone, Copy, Debug, ValueEnum, Default, Display, Deserialize)]
+#[strum(serialize_all = "kebab-case")]
+pub enum ReleaseChannel {
+    #[default]
+    Nightly,
+    Stable,
+}
+
+#[derive(Clone, Debug, Parser)]
+pub(crate) struct UpdateArgs {
+    /// Vlayer release channel
+    #[arg(
+        long,
+        value_enum,
+        env = "VLAYER_RELEASE_CHANNEL",
+        default_value = "nightly"
+    )]
+    channel: ReleaseChannel,
+}
+
+pub async fn run_update(args: UpdateArgs) -> Result<()> {
     ensure_vlayerup_exists()?;
-    update_cli()?;
+    update_cli(args.channel)?;
     update_sdk()?;
     update_contracts().await?;
     update_docker()?;
@@ -40,10 +63,10 @@ fn ensure_vlayerup_exists() -> Result<()> {
         })
 }
 
-fn update_cli() -> Result<()> {
+fn update_cli(channel: ReleaseChannel) -> Result<()> {
     let logger = UpdateLogger::new("CLI");
     let previous_version = vlayer::Cli::version()?;
-    base::Cli::run("vlayerup", &["update"])?;
+    base::Cli::run("vlayerup", &["--channel", channel.to_string().as_str()])?;
     let updated_version = vlayer::Cli::version()?;
     logger.success_with_version_info(&previous_version, &updated_version);
     Ok(())

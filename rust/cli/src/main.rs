@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 use commands::{
     init::{InitArgs, run_init},
     jwt::{Args as JwtArgs, run as run_jwt},
+    update::UpdateArgs,
     web_proof::{WebProofArgs, webproof_fetch},
 };
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
@@ -36,7 +37,7 @@ struct Cli {
 enum Commands {
     Init(InitArgs),
     Test(Box<TestArgs>),
-    Update,
+    Update(UpdateArgs),
     WebProofFetch(WebProofArgs),
     #[command(hide = true)]
     TestLoggingConfiguration,
@@ -66,7 +67,7 @@ async fn run() -> Result<()> {
             set_risc0_dev_mode();
             Box::pin(run_test(args)).await
         }
-        Commands::Update => run_update().await,
+        Commands::Update(args) => run_update(args).await,
         Commands::WebProofFetch(args) => {
             webproof_fetch(args).await.map_err(derive_more::Into::into)
         }
