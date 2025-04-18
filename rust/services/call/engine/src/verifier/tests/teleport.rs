@@ -1,16 +1,17 @@
 #[cfg(test)]
 mod ensure_latest_teleport_location_is_confirmed {
-    use alloy_primitives::B256;
+    use alloy_primitives::{B256, ChainId};
     use anyhow::Result;
 
     use crate::verifier::teleport::{Error, ensure_latest_teleport_location_is_confirmed};
+    const CHAIN_ID: ChainId = 1;
 
     #[test]
     fn success() -> Result<()> {
         let hash = B256::ZERO;
         let blocks = &[(1, hash), (2, hash)];
 
-        ensure_latest_teleport_location_is_confirmed(blocks, 2)?;
+        ensure_latest_teleport_location_is_confirmed(blocks, 2, CHAIN_ID)?;
         Ok(())
     }
 
@@ -19,8 +20,15 @@ mod ensure_latest_teleport_location_is_confirmed {
         let hash = B256::ZERO;
         let blocks = &[(1, hash), (2, hash)];
 
-        let err = ensure_latest_teleport_location_is_confirmed(blocks, 1).unwrap_err();
-        assert_eq!(err, Error::TeleportOnUnconfirmed);
+        let err = ensure_latest_teleport_location_is_confirmed(blocks, 1, CHAIN_ID).unwrap_err();
+        assert_eq!(
+            err,
+            Error::TeleportOnUnconfirmed {
+                target_block: 2,
+                chain_id: CHAIN_ID,
+                latest_confirmed_block: 1
+            }
+        );
         Ok(())
     }
 }
