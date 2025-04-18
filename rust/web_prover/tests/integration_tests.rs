@@ -3,9 +3,9 @@
 mod integration_tests {
     use std::collections::HashMap;
 
+    use rangeset::RangeSet;
     use regex::Regex;
     use tlsn_core::{connection::ServerName, presentation::Presentation};
-    use utils::range::RangeSet;
     use web_prover::{
         NotarizeParamsBuilder, NotaryConfig, RedactionConfig, generate_web_proof,
         verify_presentation,

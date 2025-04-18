@@ -6,10 +6,11 @@ edition = "2024"
 [dependencies]
 bincode = { workspace = true }
 hex = { workspace = true }
+rangeset = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
-tlsn-core = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
+tlsn-core = { workspace = true }
 tlsn-utils = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 tracing = { workspace = true }
