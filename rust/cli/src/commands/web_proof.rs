@@ -17,7 +17,7 @@ pub enum Scheme {
     Https,
 }
 
-const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/v0.1.0-alpha.9";
+const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/";
 const DEFAULT_MAX_SENT_DATA: usize = 1 << 12;
 const DEFAULT_MAX_RECV_DATA: usize = 1 << 14;
 
