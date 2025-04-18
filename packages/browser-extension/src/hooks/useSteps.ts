@@ -130,8 +130,8 @@ export const useSteps = (): Step[] => {
   const stepsSetup = match(config)
     .with(LOADING, () => [])
     .with(P.nullish, () => [])
-    .with({ steps: P.array(P.string) }, ({ steps }) => steps)
-    .otherwise(() => []);
+    .with({ steps: P.array(P.any) }, ({ steps }) => steps)
+    .exhaustive();
 
   return calculateSteps({
     stepsSetup,
