@@ -16,12 +16,12 @@ export const chainToTeleportConfig: Record<string, TeleportConfig> = {
       erc20BlockNumbers: "3",
     },
   },
-  optimismSepolia: {
-    tokenHolder: "0xA6E3d943197A53C5608fF49239310C19843B3Cf1",
+  sepolia: {
+    tokenHolder: "0x4631d3E5803332448e0D9cBb9bF501A4C50B95ed",
     prover: {
-      erc20Addresses: "0x298b4c4f9be251c100724a3beae234bd1652cbce",
+      erc20Addresses: "0xc6e1fb449b08b26b2063c289df9bbcb79b91c992",
       erc20ChainIds: "11155420",
-      erc20BlockNumbers: "24192026",
+      erc20BlockNumbers: "25181931",
     },
   },
 };

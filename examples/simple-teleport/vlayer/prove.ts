@@ -31,7 +31,7 @@ const vlayer = createVlayerClient({
   url: proverUrl,
   token: config.token,
 });
-
+console.log("⏳ Deploying helper contracts...");
 const deployWhaleBadgeHash = await ethClient.deployContract({
   abi: whaleBadgeNFTSpec.abi,
   bytecode: whaleBadgeNFTSpec.bytecode.object,
@@ -57,7 +57,6 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
-console.log("Proving...");
 const proofHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
@@ -67,7 +66,7 @@ const proofHash = await vlayer.prove({
 });
 const result = await vlayer.waitForProvingResult({ hash: proofHash });
 console.log("Proof:", result[0]);
-console.log("Verifying...");
+console.log("⏳ Verifying...");
 
 const verificationHash = await ethClient.writeContract({
   address: verifier,
@@ -84,4 +83,4 @@ const receipt = await ethClient.waitForTransactionReceipt({
   retryDelay: 1000,
 });
 
-console.log(`Verification result: ${receipt.status}`);
+console.log(`✅ Verification result: ${receipt.status}`);
