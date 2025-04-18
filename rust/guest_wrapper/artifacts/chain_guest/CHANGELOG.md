@@ -17,3 +17,4 @@
   * `4af5b2998ca397f906dc0cffbe13937dde04c1cdd833fb460dd81d2815468896` – Rust 1.85.0 - [#2150] (https://github.com/vlayer-xyz/vlayer/pull/2150)
   * `605a504383da17012e2af35e674bb0fb8b4d9ceb2714217d3618f43c3d4c6ded` – hashbrown 0.15.0 -> 0.15.1 - [#2011] (https://github.com/vlayer-xyz/vlayer/pull/2011)
   * `3dedd7024c3462f3f326489b27ff1843f30f03afff71cdd88ccd24f81fbe8f67` – Deny panics globally [#2199](https://github.com/vlayer-xyz/vlayer/pull/2199)
+  * `304957ee9fdecb19ec65f8633d40a926aacd142b81c4cfd43d42ca6742f67130` – Update `chain_specs.toml` [#2218](https://github.com/vlayer-xyz/vlayer/pull/2218)
