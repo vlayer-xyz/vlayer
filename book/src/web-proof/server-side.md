@@ -1,5 +1,9 @@
 # Server-side Web Proof
-vlayer allows to notarize HTTP requests from command line:
+vlayer supports generating Web Proofs on the server side. This method is especially useful for proving web data returned by public or token-authenticated APIs, without requiring a browser extension.
+
+Typical use cases include verifying responses from centralized services such as Coinbase, Binance, Kraken, Stripe, Github, Meta, YouTube or similar platforms.
+
+To notarize HTTP requests from the server, use the vlayer CLI:
 ```sh
 vlayer web-proof-fetch [OPTIONS] --url <URL>
 ```
@@ -22,7 +26,7 @@ vlayer web-proof-fetch
   --url "https://api.kraken.com/0/public/Ticker?pair=ETHUSD"
 ```
 
-Such produced Web Proof can be passed into vlayer prover and then verified on-chain. 
+Such produced Web Proof (including url, headers and body) can be passed into vlayer prover and then verified on-chain. 
 
 > 💡 **Try it Now**
 >
@@ -34,3 +38,5 @@ Such produced Web Proof can be passed into vlayer prover and then verified on-ch
 >
 > This will download all necessary artifacts to your project.  
 > The next steps are detailed in [Running Examples](../getting-started/first-steps.md#running-examples-locally).
+
+For proving HTTP requests that rely on httpOnly cookies, use the [client-side approach](/web-proof/quickstart-guide.html). 
