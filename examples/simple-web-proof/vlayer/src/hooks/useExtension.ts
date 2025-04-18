@@ -17,14 +17,12 @@ export const useExtension = () => {
       return;
     }
     if (!isSupportedBrowser()) {
-      console.log("isUnsupportedBrowser");
       setError("Unsupported browser. Please try Chrome based browsers.");
       setHasExtensionInstalled(false);
       return;
     }
-    console.log("before checkExtensionInstalled ");
+
     const isInstalled = await checkExtensionInstalled();
-    console.log("isInstalled", isInstalled);
     if (!isInstalled) {
       setHasExtensionInstalled(false);
       return;
