@@ -1,16 +1,9 @@
 # JSON Web Tokens
+Authentication with vlayer services is handled via **JSON Web Tokens (JWTs)**. Since JWTs are Base64-encoded by default, it can be difficult to visually inspect them when debugging failed authentication attempts.
 
-Authentication into vlayer services is done using JSON Web Tokens (JWTs). JWTs are base64
-encoded by default which may be difficult to simply eye-ball when searching for the reason
-that your request failed to authenticate.
+For most use cases, generating a JWT through the [dashboard](https://dashboard.vlayer.xyz) is sufficient. However, for local development or debugging, the vlayer CLI includes a helpful utility for generating and verifying JWTs compatible with the vlayer network.
 
-This is particulary important when developing with [vlayer's devnet](/getting-started/dev-and-production.html)
-and you would like to generate/validate different JWT combinations.
-
-For that reason, we have provided a tool that's integrated with the vlayer CLI which allows
-generating and verifying JWT tokens that are compatible with the vlayer network.
-
-The tool can be accessed under `vlayer jwt` command.
+This utility is available under the `vlayer jwt` command.
 
 ## Generating/encoding new JWTs
 
@@ -19,7 +12,7 @@ Generating new JWTs can be done using `vlayer jwt encode` command.
 Typical usage when targeting vlayer devnet would look as follows:
 
 ```bash
-$ vlayer jwt encode -p docker/fixtures/jwt-authority.key --subject deadbeef --host "api.x.com" --post 443
+$ vlayer jwt encode -p docker/fixtures/jwt-authority.key --subject deadbeef --host "api.x.com" --port 443
 2025-03-28T06:47:46.993637Z  INFO vlayer::commands::jwt: Claims {
     host: "api.x.com",
     port: 443,
