@@ -142,8 +142,8 @@ rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
 revm = { version = "=19.4.0", default-features = false, features = ["optimism"] }
-risc0-build = "=2.1.0"
-risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "cf3d1381f076f1094455a0fc6ebd5bd172424d09" }
+risc0-build = { git = "https://github.com/kubkon/risc0-build-patched.git", rev = "e584614d1cdaee1cb0d8acf43165b96628e6eca3" }
+risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "2f824c1e02d8929b6f297ed213eead8cb498d27a" }
 risc0-zkp = { version = "=2.0.0", default-features = false }
 risc0-zkvm = "=2.0.0"
 risc0-zkvm-platform = "=2.0.1"
