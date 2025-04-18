@@ -20,6 +20,12 @@ const {
   confirmations,
 } = createContext(config);
 
+if (!john) {
+  throw new Error(
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
+  );
+}
+
 const INITIAL_TOKEN_SUPPLY = BigInt(10_000_000);
 
 const tokenDeployTransactionHash = await ethClient.deployContract({

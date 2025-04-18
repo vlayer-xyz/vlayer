@@ -20,6 +20,12 @@ if (config.chainName === "anvil") {
 
 const { ethClient, account, proverUrl } = createContext(config);
 
+if (!account) {
+  throw new Error(
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
+  );
+}
+
 const { startBlock, endBlock } = await getStartEndBlock({
   config,
   timeTravelConfig,

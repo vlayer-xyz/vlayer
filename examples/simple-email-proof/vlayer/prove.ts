@@ -21,6 +21,12 @@ const {
   confirmations,
 } = createContext(config);
 
+if (!john) {
+  throw new Error(
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
+  );
+}
+
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,

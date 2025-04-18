@@ -21,6 +21,12 @@ if (config.chainName === "anvil") {
 
 const { chain, ethClient, account, proverUrl, confirmations } =
   createContext(config);
+
+if (!account) {
+  throw new Error(
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
+  );
+}
 const vlayer = createVlayerClient({
   url: proverUrl,
   token: config.token,
