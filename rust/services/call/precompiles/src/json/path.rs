@@ -68,6 +68,18 @@ mod tests {
     }
 
     #[test]
+    fn success_array_of_numbers() {
+        let value = get_value_by_path(&JSON, "root.nested_level.field_array_of_numbers[2]");
+        assert_eq!(value, Ok(Variable::Number(3.into())));
+    }
+
+    #[test]
+    fn success_array_of_objects() {
+        let value = get_value_by_path(&JSON, "root.nested_level.field_array_of_objects[1].key");
+        assert_eq!(value, Ok(Variable::String("val02".to_string())));
+    }
+
+    #[test]
     fn failure_array_length() {
         let value = get_value_by_path(&JSON, "root.nested_level.field_number | length(@)");
         assert_eq!(
