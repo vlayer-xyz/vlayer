@@ -29,16 +29,38 @@ config = getConfig();
 const { chain, ethClient, account, proverUrl, confirmations } =
   createContext(config);
 
+if (!account) {
+  throw new Error(
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
+  );
+}
+
 const twitterUserAddress = account.address;
 const vlayer = createVlayerClient({
   url: proverUrl,
   token: config.token,
 });
 
-await testSuccessProvingAndVerification();
-await testFailedProving();
+await testSuccessProvingAndVerification({
+  chain,
+  ethClient,
+  account,
+  confirmations,
+});
 
-async function testSuccessProvingAndVerification() {
+await testFailedProving({ chain });
+
+async function testSuccessProvingAndVerification({
+  chain,
+  ethClient,
+  account,
+  confirmations,
+}: Required<
+  Pick<
+    ReturnType<typeof createContext>,
+    "chain" | "ethClient" | "account" | "confirmations"
+  >
+>) {
   console.log("Proving...");
 
   const hash = await vlayer.prove({
@@ -64,7 +86,7 @@ async function testSuccessProvingAndVerification() {
     functionName: "verify",
     args: [proof, twitterHandle, address],
     chain,
-    account: account,
+    account,
   });
 
   await ethClient.waitForTransactionReceipt({
@@ -107,9 +129,9 @@ async function testSuccessProvingAndVerification() {
   );
 }
 
-async function testFailedProving() {
-  console.log("Proving...");
-
+async function testFailedProving({
+  chain,
+}: Pick<ReturnType<typeof createContext>, "chain">) {
   try {
     const hash = await vlayer.prove({
       address: prover,

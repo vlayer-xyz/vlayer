@@ -81,14 +81,4 @@ library WebLib {
 
         return abi.decode(returnData, (bool));
     }
-
-    function jsonGetArrayLength(Web memory web, string memory jsonPath) internal view returns (uint256) {
-        require(bytes(web.body).length > 0, "Body is empty");
-
-        bytes memory encodedParams = abi.encode([web.body, jsonPath]);
-        (bool success, bytes memory returnData) = Precompiles.JSON_GET_ARRAY_LENGTH.staticcall(encodedParams);
-        Address.verifyCallResult(success, returnData);
-
-        return abi.decode(returnData, (uint256));
-    }
 }

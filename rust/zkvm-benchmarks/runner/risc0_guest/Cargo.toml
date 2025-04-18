@@ -6,11 +6,19 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+call_guest = { path = "../../../services/call/guest" }
 risc0-zkvm = { version = "=2.0.0", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm-platform = { version = "=2.0.1", features = [ "rust-runtime", "export-getrandom", "sys-getenv" ] }
 zkvm-benchmarks = { path = "../../benchmarks" }
+
+[package.metadata.risc0]
+rustc-flags = ['--cfg', 'getrandom_backend="custom"']
 
 [patch.crates-io]
 sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.8-risczero.0" }
 ring = { git = "https://github.com/briansmith/ring.git", rev = "7c0024abaf4fd59250c9b79cc41a029aa0ef3497" }
 rsa = { git = "https://github.com/risc0/RustCrypto-RSA", tag = "v0.9.6-risczero.0" }
 tiny-keccak = { git = "https://github.com/risc0/tiny-keccak", tag = "tiny-keccak/v2.0.2-risczero.0" }
+
+[package.metadata.cargo-machete]
+ignored = ["call_guest", "risc0-zkvm-platform"]

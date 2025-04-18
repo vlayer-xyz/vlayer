@@ -13,12 +13,29 @@ import type { VlayerContextConfig } from "./types";
 
 export type EthClient = ReturnType<typeof createContext>["ethClient"];
 
-const getChainSpecs = (chainName: string): Chain => {
+const isChain = (chain: unknown): chain is Chain => {
+  return (
+    typeof chain === "object" &&
+    chain !== null &&
+    "id" in chain &&
+    "name" in chain &&
+    "nativeCurrency" in chain &&
+    "rpcUrls" in chain
+  );
+};
+
+export const getChainSpecs = (chainName: string): Chain => {
+  let chain = undefined;
   try {
-    return chains[chainName as keyof typeof chains] as Chain;
+    chain = chains[chainName as keyof typeof chains];
   } catch {
     throw Error(`Cannot import ${chainName} from viem/chains`);
   }
+
+  if (!chain || !isChain(chain)) {
+    throw new Error(`Chain ${chainName} is not supported by viem`);
+  }
+  return chain;
 };
 
 export const customTransport = custom;
@@ -36,7 +53,13 @@ const createEthClient = (
 export function createContext(
   config: VlayerContextConfig,
   transport?: CustomTransport,
-) {
+): {
+  chain: Chain;
+  account?: ReturnType<typeof privateKeyToAccount>;
+  jsonRpcUrl: string;
+  ethClient: ReturnType<typeof createEthClient>;
+  confirmations: number;
+} & VlayerContextConfig {
   const chain = getChainSpecs(config.chainName);
   const jsonRpcUrl = config.jsonRpcUrl ?? chain.rpcUrls.default.http[0];
 

@@ -12,3 +12,9 @@ export class EnvValidationError extends Error {
     Object.setPrototypeOf(this, EnvValidationError.prototype);
   }
 }
+
+export class AccountNotSetError extends Error {
+  constructor() {
+    super("Account is not set, privateKey has to be added to the env");
+  }
+}

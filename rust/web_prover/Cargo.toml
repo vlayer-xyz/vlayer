@@ -18,11 +18,12 @@ http-body-util = { workspace = true }
 hyper = { workspace = true, features = ["client", "http1"] }
 hyper-util = { workspace = true, features = ["full"] }
 notary-client = { workspace = true }
+rangeset = { workspace = true }
 regex = "1.11.1"
 serde_json = { workspace = true }
-tlsn-common = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
-tlsn-core = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
-tlsn-prover = { git = "https://github.com/vlayer-xyz/tlsn.git", rev = "febf4d080469892cebde57bd3b98ae269d44abe6" }
+tlsn-common = { workspace = true }
+tlsn-core = { workspace = true }
+tlsn-prover = { workspace = true }
 tlsn-utils = { workspace = true }
 tokio = { workspace = true, features = [
     "rt",

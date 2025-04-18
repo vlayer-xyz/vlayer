@@ -1,3 +1,5 @@
+use alloy_primitives::Bytes;
+use alloy_sol_types::SolValue;
 use revm::precompile::PrecompileErrors;
 
 pub(super) type Result<T> = std::result::Result<T, PrecompileErrors>;
@@ -7,6 +9,11 @@ pub(super) fn map_to_fatal<E: ToString>(err: E) -> PrecompileErrors {
     PrecompileErrors::Fatal {
         msg: err.to_string(),
     }
+}
+
+#[allow(clippy::needless_pass_by_value)] // More convenient to use in map
+pub(crate) fn abi_encode(value: impl SolValue) -> Bytes {
+    value.abi_encode().into()
 }
 
 // Implements precompile address generation as described in EIP-7201:

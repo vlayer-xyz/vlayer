@@ -17,7 +17,7 @@ pub enum Scheme {
     Https,
 }
 
-const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/v0.1.0-alpha.8";
+const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/";
 const DEFAULT_MAX_SENT_DATA: usize = 1 << 12;
 const DEFAULT_MAX_RECV_DATA: usize = 1 << 14;
 
@@ -207,7 +207,7 @@ mod tests {
         let input_args = WebProofArgs {
             url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
             host: Some("127.0.0.1".into()),
-            notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.8".into()),
+            notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.9".into()),
             headers: vec!["Authorization: Basic 1234".into(), "X-Api-Key: 5678".into()],
             data: Some("example body data".into()),
             max_sent_data: Some(100),
@@ -222,7 +222,7 @@ mod tests {
         assert_eq!(converted.uri, "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245");
         assert_eq!(converted.notary_config.host, "notary.pse.dev");
         assert_eq!(converted.notary_config.port, 3030);
-        assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
+        assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.9");
         assert_eq!(converted.headers.get("Authorization"), Some(&"Basic 1234".to_string()));
         assert_eq!(converted.headers.get("X-Api-Key"), Some(&"5678".to_string()));
         assert_eq!(converted.body, "example body data".as_bytes());
@@ -252,7 +252,7 @@ mod tests {
 
         assert_eq!(converted.notary_config.host, "test-notary.vlayer.xyz");
         assert_eq!(converted.notary_config.port, 443);
-        assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.8");
+        assert_eq!(converted.notary_config.path_prefix, "");
         assert_eq!(converted.max_sent_data, DEFAULT_MAX_SENT_DATA);
         assert_eq!(converted.max_recv_data, DEFAULT_MAX_RECV_DATA);
         assert!(converted.notary_config.enable_tls);
@@ -394,7 +394,7 @@ mod tests {
             Self {
                 url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".into(),
                 host: Some("127.0.0.1".into()),
-                notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.8".into()),
+                notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.9".into()),
                 headers: vec![],
                 data: None,
                 max_sent_data: Some(DEFAULT_MAX_SENT_DATA),

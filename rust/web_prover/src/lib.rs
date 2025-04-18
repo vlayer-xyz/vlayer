@@ -11,12 +11,12 @@ pub use params::{
     RedactionConfigFn,
 };
 pub use presentation::create_presentation_with_redaction;
+use rangeset::RangeSet;
 use serde_json::Value;
 use tlsn_core::transcript::Transcript;
-use utils::range::RangeSet;
 pub use verify::verify_presentation;
 
-pub const TLSN_VERSION: &str = "0.1.0-alpha.8";
+pub const TLSN_VERSION: &str = "0.1.0-alpha.9";
 pub const TLSN_VERSION_WITH_V_PREFIX: &str = concat!("v", TLSN_VERSION);
 
 pub struct RedactionConfig {

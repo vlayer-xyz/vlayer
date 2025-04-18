@@ -30,6 +30,7 @@ The following templates are available for quick project setup:
 - `simple-teleport`: Prove a cross-chain ERC20 token balance.
 - `simple-time-travel`: Prove the average ERC20 token balance across multiple block numbers.
 - `simple-web-proof`: Mint an NFT to the owner of a specific X/Twitter handle using Web Proofs.
+- `kraken-web-proof`: Generate server-side web proof of ETH to USD exchange rate and store it on-chain
 
 ## Directory structure
 The vlayer directory structure resembles a typical Foundry project but with two additional folders: `src/vlayer` and `vlayer`.
