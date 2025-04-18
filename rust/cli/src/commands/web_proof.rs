@@ -252,7 +252,7 @@ mod tests {
 
         assert_eq!(converted.notary_config.host, "test-notary.vlayer.xyz");
         assert_eq!(converted.notary_config.port, 443);
-        assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.9");
+        assert_eq!(converted.notary_config.path_prefix, "");
         assert_eq!(converted.max_sent_data, DEFAULT_MAX_SENT_DATA);
         assert_eq!(converted.max_recv_data, DEFAULT_MAX_RECV_DATA);
         assert!(converted.notary_config.enable_tls);
