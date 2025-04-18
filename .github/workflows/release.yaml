@@ -11,6 +11,8 @@ jobs:
   build-release:
     if: github.repository == 'vlayer-xyz/vlayer'
     uses: ./.github/workflows/build_rust_release.yaml
+    with:
+      vlayer_release: ${{ inputs.vlayer_release }}
 
   build-examples:
     if: github.repository == 'vlayer-xyz/vlayer'
@@ -113,37 +115,6 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  create-release:
-    if: github.repository == 'vlayer-xyz/vlayer'
-    name: Create GH releases
-    runs-on: ubuntu-latest
-    needs: [build-examples, build-extension, push-contracts]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - run: mkdir -p dist
-      - uses: actions/download-artifact@v4
-        with:
-          path: ./dist
-          merge-multiple: true
-      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
-      - run: cp ./docker/docker-compose.devnet.yaml ./dist/
-
-      - name: Release tagged nightly
-        uses: ncipollo/release-action@v1
-        with:
-          tag: nightly-${{ github.sha }}
-          allowUpdates: true
-          artifacts: "./dist/*"
-
-      - name: Release nightly-latest
-        uses: ncipollo/release-action@v1
-        with:
-          tag: nightly-latest
-          makeLatest: true
-          allowUpdates: true
-          artifacts: "./dist/*"
-
   push-artifacts-to-s3:
     if: github.repository == 'vlayer-xyz/vlayer'
     name: Push artifacts to AWS S3
@@ -160,10 +131,10 @@ jobs:
           merge-multiple: true
       - run: rm ./dist/latest/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
       - run: cp ./docker/docker-compose.devnet.yaml ./dist/latest/
+
       - env:
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: cp -r "./dist/latest" "./dist/${VLAYER_BUILD}"
-
       - name: Push tagged binaries to AWS S3
         uses: mostlytyped/s3-put-action@v1.0.0
         with:
@@ -177,6 +148,7 @@ jobs:
           LOCAL_FILE: ./dist/${{ needs.build-release.outputs.vlayer_build }}
           REMOTE_FILE: ""
 
+      - run: cp -r "./dist/latest" "./dist/latest-${{ inputs.vlayer_release }}"
       - name: Push latest binaries to AWS S3
         uses: mostlytyped/s3-put-action@v1.0.0
         with:
@@ -187,7 +159,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-          LOCAL_FILE: ./dist/latest
+          LOCAL_FILE: ./dist/latest-${{ inputs.vlayer_release }}
           REMOTE_FILE: ""
 
       - name: Push vlayerup scripts to AWS S3
@@ -309,17 +281,97 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up tags
+        id: tags
+        run: |
+          tags="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
+          if [ "${{ inputs.vlayer_release }}" = "nightly" ]; then
+            tags="${tags},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          fi
+          echo "TAGS=$tags" >> $GITHUB_ENV
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
-          file: "docker/${{ matrix.docker_image }}/Dockerfile.nightly"
+          file: "docker/${{ matrix.docker_image }}/Dockerfile"
           push: true
-          tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
+          tags: ${{ env.TAGS }}
+          build-args: |
+            VLAYER_RELEASE=${{ inputs.vlayer_release }}
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+  create-nightly-release:
+    if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'nightly'
+    name: Create GH releases
+    runs-on: ubuntu-latest
+    needs:
+      [
+        build-release,
+        build-examples,
+        build-extension,
+        push-contracts,
+        publish-react-hooks-to-npm,
+        push-docker-image,
+      ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - run: mkdir -p dist
+      - uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          merge-multiple: true
+      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
+
+      - name: Release tagged nightly
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly-${{ github.sha }}
+          makeLatest: false
+          allowUpdates: true
+          artifacts: "./dist/*"
+
+      - name: Release nightly-latest
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly-latest
+          makeLatest: true
+          allowUpdates: true
+          artifacts: "./dist/*"
+
+  create-stable-release:
+    if: github.repository == 'vlayer-xyz/vlayer' && inputs.vlayer_release == 'stable'
+    name: Create GH releases
+    runs-on: ubuntu-latest
+    needs:
+      [
+        build-release,
+        build-examples,
+        build-extension,
+        push-contracts,
+        publish-react-hooks-to-npm,
+        push-docker-image,
+      ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - run: mkdir -p dist
+      - uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          merge-multiple: true
+      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
+
+      - name: Release latest stable version
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "v${{ needs.build-release.outputs.vlayer_build }}"
+          body: "Latest vlayer stable release"
+          allowUpdates: false
+          artifacts: "./dist/*"

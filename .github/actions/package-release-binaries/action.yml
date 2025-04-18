@@ -21,8 +21,8 @@ runs:
           mv "release/${name}" bin/
         done
 
-        tar -czvf "nightly-${{ inputs.output_file_suffix }}" bin
-        echo "output_file=target/${{ inputs.target }}/nightly-${{ inputs.output_file_suffix }}" >> $GITHUB_OUTPUT
+        tar -czvf "binaries-${{ inputs.output_file_suffix }}" bin
+        echo "output_file=target/${{ inputs.target }}/binaries-${{ inputs.output_file_suffix }}" >> $GITHUB_OUTPUT
         echo "output_file_suffix=${{ inputs.output_file_suffix }}" >> $GITHUB_OUTPUT
       shell: bash
 
