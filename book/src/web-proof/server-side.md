@@ -12,7 +12,7 @@ Available options:
 ```sh
       --url <URL>            Full URL of the request to notarize
       --host <HOST>          Optional host address, if different from the domain provided in URL
-      --notary <NOTARY_URL>  Notary URL [default: https://test-notary.vlayer.xyz/v0.1.0-alpha.8]
+      --notary <NOTARY_URL>  Notary URL [default: https://test-notary.vlayer.xyz/]
   -H, --headers <HEADER>     Additional headers (format: "Header-Name: Header-Value")
   -d, --data <DATA>          HTTP data to be sent with the request
   -h, --help                 Print help
