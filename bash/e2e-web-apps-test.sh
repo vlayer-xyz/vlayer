@@ -18,7 +18,7 @@ build_sdk
 build_sdk_hooks
 
 echo "🚀 Running services for example: $EXAMPLE"
-DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy notary-server"
+DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy wsproxy-test-client notary-server"
 
 source "${VLAYER_HOME}/bash/run-services.sh"
 
