@@ -53,7 +53,13 @@ const createEthClient = (
 export function createContext(
   config: VlayerContextConfig,
   transport?: CustomTransport,
-) {
+): {
+  chain: Chain;
+  account?: ReturnType<typeof privateKeyToAccount>;
+  jsonRpcUrl: string;
+  ethClient: ReturnType<typeof createEthClient>;
+  confirmations: number;
+} & VlayerContextConfig {
   const chain = getChainSpecs(config.chainName);
   const jsonRpcUrl = config.jsonRpcUrl ?? chain.rpcUrls.default.http[0];
 
