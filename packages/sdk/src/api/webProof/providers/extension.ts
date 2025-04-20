@@ -6,16 +6,16 @@ import {
 
 import {
   EXTENSION_STEP,
-  ExtensionAction,
-  type ExtensionMessage,
-  ExtensionMessageType,
+  MessageToExtensionType,
+  type MessageToExtension,
+  type MessageFromExtension,
   type WebProofStep,
   ZkProvingStatus,
   assertUrl,
   assertUrlPattern,
   type RedactionConfig,
   RedactionItemsArray,
-  type MessageToExtension,
+  MessageFromExtensionType,
 } from "../../../web-proof-commons";
 
 import debug from "debug";
@@ -46,9 +46,9 @@ class ExtensionWebProofProvider implements WebProofProvider {
 
   private listeners: Partial<
     Record<
-      ExtensionMessageType,
+      MessageFromExtensionType,
       ((
-        args: Extract<ExtensionMessage, { type: ExtensionMessageType }>,
+        args: Extract<MessageFromExtension, { type: MessageFromExtensionType }>,
       ) => void)[]
     >
   > = {};
@@ -68,7 +68,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
       // so still will need to try catch
       try {
         chrome.runtime.sendMessage(EXTENSION_ID, {
-          action: ExtensionAction.NotifyZkProvingStatus,
+          type: MessageToExtensionType.NotifyZkProvingStatus,
           payload: { status },
         });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -85,43 +85,43 @@ class ExtensionWebProofProvider implements WebProofProvider {
         this.port = null;
         this.connectToExtension();
       });
-      this.port.onMessage.addListener((message: ExtensionMessage) => {
+      this.port.onMessage.addListener((message: MessageFromExtension) => {
         this.listeners[message.type]?.forEach((cb) => cb(message));
       });
     }
     return this.port;
   }
 
-  public addEventListeners<T extends ExtensionMessageType>(
+  public addEventListeners<T extends MessageFromExtensionType>(
     messageType: T,
-    listener: (args: Extract<ExtensionMessage, { type: T }>) => void,
+    listener: (args: Extract<MessageFromExtension, { type: T }>) => void,
   ) {
     this.connectToExtension();
     if (!this.listeners[messageType]) {
       this.listeners[messageType] = [];
     }
     this.listeners[messageType].push(
-      listener as (args: ExtensionMessage) => void,
+      listener as (args: MessageFromExtension) => void,
     );
   }
 
   public closeSidePanel() {
     const port = this.connectToExtension();
     port.postMessage({
-      action: ExtensionAction.CloseSidePanel,
+      type: MessageToExtensionType.CloseSidePanel,
     });
   }
 
   public openSidePanel() {
     this.connectToExtension().postMessage({
-      action: ExtensionAction.OpenSidePanel,
+      type: MessageToExtensionType.OpenSidePanel,
     });
   }
 
   public requestWebProof(webProofRequest: WebProofRequestInput) {
     validateWebProofRequest(webProofRequest);
     this.connectToExtension().postMessage({
-      action: ExtensionAction.RequestWebProof,
+      type: MessageToExtensionType.RequestWebProof,
       payload: {
         notaryUrl: this.notaryUrl,
         wsProxyUrl: this.wsProxyUrl,

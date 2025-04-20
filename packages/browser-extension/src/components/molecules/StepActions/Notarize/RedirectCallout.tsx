@@ -2,7 +2,7 @@ import React, { FC, useState, useEffect } from "react";
 import { Callout } from "@radix-ui/themes";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
-import { ExtensionMessageType } from "../../../../web-proof-commons";
+import { ExtensionInternalMessageType } from "../../../../web-proof-commons";
 import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
 import { useInterval } from "usehooks-ts";
 import { AnimatedContainer } from "components/molecules/AnimationContainer";
@@ -24,7 +24,7 @@ const useRedirectCallout = ({ isVisible }: { isVisible: boolean }) => {
       if (timeout === 0) {
         setShow(false);
         sendMessageToServiceWorker({
-          type: ExtensionMessageType.RedirectBack,
+          type: ExtensionInternalMessageType.RedirectBack,
         }).catch(console.error);
       }
     },

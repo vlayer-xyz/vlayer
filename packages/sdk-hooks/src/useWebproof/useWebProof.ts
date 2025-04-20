@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { type Abi, type ContractFunctionName } from "viem";
 import { useProofContext } from "../context";
 import { WebProofRequestStatus } from "../types";
-import { ExtensionMessageType, type WebProofConfig } from "@vlayer/sdk";
+import { MessageFromExtensionType, type WebProofConfig } from "@vlayer/sdk";
 
 export const useWebProof = (
   webProofRequest: WebProofConfig<Abi, ContractFunctionName>,
@@ -18,7 +18,7 @@ export const useWebProof = (
 
   useEffect(() => {
     webProofProvider.addEventListeners(
-      ExtensionMessageType.ProofDone,
+      MessageFromExtensionType.ProofDone,
       ({ payload: { presentationJson } }) => {
         setWebProof({
           webProofJson: JSON.stringify({ presentationJson: presentationJson }),
@@ -28,7 +28,7 @@ export const useWebProof = (
     );
 
     webProofProvider.addEventListeners(
-      ExtensionMessageType.ProofError,
+      MessageFromExtensionType.ProofError,
       ({ payload: { error } }) => {
         setError(new Error(error));
         setStatus(WebProofRequestStatus.error);

@@ -2,10 +2,10 @@ import { type Hex, type Abi, type ContractFunctionName } from "viem";
 import type { ContractFunctionArgsWithout } from "./viem";
 import {
   type Branded,
-  type ExtensionMessageType,
-  type ExtensionMessage,
+  type MessageFromExtension,
   type WebProofStep,
   type ZkProvingStatus,
+  MessageFromExtensionType,
 } from "../../../web-proof-commons";
 
 export type WebProofRequestInput = {
@@ -42,9 +42,9 @@ export type WebProofProvider = {
 
   notifyZkProvingStatus: (status: ZkProvingStatus) => void;
 
-  addEventListeners: <T extends ExtensionMessageType>(
+  addEventListeners: <T extends MessageFromExtensionType>(
     messageType: T,
-    listener: (args: Extract<ExtensionMessage, { type: T }>) => void,
+    listener: (args: Extract<MessageFromExtension, { type: T }>) => void,
   ) => void;
 };
 

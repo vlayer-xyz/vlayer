@@ -5,11 +5,13 @@ import {
   assertUrl,
   assertUrlPattern,
   EXTENSION_STEP,
-  ExtensionAction,
-  ExtensionMessage,
-  ExtensionMessageType,
   MessageToExtension,
+  MessageToExtensionType,
+  ExtensionInternalMessageType,
+  isExtensionInternalMessage,
   ZkProvingStatus,
+  MessageFromExtensionType,
+  isMessageToExtension,
 } from "./web-proof-commons";
 
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
@@ -28,32 +30,43 @@ void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
-
-  port.onMessage.addListener((message: MessageToExtension) => {
+  port.onMessage.addListener((message: unknown) => {
+    if (!isMessageToExtension(message)) {
+      return;
+    }
     match(message)
-      .with({ action: ExtensionAction.RequestWebProof }, (msg) => {
+      .with({ type: MessageToExtensionType.RequestWebProof }, (msg) => {
         void handleProofRequest(msg, connectedPort.sender);
       })
-      .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) => {
+      .with({ type: MessageToExtensionType.NotifyZkProvingStatus }, (msg) => {
         void handleProvingStatusNotification(msg);
       })
-      .with({ action: ExtensionAction.OpenSidePanel }, () => {
+      .with({ type: MessageToExtensionType.OpenSidePanel }, () => {
         void handleOpenSidePanel(connectedPort.sender);
       })
-      .with({ action: ExtensionAction.CloseSidePanel }, () => {
+      .with({ type: MessageToExtensionType.CloseSidePanel }, () => {
         void handleCloseSidePanel();
+      })
+      .with({ type: MessageToExtensionType.Ping }, () => {
+        void connectedPort.postMessage({
+          type: MessageFromExtensionType.Pong,
+          payload: {},
+        });
       })
       .exhaustive();
   });
 });
 
-browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
+browser.runtime.onMessage.addListener(async (message: unknown) => {
+  if (!isExtensionInternalMessage(message)) {
+    return;
+  }
   await match(message)
     .with(
       {
         type: P.union(
-          ExtensionMessageType.ProofDone,
-          ExtensionMessageType.ProofError,
+          ExtensionInternalMessageType.ProofDone,
+          ExtensionInternalMessageType.ProofError,
         ),
       },
       () => {
@@ -64,47 +77,41 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         }
       },
     )
-    .with({ type: ExtensionMessageType.RedirectBack }, async () => {
+    .with({ type: ExtensionInternalMessageType.RedirectBack }, async () => {
       if (openedTabId) {
         await browser.tabs.remove(openedTabId);
       }
       await browser.tabs.update(port?.sender?.tab?.id, { active: true });
     })
-    .with({ type: ExtensionMessageType.TabOpened }, ({ payload }) => {
+    .with({ type: ExtensionInternalMessageType.TabOpened }, ({ payload }) => {
       openedTabId = payload.tabId;
     })
-    .with({ type: ExtensionMessageType.ProofProcessing }, () => {
+    .with({ type: ExtensionInternalMessageType.ProofProcessing }, () => {
       port?.postMessage({
-        type: ExtensionMessageType.ProofProcessing,
+        type: ExtensionInternalMessageType.ProofProcessing,
         payload: {},
       });
     })
-    .otherwise((message) => {
-      console.error("No handler for message", message);
-    });
+    .otherwise(() => {});
 });
 
-browser.runtime.onMessageExternal.addListener(
-  (message: MessageToExtension, sender) => {
-    return match(message)
-      .with(
-        { action: ExtensionAction.RequestWebProof },
-        async (msg) => await handleProofRequest(msg, sender),
-      )
-      .with(
-        { action: ExtensionAction.NotifyZkProvingStatus },
-        async (msg) => await handleProvingStatusNotification(msg),
-      )
-      .with(
-        { action: ExtensionAction.OpenSidePanel },
-        async () => await handleOpenSidePanel(sender),
-      )
-      .with({ action: ExtensionAction.CloseSidePanel }, () =>
-        handleCloseSidePanel(),
-      )
-      .exhaustive();
-  },
-);
+browser.runtime.onMessageExternal.addListener((message: unknown) => {
+  if (!isMessageToExtension(message)) {
+    return;
+  }
+  return match(message)
+    .with({ type: MessageToExtensionType.Ping }, () =>
+      port?.postMessage({
+        type: MessageFromExtensionType.Pong,
+        payload: {},
+      }),
+    )
+    .otherwise(() => {
+      throw new Error(
+        "Only ping is supposed to be sent this way, use port.postMessage instead ",
+      );
+    });
+});
 
 const handleOpenSidePanel = async (sender?: browser.Runtime.MessageSender) => {
   // important sidePanel is chrome specific it doesn't exist in webExtension polyfill
@@ -114,19 +121,19 @@ const handleOpenSidePanel = async (sender?: browser.Runtime.MessageSender) => {
 };
 
 const handleCloseSidePanel = () => {
-  void browser.runtime.sendMessage(ExtensionMessageType.CloseSidePanel);
+  void browser.runtime.sendMessage(ExtensionInternalMessageType.CloseSidePanel);
 };
 
 const cleanProvingSessionStorageOnClose = () => {
   void browser.runtime.sendMessage(
-    ExtensionMessageType.CleanProvingSessionStorageOnClose,
+    ExtensionInternalMessageType.CleanProvingSessionStorageOnClose,
   );
 };
 
 const handleProofRequest = async (
   message: Extract<
     MessageToExtension,
-    { action: ExtensionAction.RequestWebProof }
+    { type: MessageToExtensionType.RequestWebProof }
   >,
   sender?: browser.Runtime.MessageSender,
 ) => {
@@ -154,7 +161,7 @@ const handleProofRequest = async (
 const handleProvingStatusNotification = async (
   message: Extract<
     MessageToExtension,
-    { action: ExtensionAction.NotifyZkProvingStatus }
+    { type: MessageToExtensionType.NotifyZkProvingStatus }
   >,
 ) => {
   await zkProvingStatusStore.setProvingStatus(message.payload);
@@ -171,7 +178,7 @@ const handleProvingStatusNotification = async (
 const validateProofRequest = (
   message: Extract<
     MessageToExtension,
-    { action: ExtensionAction.RequestWebProof }
+    { type: MessageToExtensionType.RequestWebProof }
   >,
 ) => {
   try {
@@ -210,7 +217,7 @@ browser.runtime.onConnect.addListener((sidePanelPort) => {
   if (sidePanelPort.name === SIDE_PANEL_CONNECTION_NAME) {
     sidePanelPort.onDisconnect.addListener(() => {
       port?.postMessage({
-        type: ExtensionMessageType.SidePanelClosed,
+        type: MessageFromExtensionType.SidePanelClosed,
         payload: {},
       });
     });

@@ -9,7 +9,7 @@ import React, {
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
 import {
   isDefined,
-  ExtensionMessageType,
+  ExtensionInternalMessageType,
   getRedactionConfig,
 } from "../web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
@@ -56,7 +56,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     setIsProving(true);
     const progressInterval = setInterval(() => {
       void sendMessageToServiceWorker({
-        type: ExtensionMessageType.ProofProcessing,
+        type: ExtensionInternalMessageType.ProofProcessing,
         payload: {},
       });
     }, 1000);
@@ -112,7 +112,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       );
 
       void sendMessageToServiceWorker({
-        type: ExtensionMessageType.ProofDone,
+        type: ExtensionInternalMessageType.ProofDone,
         payload: {
           ...tlsnProof,
         },
@@ -122,7 +122,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
       void sendMessageToServiceWorker({
-        type: ExtensionMessageType.ProofError,
+        type: ExtensionInternalMessageType.ProofError,
         payload: {
           error: e instanceof Error ? e.message : String(e),
         },
