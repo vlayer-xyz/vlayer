@@ -94,6 +94,9 @@ export type ExtensionInternalMessage =
   | {
       type: ExtensionInternalMessageType.ProofProcessing;
       payload: { progress?: number };
+    }
+  | {
+      type: ExtensionInternalMessageType.CleanProvingSessionStorageOnClose;
     };
 
 export type MessageFromExtension =

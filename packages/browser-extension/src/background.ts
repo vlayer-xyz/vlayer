@@ -110,6 +110,12 @@ browser.runtime.onMessageExternal.addListener(
       .with({ type: MessageToExtensionType.RequestWebProof }, (msg) => {
         void handleProofRequest(msg, sender);
       })
+      .with({ type: MessageToExtensionType.OpenSidePanel }, () => {
+        void handleOpenSidePanel(sender);
+      })
+      .with({ type: MessageToExtensionType.CloseSidePanel }, () => {
+        void handleCloseSidePanel();
+      })
       .with({ type: MessageToExtensionType.NotifyZkProvingStatus }, (msg) => {
         void handleProvingStatusNotification(msg);
       })

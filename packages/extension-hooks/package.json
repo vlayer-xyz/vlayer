@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@types/react": "^18.3.5",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.4",
+    "zod": "^3.24.3"
   }
 }
