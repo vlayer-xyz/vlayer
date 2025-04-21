@@ -1,5 +1,5 @@
 import { BrowserContext, Page } from "@playwright/test";
-import { ExtensionAction, ZkProvingStatus } from "../web-proof-commons";
+import { MessageToExtensionType, ZkProvingStatus } from "../web-proof-commons";
 import { extensionId, expect } from "../config";
 import { type Response } from "@playwright/test";
 
@@ -38,17 +38,20 @@ export class Webpage {
   }
 
   openExtension() {
-    return this.sendMessageToExtension(ExtensionAction.OpenSidePanel);
+    return this.sendMessageToExtension(MessageToExtensionType.OpenSidePanel);
   }
 
   closeExtension() {
-    return this.sendMessageToExtension(ExtensionAction.CloseSidePanel);
+    return this.sendMessageToExtension(MessageToExtensionType.CloseSidePanel);
   }
 
   finishZkProof() {
-    return this.sendMessageToExtension(ExtensionAction.NotifyZkProvingStatus, {
-      payload: { status: ZkProvingStatus.Done },
-    });
+    return this.sendMessageToExtension(
+      MessageToExtensionType.NotifyZkProvingStatus,
+      {
+        payload: { status: ZkProvingStatus.Done },
+      },
+    );
   }
 
   async expectRequestZkProofButtonToBeVisible() {
