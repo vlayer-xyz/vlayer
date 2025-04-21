@@ -28,7 +28,7 @@ void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
-  // @ts-expect-error outdated types
+
   port.onMessage.addListener((message: MessageToExtension) => {
     match(message)
       .with({ action: ExtensionAction.RequestWebProof }, (msg) => {
@@ -47,7 +47,6 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
   });
 });
 
-// @ts-expect-error outdated types
 browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
   await match(message)
     .with(
@@ -86,7 +85,6 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
 });
 
 browser.runtime.onMessageExternal.addListener(
-  // @ts-expect-error outdated types
   (message: MessageToExtension, sender) => {
     return match(message)
       .with(

@@ -66,14 +66,6 @@ const mockRuntime = () => {
 const mockExternalMessageProducer = (
   callbacksExternal: ((message: unknown) => void)[],
 ) => {
-  const IntersectionObserverMock = vi.fn(() => ({
-    disconnect: vi.fn(),
-    observe: vi.fn(),
-    takeRecords: vi.fn(),
-    unobserve: vi.fn(),
-  }));
-
-  vi.stubGlobal("IntersectionObserver", IntersectionObserverMock);
   vi.stubGlobal("externalMessageProducer", {
     sendMessage: vi.fn().mockImplementation((message: unknown) => {
       callbacksExternal.forEach((callback) => {
