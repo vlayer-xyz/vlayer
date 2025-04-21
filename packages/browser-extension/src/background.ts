@@ -23,12 +23,12 @@ let openedTabId: number | undefined = undefined;
 
 initSentry();
 
-// @ts-expect-error https://github.com/wxt-dev/wxt/issues/570#issuecomment-2022365906
-// eslint-disable-next-line
-browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+// important sidePanel is chrome specific it doesn't exist in webExtension polyfill
+void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
+  // @ts-expect-error outdated types
   port.onMessage.addListener((message: MessageToExtension) => {
     match(message)
       .with({ action: ExtensionAction.RequestWebProof }, (msg) => {
@@ -47,6 +47,7 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
   });
 });
 
+// @ts-expect-error outdated types
 browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
   await match(message)
     .with(
@@ -85,6 +86,7 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
 });
 
 browser.runtime.onMessageExternal.addListener(
+  // @ts-expect-error outdated types
   (message: MessageToExtension, sender) => {
     return match(message)
       .with(
@@ -107,6 +109,7 @@ browser.runtime.onMessageExternal.addListener(
 );
 
 const handleOpenSidePanel = async (sender?: browser.Runtime.MessageSender) => {
+  // important sidePanel is chrome specific it doesn't exist in webExtension polyfill
   if (chrome.sidePanel && sender?.tab?.windowId) {
     await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
   }
