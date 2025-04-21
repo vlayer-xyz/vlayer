@@ -1,5 +1,5 @@
 ---
-ansible_host: 3.145.122.35
+ansible_host: 13.58.219.78
 ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJvWwoaoycn7OqZH0+DYsWRyzXA6WYUUbN0SqTuyjtL7
 ansible_user: ubuntu
 vlayer_prover_host: 127.0.0.1
