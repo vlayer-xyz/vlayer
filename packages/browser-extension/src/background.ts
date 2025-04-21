@@ -95,23 +95,31 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
     .otherwise(() => {});
 });
 
-browser.runtime.onMessageExternal.addListener((message: unknown) => {
-  if (!isMessageToExtension(message)) {
-    return;
-  }
-  return match(message)
-    .with({ type: MessageToExtensionType.Ping }, () =>
-      port?.postMessage({
-        type: MessageFromExtensionType.Pong,
-        payload: {},
-      }),
-    )
-    .otherwise(() => {
-      throw new Error(
-        "Only ping is supposed to be sent this way, use port.postMessage instead ",
-      );
-    });
-});
+browser.runtime.onMessageExternal.addListener(
+  (message: unknown, sender: browser.Runtime.MessageSender) => {
+    if (!isMessageToExtension(message)) {
+      return;
+    }
+    return match(message)
+      .with({ type: MessageToExtensionType.Ping }, () =>
+        port?.postMessage({
+          type: MessageFromExtensionType.Pong,
+          payload: {},
+        }),
+      )
+      .with({ type: MessageToExtensionType.RequestWebProof }, (msg) => {
+        void handleProofRequest(msg, sender);
+      })
+      .with({ type: MessageToExtensionType.NotifyZkProvingStatus }, (msg) => {
+        void handleProvingStatusNotification(msg);
+      })
+      .otherwise(() => {
+        throw new Error(
+          `${message.type} sent wrong channel Only ping is supposed to be sent this way, use port.postMessage instead `,
+        );
+      });
+  },
+);
 
 const handleOpenSidePanel = async (sender?: browser.Runtime.MessageSender) => {
   // important sidePanel is chrome specific it doesn't exist in webExtension polyfill
