@@ -12,6 +12,7 @@ import {
   ZkProvingStatus,
   MessageFromExtensionType,
   isMessageToExtension,
+  isLegacyPingMessage,
 } from "./web-proof-commons";
 
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
@@ -31,6 +32,13 @@ void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
   port.onMessage.addListener((message: unknown) => {
+    if (isLegacyPingMessage(message)) {
+      port?.postMessage({
+        type: MessageFromExtensionType.Pong,
+        payload: {},
+      });
+      return;
+    }
     if (!isMessageToExtension(message)) {
       return;
     }
@@ -46,12 +54,6 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
       })
       .with({ type: MessageToExtensionType.CloseSidePanel }, () => {
         void handleCloseSidePanel();
-      })
-      .with({ type: MessageToExtensionType.Ping }, () => {
-        void connectedPort.postMessage({
-          type: MessageFromExtensionType.Pong,
-          payload: {},
-        });
       })
       .exhaustive();
   });
@@ -97,16 +99,25 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
 
 browser.runtime.onMessageExternal.addListener(
   (message: unknown, sender: browser.Runtime.MessageSender) => {
-    if (!isMessageToExtension(message)) {
-      return;
-    }
-    return match(message)
-      .with({ type: MessageToExtensionType.Ping }, () =>
-        port?.postMessage({
+    if (isLegacyPingMessage(message)) {
+      return new Promise((resolve) => {
+        resolve({
           type: MessageFromExtensionType.Pong,
           payload: {},
-        }),
-      )
+        });
+      });
+    }
+
+    if (!isMessageToExtension(message)) {
+      return new Promise((resolve) => {
+        resolve({
+          type: MessageFromExtensionType.Pong,
+          payload: {},
+        });
+      });
+    }
+
+    return match(message)
       .with({ type: MessageToExtensionType.RequestWebProof }, (msg) => {
         void handleProofRequest(msg, sender);
       })
@@ -120,9 +131,7 @@ browser.runtime.onMessageExternal.addListener(
         void handleProvingStatusNotification(msg);
       })
       .otherwise(() => {
-        throw new Error(
-          `${message.type} sent wrong channel Only ping is supposed to be sent this way, use port.postMessage instead `,
-        );
+        throw new Error(`${message.type} sent wrong channel`);
       });
   },
 );

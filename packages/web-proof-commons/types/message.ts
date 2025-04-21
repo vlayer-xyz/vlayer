@@ -29,6 +29,9 @@ export enum MessageToExtensionType {
   NotifyZkProvingStatus = "NotifyZkProvingStatus",
   OpenSidePanel = "OpenSidePanel",
   CloseSidePanel = "CloseSidePanel",
+}
+
+export enum LegacyMessageToExtensionType {
   Ping = "Ping",
 }
 
@@ -66,9 +69,6 @@ export type MessageToExtension =
     }
   | {
       type: MessageToExtensionType.CloseSidePanel;
-    }
-  | {
-      type: MessageToExtensionType.Ping;
     };
 
 export type PresentationJSON = TLSNPresentationJSON;
@@ -254,13 +254,16 @@ export function assertMessageFromExtension(
     throw new Error("Invalid message from extension");
   }
 }
-
 const messageSchema = z.object({
   type: z.enum([
     ...Object.values<string>(MessageFromExtensionType),
     ...Object.values<string>(MessageToExtensionType),
     ...Object.values<string>(ExtensionInternalMessageType),
   ] as [string, ...string[]]),
+});
+
+const legacyPingMessageSchema = z.object({
+  message: z.literal("ping"),
 });
 
 export function isMessageFromExtension(
@@ -273,6 +276,14 @@ export function isMessageFromExtension(
   return Object.values<string>(MessageFromExtensionType).includes(
     parsed.data.type,
   );
+}
+
+export function isLegacyPingMessage(message: unknown): boolean {
+  const parsed = legacyPingMessageSchema.safeParse(message);
+  if (!parsed.success) {
+    return false;
+  }
+  return parsed.data.message === "ping";
 }
 
 export function isMessageToExtension(

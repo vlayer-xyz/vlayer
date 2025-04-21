@@ -22,6 +22,7 @@ import { type Claims } from "lib/types/jwt";
 import { validateJwtHostname } from "lib/validateJwtHostname";
 import { pipe } from "fp-ts/lib/function";
 import { decodeJwt } from "jose";
+import { match, P } from "ts-pattern";
 
 const TlsnProofContext = createContext({
   prove: async () => {},
@@ -95,11 +96,10 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
             )
           : "";
 
-      const redactionConfig =
-        provingSessionConfig !== LOADING
-          ? getRedactionConfig(provingSessionConfig)
-          : [];
-
+      const redactionConfig = match(provingSessionConfig)
+        .with(LOADING, () => [])
+        .with(P.nullish, () => [])
+        .otherwise((w) => getRedactionConfig(w));
       const tlsnProof = await tlsnProve(
         notaryUrl,
         hostname,
