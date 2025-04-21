@@ -17,23 +17,23 @@ export class Webpage {
     return this.page.getByRole("button", { name }).click();
   }
 
-  private sendMessageToExtension(action: string, payload?: object) {
+  private sendMessageToExtension(type: string, payload?: object) {
     return this.page.evaluate(
       ({
-        action,
+        type,
         extensionId,
         payload,
       }: {
-        action: string;
+        type: string;
         extensionId: string;
         payload?: object;
       }) => {
         void chrome.runtime.sendMessage(extensionId, {
-          action,
+          type,
           ...payload,
         });
       },
-      { action, extensionId, payload },
+      { type, extensionId, payload },
     );
   }
 

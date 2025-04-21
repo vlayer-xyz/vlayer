@@ -107,16 +107,11 @@ browser.runtime.onMessageExternal.addListener(
         });
       });
     }
-
     if (!isMessageToExtension(message)) {
       return new Promise((resolve) => {
-        resolve({
-          type: MessageFromExtensionType.Pong,
-          payload: {},
-        });
+        resolve(`Unknown message type: ${message as string}`);
       });
     }
-
     return match(message)
       .with({ type: MessageToExtensionType.RequestWebProof }, (msg) => {
         void handleProofRequest(msg, sender);
@@ -144,13 +139,15 @@ const handleOpenSidePanel = async (sender?: browser.Runtime.MessageSender) => {
 };
 
 const handleCloseSidePanel = () => {
-  void browser.runtime.sendMessage(ExtensionInternalMessageType.CloseSidePanel);
+  void browser.runtime.sendMessage({
+    type: ExtensionInternalMessageType.CloseSidePanel,
+  });
 };
 
 const cleanProvingSessionStorageOnClose = () => {
-  void browser.runtime.sendMessage(
-    ExtensionInternalMessageType.CleanProvingSessionStorageOnClose,
-  );
+  void browser.runtime.sendMessage({
+    type: ExtensionInternalMessageType.CleanProvingSessionStorageOnClose,
+  });
 };
 
 const handleProofRequest = async (
