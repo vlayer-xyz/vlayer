@@ -33,7 +33,7 @@ function startup_vdns_server() {
 
     RUST_LOG=info \
     ./target/debug/dns_server \
-        ${args[@]} \
+        ${args[@]+"${args[@]}"} \
         >>"${LOGS_DIR}/dns_server.out" &
 
     DNS_SERVER=$!
