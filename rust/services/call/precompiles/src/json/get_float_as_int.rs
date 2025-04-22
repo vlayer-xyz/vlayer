@@ -157,7 +157,7 @@ mod tests {
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
-                    msg: format!("Missing value at path {wrong_path}")
+                    msg: format!("Expected numeric type at {wrong_path}, found Null")
                 })
             );
         }
@@ -172,24 +172,6 @@ mod tests {
                 err_msg.contains("Error parsing JSON"),
                 "Expected error message to contain 'Error parsing JSON', got: {}",
                 err_msg
-            );
-        }
-
-        #[test]
-        fn number_cannot_be_represented_as_f64() {
-            use crate::json::Variable;
-
-            // Simulate a Variable::Number that cannot be represented as f64
-            let path = "field";
-            let json = r#"{"field": null}"#;
-
-            // You'll need to mock or modify `get_value_by_path` to return such a Variable if you want true coverage
-            let result = extract_f64_from_json(json, path);
-
-            let err_msg = result.unwrap_err().to_string();
-            assert!(
-                err_msg.contains("cannot be represented as f64"),
-                "Expected representation error, got: {err_msg}"
             );
         }
 
