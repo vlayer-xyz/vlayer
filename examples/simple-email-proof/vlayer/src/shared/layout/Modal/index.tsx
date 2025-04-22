@@ -11,6 +11,8 @@ import { StepKind } from "../../../app/router/types";
 import { ProgressBar } from "../ProgressBar";
 import { Navigation } from "../Navigation";
 import { motionConfig } from "./Modal.animations";
+import { ErrorBoundary } from "react-error-boundary";
+import { StepErrorBoundaryComponent } from "../../errors/ErrorBoundary";
 
 export const modalContext = createContext({
   showModal: () => {},
@@ -61,27 +63,29 @@ export const Modal = ({ children }: { children: React.ReactNode }) => {
           <AnimatePresence>
             {!isWelcome && !isSuccessStep && <ProgressBar />}
           </AnimatePresence>
-          <AnimatePresence>
-            {currentStep?.headerIcon && (
-              <motion.img
-                src={currentStep?.headerIcon}
-                alt="Success Icon"
-                className="w-[282px] h-[150px]"
-                {...motionConfig}
-              />
-            )}
-          </AnimatePresence>
-          <div className="flex-col flex gap-4 justify-between mb-2">
-            {currentStep?.title && (
-              <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
-            )}
-            {currentStep?.description && (
-              <p className={`h-[116px] desc ${descClass}`}>{description}</p>
-            )}
-            <modalContext.Provider value={{ showModal, closeModal }}>
-              {children}
-            </modalContext.Provider>
-          </div>
+          <ErrorBoundary FallbackComponent={StepErrorBoundaryComponent}>
+            <AnimatePresence>
+              {currentStep?.headerIcon && (
+                <motion.img
+                  src={currentStep?.headerIcon}
+                  alt="Success Icon"
+                  className="w-[282px] h-[150px]"
+                  {...motionConfig}
+                />
+              )}
+            </AnimatePresence>
+            <div className="flex-col flex gap-4 justify-between mb-2">
+              {currentStep?.title && (
+                <h3 className={`header ${descClass}`}>{currentStep?.title}</h3>
+              )}
+              {currentStep?.description && (
+                <p className={`h-[116px] desc ${descClass}`}>{description}</p>
+              )}
+              <modalContext.Provider value={{ showModal, closeModal }}>
+                {children}
+              </modalContext.Provider>
+            </div>
+          </ErrorBoundary>
         </motion.div>
       </div>
     </dialog>

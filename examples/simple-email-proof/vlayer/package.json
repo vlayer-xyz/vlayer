@@ -17,24 +17,25 @@
     "test-web:testnet": "VLAYER_ENV=testnet bun run playwright test"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@reown/appkit": "^1.6.9",
     "@reown/appkit-adapter-wagmi": "^1.6.9",
     "@sentry/react": "^8.54.0",
+    "@tanstack/react-query": "^5.72.1",
     "@vercel/analytics": "^1.4.1",
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
     "debug": "^4.4.0",
+    "motion": "^12.4.2",
     "react": "^18.3.1",
     "react-daisyui": "^5.0.5",
     "react-dom": "^18.3.1",
+    "react-error-boundary": "^5.0.0",
+    "react-router": "^7.1.5",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.5",
-    "@heroicons/react": "^2.2.0",
     "wagmi": "2.14.16",
-    "viem": "2.27.0",
-    "@tanstack/react-query": "^5.72.1",
-    "react-router": "^7.1.5",
-    "motion": "^12.4.2"
+    "viem": "2.27.0"
   },
   "devDependencies": {
     "postcss": "^8.4.47",

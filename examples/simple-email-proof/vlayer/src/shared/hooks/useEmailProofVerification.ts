@@ -7,6 +7,7 @@ import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVeri
 import { AbiStateMutability, ContractFunctionArgs } from "viem";
 import { useNavigate } from "react-router";
 import debug from "debug";
+import { AlreadyMintedError } from "../errors/appErrors";
 
 const log = debug("vlayer:email-proof-verification");
 
@@ -100,6 +101,15 @@ export const useEmailProofVerification = () => {
       );
     }
   }, [status]);
+
+  useEffect(() => {
+    if (verificationError) {
+      if (verificationError.message.includes("already been minted")) {
+        throw new AlreadyMintedError();
+      }
+      throw new Error(verificationError.message);
+    }
+  }, [verificationError]);
 
   return {
     currentStep,
