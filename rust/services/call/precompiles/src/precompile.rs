@@ -14,6 +14,7 @@ pub enum Tag {
     JsonGetString,
     JsonGetInt,
     JsonGetBool,
+    JsonGetFloatAsInt,
     JsonGetArrayLength,
     RegexIsMatch,
     RegexCapture,
