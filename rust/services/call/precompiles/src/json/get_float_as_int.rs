@@ -87,6 +87,7 @@ pub fn scale_float_to_int(float_val: f64, precision: u8) -> Result<i64> {
     Ok(scaled as i64)
 }
 
+#[cfg(test)]
 mod tests {
     use alloy_sol_types::sol_data;
     use revm::primitives::PrecompileErrors;
@@ -132,7 +133,9 @@ mod tests {
         #[test]
         fn float_value_too_large() {
             let value = *MAXIMAL_PRECISE_FLOAT_VALUE;
+            #[allow(clippy::cast_possible_truncation)]
             let value_as_int = value as i64 + 1;
+            #[allow(clippy::cast_precision_loss)]
             let result = scale_float_to_int(value_as_int as f64, 0);
             assert_eq!(
                 result,
@@ -170,8 +173,7 @@ mod tests {
             let err_msg = result.unwrap_err().to_string();
             assert!(
                 err_msg.contains("Error parsing JSON"),
-                "Expected error message to contain 'Error parsing JSON', got: {}",
-                err_msg
+                "Expected error message to contain 'Error parsing JSON', got: {err_msg}"
             );
         }
 
