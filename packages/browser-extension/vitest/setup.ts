@@ -1,5 +1,4 @@
 import { vi } from "vitest";
-import { MessageToExtension } from "../src/web-proof-commons";
 import "@testing-library/jest-dom/vitest";
 
 const mockStore = function () {
@@ -48,60 +47,104 @@ const mockStore = function () {
   };
 };
 
-vi.doMock("webextension-polyfill", () => {
-  const callbacks: ((message: MessageToExtension) => void)[] = [];
+declare global {
+  interface Window {
+    externalMessageProducer: {
+      sendMessage: (message: unknown) => Promise<void>;
+    };
+  }
+}
 
-  return {
-    default: {
-      storage: {
-        local: mockStore(),
-        sync: mockStore(),
-        session: mockStore(),
-      },
-      tabs: {
-        query: vi.fn().mockImplementation(() => {
-          return Promise.resolve([{ windowId: 0 }]);
-        }),
-        onActivated: {
-          addListener: vi.fn().mockImplementation(() => {}),
-        },
-      },
-      sidePanel: {
-        setPanelBehavior: vi.fn().mockImplementation(() => {}),
-      },
-      runtime: {
-        connect: vi.fn().mockImplementation(() => {}),
-        onConnect: {
-          addListener: vi.fn().mockImplementation(() => {}),
-        },
-        onInstalled: {
-          addListener: vi.fn().mockImplementation(() => {}),
-        },
-        onConnectExternal: {
-          addListener: vi.fn().mockImplementation(() => {}),
-        },
-        onMessage: {
-          addListener: vi.fn().mockImplementation(() => {}),
-        },
+const mockRuntime = () => {
+  const callbacks: ((message: unknown) => void)[] = [];
+  const callbacksExternal: ((message: unknown) => void)[] = [];
+  mockExternalMessageProducer(callbacksExternal);
+  mockWebextensionPolyfill(callbacksExternal, callbacks);
+  mockChromeNamespace();
+};
 
-        callbacks: [],
-        sendMessage: vi
-          .fn()
-          .mockImplementation((message: MessageToExtension) => {
+const mockExternalMessageProducer = (
+  callbacksExternal: ((message: unknown) => void)[],
+) => {
+  vi.stubGlobal("externalMessageProducer", {
+    sendMessage: vi.fn().mockImplementation((message: unknown) => {
+      callbacksExternal.forEach((callback) => {
+        callback(message);
+      });
+    }),
+  });
+};
+
+const mockChromeNamespace = () => {
+  vi.stubGlobal("chrome", {
+    sidePanel: {
+      open: vi.fn(),
+      setPanelBehavior: vi.fn(),
+    },
+  });
+};
+const mockWebextensionPolyfill = (
+  callbacksExternal: ((message: unknown) => void)[],
+  callbacks: ((message: unknown) => void)[],
+) => {
+  vi.doMock("webextension-polyfill", () => {
+    return {
+      default: {
+        storage: {
+          local: mockStore(),
+          sync: mockStore(),
+          session: mockStore(),
+        },
+        tabs: {
+          query: vi.fn().mockImplementation(() => {
+            return Promise.resolve([{ windowId: 0 }]);
+          }),
+          onActivated: {
+            addListener: vi.fn().mockImplementation(() => {}),
+          },
+        },
+        sidePanel: {
+          setPanelBehavior: vi.fn().mockImplementation(() => {}),
+        },
+        runtime: {
+          connect: vi.fn().mockImplementation(() => {}),
+          onConnect: {
+            addListener: vi.fn().mockImplementation(() => {}),
+          },
+          onInstalled: {
+            addListener: vi.fn().mockImplementation(() => {}),
+          },
+          onConnectExternal: {
+            addListener: vi.fn().mockImplementation(() => {}),
+          },
+
+          callbacks: [],
+
+          sendMessage: vi.fn().mockImplementation((message: unknown) => {
             callbacks.forEach((callback) => {
               callback(message);
             });
           }),
-        onMessageExternal: {
-          addListener: vi
-            .fn()
-            .mockImplementation(
-              (callback: (message: MessageToExtension) => void) => {
+
+          onMessage: {
+            addListener: vi
+              .fn()
+              .mockImplementation((callback: (message: unknown) => void) => {
                 callbacks.push(callback);
-              },
-            ),
+              }),
+          },
+
+          onMessageExternal: {
+            addListener: vi
+              .fn()
+              .mockImplementation((callback: (message: unknown) => void) => {
+                callbacksExternal.push(callback);
+              }),
+          },
         },
       },
-    },
-  };
-});
+    };
+  });
+};
+
+mockRuntime();
