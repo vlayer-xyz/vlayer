@@ -3,27 +3,56 @@
   "module": "prove.ts",
   "type": "module",
   "scripts": {
+    "build": "tsc -b && vite build",
     "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
-    "lint:solidity": "solhint '../src/**/*.sol' --max-warnings 0 && forge fmt ../src --check",
-    "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
-    "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
+    "lint:solidity": "solhint '../src/**/*.sol'",
+    "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
+    "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
+    "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
+    "web:dev": "bun run deploy:dev && vite",
+    "web:testnet": "bun run deploy:testnet && vite",
     "test-web:dev": "echo \"No tests specified yet\"",
     "test-web:testnet": "echo \"No tests specified yet\""
   },
   "dependencies": {
-    "@types/node": "^22.14.0",
+    "@heroicons/react": "^2.2.0",
+    "@sentry/react": "^8.54.0",
+    "@tanstack/react-query": "^5.64.2",
+    "@vercel/analytics": "^1.4.1",
+    "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
+    "debug": "^4.4.0",
+    "react": "^18.3.1",
+    "react-daisyui": "^5.0.5",
+    "react-dom": "^18.3.1",
+    "usehooks-ts": "^3.1.1",
+    "uuid": "^11.0.5",
     "viem": "2.27.0",
-    "zod": "^3.24.2"
+    "wagmi": "2.14.16",
+    "zod": "^3.24.2",
+    "motion": "^12.4.2"
   },
   "devDependencies": {
-    "typescript": "^5.5.4",
+    "@johanneskares/wallet-mock": "^1.4.1",
+    "@playwright/test": "1.48.0",
     "@types/bun": "^1.1.6",
-    "solhint": "^5.0.5"
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "daisyui": "^4.12.14",
+    "playwright": "1.48.0",
+    "react-router": "^7.1.5",
+    "solhint": "^5.0.5",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.9",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17"
   },
   "overrides": {
-    "viem": "2.27.0"
+    "viem": "2.27.0",
+    "wagmi": "2.14.16"
   }
 }
