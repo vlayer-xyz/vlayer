@@ -143,12 +143,13 @@ mod tests {
 
         #[test]
         fn missing_value() {
+            let wrong_path = "wrong_path";
             let json = r#"{"field": 1}"#;
-            let result = extract_f64_from_json(json, "missing_field");
+            let result = extract_f64_from_json(json, wrong_path);
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
-                    msg: "Missing value at path missing_field".to_string()
+                    msg: format!("Missing value at path {wrong_path}")
                 })
             );
         }
