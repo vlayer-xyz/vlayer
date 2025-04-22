@@ -197,6 +197,24 @@ mod tests {
         }
 
         #[test]
+        fn number_cannot_be_represented_as_f64() {
+            use crate::json::Variable;
+
+            // Simulate a Variable::Number that cannot be represented as f64
+            let path = "field";
+            let json = r#"{"field": null}"#;
+
+            // You'll need to mock or modify `get_value_by_path` to return such a Variable if you want true coverage
+            let result = extract_f64_from_json(json, path);
+
+            let err_msg = result.unwrap_err().to_string();
+            assert!(
+                err_msg.contains("cannot be represented as f64"),
+                "Expected representation error, got: {err_msg}"
+            );
+        }
+
+        #[test]
         fn success() {
             let json = r#"{"field": 1.5}"#;
             let result = extract_f64_from_json(json, "field");
