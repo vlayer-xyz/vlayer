@@ -4,6 +4,7 @@ import { type RedactionConfig } from "./redaction";
 import urlRegex from "url-regex";
 import type { PresentationJSON as TLSNPresentationJSON } from "tlsn-js/src/types";
 import type { OutputsConfig } from "./notarizeOutput";
+import { z } from "zod";
 
 export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
@@ -13,16 +14,6 @@ export const EXTENSION_STEP = {
   clickButton: "clickButton",
 } as const;
 
-export type ExtensionStep =
-  (typeof EXTENSION_STEP)[keyof typeof EXTENSION_STEP];
-
-export const enum ExtensionAction {
-  RequestWebProof = "RequestWebProof",
-  NotifyZkProvingStatus = "NotifyZkProvingStatus",
-  OpenSidePanel = "OpenSidePanel",
-  CloseSidePanel = "CloseSidePanel",
-}
-
 export enum ZkProvingStatus {
   NotStarted = "NotStarted",
   Proving = "Proving",
@@ -30,40 +21,68 @@ export enum ZkProvingStatus {
   Error = "Error",
 }
 
+export type ExtensionStep =
+  (typeof EXTENSION_STEP)[keyof typeof EXTENSION_STEP];
+
+export enum MessageToExtensionType {
+  RequestWebProof = "RequestWebProof",
+  NotifyZkProvingStatus = "NotifyZkProvingStatus",
+  OpenSidePanel = "OpenSidePanel",
+  CloseSidePanel = "CloseSidePanel",
+}
+
+export enum LegacyMessageToExtensionType {
+  Ping = "Ping",
+}
+
+export enum ExtensionInternalMessageType {
+  RedirectBack = "RedirectBack",
+  TabOpened = "TabOpened",
+  CleanProvingSessionStorageOnClose = "CleanProvingSessionStorageOnClose",
+  CloseSidePanel = "CloseSidePanel",
+  ProofDone = "ProofDone",
+  ProofError = "ProofError",
+  ProofProcessing = "ProofProcessing",
+}
+
+export enum MessageFromExtensionType {
+  SidePanelClosed = "SidePanelClosed",
+  ProofDone = "ProofDone",
+  ProofError = "ProofError",
+  ProofProcessing = "ProofProcessing",
+  Pong = "Pong",
+}
+
+export type LegacyMessage = {
+  type: LegacyMessageToExtensionType.Ping;
+};
+
 export type MessageToExtension =
   | {
-      action: ExtensionAction.RequestWebProof;
+      type: MessageToExtensionType.RequestWebProof;
       payload: WebProverSessionConfig;
     }
   | {
-      action: ExtensionAction.NotifyZkProvingStatus;
+      type: MessageToExtensionType.NotifyZkProvingStatus;
       payload: {
         status: ZkProvingStatus;
       };
     }
   | {
-      action: ExtensionAction.OpenSidePanel;
+      type: MessageToExtensionType.OpenSidePanel;
     }
   | {
-      action: ExtensionAction.CloseSidePanel;
+      type: MessageToExtensionType.CloseSidePanel;
     };
-
-export enum ExtensionMessageType {
-  ProofDone = "ProofDone",
-  ProofError = "ProofError",
-  RedirectBack = "RedirectBack",
-  TabOpened = "TabOpened",
-  ProofProcessing = "ProofProcessing",
-  CleanProvingSessionStorageOnClose = "CleanProvingSessionStorageOnClose",
-  CloseSidePanel = "CloseSidePanel",
-  SidePanelClosed = "SidePanelClosed",
-}
 
 export type PresentationJSON = TLSNPresentationJSON;
 
-export type ExtensionMessage =
+export type ExtensionInternalMessage =
+  | { type: ExtensionInternalMessageType.RedirectBack }
+  | { type: ExtensionInternalMessageType.TabOpened; payload: { tabId: number } }
+  | { type: ExtensionInternalMessageType.CloseSidePanel }
   | {
-      type: ExtensionMessageType.ProofDone;
+      type: ExtensionInternalMessageType.ProofDone;
       payload: {
         presentationJson: PresentationJSON;
         decodedTranscript: {
@@ -72,18 +91,42 @@ export type ExtensionMessage =
         };
       };
     }
-  | { type: ExtensionMessageType.ProofError; payload: { error: string } }
-  | { type: ExtensionMessageType.RedirectBack }
-  | { type: ExtensionMessageType.TabOpened; payload: { tabId: number } }
   | {
-      type: ExtensionMessageType.ProofProcessing;
+      type: ExtensionInternalMessageType.ProofError;
+      payload: { error: string };
+    }
+  | {
+      type: ExtensionInternalMessageType.ProofProcessing;
+      payload: { progress?: number };
+    }
+  | {
+      type: ExtensionInternalMessageType.CleanProvingSessionStorageOnClose;
+    };
+
+export type MessageFromExtension =
+  | {
+      type: MessageFromExtensionType.SidePanelClosed;
+    }
+  | {
+      type: MessageFromExtensionType.ProofDone;
       payload: {
-        // as we dont have progress yet from tlsn this is optional
-        progress?: number;
+        presentationJson: PresentationJSON;
+        decodedTranscript: {
+          sent: string;
+          recv: string;
+        };
       };
     }
-  | { type: ExtensionMessageType.SidePanelClosed }
-  | { type: ExtensionMessageType.CloseSidePanel };
+  | {
+      type: MessageFromExtensionType.ProofError;
+      payload: { error: string };
+    }
+  | {
+      type: MessageFromExtensionType.ProofProcessing;
+      payload: {
+        progress?: number;
+      };
+    };
 
 export type WebProverSessionConfig = {
   notaryUrl: string;
@@ -206,4 +249,53 @@ export function assertUrlPattern(
       StepValidationErrors.InvalidUrlPattern,
     );
   }
+}
+
+const messageFromExtensionSchema = z.object({
+  type: z.enum(
+    Object.values<string>(MessageFromExtensionType) as [string, ...string[]],
+  ),
+});
+
+const messageToExtensionSchema = z.object({
+  type: z.enum(
+    Object.values<string>(MessageToExtensionType) as [string, ...string[]],
+  ),
+});
+
+const extensionInternalMessageSchema = z.object({
+  type: z.enum(
+    Object.values<string>(ExtensionInternalMessageType) as [
+      string,
+      ...string[],
+    ],
+  ),
+});
+
+const legacyPingMessageSchema = z.object({
+  message: z.literal("ping"),
+});
+
+export function isMessageFromExtension(
+  message: unknown,
+): message is MessageFromExtension {
+  return messageFromExtensionSchema.safeParse(message).success;
+}
+
+export function isLegacyPingMessage(
+  message: unknown,
+): message is LegacyMessage {
+  return legacyPingMessageSchema.safeParse(message).success;
+}
+
+export function isMessageToExtension(
+  message: unknown,
+): message is MessageToExtension {
+  return messageToExtensionSchema.safeParse(message).success;
+}
+
+export function isExtensionInternalMessage(
+  message: unknown,
+): message is ExtensionInternalMessage {
+  return extensionInternalMessageSchema.safeParse(message).success;
 }

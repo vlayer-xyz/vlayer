@@ -1,7 +1,7 @@
 import {
   type PresentationJSON,
   createVlayerClient,
-  ExtensionMessageType,
+  MessageFromExtensionType,
 } from "@vlayer/sdk";
 
 import {
@@ -50,7 +50,7 @@ function DappWithProfile(profile: string) {
 
   useEffect(() => {
     webProofProvider.addEventListeners(
-      ExtensionMessageType.ProofDone,
+      MessageFromExtensionType.ProofDone,
       ({
         payload,
       }: {

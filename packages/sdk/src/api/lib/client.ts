@@ -11,7 +11,7 @@ import {
   decodeFunctionResult,
 } from "viem";
 import {
-  ExtensionMessageType,
+  MessageFromExtensionType,
   ZkProvingStatus,
   type PresentationJSON,
 } from "../../web-proof-commons";
@@ -162,14 +162,14 @@ export const createVlayerClient = (
         };
       }> = new Promise((resolve, reject) => {
         webProofProvider.addEventListeners(
-          ExtensionMessageType.ProofDone,
+          MessageFromExtensionType.ProofDone,
           ({ payload: { presentationJson, decodedTranscript } }) => {
             resolve({ presentationJson, decodedTranscript });
           },
         );
 
         webProofProvider.addEventListeners(
-          ExtensionMessageType.ProofError,
+          MessageFromExtensionType.ProofError,
           ({ payload: { error } }) => {
             reject(new Error(error));
           },
