@@ -1,7 +1,5 @@
-use std::char::MAX;
-
 use alloy_primitives::Bytes;
-use alloy_sol_types::{SolType, SolValue, sol};
+use alloy_sol_types::{SolValue, sol};
 use serde_json::Value;
 
 use crate::{
