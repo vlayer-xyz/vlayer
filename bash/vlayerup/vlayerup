@@ -9,7 +9,7 @@ set -ueo pipefail
 BASE_DIR=${XDG_CONFIG_HOME:-$HOME}
 VLAYER_DIR=${VLAYER_DIR:-"$BASE_DIR/.vlayer"}
 VLAYER_BIN_DIR="$VLAYER_DIR/bin"
-CHANNEL="nightly" # Default channel.
+CHANNEL="stable" # Default channel.
 
 main() {
   parse_args "$@"

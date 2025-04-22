@@ -22,8 +22,8 @@ mod logger;
 #[derive(Clone, Copy, Debug, ValueEnum, Default, Display, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
 pub enum ReleaseChannel {
-    #[default]
     Nightly,
+    #[default]
     Stable,
 }
 
@@ -34,7 +34,7 @@ pub(crate) struct UpdateArgs {
         long,
         value_enum,
         env = "VLAYER_RELEASE_CHANNEL",
-        default_value = "nightly"
+        default_value = "stable"
     )]
     channel: ReleaseChannel,
 }
