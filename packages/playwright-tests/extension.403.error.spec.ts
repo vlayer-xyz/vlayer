@@ -30,6 +30,6 @@ test("Flow from opening sidepanel until 403 from proven endpoint", async ({
 
   await extension.generateWebProof();
   await extension.expectErrorToBeDisplayed(
-    "Authentication failed. Please restart the process.",
+    "Non 200 response from proven endpoint.",
   );
 });
