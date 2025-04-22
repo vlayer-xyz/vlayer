@@ -1,3 +1,5 @@
+use std::char::MAX;
+
 use alloy_primitives::Bytes;
 use alloy_sol_types::{SolType, SolValue, sol};
 use serde_json::Value;
@@ -59,7 +61,7 @@ fn extract_f64_from_json(json: &str, path: &str) -> Result<f64> {
 pub fn scale_float_to_int(float_val: f64, precision: u8) -> Result<i64> {
     if precision > MAX_PRECISION {
         return Err(map_to_fatal(format!(
-            "Invalid precision value: {precision}. Precision must be between 0 and 18 (inclusive)."
+            "Invalid precision value: {precision}. Precision must be between 0 and {MAX_PRECISION} (inclusive)."
         )));
     }
 
