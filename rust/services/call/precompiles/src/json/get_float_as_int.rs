@@ -83,6 +83,11 @@ pub fn scale_float_to_int(float_val: f64, precision: u8) -> Result<i64> {
     let power_of_ten = 10_f64.powi(precision.into());
     let scaled = float_val * power_of_ten;
 
+    #[allow(clippy::cast_precision_loss)]
+    if scaled.abs() > i64::MAX as f64 {
+        return Err(map_to_fatal(format!("Scaled value {scaled} exceeds i64::MAX ({})", i64::MAX)));
+    }
+
     #[allow(clippy::cast_possible_truncation)]
     Ok(scaled as i64)
 }
@@ -143,6 +148,27 @@ mod tests {
                     msg: format!(
                         "Scaled value {} exceeds the maximum safe value for precise conversion to i64 (limit: {}).",
                         value_as_int, *MAXIMAL_PRECISE_FLOAT_VALUE
+                    )
+                })
+            );
+        }
+
+        #[test]
+        #[allow(clippy::cast_precision_loss)]
+        fn scaled_value_overflows_i64_max() {
+            let float_val = *MAXIMAL_PRECISE_FLOAT_VALUE;
+            let precision = 4;
+            let result = scale_float_to_int(float_val, precision);
+
+            let scaled = float_val * 10_f64.powi(precision.into());
+
+            assert_eq!(
+                result,
+                Err(PrecompileErrors::Fatal {
+                    msg: format!(
+                        "Scaled value {} exceeds i64::MAX ({})",
+                        scaled,
+                        i64::MAX
                     )
                 })
             );
