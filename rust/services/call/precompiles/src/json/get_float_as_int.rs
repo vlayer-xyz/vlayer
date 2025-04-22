@@ -21,7 +21,11 @@ use lazy_static::lazy_static;
 
 const MAX_PRECISION: u8 = 18;
 lazy_static! {
-    // f64 has a 52-bit mantissa
+    // f64 has 52 mantissa bits, plus 1 implicit leading bit for normalized numbers
+    // → gives 53 bits of precision
+    // 2^53 is the first number that cannot be exactly represented
+    // So we use 2^53 - 1 as the max safe integer for precise float-to-int conversion
+    // Reference: https://en.wikipedia.org/wiki/Double-precision_floating-point_format#IEEE_754_double-precision_binary_floating-point_format:_binary64
     static ref MAXIMAL_PRECISE_FLOAT_VALUE: f64 = 2_f64.powi(53) - 1.0;
 }
 
