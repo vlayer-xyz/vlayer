@@ -165,11 +165,7 @@ mod tests {
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
-                    msg: format!(
-                        "Scaled value {} exceeds i64::MAX ({})",
-                        scaled,
-                        i64::MAX
-                    )
+                    msg: format!("Scaled value {} exceeds i64::MAX ({})", scaled, i64::MAX)
                 })
             );
         }
