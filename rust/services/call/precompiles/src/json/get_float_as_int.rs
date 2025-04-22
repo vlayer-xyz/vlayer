@@ -50,11 +50,9 @@ fn extract_f64_from_json(json: &str, path: &str) -> Result<f64> {
 
     match variable {
         Variable::Number(num) => {
-            let Some(float_val) = num.as_f64() else {
-                unreachable!(
-                    "Unexpected: `as_f64()` returned None. This can only happen if `serde_json` is compiled with the `arbitrary_precision` feature"
-                );
-            };
+            let float_val = num.as_f64().ok_or_else(|| {
+                map_to_fatal(format!("Number {num} at path `{path}` cannot be represented as f64"))
+            })?;
             if float_val.is_nan() {
                 unreachable!(
                     "NaN should not be possible: JSON cannot contain NaN values. RFC: https://datatracker.ietf.org/doc/html/rfc8259#section-6"
