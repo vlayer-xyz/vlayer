@@ -11,7 +11,7 @@ use crate::{
 sol! {
     struct FloatInput {
         string json;
-        string path;
+        string field_name;
         uint8 precision;
     }
 }
@@ -31,7 +31,7 @@ lazy_static! {
 pub fn get_float_as_int(input: &Bytes) -> Result<Bytes> {
     let FloatInput {
         json,
-        path,
+        field_name: path,
         precision,
     } = <FloatInput as alloy_sol_types::SolType>::abi_decode(input, true).map_err(map_to_fatal)?;
 
