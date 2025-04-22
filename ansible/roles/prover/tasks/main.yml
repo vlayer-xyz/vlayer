@@ -25,7 +25,7 @@
 - name: Install vlayer # noqa: no-changed-when
   ansible.builtin.shell: |
     export PATH="$PATH:~/.foundry/bin"
-    ~/.vlayer/bin/vlayerup
+    ~/.vlayer/bin/vlayerup --channel {{ vlayer_release_channel }}
   args:
     executable: /bin/bash
   async: 600  # 10 minutes to complete
