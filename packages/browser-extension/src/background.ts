@@ -94,7 +94,28 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
         payload: {},
       });
     })
-    .otherwise(() => {});
+
+    //Two handler above are here to make sure we can safely do exhaustive match below
+    //that shows that probably we should have one more messages cateegory which is internal but from background to the sidepanel
+
+    .with(
+      { type: ExtensionInternalMessageType.CleanProvingSessionStorageOnClose },
+      () => {
+        return new Promise((resolve) => {
+          resolve(
+            `${ExtensionInternalMessageType.CleanProvingSessionStorageOnClose} shouldnt be sent to background`,
+          );
+        });
+      },
+    )
+    .with({ type: ExtensionInternalMessageType.CloseSidePanel }, () => {
+      return new Promise((resolve) => {
+        resolve(
+          `${ExtensionInternalMessageType.CloseSidePanel} shouldnt be sent to background`,
+        );
+      });
+    })
+    .exhaustive();
 });
 
 browser.runtime.onMessageExternal.addListener(
@@ -108,8 +129,8 @@ browser.runtime.onMessageExternal.addListener(
       });
     }
     if (!isMessageToExtension(message)) {
-      return new Promise((resolve) => {
-        resolve(`Unknown message type: ${message as string}`);
+      return new Promise((_resolve, reject) => {
+        reject(new Error(`Unknown message type: ${message as string}`));
       });
     }
     return match(message)
@@ -126,7 +147,9 @@ browser.runtime.onMessageExternal.addListener(
         void handleProvingStatusNotification(msg);
       })
       .otherwise(() => {
-        throw new Error(`${message.type} sent wrong channel`);
+        return new Promise((_resolve, reject) => {
+          reject(new Error(`${message.type} sent wrong channel`));
+        });
       });
   },
 );
