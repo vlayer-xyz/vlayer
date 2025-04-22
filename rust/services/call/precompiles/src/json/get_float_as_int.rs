@@ -1,3 +1,5 @@
+use std::char::MAX;
+
 use alloy_primitives::Bytes;
 use alloy_sol_types::{SolValue, sol};
 use jmespath::Variable;
