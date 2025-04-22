@@ -53,6 +53,10 @@ export enum MessageFromExtensionType {
   Pong = "Pong",
 }
 
+export type LegacyMessage = {
+  type: LegacyMessageToExtensionType.Ping;
+};
+
 export type MessageToExtension =
   | {
       type: MessageToExtensionType.RequestWebProof;
@@ -247,19 +251,25 @@ export function assertUrlPattern(
   }
 }
 
-export function assertMessageFromExtension(
-  message: MessageFromExtension,
-): asserts message is MessageFromExtension {
-  if (message.type !== MessageFromExtensionType.SidePanelClosed) {
-    throw new Error("Invalid message from extension");
-  }
-}
-const messageSchema = z.object({
-  type: z.enum([
-    ...Object.values<string>(MessageFromExtensionType),
-    ...Object.values<string>(MessageToExtensionType),
-    ...Object.values<string>(ExtensionInternalMessageType),
-  ] as [string, ...string[]]),
+const messageFromExtensionSchema = z.object({
+  type: z.enum(
+    Object.values<string>(MessageFromExtensionType) as [string, ...string[]],
+  ),
+});
+
+const messageToExtensionSchema = z.object({
+  type: z.enum(
+    Object.values<string>(MessageToExtensionType) as [string, ...string[]],
+  ),
+});
+
+const extensionInternalMessageSchema = z.object({
+  type: z.enum(
+    Object.values<string>(ExtensionInternalMessageType) as [
+      string,
+      ...string[],
+    ],
+  ),
 });
 
 const legacyPingMessageSchema = z.object({
@@ -269,43 +279,23 @@ const legacyPingMessageSchema = z.object({
 export function isMessageFromExtension(
   message: unknown,
 ): message is MessageFromExtension {
-  const parsed = messageSchema.safeParse(message);
-  if (!parsed.success) {
-    return false;
-  }
-  return Object.values<string>(MessageFromExtensionType).includes(
-    parsed.data.type,
-  );
+  return messageFromExtensionSchema.safeParse(message).success;
 }
 
-export function isLegacyPingMessage(message: unknown): boolean {
-  const parsed = legacyPingMessageSchema.safeParse(message);
-  if (!parsed.success) {
-    return false;
-  }
-  return parsed.data.message === "ping";
+export function isLegacyPingMessage(
+  message: unknown,
+): message is LegacyMessage {
+  return legacyPingMessageSchema.safeParse(message).success;
 }
 
 export function isMessageToExtension(
   message: unknown,
 ): message is MessageToExtension {
-  const parsed = messageSchema.safeParse(message);
-  if (!parsed.success) {
-    return false;
-  }
-  return Object.values<string>(MessageToExtensionType).includes(
-    parsed.data.type,
-  );
+  return messageToExtensionSchema.safeParse(message).success;
 }
 
 export function isExtensionInternalMessage(
   message: unknown,
 ): message is ExtensionInternalMessage {
-  const parsed = messageSchema.safeParse(message);
-  if (!parsed.success) {
-    return false;
-  }
-  return Object.values<string>(ExtensionInternalMessageType).includes(
-    parsed.data.type,
-  );
+  return extensionInternalMessageSchema.safeParse(message).success;
 }

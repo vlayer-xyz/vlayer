@@ -130,7 +130,11 @@ browser.runtime.onMessageExternal.addListener(
     }
     if (!isMessageToExtension(message)) {
       return new Promise((_resolve, reject) => {
-        reject(new Error(`Unknown message type: ${message as string}`));
+        reject(
+          new Error(
+            `Unknown message type: ${(message as { type: string }).type}`,
+          ),
+        );
       });
     }
     return match(message)

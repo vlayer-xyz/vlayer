@@ -7,7 +7,7 @@ import { MessageToExtensionType, ZkProvingStatus } from "./web-proof-commons";
 describe("zk related messaging", () => {
   it("should listen to zk proving status messages ", async () => {
     const zkProvingSpy = vi.spyOn(zkProvingStatusStore, "setProvingStatus");
-    await browser.runtime.sendMessage({
+    await window.externalMessageProducer.sendMessage({
       type: MessageToExtensionType.NotifyZkProvingStatus,
       payload: { status: ZkProvingStatus.Proving },
     });
@@ -23,7 +23,7 @@ describe("zk related messaging", () => {
     await browser.storage.session.set({
       zkProvingStatus: ZkProvingStatus.Proving,
     });
-    await browser.runtime.sendMessage({
+    await window.externalMessageProducer.sendMessage({
       type: MessageToExtensionType.RequestWebProof,
       payload: { steps: [] },
     });
