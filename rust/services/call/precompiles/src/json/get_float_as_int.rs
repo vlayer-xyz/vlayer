@@ -146,7 +146,7 @@ mod tests {
                 result,
                 Err(PrecompileErrors::Fatal {
                     msg: format!(
-                        "Scaled value {} exceeds the maximum safe value for precise conversion to i64 (limit: {}).",
+                        "Float value {} exceeds the maximum safe value for precise conversion to i64 (limit: {}).",
                         value_as_int, *MAXIMAL_PRECISE_FLOAT_VALUE
                     )
                 })
@@ -154,7 +154,6 @@ mod tests {
         }
 
         #[test]
-        #[allow(clippy::cast_precision_loss)]
         fn scaled_value_overflows_i64_max() {
             let float_val = *MAXIMAL_PRECISE_FLOAT_VALUE;
             let precision = 4;
