@@ -30,7 +30,7 @@ pub fn precompiles(is_vlayer_test: bool) -> Vec<Precompile> {
         generate_precompile!(0x02, json_get_string, 1000, 10, Tag::JsonGetString),
         generate_precompile!(0x03, json_get_int, 1000, 10, Tag::JsonGetInt),
         generate_precompile!(0x04, json_get_bool, 1000, 10, Tag::JsonGetBool),
-        generate_precompile!(0x06, json_get_float_as_int, 1000, 10, Tag::JsonGetFloatAsInt),
+        generate_precompile!(0x05, json_get_float_as_int, 1000, 10, Tag::JsonGetFloatAsInt),
         generate_precompile!(0x10, regex_is_match, 1000, 10, Tag::RegexIsMatch),
         generate_precompile!(0x11, regex_capture, 1000, 10, Tag::RegexCapture),
         generate_precompile!(0x20, url_pattern_test, 1000, 10, Tag::UrlPatternTest),
