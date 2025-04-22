@@ -12,7 +12,7 @@ import { ProgressBar } from "../ProgressBar";
 import { Navigation } from "../Navigation";
 import { motionConfig } from "./Modal.animations";
 import { ErrorBoundary } from "react-error-boundary";
-import { StepErrorBoundaryComponent } from "../ErrorBoundary";
+import { StepErrorBoundaryComponent } from "../../errors/ErrorBoundary";
 
 export const modalContext = createContext({
   showModal: () => {},

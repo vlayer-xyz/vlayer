@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import { ErrorBoundary } from "react-error-boundary";
-import { AppErrorBoundaryComponent } from "../../shared/layout/ErrorBoundary";
+import { AppErrorBoundaryComponent } from "../../shared/errors/ErrorBoundary";
 import { Layout } from "../../shared/layout/Layout";
 import { getAllSteps } from "./steps";
 

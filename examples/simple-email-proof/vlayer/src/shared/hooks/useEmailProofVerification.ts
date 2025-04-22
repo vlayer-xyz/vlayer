@@ -7,7 +7,7 @@ import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVeri
 import { AbiStateMutability, ContractFunctionArgs } from "viem";
 import { useNavigate } from "react-router";
 import debug from "debug";
-import { AlreadyMintedError, VerificationError } from "../errors";
+import { AlreadyMintedError } from "../errors/appErrors";
 
 const log = debug("vlayer:email-proof-verification");
 
@@ -107,7 +107,7 @@ export const useEmailProofVerification = () => {
       if (verificationError.message.includes("already been minted")) {
         throw new AlreadyMintedError();
       }
-      throw new VerificationError();
+      throw new Error("Cannot verify proof on-chain");
     }
   }, [verificationError]);
 

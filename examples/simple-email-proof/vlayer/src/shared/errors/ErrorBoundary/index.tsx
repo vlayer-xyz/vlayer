@@ -1,5 +1,5 @@
 import { FallbackProps } from "react-error-boundary";
-import { AppError } from "../../errors";
+import { AppError } from "../appErrors";
 import styles from "./ErrorBoundary.module.css";
 import { useNavigate } from "react-router";
 
