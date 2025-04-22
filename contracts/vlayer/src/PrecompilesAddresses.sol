@@ -15,6 +15,7 @@ library Precompiles {
     address public constant JSON_GET_STRING = address(uint160(PRECOMPILES) + 2);
     address public constant JSON_GET_INT = address(uint160(PRECOMPILES) + 3);
     address public constant JSON_GET_BOOL = address(uint160(PRECOMPILES) + 4);
+    address public constant  = address(uint160(PRECOMPILES) + 5);
     address public constant REGEX_MATCH = address(uint160(PRECOMPILES) + 0x10);
     address public constant REGEX_CAPTURE = address(uint160(PRECOMPILES) + 0x11);
     address public constant URL_PATTERN_TEST = address(uint160(PRECOMPILES) + 0x20);
