@@ -1,5 +1,6 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::{SolValue, sol};
+use jmespath::Variable;
 use serde_json::Value;
 
 use crate::{
@@ -44,20 +45,25 @@ fn extract_f64_from_json(json: &str, path: &str) -> Result<f64> {
     let json_body: Value =
         serde_json::from_str(json).map_err(|e| map_to_fatal(format!("Error parsing JSON: {e}")))?;
 
-    let value = get_value_by_path(&json_body, path)
-        .ok_or(map_to_fatal(format!("Missing value at path {path}")))?;
+    let variable = get_value_by_path(&json_body, path)
+        .map_err(|e| map_to_fatal(format!("Error at path {path}: {e}")))?;
 
-    let Some(float_val) = value.as_f64() else {
-        return Err(map_to_fatal(format!("Expected numeric type at {path}, found {value:?}")));
-    };
-
-    if float_val.is_nan() {
-        unreachable!(
-            "NaN should not be possible: JSON cannot contain NaN values. RFC: https://datatracker.ietf.org/doc/html/rfc8259#section-6"
-        );
+    match variable {
+        Variable::Number(num) => {
+            let Some(float_val) = num.as_f64() else {
+                unreachable!(
+                    "Unexpected: `as_f64()` returned None. This can only happen if `serde_json` is compiled with the `arbitrary_precision` feature"
+                );
+            };
+            if float_val.is_nan() {
+                unreachable!(
+                    "NaN should not be possible: JSON cannot contain NaN values. RFC: https://datatracker.ietf.org/doc/html/rfc8259#section-6"
+                );
+            }
+            Ok(float_val)
+        }
+        other => Err(map_to_fatal(format!("Expected numeric type at {path}, found {other:?}"))),
     }
-
-    Ok(float_val)
 }
 
 pub fn scale_float_to_int(float_val: f64, precision: u8) -> Result<i64> {
@@ -166,6 +172,24 @@ mod tests {
                 err_msg.contains("Error parsing JSON"),
                 "Expected error message to contain 'Error parsing JSON', got: {}",
                 err_msg
+            );
+        }
+
+        #[test]
+        fn number_cannot_be_represented_as_f64() {
+            use crate::json::Variable;
+
+            // Simulate a Variable::Number that cannot be represented as f64
+            let path = "field";
+            let json = r#"{"field": null}"#;
+
+            // You'll need to mock or modify `get_value_by_path` to return such a Variable if you want true coverage
+            let result = extract_f64_from_json(json, path);
+
+            let err_msg = result.unwrap_err().to_string();
+            assert!(
+                err_msg.contains("cannot be represented as f64"),
+                "Expected representation error, got: {err_msg}"
             );
         }
 
