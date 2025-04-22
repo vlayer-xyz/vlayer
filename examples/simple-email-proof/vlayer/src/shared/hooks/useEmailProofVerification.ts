@@ -107,7 +107,7 @@ export const useEmailProofVerification = () => {
       if (verificationError.message.includes("already been minted")) {
         throw new AlreadyMintedError();
       }
-      throw new Error("Cannot verify proof on-chain");
+      throw new Error(verificationError.message);
     }
   }, [verificationError]);
 
