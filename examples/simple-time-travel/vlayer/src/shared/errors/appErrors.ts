@@ -12,9 +12,3 @@ export class AlreadyMintedError extends AppError {
     );
   }
 }
-
-export class VerificationError extends AppError {
-  constructor() {
-    super("VerificationError", "Cannot verify proof on-chain");
-  }
-}

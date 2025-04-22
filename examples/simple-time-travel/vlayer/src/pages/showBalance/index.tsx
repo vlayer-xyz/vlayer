@@ -5,8 +5,7 @@ import { useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
-import { AlreadyMintedError } from "../../shared/errors";
-import { VerificationError } from "../../shared/errors";
+import { AlreadyMintedError } from "../../shared/errors/appErrors";
 
 export const ShowBalancePage = () => {
   const navigate = useNavigate();
@@ -49,7 +48,7 @@ export const ShowBalancePage = () => {
       if (mintError.message.includes("already been minted")) {
         throw new AlreadyMintedError();
       }
-      throw new VerificationError();
+      throw new Error(mintError.message);
     }
   }, [mintError]);
 

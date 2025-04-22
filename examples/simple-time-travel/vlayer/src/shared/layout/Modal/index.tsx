@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ErrorBoundary } from "react-error-boundary";
-import { StepErrorBoundaryComponent } from "../ErrorBoundary";
+import { StepErrorBoundaryComponent } from "../../errors/ErrorBoundary";
 import { useCurrentStep } from "../../hooks/useCurrentStep";
 import { Navigation } from "../Navigation";
 import { motionConfig } from "./Modal.animations";
