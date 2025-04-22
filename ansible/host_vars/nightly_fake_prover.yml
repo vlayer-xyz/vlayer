@@ -1,0 +1,68 @@
+---
+ansible_host: 13.58.219.78
+ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJvWwoaoycn7OqZH0+DYsWRyzXA6WYUUbN0SqTuyjtL7
+ansible_user: ubuntu
+vlayer_release_channel: nightly
+vlayer_prover_host: 127.0.0.1
+vlayer_prover_port: 3000
+prover_nginx_ip_rate_limit_burst: 20
+prover_nginx_ip_rate_limit_per_minute: 60
+vlayer_alchemy_api_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  39616235323862363630616335393437336663323731656630393035616463376539616230333434
+  3932356438366637653132393830306437613065613637360a646337653931306332363739613935
+  34633765386630623265363236333064633035666632383735643734386463393562393535656630
+  6239383836376233340a373166623730326666353139386331323564643632373361633765636161
+  63343030643438373066326432356565363534623131306166383939656563623537656535626161
+  6164386166343532386262626237643763623366376537663030
+vlayer_prover_rpc_urls:
+ - "11155111:https://omniscient-flashy-frog.ethereum-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}"
+ - "11155420:https://omniscient-flashy-frog.optimism-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}"
+ - "1:https://eth-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "8453:https://base-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "10:https://opt-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "84532:https://omniscient-flashy-frog.base-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}"
+ - "80002:https://polygon-amoy.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "421614:https://arb-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "300:https://zksync-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "8453:https://base-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "42161:https://arb-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "42170:https://arbnova-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "137:https://polygon-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "324:https://zksync-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "747:https://flow-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "545:https://flow-testnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "534352:https://scroll-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "534351:https://scroll-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "5000:https://mantle-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "59144:https://linea-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "59141:https://linea-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "100:https://gnosis-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "10200:https://gnosis-chiado.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ # https://docs.bitkubchain.org/rpc-service/rpc
+ # The rate limit of RPC endpoint on Mainnet and Testnet is 2K/1min.
+ - "96:https://rpc.bitkubchain.io"
+ - "25925:https://rpc-testnet.bitkubchain.io"
+ # https://docs.kinto.xyz/kinto-the-safe-l2/building-on-kinto/tools/node-rpc
+ - "7887:https://rpc.kinto-rpc.com"
+ # https://docs.celo.org/network
+ - "42220:https://forno.celo.org"
+ # https://docs.zircuit.com/dev-tools/rpc-endpoints
+ - "48900:https://zircuit1-mainnet.p2pify.com"
+ - "48899:https://zircuit1-testnet.p2pify.com"
+ # https://docs.fhenix.zone/getting-started
+ - "8008135:https://api.helium.fhenix.zone"
+vlayer_prover_gas_meter_url: "https://dashboard.vlayer.xyz/api/webhooks/prover"
+vlayer_prover_gas_meter_api_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  31396562656134383833636463386566376232323636633734323837343464636139303532656663
+  6230633632623363343866363866633936316465363334390a346633336339363562396135383961
+  31363239666135646438366364626335373061633466646332653032623564366162653634343830
+  6361393633376332300a386531383066653235393766333232623136646335373265323939336163
+  33646361663465363932646333366464366663613132303739356564353466616133666233396633
+  66316461656164363263333731663365393962373739366534326562343436656434343166306633
+  32623238383032663439343164663332643461353339393964643438383432316634346333333230
+  64326132366630306266626539626538396233623034313630326362653932316435633963353536
+  62353932643337323737666234353765623363643531646533336435333564326636366436336531
+  35633263303637613536333463643966336565313263396131623132306632333631313165376534
+  333634303764653162643233336133656661
