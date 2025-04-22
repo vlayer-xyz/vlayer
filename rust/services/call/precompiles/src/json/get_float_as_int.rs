@@ -178,6 +178,8 @@ mod tests {
     }
 
     mod get_float_as_int {
+        use alloy_sol_types::SolType;
+
         use super::*;
 
         #[test]
