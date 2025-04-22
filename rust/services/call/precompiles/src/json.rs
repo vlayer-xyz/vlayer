@@ -1,6 +1,7 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::sol_data;
 use args::decode_args;
+pub use get_float_as_int::get_float_as_int;
 use jmespath::Variable;
 use path::get_value_by_path;
 
@@ -8,6 +9,7 @@ use crate::helpers::{Result, abi_encode, map_to_fatal};
 
 mod args;
 mod path;
+mod get_float_as_int;
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
