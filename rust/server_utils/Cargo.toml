@@ -19,7 +19,7 @@ hex = { workspace = true }
 host_utils = { workspace = true }
 http-body-util = { workspace = true }
 jsonrpsee = { workspace = true }
-jsonwebtoken = { workspace = true }
+jwt = { workspace = true }
 mime = { workspace = true }
 mockito = { workspace = true }
 reqwest = { workspace = true }

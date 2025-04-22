@@ -2,11 +2,11 @@ use std::{fs, path::PathBuf};
 
 use anyhow::Context;
 use clap::{Args as ClapArgs, Parser, Subcommand};
-use jsonwebtoken::{
-    Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation, decode, decode_header,
-    encode, errors::Error as JwtError, get_current_timestamp,
+use jwt::{
+    Algorithm, Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey,
+    Error as JwtError, Header, TokenData, Validation, decode, decode_header, encode,
+    get_current_timestamp,
 };
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::info;
 
@@ -22,6 +22,8 @@ pub enum Error {
     EmptyHostname,
     #[error("JWT encoding/decoding error: {0}")]
     Jwt(#[from] JwtError),
+    #[error("Invalid Claims args: {0}")]
+    ClaimsBuilder(#[from] ClaimsBuilderError),
 }
 
 type Result<T> = std::result::Result<T, Error>;
@@ -49,9 +51,9 @@ struct Encode {
     #[arg(short, long)]
     private_key: PathBuf,
 
-    /// Host url for the (web) proof
-    #[arg(long, default_value_t = String::from("api.x.com:443"))]
-    host: String,
+    /// Host url for the Web Proof
+    #[arg(long)]
+    web_proof_host: Option<String>,
 
     /// Invalid after N seconds
     #[arg(long)]
@@ -72,14 +74,6 @@ struct Decode {
     jwt: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    host: String,
-    port: u16,
-    exp: u64,
-    sub: String,
-}
-
 pub fn run(args: Args) -> Result<()> {
     match args.command {
         Command::Encode(enc) => encode_jwt(enc)?,
@@ -93,18 +87,18 @@ fn encode_jwt(args: Encode) -> Result<()> {
         .with_context(|| format!("private key {} not found", args.private_key.display()))?;
     let priv_key = EncodingKey::from_rsa_pem(&priv_key)?;
 
-    let (host, port) = parse_host(&args.host)?;
     let exp = args
         .invalid_after
         .map_or(u64::MAX, |x| get_current_timestamp() + x);
-    let sub = args.subject;
 
-    let claims = Claims {
-        host,
-        port,
-        exp,
-        sub,
-    };
+    let mut claims_builder = ClaimsBuilder::default().exp(exp).sub(args.subject);
+
+    if let Some(host) = &args.web_proof_host {
+        let (host, port) = parse_host(host)?;
+        claims_builder = claims_builder.host(host).port(port);
+    }
+
+    let claims = claims_builder.build().map_err(Error::ClaimsBuilder)?;
 
     info!("{claims:#?}");
 
