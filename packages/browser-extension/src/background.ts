@@ -115,6 +115,13 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
         );
       });
     })
+    .with({ type: ExtensionInternalMessageType.ResetTlsnProving }, () => {
+      return new Promise((resolve) => {
+        resolve(
+          `${ExtensionInternalMessageType.ResetTlsnProving} shouldnt be sent to background`,
+        );
+      });
+    })
     .exhaustive();
 });
 
@@ -196,6 +203,10 @@ const handleProofRequest = async (
   await WebProverSessionContextManager.instance.setWebProverSessionConfig(
     message.payload,
   );
+
+  void browser.runtime.sendMessage({
+    type: ExtensionInternalMessageType.ResetTlsnProving,
+  });
 
   if (Sentry.isInitialized()) {
     Sentry.setContext("WebProverSessionConfig", {

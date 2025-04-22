@@ -37,7 +37,13 @@ describe("SidePanelContent", () => {
     mocks.useProvingSessionConfig.mockReturnValue([LOADING]);
     mocks.isEmptyWebProverSessionConfig.mockReturnValue(false);
     mocks.ZkProvingStatus.mockReturnValue(ZkProvingStatus.NotStarted);
-
+    mocks.useTlsnProver.mockReturnValue({
+      error: null,
+      isProving: false,
+      proof: null,
+      prove: vi.fn(),
+      resetTlsnProving: vi.fn(),
+    });
     render(<SidePanelContainer />);
     expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
@@ -46,6 +52,13 @@ describe("SidePanelContent", () => {
     vi.resetAllMocks();
     mocks.useProvingSessionConfig.mockReturnValue([]);
     mocks.isEmptyWebProverSessionConfig.mockReturnValue(true);
+    mocks.useTlsnProver.mockReturnValue({
+      error: null,
+      isProving: false,
+      proof: null,
+      prove: vi.fn(),
+      resetTlsnProving: vi.fn(),
+    });
     render(<SidePanelContainer />);
     expect(screen.getByTestId("empty-flow-card")).toBeInTheDocument();
   });

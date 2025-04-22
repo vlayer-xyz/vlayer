@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
@@ -29,6 +30,7 @@ const TlsnProofContext = createContext({
   proof: null as object | null,
   isProving: false,
   error: null as string | null,
+  resetTlsnProving: () => {},
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
@@ -42,6 +44,12 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     headers: {},
     secretHeaders: [],
   });
+
+  const isProvingReference = useRef(false);
+
+  useEffect(() => {
+    isProvingReference.current = isProving;
+  }, [isProving]);
 
   useTrackHistory();
   const [provingSessionConfig] = useProvingSessionConfig();
@@ -110,6 +118,10 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         redactionConfig,
         provenUrl.body,
       );
+      // mutable ref is need here to avoid stale closure
+      if (isProvingReference.current === false) {
+        return;
+      }
 
       void sendMessageToServiceWorker({
         type: ExtensionInternalMessageType.ProofDone,
@@ -117,8 +129,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
           ...tlsnProof,
         },
       });
-
-      setProof(tlsnProof);
+      //only set proof is is proving ( session was not reset)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
       void sendMessageToServiceWorker({
@@ -133,8 +144,22 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     }
   }, [provenUrl, formattedHeaders, provingSessionConfig]);
 
+  const resetTlsnProving = useCallback(() => {
+    setProof(null);
+    setIsProving(false);
+    setError(null);
+  }, []);
+
   return (
-    <TlsnProofContext.Provider value={{ prove, proof, isProving, error }}>
+    <TlsnProofContext.Provider
+      value={{
+        prove,
+        proof,
+        isProving,
+        error,
+        resetTlsnProving,
+      }}
+    >
       {children}
     </TlsnProofContext.Provider>
   );

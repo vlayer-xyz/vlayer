@@ -70,7 +70,9 @@ const useProgress = () => {
         setIsProvingProgressVisible(false);
       }, 2000);
     }
-
+    if (!isZkProving && !isWebProving) {
+      setIsProvingProgressVisible(false);
+    }
     return () => {};
   }, [
     isZkProvingDone,
