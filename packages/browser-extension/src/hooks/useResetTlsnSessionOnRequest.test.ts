@@ -1,5 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import { ExtensionMessageType } from "src/web-proof-commons";
+import { ExtensionInternalMessageType } from "src/web-proof-commons";
 import browser from "webextension-polyfill";
 import { useResetTlsnSessionOnNewWebproofRequest } from "./useResetTlsnSessionOnRequest";
 import { describe, it, expect, vi, type Mock, beforeEach } from "vitest";
@@ -35,7 +35,7 @@ describe("useResetTlsnSessionOnNewWebproofRequest", () => {
     renderHook(() => useResetTlsnSessionOnNewWebproofRequest());
     const listener = (browser.runtime.onMessage.addListener as Mock).mock
       .calls[0][0] as (message: unknown) => void;
-    listener(ExtensionMessageType.ResetTlsnProving);
+    listener({ type: ExtensionInternalMessageType.ResetTlsnProving });
     expect(mockResetTlsnProving).toHaveBeenCalledTimes(1);
   });
 

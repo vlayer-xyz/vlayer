@@ -132,6 +132,11 @@ const mockWebextensionPolyfill = (
               .mockImplementation((callback: (message: unknown) => void) => {
                 callbacks.push(callback);
               }),
+            removeListener: vi
+              .fn()
+              .mockImplementation((callback: (message: unknown) => void) => {
+                callbacks.splice(callbacks.indexOf(callback), 1);
+              }),
           },
 
           onMessageExternal: {
@@ -139,6 +144,14 @@ const mockWebextensionPolyfill = (
               .fn()
               .mockImplementation((callback: (message: unknown) => void) => {
                 callbacksExternal.push(callback);
+              }),
+            removeListener: vi
+              .fn()
+              .mockImplementation((callback: (message: unknown) => void) => {
+                callbacksExternal.splice(
+                  callbacksExternal.indexOf(callback),
+                  1,
+                );
               }),
           },
         },

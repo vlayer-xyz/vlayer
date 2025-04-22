@@ -43,6 +43,7 @@ export enum ExtensionInternalMessageType {
   ProofDone = "ProofDone",
   ProofError = "ProofError",
   ProofProcessing = "ProofProcessing",
+  ResetTlsnProving = "ResetTlsnProving",
 }
 
 export enum MessageFromExtensionType {
@@ -101,6 +102,9 @@ export type ExtensionInternalMessage =
     }
   | {
       type: ExtensionInternalMessageType.CleanProvingSessionStorageOnClose;
+    }
+  | {
+      type: ExtensionInternalMessageType.ResetTlsnProving;
     };
 
 export type MessageFromExtension =
