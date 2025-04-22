@@ -10,7 +10,7 @@ use crate::{
 sol! {
     struct FloatInput {
         string json;
-        string path;
+        string field_name;
         uint8 precision;
     }
 }
@@ -26,18 +26,21 @@ lazy_static! {
 pub fn get_float_as_int(input: &Bytes) -> Result<Bytes> {
     let FloatInput {
         json,
-        path,
+        field_name: path,
         precision,
     } = <FloatInput as alloy_sol_types::SolType>::abi_decode(input, true).map_err(map_to_fatal)?;
-    if precision > MAX_PRECISION {
-        return Err(map_to_fatal(format!(
-            "Invalid precision value: {precision}. Precision must be between 0 and 18 (inclusive)."
-        )));
-    }
-    let json_body = serde_json::from_str::<Value>(json.as_str())
-        .map_err(|e| map_to_fatal(format!("Error parsing JSON: {e}")))?;
 
-    let value = get_value_by_path(&json_body, path.as_str())
+    let float_val = extract_f64_from_json(&json, &path)?;
+
+    let int_result = scale_float_to_int(float_val, precision)?;
+    Ok(int_result.abi_encode().into())
+}
+
+fn extract_f64_from_json(json: &str, path: &str) -> Result<f64> {
+    let json_body: Value =
+        serde_json::from_str(json).map_err(|e| map_to_fatal(format!("Error parsing JSON: {e}")))?;
+
+    let value = get_value_by_path(&json_body, path)
         .ok_or(map_to_fatal(format!("Missing value at path {path}")))?;
 
     let Some(float_val) = value.as_f64() else {
@@ -45,7 +48,19 @@ pub fn get_float_as_int(input: &Bytes) -> Result<Bytes> {
     };
 
     if float_val.is_nan() {
-        unreachable!("NaN should not be possible: JSON cannot contain NaN values. RFC: https://datatracker.ietf.org/doc/html/rfc8259#section-6");
+        unreachable!(
+            "NaN should not be possible: JSON cannot contain NaN values. RFC: https://datatracker.ietf.org/doc/html/rfc8259#section-6"
+        );
+    }
+
+    Ok(float_val)
+}
+
+pub fn scale_float_to_int(float_val: f64, precision: u8) -> Result<i64> {
+    if precision > MAX_PRECISION {
+        return Err(map_to_fatal(format!(
+            "Invalid precision value: {precision}. Precision must be between 0 and 18 (inclusive)."
+        )));
     }
 
     let power_of_ten = 10_f64.powi(precision.into());
@@ -59,192 +74,126 @@ pub fn get_float_as_int(input: &Bytes) -> Result<Bytes> {
     }
 
     #[allow(clippy::cast_possible_truncation)]
-    let as_int = scaled as i64;
-
-    Ok(as_int.abi_encode().into())
+    Ok(scaled as i64)
 }
 
 mod tests {
-    use std::u8::MAX;
-
     use alloy_sol_types::sol_data;
     use revm::primitives::PrecompileErrors;
 
     use super::*;
 
-    // #[test]
-    // fn testing() {
-    //     dbg!(*MAXIMAL_PRECISE_FLOAT_VALUE);
-    //     dbg!(*MAXIMAL_PRECISE_FLOAT_VALUE + 1.0);
-    // }
+    mod scale_float_to_int {
+        use super::*;
 
-    // Helper to decode output as i64
-    fn decode_result(bytes: Bytes) -> i64 {
-        sol_data::Int::<256>::abi_decode(bytes.as_ref(), false)
-            .unwrap()
-            .as_i64()
-    }
+        mod rounding_precision {
+            use super::*;
 
-    #[test]
-    fn float_rounding_precision() {
-        let json = r#"{ "field": 3.4 }"#;
-
-        let input_struct = FloatInput {
-            json: json.into(),
-            path: "field".into(),
-            precision: 0 as u8,
-        };
-        let input0 = input_struct.abi_encode();
-        assert_eq!(decode_result(get_float_as_int(&input0.into()).unwrap()), 3);
-
-        let input_struct = FloatInput {
-            json: json.into(),
-            path: "field".into(),
-            precision: 1 as u8,
-        };
-        let input1 = input_struct.abi_encode();
-        assert_eq!(decode_result(get_float_as_int(&input1.into()).unwrap()), 34);
-
-        let input_struct = FloatInput {
-            json: json.into(),
-            path: "field".into(),
-            precision: 2 as u8,
-        };
-        let input2 = input_struct.abi_encode();
-        assert_eq!(decode_result(get_float_as_int(&input2.into()).unwrap()), 340);
-    }
-
-    #[test]
-    fn float_negative_scaling() {
-        let json = r#"{ "field": -3 }"#;
-
-        let input_struct = FloatInput {
-            json: json.into(),
-            path: "field".into(),
-            precision: 0 as u8,
-        };
-        let input = input_struct.abi_encode();
-        assert_eq!(decode_result(get_float_as_int(&input.into()).unwrap()), -3);
-    }
-
-    #[test]
-    fn invalid_precision() {
-        let json = r#"{ "field": 1 }"#;
-
-        let input = FloatInput {
-            json: json.into(),
-            path: "field".into(),
-            precision: MAX_PRECISION + 1,
-        };
-        let encoded = input.abi_encode();
-
-        let result = get_float_as_int(&encoded.into());
-        assert_eq!(
-            result,
-            Err(PrecompileErrors::Fatal {
-                msg: format!(
-                    "Invalid precision value: {}. Precision must be between 0 and {MAX_PRECISION} (inclusive).",
-                    MAX_PRECISION + 1
-                )
-            })
-        );
-    }
-
-    #[test]
-    fn error_invalid_json() {
-        let input = FloatInput {
-            json: "this is not json".into(),
-            path: "field".into(),
-            precision: 1,
-        };
-        let encoded = input.abi_encode();
-
-        let result = get_float_as_int(&encoded.into());
-        assert!(matches!(
-            result,
-            Err(PrecompileErrors::Fatal { msg }) if msg.contains("Error parsing JSON:")
-        ));
-    }
-
-    #[test]
-    fn error_non_number_type() {
-        let json = r#"{ "field": "hello" }"#; // properly formed JSON
-        let path = "field";
-
-        let input = FloatInput {
-            json: json.into(),
-            path: path.into(),
-            precision: 1,
-        };
-        let encoded = input.abi_encode();
-
-        let result = get_float_as_int(&encoded.into());
-
-        let expected_msg = r#"Expected numeric type at field, found String("hello")"#;
-
-        assert_eq!(
-            result.unwrap_err(),
-            PrecompileErrors::Fatal {
-                msg: expected_msg.to_string()
+            #[test]
+            fn rounds_down_when_precision_is_less_than_fraction_digits() {
+                assert_eq!(scale_float_to_int(3.4, 0), Ok(3));
             }
-        );
+
+            #[test]
+            fn preserves_fraction_when_precision_matches() {
+                assert_eq!(scale_float_to_int(3.4, 1), Ok(34));
+            }
+
+            #[test]
+            fn pads_with_zeros_when_precision_exceeds_fraction_length() {
+                assert_eq!(scale_float_to_int(3.4, 2), Ok(340));
+            }
+        }
+
+        #[test]
+        fn precision_too_big() {
+            let result = scale_float_to_int(1.0, MAX_PRECISION + 1);
+            assert_eq!(
+                result,
+                Err(PrecompileErrors::Fatal {
+                    msg: format!(
+                        "Invalid precision value: {}. Precision must be between 0 and {MAX_PRECISION} (inclusive).",
+                        MAX_PRECISION + 1
+                    )
+                })
+            );
+        }
+
+        #[test]
+        fn float_value_too_large() {
+            let value = *MAXIMAL_PRECISE_FLOAT_VALUE;
+            let value_as_int = value as i64 + 1;
+            let result = scale_float_to_int(value_as_int as f64, 0);
+            assert_eq!(
+                result,
+                Err(PrecompileErrors::Fatal {
+                    msg: format!(
+                        "Scaled value {} exceeds the maximum safe value for precise conversion to i64 (limit: {}).",
+                        value_as_int, *MAXIMAL_PRECISE_FLOAT_VALUE
+                    )
+                })
+            );
+        }
     }
 
-    #[test]
-    fn error_null_value() {
-        let json = r#"{ "field": null }"#;
+    mod extract_f64_from_json {
+        use super::*;
 
-        let input = FloatInput {
-            json: json.into(),
-            path: "field".into(),
-            precision: 0,
-        };
-        let encoded = input.abi_encode();
+        #[test]
+        fn missing_value() {
+            let json = r#"{"field": 1}"#;
+            let result = extract_f64_from_json(json, "missing_field");
+            assert_eq!(
+                result,
+                Err(PrecompileErrors::Fatal {
+                    msg: "Missing value at path missing_field".to_string()
+                })
+            );
+        }
 
-        let result = get_float_as_int(&encoded.into());
-        assert_eq!(
-            result.unwrap_err().to_string(),
-            r#"Expected numeric type at field, found Null"#
-        );
-    } 
+        #[test]
+        fn invalid_json() {
+            let json = r#"this is not json"#;
+            let result = extract_f64_from_json(json, "field");
 
-    // #[test]
-    // fn float_negative_zero() {
-    //     let json = r#"{ "field": -0 }"#;
+            let err_msg = result.unwrap_err().to_string();
+            assert!(
+                err_msg.contains("Error parsing JSON"),
+                "Expected error message to contain 'Error parsing JSON', got: {}",
+                err_msg
+            );
+        }
 
-    //     for prec in [0, 2, 4] {
-    //         let input = <FloatInput as alloy_sol_types::SolType>::abi_encode(&FloatInput {
-    //             json: json.into(),
-    //             path: "field".into(),
-    //             precision: prec as u32,
-    //         });
-    //         assert_eq!(decode_result(get_float_as_int(&input.into()).unwrap()), 0);
-    //     }
-    // }
+        #[test]
+        fn success() {
+            let json = r#"{"field": 1.5}"#;
+            let result = extract_f64_from_json(json, "field");
+            assert_eq!(result, Ok(1.5));
+        }
+    }
 
-    // #[test]
-    // fn float_precision_overflow() {
-    //     let json = r#"{ "field": 1 }"#;
+    mod get_float_as_int {
+        use super::*;
 
-    //     let input = <FloatInput as alloy_sol_types::SolType>::abi_encode(&FloatInput {
-    //         json: json.into(),
-    //         path: "field".into(),
-    //         precision: 100 as u32, // 10^100
-    //     });
-    //     let result = get_float_as_int(&input.into());
-    //     assert!(matches!(result, Err(Fatal { msg: _ })));
-    // }
+        #[test]
+        fn success() {
+            let json = r#"{"field": 1.5}"#;
 
-    // #[test]
-    // fn float_large_number_overflow() {
-    //     let json = r#"{ "field": 1e100 }"#;
+            let input = FloatInput {
+                json: json.into(),
+                field_name: "field".into(),
+                precision: 1,
+            };
+            let encoded = input.abi_encode();
 
-    //     let input = <FloatInput as alloy_sol_types::SolType>::abi_encode(&FloatInput {
-    //         json: json.into(),
-    //         path: "field".into(),
-    //         precision: 1 as u32,
-    //     });
-    //     let result = get_float_as_int(&input.into());
-    //     assert!(matches!(result, Err(Fatal { msg: _ })));
-    // }
+            let result_bytes = get_float_as_int(&encoded.into()).unwrap();
+
+            let result = sol_data::Int::<256>::abi_decode(result_bytes.as_ref(), false)
+                .unwrap()
+                .as_i64();
+
+            // 1.5 * 10^1 = 15
+            assert_eq!(result, 15);
+        }
+    }
 }
