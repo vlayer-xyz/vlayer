@@ -150,8 +150,8 @@ mod tests {
         fn token(invalid_after: i64, subject: &str) -> String {
             test_token(&TokenArgs {
                 secret: JWT_SECRET,
-                host: "api.vlayer.xyz",
-                port: 443,
+                host: None,
+                port: None,
                 invalid_after,
                 subject,
             })
@@ -191,8 +191,8 @@ mod tests {
             assert_eq!(
                 run_dns_query_with_token(test_token(&TokenArgs {
                     secret: "beefdead",
-                    host: "localhost",
-                    port: 123,
+                    host: None,
+                    port: None,
                     invalid_after: 60,
                     subject: "1234",
                 }))

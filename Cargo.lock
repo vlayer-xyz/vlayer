@@ -3241,7 +3241,7 @@ dependencies = [
  "derive-new",
  "derive_more 1.0.0",
  "flate2",
- "jsonwebtoken 9.3.1",
+ "jwt",
  "predicates",
  "regex",
  "reqwest 0.12.12",
@@ -7956,6 +7956,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "jwt"
+version = "0.1.0"
+dependencies = [
+ "derive-new",
+ "derive_builder 0.12.0",
+ "jsonwebtoken 9.3.1",
+ "serde",
+]
+
+[[package]]
 name = "k256"
 version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12217,7 +12227,7 @@ dependencies = [
  "host_utils",
  "http-body-util",
  "jsonrpsee",
- "jsonwebtoken 9.3.1",
+ "jwt",
  "mime",
  "mockito",
  "reqwest 0.12.12",

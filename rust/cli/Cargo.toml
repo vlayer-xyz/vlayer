@@ -14,7 +14,7 @@ colored = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 flate2 = { workspace = true }
-jsonwebtoken = { workspace = true, features = ["use_pem"] }
+jwt = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
 serde = { workspace = true }
