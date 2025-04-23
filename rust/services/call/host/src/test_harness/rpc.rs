@@ -20,6 +20,13 @@ fn get_alchemy_key() -> String {
     )
 }
 
+fn get_quicknode_key() -> String {
+    dotenv().ok();
+    env::var("QUICKNODE_KEY").expect(
+        "To use sequencer client you need to set QUICKNODE_KEY in an .env file. See .env.example",
+    )
+}
+
 lazy_static! {
     static ref alchemy_key: String = get_alchemy_key();
     static ref mainnet_url: String =
@@ -32,6 +39,11 @@ lazy_static! {
         format!("https://opt-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref anvil_url: String = format!("http://localhost:8545");
     static ref op_anvil_url: String = format!("http://localhost:8546");
+    static ref quicknode_key: String = get_quicknode_key();
+    pub static ref quicknode_op_sepolia_url: String = format!(
+        "https://thrumming-burned-butterfly.optimism-sepolia.quiknode.pro/{}",
+        *quicknode_key
+    );
 }
 
 pub const OP_ANVIL: ChainId = 31_338;
@@ -51,7 +63,7 @@ pub fn rpc_cache_paths(test_name: &str) -> HashMap<ChainId, String> {
     ])
 }
 
-fn rpc_urls() -> HashMap<ChainId, String> {
+pub fn rpc_urls() -> HashMap<ChainId, String> {
     HashMap::from([
         (Chain::mainnet().id(), mainnet_url.clone()),
         (Chain::sepolia().id(), sepolia_url.clone()),

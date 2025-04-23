@@ -20,6 +20,7 @@ derive-new = { workspace = true }
 derive_more = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }
+jsonrpsee = { workspace = true }
 lazy_static = { workspace = true }
 mpt = { workspace = true }
 optimism = { workspace = true, features = ["http", "testing"] }

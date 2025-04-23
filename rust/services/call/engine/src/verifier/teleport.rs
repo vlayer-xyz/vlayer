@@ -146,7 +146,7 @@ impl<D: RevmDB> IVerifier<D> for Verifier {
     }
 }
 
-async fn fetch_latest_confirmed_l2_block<D: RevmDB>(
+pub async fn fetch_latest_confirmed_l2_block<D: RevmDB>(
     anchor_state_registry: AnchorStateRegistry<D>,
     sequencer_client: &dyn optimism::IClient,
 ) -> Result<NumHash> {
