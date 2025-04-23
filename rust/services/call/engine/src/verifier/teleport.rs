@@ -11,7 +11,7 @@ use optimism::{
     anchor_state_registry::{AnchorStateRegistry, L2Commitment},
     types::SequencerOutput,
 };
-use tracing::{debug, info};
+use tracing::info;
 
 use crate::evm::env::{BlocksByChain, cached::CachedEvmEnv};
 
