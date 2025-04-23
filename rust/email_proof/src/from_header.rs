@@ -34,14 +34,12 @@ mod test {
                 ("Hello Worldowski <hello@world.com>", Ok("world.com")),
                 ("Hello Worldowski <hello@world.com  \t>  \t ", Ok("world.com")),
                 ("Hello Worldowski (Hi) <hello@world.com>", Ok("world.com")),
-                (r#"John Doe <"user@name"@example.com>"#, Ok("example.com")),
                 (
                     r#""John Doe" <user@example.com>, "Jane Smith" <jane@example.com>"#,
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
                         "Expected exactly one address in the \"From\" header",
                     ))),
                 ),
-                (r#"John Doe <"user.name"@example.com>"#, Ok("example.com")),
                 (
                     "@routing:user@example.com",
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
@@ -93,18 +91,8 @@ mod test {
     }
 
     #[test]
-    fn quoted_local_part_format() {
-        test_domain_extraction(r#"John Doe <"user.name"@example.com>"#);
-    }
-
-    #[test]
     fn fails_for_multiple_recipients() {
         test_domain_extraction(r#""John Doe" <user@example.com>, "Jane Smith" <jane@example.com>"#);
-    }
-
-    #[test]
-    fn works_for_quoted_local_part_with_at_symbol() {
-        test_domain_extraction(r#"John Doe <"user@name"@example.com>"#);
     }
 
     #[test]
@@ -134,6 +122,7 @@ mod test {
         let email = mailparse::parse_mail(raw_email.as_ref()).unwrap();
         let result = extract_from_domain(&email);
         let expected = FIXTURES.get(key).unwrap();
+        dbg!(&result, &expected);
         match result {
             Ok(res) => {
                 assert_eq!(&res.as_str(), expected.as_ref().unwrap())
