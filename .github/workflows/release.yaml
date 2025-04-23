@@ -386,9 +386,11 @@ jobs:
             -f tag_name=${{ steps.tags.outputs.NEW_TAG }} \
             -f previous_tag_name=${{ steps.tags.outputs.PREVIOUS_TAG }} \
             --jq .body)
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "$NOTES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          { 
+            echo "RELEASE_NOTES<<EOF"; 
+            echo "$NOTES"; 
+            echo "EOF"; 
+          } >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -18,14 +18,14 @@ jobs:
       - name: Check local and latest stable version tag
         id: compare-versions
         run: |
-            LOCAL_VERSION="v$(grep '^version' rust/version/Cargo.toml | awk -F' = ' '{print $2}' | tr -d '"')"
-            LATEST_TAG=$(git tag --sort=-creatordate | grep '^v[0-9]' | head -n 1)
-            echo "Local version is '${LOCAL_VERSION}'. Latest remote tag is '${LATEST_TAG}'"
-            if [ "$LOCAL_VERSION" != "$LATEST_TAG" ]; then
-              echo "needs_releasing=true" >> $GITHUB_OUTPUT
-            else
-              echo "needs_releasing=false" >> $GITHUB_OUTPUT
-            fi
+          LOCAL_VERSION="v$(grep '^version' rust/version/Cargo.toml | awk -F' = ' '{print $2}' | tr -d '"')"
+          LATEST_TAG=$(git tag --sort=-creatordate | grep '^v[0-9]' | head -n 1)
+          echo "Local version is '${LOCAL_VERSION}'. Latest remote tag is '${LATEST_TAG}'"
+          if [ "$LOCAL_VERSION" != "$LATEST_TAG" ]; then
+            echo "needs_releasing=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_releasing=false" >> $GITHUB_OUTPUT
+          fi
 
   release:
     needs: [check-if-needs-releasing]
