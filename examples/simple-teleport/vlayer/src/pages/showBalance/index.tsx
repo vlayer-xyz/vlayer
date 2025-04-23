@@ -17,15 +17,8 @@ export const ShowBalancePage = () => {
   const [holderAddress, setHolderAddress] = useState<`0x${string}` | null>(
     null,
   );
-<<<<<<< HEAD
   const [, setBalance] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-=======
-  const [balance, setBalance] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
-  const networkChain = import.meta.env.VITE_CHAIN_NAME;
-  const token = "USDC";
->>>>>>> d3c9a54e4 (intro to UI)
   const [proverResult] = useLocalStorage("proverResult", "");
 
   useEffect(() => {
