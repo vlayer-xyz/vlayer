@@ -1,5 +1,5 @@
 import { BrowserContext, Page } from "@playwright/test";
-import { ExtensionAction, ZkProvingStatus } from "../web-proof-commons";
+import { MessageToExtensionType, ZkProvingStatus } from "../web-proof-commons";
 import { extensionId, expect } from "../config";
 import { type Response } from "@playwright/test";
 
@@ -17,38 +17,41 @@ export class Webpage {
     return this.page.getByRole("button", { name }).click();
   }
 
-  private sendMessageToExtension(action: string, payload?: object) {
+  private sendMessageToExtension(type: string, payload?: object) {
     return this.page.evaluate(
       ({
-        action,
+        type,
         extensionId,
         payload,
       }: {
-        action: string;
+        type: string;
         extensionId: string;
         payload?: object;
       }) => {
         void chrome.runtime.sendMessage(extensionId, {
-          action,
+          type,
           ...payload,
         });
       },
-      { action, extensionId, payload },
+      { type, extensionId, payload },
     );
   }
 
   openExtension() {
-    return this.sendMessageToExtension(ExtensionAction.OpenSidePanel);
+    return this.sendMessageToExtension(MessageToExtensionType.OpenSidePanel);
   }
 
   closeExtension() {
-    return this.sendMessageToExtension(ExtensionAction.CloseSidePanel);
+    return this.sendMessageToExtension(MessageToExtensionType.CloseSidePanel);
   }
 
   finishZkProof() {
-    return this.sendMessageToExtension(ExtensionAction.NotifyZkProvingStatus, {
-      payload: { status: ZkProvingStatus.Done },
-    });
+    return this.sendMessageToExtension(
+      MessageToExtensionType.NotifyZkProvingStatus,
+      {
+        payload: { status: ZkProvingStatus.Done },
+      },
+    );
   }
 
   async expectRequestZkProofButtonToBeVisible() {

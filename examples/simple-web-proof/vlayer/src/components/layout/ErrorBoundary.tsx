@@ -2,6 +2,7 @@ import { FallbackProps } from "react-error-boundary";
 import { AppError } from "../../errors";
 import styles from "./ErrorBoundary.module.css";
 import { useNavigate } from "react-router";
+import { TlsnProveError } from "@vlayer/sdk";
 
 export const StepErrorBoundaryComponent = ({ error }: FallbackProps) => {
   console.error("Step error: ", error);
@@ -34,7 +35,9 @@ export const AppErrorBoundaryComponent = ({ error }: FallbackProps) => {
   console.error("App error: ", error);
 
   const errorMsg =
-    error instanceof AppError ? error.message : "Something went wrong";
+    error instanceof AppError || error instanceof TlsnProveError
+      ? error.message
+      : "Something went wrong";
 
   const navigate = useNavigate();
 

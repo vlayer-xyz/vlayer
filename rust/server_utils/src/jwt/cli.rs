@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use derive_new::new;
-use jsonwebtoken::{Algorithm, DecodingKey, errors::Error as JwtError};
+use jwt::{Algorithm, DecodingKey, Error as JwtError};
 use thiserror::Error;
 use tracing::{info, warn};
 

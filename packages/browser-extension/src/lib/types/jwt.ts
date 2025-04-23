@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const claimsSchema = z.object({
-  host: z.string(),
-  port: z.number(),
+  host: z.string().optional(),
+  port: z.number().optional(),
   sub: z.string(),
   exp: z.number(),
 });

@@ -10,6 +10,7 @@ members = [
     "rust/guest_wrapper",
     "rust/guest_wrapper/build_utils",
     "rust/host_utils",
+    "rust/jwt",
     "rust/key_value",
     "rust/mpt",
     "rust/provider",
@@ -215,6 +216,7 @@ email_proof = { path = "rust/email_proof" }
 guest_build_utils = { path = "rust/guest_wrapper/build_utils" }
 guest_wrapper = { path = "rust/guest_wrapper" }
 host_utils = { path = "rust/host_utils" }
+jwt = { path = "rust/jwt" }
 key_value = { path = "rust/key_value" }
 mpt = { path = "rust/mpt" }
 provider = { path = "rust/provider" }

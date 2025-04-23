@@ -1,0 +1,8 @@
+services:
+  wsproxy-test-client:
+    container_name: wsproxy-test-client
+    build: .
+    expose:
+      - "${PORT}"
+    environment:
+      - PORT=3010

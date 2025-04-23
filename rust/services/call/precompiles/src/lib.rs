@@ -10,7 +10,10 @@ mod web_proof;
 use alloy_primitives::{Address, Bytes};
 use email_proof::verify as email_proof;
 use helpers::generate_precompile;
-use json::{get_bool as json_get_bool, get_int as json_get_int, get_string as json_get_string};
+use json::{
+    get_bool as json_get_bool, get_float_as_int as json_get_float_as_int, get_int as json_get_int,
+    get_string as json_get_string,
+};
 use precompile::{Precompile, Tag, gas_used};
 use regex::{capture as regex_capture, is_match as regex_is_match};
 use revm::precompile::{
@@ -27,6 +30,7 @@ pub fn precompiles(is_vlayer_test: bool) -> Vec<Precompile> {
         generate_precompile!(0x02, json_get_string, 1000, 10, Tag::JsonGetString),
         generate_precompile!(0x03, json_get_int, 1000, 10, Tag::JsonGetInt),
         generate_precompile!(0x04, json_get_bool, 1000, 10, Tag::JsonGetBool),
+        generate_precompile!(0x05, json_get_float_as_int, 1000, 10, Tag::JsonGetFloatAsInt),
         generate_precompile!(0x10, regex_is_match, 1000, 10, Tag::RegexIsMatch),
         generate_precompile!(0x11, regex_capture, 1000, 10, Tag::RegexCapture),
         generate_precompile!(0x20, url_pattern_test, 1000, 10, Tag::UrlPatternTest),

@@ -12,7 +12,7 @@ import { useCleanStorageOnClose } from "hooks/useCleanStorageOnClose";
 import { useCloseSidePanelOnRequest } from "hooks/useCloseSidePanelOnRequest";
 import { useConnectToBackground } from "hooks/useConnectToBackground";
 import { match } from "ts-pattern";
-
+import { useResetTlsnSessionOnNewWebproofRequest } from "hooks/useResetTlsnSessionOnRequest";
 export const SidePanelContent = ({
   config,
 }: {
@@ -34,6 +34,7 @@ export const SidePanelContainer = () => {
   useCleanStorageOnClose();
   useCloseSidePanelOnRequest();
   useConnectToBackground();
+  useResetTlsnSessionOnNewWebproofRequest();
   const [config] = useProvingSessionConfig();
   useEffect(() => {
     if (config !== LOADING && Sentry.isInitialized()) {

@@ -4,12 +4,13 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
 import {
   isDefined,
-  ExtensionMessageType,
+  ExtensionInternalMessageType,
   getRedactionConfig,
 } from "../web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
@@ -22,12 +23,14 @@ import { type Claims } from "lib/types/jwt";
 import { validateJwtHostname } from "lib/validateJwtHostname";
 import { pipe } from "fp-ts/lib/function";
 import { decodeJwt } from "jose";
+import { match, P } from "ts-pattern";
 
 const TlsnProofContext = createContext({
   prove: async () => {},
   proof: null as object | null,
   isProving: false,
   error: null as string | null,
+  resetTlsnProving: () => {},
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
@@ -41,6 +44,12 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     headers: {},
     secretHeaders: [],
   });
+
+  const isProvingReference = useRef(false);
+
+  useEffect(() => {
+    isProvingReference.current = isProving;
+  }, [isProving]);
 
   useTrackHistory();
   const [provingSessionConfig] = useProvingSessionConfig();
@@ -56,7 +65,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     setIsProving(true);
     const progressInterval = setInterval(() => {
       void sendMessageToServiceWorker({
-        type: ExtensionMessageType.ProofProcessing,
+        type: ExtensionInternalMessageType.ProofProcessing,
         payload: {},
       });
     }, 1000);
@@ -95,11 +104,10 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
             )
           : "";
 
-      const redactionConfig =
-        provingSessionConfig !== LOADING
-          ? getRedactionConfig(provingSessionConfig)
-          : [];
-
+      const redactionConfig = match(provingSessionConfig)
+        .with(LOADING, () => [])
+        .with(P.nullish, () => [])
+        .otherwise((w) => getRedactionConfig(w));
       const tlsnProof = await tlsnProve(
         notaryUrl,
         hostname,
@@ -110,19 +118,22 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         redactionConfig,
         provenUrl.body,
       );
+      // mutable ref is need here to avoid stale closure
+      if (isProvingReference.current === false) {
+        return;
+      }
 
       void sendMessageToServiceWorker({
-        type: ExtensionMessageType.ProofDone,
+        type: ExtensionInternalMessageType.ProofDone,
         payload: {
           ...tlsnProof,
         },
       });
-
-      setProof(tlsnProof);
+      //only set proof is is proving ( session was not reset)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
       void sendMessageToServiceWorker({
-        type: ExtensionMessageType.ProofError,
+        type: ExtensionInternalMessageType.ProofError,
         payload: {
           error: e instanceof Error ? e.message : String(e),
         },
@@ -133,8 +144,22 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     }
   }, [provenUrl, formattedHeaders, provingSessionConfig]);
 
+  const resetTlsnProving = useCallback(() => {
+    setProof(null);
+    setIsProving(false);
+    setError(null);
+  }, []);
+
   return (
-    <TlsnProofContext.Provider value={{ prove, proof, isProving, error }}>
+    <TlsnProofContext.Provider
+      value={{
+        prove,
+        proof,
+        isProving,
+        error,
+        resetTlsnProving,
+      }}
+    >
       {children}
     </TlsnProofContext.Provider>
   );

@@ -489,7 +489,7 @@ mod server_tests {
     mod jwt {
         use assert_json_diff::assert_json_eq;
         use server_utils::jwt::{
-            Claims, EncodingKey, Header, encode, get_current_timestamp,
+            ClaimsBuilder, EncodingKey, Header, encode, get_current_timestamp,
             test_helpers::{
                 JWT_SECRET, TokenArgs, default_config as default_jwt_config, token as test_token,
             },
@@ -501,8 +501,8 @@ mod server_tests {
         fn token(invalid_after: i64, subject: &str) -> String {
             test_token(&TokenArgs {
                 secret: JWT_SECRET,
-                host: "api.vlayer.xyz",
-                port: 443,
+                host: Some("api.vlayer.xyz"),
+                port: None,
                 invalid_after,
                 subject,
             })
@@ -558,7 +558,11 @@ mod server_tests {
         async fn rejects_requests_with_tampered_with_token() {
             let key = EncodingKey::from_secret(b"beefdead");
             let ts = get_current_timestamp() + 1000;
-            let claims = Claims::new("localhost".to_string(), 80, ts, "1234".to_string());
+            let claims = ClaimsBuilder::default()
+                .exp(ts)
+                .sub("1234".to_string())
+                .build()
+                .unwrap();
             let token = encode(&Header::default(), &claims, &key).unwrap();
 
             let app = default_app();

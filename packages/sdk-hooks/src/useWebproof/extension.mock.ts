@@ -1,17 +1,16 @@
-import type { PresentationJSON } from "@vlayer/sdk";
-
 import {
-  ExtensionMessageType,
-  type ExtensionMessage,
+  MessageFromExtensionType,
+  type MessageFromExtension,
+  type PresentationJSON,
   type WebProofProvider,
 } from "@vlayer/sdk";
 
 export class MockExtensionWebProofProvider implements WebProofProvider {
   private listeners: Partial<
     Record<
-      ExtensionMessageType,
+      MessageFromExtensionType,
       ((
-        args: Extract<ExtensionMessage, { type: ExtensionMessageType }>,
+        args: Extract<MessageFromExtension, { type: MessageFromExtensionType }>,
       ) => void)[]
     >
   > = {};
@@ -27,15 +26,15 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
 
   public notifyZkProvingStatus(): void {}
 
-  public addEventListeners<T extends ExtensionMessageType>(
+  public addEventListeners<T extends MessageFromExtensionType>(
     messageType: T,
-    listener: (args: Extract<ExtensionMessage, { type: T }>) => void,
+    listener: (args: Extract<MessageFromExtension, { type: T }>) => void,
   ): void {
     if (!this.listeners[messageType]) {
       this.listeners[messageType] = [];
     }
     this.listeners[messageType].push(
-      listener as (args: ExtensionMessage) => void,
+      listener as (args: MessageFromExtension) => void,
     );
   }
 
@@ -43,8 +42,8 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
     // Simulate async response
     setTimeout(() => {
       if (this.mockBehavior.shouldSucceed) {
-        const mockProofDoneMessage: ExtensionMessage = {
-          type: ExtensionMessageType.ProofDone,
+        const mockProofDoneMessage: MessageFromExtension = {
+          type: MessageFromExtensionType.ProofDone,
           payload: {
             presentationJson:
               this.mockBehavior.mockProof ||
@@ -55,18 +54,20 @@ export class MockExtensionWebProofProvider implements WebProofProvider {
             },
           },
         };
-        this.listeners[ExtensionMessageType.ProofDone]?.forEach((listener) => {
-          listener(mockProofDoneMessage);
-        });
+        this.listeners[MessageFromExtensionType.ProofDone]?.forEach(
+          (listener) => {
+            listener(mockProofDoneMessage);
+          },
+        );
       } else {
-        const mockErrorMessage: ExtensionMessage = {
-          type: ExtensionMessageType.ProofError,
+        const mockErrorMessage: MessageFromExtension = {
+          type: MessageFromExtensionType.ProofError,
           payload: {
             error: this.mockBehavior.mockError || "Mock error occurred",
           },
         };
-        this.listeners[ExtensionMessageType.ProofError]?.forEach((listener) =>
-          listener(mockErrorMessage),
+        this.listeners[MessageFromExtensionType.ProofError]?.forEach(
+          (listener) => listener(mockErrorMessage),
         );
       }
     }, this.mockBehavior.delayMs);

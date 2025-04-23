@@ -13,7 +13,7 @@
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "web:dev": "bun run deploy:dev && vite",
     "web:testnet": "bun run deploy:testnet && vite",
-    "test-web:dev": "bun run deploy:dev && VLAYER_ENV=dev bun run playwright test",
+    "test-web:dev": "VLAYER_ENV=dev bun run playwright test",
     "test-web:testnet": "VLAYER_ENV=testnet bun run playwright test"
   },
   "dependencies": {
@@ -24,15 +24,16 @@
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
     "debug": "^4.4.0",
+    "motion": "^12.4.2",
     "react": "^18.3.1",
     "react-daisyui": "^5.0.5",
     "react-dom": "^18.3.1",
+    "react-error-boundary": "^5.0.0",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.5",
     "viem": "2.27.0",
     "wagmi": "2.14.16",
-    "zod": "^3.24.2",
-    "motion": "^12.4.2"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@johanneskares/wallet-mock": "^1.4.1",

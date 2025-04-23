@@ -1,7 +1,7 @@
 import browser from "webextension-polyfill";
-import type { ExtensionMessage } from "../web-proof-commons";
+import type { ExtensionInternalMessage } from "../web-proof-commons";
 
-async function sendMessageToServiceWorker(message: ExtensionMessage) {
+async function sendMessageToServiceWorker(message: ExtensionInternalMessage) {
   await browser.runtime.sendMessage(message);
 }
 

@@ -7,10 +7,10 @@ To support these needs, we provide helpers for parsing text using [regular expre
 ## JSON Parsing
 
 We provide four functions to extract data from JSON based on the field type:
-- `jsonGetInt`: Extracts an integer value and returns `int256`;
-- `jsonGetBool`: Extracts a boolean value and returns `bool`;
-- `jsonGetString`: Extracts a string value and returns `string memory`;
-- `jsonGetArrayLength`: Returns length of an array under provided `jsonPath`, returns `uint256`. 
+- `jsonGetInt(json, path)`: Extracts an integer value and returns `int256`;
+- `jsonGetBool(json, path)`: Extracts a boolean value and returns `bool`;
+- `jsonGetString(json, path)`: Extracts a string value and returns `string memory`;
+- `jsonGetFloatAsInt(json, path, precision)`: Extracts a decimal number from JSON, moves its decimal point right by the specified `precision`, and returns it as a truncated `int256`. If `precision` is greater than the number of decimal digits, it pads it with zeros. For example, reading `1.234` at precision `2` yields `123`, and at precision `4` yields `12340`. This approach is used because Solidity does not support floating-point numbers.
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
@@ -41,9 +41,33 @@ In the example above, the function extracts the value of the field `deep.nested.
 }
 ```
 
-The functions will revert if the field does not exist or if the value is of the wrong type. 
+The functions will revert if the field does not exist or if the value is of the wrong type.
 
-Currently, accessing fields inside arrays is not supported.
+## Jmespath
+Field paths provided to `jsonGet...` functions are evaluated using [JMESPath](https://jmespath.org/), a query language for JSON that allows powerful expressions beyond simple key access.
+
+For example, to get the number of elements in an array:
+
+```solidity
+int256 length = web.jsonGetInt("root.nested_level.field_array | length(@)");
+require(length == 2, "Expected array of length 2");
+```
+
+To access a specific element from an array:
+
+```solidity
+string memory value = web.jsonGetString("root.nested_level.field_array[1]");
+require(keccak256(bytes(value)) == keccak256("val2"), "Unexpected array value");
+```
+
+You can also access fields within arrays of objects:
+
+```solidity
+int256 value = web.jsonGetInt("root.nested_level.field_array_of_objects_with_numbers[1].key");
+require(value == 2, "Expected value at index 1");
+```
+
+This makes it easy to work with complex JSON structures directly inside your prover logic, without needing preprocessing.
 
 ## Regular Expressions
 Regular expressions are a powerful tool for finding patterns in text.

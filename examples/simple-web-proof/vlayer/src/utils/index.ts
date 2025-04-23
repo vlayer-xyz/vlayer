@@ -1,4 +1,7 @@
 /// <reference types="chrome" />
+
+import { MessageFromExtensionType } from "@vlayer/sdk";
+import { z } from "zod";
 const vlayerPovingExtensionId = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 const isMobile =
@@ -16,15 +19,23 @@ const isSupportedBrowser = () => {
   return isChromiumBased;
 };
 
+const responseSchema = z.object({
+  type: z.literal(MessageFromExtensionType.Pong),
+});
+
 const checkExtensionInstalled = async () => {
-  try {
-    await chrome.runtime.sendMessage(vlayerPovingExtensionId, {
+  const response = await chrome.runtime.sendMessage<unknown, unknown>(
+    vlayerPovingExtensionId,
+    {
       message: "ping",
-    });
+    },
+  );
+  const parsedResponse = responseSchema.safeParse(response);
+
+  if (parsedResponse.success) {
     return true;
-  } catch {
-    return false;
   }
+  return false;
 };
 
 export {

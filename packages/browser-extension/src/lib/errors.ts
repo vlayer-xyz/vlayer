@@ -6,3 +6,12 @@ export class JwtInvalidHostname extends Error {
     this.name = "JwtInvalidHostname";
   }
 }
+
+export class JwtMissingHostname extends Error {
+  constructor(expected: string) {
+    super(
+      `Missing JWT hostname: no hostname given, but Web Proof needs ${expected}`,
+    );
+    this.name = "JwtMissingHostname";
+  }
+}

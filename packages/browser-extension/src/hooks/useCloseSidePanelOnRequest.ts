@@ -1,4 +1,7 @@
-import { ExtensionMessageType } from "src/web-proof-commons";
+import {
+  ExtensionInternalMessageType,
+  isExtensionInternalMessage,
+} from "src/web-proof-commons";
 import browser from "webextension-polyfill";
 import { useEffect } from "react";
 
@@ -6,8 +9,11 @@ import { useEffect } from "react";
 
 export const useCloseSidePanelOnRequest = () => {
   useEffect(() => {
-    browser.runtime.onMessage.addListener((message) => {
-      if (message === ExtensionMessageType.CloseSidePanel) {
+    browser.runtime.onMessage.addListener((message: unknown) => {
+      if (
+        isExtensionInternalMessage(message) &&
+        message.type === ExtensionInternalMessageType.CloseSidePanel
+      ) {
         window.close();
       }
     });

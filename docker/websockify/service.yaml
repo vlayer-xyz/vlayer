@@ -5,4 +5,4 @@ services:
     platform: linux/amd64
     ports:
       - "127.0.0.1:3003:80" 
-    command: "80 api.x.com:443"
+    command: "80 --token-plugin JSONTokenApi --token-source 'http://wsproxy-test-client:3010/?token=%s'"

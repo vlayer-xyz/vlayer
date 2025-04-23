@@ -25,7 +25,11 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
-    setupFiles: ["./vitest/setup.ts", "./vitest/custom.matchers.ts"],
+    setupFiles: [
+      "./vitest/setup.ts",
+      "./vitest/custom.matchers.ts",
+      "@vitest/web-worker",
+    ],
   },
   build: {
     minify: false,

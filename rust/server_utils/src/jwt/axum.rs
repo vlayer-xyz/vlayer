@@ -10,9 +10,7 @@ use axum_extra::{
 };
 use derive_more::Deref;
 use derive_new::new;
-use jsonwebtoken::{
-    Algorithm, DecodingKey, Validation, decode, decode_header, errors::Error as JwtError,
-};
+use jwt::{Algorithm, DecodingKey, Error as JwtError, Validation, decode, decode_header};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
