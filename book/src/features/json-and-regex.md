@@ -41,6 +41,8 @@ In the example above, the function extracts the value of the field `deep.nested.
 }
 ```
 
+The functions will revert if the field does not exist or if the value is of the wrong type.
+
 ## Jmespath
 Field paths passed to `jsonGet...` functions use [JMESPath](https://jmespath.org/) under the hood. This enables more than just static key access—you can also apply filters, functions, or access individual array elements directly in the path string.
 
