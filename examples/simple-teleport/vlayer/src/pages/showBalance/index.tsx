@@ -17,10 +17,8 @@ export const ShowBalancePage = () => {
   const [holderAddress, setHolderAddress] = useState<`0x${string}` | null>(
     null,
   );
-  const [balance, setBalance] = useState<string | undefined>(undefined);
+  const [, setBalance] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-  const networkChain = import.meta.env.VITE_CHAIN_NAME;
-  const token = "USDC";
   const [proverResult] = useLocalStorage("proverResult", "");
 
   useEffect(() => {
@@ -71,12 +69,9 @@ export const ShowBalancePage = () => {
 
   return (
     <HodlerForm
-      networkChain={networkChain}
-      token={token}
       holderAddress={holderAddress}
       onSubmit={handleSubmit}
       isLoading={isLoading}
-      balance={balance}
       loadingLabel="Minting..."
       submitLabel="Generate Proof NFT"
       isEditable={false}

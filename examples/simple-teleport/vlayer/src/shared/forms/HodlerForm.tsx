@@ -14,7 +14,6 @@ export const HodlerForm = ({
   loadingLabel: string;
   submitLabel: string;
   isEditable: boolean;
-  balance?: string;
 }) => {
   return (
     <form onSubmit={onSubmit}>
