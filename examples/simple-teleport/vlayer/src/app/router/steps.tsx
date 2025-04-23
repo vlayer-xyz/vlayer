@@ -1,9 +1,15 @@
 import { Step, StepKind, stepsMeta, StepComponentMap } from "./types";
-import { WelcomePage, ShowBalancePage, SuccessPage } from "../../pages";
+import {
+  WelcomePage,
+  ShowBalancePage,
+  SuccessPage,
+  ConfirmMintPage,
+} from "../../pages";
 
 export const stepComponents: StepComponentMap = {
   [StepKind.welcome]: WelcomePage,
   [StepKind.showBalance]: ShowBalancePage,
+  [StepKind.confirmMint]: ConfirmMintPage,
   [StepKind.success]: SuccessPage,
 };
 

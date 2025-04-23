@@ -9,8 +9,8 @@ import { ConnectWallet } from "../../shared/components/ConnectWallet";
 export const WelcomePage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { address } = useAccount();
-
+  const defaultTokenHolder = import.meta.env
+    .VITE_DEFAULT_TOKEN_HOLDER as `0x${string}`;
   const { callProver, result } = useProver();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -18,7 +18,14 @@ export const WelcomePage = () => {
     setIsLoading(true);
     const formData = new FormData(e.target as HTMLFormElement);
     const holderAddress = formData.get("holderAddress") as `0x${string}`;
-    void callProver([holderAddress]);
+    const tokensToCheck = JSON.parse(
+      import.meta.env.VITE_TOKENS_TO_CHECK as string,
+    ) as {
+      addr: string;
+      chainId: string;
+      blockNumber: string;
+    }[];
+    void callProver([holderAddress, tokensToCheck]);
   };
 
   useEffect(() => {
@@ -28,17 +35,17 @@ export const WelcomePage = () => {
     }
   }, [result]);
 
-  if (!address) {
+  if (!defaultTokenHolder) {
     return <ConnectWallet />;
   }
 
   return (
     <HodlerForm
-      holderAddress={address}
+      holderAddress={defaultTokenHolder}
       onSubmit={handleSubmit}
       isLoading={isLoading}
       loadingLabel="Loading..."
-      submitLabel="Show balance"
+      submitLabel="Show cross-chain balance"
       isEditable={true}
     />
   );
