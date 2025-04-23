@@ -7,15 +7,18 @@ edition = "2024"
 alloy-eips = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy-serde = { workspace = true }
+alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 auto_impl = { workspace = true }
 call_common = { workspace = true }
+chain = { workspace = true }
 common = { workspace = true }
 derivative = { workspace = true }
 derive-new = { workspace = true }
 jsonrpsee = { workspace = true, optional = true }
 lazy_static = { workspace = true }
+revm = { workspace = true, features = ["std"] }
 serde = { workspace = true }
 thiserror = { workspace = true }
 
