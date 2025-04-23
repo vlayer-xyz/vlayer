@@ -1,9 +1,11 @@
 use alloy_sol_types::SolValue;
 use mailparse::{
-    DispositionType, MailAddr, MailHeader, MailHeaderMap, MailParseError, ParsedMail,
-    addrparse_header, headers::Headers,
+    DispositionType, MailHeader, MailHeaderMap, MailParseError, ParsedMail, headers::Headers,
 };
+use sol::SolEmail;
+use extract_address::extract_address;
 
+pub(crate) mod extract_address;
 pub(crate) mod sol;
 
 #[derive(Debug, PartialEq)]
@@ -16,7 +18,7 @@ pub struct Email {
 
 impl Email {
     pub fn abi_encode(self) -> Vec<u8> {
-        sol::SolEmail::from(self).abi_encode()
+        SolEmail::from(self).abi_encode()
     }
 }
 
@@ -69,63 +71,6 @@ fn is_plain_text_mimetype(part: &ParsedMail) -> bool {
 
 fn is_inlined_body_content(part: &ParsedMail) -> bool {
     part.get_content_disposition().disposition == DispositionType::Inline
-}
-
-pub fn extract_address(from_header: &MailHeader<'_>) -> Result<String, MailParseError> {
-    let addresses = addrparse_header(from_header)?;
-
-    if addresses.len() != 1 {
-        return Err(MailParseError::Generic("Expected exactly one address in the \"From\" header"));
-    }
-
-    let MailAddr::Single(ref info) = addresses[0] else {
-        return Err(MailParseError::Generic(
-            "Group addresses are not supported in the \"From\" header",
-        ));
-    };
-    let trimmed_address = info.addr.trim();
-    if trimmed_address.chars().any(char::is_whitespace) {
-        return Err(MailParseError::Generic(
-            "Email address must not contain whitespace characters",
-        ));
-    }
-
-    let parts: Vec<_> = trimmed_address.split('@').collect();
-    if parts.len() != 2 {
-        return Err(MailParseError::Generic("Email address must contain exactly one ‘@’"));
-    }
-    let (local, domain) = (parts[0], parts[1]);
-
-    if local.is_empty() || domain.is_empty() {
-        return Err(MailParseError::Generic("Local-part or domain is empty"));
-    }
-
-    if local.len() > 64 || domain.len() > 255 {
-        return Err(MailParseError::Generic("Local-part or domain too long"));
-    }
-
-    if local.starts_with('.')
-        || local.ends_with('.')
-        || local.contains("..")
-        || domain.starts_with('.')
-        || domain.ends_with('.')
-        || domain.contains("..")
-    {
-        return Err(MailParseError::Generic("Invalid dot placement in local-part or domain"));
-    }
-
-    const LOCAL_OK: &str =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.!#$%&'*+/=?^_`{|}~-";
-    if !local.chars().all(|c| LOCAL_OK.contains(c)) {
-        return Err(MailParseError::Generic("Invalid character in local-part"));
-    }
-    for label in domain.split('.') {
-        if !label.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
-            return Err(MailParseError::Generic("Invalid character in domain"));
-        }
-    }
-
-    Ok(trimmed_address.to_string())
 }
 
 // Last headers are signed first: https://datatracker.ietf.org/doc/html/rfc6376#section-5.4.2
@@ -331,7 +276,7 @@ ZmlsZSBjb250ZW50Cg==
                 "body",
             );
             let encoded = email.unwrap().abi_encode();
-            let decoded = sol::SolEmail::abi_decode(&encoded, true).unwrap();
+            let decoded = SolEmail::abi_decode(&encoded, true).unwrap();
             assert_eq!(decoded.from, "me@aa.aa".to_string());
             assert_eq!(decoded.to, "you".to_string());
             assert_eq!(decoded.subject, "hello".to_string());
@@ -342,188 +287,11 @@ ZmlsZSBjb250ZW50Cg==
         fn replaces_empty_subject_with_empty_string() {
             let email = parsed_email(vec![("From", "me@aa.aa"), ("To", "you")], "body");
             let encoded = email.unwrap().abi_encode();
-            let decoded = sol::SolEmail::abi_decode(&encoded, true).unwrap();
+            let decoded = SolEmail::abi_decode(&encoded, true).unwrap();
             assert_eq!(decoded.from, "me@aa.aa".to_string());
             assert_eq!(decoded.to, "you".to_string());
             assert_eq!(decoded.subject, "".to_string());
             assert_eq!(decoded.body, "body".to_string());
-        }
-    }
-
-    mod extract_address_from_header {
-        use mailparse::parse_header;
-
-        use super::*;
-
-        #[test]
-        fn extracts_email_from_header() {
-            let (header, _) = parse_header(b"From:   Name (comment) <hello@aa.aa >  ").unwrap();
-            let extracted_email = extract_address(&header).unwrap();
-            assert_eq!(extracted_email, "hello@aa.aa");
-        }
-
-        #[test]
-        fn works_for_not_named_field() {
-            let (header, _) = parse_header(b"From: hello@aa.aa ").unwrap();
-            let extracted_email = extract_address(&header).unwrap();
-            assert_eq!(extracted_email, "hello@aa.aa");
-        }
-
-        #[test]
-        fn error_for_missing_brackets() {
-            let (header, _) = parse_header(b"Name hello@aa.aa").unwrap();
-            let email = extract_address(&header);
-            assert_eq!(
-                email.unwrap_err().to_string(),
-                "Expected exactly one address in the \"From\" header"
-            );
-        }
-
-        #[test]
-        fn error_if_incorrect_email_inside_brackets() {
-            let (header, _) = parse_header(b"Name <aaa>").unwrap();
-            let email = extract_address(&header);
-            assert_eq!(
-                email.unwrap_err().to_string(),
-                "Expected exactly one address in the \"From\" header"
-            );
-        }
-
-        #[test]
-        fn error_if_brackets_misaligned() {
-            let extract = |from: &str| {
-                let formatted_from = format!("From: {from}");
-                let (header, _) = parse_header(formatted_from.as_bytes()).unwrap();
-                extract_address(&header).unwrap_err().to_string()
-            };
-
-            assert_eq!(
-                extract("Name <hello@aa.aa>>"),
-                "Unexpected char found after bracketed address"
-            );
-            assert_eq!(
-                extract("Name hello@aa.aa>"),
-                "Email address must not contain whitespace characters"
-            );
-            assert_eq!(extract("Name <hello@aa.aa"), "Address string unexpectedly terminated");
-            assert_eq!(
-                extract("Name <<hello@aa.aa>>"),
-                "Unexpected char found after bracketed address"
-            );
-        }
-
-        #[test]
-        fn error_if_several_emails() {
-            let (header, _) =
-                parse_header(b"From: Name <hello@aa.aa>, Name2 <hello2@aa.aa>").unwrap();
-            let error = extract_address(&header).unwrap_err().to_string();
-            assert_eq!(error, "Expected exactly one address in the \"From\" header");
-        }
-
-        #[test]
-        fn error_multiple_at_symbols() {
-            let (header, _) = parse_header(b"From: <foo@@bar.com>").unwrap();
-            let error = extract_address(&header).unwrap_err().to_string();
-            assert_eq!(error, "Email address must contain exactly one ‘@’");
-        }
-
-        #[test]
-        fn error_empty_local_part() {
-            let (header, _) = parse_header(b"From: <@example.com>").unwrap();
-            assert_eq!(
-                extract_address(&header).unwrap_err().to_string(),
-                "Local-part or domain is empty"
-            );
-        }
-
-        #[test]
-        fn error_empty_domain_part() {
-            let (header, _) = parse_header(b"From: <local@>").unwrap();
-            assert_eq!(
-                extract_address(&header).unwrap_err().to_string(),
-                "Local-part or domain is empty"
-            );
-        }
-
-        #[test]
-        fn error_local_part_too_long() {
-            let long_local = "a".repeat(65);
-            let hdr = format!("From: <{}@example.com>", long_local);
-            let (header, _) = parse_header(hdr.as_bytes()).unwrap();
-            let error = extract_address(&header).unwrap_err().to_string();
-            assert_eq!(error, "Local-part or domain too long");
-        }
-
-        #[test]
-        fn error_domain_part_too_long() {
-            let long_domain = "a".repeat(256);
-            let hdr = format!("From: <user@{}>", long_domain);
-            let (header, _) = parse_header(hdr.as_bytes()).unwrap();
-            assert!(extract_address(&header).is_err());
-            let error = extract_address(&header).unwrap_err().to_string();
-            assert_eq!(error, "Local-part or domain too long");
-        }
-
-        mod invalid_dots {
-            use super::*;
-
-            const INVALID_DOT_PLACEMENT: &str = "Invalid dot placement in local-part or domain";
-
-            #[test]
-            fn error_leading_dot_in_local() {
-                let (header, _) = parse_header(b"From: <.local@domain.com>").unwrap();
-                let error = extract_address(&header).unwrap_err().to_string();
-                assert_eq!(error, INVALID_DOT_PLACEMENT);
-            }
-
-            #[test]
-            fn error_trailing_dot_in_local() {
-                let (header, _) = parse_header(b"From: <local.@domain.com>").unwrap();
-                let error = extract_address(&header).unwrap_err().to_string();
-                assert_eq!(error, INVALID_DOT_PLACEMENT);
-            }
-
-            #[test]
-            fn error_consecutive_dots_in_local() {
-                let (header, _) = parse_header(b"From: <lo..cal@domain.com>").unwrap();
-                let error = extract_address(&header).unwrap_err().to_string();
-                assert_eq!(error, INVALID_DOT_PLACEMENT);
-            }
-
-            #[test]
-            fn error_leading_dot_in_domain() {
-                let (header, _) = parse_header(b"From: <local@.domain.com>").unwrap();
-                let error = extract_address(&header).unwrap_err().to_string();
-                assert_eq!(error, INVALID_DOT_PLACEMENT);
-            }
-
-            #[test]
-            fn error_trailing_dot_in_domain() {
-                let (header, _) = parse_header(b"From: <local@domain.com.>").unwrap();
-                let error = extract_address(&header).unwrap_err().to_string();
-                assert_eq!(error, INVALID_DOT_PLACEMENT);
-            }
-
-            #[test]
-            fn error_consecutive_dots_in_domain() {
-                let (header, _) = parse_header(b"From: <local@domain..com>").unwrap();
-                let error = extract_address(&header).unwrap_err().to_string();
-                assert_eq!(error, INVALID_DOT_PLACEMENT);
-            }
-        }
-
-        #[test]
-        fn error_invalid_character_in_local() {
-            let (header, _) = parse_header(b"From: <loc(al)@domain.com>").unwrap();
-            let error = extract_address(&header).unwrap_err().to_string();
-            assert_eq!(error, "Invalid character in local-part");
-        }
-
-        #[test]
-        fn error_invalid_character_in_domain() {
-            let (header, _) = parse_header(b"From: <user@domain_.com>").unwrap();
-            let error = extract_address(&header).unwrap_err().to_string();
-            assert_eq!(error, "Invalid character in domain");
         }
     }
 }
