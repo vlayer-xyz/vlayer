@@ -12,7 +12,6 @@ anyhow = { workspace = true }
 async-trait = { workspace = true }
 auto_impl = { workspace = true }
 call_common = { workspace = true }
-chain = { workspace = true }
 common = { workspace = true }
 derivative = { workspace = true }
 derive-new = { workspace = true }

@@ -2912,7 +2912,6 @@ dependencies = [
  "async-trait",
  "auto_impl",
  "call_common",
- "chain",
  "common",
  "derivative",
  "derive-new",
