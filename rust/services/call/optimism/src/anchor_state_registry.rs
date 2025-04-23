@@ -25,7 +25,7 @@ pub struct AnchorStateRegistry<D: RevmDB> {
     db: D,
 }
 
-fn evm_call<C: SolCall>(db: impl RevmDB, to: Address, call: C) -> Result<C::Return> {
+fn evm_call<C: SolCall>(db: impl RevmDB, to: Address, call: &C) -> Result<C::Return> {
     let tx_env = TxEnv {
         transact_to: to.into(),
         data: call.abi_encode().into(),
@@ -58,7 +58,7 @@ impl<D: RevmDB> AnchorStateRegistry<D> {
                     output_hash,
                     block_number,
                 },
-        } = evm_call(&self.db, self.address, anchorsCall { _0: 1 })?;
+        } = evm_call(&self.db, self.address, &anchorsCall { _0: 1 })?;
 
         Ok(L2Commitment {
             output_hash,
