@@ -178,7 +178,7 @@ The list, configuration, and addresses of these precompiles are defined in `serv
   
   See [Web Proof](../../features/web.md) for details.
   
-- **`Web.jsonGetString`**, **`Web.jsonGetInt`**, **`Web.jsonGetBool`**, **`Web.jsonGetArrayLength`** (via `WebLib`):  
+- **`Web.jsonGetString`**, **`Web.jsonGetInt`**, **`Web.jsonGetBool`**, **`Web.jsonGetFloatAsInt`** (via `WebLib`):  
   Parses JSON from an HTTP response body (`Web.body`).  
   See [JSON Parsing](../../features/json-and-regex.md#json-parsing) for more information.
   
