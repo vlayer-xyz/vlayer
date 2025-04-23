@@ -144,13 +144,6 @@ A `VerifiedEmail` consists of the following fields:
 
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
-### Header Parsing Details
-#### Multiple headers:
-If duplicate headers exist (e.g., multiple `From` headers), the last occurrence is used during verification, following the DKIM specification which processes headers in reverse order (see [RFC 6376, Section 5.4.2](https://datatracker.ietf.org/doc/html/rfc6376#section-5.4.2)).
-
-#### Address fields:
-`From` address is extracted using the [`addrparse_header`](https://docs.rs/mailparse/latest/mailparse/fn.addrparse_header.html) function from the [`mailparse`](https://docs.rs/mailparse/latest/mailparse/index.html) crate.
-
 ## Getting `.eml` Files
 Obtaining an `.eml` file can be helpful for development purposes, such as testing your own email proofs. Below are instructions for retrieving `.eml` files from common email clients.
 
