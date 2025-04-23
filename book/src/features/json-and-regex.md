@@ -41,9 +41,31 @@ In the example above, the function extracts the value of the field `deep.nested.
 }
 ```
 
-The functions will revert if the field does not exist or if the value is of the wrong type. 
+## Jmespath
+Field paths passed to `jsonGet...` functions use [JMESPath](https://jmespath.org/) under the hood. This enables more than just static key access—you can also apply filters, functions, or access individual array elements directly in the path string.
 
-Currently, accessing fields inside arrays is not supported.
+For example, to get the number of elements in an array:
+
+```solidity
+int256 length = web.jsonGetInt("root.nested_level.field_array | length(@)");
+require(length == 2, "Expected array of length 2");
+```
+
+To access a specific element from an array:
+
+```solidity
+string memory value = web.jsonGetString("root.nested_level.field_array[1]");
+require(keccak256(bytes(value)) == keccak256("val2"), "Unexpected array value");
+```
+
+You can also access fields within arrays of objects:
+
+```solidity
+int256 value = web.jsonGetInt("root.nested_level.field_array_of_objects_with_numbers[1].key");
+require(value == 2, "Expected value at index 1");
+```
+
+This makes it easy to work with complex JSON structures directly inside your prover logic, without needing preprocessing.
 
 ## Regular Expressions
 Regular expressions are a powerful tool for finding patterns in text.
