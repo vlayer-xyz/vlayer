@@ -7,10 +7,10 @@ To support these needs, we provide helpers for parsing text using [regular expre
 ## JSON Parsing
 
 We provide four functions to extract data from JSON based on the field type:
-- `jsonGetInt`: Extracts an integer value and returns `int256`;
-- `jsonGetBool`: Extracts a boolean value and returns `bool`;
-- `jsonGetString`: Extracts a string value and returns `string memory`;
-- `jsonGetArrayLength`: Returns length of an array under provided `jsonPath`, returns `uint256`. 
+- `jsonGetInt(json, path)`: Extracts an integer value and returns `int256`;
+- `jsonGetBool(json, path)`: Extracts a boolean value and returns `bool`;
+- `jsonGetString(json, path)`: Extracts a string value and returns `string memory`;
+- `jsonGetFloatAsInt(json, path, precision)`: Extracts a decimal number from JSON, moves its decimal point right by the specified `precision`, and returns it as a truncated `int256`. If `precision` is greater than the number of decimal digits, it pads it with zeros. For example, reading `1.234` at precision `2` yields `123`, and at precision `4` yields `12340`. This approach is used because Solidity does not support floating-point numbers.
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
