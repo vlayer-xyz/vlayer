@@ -30,7 +30,7 @@ impl TryFrom<ParsedMail<'_>> for Email {
 
         let from_header =
             get_header("From").ok_or(MailParseError::Generic("\"From\" header is missing"))?;
-        let from_email = extract_address_from_header(from_header)?;
+        let from_email = extract_address(from_header)?;
         let to = get_header("To")
             .ok_or(MailParseError::Generic("\"To\" header is missing"))?
             .get_value();
@@ -71,7 +71,7 @@ fn is_inlined_body_content(part: &ParsedMail) -> bool {
     part.get_content_disposition().disposition == DispositionType::Inline
 }
 
-pub fn extract_address_from_header(from_header: &MailHeader<'_>) -> Result<String, MailParseError> {
+pub fn extract_address(from_header: &MailHeader<'_>) -> Result<String, MailParseError> {
     let addresses = addrparse_header(from_header)?;
 
     if addresses.len() != 1 {
@@ -358,21 +358,21 @@ ZmlsZSBjb250ZW50Cg==
         #[test]
         fn extracts_email_from_header() {
             let (header, _) = parse_header(b"From:   Name (comment) <hello@aa.aa >  ").unwrap();
-            let extracted_email = extract_address_from_header(&header).unwrap();
+            let extracted_email = extract_address(&header).unwrap();
             assert_eq!(extracted_email, "hello@aa.aa");
         }
 
         #[test]
         fn works_for_not_named_field() {
             let (header, _) = parse_header(b"From: hello@aa.aa ").unwrap();
-            let extracted_email = extract_address_from_header(&header).unwrap();
+            let extracted_email = extract_address(&header).unwrap();
             assert_eq!(extracted_email, "hello@aa.aa");
         }
 
         #[test]
         fn error_for_missing_brackets() {
             let (header, _) = parse_header(b"Name hello@aa.aa").unwrap();
-            let email = extract_address_from_header(&header);
+            let email = extract_address(&header);
             assert_eq!(
                 email.unwrap_err().to_string(),
                 "Expected exactly one address in the \"From\" header"
@@ -382,7 +382,7 @@ ZmlsZSBjb250ZW50Cg==
         #[test]
         fn error_if_incorrect_email_inside_brackets() {
             let (header, _) = parse_header(b"Name <aaa>").unwrap();
-            let email = extract_address_from_header(&header);
+            let email = extract_address(&header);
             assert_eq!(
                 email.unwrap_err().to_string(),
                 "Expected exactly one address in the \"From\" header"
@@ -394,9 +394,7 @@ ZmlsZSBjb250ZW50Cg==
             let extract = |from: &str| {
                 let formatted_from = format!("From: {from}");
                 let (header, _) = parse_header(formatted_from.as_bytes()).unwrap();
-                extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string()
+                extract_address(&header).unwrap_err().to_string()
             };
 
             assert_eq!(
@@ -418,18 +416,14 @@ ZmlsZSBjb250ZW50Cg==
         fn error_if_several_emails() {
             let (header, _) =
                 parse_header(b"From: Name <hello@aa.aa>, Name2 <hello2@aa.aa>").unwrap();
-            let error = extract_address_from_header(&header)
-                .unwrap_err()
-                .to_string();
+            let error = extract_address(&header).unwrap_err().to_string();
             assert_eq!(error, "Expected exactly one address in the \"From\" header");
         }
 
         #[test]
         fn error_multiple_at_symbols() {
             let (header, _) = parse_header(b"From: <foo@@bar.com>").unwrap();
-            let error = extract_address_from_header(&header)
-                .unwrap_err()
-                .to_string();
+            let error = extract_address(&header).unwrap_err().to_string();
             assert_eq!(error, "Email address must contain exactly one ‘@’");
         }
 
@@ -437,9 +431,7 @@ ZmlsZSBjb250ZW50Cg==
         fn error_empty_local_part() {
             let (header, _) = parse_header(b"From: <@example.com>").unwrap();
             assert_eq!(
-                extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string(),
+                extract_address(&header).unwrap_err().to_string(),
                 "Local-part or domain is empty"
             );
         }
@@ -448,9 +440,7 @@ ZmlsZSBjb250ZW50Cg==
         fn error_empty_domain_part() {
             let (header, _) = parse_header(b"From: <local@>").unwrap();
             assert_eq!(
-                extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string(),
+                extract_address(&header).unwrap_err().to_string(),
                 "Local-part or domain is empty"
             );
         }
@@ -460,9 +450,7 @@ ZmlsZSBjb250ZW50Cg==
             let long_local = "a".repeat(65);
             let hdr = format!("From: <{}@example.com>", long_local);
             let (header, _) = parse_header(hdr.as_bytes()).unwrap();
-            let error = extract_address_from_header(&header)
-                .unwrap_err()
-                .to_string();
+            let error = extract_address(&header).unwrap_err().to_string();
             assert_eq!(error, "Local-part or domain too long");
         }
 
@@ -471,10 +459,8 @@ ZmlsZSBjb250ZW50Cg==
             let long_domain = "a".repeat(256);
             let hdr = format!("From: <user@{}>", long_domain);
             let (header, _) = parse_header(hdr.as_bytes()).unwrap();
-            assert!(extract_address_from_header(&header).is_err());
-            let error = extract_address_from_header(&header)
-                .unwrap_err()
-                .to_string();
+            assert!(extract_address(&header).is_err());
+            let error = extract_address(&header).unwrap_err().to_string();
             assert_eq!(error, "Local-part or domain too long");
         }
 
@@ -486,54 +472,42 @@ ZmlsZSBjb250ZW50Cg==
             #[test]
             fn error_leading_dot_in_local() {
                 let (header, _) = parse_header(b"From: <.local@domain.com>").unwrap();
-                let error = extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string();
+                let error = extract_address(&header).unwrap_err().to_string();
                 assert_eq!(error, INVALID_DOT_PLACEMENT);
             }
 
             #[test]
             fn error_trailing_dot_in_local() {
                 let (header, _) = parse_header(b"From: <local.@domain.com>").unwrap();
-                let error = extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string();
+                let error = extract_address(&header).unwrap_err().to_string();
                 assert_eq!(error, INVALID_DOT_PLACEMENT);
             }
 
             #[test]
             fn error_consecutive_dots_in_local() {
                 let (header, _) = parse_header(b"From: <lo..cal@domain.com>").unwrap();
-                let error = extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string();
+                let error = extract_address(&header).unwrap_err().to_string();
                 assert_eq!(error, INVALID_DOT_PLACEMENT);
             }
 
             #[test]
             fn error_leading_dot_in_domain() {
                 let (header, _) = parse_header(b"From: <local@.domain.com>").unwrap();
-                let error = extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string();
+                let error = extract_address(&header).unwrap_err().to_string();
                 assert_eq!(error, INVALID_DOT_PLACEMENT);
             }
 
             #[test]
             fn error_trailing_dot_in_domain() {
                 let (header, _) = parse_header(b"From: <local@domain.com.>").unwrap();
-                let error = extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string();
+                let error = extract_address(&header).unwrap_err().to_string();
                 assert_eq!(error, INVALID_DOT_PLACEMENT);
             }
 
             #[test]
             fn error_consecutive_dots_in_domain() {
                 let (header, _) = parse_header(b"From: <local@domain..com>").unwrap();
-                let error = extract_address_from_header(&header)
-                    .unwrap_err()
-                    .to_string();
+                let error = extract_address(&header).unwrap_err().to_string();
                 assert_eq!(error, INVALID_DOT_PLACEMENT);
             }
         }
@@ -541,18 +515,14 @@ ZmlsZSBjb250ZW50Cg==
         #[test]
         fn error_invalid_character_in_local() {
             let (header, _) = parse_header(b"From: <loc(al)@domain.com>").unwrap();
-            let error = extract_address_from_header(&header)
-                .unwrap_err()
-                .to_string();
+            let error = extract_address(&header).unwrap_err().to_string();
             assert_eq!(error, "Invalid character in local-part");
         }
 
         #[test]
         fn error_invalid_character_in_domain() {
             let (header, _) = parse_header(b"From: <user@domain_.com>").unwrap();
-            let error = extract_address_from_header(&header)
-                .unwrap_err()
-                .to_string();
+            let error = extract_address(&header).unwrap_err().to_string();
             assert_eq!(error, "Invalid character in domain");
         }
     }
