@@ -49,6 +49,7 @@ mod anchor_state_registry {
             block = $block:literal
         ) => {
             #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
             async fn $test_name() -> anyhow::Result<()> {
                 let anchor_state_registry = create_anchor_state_registry(
                     ($src_chain.id(), $height).into(),
@@ -124,6 +125,7 @@ mod sequencer_client {
     use super::*;
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore = "This test is ignored because it requires quicknode Api key set in .env file"]
     async fn test_sequencer_client() -> anyhow::Result<()> {
         let http_client = HttpClientBuilder::default().build(&*quicknode_op_sepolia_url)?;
         let sequencer_client = http::Client::new(http_client);
@@ -155,6 +157,7 @@ mod output_hash_match {
     use super::*;
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore = "This test is ignored because it requires quicknode Api key set in .env file"]
     async fn sepolia_op_sepolia() -> anyhow::Result<()> {
         let src_chain = Chain::sepolia();
         let dest_chain = Chain::optimism_sepolia();
