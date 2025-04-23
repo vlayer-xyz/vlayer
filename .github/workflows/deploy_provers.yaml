@@ -26,7 +26,7 @@ jobs:
           ansible-galaxy collection install -r requirements.yml
           ansible-galaxy role install -r requirements.yml
       - name: Deploy nightly prover
-        if: ${{ github.event.workflow_run.workflow_name == 'Release nightly' }}
+        if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.workflow.name == 'Release nightly' }}
         run: |
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${{ secrets.PRODUCTION_DEPLOYER_SSH_KEY }}"
@@ -34,7 +34,7 @@ jobs:
           ansible-playbook -i hosts.yml prover.yml --limit "nightly_fake_prover" \
             --vault-password-file <(echo '${{ secrets.ANSIBLE_PRODUCTION_VAULT_PASSWORD }}')
       - name: Deploy stable prover
-        if: ${{ github.event.workflow_run.workflow_name == 'Release stable' }}
+        if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.workflow.name == 'Release stable' }}
         run: |
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${{ secrets.PRODUCTION_DEPLOYER_SSH_KEY }}"
