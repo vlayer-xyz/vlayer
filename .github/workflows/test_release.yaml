@@ -69,7 +69,7 @@ jobs:
           REPORT_PATH: "vlayer-test-release/examples/**/vlayer/playwright-report/"
           PR_NUMBER: ${{ github.event.number }}
           DEPLOY_TYPE: "examples"
-          CONTEXT: "test-release-sepolia-${{ matrix.vlayer_release }}"
+          CONTEXT: "test-release-sepolia-${{ matrix.vlayer_release.channel }}"
 
   test-release-js-sdk:
     name: Test JS SDK release
