@@ -39,5 +39,5 @@ vlayer --version
 You can use use the following command to install a nightly version of vlayer:
 
 ```sh
-vlayer --channel nightly
+vlayerup --channel nightly
 ```
