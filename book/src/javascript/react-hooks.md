@@ -133,7 +133,7 @@ In addition to selecting an environment, the `config` prop allows you to specify
 ```javascript
 <ProofProvider
   config={{
-    proverUrl: "https://test-prover.vlayer.xyz",
+    proverUrl: "https://stable-fake-prover.vlayer.xyz",
     notaryUrl: "https://test-notary.vlayer.xyz",
     wsProxyUrl: "wss://test-wsproxy.vlayer.xyz",
   }}

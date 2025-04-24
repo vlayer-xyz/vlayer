@@ -31,7 +31,8 @@ The Test Prover operates in [`FAKE` mode](/getting-started/dev-and-production.ht
 
 | Service            | Endpoint                         | Description                                  |
 |--------------------|----------------------------------|----------------------------------------------|
-| Prover             | `https://test-prover.vlayer.xyz` | zkEVM prover for vlayer contracts            |
+| Prover             | `https://stable-fake-prover.vlayer.xyz` | zkEVM prover for vlayer contracts     |
+| Nightly Prover     | `https://nightly-fake-prover.vlayer.xyz` | Nightly version of the zkEVM prover  |
 | Indexer            | `https://test-chainservice.vlayer.xyz` | Storage proof indexer                |
 | Notary             | `https://test-notary.vlayer.xyz` | TLS Notary server                            |
 | WebSocket Proxy    | `https://test-wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary |

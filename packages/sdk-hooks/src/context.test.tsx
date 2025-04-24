@@ -20,7 +20,7 @@ describe("Context Providers and Hooks", () => {
 
     it("should provide both WebProof and Prover contexts", () => {
       const config = {
-        proverUrl: "test-prover-url",
+        proverUrl: "fake-prover-url",
         notaryUrl: "test-notary-url",
         wsProxyUrl: "test-ws-url",
       };
