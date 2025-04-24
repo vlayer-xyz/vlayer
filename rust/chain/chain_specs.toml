@@ -70,7 +70,7 @@ forks = [{ spec = "LONDON", activation = { Block = 0 } }]
 [[chains]]
 name = "worldchain-sepolia"
 id = 4801
-op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0x1333d5E5201D760444A399E77b3D337eBDB0DD07", structure = { type = "v1", value = { game_type = 1 } } } }
+op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0x1333d5E5201D760444A399E77b3D337eBDB0DD07", structure = { type = "v1", value = { game_type = "PermissionedCannon" } } } }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
     { spec = "FJORD", activation = { Timestamp = 1721826000 } },
@@ -82,7 +82,7 @@ forks = [
 [[chains]]
 name = "unichain-sepolia"
 id = 1301
-op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0xf971F1b0D80eb769577135b490b913825BfcF00B", structure = { type = "v1", value = { game_type = 0 } } } }
+op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0xf971F1b0D80eb769577135b490b913825BfcF00B", structure = { type = "v1", value = { game_type = "Cannon" } } } }
 forks = [{ spec = "GRANITE", activation = { Block = 0 } }]
 # endregion testnets
 
@@ -115,7 +115,7 @@ forks = [
 [[chains]]
 name = "base"
 id = 8453
-op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0xdB9091e48B1C42992A1213e6916184f9eBDbfEDf", structure = { type = "v1", value = { game_type = 0 } } } }
+op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0xdB9091e48B1C42992A1213e6916184f9eBDbfEDf", structure = { type = "v1", value = { game_type = "Cannon" } } } }
 forks = [
     { spec = "REGOLITH", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1704992401 } },
@@ -180,7 +180,7 @@ forks = [{ spec = "LONDON", activation = { Block = 0 } }]
 [[chains]]
 name = "worldchain"
 id = 480
-op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0xD4D7A57DCC563756DeD99e224E144A6Bf0327099", structure = { type = "v1", value = { game_type = 1 } } } }
+op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0xD4D7A57DCC563756DeD99e224E144A6Bf0327099", structure = { type = "v1", value = { game_type = "PermissionedCannon" } } } }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
     { spec = "FJORD", activation = { Timestamp = 1721826000 } },
