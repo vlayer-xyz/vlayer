@@ -2915,6 +2915,7 @@ dependencies = [
  "alloy-eips",
  "alloy-primitives",
  "alloy-serde",
+ "alloy-sol-types",
  "anyhow",
  "async-trait",
  "auto_impl",
@@ -2923,6 +2924,7 @@ dependencies = [
  "derivative",
  "derive-new",
  "lazy_static",
+ "revm",
  "serde",
  "thiserror 2.0.11",
 ]

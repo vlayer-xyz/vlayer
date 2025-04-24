@@ -79,7 +79,9 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
     }
 
     fn on_call(&mut self, inputs: &CallInputs) -> Option<CallOutcome> {
+        info!("Call to normal contract or precompile");
         let Some(location) = self.location.take() else {
+            info!("No location set. Returning None.");
             return None; // If no setChain/setBlock happened, we don't need to teleport to a new VM, but can continue with the current one.
         };
 
@@ -102,6 +104,7 @@ impl<'a, D: RevmDB> Inspector<'a, D> {
     }
 
     fn on_travel_call(&mut self, inputs: &CallInputs) -> Option<CallOutcome> {
+        info!("Call to travel contract");
         match Args::from_inputs(inputs) {
             Args::SetBlock { block_number } => self.set_block(block_number),
             Args::SetChain {
@@ -124,7 +127,7 @@ where
         _context: &mut EvmContext<WrapDatabaseRef<&D>>,
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
-        info!("Call: {:?} -> {:?}", inputs.caller, inputs.bytecode_address);
+        info!(caller = ?inputs.caller, callee = ?inputs.bytecode_address, "Call");
         debug!("Input: {:?}", inputs.input);
 
         if let Some(precompile) =

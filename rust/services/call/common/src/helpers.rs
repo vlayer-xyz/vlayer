@@ -3,8 +3,14 @@ use std::fmt;
 
 use revm::{Database, DatabaseRef, db::WrapDatabaseRef};
 
-pub trait RevmDBError: fmt::Debug + Send + Sync + 'static + Into<anyhow::Error> {}
-impl<T> RevmDBError for T where T: fmt::Debug + Send + Sync + 'static + Into<anyhow::Error> {}
+pub trait RevmDBError:
+    std::error::Error + fmt::Debug + fmt::Display + Send + Sync + 'static + Into<anyhow::Error>
+{
+}
+impl<T> RevmDBError for T where
+    T: std::error::Error + fmt::Debug + fmt::Display + Send + Sync + 'static + Into<anyhow::Error>
+{
+}
 
 /// Helper trait to be used in bounds instead of revm::DatabaseRef
 /// Requires Database and it's errors to be Debug, anyhow wrappable and safe in async contexts

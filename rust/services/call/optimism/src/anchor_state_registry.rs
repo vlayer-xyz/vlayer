@@ -1,32 +1,19 @@
 use alloy_primitives::{Address, B256, BlockNumber};
+use alloy_sol_types::{SolCall, sol};
 use anyhow::anyhow;
 use call_common::RevmDB;
 use derive_new::new;
+use revm::{
+    Evm,
+    primitives::{ExecutionResult, ResultAndState, TxEnv},
+};
 
 #[derive(thiserror::Error, Debug)]
 #[error(transparent)]
 pub struct Error(#[from] anyhow::Error);
 type Result<T> = std::result::Result<T, Error>;
 
-/// Storage layout:
-/// `OutputRoot` struct is stored at mapping(GameType -> OutputRoot) in slot 1.
-/// - Field 0: `hash` (bytes32) -> Located at keccak(GameType . 1)
-/// - Field 1: `blockNumber` (uint256) -> Located at keccak(GameType . 1) + 1
-mod layout {
-    use alloy_primitives::U256;
-    use lazy_static::lazy_static;
-    lazy_static! {
-        pub static ref OUTPUT_HASH_SLOT: U256 = #[allow(clippy::unwrap_used)]
-        U256::from_str_radix(
-            "a6eef7e35abe7026729641147f7915573c7e97b47efa546f5f6e3230263bcb49",
-            16,
-        )
-        .unwrap();
-        pub static ref BLOCK_NUMBER_SLOT: U256 = *OUTPUT_HASH_SLOT + U256::from(1);
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, new, PartialEq, Eq)]
 pub struct L2Commitment {
     pub output_hash: B256,
     pub block_number: BlockNumber,
@@ -38,26 +25,61 @@ pub struct AnchorStateRegistry<D: RevmDB> {
     db: D,
 }
 
+fn evm_call<C: SolCall>(db: impl RevmDB, to: Address, call: &C) -> Result<C::Return> {
+    let tx_env = TxEnv {
+        transact_to: to.into(),
+        data: call.abi_encode().into(),
+        ..Default::default()
+    };
+    let mut evm = Evm::builder().with_ref_db(db).with_tx_env(tx_env).build();
+
+    let ResultAndState { result, .. } = evm.transact_preverified().map_err(anyhow::Error::new)?;
+    let ExecutionResult::Success { output, .. } = result else {
+        return Err(Error(anyhow!("Failed to get latest confirmed L2 commitment")));
+    };
+    let result = C::abi_decode_returns(output.data(), true)
+        .map_err(|_| Error(anyhow!("Failed to decode latest confirmed L2 commitment")))?;
+    Ok(result)
+}
+
+sol! {
+    struct OutputRoot {
+        bytes32 output_hash;
+        uint256 block_number;
+    }
+    function anchors(uint32) public view returns (OutputRoot);
+}
+
+#[allow(dead_code)]
+enum GameType {
+    Cannon = 0,
+    PermissionedCannon = 1,
+    Asterisc = 2,
+    Fast = 254,
+    Alphabet = 255,
+}
+
 impl<D: RevmDB> AnchorStateRegistry<D> {
     pub fn get_latest_confirmed_l2_commitment(&self) -> Result<L2Commitment> {
-        // `WrapStateDB` relies on the guarantee that EVM always asks for account state before storage and caches some things
-        // Therefore - without this step - we can't access storage
-        let _ = self
-            .db
-            .basic_ref(self.address)
-            .map_err(|err| anyhow!(err))?;
-        let root = self
-            .db
-            .storage_ref(self.address, *layout::OUTPUT_HASH_SLOT)
-            .map_err(|err| anyhow!(err))?;
-        let block_number = self
-            .db
-            .storage_ref(self.address, *layout::BLOCK_NUMBER_SLOT)
-            .map_err(|err| anyhow!(err))?;
+        let anchorsReturn {
+            _0:
+                OutputRoot {
+                    output_hash,
+                    block_number,
+                },
+        } = evm_call(
+            &self.db,
+            self.address,
+            &anchorsCall {
+                _0: GameType::PermissionedCannon as u32,
+            },
+        )?;
 
         Ok(L2Commitment {
-            output_hash: B256::from(root),
-            block_number: block_number.to::<BlockNumber>(),
+            output_hash,
+            block_number: block_number.try_into().map_err(|_| {
+                Error(anyhow!("Block number returned from getAnchorRoot overflows u64"))
+            })?,
         })
     }
 }

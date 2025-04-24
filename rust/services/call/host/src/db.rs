@@ -1,5 +1,5 @@
 pub mod proof;
-mod provider;
+pub mod provider;
 use call_common::RevmDB;
 use revm::db::CacheDB;
 

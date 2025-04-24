@@ -6,8 +6,12 @@ use async_trait::async_trait;
 use call_common::{ExecutionLocation, RevmDB};
 use common::Hashable;
 use derivative::Derivative;
-use optimism::{NumHash, anchor_state_registry::AnchorStateRegistry};
-use tracing::{debug, info};
+use optimism::{
+    NumHash,
+    anchor_state_registry::{AnchorStateRegistry, L2Commitment},
+    types::SequencerOutput,
+};
+use tracing::info;
 
 use crate::evm::env::{BlocksByChain, cached::CachedEvmEnv};
 
@@ -104,8 +108,11 @@ impl<D: RevmDB> IVerifier<D> for Verifier {
         evm_envs: &CachedEvmEnv<D>,
         start_exec_location: ExecutionLocation,
     ) -> Result<()> {
-        info!("Verifying teleport");
-        let source_chain_id = start_exec_location.chain_id;
+        let ExecutionLocation {
+            chain_id: source_chain_id,
+            block_number,
+        } = start_exec_location;
+        info!(source_chain_id, block_number, "Verifying teleport");
         let source_chain_spec = chain::ChainSpec::try_from(source_chain_id)?;
         if source_chain_spec.is_local_testnet() {
             info!("Skipping teleport verification for local testnet");
@@ -139,19 +146,34 @@ impl<D: RevmDB> IVerifier<D> for Verifier {
     }
 }
 
-async fn fetch_latest_confirmed_l2_block<D: RevmDB>(
+pub async fn fetch_latest_confirmed_l2_block<D: RevmDB>(
     anchor_state_registry: AnchorStateRegistry<D>,
     sequencer_client: &dyn optimism::IClient,
 ) -> Result<NumHash> {
-    let l2_commitment = anchor_state_registry.get_latest_confirmed_l2_commitment()?;
-    debug!("L2 commitment: {l2_commitment:?}");
+    info!("Fetching latest confirmed L2 block");
+    let L2Commitment {
+        output_hash,
+        block_number,
+    } = anchor_state_registry.get_latest_confirmed_l2_commitment()?;
+    info!(?output_hash, block_number, "L2 commitment");
 
-    let sequencer_output = sequencer_client
-        .get_output_at_block(l2_commitment.block_number)
-        .await?;
-    debug!("Sequencer output: {sequencer_output:?}");
+    let sequencer_output = sequencer_client.get_output_at_block(block_number).await?;
+    let SequencerOutput {
+        version,
+        state_root,
+        withdrawal_storage_root,
+        l2_block: NumHash { number, hash },
+    } = sequencer_output;
+    info!(
+        ?version,
+        ?state_root,
+        ?withdrawal_storage_root,
+        number,
+        ?hash,
+        "Sequencer output"
+    );
 
-    if sequencer_output.hash_slow() != l2_commitment.output_hash {
+    if sequencer_output.hash_slow() != output_hash {
         return Err(Error::L2OutputHashMismatch);
     }
     Ok(sequencer_output.l2_block)

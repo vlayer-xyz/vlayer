@@ -30,7 +30,7 @@ impl ChainSpec {
                 anchor: self.anchor_chain,
             });
         };
-        info!("Chain {} commits into {}", chain_id, self.anchor_chain);
+        info!("Chain {} commits into {}", self.chain_spec.id(), self.anchor_chain);
         Ok(())
     }
 }
