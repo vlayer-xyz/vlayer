@@ -144,6 +144,8 @@ A `VerifiedEmail` consists of the following fields:
 
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
+> **Note:** If multiple headers share the same name (for example, two `From:` lines), we always use the last one encountered when parsing or verifying headers (i.e. headers are processed in reverse order). See [RFC 6376 §5.4.2](https://datatracker.ietf.org/doc/html/rfc6376#section-5.4.2) for details.
+
 ## Getting `.eml` Files
 Obtaining an `.eml` file can be helpful for development purposes, such as testing your own email proofs. Below are instructions for retrieving `.eml` files from common email clients.
 
@@ -169,3 +171,15 @@ The vlayer prover verifies that the message signature matches the public key lis
 Both outgoing and incoming servers can read emails and use them to create proofs without the permission of the actual mail sender or receiver. This risk also extends to the prover, which accesses the email to generate claims. It is crucial for protocols to utilize email proofs in a manner that prevents the manipulation of smart contracts into performing unauthorized actions, such as sending funds to unintended recipients.
 
 For example, it is advisable to include complete information in the email to ensure correct actions. Opt for emails like: "Send 1 ETH from address X to address Y on Ethereum Mainnet" over partial instructions, like: "Send 1 ETH," where other details come from another source, such as smart contract call parameters. Another approach is to use unique identifiers that unambiguously point to the necessary details.
+
+## `From` header format
+We only accept a single `local@domain` address, checked as follows:
+* One mailbox: exactly one address, no groups/lists
+* `Local` (1–64 chars):
+  * May include letters (A–Z, a–z), digits (0–9), and these symbols: `!  #  $  %  &  '  *  +  -  /  =  ?  ^  _  {  |  }  ~`
+  * Periods (`.`) can appear between characters, but not at the very start or end, and never two in a row.
+
+* `Domain` (1–255 chars):
+  * Made of one or more labels separated by periods, e.g. `example.com` → `example` + `com`
+  * Each label can only use letters (`A–Z`, `a–z`), digits (`0–9`), or hyphens (`-`)
+  * A label may not begin or end with a hyphen, and labels can’t be empty (no `..`)
