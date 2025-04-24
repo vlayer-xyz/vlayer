@@ -1,5 +1,4 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useAccount } from "wagmi";
 import { useProver } from "../../shared/hooks/useProver";
 import { useNavigate } from "react-router";
 import { getStepPath } from "../../app/router/steps";
@@ -18,9 +17,7 @@ export const WelcomePage = () => {
     setIsLoading(true);
     const formData = new FormData(e.target as HTMLFormElement);
     const holderAddress = formData.get("holderAddress") as `0x${string}`;
-    const tokensToCheck = JSON.parse(
-      import.meta.env.VITE_TOKENS_TO_CHECK as string,
-    ) as {
+    const tokensToCheck = JSON.parse(import.meta.env.VITE_TOKENS_TO_CHECK) as {
       addr: string;
       chainId: string;
       blockNumber: string;

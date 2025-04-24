@@ -20,9 +20,11 @@ export const ConfirmMintPage = () => {
   const [, setBalance] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [proverResult] = useLocalStorage("proverResult", "");
-  const tokensToCheck = JSON.parse(
-    import.meta.env.VITE_TOKENS_TO_CHECK as string,
-  ) as { addr: string; chainId: string; blockNumber: string }[];
+  const tokensToCheck = JSON.parse(import.meta.env.VITE_TOKENS_TO_CHECK) as {
+    addr: string;
+    chainId: string;
+    blockNumber: string;
+  }[];
 
   useEffect(() => {
     if (txHash && status === "success") {
