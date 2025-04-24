@@ -122,7 +122,6 @@ mod test {
         let email = mailparse::parse_mail(raw_email.as_ref()).unwrap();
         let result = extract_from_domain(&email);
         let expected = FIXTURES.get(key).unwrap();
-        dbg!(&result, &expected);
         match result {
             Ok(res) => {
                 assert_eq!(&res.as_str(), expected.as_ref().unwrap())

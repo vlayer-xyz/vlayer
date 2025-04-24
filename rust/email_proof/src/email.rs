@@ -1,9 +1,9 @@
 use alloy_sol_types::SolValue;
+use extract_address::extract_address;
 use mailparse::{
     DispositionType, MailHeader, MailHeaderMap, MailParseError, ParsedMail, headers::Headers,
 };
 use sol::SolEmail;
-use extract_address::extract_address;
 
 pub(crate) mod extract_address;
 pub(crate) mod sol;
