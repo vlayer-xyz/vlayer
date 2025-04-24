@@ -8,10 +8,12 @@ use std::{
 use anyhow::Context;
 use clap::Parser;
 use flate2::read::GzDecoder;
+use regex::Regex;
 use reqwest::get;
 use serde_json::{Map, Value};
 use tar::Archive;
 use tracing::{error, info};
+use version::is_stable;
 
 use crate::{
     config::{Config, Error as ConfigError, JsDependencies, SolDependencies, Template},
@@ -258,6 +260,8 @@ async fn init_existing(
 
     change_sdk_dependency_to_npm(&root_path, &config.js_dependencies)?;
 
+    update_prover_url(&root_path)?;
+
     std::env::set_current_dir(&cwd)?;
 
     Ok(())
@@ -269,6 +273,34 @@ fn add_fs_permissions_to_foundry_toml(root_path: &Path) -> Result<(), std::io::E
         &foundry_toml_path,
         "fs_permissions = [{ access = \"read\", path = \"./testdata\"}]",
     )
+}
+
+fn update_prover_url(root_path: &Path) -> Result<(), crate::errors::Error> {
+    let env_testnet_path = root_path.join("vlayer/.env.testnet");
+
+    if env_testnet_path.exists() {
+        info!("Updating prover URL in .env.testnet");
+
+        let content = fs::read_to_string(&env_testnet_path)?;
+        let channel = if is_stable() { "stable" } else { "nightly" };
+        let output = modify_channel_in_url(&content, channel)?;
+        fs::write(env_testnet_path, output)?;
+    } else {
+        info!(
+            ".env.testnet file not found in \"{}\". Skipping update.",
+            env_testnet_path.display()
+        );
+    }
+
+    Ok(())
+}
+
+fn modify_channel_in_url(file_content: &str, channel: &str) -> Result<String, regex::Error> {
+    let re = Regex::new(r"https://(stable|nightly|dev)-([^.]+)\.vlayer\.xyz")?;
+
+    let replacement = format!("https://{channel}-$2.vlayer.xyz");
+
+    Ok(re.replace_all(file_content, replacement).to_string())
 }
 
 fn init_soldeer(root_path: &Path) -> CLIResult<()> {
@@ -420,6 +452,53 @@ mod tests {
         let (_temp_dir, src_path, root_path) = prepare_foundry_dir(src);
         let path = find_src_path(&root_path).unwrap();
         assert_eq!(path, src_path);
+    }
+
+    mod test_modify_channel_in_url {
+        use super::*;
+
+        #[test]
+        fn env_file() {
+            let content = "CHAIN_NAME=optimismSepolia\nPROVER_URL=https://stable-fake-prover.vlayer.xyz\nJSON_RPC_URL=https://sepolia.optimism.io\n";
+            let channel = "nightly";
+            let modified_url = modify_channel_in_url(content, channel).unwrap();
+            assert_eq!(
+                modified_url,
+                "CHAIN_NAME=optimismSepolia\nPROVER_URL=https://nightly-fake-prover.vlayer.xyz\nJSON_RPC_URL=https://sepolia.optimism.io\n"
+            );
+        }
+
+        #[test]
+        fn change_nightly_to_dev() {
+            let content = "PROVER_URL=https://nightly-fake-prover.vlayer.xyz";
+            let channel = "dev";
+            let modified_url = modify_channel_in_url(content, channel).unwrap();
+            assert_eq!(modified_url, "PROVER_URL=https://dev-fake-prover.vlayer.xyz");
+        }
+
+        #[test]
+        fn change_dev_to_stable() {
+            let content = "PROVER_URL=https://dev-fake-prover.vlayer.xyz";
+            let channel = "stable";
+            let modified_url = modify_channel_in_url(content, channel).unwrap();
+            assert_eq!(modified_url, "PROVER_URL=https://stable-fake-prover.vlayer.xyz");
+        }
+
+        #[test]
+        fn no_url() {
+            let content = "some random text";
+            let channel = "nightly";
+            let modified_url = modify_channel_in_url(content, channel).unwrap();
+            assert_eq!(modified_url, "some random text");
+        }
+
+        #[test]
+        fn empty() {
+            let content = "";
+            let channel = "nightly";
+            let modified_url = modify_channel_in_url(content, channel).unwrap();
+            assert_eq!(modified_url, "");
+        }
     }
 
     #[test]

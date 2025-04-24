@@ -12,6 +12,10 @@ pub fn version() -> String {
     .join("-")
 }
 
+pub fn is_stable() -> bool {
+    env!("VLAYER_RELEASE") == "stable"
+}
+
 #[cfg(test)]
 mod tests {
     use regex::Regex;
