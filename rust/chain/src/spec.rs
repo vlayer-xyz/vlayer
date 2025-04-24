@@ -29,11 +29,20 @@ pub struct AnchorStateRegistrySpec {
     pub structure: AnchorStateRegistryStructure,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Copy)]
+pub enum GameType {
+    Cannon = 0,
+    PermissionedCannon = 1,
+    Asterisc = 2,
+    Fast = 254,
+    Alphabet = 255,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default, Copy)]
 #[serde(tag = "type", content = "value")]
 pub enum AnchorStateRegistryStructure {
     #[serde(rename = "v1")]
-    V1 { game_type: u8 }, // `anchors(game_type)`
+    V1 { game_type: GameType }, // `anchors(game_type)`
     #[serde(rename = "v2")]
     #[default]
     V2, // `getAnchorRoot()`
@@ -44,8 +53,8 @@ impl OptimismSpec {
         self.anchor_chain
     }
 
-    pub const fn anchor_state_registry(&self) -> Address {
-        self.anchor_state_registry.address
+    pub fn anchor_state_registry(&self) -> AnchorStateRegistrySpec {
+        self.anchor_state_registry.clone()
     }
 }
 

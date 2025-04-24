@@ -1,14 +1,17 @@
-use alloy_primitives::{Address, ChainId};
+use alloy_primitives::ChainId;
 use thiserror::Error;
 use tracing::info;
 
-use crate::{ChainSpec as BaseChainSpec, ConversionError as BaseConversionError};
+use crate::{
+    ChainSpec as BaseChainSpec, ConversionError as BaseConversionError,
+    spec::AnchorStateRegistrySpec,
+};
 
 #[derive(Debug, Clone)]
 pub struct ChainSpec {
     pub chain_spec: BaseChainSpec,
     pub anchor_chain: ChainId,
-    pub anchor_state_registry: Address,
+    pub anchor_state_registry: AnchorStateRegistrySpec,
 }
 
 #[derive(Debug, Error, PartialEq, Eq)]

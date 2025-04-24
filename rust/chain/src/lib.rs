@@ -7,4 +7,7 @@ mod spec;
 pub use config::{
     CHAIN_ID_TO_CHAIN_SPEC, CHAIN_NAME_TO_CHAIN_ID, MAINNET_MERGE_BLOCK_NUMBER, TEST_CHAIN_ID,
 };
-pub use spec::{ChainSpec, ConversionError, ForkError, OptimismSpec};
+pub use spec::{
+    AnchorStateRegistrySpec, AnchorStateRegistryStructure, ChainSpec, ConversionError, ForkError,
+    OptimismSpec,
+};
