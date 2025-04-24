@@ -17,7 +17,6 @@ export const ConfirmMintPage = () => {
   const [holderAddress, setHolderAddress] = useState<`0x${string}` | null>(
     null,
   );
-  const [, setBalance] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [proverResult] = useLocalStorage("proverResult", "");
   const tokensToCheck = JSON.parse(import.meta.env.VITE_TOKENS_TO_CHECK) as {
@@ -35,13 +34,12 @@ export const ConfirmMintPage = () => {
 
   useEffect(() => {
     if (proverResult) {
-      const [, owner, balance] = JSON.parse(proverResult) as [
+      const [, owner] = JSON.parse(proverResult) as [
         unknown,
         `0x${string}`,
         string,
       ];
       setHolderAddress(owner);
-      setBalance(balance);
     }
   }, [proverResult]);
 
