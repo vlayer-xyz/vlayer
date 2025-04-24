@@ -97,19 +97,22 @@ fn validate_domain(domain: &str) -> Result<(), MailParseError> {
 
     domain
         .split('.')
-        .find_map(|label| {
-            if label.is_empty() {
-                Some("Empty label in domain")
-            } else if label.starts_with('-') || label.ends_with('-') {
-                Some("Domain label must not start or end with a hyphen")
-            } else if !label.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
-                Some("Invalid character in domain")
-            } else {
-                None
-            }
-        })
-        .map_or(Ok(()), |msg| Err(MailParseError::Generic(msg)))?;
+        .find_map(|label| validate_domain_label(label).err())
+        .map_or(Ok(()), Err)?;
 
+    Ok(())
+}
+
+fn validate_domain_label(label: &str) -> Result<(), MailParseError> {
+    if label.is_empty() {
+        return Err(MailParseError::Generic("Empty label in domain"));
+    }
+    if label.starts_with('-') || label.ends_with('-') {
+        return Err(MailParseError::Generic("Domain label must not start or end with a hyphen"));
+    }
+    if !label.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+        return Err(MailParseError::Generic("Invalid character in domain"));
+    }
     Ok(())
 }
 
@@ -296,22 +299,51 @@ mod tests {
         }
 
         #[test]
+        fn empty_domain() {
+            let err = validate_domain("").unwrap_err();
+            assert_eq!(err.to_string(), "Domain is empty");
+        }
+
+        #[test]
+        fn domain_too_long() {
+            let long_domain = "a".repeat(256);
+            let err = validate_domain(&long_domain).unwrap_err();
+            assert_eq!(err.to_string(), "Domain too long. Maximal length is 255 characters");
+        }
+
+        #[test]
+        fn invalid_label() {
+            let result = validate_domain("example@com");
+            assert!(result.is_err());
+        }
+    }
+
+    mod validate_domain_label {
+        use super::*;
+
+        #[test]
+        fn success() {
+            assert!(validate_domain_label("example").is_ok());
+            assert!(validate_domain_label("sub-domain").is_ok());
+        }
+
+        #[test]
         fn empty_label() {
-            let err = validate_domain("example..com").unwrap_err();
+            let err = validate_domain_label("").unwrap_err();
             assert_eq!(err.to_string(), "Empty label in domain");
         }
 
         #[test]
         fn wrong_hyphen_placement() {
-            let err = validate_domain("-example.com").unwrap_err();
-            let err2 = validate_domain("example-.com").unwrap_err();
+            let err = validate_domain_label("-example").unwrap_err();
+            let err2 = validate_domain_label("example-").unwrap_err();
             assert_eq!(err.to_string(), "Domain label must not start or end with a hyphen");
             assert_eq!(err2.to_string(), "Domain label must not start or end with a hyphen");
         }
 
         #[test]
         fn invalid_character() {
-            let err = validate_domain("example@com").unwrap_err();
+            let err = validate_domain_label("example@com").unwrap_err();
             assert_eq!(err.to_string(), "Invalid character in domain");
         }
     }
