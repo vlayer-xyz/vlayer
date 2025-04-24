@@ -3,7 +3,7 @@
 name: Deploy Provers
 on:
   workflow_run:
-    workflows: ["Release nightly"]
+    workflows: ["Release nightly", "Release stable"]
     types: [completed]
   workflow_dispatch:
 concurrency:
