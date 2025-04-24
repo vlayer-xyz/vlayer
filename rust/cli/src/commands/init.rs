@@ -49,6 +49,8 @@ pub(crate) struct InitArgs {
     /// Config file to init from
     #[arg(long)]
     config_file: Option<PathBuf>,
+    #[clap(hide = true, default_value_t = true)]
+    install_solidity_deps: bool,
 }
 
 const VLAYER_DIR_NAME: &str = "vlayer";
@@ -203,7 +205,7 @@ pub(crate) async fn run_init(args: InitArgs) -> CLIResult<()> {
         .map_or_else(|| TemplatesLocation::Url(templates_url), TemplatesLocation::Path);
     let work_dir = args.work_dir.try_into()?;
 
-    init_existing(cwd, &config, templates_location, work_dir).await
+    init_existing(cwd, &config, templates_location, work_dir, args.install_solidity_deps).await
 }
 
 async fn init_existing(
@@ -211,6 +213,7 @@ async fn init_existing(
     config: &Config,
     templates_location: TemplatesLocation,
     work_dir: WorkDir,
+    install_solidity_deps: bool,
 ) -> CLIResult<()> {
     info!("Running vlayer init from directory {:?}", cwd.display());
 
@@ -253,8 +256,13 @@ async fn init_existing(
     info!("Initialising soldeer");
     init_soldeer(&root_path)?;
 
-    info!("Installing solidity dependencies");
-    install_solidity_dependencies(&config.sol_dependencies).await?;
+    if install_solidity_deps {
+        info!("Installing solidity dependencies");
+        install_solidity_dependencies(&config.sol_dependencies).await?;
+    } else {
+        info!("Skipping installation of solidity dependencies");
+    }
+
     info!("Successfully installed all solidity dependencies");
     add_remappings(&root_path, config.sol_dependencies.values())?;
 
@@ -411,7 +419,7 @@ pub(crate) fn create_vlayer_dir(src_path: &Path) -> anyhow::Result<PathBuf> {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
+    use std::{collections::BTreeMap, env};
 
     use tempfile::TempDir;
 
@@ -499,6 +507,36 @@ mod tests {
             let modified_url = modify_channel_in_url(content, channel).unwrap();
             assert_eq!(modified_url, "");
         }
+    }
+
+    #[tokio::test]
+    async fn test_run_init() -> CLIResult<()> {
+        let temp_dir = tempfile::tempdir()?;
+        let temp_path = temp_dir.path();
+        std::env::set_current_dir(temp_dir.path())?;
+
+        let args = InitArgs {
+            template: Some(Template::Simple),
+            templates_url: None,
+            templates_dir: Some(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples")),
+            existing: false,
+            project_name: None,
+            work_dir: Some(temp_path.to_path_buf()),
+            config_file: None,
+            install_solidity_deps: false,
+        };
+
+        run_init(args).await?;
+
+        let env_file = temp_path.join("vlayer/.env.testnet");
+        let contents = fs::read_to_string(env_file)?;
+
+        assert_eq!(
+            contents,
+            "CHAIN_NAME=optimismSepolia\nPROVER_URL=https://nightly-fake-prover.vlayer.xyz\nJSON_RPC_URL=https://sepolia.optimism.io\n"
+        );
+
+        Ok(())
     }
 
     #[test]
