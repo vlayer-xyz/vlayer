@@ -359,6 +359,7 @@ jobs:
           tag: ${{ steps.tags.outputs.NEW_TAG }}
           makeLatest: false
           prerelease: true
+          body: ${{ env.RELEASE_NOTES }}
           allowUpdates: true
           artifacts: "./dist/*"
 
