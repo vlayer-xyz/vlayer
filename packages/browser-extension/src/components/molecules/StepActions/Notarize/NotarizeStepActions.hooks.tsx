@@ -140,7 +140,7 @@ const useRedirectCallout = () => {
   }, [isWebProving, redirectDelay]);
 
   // redirection callout should be visible when web proving starts
-  // aand stay till
+  // and stay till redirection or error
   useEffect(() => {
     if (isWebProving) {
       setIsRedirectCalloutVisible(true);
