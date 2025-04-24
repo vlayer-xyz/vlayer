@@ -1,6 +1,10 @@
 name: Release stable
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - rust/version/Cargo.toml
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
