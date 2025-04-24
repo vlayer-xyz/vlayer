@@ -2,7 +2,7 @@ name: Lint Commit Messages (Conventional Commits)
 on:
   pull_request:
     branches:
-     - main
+      - main
 permissions:
   contents: read
   pull-requests: read
