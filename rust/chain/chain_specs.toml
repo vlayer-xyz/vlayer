@@ -202,6 +202,17 @@ forks = [
     { spec = "FJORD", activation = { Timestamp = 1721826000 } },
     { spec = "GRANITE", activation = { Timestamp = 1727780400 } },
 ]
+
+# https://docs.unichain.org/docs/technical-information/network-information
+# https://docs.unichain.org/docs/technical-information/contract-addresses
+[[chains]]
+name = "unichain"
+id = 130
+op_spec = { anchor_chain = 1, anchor_state_registry = "0x318A642db9e24A85318B8BF18eFd5287BA38643B" }
+forks = [
+    { spec = "GRANITE", activation = { Block = 0 } }
+]
+
 # endregion mainnets
 
 # region local
