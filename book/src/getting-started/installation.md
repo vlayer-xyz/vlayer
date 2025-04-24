@@ -34,3 +34,11 @@ You can check that the binary has been successfully installed and inspect its ve
 ```sh
 vlayer --version
 ```
+
+### Installing nightly version
+
+You can use use the following command to install a nightly version of vlayer:
+
+```sh
+vlayerup --channel nightly
+```
