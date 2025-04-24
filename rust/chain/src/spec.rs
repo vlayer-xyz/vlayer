@@ -19,7 +19,24 @@ pub struct ChainSpec {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OptimismSpec {
     anchor_chain: ChainId,
-    anchor_state_registry: Address,
+    anchor_state_registry: AnchorStateRegistrySpec,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AnchorStateRegistrySpec {
+    pub address: Address,
+    #[serde(default)]
+    pub structure: AnchorStateRegistryStructure,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(tag = "type", content = "value")]
+pub enum AnchorStateRegistryStructure {
+    #[serde(rename = "v1")]
+    V1 { game_type: u8 }, // `anchors(game_type)`
+    #[serde(rename = "v2")]
+    #[default]
+    V2, // `getAnchorRoot()`
 }
 
 impl OptimismSpec {
@@ -28,7 +45,7 @@ impl OptimismSpec {
     }
 
     pub const fn anchor_state_registry(&self) -> Address {
-        self.anchor_state_registry
+        self.anchor_state_registry.address
     }
 }
 
