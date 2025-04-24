@@ -13,6 +13,7 @@ import {
   ExtensionInternalMessageType,
   getRedactionConfig,
 } from "../web-proof-commons";
+
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
