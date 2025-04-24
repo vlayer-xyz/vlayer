@@ -1,1 +1,0 @@
-http :3000 @prover.json
