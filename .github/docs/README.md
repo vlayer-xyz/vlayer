@@ -49,6 +49,7 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [Lint TS](/.github/workflows/lint_ts.yaml) | Lint TypeScript code. |
 | [Lint Bash](/.github/workflows/lint_bash.yaml) | Lint Bash code. |
 | [Lint Workflows](/.github/workflows/lint_workflows.yaml) | Lint GitHub Actions workflows. |
+| [Lint Commits](/.github/workflows/lint_commit.yaml) | Validates Git commit messages against the [Conventional Commits](https://www.conventionalcommits.org/) specification. |
 | [Rust compilation performance](/.github/workflows/performance_rust_compilation.yaml) | Checks Rust incremental compilation performance. |
 | [PR team labeler](/.github/workflows/pr_team_labeler.yaml) | Adds team labels to PRs. |
 | [Release](/.github/workflows/release.yaml) | Reusable workflow to publish artifacts to npm, GitHub Releases, S3. |
