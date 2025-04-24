@@ -55,6 +55,8 @@ pub enum Error {
     UpdateDocker(#[from] update::docker::Error),
     #[error(transparent)]
     Jwt(#[from] JwtError),
+    #[error(transparent)]
+    Regex(#[from] regex::Error),
 }
 
 impl Error {
