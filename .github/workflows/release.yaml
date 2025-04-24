@@ -343,6 +343,7 @@ jobs:
         run: |
           NOTES=$(gh api repos/${{ github.repository }}/releases/generate-notes \
             -f tag_name=${{ steps.tags.outputs.NEW_TAG }} \
+            -f target_commitish=${{ github.sha }} \
             -f previous_tag_name=${{ steps.tags.outputs.PREVIOUS_TAG }} \
             --jq .body)
           { 
@@ -357,6 +358,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tags.outputs.NEW_TAG }}
+          commit: ${{ github.sha }}
           makeLatest: false
           prerelease: true
           body: ${{ env.RELEASE_NOTES }}
@@ -410,6 +412,7 @@ jobs:
         run: |
           NOTES=$(gh api repos/${{ github.repository }}/releases/generate-notes \
             -f tag_name=${{ steps.tags.outputs.NEW_TAG }} \
+            -f target_commitish=${{ github.sha }} \
             -f previous_tag_name=${{ steps.tags.outputs.PREVIOUS_TAG }} \
             --jq .body)
           { 
@@ -424,6 +427,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tags.outputs.NEW_TAG }}
+          commit: ${{ github.sha }}
           makeLatest: true
           body: ${{ env.RELEASE_NOTES }}
           allowUpdates: false
