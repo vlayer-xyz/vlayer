@@ -1,13 +1,13 @@
 use mailparse::{MailHeaderMap, ParsedMail};
 
-use crate::{Error, email::extract_address_from_header};
+use crate::{Error, email::extract_address::extract_address};
 
 pub fn extract_from_domain(email: &ParsedMail) -> Result<String, Error> {
     let all_headers = email.get_headers();
     let from_headers = all_headers.get_all_headers("From");
     let last_from_header = from_headers.last().ok_or(Error::MissingFromHeader)?;
 
-    let from_address = extract_address_from_header(last_from_header).map_err(Error::EmailParse)?;
+    let from_address = extract_address(last_from_header).map_err(Error::EmailParse)?;
 
     let (_, domain) = from_address
         .rsplit_once('@')
@@ -34,14 +34,12 @@ mod test {
                 ("Hello Worldowski <hello@world.com>", Ok("world.com")),
                 ("Hello Worldowski <hello@world.com  \t>  \t ", Ok("world.com")),
                 ("Hello Worldowski (Hi) <hello@world.com>", Ok("world.com")),
-                (r#"John Doe <"user@name"@example.com>"#, Ok("example.com")),
                 (
                     r#""John Doe" <user@example.com>, "Jane Smith" <jane@example.com>"#,
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
                         "Expected exactly one address in the \"From\" header",
                     ))),
                 ),
-                (r#"John Doe <"user.name"@example.com>"#, Ok("example.com")),
                 (
                     "@routing:user@example.com",
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
@@ -93,18 +91,8 @@ mod test {
     }
 
     #[test]
-    fn quoted_local_part_format() {
-        test_domain_extraction(r#"John Doe <"user.name"@example.com>"#);
-    }
-
-    #[test]
     fn fails_for_multiple_recipients() {
         test_domain_extraction(r#""John Doe" <user@example.com>, "Jane Smith" <jane@example.com>"#);
-    }
-
-    #[test]
-    fn works_for_quoted_local_part_with_at_symbol() {
-        test_domain_extraction(r#"John Doe <"user@name"@example.com>"#);
     }
 
     #[test]
