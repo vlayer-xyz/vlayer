@@ -8,8 +8,9 @@ import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { ExtensionInternalMessageType } from "src/web-proof-commons";
 
-export const CALLOUT_DEBOUNCE_TIME = 1000;
-
+const ONE_SECOND = 1000;
+export const PROVING_PROGRESS_HIDE_DELAY = 2 * ONE_SECOND;
+export const CALLOUT_DEBOUNCE_TIME = 1.5 * ONE_SECOND;
 const useProveButton = () => {
   const { prove, isProving: isWebProving, proof } = useTlsnProver();
   return {
@@ -76,7 +77,7 @@ const useProgress = () => {
     if (isZkProvingDone) {
       setTimeout(() => {
         setIsProvingProgressVisible(false);
-      }, 2000);
+      }, PROVING_PROGRESS_HIDE_DELAY);
     }
     if (!isZkProving && !isWebProving) {
       setIsProvingProgressVisible(false);
@@ -173,7 +174,7 @@ const useRedirectCallout = () => {
         }).catch(console.error);
       }
     },
-    isWebProving ? 1000 : null,
+    isWebProving ? ONE_SECOND : null,
   );
 
   return {

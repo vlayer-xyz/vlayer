@@ -103,10 +103,7 @@ describe("RedirectCallout", () => {
     const timoutText = within(redirectMessage).getByTestId("timeout");
 
     expect(timoutText).toHaveTextContent(
-      (
-        DEFAULT_REDIRECT_DELAY_SECONDS -
-        CALLOUT_DEBOUNCE_TIME / 1000
-      ).toString(),
+      (DEFAULT_REDIRECT_DELAY_SECONDS - 1).toString(),
     );
 
     for (let i = DEFAULT_REDIRECT_DELAY_SECONDS; i > 0; i--) {
