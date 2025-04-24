@@ -22,7 +22,7 @@ export const stepsMeta: Record<StepKind, StepMeta> = {
     kind: StepKind.welcome,
     title: "Superchain Whale NFT",
     description: "Prove that you own USDC token across multiple chains.",
-    headerIcon: "/img/time-travel-icon.svg",
+    headerIcon: "/img/teleport-icon.svg",
     index: 0,
   },
   [StepKind.showBalance]: {
@@ -30,7 +30,7 @@ export const stepsMeta: Record<StepKind, StepMeta> = {
     kind: StepKind.showBalance,
     title: "Superchain Whale NFT",
     description: "Prove that you own USDC token across multiple chains.",
-    headerIcon: "/img/time-travel-icon.svg",
+    headerIcon: "/img/teleport-icon.svg",
     index: 1,
   },
   [StepKind.success]: {
