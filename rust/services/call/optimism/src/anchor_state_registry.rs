@@ -50,6 +50,15 @@ sol! {
     function anchors(uint32) public view returns (OutputRoot);
 }
 
+#[allow(dead_code)]
+enum GameType {
+    Cannon = 0,
+    PermissionedCannon = 1,
+    Asterisc = 2,
+    Fast = 254,
+    Alphabet = 255,
+}
+
 impl<D: RevmDB> AnchorStateRegistry<D> {
     pub fn get_latest_confirmed_l2_commitment(&self) -> Result<L2Commitment> {
         let anchorsReturn {
@@ -58,7 +67,13 @@ impl<D: RevmDB> AnchorStateRegistry<D> {
                     output_hash,
                     block_number,
                 },
-        } = evm_call(&self.db, self.address, &anchorsCall { _0: 1 })?;
+        } = evm_call(
+            &self.db,
+            self.address,
+            &anchorsCall {
+                _0: GameType::PermissionedCannon as u32,
+            },
+        )?;
 
         Ok(L2Commitment {
             output_hash,
