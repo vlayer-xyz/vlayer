@@ -36,7 +36,7 @@ jobs:
           vercel_project_id: ${{ secrets.VERCEL_SIMPLE_TELEPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          json_rpc_url: https://virulent-green-paper.ethereum-sepolia.quiknode.pro/61a794a034c819264f86f5e8243a4e24cfb84b25 #TODO: change it to the correct one
+          json_rpc_url: "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
           vlayer_api_token: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN }}
           vite_sentry_dsn: "https://fe1013ab0d2ae6227a1ed302b1c50383@o4508754893012992.ingest.de.sentry.io/4509196678922320"
   e2e-test-web-apps-vercel:
