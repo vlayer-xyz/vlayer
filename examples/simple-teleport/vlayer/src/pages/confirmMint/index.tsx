@@ -27,7 +27,6 @@ export const ConfirmMintPage = () => {
 
   useEffect(() => {
     if (txHash && status === "success") {
-      console.log("Claimed", txHash);
       void navigate(`/success?txHash=${txHash}`);
     }
   }, [txHash, status]);
@@ -62,7 +61,7 @@ export const ConfirmMintPage = () => {
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
       abi: verifierSpec.abi,
       functionName: "claim",
-      //@ts-expect-error proof is unknown @Artur fix this
+      //@ts-expect-error proof is unknown
       args: [proof, owner, balances, tokens],
     });
   };

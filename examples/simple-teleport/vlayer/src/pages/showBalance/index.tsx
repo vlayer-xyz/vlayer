@@ -27,7 +27,6 @@ export const ShowBalancePage = () => {
       setHolderAddress(owner);
       setBalances(balances);
       setTokens(tokens);
-      console.log(balances, tokens);
       setIsLoading(false);
     }
   }, [proverResult]);
