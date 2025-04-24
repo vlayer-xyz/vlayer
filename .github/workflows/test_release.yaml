@@ -30,6 +30,10 @@ jobs:
         run: bash/test-release-local-prover.sh
 
   test-release-sepolia:
+    strategy:
+      fail-fast: false
+      matrix:
+        vlayer_release: [nightly, stable]
     name: Test release on OP Sepolia and remote prover
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
@@ -40,11 +44,12 @@ jobs:
           submodules: recursive
       - name: Test remote prover
         env:
-          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_RELEASE_PRIVATE_KEY }}
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ matrix.vlayer_release == 'nightly' && secrets.EXAMPLES_TEST_RELEASE_PRIVATE_KEY || secrets.EXAMPLES_TEST_RELEASE_PRIVATE_KEY_2 }}
           JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
           VLAYER_API_TOKEN: ${{ secrets.DEPLOYED_VLAYER_API_TOKEN }}
           WS_PROXY_URL: wss://test-wsproxy.vlayer.xyz/jwt
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          VLAYER_RELEASE: ${{ matrix.vlayer_release }}
 
         run: bash/test-release-remote-prover.sh
       - name: Handle Playwright Reports
@@ -60,7 +65,7 @@ jobs:
           REPORT_PATH: "vlayer-test-release/examples/**/vlayer/playwright-report/"
           PR_NUMBER: ${{ github.event.number }}
           DEPLOY_TYPE: "examples"
-          CONTEXT: "test-release"
+          CONTEXT: "test-release-sepolia-${{ matrix.vlayer_release }}"
 
   test-release-js-sdk:
     name: Test JS SDK release

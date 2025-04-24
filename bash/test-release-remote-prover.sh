@@ -6,6 +6,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
 
 set -ueo pipefail
 
+VLAYER_RELEASE=${VLAYER_RELEASE:-nightly}
+
 echo "::group::setting git config"
 set_missing_git_config
 echo "::endgroup::"
@@ -19,7 +21,8 @@ echo "::endgroup::"
 echo "::group::vlayer installation"
 curl -SL https://install.vlayer.xyz | bash
 export PATH="$PATH:$HOME/.config/.vlayer/bin"
-vlayerup
+vlayerup --channel "${VLAYER_RELEASE}"
+vlayer --version
 echo "::endgroup::"
 
 echo "::group::bun installation"
