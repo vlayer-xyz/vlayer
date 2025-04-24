@@ -58,7 +58,7 @@ export const ShowBalancePage = () => {
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
       abi: verifierSpec.abi,
       functionName: "claim",
-      //@ts-expect-error proof is unknown @Artur fix this
+      //@ts-expect-error proof is unknown
       args: [proof, owner, BigInt(balance)],
     });
   };

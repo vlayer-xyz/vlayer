@@ -1,14 +1,12 @@
 import { Step, StepKind, stepsMeta, StepComponentMap } from "./types";
 import { WelcomePage, ShowBalancePage, SuccessPage } from "../../pages";
 
-// Map step kinds to their respective components
 export const stepComponents: StepComponentMap = {
   [StepKind.welcome]: WelcomePage,
   [StepKind.showBalance]: ShowBalancePage,
   [StepKind.success]: SuccessPage,
 };
 
-// Get complete step data with component
 export const getStep = (kind: StepKind): Step => {
   const meta = stepsMeta[kind];
   if (!meta) {
@@ -22,7 +20,6 @@ export const getStep = (kind: StepKind): Step => {
   };
 };
 
-// Get all steps as an array when needed
 export const getAllSteps = (): Step[] => {
   return Object.entries(stepsMeta).map(([kindStr, meta]) => {
     const kind = Number(kindStr) as StepKind;
