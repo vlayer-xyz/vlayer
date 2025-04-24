@@ -1,4 +1,4 @@
-# Quickstart guide for web proofs with custom data source
+# Custom data source - quick guide
 This guide walks you through setting up a development environment, configuring a custom data source, and generating/verifying Web Proofs using vlayer.
 
 ## Setting up dev environment

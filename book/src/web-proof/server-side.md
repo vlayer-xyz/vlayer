@@ -1,4 +1,4 @@
-# Server-side Web Proof
+# Server-side proving
 vlayer supports generating Web Proofs on the server side. This method is especially useful for proving web data returned by public or token-authenticated APIs, without requiring a browser extension.
 
 Typical use cases include verifying responses from centralized services such as Coinbase, Binance, Kraken, Stripe, Github, Meta, YouTube or similar platforms.
