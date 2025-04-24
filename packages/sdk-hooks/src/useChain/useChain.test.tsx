@@ -13,23 +13,23 @@ describe("useChain", () => {
   });
 
   it("should successfully return chain", () => {
-    vi.stubEnv("VITE_VLAYER_CHAIN_ID", "anvil");
+    vi.stubEnv("VITE_CHAIN_NAME", "anvil");
 
     const { result } = renderHook(() => useChain());
     const chain = result.current.chain;
 
-    expect(result.current.error).toBeUndefined();
+    expect(result.current.error).toBeNull();
     expect(chain).toBeDefined();
-    expect(chain).toBe("anvil");
+    expect(chain?.name).toBe("Anvil");
   });
 
   it("should fail when chains mismatched", () => {
-    vi.stubEnv("VITE_VLAYER_CHAIN_ID", "sepolia");
+    vi.stubEnv("VITE_CHAIN_NAME", "sepolia");
 
     const { result } = renderHook(() => useChain());
     const error = result.current.error;
 
-    expect(result.current.chain).toBeUndefined();
+    expect(result.current.chain).toBeNull();
     expect(error).toBeDefined();
     expect(error).toBe(
       "Chains mismatched. Wallet chain: anvil is not equal to env chain: sepolia",
@@ -42,19 +42,19 @@ describe("useChain", () => {
     const { result } = renderHook(() => useChain());
     const error = result.current.error;
 
-    expect(result.current.chain).toBeUndefined();
+    expect(result.current.chain).toBeNull();
     expect(error).toBeDefined();
     expect(error).toBe("Env chain undefined not found");
   });
 
   it("should fail when chain is not supported", () => {
-    vi.stubEnv("VITE_VLAYER_CHAIN_ID", "unsupported-chain");
+    vi.stubEnv("VITE_CHAIN_NAME", "unsupported-chain");
 
     const { result } = renderHook(() => useChain());
     const error = result.current.error;
 
-    expect(result.current.chain).toBeUndefined();
+    expect(result.current.chain).toBeNull();
     expect(error).toBeDefined();
-    expect(error).toBe("Chain unsupported-chain is not suported");
+    expect(error).toBe("Chain unsupported-chain is not supported");
   });
 });
