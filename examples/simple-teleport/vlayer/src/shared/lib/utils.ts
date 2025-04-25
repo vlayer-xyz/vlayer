@@ -18,10 +18,13 @@ export const getChainName = (chainId: string): string => {
   );
 };
 
-export const tokensToProve = JSON.parse(import.meta.env.VITE_TOKENS_TO_CHECK) as {
+export const tokensToProve = JSON.parse(
+  import.meta.env.VITE_TOKENS_TO_CHECK,
+) as {
   addr: string;
   chainId: string;
   blockNumber: string;
+  balance: string;
 }[];
 
 export const parseProverResult = (proverResult: string) =>
