@@ -47,10 +47,21 @@ impl Args {
 }
 
 /// Take last 8 bytes from slice and interpret as big-endian encoded u64.
-/// Will trim larger numbers to u64 range, and panic if slice is smaller than 8 bytes.
+/// Will trim larger numbers to u64 range, and panic if slice is smaller than 8 bytes
+/// or if discarded leading bytes are non-zero.
 #[allow(clippy::missing_const_for_fn)] // Remove and add const when const Option::expect is stabilized
 fn u64_from_be_slice(slice: &[u8]) -> u64 {
-    u64::from_be_bytes(*slice.last_chunk().expect("invalid u64 slice"))
+    if slice.len() < 8 {
+        panic!("u64_from_be_slice: input slice too short, must be at least 8 bytes");
+    }
+
+    let (prefix, last8) = slice.split_at(slice.len() - 8);
+
+    if prefix.iter().any(|&b| b != 0) {
+        panic!("u64_from_be_slice: value overflows u64 — leading bytes must be zero");
+    }
+
+    u64::from_be_bytes(last8.try_into().expect("slice must be exactly 8 bytes"))
 }
 
 #[cfg(test)]
