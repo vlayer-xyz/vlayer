@@ -6,7 +6,7 @@ use chain::TEST_CHAIN_ID;
 use common::GuestElf;
 use derive_more::From;
 use risc0_zkp::core::digest::Digest;
-use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
+use server_utils::{Environment, ProofMode, jwt::cli::Config as JwtConfig};
 use thiserror::Error;
 
 use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
@@ -27,6 +27,7 @@ pub struct Config {
     pub semver: String,
     pub gas_meter_config: Option<GasMeterConfig>,
     pub jwt_config: Option<JwtConfig>,
+    pub environment: Environment,
 }
 
 impl Config {
@@ -93,6 +94,7 @@ pub struct ConfigBuilder {
     semver: Option<String>,
     gas_meter_config: Option<GasMeterConfig>,
     jwt_config: Option<JwtConfig>,
+    environment: Environment,
 }
 
 impl ConfigBuilder {
@@ -179,6 +181,12 @@ impl ConfigBuilder {
         self
     }
 
+    #[must_use]
+    pub const fn with_environment(mut self, environment: Environment) -> Self {
+        self.environment = environment;
+        self
+    }
+
     pub fn build(self) -> Result<Config, Error> {
         let Self {
             socket_addr,
@@ -191,6 +199,7 @@ impl ConfigBuilder {
             semver,
             gas_meter_config,
             jwt_config,
+            environment,
         } = self;
 
         let call_guest_elf = call_guest_elf.ok_or(Error("call_guest_elf".into()))?;
@@ -208,6 +217,7 @@ impl ConfigBuilder {
             semver,
             gas_meter_config,
             jwt_config,
+            environment,
         })
     }
 }

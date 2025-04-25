@@ -11,6 +11,7 @@ use clap::{ArgAction, Parser};
 use common::{GlobalArgs, extract_rpc_url_token, init_tracing};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
 use server_utils::{
+    Environment,
     jwt::cli::{Args as JwtArgs, Config as JwtConfig},
     set_risc0_dev_mode,
 };
@@ -59,11 +60,15 @@ struct Cli {
 
     #[clap(flatten)]
     global_args: GlobalArgs,
+
+    #[arg(long, value_enum, env)]
+    environment: Option<Environment>,
 }
 
 impl Cli {
     fn into_config(self, api_version: String) -> anyhow::Result<Config> {
         let proof_mode = self.proof.unwrap_or_default();
+        let environment = self.environment.unwrap_or_default();
         let gas_meter_config = self
             .gas_meter_url
             .zip(Some(self.gas_meter_ttl.unwrap_or_default()))
@@ -89,6 +94,7 @@ impl Cli {
             .with_host(self.host)
             .with_port(self.port)
             .with_jwt_config(jwt_config)
+            .with_environment(environment)
             .build()?)
     }
 }
@@ -108,7 +114,7 @@ async fn main() -> anyhow::Result<()> {
 
     let config = cli.into_config(api_version)?;
 
-    info!("Running vlayer serve...");
+    info!("Running vlayer serve in {} environment", config.environment);
     if config.proof_mode == ProofMode::Fake {
         warn!("Running in fake mode. Server will not generate real proofs.");
         set_risc0_dev_mode();
