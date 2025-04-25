@@ -39,7 +39,7 @@ export const stepsMeta: Record<StepKind, StepMeta> = {
     kind: StepKind.confirmMint,
     title: "Mint NFT Confirmation",
     description: "",
-    headerIcon: "/img/time-travel-icon.svg",
+    headerIcon: "/img/teleport-icon.svg",
     index: 2,
   },
   [StepKind.success]: {
@@ -48,7 +48,7 @@ export const stepsMeta: Record<StepKind, StepMeta> = {
     title: "Success",
     description: "",
     headerIcon: "/img/success.svg",
-    index: 2,
+    index: 3,
   },
 };
 

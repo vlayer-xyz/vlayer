@@ -5,6 +5,8 @@ import { getStepPath } from "../../app/router/steps";
 import { StepKind } from "../../app/router/types";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
+import { tokensToProve } from "../../shared/lib/utils";
+
 export const WelcomePage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -17,12 +19,7 @@ export const WelcomePage = () => {
     setIsLoading(true);
     const formData = new FormData(e.target as HTMLFormElement);
     const holderAddress = formData.get("holderAddress") as `0x${string}`;
-    const tokensToCheck = JSON.parse(import.meta.env.VITE_TOKENS_TO_CHECK) as {
-      addr: string;
-      chainId: string;
-      blockNumber: string;
-    }[];
-    void callProver([holderAddress, tokensToCheck]);
+    void callProver([holderAddress, tokensToProve]);
   };
 
   useEffect(() => {

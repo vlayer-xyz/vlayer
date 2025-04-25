@@ -4,6 +4,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { useAccount, useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
+import { parseProverResult, tokensToProve } from "../../shared/lib/utils";
 
 export const ConfirmMintPage = () => {
   const { address } = useAccount();
@@ -19,11 +20,6 @@ export const ConfirmMintPage = () => {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [proverResult] = useLocalStorage("proverResult", "");
-  const tokensToCheck = JSON.parse(import.meta.env.VITE_TOKENS_TO_CHECK) as {
-    addr: string;
-    chainId: string;
-    blockNumber: string;
-  }[];
 
   useEffect(() => {
     if (txHash && status === "success") {
@@ -33,11 +29,7 @@ export const ConfirmMintPage = () => {
 
   useEffect(() => {
     if (proverResult) {
-      const [, owner] = JSON.parse(proverResult) as [
-        unknown,
-        `0x${string}`,
-        string,
-      ];
+      const [, owner] = parseProverResult(proverResult);
       setHolderAddress(owner);
     }
   }, [proverResult]);
@@ -50,19 +42,14 @@ export const ConfirmMintPage = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const [proof, owner, balances, tokens] = JSON.parse(proverResult) as [
-      unknown,
-      `0x${string}`,
-      string[],
-      { addr: string; chainId: string; blockNumber: string }[],
-    ];
+    const [proof, owner, tokens] = parseProverResult(proverResult);
     setIsLoading(true);
     writeContract({
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
       abi: verifierSpec.abi,
       functionName: "claim",
       //@ts-expect-error proof is unknown
-      args: [proof, owner, balances, tokens],
+      args: [proof, owner, tokens],
     });
   };
 
@@ -73,7 +60,7 @@ export const ConfirmMintPage = () => {
   return (
     <form onSubmit={handleSubmit}>
       <p className="desc w-full text-center">
-        NFT of holding USDC across {tokensToCheck.length} chains
+        NFT of holding USDC across {tokensToProve.length} chains
       </p>
       <div className="mb-4 w-full block">
         <label
