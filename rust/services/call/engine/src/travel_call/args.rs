@@ -6,6 +6,7 @@ use crate::utils::evm_call::split_calldata;
 
 // The length of an argument in call data is 32 bytes.
 const ARG_LEN: usize = 32;
+const U64_BYTE_LEN: usize = 8;
 
 pub static SET_BLOCK_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
     decode("87cea3ae")
@@ -51,17 +52,18 @@ impl Args {
 /// or if discarded leading bytes are non-zero.
 #[allow(clippy::missing_const_for_fn)] // Remove and add const when const Option::expect is stabilized
 fn u64_from_be_slice(slice: &[u8]) -> u64 {
-    if slice.len() < 8 {
-        panic!("u64_from_be_slice: input slice too short, must be at least 8 bytes");
-    }
+    assert!(slice.len() >= U64_BYTE_LEN, "slice must be at least {U64_BYTE_LEN} bytes");
 
-    let (prefix, last8) = slice.split_at(slice.len() - 8);
+    let start = slice.len() - U64_BYTE_LEN;
 
-    if prefix.iter().any(|&b| b != 0) {
-        panic!("u64_from_be_slice: value overflows u64 — leading bytes must be zero");
-    }
+    assert!(
+        slice[..start].iter().all(|&b| b == 0),
+        "value overflows u64 — leading bytes must be zero"
+    );
 
-    u64::from_be_bytes(last8.try_into().expect("slice must be exactly 8 bytes"))
+    let mut buf = [0_u8; U64_BYTE_LEN];
+    buf.copy_from_slice(&slice[start..]);
+    u64::from_be_bytes(buf)
 }
 
 #[cfg(test)]
@@ -79,16 +81,14 @@ mod u64_from_be_slice {
     }
 
     #[test]
-    #[should_panic(expected = "slice must be exactly 8 bytes")]
+    #[should_panic(expected = "slice must be at leas 8 bytes")]
     fn too_short() {
         let slice = [0];
-        _ = u64_from_be_slice(&slice);
+        u64_from_be_slice(&slice);
     }
 
     #[test]
-    #[should_panic(
-        expected = "u64_from_be_slice: value overflows u64 — leading bytes must be zero"
-    )]
+    #[should_panic(expected = "value overflows u64 — leading bytes must be zero")]
     fn invalid_leading_bytes() {
         let slice = [1; 32];
         _ = u64_from_be_slice(&slice);
