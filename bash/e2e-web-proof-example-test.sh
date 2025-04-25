@@ -24,5 +24,5 @@ build_extension
 run_web_tests simple-web-proof
 
 echo "::group::Cleanup"
-cleanup
+# cleanup
 echo "::endgroup::Cleanup"
