@@ -91,6 +91,6 @@ mod u64_from_be_slice {
     #[should_panic(expected = "value overflows u64 — leading bytes must be zero")]
     fn invalid_leading_bytes() {
         let slice = [1; 32];
-        _ = u64_from_be_slice(&slice);
+        u64_from_be_slice(&slice);
     }
 }
