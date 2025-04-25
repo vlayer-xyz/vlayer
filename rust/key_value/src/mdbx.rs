@@ -10,7 +10,7 @@ use crate::ReadWriteTx;
 
 pub const MAX_TABLES: u64 = 1024;
 pub const MIN_DB_SIZE: isize = 100_000_000;
-pub const MAX_DB_SIZE: isize = 10_000_000_000;
+pub const MAX_DB_SIZE: isize = 1 << 43; // 8TB
 pub const DB_GROWTH_STEP: isize = 100_000_000;
 
 pub struct Mdbx {
