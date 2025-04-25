@@ -61,7 +61,7 @@ struct Cli {
     #[clap(flatten)]
     global_args: GlobalArgs,
 
-    #[arg(long, value_enum, env)]
+    #[arg(long, value_enum, env = "VLAYER_ENVIRONMENT")]
     environment: Option<Environment>,
 }
 
