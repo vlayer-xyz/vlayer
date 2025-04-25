@@ -2,8 +2,8 @@ pub mod axum;
 pub mod cli;
 
 pub use jwt::{
-    Algorithm, Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey, Header, encode,
-    get_current_timestamp,
+    Algorithm, Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey, Environment,
+    Header, encode, get_current_timestamp,
 };
 
 pub mod test_helpers {

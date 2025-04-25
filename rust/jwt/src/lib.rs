@@ -135,4 +135,3 @@ mod tests {
         assert_eq!(token_data.claims.environment, Some(Environment::Mainnet));
     }
 }
-
