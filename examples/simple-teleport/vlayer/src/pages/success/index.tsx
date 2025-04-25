@@ -15,8 +15,8 @@ export const SuccessPage = () => {
           <a
             href={
               account.chain?.blockExplorers?.default.name === "Etherscan"
-                ? `https://${account.chain?.blockExplorers?.default.url}/token/${txHash}`
-                : `https://${account.chain?.blockExplorers?.default.url}/tx/${txHash}`
+                ? `${account.chain?.blockExplorers?.default.url}/token/${txHash}`
+                : `${account.chain?.blockExplorers?.default.url}/tx/${txHash}`
             }
             className="text-blue-700 text-center text-block font-bold"
           >
