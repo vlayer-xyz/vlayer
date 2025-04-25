@@ -79,9 +79,16 @@ mod u64_from_be_slice {
     }
 
     #[test]
-    #[should_panic(expected = "invalid u64 slice")]
-    fn invalid() {
+    #[should_panic(expected = "slice must be exactly 8 bytes")]
+    fn too_short() {
         let slice = [0];
+        _ = u64_from_be_slice(&slice);
+    }
+
+    #[test]
+    #[should_panic(expected = "u64_from_be_slice: value overflows u64 — leading bytes must be zero")]
+    fn invalid_leading_bytes() {
+        let slice = [1; 32];
         _ = u64_from_be_slice(&slice);
     }
 }
