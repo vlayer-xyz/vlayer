@@ -81,7 +81,7 @@ mod u64_from_be_slice {
     }
 
     #[test]
-    #[should_panic(expected = "slice must be at leas 8 bytes")]
+    #[should_panic(expected = "slice must be at least 8 bytes")]
     fn too_short() {
         let slice = [0];
         u64_from_be_slice(&slice);
