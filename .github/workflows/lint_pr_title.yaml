@@ -8,10 +8,10 @@ jobs:
   lint-pr-title:
     name: Lint PR Title
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - name: Lint PR title
         id: lint
+        continue-on-error: true
         uses: amannn/action-semantic-pull-request@v5
         with:
           requireScope: false
