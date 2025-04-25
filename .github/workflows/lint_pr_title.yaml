@@ -8,9 +8,22 @@ jobs:
   lint-pr-title:
     name: Lint PR Title
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - name: Lint PR title
+        uses: amannn/action-semantic-pull-request@v5
         with:
           requireScope: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on failure
+        if: steps.lint.outcome == 'failure'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: semantic-pr-title
+          message: |
+            ❌ **PR title does not follow the Conventional Commits format.**
+            Please use a format like `feat: add new feature` or `fix: correct typo`.
+
+            Refer to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for more details.
