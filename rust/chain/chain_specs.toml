@@ -7,7 +7,7 @@ id = 11155111
 forks = [
     { spec = "MERGE", activation = { Block = 0 } },
     { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } },
-    { spec = "CANCUN", activation = { Timestamp = 1706655072 } }
+    { spec = "CANCUN", activation = { Timestamp = 1706655072 } },
 ]
 
 # https://github.com/base-org/op-geth/blob/78436b6ae2a45a9c8449a9b0c93b062a37bd20da/core/forkid/forkid_test.go#L103
@@ -15,7 +15,7 @@ forks = [
 # https://docs.base.org/chain/base-contracts#ethereum-testnet-sepolia
 name = "base-sepolia"
 id = 84532
-op_spec = { anchor_chain = 11155111, anchor_state_registry = "0x0729957c92A1F50590A84cb2D65D761093f3f8eB" }
+op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0x0729957c92A1F50590A84cb2D65D761093f3f8eB" } }
 forks = [
     { spec = "CANYON", activation = { Block = 0 } },
     { spec = "ECOTONE", activation = { Timestamp = 1706634000 } },
@@ -27,7 +27,7 @@ forks = [
 [[chains]]
 name = "optimism-sepolia"
 id = 11155420
-op_spec = { anchor_chain = 11155111, anchor_state_registry = "0xDB2727Fc71176Bf8ED630F4142e0439733588e85" }
+op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0xDB2727Fc71176Bf8ED630F4142e0439733588e85" } }
 forks = [
     { spec = "BEDROCK", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1699981200 } },
@@ -52,31 +52,25 @@ forks = [
 [[chains]]
 name = "arbitrum-sepolia"
 id = 421614
-forks = [
-    { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
-]
+forks = [{ spec = "CANCUN", activation = { Timestamp = 1710338135 } }]
 
 [[chains]]
 name = "zksync-sepolia"
 id = 300
-forks = [
-    { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
-]
+forks = [{ spec = "CANCUN", activation = { Timestamp = 1710338135 } }]
 
 # https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-sepolia/genesis.json#L3
 [[chains]]
 name = "linea-sepolia"
 id = 59141
-forks = [
-    { spec = "LONDON", activation = { Block = 0 } }
-]
+forks = [{ spec = "LONDON", activation = { Block = 0 } }]
 
 # https://github.com/worldcoin/world-id-docs/blob/524b92581b06b46dde08d7a31fc1f0c99aea180c/src/pages/world-chain/reference/node-setup.mdx#running-world-chain-sepolia
 # https://docs.world.org/world-chain/developers/world-chain-contracts#ethereum-sepolia-testnet
 [[chains]]
 name = "worldchain-sepolia"
 id = 4801
-op_spec = { anchor_chain = 11155111, anchor_state_registry = "0x1333d5E5201D760444A399E77b3D337eBDB0DD07" }
+op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0x1333d5E5201D760444A399E77b3D337eBDB0DD07", structure = { type = "v1", value = { game_type = "PermissionedCannon" } } } }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
     { spec = "FJORD", activation = { Timestamp = 1721826000 } },
@@ -88,10 +82,8 @@ forks = [
 [[chains]]
 name = "unichain-sepolia"
 id = 1301
-op_spec = { anchor_chain = 11155111, anchor_state_registry = "0xf971F1b0D80eb769577135b490b913825BfcF00B" }
-forks = [
-    { spec = "GRANITE", activation = { Block = 0 } },
-]
+op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0xf971F1b0D80eb769577135b490b913825BfcF00B", structure = { type = "v1", value = { game_type = "Cannon" } } } }
+forks = [{ spec = "GRANITE", activation = { Block = 0 } }]
 # endregion testnets
 
 # region mainnets
@@ -115,7 +107,7 @@ forks = [
     { spec = "GRAY_GLACIER", activation = { Block = 15050000 } },
     { spec = "MERGE", activation = { Block = 15537394 } },
     { spec = "SHANGHAI", activation = { Timestamp = 1681338455 } },
-    { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
+    { spec = "CANCUN", activation = { Timestamp = 1710338135 } },
 ]
 
 # https://github.com/base-org/optimism/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
@@ -123,7 +115,7 @@ forks = [
 [[chains]]
 name = "base"
 id = 8453
-op_spec = { anchor_chain = 1, anchor_state_registry = "0xdB9091e48B1C42992A1213e6916184f9eBDbfEDf" }
+op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0xdB9091e48B1C42992A1213e6916184f9eBDbfEDf", structure = { type = "v1", value = { game_type = "Cannon" } } } }
 forks = [
     { spec = "REGOLITH", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1704992401 } },
@@ -136,7 +128,7 @@ forks = [
 [[chains]]
 name = "optimism"
 id = 10
-op_spec = { anchor_chain = 1, anchor_state_registry = "0x1c68ECfbf9C8B1E6C0677965b3B9Ecf9A104305b" }
+op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0x1c68ECfbf9C8B1E6C0677965b3B9Ecf9A104305b" } }
 forks = [
     { spec = "MERGE", activation = { Block = 0 } },
     { spec = "BEDROCK", activation = { Timestamp = 1686079703 } },
@@ -165,43 +157,44 @@ forks = [
 [[chains]]
 name = "arbitrum-one"
 id = 42161
-forks = [
-    { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
-]
+forks = [{ spec = "CANCUN", activation = { Timestamp = 1710338135 } }]
 
 [[chains]]
 name = "arbitrum-nova"
 id = 42170
-forks = [
-    { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
-]
+forks = [{ spec = "CANCUN", activation = { Timestamp = 1710338135 } }]
 
 [[chains]]
 name = "zksync"
 id = 324
-forks = [
-    { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
-]
+forks = [{ spec = "CANCUN", activation = { Timestamp = 1710338135 } }]
 
 # https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-mainnet/genesis.json
 [[chains]]
 name = "linea"
 id = 59144
-forks = [
-    { spec = "LONDON", activation = { Block = 0 } }
-]
+forks = [{ spec = "LONDON", activation = { Block = 0 } }]
 
 # https://github.com/worldcoin/world-id-docs/blob/524b92581b06b46dde08d7a31fc1f0c99aea180c/src/pages/world-chain/reference/node-setup.mdx#running-world-chain-mainnet
 # https://docs.world.org/world-chain/developers/world-chain-contracts#ethereum-mainnet
 [[chains]]
 name = "worldchain"
 id = 480
-op_spec = { anchor_chain = 1, anchor_state_registry = "0xD4D7A57DCC563756DeD99e224E144A6Bf0327099" }
+op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0xD4D7A57DCC563756DeD99e224E144A6Bf0327099", structure = { type = "v1", value = { game_type = "PermissionedCannon" } } } }
 forks = [
     { spec = "ECOTONE", activation = { Block = 0 } },
     { spec = "FJORD", activation = { Timestamp = 1721826000 } },
     { spec = "GRANITE", activation = { Timestamp = 1727780400 } },
 ]
+
+# https://docs.unichain.org/docs/technical-information/network-information
+# https://docs.unichain.org/docs/technical-information/contract-addresses
+[[chains]]
+name = "unichain"
+id = 130
+op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0x318A642db9e24A85318B8BF18eFd5287BA38643B" } }
+forks = [{ spec = "GRANITE", activation = { Block = 0 } }]
+
 # endregion mainnets
 
 # region local
@@ -210,23 +203,17 @@ forks = [
 name = "local-testnet"
 is_local_testnet = true
 id = 31337
-forks = [
-    { spec = "CANCUN", activation = { Block = 0 } }
-]
+forks = [{ spec = "CANCUN", activation = { Block = 0 } }]
 
 [[chains]]
 name = "local-testnet-optimism"
 is_local_testnet = true
 id = 31338
-op_spec = { anchor_chain = 31_337, anchor_state_registry = "0x5FbDB2315678afecb367f032d93F642f64180aa3" }
-forks = [
-    { spec = "GRANITE", activation = { Block = 0 } }
-]
+op_spec = { anchor_chain = 31_337, anchor_state_registry = { address = "0x5FbDB2315678afecb367f032d93F642f64180aa3" } }
+forks = [{ spec = "GRANITE", activation = { Block = 0 } }]
 
 [[chains]]
 name = "vlayer-test-runner"
 id = 301337
-forks = [
-    { spec = "CANCUN", activation = { Block = 0 } }
-]
+forks = [{ spec = "CANCUN", activation = { Block = 0 } }]
 # endregion local

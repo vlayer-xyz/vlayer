@@ -2,6 +2,7 @@ use alloy_primitives::{Address, B256, BlockNumber};
 use alloy_sol_types::{SolCall, sol};
 use anyhow::anyhow;
 use call_common::RevmDB;
+use chain::{AnchorStateRegistrySpec, AnchorStateRegistryStructure};
 use derive_new::new;
 use revm::{
     Evm,
@@ -21,7 +22,7 @@ pub struct L2Commitment {
 
 #[derive(Clone, Debug, new)]
 pub struct AnchorStateRegistry<D: RevmDB> {
-    address: Address,
+    spec: AnchorStateRegistrySpec,
     db: D,
 }
 
@@ -48,32 +49,38 @@ sol! {
         uint256 block_number;
     }
     function anchors(uint32) public view returns (OutputRoot);
-}
-
-#[allow(dead_code)]
-enum GameType {
-    Cannon = 0,
-    PermissionedCannon = 1,
-    Asterisc = 2,
-    Fast = 254,
-    Alphabet = 255,
+    function getAnchorRoot() public view returns (bytes32, uint256);
 }
 
 impl<D: RevmDB> AnchorStateRegistry<D> {
     pub fn get_latest_confirmed_l2_commitment(&self) -> Result<L2Commitment> {
-        let anchorsReturn {
-            _0:
-                OutputRoot {
-                    output_hash,
-                    block_number,
-                },
-        } = evm_call(
-            &self.db,
-            self.address,
-            &anchorsCall {
-                _0: GameType::PermissionedCannon as u32,
-            },
-        )?;
+        let address = self.spec.address;
+        let structure = self.spec.structure;
+        let (output_hash, block_number) = match structure {
+            AnchorStateRegistryStructure::V1 { game_type } => {
+                let anchorsReturn {
+                    _0:
+                        OutputRoot {
+                            output_hash,
+                            block_number,
+                        },
+                } = evm_call(
+                    &self.db,
+                    address,
+                    &anchorsCall {
+                        _0: game_type as u32,
+                    },
+                )?;
+                (output_hash, block_number)
+            }
+            AnchorStateRegistryStructure::V2 => {
+                let getAnchorRootReturn {
+                    _0: output_hash,
+                    _1: block_number,
+                } = evm_call(&self.db, address, &getAnchorRootCall {})?;
+                (output_hash, block_number)
+            }
+        };
 
         Ok(L2Commitment {
             output_hash,

@@ -115,8 +115,8 @@ mod anchor_state_registry {
             src = Chain::sepolia(),
             dest = Chain::from_named(NamedChain::UnichainSepolia),
             height = 8_178_125_u64,
-            hash = "4e9add7f1e4950459c695e1e928e2bc9659b065e6687fc3add7882be408c6d64",
-            block = 9_934_712
+            hash = "34184ca6e9f0d6f2c3c30e953b40981bab5faee02ae249d026ecea7250651703",
+            block = 16_681_148
         );
     }
 }
