@@ -28,3 +28,10 @@ jobs:
             Please use a format like `feat: add new feature` or `fix: correct typo`.
 
             Refer to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for more details.
+
+      - name: Remove comment on success
+        if: steps.lint.conclusion == 'success'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: semantic-pr-title
+          delete: true
