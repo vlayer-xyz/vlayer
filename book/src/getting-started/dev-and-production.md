@@ -113,17 +113,16 @@ Testnet and devnet provers run in `FAKE` mode by default.
 
 To speed up proof generation, vlayer supports the use of infrastructure like [Bonsai](https://www.bonsai.xyz/) (and eventually [Boundless](https://beboundless.xyz/)) to offload heavy computations to high-performance machines.
 
-To run a prover node in production mode, download and modify `docker-compose.devnet.yaml`:
+To run a prover node in production mode, download and modify `call_server/service.yaml`:
 
 ```yaml
-# rest of the config
-vlayer:
+vlayer-call-server:
     # existing vlayer config
     environment:
       # other env variables...
       BONSAI_API_URL: https://api.bonsai.xyz
       BONSAI_API_KEY: api_key_goes_here
-    command: "serve --proof groth16 ...other_args"
+    command: "--proof groth16 ...other_args"
 ```
 
 You can request a `BONSAI_API_KEY` [here](https://docs.google.com/forms/d/e/1FAIpQLSf9mu18V65862GS4PLYd7tFTEKrl90J5GTyzw_d14ASxrruFQ/viewform).
