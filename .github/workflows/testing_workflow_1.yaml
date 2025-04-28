@@ -1,0 +1,21 @@
+name: Testing Workflow 1
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep for 1 minute
+        run: sleep 60
+
+      - name: Print Pull Request Branch
+        run: echo "Pull Request Branch: ${{ github.head_ref }}"
+
+      - name: Print Latest Branch Commit Hash
+        run: echo "Latest Branch Commit Hash: ${{ github.sha }}"
+
+      - name: Print Workflow Run Head SHA
+        run: echo "Workflow Run Head SHA: ${{ github.event.workflow_run.head_sha }}"
