@@ -505,6 +505,7 @@ mod server_tests {
                 port: None,
                 invalid_after,
                 subject,
+                environment: None,
             })
         }
 

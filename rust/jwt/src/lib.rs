@@ -4,6 +4,16 @@ pub use jsonwebtoken::{
     encode, errors::Error, get_current_timestamp,
 };
 use serde::{Deserialize, Serialize};
+use strum::{Display, EnumString};
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, EnumString, Display)]
+#[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
+pub enum Environment {
+    #[default]
+    Test,
+    Mainnet,
+}
 
 #[derive(Builder, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,6 +25,8 @@ pub struct Claims {
     pub port: Option<u16>,
     pub exp: u64,
     pub sub: String,
+    #[builder(setter(into), default)]
+    pub environment: Option<Environment>,
 }
 
 #[allow(clippy::unwrap_used)]
@@ -27,6 +39,7 @@ pub mod test_helpers {
         pub subject: &'a str,
         pub host: Option<&'a str>,
         pub port: Option<u16>,
+        pub environment: Option<Environment>,
     }
 
     #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
@@ -35,12 +48,12 @@ pub mod test_helpers {
         let ts = get_current_timestamp() as i64 + args.invalid_after;
         let mut claims_builder = ClaimsBuilder::default()
             .exp(ts as u64)
-            .sub(args.subject.to_string());
-
+            .sub(args.subject.to_string())
+            .environment(args.environment);
         if let Some(host) = args.host {
             claims_builder = claims_builder
                 .host(host.to_string())
-                .port(args.port.unwrap_or(DEFAULT_WEB_PROOF_PORT));
+                .port(args.port.unwrap_or(DEFAULT_WEB_PROOF_PORT))
         }
 
         let claims = claims_builder.build().unwrap();
@@ -70,6 +83,7 @@ mod tests {
             port: None,
             invalid_after: 0,
             subject: "1234",
+            environment: None,
         });
         let claims: TokenData<Claims> =
             decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
@@ -85,10 +99,41 @@ mod tests {
             port: None,
             invalid_after: 0,
             subject: "1234",
+            environment: None,
         });
         let claims: TokenData<Claims> =
             decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
         assert_eq!(claims.claims.host, Some("xyz.xyz".to_string()));
         assert_eq!(claims.claims.port, Some(443));
+    }
+
+    #[test]
+    fn decodes_as_test() {
+        let jwt = token(&TokenArgs {
+            secret: JWT_SECRET,
+            host: None,
+            port: None,
+            invalid_after: 0,
+            subject: "1234",
+            environment: Some(Environment::Test),
+        });
+        let token_data: TokenData<Claims> =
+            decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
+        assert_eq!(token_data.claims.environment, Some(Environment::Test));
+    }
+
+    #[test]
+    fn decodes_as_mainnet() {
+        let jwt = token(&TokenArgs {
+            secret: JWT_SECRET,
+            host: None,
+            port: None,
+            invalid_after: 0,
+            subject: "1234",
+            environment: Some(Environment::Mainnet),
+        });
+        let token_data: TokenData<Claims> =
+            decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
+        assert_eq!(token_data.claims.environment, Some(Environment::Mainnet));
     }
 }

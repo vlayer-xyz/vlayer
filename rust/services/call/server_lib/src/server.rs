@@ -23,6 +23,7 @@ use tracing::info;
 use crate::{
     config::Config,
     handlers::{Params, RpcServer, State as AppState},
+    jwt::validate_environment,
     token::Token,
 };
 
@@ -45,13 +46,21 @@ async fn handle(
 }
 
 async fn handle_with_auth(
-    ClaimsExtractor(Claims { sub, .. }): ClaimsExtractor<Claims>,
+    ClaimsExtractor(Claims {
+        sub, environment, ..
+    }): ClaimsExtractor<Claims>,
     AxumState(State { router, config }): AxumState<State>,
     Extension(req_id): Extension<RequestId>,
     body: Bytes,
 ) -> impl IntoResponse {
+    if let Err(e) = validate_environment(&config, environment) {
+        return e.into_response();
+    }
     let params = Params::new(config, Some(Token::new(sub)), req_id);
-    router.handle_request_with_params(body, params).await
+    router
+        .handle_request_with_params(body, params)
+        .await
+        .into_response()
 }
 
 #[derive(new, Clone)]

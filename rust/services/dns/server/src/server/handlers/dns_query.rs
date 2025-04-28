@@ -154,6 +154,7 @@ mod tests {
                 port: None,
                 invalid_after,
                 subject,
+                environment: None,
             })
         }
 
@@ -195,6 +196,7 @@ mod tests {
                     port: None,
                     invalid_after: 60,
                     subject: "1234",
+                    environment: None,
                 }))
                 .await
                 .status(),

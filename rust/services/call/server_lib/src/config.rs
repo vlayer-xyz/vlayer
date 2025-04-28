@@ -224,10 +224,10 @@ impl From<&Config> for HostConfig {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
 
-    fn config_builder() -> ConfigBuilder {
+    pub(crate) fn config_builder() -> ConfigBuilder {
         let call_elf = GuestElf::new([0; 8], &[]);
         let chain_guest_ids = vec![Digest::new([1; 8])];
         ConfigBuilder::default()
