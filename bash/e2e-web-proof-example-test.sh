@@ -12,17 +12,8 @@ set_proving_mode
 
 generate_ts_bindings
 
-echo "::group::Running services"
-DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy wsproxy-test-client notary-server"
-
-# source ${VLAYER_HOME}/bash/run-services.sh
 ./bash/mock-imageid.sh
-echo "::endgroup::Running services"
 
 build_extension
 
 run_web_tests simple-web-proof
-
-echo "::group::Cleanup"
-# cleanup
-echo "::endgroup::Cleanup"
