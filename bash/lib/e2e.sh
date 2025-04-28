@@ -8,11 +8,16 @@ function run_playwright_tests() {
   pushd vlayer
   if grep -q "test-web:${VLAYER_ENV}" package.json; then
     echo "Using test-web:${VLAYER_ENV}"
-    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test-web:"${VLAYER_ENV}" || exit 1 
+    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test-web:"${VLAYER_ENV}"
+    if [ $? -ne 0 ]; then
+      echo "Playwright tests failed"
+      return 1
+    fi
   else
     echo "Skipping playwright tests as neither test-web:${VLAYER_ENV} nor test-web:${VLAYER_ENV} script exists in package.json"
   fi
   popd
+  return 0
 }
 
 function run_prover_script() {
