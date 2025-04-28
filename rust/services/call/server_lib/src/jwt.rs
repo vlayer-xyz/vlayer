@@ -12,7 +12,7 @@ use server_utils::{
 use crate::{config::Config, server::State};
 
 #[derive(Debug, thiserror::Error)]
-#[error("Invalid environment in JWT: {0:?}, prover server proof mode: {1:?}")]
+#[error("Invalid environment in JWT: {0:?}, prover server proof mode: {1}")]
 pub struct Error(Option<Environment>, ProofMode);
 
 impl FromRef<State> for JwtState {

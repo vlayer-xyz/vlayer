@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf};
 use anyhow::Context;
 use clap::{Args as ClapArgs, Parser, Subcommand};
 use jwt::{
-    Algorithm, Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey,
+    Algorithm, Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey, Environment,
     Error as JwtError, Header, TokenData, Validation, decode, decode_header, encode,
     get_current_timestamp,
 };
@@ -62,6 +62,10 @@ struct Encode {
     /// Subject
     #[arg(long, default_value_t = String::from("test"))]
     subject: String,
+
+    /// Environment: either test or mainnet
+    #[arg(long, default_value_t = Environment::default())]
+    environment: Environment,
 }
 
 #[derive(Debug, ClapArgs)]
@@ -91,7 +95,10 @@ fn encode_jwt(args: Encode) -> Result<()> {
         .invalid_after
         .map_or(u64::MAX, |x| get_current_timestamp() + x);
 
-    let mut claims_builder = ClaimsBuilder::default().exp(exp).sub(args.subject);
+    let mut claims_builder = ClaimsBuilder::default()
+        .exp(exp)
+        .sub(args.subject)
+        .environment(Some(args.environment));
 
     if let Some(host) = &args.web_proof_host {
         let (host, port) = parse_host(host)?;
