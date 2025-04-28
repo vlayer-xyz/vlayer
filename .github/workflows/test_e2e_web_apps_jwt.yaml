@@ -86,7 +86,7 @@ jobs:
           VLAYER_TMP_DIR: ./artifacts
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
           JWT_AUTH: "on"
-          VLAYER_API_TOKEN: ${{ vars.VLAYER_TEST_JWT }}
+          VLAYER_API_TOKEN: ${{ vars.VLAYER_API_TOKEN }}
         run: xvfb-run bash/e2e-web-apps-tests.sh
 
       # Teardown
