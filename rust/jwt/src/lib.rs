@@ -5,7 +5,7 @@ pub use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Environment {
     #[default]
@@ -47,7 +47,7 @@ pub mod test_helpers {
         let mut claims_builder = ClaimsBuilder::default()
             .exp(ts as u64)
             .sub(args.subject.to_string())
-            .environment(args.environment.clone());
+            .environment(args.environment);
         if let Some(host) = args.host {
             claims_builder = claims_builder
                 .host(host.to_string())
