@@ -59,7 +59,7 @@ install_chromium
 echo "::endgroup::"
 
 # We need to first create a temporary directory and perform operations there.
-# After that we copy the results to the VLAYER_HOME directory.
+# After that we copy the results to VLAYER_HOME directory.
 # This is necessary because initializing in the repository directly causes
 # `forge init (called by vlayer init)` error because git is already initialized. 
 # This is a workaround to avoid this and make all the playwright reports available
