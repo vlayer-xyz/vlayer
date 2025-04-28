@@ -12,7 +12,7 @@
 
 - name: Install vlayer certificate
   ansible.builtin.copy:
-    src: prover.vlayer.xyz.pem
+    src: "{{ prover_nginx_ssl_certificate }}.pem"
     dest: /etc/ssl/certs/prover.vlayer.xyz.pem
     mode: '644'
     owner: root
@@ -20,7 +20,7 @@
 
 - name: Install vlayer certificate key
   ansible.builtin.copy:
-    src: prover.vlayer.xyz.key
+    src: "{{ prover_nginx_ssl_certificate }}.key"
     dest: /etc/ssl/private/prover.vlayer.xyz.key
     mode: '600'
     owner: root
