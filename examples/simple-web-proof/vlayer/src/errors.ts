@@ -30,3 +30,9 @@ export class WebProofError extends AppError {
     super("WebProofError", message);
   }
 }
+
+export class UseChainError extends AppError {
+  constructor(message: string) {
+    super("UseChainError", message);
+  }
+}
