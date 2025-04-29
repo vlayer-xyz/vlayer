@@ -60,7 +60,7 @@ jobs:
     name: Build binaries
     needs: changes
     runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
 
     steps:
       - name: Checkout repository
@@ -220,7 +220,7 @@ jobs:
     runs-on: aws-linux-medium
 
     env:
-      GAS_PRICE_THRESHOLD: 15
+      GAS_PRICE_THRESHOLD: 50
       SEPOLIA_RPC_URL: https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
 
     # Sepolia gas price chart reference: https://owlracle.info/sepolia
