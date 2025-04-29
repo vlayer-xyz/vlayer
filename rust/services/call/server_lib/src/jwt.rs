@@ -50,8 +50,8 @@ impl IntoResponse for Error {
         let body = json!({
             "error": self.to_string(),
         });
-        error!("authorization error: {body}");
-        (StatusCode::UNAUTHORIZED, Json(body)).into_response()
+        error!("bad request error: {body}");
+        (StatusCode::BAD_REQUEST, Json(body)).into_response()
     }
 }
 
