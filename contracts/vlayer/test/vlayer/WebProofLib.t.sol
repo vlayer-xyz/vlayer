@@ -51,7 +51,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                'Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert("Incorrect URL")))'
+                'Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert("URL mismatch")))'
             );
         }
     }

@@ -41,7 +41,7 @@ library WebProofLib {
         view
         returns (Web memory)
     {
-        Web memory web = recover(webProof, UrlTestMode.Prefix, bodyRedactionMode);
+        Web memory web = recover(webProof, UrlTestMode.Full, bodyRedactionMode);
         verifyNotaryKey(web.notaryPubKey);
         require(web.url.equal(url), "URL mismatch");
         return web;
@@ -64,7 +64,7 @@ library WebProofLib {
         returns (Web memory)
     {
         (bool success, bytes memory returnData) =
-            Precompiles.VERIFY_AND_PARSE.staticcall(abi.encode(webProof.webProofJson, urlTestMode, bodyRedactionMode));
+            Precompiles.VERIFY_AND_PARSE.staticcall(abi.encode(webProof, urlTestMode, bodyRedactionMode));
 
         Address.verifyCallResult(success, returnData);
 
