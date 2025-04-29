@@ -18,3 +18,4 @@
   * `605a504383da17012e2af35e674bb0fb8b4d9ceb2714217d3618f43c3d4c6ded` – hashbrown 0.15.0 -> 0.15.1 - [#2011] (https://github.com/vlayer-xyz/vlayer/pull/2011)
   * `3dedd7024c3462f3f326489b27ff1843f30f03afff71cdd88ccd24f81fbe8f67` – Deny panics globally [#2199](https://github.com/vlayer-xyz/vlayer/pull/2199)
   * `304957ee9fdecb19ec65f8633d40a926aacd142b81c4cfd43d42ca6742f67130` – Update `chain_specs.toml` [#2218](https://github.com/vlayer-xyz/vlayer/pull/2218)
+  * `d47c721762613c905c892b615c3496fc172ea7d5f7fc29ae9900a4f0b5478dd3` – Risc0 2.0.2 - [#2279](https://github.com/vlayer-xyz/vlayer/pull/2279)
