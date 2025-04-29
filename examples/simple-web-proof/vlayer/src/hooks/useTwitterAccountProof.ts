@@ -61,7 +61,9 @@ export const useTwitterAccountProof = () => {
     throw new WebProofError(webProofError.message);
   }
 
-  const { chain, error: chainError } = useChain();
+  const { chain, error: chainError } = useChain(
+    import.meta.env.VITE_CHAIN_NAME,
+  );
   useEffect(() => {
     if (chainError) {
       setError(new UseChainError(chainError));

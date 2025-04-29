@@ -29,9 +29,9 @@ export const useChain = (
   }, [wagmiChainId, wagmiChains]);
 
   useEffect(() => {
-    if (!configChain) {
+    if (configChain === undefined) {
       setChain(null);
-      setError(`Env chain ${configChain} not found`);
+      setError(`Env chain not defined`);
       return;
     }
 

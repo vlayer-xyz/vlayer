@@ -10,7 +10,6 @@ import { Chain } from "viem";
 import { ErrorBoundary } from "react-error-boundary";
 import { AppErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
 import { getChainSpecs } from "@vlayer/sdk/config";
-import { mainnet } from "viem/chains";
 
 const queryClient = new QueryClient();
 const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
@@ -22,7 +21,12 @@ try {
   // In case of wrong chain name in env, we set chain variable to whatever.
   // Thanks to this, the app does not crash here, but later with a proper error handling.
   console.error("Wrong chain name in env: ", import.meta.env.VITE_CHAIN_NAME);
-  chain = mainnet;
+  chain = {
+    id: "wrongChain",
+    name: "Wrong chain",
+    nativeCurrency: {},
+    rpcUrls: { default: { http: [] } },
+  } as unknown as Chain;
 }
 const chains: [Chain, ...Chain[]] = [chain];
 const networks = chains;
