@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import type { Chain } from "viem";
 import { useChainId, useChains } from "wagmi";
 
-export const useChain = (): { chain: Chain | null; error: string | null } => {
+export const useChain = (
+  configChain: string | undefined,
+): { chain: Chain | null; error: string | null } => {
   const [chain, setChain] = useState<Chain | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,8 +17,6 @@ export const useChain = (): { chain: Chain | null; error: string | null } => {
       .find((chain) => chain.id === wagmiChainId)
       ?.name.toLowerCase();
   }, [wagmiChainId, wagmiChains]);
-
-  const configChain = import.meta.env.VITE_CHAIN_NAME;
 
   useEffect(() => {
     if (!configChain) {

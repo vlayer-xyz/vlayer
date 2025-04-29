@@ -13,9 +13,9 @@ describe("useChain", () => {
   });
 
   it("should successfully return chain", () => {
-    vi.stubEnv("VITE_CHAIN_NAME", "anvil");
+    const chainFromEnv = "anvil";
 
-    const { result } = renderHook(() => useChain());
+    const { result } = renderHook(() => useChain(chainFromEnv));
     const chain = result.current.chain;
 
     expect(result.current.error).toBeNull();
@@ -24,9 +24,9 @@ describe("useChain", () => {
   });
 
   it("should fail when chains mismatched", () => {
-    vi.stubEnv("VITE_CHAIN_NAME", "sepolia");
+    const mismatchedChainFromEnv = "sepolia";
 
-    const { result } = renderHook(() => useChain());
+    const { result } = renderHook(() => useChain(mismatchedChainFromEnv));
     const error = result.current.error;
 
     expect(result.current.chain).toBeNull();
@@ -37,9 +37,8 @@ describe("useChain", () => {
   });
 
   it("should fail when env chain is undefined", () => {
-    vi.unstubAllEnvs();
-
-    const { result } = renderHook(() => useChain());
+    // Simulates the case when the env chain is not set
+    const { result } = renderHook(() => useChain(undefined));
     const error = result.current.error;
 
     expect(result.current.chain).toBeNull();
@@ -48,9 +47,9 @@ describe("useChain", () => {
   });
 
   it("should fail when chain is not supported", () => {
-    vi.stubEnv("VITE_CHAIN_NAME", "unsupported-chain");
+    const unsupportedChainFromEnv = "unsupported-chain";
 
-    const { result } = renderHook(() => useChain());
+    const { result } = renderHook(() => useChain(unsupportedChainFromEnv));
     const error = result.current.error;
 
     expect(result.current.chain).toBeNull();
