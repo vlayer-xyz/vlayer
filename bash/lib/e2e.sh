@@ -8,8 +8,8 @@ function run_playwright_tests() {
   pushd vlayer
   if grep -q "test-web:${VLAYER_ENV}" package.json; then
     echo "Using test-web:${VLAYER_ENV}"
-    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}" bun run test-web:"${VLAYER_ENV}"
-    if [ $? -ne 0 ]; then
+    export WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:${VLAYER_ENV}"
+    if ! bun run test-web:"${VLAYER_ENV}"; then
       echo "Playwright tests failed"
       return 1
     fi
