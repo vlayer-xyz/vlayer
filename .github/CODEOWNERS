@@ -22,7 +22,7 @@
 /contracts/vlayer/src/Repository.sol @marekkirejczyk
 /contracts/vlayer/src/Seal.sol @marekkirejczyk
 /contracts/vlayer/src/TestnetStableDeployment.sol @marekkirejczyk
-/contracts/vlayer/src/URLPattern.sol @marekkirejczyk
+/contracts/vlayer/src/Url.sol @marekkirejczyk
 /contracts/vlayer/src/Verifier.sol @marekkirejczyk
 /contracts/vlayer/src/WebProof.sol @marekkirejczyk
 /contracts/vlayer/src/proof_verifier/ChainId.sol @marekkirejczyk
