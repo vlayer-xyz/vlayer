@@ -254,6 +254,6 @@ jobs:
           bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
           # Chain related
-          chain_name: "optimismSepolia"
+          chain_name: "sepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
