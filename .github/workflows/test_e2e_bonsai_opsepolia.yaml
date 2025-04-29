@@ -60,7 +60,7 @@ jobs:
     name: Build binaries
     needs: changes
     runs-on: aws-linux-medium
-    if: github.event_name == 'push' || github.event_name == 'pull_request' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
 
     steps:
       - name: Checkout repository
