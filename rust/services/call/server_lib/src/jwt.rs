@@ -1,18 +1,25 @@
 use axum::{
+    Json,
     extract::FromRef,
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use serde_json::json;
 pub use server_utils::jwt::{Algorithm, DecodingKey};
 use server_utils::{
     ProofMode,
     jwt::{Environment, axum::State as JwtState},
 };
+use thiserror::Error;
+use tracing::error;
 
 use crate::{config::Config, server::State};
 
-#[derive(Debug, thiserror::Error)]
-#[error("Invalid environment in JWT: {0:?}, prover server proof mode: {1}")]
+#[derive(Debug, Error)]
+#[error("Invalid environment in JWT: {env}, prover server proof mode: {1}", env = match .0 {
+    Some(x) => format!("{x}"),
+    None => "none".to_string(),
+})]
 pub struct Error(Option<Environment>, ProofMode);
 
 impl FromRef<State> for JwtState {
@@ -40,7 +47,11 @@ pub fn validate_environment(
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        (StatusCode::BAD_REQUEST, self.to_string()).into_response()
+        let body = json!({
+            "error": self.to_string(),
+        });
+        error!("bad request error: {body}");
+        (StatusCode::BAD_REQUEST, Json(body)).into_response()
     }
 }
 

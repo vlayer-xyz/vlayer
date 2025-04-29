@@ -8,6 +8,7 @@ use strum::{Display, EnumString};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, EnumString, Display)]
 #[serde(rename_all = "lowercase")]
+#[strum(ascii_case_insensitive)]
 #[strum(serialize_all = "lowercase")]
 pub enum Environment {
     #[default]
