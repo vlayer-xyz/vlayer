@@ -84,6 +84,7 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
         await browser.tabs.remove(openedTabId);
       }
       await browser.tabs.update(port?.sender?.tab?.id, { active: true });
+      port?.postMessage(message);
     })
     .with({ type: ExtensionInternalMessageType.TabOpened }, ({ payload }) => {
       openedTabId = payload.tabId;

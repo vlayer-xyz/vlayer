@@ -47,6 +47,7 @@ export enum ExtensionInternalMessageType {
 }
 
 export enum MessageFromExtensionType {
+  RedirectBack = "RedirectBack",
   SidePanelClosed = "SidePanelClosed",
   ProofDone = "ProofDone",
   ProofError = "ProofError",
