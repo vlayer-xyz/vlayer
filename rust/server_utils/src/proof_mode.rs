@@ -6,6 +6,7 @@ use strum::{Display, EnumString};
     Debug, Clone, Deserialize, Serialize, Copy, PartialEq, Eq, Display, EnumString, Default,
 )]
 #[strum(ascii_case_insensitive)]
+#[strum(serialize_all = "lowercase")]
 pub enum ProofMode {
     #[default]
     Fake,

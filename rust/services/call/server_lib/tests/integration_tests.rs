@@ -489,7 +489,7 @@ mod server_tests {
     mod jwt {
         use assert_json_diff::assert_json_eq;
         use server_utils::jwt::{
-            ClaimsBuilder, EncodingKey, Header, encode, get_current_timestamp,
+            ClaimsBuilder, EncodingKey, Environment, Header, encode, get_current_timestamp,
             test_helpers::{
                 JWT_SECRET, TokenArgs, default_config as default_jwt_config, token as test_token,
             },
@@ -589,6 +589,29 @@ mod server_tests {
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
                 json!({ "error": "Invalid JWT token" })
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn reject_requests_with_mismatched_environment() {
+            let key = EncodingKey::from_secret(JWT_SECRET.as_bytes());
+            let ts = get_current_timestamp() + 1000;
+            let claims = ClaimsBuilder::default()
+                .exp(ts)
+                .sub("1234".to_string())
+                .environment(Environment::Mainnet)
+                .build()
+                .unwrap();
+            let token = encode(&Header::default(), &claims, &key).unwrap();
+
+            let app = default_app();
+            let req = rpc_body("dummy", &json!([]));
+            let resp = app.post_with_bearer_auth("/", &req, &token).await;
+
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
+            assert_json_eq!(
+                body_to_json(resp.into_body()).await,
+                json!({ "error": "Invalid environment in JWT: mainnet, prover server proof mode: fake" }),
             );
         }
 
