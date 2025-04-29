@@ -608,7 +608,7 @@ mod server_tests {
             let req = rpc_body("dummy", &json!([]));
             let resp = app.post_with_bearer_auth("/", &req, &token).await;
 
-            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
+            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
                 json!({ "error": "Invalid environment in JWT: mainnet, prover server proof mode: fake" }),
