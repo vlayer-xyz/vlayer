@@ -35,11 +35,6 @@ console.log("⏳ Deploying helper contracts...");
 
 console.log("🧾 Using account:");
 console.log("  Address:", account.address);
-if (typeof account.privateKey === "string") {
-  console.log("  Private Key:", account.privateKey.slice(0, 10) + "...");
-} else {
-  console.log("  Private Key: (not available or invalid type)");
-}
 
 const chainId = await ethClient.getChainId?.(); // Optional chaining if not supported
 console.log("🔗 Chain ID:", chainId || config.chainName);
