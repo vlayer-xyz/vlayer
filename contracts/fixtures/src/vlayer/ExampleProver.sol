@@ -32,7 +32,7 @@ contract ExampleProver is Prover {
 
     // solhint-disable-next-line func-name-mixedcase
     function web_proof(WebProof calldata webProof) public view returns (bool) {
-        Web memory web = webProof.recover();
+        Web memory web = webProof.recover(false);
 
         require(
             web.url.test("https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken"), "Incorrect URL"

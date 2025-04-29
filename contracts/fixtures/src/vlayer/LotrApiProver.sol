@@ -21,7 +21,8 @@ contract LotrApiProver is Prover {
 
     // solhint-disable-next-line func-name-mixedcase
     function web_proof(WebProof calldata webProof) public view returns (Proof memory, string memory, string memory) {
-        Web memory web = WebProofLib.recover(webProof);
+        Web memory web =
+            WebProofLib.recover(webProof, WebProofLib.UrlTestMode.Full, WebProofLib.BodyRedactionMode.Disabled);
 
         require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Incorrect notary public key");
 

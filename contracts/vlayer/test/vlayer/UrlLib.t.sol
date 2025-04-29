@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "../../src/testing/VTest.sol";
 
-import {UrlLib} from "../../src/URL.sol";
+import {UrlLib} from "../../src/Url.sol";
 
 contract UrlLibWrapper {
     function starts_with(string memory source, string memory prefix) public pure returns (bool) {
