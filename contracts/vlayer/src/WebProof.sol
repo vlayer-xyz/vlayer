@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 import {ChainIdLibrary} from "./proof_verifier/ChainId.sol";
-import {URLPatternLib} from "./URLPattern.sol";
+import {UrlLib} from "./URL.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
 import {TestnetStableDeployment} from "./TestnetStableDeployment.sol";
 
