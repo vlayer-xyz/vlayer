@@ -8,18 +8,15 @@ alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 block_header = { workspace = true }
-bytemuck = { workspace = true }
 call_common = { workspace = true }
 call_engine = { workspace = true }
 chain_client = { workspace = true }
 chain_common = { workspace = true }
 common = { workspace = true }
-getrandom = { workspace = true }
 mpt = { workspace = true }
 optimism = { workspace = true }
 revm = { workspace = true }
 risc0-zkvm = { workspace = true }
-risc0-zkvm-platform = { workspace = true }
 
 [dev-dependencies]
 call_engine = { workspace = true, features = ["testing"] }

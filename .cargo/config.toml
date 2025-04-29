@@ -10,6 +10,3 @@ RISC0_FEATURE_bigint2 = "1"
 
 # link libusb statically to avoid runtime linking issues
 LIBUSB_STATIC = "1"
-
-[target.riscv32im-risc0-zkvm-elf]
-rustflags = ["--cfg", "getrandom_backend=\"custom\""]
