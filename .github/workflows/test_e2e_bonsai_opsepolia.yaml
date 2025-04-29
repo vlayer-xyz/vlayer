@@ -220,7 +220,7 @@ jobs:
     runs-on: aws-linux-medium
 
     env:
-      GAS_THRESHOLD: 15
+      GAS_PRICE_THRESHOLD: 15
       SEPOLIA_RPC_URL: https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
 
     # Sepolia gas price chart reference: https://owlracle.info/sepolia
@@ -228,18 +228,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Decide whether to run based on gas price
-        id: gas
+      - name: Skip if gas price is too high
+        id: gas_price_limiter
         run: |
           chmod +x ./bash/check-gas-price.sh
-          if ./bash/check-gas-price.sh "${SEPOLIA_RPC_URL}" "${GAS_THRESHOLD}"; then
+          if ./bash/check-gas-price.sh "${SEPOLIA_RPC_URL}" "${GAS_PRICE_THRESHOLD}"; then
             echo "skip=false" >> $GITHUB_OUTPUT
           else
             echo "skip=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Run E2E Test (simple-teleport)
-        if: steps.gas.outputs.skip == 'false'
+        if: steps.gas_price_limiter.outputs.skip == 'false'
         uses: ./.github/actions/test-e2e
         with:
           example: "simple-teleport"
