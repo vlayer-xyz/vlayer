@@ -213,3 +213,47 @@ jobs:
           chain_name: "optimismSepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+  test-e2e-bonsai-opsepolia-simple-teleport:
+    name: E2E test (simple-teleport) with Bonsai and OP Sepolia
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+
+    env:
+      GAS_THRESHOLD: 15
+      SEPOLIA_RPC_URL: https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}
+
+    # Sepolia gas price chart reference: https://owlracle.info/sepolia
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Decide whether to run based on gas price
+        id: gas
+        run: |
+          chmod +x ./bash/check-gas-price.sh
+          if ./bash/check-gas-price.sh "${SEPOLIA_RPC_URL}" "${GAS_THRESHOLD}"; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+          else
+            echo "skip=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run E2E Test (simple-teleport)
+        if: steps.gas.outputs.skip == 'false'
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-teleport"
+
+          # JWT auth related
+          jwt_auth: "on"
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+
+          # Proving related
+          proving_mode: "prod"
+          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
