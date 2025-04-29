@@ -10,13 +10,13 @@ if [[ -z "$RPC_URL" ]]; then
 fi
 
 
-resp=$(curl -v -X POST "$RPC_URL" \
+response=$(curl -v -X POST "$RPC_URL" \
   -H "Content-Type: application/json" \
   --data '{"jsonrpc":"2.0","method":"eth_gasPrice","params":[],"id":1}')
 
-echo "Raw response: $resp"
+echo "Raw response: $response"
 
-gas_price_hex=$(echo "$resp" | jq -r '.result')
+gas_price_hex=$(echo "$response" | jq -r '.result')
 
 if [[ "$gas_price_hex" == "null" || -z "$gas_price_hex" ]]; then
   echo "Error: Failed to fetch gas price"
