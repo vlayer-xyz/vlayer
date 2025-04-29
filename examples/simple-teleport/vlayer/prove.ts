@@ -24,7 +24,7 @@ const { chain, ethClient, account, proverUrl, confirmations } =
 
 if (!account) {
   throw new Error(
-    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables"
   );
 }
 const vlayer = createVlayerClient({
@@ -32,11 +32,37 @@ const vlayer = createVlayerClient({
   token: config.token,
 });
 console.log("⏳ Deploying helper contracts...");
-const deployWhaleBadgeHash = await ethClient.deployContract({
-  abi: whaleBadgeNFTSpec.abi,
-  bytecode: whaleBadgeNFTSpec.bytecode.object,
-  account,
-});
+
+console.log("🧾 Using account:");
+console.log("  Address:", account.address);
+if (typeof account.privateKey === "string") {
+  console.log("  Private Key:", account.privateKey.slice(0, 10) + "...");
+} else {
+  console.log("  Private Key: (not available or invalid type)");
+}
+
+const chainId = await ethClient.getChainId?.(); // Optional chaining if not supported
+console.log("🔗 Chain ID:", chainId || config.chainName);
+
+console.log(
+  "📦 Deploying contract with bytecode length:",
+  whaleBadgeNFTSpec.bytecode.object.length
+);
+
+let deployWhaleBadgeHash: `0x${string}` | undefined = undefined;
+try {
+  console.log("⏳ Deploying helper contracts...");
+  deployWhaleBadgeHash = await ethClient.deployContract({
+    abi: whaleBadgeNFTSpec.abi,
+    bytecode: whaleBadgeNFTSpec.bytecode.object,
+    account,
+  });
+  console.log("📨 Deploy tx hash:", deployWhaleBadgeHash);
+} catch (err) {
+  console.error("❌ Error during contract deployment:");
+  console.error(err);
+  throw err;
+}
 
 const whaleBadgeNFTAddress = await waitForContractDeploy({
   client: ethClient,
