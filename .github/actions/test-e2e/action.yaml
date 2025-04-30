@@ -73,7 +73,6 @@ runs:
       run: forge soldeer install
       shell: bash
 
-    # Load testnet private key for testnets
     - name: Read testnet private key
       if: ${{ inputs.testnet_private_key_location != '' }}
       run: |
@@ -82,13 +81,12 @@ runs:
         echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
       shell: bash
 
-    # Configure RPC endpoints
     - name: Configure RPC endpoints
       if: ${{ inputs.quicknode_api_key != '' }}
       run: |
-        echo "QUICKNODE_ENDPOINT=dry-alpha-tab" >> $GITHUB_ENV
-        echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
-        echo "JSON_RPC_URL=https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+        bash ./bash/configure_rpc.sh \
+        "${{ inputs.chain_name }}" \
+        "${{ inputs.quicknode_api_key }}"
       shell: bash
 
     - name: Run e2e test for ${{ inputs.example }}
