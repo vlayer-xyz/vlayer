@@ -11,7 +11,7 @@ use web_prover::{
 };
 
 #[derive(Debug, PartialEq, Eq, EnumString)]
-pub enum Scheme {
+enum Scheme {
     #[strum(serialize = "http")]
     Http,
     #[strum(serialize = "https")]
@@ -22,8 +22,10 @@ const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/";
 const DEFAULT_MAX_SENT_DATA: usize = 1 << 12;
 const DEFAULT_MAX_RECV_DATA: usize = 1 << 14;
 
+type Result<T> = std::result::Result<T, InputError>;
+
 #[derive(Debug, Error)]
-pub enum InputError {
+pub(crate) enum InputError {
     #[error("URL has no host: {0}")]
     MissingUrlHost(String),
     #[error("Invalid URL format: {0}")]
@@ -97,7 +99,7 @@ struct ProvenUrl {
 }
 
 impl ValidatedUrl {
-    fn try_from_url(url_str: &str, allowed_schemes: &[Scheme]) -> Result<Self, InputError> {
+    fn try_from_url(url_str: &str, allowed_schemes: &[Scheme]) -> Result<Self> {
         let url =
             Url::parse(url_str).map_err(|_| InputError::InvalidUrlFormat(url_str.to_string()))?;
         let scheme = Scheme::from_str(url.scheme())
@@ -123,7 +125,7 @@ impl ValidatedUrl {
     }
 }
 
-fn parse_proven_url(url_str: &str) -> Result<ProvenUrl, InputError> {
+fn parse_proven_url(url_str: &str) -> Result<ProvenUrl> {
     debug!("parsing url to notarize '{url_str}'");
 
     // Only https is allowed for proven urls as it does not make sense to prove http urls (not tls => no tlsn)
@@ -136,7 +138,7 @@ fn parse_proven_url(url_str: &str) -> Result<ProvenUrl, InputError> {
     Ok(url)
 }
 
-fn parse_notary_url(url_str: &str) -> Result<NotaryConfig, InputError> {
+fn parse_notary_url(url_str: &str) -> Result<NotaryConfig> {
     debug!("parsing notary url '{url_str}'");
 
     let ValidatedUrl {
@@ -160,10 +162,23 @@ fn parse_notary_url(url_str: &str) -> Result<NotaryConfig, InputError> {
     Ok(config)
 }
 
+fn parse_header(header_str: impl AsRef<str>) -> Result<(String, String)> {
+    header_str
+        .as_ref()
+        .split_once(':')
+        .map(|(key, value)| (key.trim().to_string(), value.trim().to_string()))
+        .ok_or(InputError::InvalidHeaderFormat(header_str.as_ref().to_string()))
+        .and_then(|(key, value)| {
+            (!key.is_empty() && !value.is_empty())
+                .then_some((key, value))
+                .ok_or(InputError::InvalidHeaderFormat(header_str.as_ref().to_string()))
+        })
+}
+
 impl TryFrom<WebProofArgs> for NotarizeParams {
     type Error = InputError;
 
-    fn try_from(value: WebProofArgs) -> Result<Self, Self::Error> {
+    fn try_from(value: WebProofArgs) -> Result<Self> {
         let ProvenUrl { host, port } = parse_proven_url(&value.url)?;
         // If host is not provided fallback to host extracted from url
         let fallback_host = value.host.unwrap_or(host.clone());
@@ -176,21 +191,8 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
         let headers = value
             .headers
             .iter()
-            .map(|header| {
-                let mut parts = header.splitn(2, ':');
-                let key = parts
-                    .next()
-                    .ok_or_else(|| InputError::InvalidHeaderFormat(header.clone()))?
-                    .trim()
-                    .to_string();
-                let value = parts
-                    .next()
-                    .ok_or_else(|| InputError::InvalidHeaderFormat(header.clone()))?
-                    .trim()
-                    .to_string();
-                Ok((key, value))
-            })
-            .collect::<Result<HashMap<String, String>, InputError>>()?;
+            .map(parse_header)
+            .collect::<Result<HashMap<String, String>>>()?;
 
         debug!("headers: {headers:#?}");
 
@@ -346,7 +348,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<NotarizeParams, _> = input_args.try_into();
+        let result: Result<NotarizeParams> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidUrlFormat("invalid-url".to_string()).to_string()
@@ -360,7 +362,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<NotarizeParams, _> = input_args.try_into();
+        let result: Result<NotarizeParams> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidUrlFormat("invalid-url".to_string()).to_string()
@@ -374,7 +376,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<NotarizeParams, _> = input_args.try_into();
+        let result: Result<NotarizeParams> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidUrlProtocol("xyz".to_string()).to_string()
@@ -388,7 +390,7 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<NotarizeParams, _> = input_args.try_into();
+        let result: Result<NotarizeParams> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidUrlProtocol("htp".to_string()).to_string()
@@ -402,11 +404,36 @@ mod tests {
             ..WebProofArgs::default()
         };
 
-        let result: Result<NotarizeParams, _> = input_args.try_into();
+        let result: Result<NotarizeParams> = input_args.try_into();
         assert_eq!(
             format!("{}", result.unwrap_err()),
             InputError::InvalidHeaderFormat("Authorization".to_string()).to_string()
         );
+    }
+
+    #[test]
+    fn test_parse_header_success() {
+        let success = |(key, value): (&str, &str), input: &str| {
+            assert_eq!((key.to_string(), value.to_string()), parse_header(input).unwrap());
+        };
+        success(("Authorization", "Bearer 1234"), "Authorization: Bearer 1234");
+        success(("Authorization", "Bearer 1234"), "Authorization:Bearer 1234");
+        success(("Authorization", "Bearer 1234"), "Authorization: Bearer 1234  ");
+        success(("Authorization", "Bearer 1234"), "  Authorization : Bearer 1234  ");
+        success(("Authorization", "Bearer 1234 :"), "  Authorization : Bearer 1234 :  ");
+    }
+
+    #[test]
+    fn test_parse_header_failure() {
+        let fail = |input: &str| {
+            let err = parse_header(input).unwrap_err();
+            assert!(matches!(err, InputError::InvalidHeaderFormat(..)));
+        };
+        fail("");
+        fail(":");
+        fail("    :     ");
+        fail("Authorization");
+        fail(" Authorization  Bearer  ");
     }
 
     impl Default for WebProofArgs {
