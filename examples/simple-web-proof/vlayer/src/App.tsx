@@ -7,14 +7,27 @@ import { Layout } from "./components/layout/Layout";
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { Chain } from "viem";
-import { anvil, optimismSepolia } from "wagmi/chains";
 import { ErrorBoundary } from "react-error-boundary";
 import { AppErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
+import { getChainSpecs } from "@vlayer/sdk/config";
 
 const queryClient = new QueryClient();
 const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
-const chain =
-  import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil : optimismSepolia;
+let chain = null;
+
+try {
+  chain = getChainSpecs(import.meta.env.VITE_CHAIN_NAME);
+} catch {
+  // In case of wrong chain name in env, we set chain variable to whatever.
+  // Thanks to this, the app does not crash here, but later with a proper error handling.
+  console.error("Wrong chain name in env: ", import.meta.env.VITE_CHAIN_NAME);
+  chain = {
+    id: "wrongChain",
+    name: "Wrong chain",
+    nativeCurrency: {},
+    rpcUrls: { default: { http: [] } },
+  } as unknown as Chain;
+}
 const chains: [Chain, ...Chain[]] = [chain];
 const networks = chains;
 

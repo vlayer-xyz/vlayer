@@ -43,7 +43,7 @@ describe("useChain", () => {
 
     expect(result.current.chain).toBeNull();
     expect(error).toBeDefined();
-    expect(error).toBe("Env chain undefined not found");
+    expect(error).toBe("Env chain not defined");
   });
 
   it("should fail when chain is not supported", () => {

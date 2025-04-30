@@ -1,27 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   useCallProver,
   useWaitForProvingResult,
   useWebProof,
+  useChain,
 } from "@vlayer/react";
 import { useLocalStorage } from "usehooks-ts";
 import { WebProofConfig, ProveArgs } from "@vlayer/sdk";
 import { Abi, ContractFunctionName } from "viem";
-import { optimismSepolia, anvil } from "viem/chains";
 import { startPage, expectUrl, notarize } from "@vlayer/sdk/web_proof";
-import { WebProofError } from "../errors";
+import { UseChainError, WebProofError } from "../errors";
 import webProofProver from "../../../out/WebProofProver.sol/WebProofProver";
-
-const vlayerProverConfig: Omit<
-  ProveArgs<Abi, ContractFunctionName<Abi>>,
-  "args"
-> = {
-  address: import.meta.env.VITE_PROVER_ADDRESS as `0x${string}`,
-  proverAbi: webProofProver.abi,
-  chainId:
-    import.meta.env.VITE_CHAIN_NAME === "anvil" ? anvil.id : optimismSepolia.id,
-  functionName: "main",
-};
 
 const webProofConfig: WebProofConfig<Abi, string> = {
   proverCallCommitment: {
@@ -59,6 +48,8 @@ const webProofConfig: WebProofConfig<Abi, string> = {
 };
 
 export const useTwitterAccountProof = () => {
+  const [error, setError] = useState<Error | null>(null);
+
   const {
     requestWebProof,
     webProof,
@@ -69,6 +60,25 @@ export const useTwitterAccountProof = () => {
   if (webProofError) {
     throw new WebProofError(webProofError.message);
   }
+
+  const { chain, error: chainError } = useChain(
+    import.meta.env.VITE_CHAIN_NAME,
+  );
+  useEffect(() => {
+    if (chainError) {
+      setError(new UseChainError(chainError));
+    }
+  }, [chainError]);
+
+  const vlayerProverConfig: Omit<
+    ProveArgs<Abi, ContractFunctionName<Abi>>,
+    "args"
+  > = {
+    address: import.meta.env.VITE_PROVER_ADDRESS as `0x${string}`,
+    proverAbi: webProofProver.abi,
+    chainId: chain?.id,
+    functionName: "main",
+  };
 
   const {
     callProver,
@@ -119,5 +129,6 @@ export const useTwitterAccountProof = () => {
     isWebProofPending,
     callProver,
     result,
+    error,
   };
 };

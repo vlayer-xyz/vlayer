@@ -17,6 +17,7 @@ export const ProveStep = () => {
     isPending,
     isCallProverIdle,
     result,
+    error,
   } = useTwitterAccountProof();
 
   useEffect(() => {
@@ -34,6 +35,12 @@ export const ProveStep = () => {
   useEffect(() => {
     modalRef.current?.showModal();
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      throw error;
+    }
+  }, [error]);
 
   return (
     <ProveStepPresentational

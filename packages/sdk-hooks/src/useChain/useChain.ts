@@ -3,6 +3,18 @@ import { useEffect, useMemo, useState } from "react";
 import type { Chain } from "viem";
 import { useChainId, useChains } from "wagmi";
 
+const findChainById = (
+  chains: readonly [Chain, ...Chain[]],
+  chainId: number,
+) => {
+  const chain = chains.find((chain) => chain.id === chainId);
+
+  if (!chain) {
+    return undefined;
+  }
+  return chain.name.toLowerCase();
+};
+
 export const useChain = (
   configChain: string | undefined,
 ): { chain: Chain | null; error: string | null } => {
@@ -13,15 +25,13 @@ export const useChain = (
   const wagmiChains = useChains();
 
   const wagmiChain = useMemo(() => {
-    return wagmiChains
-      .find((chain) => chain.id === wagmiChainId)
-      ?.name.toLowerCase();
+    return findChainById(wagmiChains, wagmiChainId);
   }, [wagmiChainId, wagmiChains]);
 
   useEffect(() => {
-    if (!configChain) {
+    if (configChain === undefined) {
       setChain(null);
-      setError(`Env chain ${configChain} not found`);
+      setError(`Env chain not defined`);
       return;
     }
 
