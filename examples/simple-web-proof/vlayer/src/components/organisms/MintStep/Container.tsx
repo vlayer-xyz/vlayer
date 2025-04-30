@@ -31,8 +31,15 @@ export const MintStep = () => {
 
   useEffect(() => {
     if (proverResult) {
-      const mintedHandle = proverResult[1];
-      setMintedHandle(mintedHandle);
+      const result = JSON.parse(proverResult) as Parameters<
+        typeof writeContract
+      >[0]["args"];
+      if (!result || !Array.isArray(result) || typeof result[1] !== "string") {
+        throw new Error(
+          "Serialized prover result from local storage is invalid",
+        );
+      }
+      setMintedHandle(result[1]);
     }
     modalRef.current?.showModal();
   }, [proverResult]);

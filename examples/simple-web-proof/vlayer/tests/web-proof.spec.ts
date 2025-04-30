@@ -89,5 +89,8 @@ test("web proof flow", async ({ page, context }) => {
   await test.step("Clicking Start Minting should display Success", async () => {
     await page.getByText("Start Minting").click();
     await expect(page.getByText("Success")).toBeVisible();
+    expect(await page.getByText("was minted to").textContent()).toMatch(
+      /@[\w]+ was minted to 0x[a-fA-F0-9]{4}\.\.\.[a-fA-F0-9]{4}/,
+    );
   });
 });
