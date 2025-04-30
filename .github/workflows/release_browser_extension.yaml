@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       # The extension is built and uploaded to S3 during the nightly release workflow.
       # We download it, and read its version for later use.
