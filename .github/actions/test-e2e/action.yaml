@@ -84,7 +84,7 @@ runs:
     - name: Configure RPC endpoints
       if: ${{ inputs.quicknode_api_key != '' }}
       run: |
-        bash ./bash/configure_rpc.sh \
+        bash ./bash/configure-rpc.sh \
         "${{ inputs.chain_name }}" \
         "${{ inputs.quicknode_api_key }}"
       shell: bash
