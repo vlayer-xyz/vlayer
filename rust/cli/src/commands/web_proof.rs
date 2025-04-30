@@ -4,6 +4,7 @@ use clap::Parser;
 use reqwest::Url;
 use strum::EnumString;
 use thiserror::Error;
+use tracing::debug;
 use web_prover::{
     NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
     generate_web_proof,
@@ -72,6 +73,8 @@ pub(crate) struct WebProofArgs {
 pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
     let server_args: NotarizeParams = args.try_into()?;
 
+    debug!("notarizing...");
+
     let presentation = generate_web_proof(server_args).await?;
 
     println!("{presentation}");
@@ -79,6 +82,7 @@ pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
     Ok(())
 }
 
+#[derive(Debug)]
 struct ValidatedUrl {
     url: Url,
     host: String,
@@ -86,6 +90,7 @@ struct ValidatedUrl {
     port: u16,
 }
 
+#[derive(Debug)]
 struct ProvenUrl {
     host: String,
     port: u16,
@@ -119,13 +124,21 @@ impl ValidatedUrl {
 }
 
 fn parse_proven_url(url_str: &str) -> Result<ProvenUrl, InputError> {
+    debug!("parsing url to notarize '{url_str}'");
+
     // Only https is allowed for proven urls as it does not make sense to prove http urls (not tls => no tlsn)
     let ValidatedUrl { host, port, .. } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https])?;
 
-    Ok(ProvenUrl { host, port })
+    let url = ProvenUrl { host, port };
+
+    debug!("proven url: {url:#?}");
+
+    Ok(url)
 }
 
 fn parse_notary_url(url_str: &str) -> Result<NotaryConfig, InputError> {
+    debug!("parsing notary url '{url_str}'");
+
     let ValidatedUrl {
         url,
         host,
@@ -140,22 +153,27 @@ fn parse_notary_url(url_str: &str) -> Result<NotaryConfig, InputError> {
         .to_string();
     let enable_tls = scheme == Scheme::Https;
 
-    Ok(NotaryConfig::new(host, port, path_prefix, enable_tls))
+    let config = NotaryConfig::new(host, port, path_prefix, enable_tls);
+
+    debug!("notary config: {config:#?}");
+
+    Ok(config)
 }
 
 impl TryFrom<WebProofArgs> for NotarizeParams {
     type Error = InputError;
 
     fn try_from(value: WebProofArgs) -> Result<Self, Self::Error> {
-        let ProvenUrl {
-            host: urlhost,
-            port,
-        } = parse_proven_url(&value.url)?;
+        let ProvenUrl { host, port } = parse_proven_url(&value.url)?;
         // If host is not provided fallback to host extracted from url
-        let host = value.host.unwrap_or(urlhost.clone());
+        let fallback_host = value.host.unwrap_or(host.clone());
+
+        debug!("fallback host for notarizing '{fallback_host}'");
+
         let max_sent_data = value.max_sent_data.unwrap_or(DEFAULT_MAX_SENT_DATA);
         let max_recv_data = value.max_recv_data.unwrap_or(DEFAULT_MAX_RECV_DATA);
-        let headers: Result<HashMap<String, String>, InputError> = value
+
+        let headers = value
             .headers
             .iter()
             .map(|header| {
@@ -172,7 +190,9 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
                     .to_string();
                 Ok((key, value))
             })
-            .collect();
+            .collect::<Result<HashMap<String, String>, InputError>>()?;
+
+        debug!("headers: {headers:#?}");
 
         let notary_config = if let Some(notary_url) = value.notary {
             parse_notary_url(&notary_url)?
@@ -183,13 +203,13 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
         let mut notarize_params_builder = NotarizeParamsBuilder::default();
         notarize_params_builder
             .notary_config(notary_config)
-            .server_domain(urlhost)
-            .server_host(host)
+            .server_domain(host)
+            .server_host(fallback_host)
             .server_port(port)
             .max_sent_data(max_sent_data)
             .max_recv_data(max_recv_data)
             .uri(value.url)
-            .headers(headers?);
+            .headers(headers);
 
         if let Some(body) = value.data {
             notarize_params_builder.body(body);
