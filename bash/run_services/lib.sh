@@ -12,7 +12,7 @@ function setup_tmp_dir() {
 
 function get_latest_block() {
     local rpc_url=$1
-    printf "Fetching latest block from %s\n" "${rpc_url}"
+    printf "Fetching latest block from %s\n" "${rpc_url}" >&2
     local block_hex=$(curl -s ${rpc_url} \
         -X POST \
         -H "Content-Type: application/json" \
