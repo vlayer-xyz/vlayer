@@ -6,7 +6,7 @@ use strum::EnumString;
 use thiserror::Error;
 use tracing::debug;
 use web_prover::{
-    NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
+    Method, NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
     generate_web_proof,
 };
 
@@ -57,8 +57,12 @@ pub(crate) struct WebProofArgs {
     )]
     notary: Option<String>,
 
-    /// Additional headers for the HTTP request (format: "Header-Name: Header-Value")
-    #[arg(short = 'H', long, value_name = "HEADER")]
+    /// HTTP method to use
+    #[arg(short = 'X', long = "request", value_name = "METHOD", default_value_t = Method::default())]
+    method: Method,
+
+    /// Additional header for the HTTP request (format: "Header-Name: Header-Value")
+    #[arg(short = 'H', long = "header", value_name = "HEADER")]
     headers: Vec<String>,
 
     /// HTTP data to be sent with the request
@@ -188,6 +192,10 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
         let max_sent_data = value.max_sent_data.unwrap_or(DEFAULT_MAX_SENT_DATA);
         let max_recv_data = value.max_recv_data.unwrap_or(DEFAULT_MAX_RECV_DATA);
 
+        let method = value.method;
+
+        debug!("HTTP method: {method}");
+
         let headers = value
             .headers
             .iter()
@@ -211,7 +219,8 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
             .max_sent_data(max_sent_data)
             .max_recv_data(max_recv_data)
             .uri(value.url)
-            .headers(headers);
+            .headers(headers)
+            .method(method);
 
         if let Some(body) = value.data {
             notarize_params_builder.body(body);
@@ -227,13 +236,11 @@ mod tests {
     #[test]
     fn test_convert_args() {
         let input_args = WebProofArgs {
-            url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
-            host: Some("127.0.0.1".into()),
-            notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.9".into()),
             headers: vec!["Authorization: Basic 1234".into(), "X-Api-Key: 5678".into()],
             data: Some("example body data".into()),
             max_sent_data: Some(100),
             max_recv_data: Some(100),
+            ..Default::default()
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -442,6 +449,7 @@ mod tests {
                 url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".into(),
                 host: Some("127.0.0.1".into()),
                 notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.9".into()),
+                method: Method::default(),
                 headers: vec![],
                 data: None,
                 max_sent_data: Some(DEFAULT_MAX_SENT_DATA),
