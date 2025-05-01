@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use clap::Parser;
 use reqwest::Url;
@@ -192,7 +192,7 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
             .headers
             .iter()
             .map(parse_header)
-            .collect::<Result<HashMap<String, String>>>()?;
+            .collect::<Result<Vec<(String, String)>>>()?;
 
         debug!("headers: {headers:#?}");
 

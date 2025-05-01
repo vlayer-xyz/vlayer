@@ -1,6 +1,6 @@
 #![allow(clippy::unwrap_used)]
 
-use std::{collections::HashMap, path::Path};
+use std::path::Path;
 
 use rangeset::RangeSet;
 use serde::Deserialize;
@@ -220,7 +220,7 @@ async fn generate_web_proofs_with_redaction_config(
             .server_host(SERVER_HOST)
             .server_port(SERVER_PORT)
             .uri("https://lotr-api.online/auth_header_require?param1=value1&param2=value2")
-            .headers(HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]))
+            .headers([("Authorization", "s3cret_t0ken")])
             .redaction_config_fn(redaction_config)
             .build()
             .unwrap(),

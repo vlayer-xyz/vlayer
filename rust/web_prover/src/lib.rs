@@ -7,7 +7,7 @@ use anyhow::Result;
 use constcat::concat;
 pub use notarize::notarize;
 pub use params::{
-    NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
+    Method, NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
     RedactionConfigFn,
 };
 pub use presentation::create_presentation_with_redaction;
