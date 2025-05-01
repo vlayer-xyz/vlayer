@@ -1,7 +1,7 @@
 use std::str;
 
 use anyhow::{Context, Result};
-use http_body_util::Full;
+use http_body_util::{BodyExt, Full};
 use hyper::{Request, StatusCode, body::Bytes};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
@@ -91,7 +91,14 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
 
     debug!("Got a response from the server: {}", response.status());
 
-    assert!(response.status() == StatusCode::OK);
+    let status = response.status();
+    if status != StatusCode::OK {
+        let body = response.collect().await?.to_bytes();
+        let body = String::from_utf8_lossy(&body);
+        anyhow::bail!(
+            "Failed to notarize: server responded with status '{status}', body: '{body}'",
+        );
+    }
 
     let prover = prover_task.await??;
 
