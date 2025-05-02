@@ -33,7 +33,7 @@ function get_latest_block() {
     if [[ -z "$block_hex" ]]; then
       # try printing any .error.message
       local err_msg
-      err_msg=$(echo "$resp" | jq -r '.error.message // "unknown error"')
+      err_msg=$(echo "$resp" | jq -r '.error.message // .error // "unknown error"')
       printf "‼️ RPC error: %s\n" "$err_msg" >&2
       return 1
     fi
