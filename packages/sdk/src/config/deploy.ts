@@ -199,6 +199,19 @@ const swapInternalVerifier = async (
 };
 
 async function getImageId(proverUrl: string, token?: string): Promise<Hex> {
+  console.log("Fetching image ID...");
+  console.log(`Prover URL: ${proverUrl}`);
+  if (token) {
+    console.log("Token provided for authentication");
+  } else {
+    console.log("No token provided for authentication");
+  }
+
   const version = await v_versions(proverUrl, token);
-  return version.call_guest_id as Hex;
+  console.log("Version information retrieved:", version);
+
+  const imageId = version.call_guest_id as Hex;
+  console.log(`Image ID: ${imageId}`);
+
+  return imageId;
 }
