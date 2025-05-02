@@ -128,6 +128,7 @@ export const deployVlayerContracts = async ({
 
   console.log("Contract deployment completed successfully");
   if (deployConfig.shouldRedeployVerifierRouter) {
+    console.log("Redeploying verifier router...");
     await swapInternalVerifier(
       ethClient,
       chain,
@@ -150,8 +151,14 @@ const swapInternalVerifier = async (
   proverUrl: string,
   token?: string,
 ) => {
-  log("Swapping internal verifier");
+  console.log("Starting the process to swap internal verifier...");
+  console.log(`Prover URL: ${proverUrl}`);
+  console.log(`Verifier Address: ${verifierAddress}`);
+  
   const imageId = await getImageId(proverUrl, token);
+  console.log(`Retrieved Image ID: ${imageId}`);
+  
+  console.log("Deploying TestVerifierRouterDeployer contract...");
   const routerDeployerHash = await ethClient.deployContract({
     chain,
     account,
@@ -159,15 +166,23 @@ const swapInternalVerifier = async (
     abi: TestVerifierRouterDeployer.abi,
     bytecode: TestVerifierRouterDeployer.bytecode.object,
   });
+  console.log(`Router Deployer Transaction Hash: ${routerDeployerHash}`);
+  
   const routerDeployerAddress = await waitForContractDeploy({
     client: ethClient,
     hash: routerDeployerHash,
   });
+  console.log(`Router Deployer Contract Address: ${routerDeployerAddress}`);
+  
+  console.log("Reading new verifier address from Router Deployer contract...");
   const newVerifier = await ethClient.readContract({
     address: routerDeployerAddress,
     functionName: "VERIFIER_ROUTER",
     abi: TestVerifierRouterDeployer.abi,
   });
+  console.log(`New Verifier Address: ${newVerifier}`);
+  
+  console.log("Writing new verifier address to the verifier contract...");
   const swapTxHash = await ethClient.writeContract({
     chain,
     account,
@@ -176,8 +191,11 @@ const swapInternalVerifier = async (
     args: [newVerifier],
     abi: parseAbi(["function _setTestVerifier(address)"]),
   });
+  console.log(`Swap Transaction Hash: ${swapTxHash}`);
+  
+  console.log("Waiting for transaction receipt...");
   await waitForTransactionReceipt({ client: ethClient, hash: swapTxHash });
-  log("Internal verifier swapped successfully");
+  console.log("Internal verifier swapped successfully");
 };
 
 async function getImageId(proverUrl: string, token?: string): Promise<Hex> {
