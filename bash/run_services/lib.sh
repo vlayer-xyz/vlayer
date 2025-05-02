@@ -12,14 +12,34 @@ function setup_tmp_dir() {
 
 function get_latest_block() {
     local rpc_url=$1
+
+    # tell me where we’re hitting
     printf "Fetching latest block from %s\n" "${rpc_url}" >&2
-    local block_hex=$(curl -s ${rpc_url} \
-        -X POST \
+
+    # grab the full JSON response
+    local resp
+    resp=$(curl -s -X POST "${rpc_url}" \
         -H "Content-Type: application/json" \
-        --data '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}' \
-        | jq -r ".result"
-    )
-    printf "%d\n" "${block_hex}"
+        --data '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}')
+
+    # dump it for debugging
+    printf "RPC raw response: %s\n" "$resp" >&2
+
+    # pull out .result
+    local block_hex
+    block_hex=$(echo "$resp" | jq -r '.result // empty')
+
+    # if it’s empty or not a valid hex, bail with the error message
+    if [[ -z "$block_hex" ]]; then
+      # try printing any .error.message
+      local err_msg
+      err_msg=$(echo "$resp" | jq -r '.error.message // "unknown error"')
+      printf "‼️ RPC error: %s\n" "$err_msg" >&2
+      return 1
+    fi
+
+    # finally convert hex to decimal
+    printf "%d\n" "$block_hex"
 }
 
 function startup_vdns_server() {
