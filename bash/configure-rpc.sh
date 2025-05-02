@@ -18,8 +18,6 @@ case "$CHAIN_NAME" in
     ;;
   sepolia)
     FRAGMENT="ethereum-sepolia"
-    # override with the known Sepolia API key
-    QK_KEY="7c1391dd1fa23de1a735fa4fae2565cc0cc36639"
     ;;
   *)
     # Fallback: convert camelCase -> kebab-case
