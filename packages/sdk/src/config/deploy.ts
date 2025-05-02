@@ -90,14 +90,14 @@ export const deployVlayerContracts = async ({
   verifierArgs?: ContractArg[];
   config?: Partial<VlayerContextConfig>;
 }) => {
-  log("Starting contract deployment process...");
+  console.log("Starting contract deployment process...");
   const config = getConfig(configOverride);
   const { chain, ethClient, account, deployConfig, proverUrl } =
     createContext(config);
   if (!account) {
     throw new AccountNotSetError();
   }
-  log("Deploying prover contract...");
+  console.log("Deploying prover contract...");
   const proverHash = await ethClient.deployContract({
     chain,
     account,
@@ -105,14 +105,14 @@ export const deployVlayerContracts = async ({
     abi: proverSpec.abi,
     bytecode: proverSpec.bytecode.object,
   });
-  log(`Prover hash: ${proverHash}`);
+  console.log(`Prover hash: ${proverHash}`);
   const prover = await waitForContractDeploy({
     client: ethClient,
     hash: proverHash,
   });
-  log(`Prover contract deployed at: ${prover}`);
+  console.log(`Prover contract deployed at: ${prover}`);
 
-  log("Deploying verifier contract...");
+  console.log("Deploying verifier contract...");
   const verifierHash = await ethClient.deployContract({
     chain,
     account,
@@ -124,9 +124,9 @@ export const deployVlayerContracts = async ({
     client: ethClient,
     hash: verifierHash,
   });
-  log(`Verifier contract deployed at: ${verifier}`);
+  console.log(`Verifier contract deployed at: ${verifier}`);
 
-  log("Contract deployment completed successfully");
+  console.log("Contract deployment completed successfully");
   if (deployConfig.shouldRedeployVerifierRouter) {
     await swapInternalVerifier(
       ethClient,
@@ -138,6 +138,7 @@ export const deployVlayerContracts = async ({
     );
   }
 
+  console.log("Redeploying verifier router completed successfully");
   return { prover, verifier };
 };
 
