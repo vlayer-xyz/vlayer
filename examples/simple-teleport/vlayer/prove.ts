@@ -64,6 +64,8 @@ const whaleBadgeNFTAddress = await waitForContractDeploy({
   hash: deployWhaleBadgeHash,
 });
 
+console.log("✅ WhaleBadgeNFT deployed at:", whaleBadgeNFTAddress);
+
 const tokensToCheck: {
   addr: Address;
   chainId: bigint;
@@ -78,12 +80,16 @@ const tokensToCheck: {
   }),
 );
 
+console.log("📦 Deploying prover and verifier contracts...");
+
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
   proverArgs: [],
   verifierArgs: [whaleBadgeNFTAddress],
 });
+
+console.log("📨 Prover tx hash:", prover);
 
 const proofHash = await vlayer.prove({
   address: prover,
