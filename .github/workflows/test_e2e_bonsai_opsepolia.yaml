@@ -246,7 +246,7 @@ jobs:
 
           # JWT auth related
           jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
           # Proving related
           proving_mode: "prod"
