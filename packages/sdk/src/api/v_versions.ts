@@ -5,9 +5,6 @@ import {
 import { InvalidProverResponseError } from "./lib/errors";
 import { validateJrpcResponse } from "./lib/jrpc";
 import { versionsSchema, type Versions } from "types/vlayer";
-import debug from "debug";
-
-const log = debug("vlayer:v_versions");
 
 const v_versionsBody = {
   method: "v_versions",
