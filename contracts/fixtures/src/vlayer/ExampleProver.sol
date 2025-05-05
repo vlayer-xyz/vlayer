@@ -2,7 +2,6 @@
 pragma solidity ^0.8.21;
 
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
-import {URLPatternLib} from "vlayer/URLPattern.sol";
 
 import {Prover} from "vlayer/Prover.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
@@ -19,7 +18,6 @@ import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 
 contract ExampleProver is Prover {
     using Strings for string;
-    using URLPatternLib for string;
     using WebProofLib for WebProof;
     using WebLib for Web;
 
@@ -32,10 +30,10 @@ contract ExampleProver is Prover {
 
     // solhint-disable-next-line func-name-mixedcase
     function web_proof(WebProof calldata webProof) public view returns (bool) {
-        Web memory web = webProof.recover();
+        Web memory web = webProof.recover(WebProofLib.UrlTestMode.Full, WebProofLib.BodyRedactionMode.Disabled);
 
         require(
-            web.url.test("https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken"), "Incorrect URL"
+            web.url.equal("https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken"), "Incorrect URL"
         );
 
         require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");

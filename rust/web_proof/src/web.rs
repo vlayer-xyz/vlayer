@@ -1,5 +1,6 @@
 use alloy_dyn_abi::DynSolValue;
 
+#[derive(Debug, Clone)]
 pub struct Web {
     pub url: String,
     pub server_name: String,

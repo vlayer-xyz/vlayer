@@ -2,7 +2,6 @@
 pragma solidity ^0.8.21;
 
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
-import {RegexLib} from "vlayer/Regex.sol";
 
 import {Proof} from "vlayer/Proof.sol";
 import {Prover} from "vlayer/Prover.sol";
@@ -11,7 +10,6 @@ import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 // this prover contract is used in playwright e2e tests
 contract LotrApiProver is Prover {
     using Strings for string;
-    using RegexLib for string;
     using WebProofLib for WebProof;
     using WebLib for Web;
 
@@ -21,13 +19,16 @@ contract LotrApiProver is Prover {
 
     // solhint-disable-next-line func-name-mixedcase
     function web_proof(WebProof calldata webProof) public view returns (Proof memory, string memory, string memory) {
-        Web memory web = WebProofLib.recover(webProof);
+        Web memory web =
+            WebProofLib.recover(webProof, WebProofLib.UrlTestMode.Full, WebProofLib.BodyRedactionMode.Disabled);
 
         require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Incorrect notary public key");
 
         require(web.jsonGetBool("success"), "Got unsuccessful response in WebProof");
 
-        require(web.url.matches("^.*are_you_sure=yes\\&really=\\*+$"), "Incorrect redaction of URL");
+        require(
+            web.url.equal("https://lotr-api.online:3011/regular_json?are_you_sure=yes"), "Incorrect redaction of URL"
+        );
 
         string memory name = web.jsonGetString("name");
         string memory greeting = web.jsonGetString("greeting");

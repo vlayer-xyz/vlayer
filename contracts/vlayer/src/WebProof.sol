@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 import {ChainIdLibrary} from "./proof_verifier/ChainId.sol";
-import {URLPatternLib} from "./URLPattern.sol";
+import {UrlLib} from "./Url.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
 import {TestnetStableDeployment} from "./TestnetStableDeployment.sol";
 
@@ -20,34 +20,65 @@ struct Web {
 
 library WebProofLib {
     using Strings for string;
-    using URLPatternLib for string;
+    using UrlLib for string;
+
+    enum UrlTestMode {
+        Full,
+        Prefix
+    }
+
+    enum BodyRedactionMode {
+        Disabled,
+        Enabled_UNSAFE
+    }
 
     // Generated using command `curl -s https://notary.pse.dev/v0.1.0-alpha.7/info | jq -r '.publicKey' | openssl ec -pubin -inform PEM -pubout -conv_form uncompressed`
     string private constant NOTARY_PUB_KEY =
         "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
 
-    function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
-        Web memory web = recover(webProof);
-        if (ChainIdLibrary.isTestEnv()) {
-            require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Invalid notary public key");
-        } else {
-            require(
-                TestnetStableDeployment.repository().isNotaryKeyValid(web.notaryPubKey), "Invalid notary public key"
-            );
-        }
-
-        require(web.url.test(dataUrl), "Incorrect URL");
+    function verify(WebProof memory webProof, string memory url, BodyRedactionMode bodyRedactionMode)
+        internal
+        view
+        returns (Web memory)
+    {
+        Web memory web = recover(webProof, UrlTestMode.Full, bodyRedactionMode);
+        verifyNotaryKey(web.notaryPubKey);
+        require(web.url.equal(url), "URL mismatch");
         return web;
     }
 
-    function recover(WebProof memory webProof) internal view returns (Web memory) {
-        (bool success, bytes memory returnData) = Precompiles.VERIFY_AND_PARSE.staticcall(bytes(webProof.webProofJson));
+    function verifyWithUrlPrefix(WebProof memory webProof, string memory urlPrefix, BodyRedactionMode bodyRedactionMode)
+        internal
+        view
+        returns (Web memory)
+    {
+        Web memory web = recover(webProof, UrlTestMode.Prefix, bodyRedactionMode);
+        verifyNotaryKey(web.notaryPubKey);
+        require(web.url.startsWith(urlPrefix), "URL prefix mismatch");
+        return web;
+    }
+
+    function recover(WebProof memory webProof, UrlTestMode urlTestMode, BodyRedactionMode bodyRedactionMode)
+        internal
+        view
+        returns (Web memory)
+    {
+        (bool success, bytes memory returnData) =
+            Precompiles.VERIFY_AND_PARSE.staticcall(abi.encode(webProof, urlTestMode, bodyRedactionMode));
 
         Address.verifyCallResult(success, returnData);
 
         string[4] memory data = abi.decode(returnData, (string[4]));
 
         return Web(data[2], data[3], data[0]);
+    }
+
+    function verifyNotaryKey(string memory pubKey) internal view {
+        if (ChainIdLibrary.isTestEnv()) {
+            require(NOTARY_PUB_KEY.equal(pubKey), "Invalid notary public key");
+        } else {
+            require(TestnetStableDeployment.repository().isNotaryKeyValid(pubKey), "Invalid notary public key");
+        }
     }
 }
 
