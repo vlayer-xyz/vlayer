@@ -886,6 +886,31 @@ mod tests {
                             ParsingError::InvalidCharset(err_string) if err_string == "application/json; charset=ISO-8859-1"
                         ));
                     }
+
+                    #[test]
+                    fn fully_redacted_string_value_with_disabled_body_redaction() {
+                        let response = "".to_string()
+                            + "HTTP/1.1 200 OK\r\n"
+                            + "Content-Type: application/json\r\n"
+                            + "Content-Length: 136\r\n"
+                            + "\r\n"
+                            + "{\r\n"
+                            + "\"string\": \"\0\0\0\0\0\0\0\0\0\0\0\0\0\",\r\n"
+                            + "\"number\": 42,\r\n"
+                            + "\"boolean\": true,\r\n"
+                            + "\"array\": [1, 2, 3, \"four\"],\r\n"
+                            + "\"object\": {\r\n"
+                            + "\"nested_string\": \"Nested\",\r\n"
+                            + "\"nested_number\": 99.99\r\n"
+                            + "}\r\n"
+                            + "}";
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
+                        assert_eq!(err, ParsingError::RedactionInResponseBody);
+                    }
                 }
             }
         }
