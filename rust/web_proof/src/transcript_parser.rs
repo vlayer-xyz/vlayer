@@ -89,13 +89,11 @@ pub(crate) fn parse_response_and_validate_redaction(
         &String::from_utf8(body_secondary.to_vec())?,
     )?;
 
-    if !body_primary.trim().is_empty() || !body_secondary.trim().is_empty() {
-        validate_name_value_redaction(
-            &json_to_redacted_transcript(&body_primary)?,
-            &json_to_redacted_transcript(&body_secondary)?,
-            RedactionElementType::ResponseBody,
-        )?;
-    }
+    validate_name_value_redaction(
+        &json_to_redacted_transcript(&body_primary)?,
+        &json_to_redacted_transcript(&body_secondary)?,
+        RedactionElementType::ResponseBody,
+    )?;
 
     if redaction_mode == BodyRedactionMode::Disabled {
         if body_primary_offset != body_secondary_offset {
@@ -418,12 +416,14 @@ mod tests {
                             + "HTTP/1.1 200 OK\r\n"
                             + "Content-Type: application/json\r\n"
                             + "\r\n";
-                        let body = parse_response_and_validate_redaction(
+                        let err = parse_response_and_validate_redaction(
                             response.as_bytes(),
                             BodyRedactionMode::Disabled,
                         )
-                        .unwrap();
-                        assert_eq!(body, "");
+                        .unwrap_err();
+                        assert!(
+                            matches!(err, ParsingError::Json(err) if err.to_string() == "EOF while parsing a value at line 1 column 0")
+                        );
                     }
 
                     #[test]

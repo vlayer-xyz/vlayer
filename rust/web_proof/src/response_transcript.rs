@@ -85,8 +85,12 @@ mod tests {
                 .to_vec(),
         );
 
-        let body = transcript.parse_body(BodyRedactionMode::Disabled);
-        assert_eq!(body.unwrap(), "".to_string());
+        let err = transcript
+            .parse_body(BodyRedactionMode::Disabled)
+            .unwrap_err();
+        assert!(
+            matches!(err, ParsingError::Json(err) if err.to_string() == "EOF while parsing a value at line 1 column 0")
+        );
     }
 
     #[test]
