@@ -49,7 +49,9 @@ export class HistoryContextManager {
         (await historyContextManager.store.get(
           provingSessionStorageConfig.storageKeys.browsingHistory,
         )) || [];
-      const existingItemIndex = history.findIndex((i) => i.url === item.url);
+      const existingItemIndex = history.findIndex(
+        (i) => i.url === item.url && i.method === item.method,
+      );
       // Add cookies and headers and mark eventually as ready
       if (existingItemIndex !== -1) {
         const existingItem = history[existingItemIndex];

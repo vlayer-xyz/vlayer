@@ -7,7 +7,7 @@ import { Separator } from "components/atoms/Separator";
 import { StepActions } from "components/molecules/StepActions/StepActions";
 import styles from "./Step.module.css";
 import { match } from "ts-pattern";
-import { ExtensionStep } from "src/web-proof-commons/types/message.ts";
+import { ExtensionStep } from "src/web-proof-commons";
 
 type StepProps = {
   label: string;

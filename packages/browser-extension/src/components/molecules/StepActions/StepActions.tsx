@@ -5,10 +5,7 @@ import { ExpectUrlStepActions } from "./ExpectUrl";
 import { NotarizeStepActions } from "./Notarize";
 import { StartPageStepActions } from "./StartPage";
 import { StepStatus } from "constants/step";
-import {
-  EXTENSION_STEP,
-  ExtensionStep,
-} from "src/web-proof-commons/types/message.ts";
+import { EXTENSION_STEP, ExtensionStep } from "src/web-proof-commons";
 
 export const StepActions: React.FC<{
   kind: ExtensionStep;

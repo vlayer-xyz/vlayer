@@ -1,9 +1,14 @@
 import { useBrowsingHistory } from "./useBrowsingHistory";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
-import { BrowsingHistoryItem } from "../state/history";
+import { BrowsingHistoryItem } from "src/state";
 import { LOADING } from "@vlayer/extension-hooks";
 import { URLPattern } from "urlpattern-polyfill";
 import { match, P } from "ts-pattern";
+import { WebProofStep, WebProofStepNotarize } from "src/web-proof-commons";
+
+function isNotarizeStep(step: WebProofStep): step is WebProofStepNotarize {
+  return step.step === "notarize";
+}
 
 export function useProvenUrl(): BrowsingHistoryItem | null {
   const [config] = useProvingSessionConfig();
@@ -16,13 +21,16 @@ export function useProvenUrl(): BrowsingHistoryItem | null {
     })
     .exhaustive();
 
-  const provenUrlAddress = steps.find(({ step }) => step === "notarize")?.url;
+  const notarizeStep = steps.find(isNotarizeStep);
+  if (!notarizeStep) {
+    return null;
+  }
 
   return (
-    browsingHistory.find((item: BrowsingHistoryItem) => {
-      return provenUrlAddress
-        ? new URLPattern(provenUrlAddress as string).test(item.url)
-        : false;
-    }) ?? null
+    browsingHistory.find(
+      (item: BrowsingHistoryItem) =>
+        item.method === notarizeStep.method &&
+        new URLPattern(notarizeStep.url).test(item.url),
+    ) ?? null
   );
 }
