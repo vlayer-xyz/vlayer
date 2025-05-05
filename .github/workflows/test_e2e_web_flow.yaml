@@ -1,21 +1,37 @@
 name: E2E Web Flow Test
 on:
   pull_request:
-    paths:
-      - "packages/**"
-      - ".github/workflows/test_e2e_web_flow.yaml"
-      - "docker/**"
-      - "bash/playwright-test.sh"
-      - "bash/run-services.sh"
   merge_group:
   push:
     branches:
       - main
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'packages/**'
+              - '.github/workflows/test_e2e_web_flow.yaml'
+              - 'docker/**'
+              - 'bash/playwright-test.sh'
+              - 'bash/run-services.sh'
+
   test-e2e-web-flow:
     name: E2E Web Flow Test
+    needs: changes
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
