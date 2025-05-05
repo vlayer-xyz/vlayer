@@ -5,6 +5,7 @@ import { useAccount, useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
 import { parseProverResult, tokensToProve } from "../../shared/lib/utils";
+import { AlreadyMintedError } from "../../shared/errors/appErrors";
 
 export const ConfirmMintPage = () => {
   const { address } = useAccount();
@@ -36,7 +37,10 @@ export const ConfirmMintPage = () => {
 
   useEffect(() => {
     if (mintError) {
-      console.error("Mint error", mintError);
+      if (mintError.message.includes("already been minted")) {
+        throw new AlreadyMintedError();
+      }
+      throw new Error(mintError.message);
     }
   }, [mintError]);
 
