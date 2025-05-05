@@ -36,25 +36,6 @@ impl Mdbx {
         let db = libmdbx::Database::open_with_options(path, db_opts).map_err(DbError::custom)?;
         Ok(Self { db })
     }
-
-    pub fn open_with_size<P: AsRef<Path>>(
-        path: P,
-        min_size: isize,
-        max_size: isize,
-    ) -> DbResult<Self> {
-        let db_opts = DatabaseOptions {
-            mode: libmdbx::Mode::ReadWrite(ReadWriteOptions {
-                min_size: Some(min_size),
-                max_size: Some(max_size),
-                growth_step: Some(DB_GROWTH_STEP),
-                ..Default::default()
-            }),
-            max_tables: Some(MAX_TABLES),
-            ..Default::default()
-        };
-        let db = libmdbx::Database::open_with_options(path, db_opts).map_err(DbError::custom)?;
-        Ok(Self { db })
-    }
 }
 
 impl<'a> crate::Database<'a> for Mdbx {
@@ -137,63 +118,3 @@ impl WriteTx for MdbxTx<'_, RW> {
 
 #[cfg(test)]
 mod tests;
-
-#[cfg(test)]
-mod other_tests {
-    use tempfile::tempdir;
-
-    use super::*;
-    use crate::{Database, ReadTx};
-
-    #[test]
-    fn test_dynamic_resize() -> anyhow::Result<()> {
-        use crate::ReadTx;
-
-        let dir = tempfile::tempdir()?;
-        let db_path = dir.path().join("testdb");
-
-        let min_size = 0;
-        let max_size = 100_000;
-        let mut mdbx = Mdbx::open_with_size(&db_path, min_size, max_size)?;
-
-        {
-            let mut wtx = mdbx.begin_rw()?;
-            wtx.create_table("table1")?;
-            wtx.insert("table1", b"key1", b"val1")?;
-            wtx.commit()?;
-        }
-
-        let result = (|| {
-            let mut wtx = mdbx.begin_rw()?;
-            let key = b"k0".to_vec();
-            let value = vec![0_u8; 100_000];
-            wtx.insert("table1", &key, &value)?;
-            wtx.commit()
-        })();
-
-        if let Err(DbError::Custom(msg)) = result {
-            assert!(msg.contains("MDBX_MAP_FULL"));
-        } else {
-            panic!("expected MapFull error");
-        }
-
-        drop(mdbx);
-
-        let new_max_size = 300_000;
-        let mut mdbx2 = Mdbx::open_with_size(&db_path, min_size, new_max_size)?;
-
-        {
-            let rtx = mdbx2.begin_ro()?;
-            let found = rtx.get("table1", b"key1")?;
-            assert_eq!(found.as_deref(), Some(b"val1".as_slice()));
-        }
-
-        {
-            let mut wtx = mdbx2.begin_rw()?;
-            wtx.insert("table1", b"key2", &vec![0_u8; 100_000])?;
-            wtx.commit()?;
-        }
-
-        Ok(())
-    }
-}
