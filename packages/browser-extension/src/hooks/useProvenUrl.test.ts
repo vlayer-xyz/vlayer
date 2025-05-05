@@ -74,6 +74,42 @@ describe("useProvenUrl", () => {
     });
   });
 
+  test("picks step based on both url pattern and method", () => {
+    mocks.useBrowsingHistory.mockImplementation(() => [
+      [
+        {
+          url: "http://example.com/api/additional/path",
+          ready: true,
+          method: "GET",
+        },
+        {
+          url: "http://example.com/api/additional/path",
+          ready: true,
+          method: "POST",
+        },
+      ],
+    ]);
+
+    function testForMethod(method: "POST" | "GET") {
+      mocks.useProvingSessionConfig.mockImplementation(() => [
+        {
+          steps: [
+            { step: "notarize", url: "http://example.com/api/*", method },
+          ],
+        },
+      ]);
+      const { result } = renderHook(() => useProvenUrl());
+      expect(result.current).toEqual({
+        method,
+        url: "http://example.com/api/additional/path",
+        ready: true,
+      });
+    }
+
+    testForMethod("POST");
+    testForMethod("GET");
+  });
+
   test("returns null when URL doesn't match notarize step", () => {
     mocks.useBrowsingHistory.mockImplementation(() => [
       [{ url: "http://different.com" }],
