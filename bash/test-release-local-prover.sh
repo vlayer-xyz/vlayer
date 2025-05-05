@@ -12,7 +12,7 @@ echo "::endgroup::"
 echo "::group::vlayer installation"
 curl -SL https://install.vlayer.xyz | bash
 export PATH="$PATH:$HOME/.config/.vlayer/bin"
-vlayerup
+vlayerup --channel stable
 echo "::endgroup::"
 
 echo "::group::bun installation"
