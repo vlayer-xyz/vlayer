@@ -45,12 +45,19 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
-const tokensToCheck: { addr: Address; chainId: string; blockNumber: string }[] =
-  (teleportConfig.prover.erc20Addresses.split(",") || []).map((addr, i) => ({
+const tokensToCheck: {
+  addr: Address;
+  chainId: string;
+  blockNumber: string;
+  balance: string;
+}[] = (teleportConfig.prover.erc20Addresses.split(",") || []).map(
+  (addr, i) => ({
     addr: addr as Address,
     chainId: teleportConfig.prover.erc20ChainIds.split(",")[i],
     blockNumber: teleportConfig.prover.erc20BlockNumbers.split(",")[i],
-  }));
+    balance: "0",
+  }),
+);
 
 await writeEnvVariables(".env", {
   VITE_PROVER_ADDRESS: prover,
