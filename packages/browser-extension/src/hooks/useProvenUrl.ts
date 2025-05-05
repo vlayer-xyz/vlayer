@@ -29,8 +29,8 @@ export function useProvenUrl(): BrowsingHistoryItem | null {
   return (
     browsingHistory.find(
       (item: BrowsingHistoryItem) =>
-        item.method === notarizeStep.method &&
-        new URLPattern(notarizeStep.url).test(item.url),
+        (item.method as string) === notarizeStep.method &&
+        new URLPattern(notarizeStep.url as string).test(item.url),
     ) ?? null
   );
 }
