@@ -1,9 +1,9 @@
-# Auto-updates the VDNS server with a latest nightly vlayer release,
+# Auto-updates the VDNS server with a latest stable vlayer release,
 # after a successful release.
 name: Deploy VDNS
 on:
   workflow_run:
-    workflows: ["Release nightly"]
+    workflows: ["Release stable"]
     types: [completed]
   workflow_dispatch:
 concurrency:

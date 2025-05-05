@@ -24,7 +24,7 @@ Environment=PROOF_MODE={{ chain_worker_proof_mode }}
 Environment=MAX_BACK_PROPAGATION_BLOCKS={{ chain_worker_max_back_propagation_blocks }}
 Environment=MAX_HEAD_BLOCKS={{ chain_worker_max_head_blocks }}
 Environment=CONFIRMATIONS={{ chain_worker_confirmations }}
-ExecStart=/opt/vlayer/chain_worker
+ExecStart=/home/{{ ansible_user }}/.vlayer/bin/worker
 
 [Install]
 WantedBy=multi-user.target

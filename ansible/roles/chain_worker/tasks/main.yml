@@ -3,23 +3,27 @@
   ansible.builtin.import_role:
     name: risc0
 
+- name: Install vlayerup
+  ansible.builtin.shell: |
+    set -ueo pipefail
+    curl -SL https://install.vlayer.xyz | bash
+  args:
+    creates: ~/.vlayer/bin/vlayerup
+    executable: /bin/bash
+
 - name: Install log configuration
   ansible.builtin.import_tasks: logs.yml
 
-- name: Create vlayer directory
-  become: true
-  ansible.builtin.file:
-    path: /opt/vlayer
-    state: directory
-    mode: '755'
-
-# Copying a built binary because the binary is not a part of the release (yet).
-- name: Copy chain worker binary
-  become: true
-  ansible.builtin.copy:
-    src: ../target/release/worker
-    dest: /opt/vlayer/chain_worker
-    mode: '755'
+# We're installing a most-recent nightly or stable version every time.
+- name: Install chain worker binary # noqa: no-changed-when
+  ansible.builtin.shell: |
+    export PATH="$PATH:~/.foundry/bin"
+    ~/.vlayer/bin/vlayerup --channel {{ vlayer_release_channel }}
+  args:
+    executable: /bin/bash
+  async: 600  # 10 minutes to complete
+  poll: 10  # check every 10 seconds
+  retries: 2
   notify: "Restart vlayer"
 
 - name: Install service file

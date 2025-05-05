@@ -5,3 +5,4 @@ chain_worker_rust_log:
 chain_server_rust_log:
   - info
 chain_services_db_path: "/data/chain_db"
+vlayer_release_channel: stable
