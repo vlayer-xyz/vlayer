@@ -48,7 +48,25 @@ function set_devnet_chain_worker_args() {
 }
 
 function set_testnet_chain_worker_args() {
-    latest_op_sepolia_block=$(get_latest_block "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY}")
+    local slug=""
+    case "$CHAIN_NAME" in
+    optimismSepolia)
+        slug="optimism-sepolia"
+        ;;
+    sepolia)
+        slug="ethereum-sepolia"
+        ;;
+    *)
+        # fallback: camelCase to kebab-case
+        slug=$(echo "$CHAIN_NAME" |
+            sed -E 's/([a-z0-9])([A-Z])/\1-\L\2/g' |
+            tr '[:upper:]' '[:lower:]')
+        ;;
+    esac
+
+    local full_url="https://${QUICKNODE_ENDPOINT}.${slug}.quiknode.pro/${QUICKNODE_API_KEY}"
+
+    latest_op_sepolia_block=$(get_latest_block "https://${QUICKNODE_ENDPOINT}.ethereum-sepolia.quiknode.pro/${QUICKNODE_API_KEY}")
 
     if [[ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]]; then
         # Time travel example needs to travel 10 block back
