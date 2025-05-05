@@ -10,7 +10,7 @@ use crate::ReadWriteTx;
 
 pub const MAX_TABLES: u64 = 1024;
 pub const MIN_DB_SIZE: isize = 100_000_000;
-/// Database size: up to 2,147,483,648 pages (≈8.0 TiB for default 4 KiB pagesize). 
+/// Database size: up to 2,147,483,648 pages (≈8.0 TiB for default 4 KiB pagesize).
 /// Reference: https://github.com/erthink/libmdbx/blob/master/README.md
 /// Default page size on Linus is 4 KiB.  
 /// Reference: https://docs.kernel.org/admin-guide/mm/transhuge.html
