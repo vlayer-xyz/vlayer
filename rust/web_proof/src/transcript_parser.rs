@@ -711,7 +711,9 @@ mod tests {
                             BodyRedactionMode::Disabled,
                         )
                         .unwrap_err();
-                        assert!(matches!(err, ParsingError::Json(_)));
+                        assert!(
+                            matches!(err, ParsingError::Json(err) if err.to_string() == "expected value at line 3 column 11")
+                        );
                     }
 
                     #[test]
@@ -756,6 +758,41 @@ mod tests {
                             err,
                             ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.string*: Hello"
                         ));
+                    }
+
+                    #[test]
+                    fn invalid_json() {
+                        let response = "".to_string()
+                            + "HTTP/1.1 200 OK\r\n"
+                            + "Content-Type: application/json\r\n"
+                            + "Content-Length: 136\r\n"
+                            + "\r\n"
+                            + "}";
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
+                        assert!(
+                            matches!(err, ParsingError::Json(err) if err.to_string() == "expected value at line 1 column 1")
+                        );
+                    }
+
+                    #[test]
+                    fn empty_body() {
+                        let response = "".to_string()
+                            + "HTTP/1.1 200 OK\r\n"
+                            + "Content-Type: application/json\r\n"
+                            + "Content-Length: 136\r\n"
+                            + "\r\n";
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
+                        assert!(
+                            matches!(err, ParsingError::Json(err) if err.to_string() == "EOF while parsing a value at line 1 column 0")
+                        );
                     }
 
                     #[test]
