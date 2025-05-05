@@ -1,9 +1,9 @@
-# Auto-updates the Prover servers with a latest nightly vlayer release,
+# Auto-updates the Prover servers with a latest stable vlayer release,
 # after a successful release.
-name: Deploy Provers
+name: Deploy Stable Provers
 on:
   workflow_run:
-    workflows: ["Release nightly", "Release stable"]
+    workflows: ["Release stable"]
     types: [completed]
   workflow_dispatch:
 concurrency:
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy-provers:
-    name: Deploy Provers
+    name: Deploy Stable Provers
     environment: Production
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     defaults:
@@ -27,16 +27,7 @@ jobs:
         run: |
           ansible-galaxy collection install -r requirements.yml
           ansible-galaxy role install -r requirements.yml
-      - name: Deploy nightly prover
-        if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.name == 'Release nightly' }}
-        run: |
-          eval "$(ssh-agent -s)"
-          ssh-add - <<< "${{ secrets.PRODUCTION_DEPLOYER_SSH_KEY }}"
-
-          ansible-playbook -i hosts.yml prover.yml --limit "nightly_fake_prover" \
-            --vault-password-file <(echo '${{ secrets.ANSIBLE_PRODUCTION_VAULT_PASSWORD }}')
       - name: Deploy stable prover
-        if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.name == 'Release stable' }}
         run: |
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${{ secrets.PRODUCTION_DEPLOYER_SSH_KEY }}"
