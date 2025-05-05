@@ -34,13 +34,13 @@ pub enum WebProofError {
     ConversionToPemFormat(#[from] pkcs8::spki::Error),
 }
 
-pub fn verify_and_parse(web_proof: WebProof, _config: Config) -> Result<Web, WebProofError> {
+pub fn verify_and_parse(web_proof: WebProof, config: Config) -> Result<Web, WebProofError> {
     let (request, response, server_name, notary_pub_key) = web_proof.verify()?;
 
     let web = Web {
         url: request.parse_url()?,
         server_name: server_name.to_string(),
-        body: response.parse_body()?,
+        body: response.parse_body(config.body_redaction_mode)?,
         notary_pub_key: to_pem_format(&notary_pub_key)?,
     };
 
@@ -154,11 +154,15 @@ mod tests {
 
         #[test]
         fn success_all_redaction_turned_on() {
+            let config = Config {
+                body_redaction_mode: BodyRedactionMode::EnabledUnsafe,
+                url_test_mode: UrlTestMode::Prefix,
+            };
             let web_proof =
                 read_fixture("./testdata/0.1.0-alpha.8/web_proof_all_redaction_types.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
-            let web = verify_and_parse(web_proof, CONFIG).unwrap();
+            let web = verify_and_parse(web_proof, config).unwrap();
 
             let body = &web.body;
             let parsed: Value = serde_json::from_str(body).unwrap();

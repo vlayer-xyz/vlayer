@@ -24,6 +24,11 @@ pub enum ParsingError {
     #[error("IO error: {0}")]
     StdIoError(#[from] std::io::Error),
 
+    #[error(
+        "Response body contain redacted elements. This is unsafe. Please set the BodyRedactionMode to Enabled_UNSAFE to allow this."
+    )]
+    RedactionInResponseBody,
+
     #[error("{0} name is redacted: {1}")]
     RedactedName(RedactionElementType, String),
 
