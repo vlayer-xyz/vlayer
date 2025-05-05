@@ -1,5 +1,8 @@
-import { Elysia } from "elysia";
+import { Elysia, type Context, t } from "elysia";
 import { cors } from "@elysiajs/cors";
+
+const TOKEN = "s3cret_t0ken";
+
 new Elysia({
   serve: {
     tls: {
@@ -11,12 +14,8 @@ new Elysia({
   .get("/regular_json", ({ request, set }) => {
     const url = request.url;
     const queryParams = new URLSearchParams(url.split("?")[1]);
-    if (queryParams.get("auth") !== "s3cret_t0ken") {
-      set.status = 403;
-      return {
-        success: false,
-        error_message: "Missing or wrong authentication",
-      };
+    if (queryParams.get("auth") !== TOKEN) {
+      return unauthorized(set);
     }
     if (queryParams.get("are_you_sure") !== "yes") {
       return {
@@ -38,12 +37,8 @@ new Elysia({
   })
   .get("/auth_header_require", ({ request, set }) => {
     const auth = request.headers.get("Authorization");
-    if (auth !== "s3cret_t0ken") {
-      set.status = 403;
-      return {
-        success: false,
-        error_message: "Missing or wrong authentication",
-      };
+    if (auth !== TOKEN) {
+      return unauthorized(set);
     }
     return {
       success: true,
@@ -51,5 +46,31 @@ new Elysia({
       greeting: "Old Tom Bombadil is a merry fellow!",
     };
   })
+  .post(
+    "/auth_header_require",
+    ({ headers, body, set }) => {
+      const auth = headers.authorization;
+      if (auth !== TOKEN) {
+        return unauthorized(set);
+      }
+      const { name } = body as { name: string };
+      return {
+        success: true,
+        greeting: `Hello, ${name}!`,
+      };
+    },
+    {
+      headers: t.Object({ authorization: t.String() }),
+      body: t.Object({ name: t.String() }),
+    },
+  )
   .use(cors())
   .listen(3011);
+
+function unauthorized(set: Context["set"]) {
+  set.status = 403;
+  return {
+    success: false,
+    error_message: "Missing or wrong authentication",
+  };
+}

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use clap::Parser;
 use reqwest::Url;
@@ -6,7 +6,7 @@ use strum::EnumString;
 use thiserror::Error;
 use tracing::debug;
 use web_prover::{
-    NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
+    Method, NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
     generate_web_proof,
 };
 
@@ -57,8 +57,12 @@ pub(crate) struct WebProofArgs {
     )]
     notary: Option<String>,
 
-    /// Additional headers for the HTTP request (format: "Header-Name: Header-Value")
-    #[arg(short = 'H', long, value_name = "HEADER")]
+    /// HTTP method to use
+    #[arg(short = 'X', long = "request", value_name = "METHOD")]
+    method: Option<Method>,
+
+    /// Additional header for the HTTP request (format: "Header-Name: Header-Value")
+    #[arg(short = 'H', long = "header", value_name = "HEADER")]
     headers: Vec<String>,
 
     /// HTTP data to be sent with the request
@@ -188,11 +192,21 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
         let max_sent_data = value.max_sent_data.unwrap_or(DEFAULT_MAX_SENT_DATA);
         let max_recv_data = value.max_recv_data.unwrap_or(DEFAULT_MAX_RECV_DATA);
 
+        let method = value.method.unwrap_or_else(|| {
+            if value.data.is_some() {
+                Method::POST
+            } else {
+                Method::GET
+            }
+        });
+
+        debug!("HTTP method: {method}");
+
         let headers = value
             .headers
             .iter()
             .map(parse_header)
-            .collect::<Result<HashMap<String, String>>>()?;
+            .collect::<Result<Vec<(String, String)>>>()?;
 
         debug!("headers: {headers:#?}");
 
@@ -211,7 +225,8 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
             .max_sent_data(max_sent_data)
             .max_recv_data(max_recv_data)
             .uri(value.url)
-            .headers(headers);
+            .headers(headers)
+            .method(method);
 
         if let Some(body) = value.data {
             notarize_params_builder.body(body);
@@ -227,13 +242,11 @@ mod tests {
     #[test]
     fn test_convert_args() {
         let input_args = WebProofArgs {
-            url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
-            host: Some("127.0.0.1".into()),
-            notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.9".into()),
             headers: vec!["Authorization: Basic 1234".into(), "X-Api-Key: 5678".into()],
             data: Some("example body data".into()),
             max_sent_data: Some(100),
             max_recv_data: Some(100),
+            ..Default::default()
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -256,7 +269,7 @@ mod tests {
     fn test_parse_headers() {
         let input_args: WebProofArgs = WebProofArgs {
             headers: vec!["Auth:oriza:tion: Basic 1234".into(), "X-Api-Key: 5678".into()],
-            ..WebProofArgs::default()
+            ..Default::default()
         };
         let converted: NotarizeParams = input_args.try_into().unwrap();
         assert_eq!(converted.headers.get("Auth"), Some(&"oriza:tion: Basic 1234".to_string()));
@@ -267,7 +280,7 @@ mod tests {
     fn test_default_notary_args() {
         let input_args = WebProofArgs {
             notary: None,
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -281,10 +294,30 @@ mod tests {
     }
 
     #[test]
+    fn test_default_method_no_data() {
+        let input_args = WebProofArgs {
+            data: None,
+            ..Default::default()
+        };
+        let converted: NotarizeParams = input_args.try_into().unwrap();
+        assert_eq!(converted.method, Method::GET);
+    }
+
+    #[test]
+    fn test_default_method_with_data() {
+        let input_args = WebProofArgs {
+            data: Some("something".to_string()),
+            ..Default::default()
+        };
+        let converted: NotarizeParams = input_args.try_into().unwrap();
+        assert_eq!(converted.method, Method::POST);
+    }
+
+    #[test]
     fn test_trim_slashes_in_notary_path() {
         let input_args = WebProofArgs {
             notary: Some("https://notary.vlayer.xyz/path/to/api/".into()),
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -297,7 +330,7 @@ mod tests {
     fn test_set_notary_tls_https() {
         let input_args = WebProofArgs {
             notary: Some("https://notary.vlayer.xyz/path/to/api/".into()),
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -309,7 +342,7 @@ mod tests {
     fn test_set_notary_tls_http() {
         let input_args = WebProofArgs {
             notary: Some("http://notary.vlayer.xyz/path/to/api/".into()),
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -321,7 +354,7 @@ mod tests {
     fn test_convert_args_no_uri_params() {
         let input_args: WebProofArgs = WebProofArgs {
             url: "https://api.x.com:8080/v1/followers".to_string(),
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let converted: NotarizeParams = input_args.try_into().unwrap();
@@ -345,7 +378,7 @@ mod tests {
     fn test_invalid_proven_url_error() {
         let input_args: WebProofArgs = WebProofArgs {
             url: "invalid-url".to_string(),
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let result: Result<NotarizeParams> = input_args.try_into();
@@ -359,7 +392,7 @@ mod tests {
     fn test_invalid_notary_url_error() {
         let input_args: WebProofArgs = WebProofArgs {
             notary: Some("invalid-url".to_string()),
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let result: Result<NotarizeParams> = input_args.try_into();
@@ -373,7 +406,7 @@ mod tests {
     fn test_invalid_proven_url_protocol_error() {
         let input_args: WebProofArgs = WebProofArgs {
             url: "xyz:///path/to/resource".to_string(),
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let result: Result<NotarizeParams> = input_args.try_into();
@@ -387,7 +420,7 @@ mod tests {
     fn test_invalid_notary_url_protocol_error() {
         let input_args: WebProofArgs = WebProofArgs {
             notary: Some("htp://notary.vlayer.xyz/path/to/api/".into()),
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let result: Result<NotarizeParams> = input_args.try_into();
@@ -401,7 +434,7 @@ mod tests {
     fn test_invalid_header_format_error() {
         let input_args: WebProofArgs = WebProofArgs {
             headers: vec!["Authorization".into()],
-            ..WebProofArgs::default()
+            ..Default::default()
         };
 
         let result: Result<NotarizeParams> = input_args.try_into();
@@ -442,6 +475,7 @@ mod tests {
                 url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".into(),
                 host: Some("127.0.0.1".into()),
                 notary: Some("https://notary.pse.dev:3030/v0.1.0-alpha.9".into()),
+                method: None,
                 headers: vec![],
                 data: None,
                 max_sent_data: Some(DEFAULT_MAX_SENT_DATA),

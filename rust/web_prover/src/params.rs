@@ -1,8 +1,9 @@
-use std::{collections::HashMap, str, sync::Arc};
+use std::{collections::BTreeMap, str, sync::Arc};
 
 use derive_builder::Builder;
-use derive_more::derive::Debug;
+use derive_more::Debug;
 use derive_new::new;
+pub use hyper::http::Method;
 use rangeset::RangeSet;
 use tlsn_core::transcript::Transcript;
 
@@ -28,8 +29,10 @@ pub struct NotarizeParams {
     pub server_host: String,
     pub server_port: u16,
     pub uri: String,
-    #[builder(setter(strip_option), default)]
-    pub headers: HashMap<String, String>,
+    #[builder(default)]
+    pub method: Method,
+    #[builder(setter(custom))]
+    pub headers: BTreeMap<String, String>,
     #[builder(setter(into), default)]
     pub body: Vec<u8>,
     #[builder(
@@ -42,6 +45,21 @@ pub struct NotarizeParams {
     pub max_sent_data: usize,
     #[builder(default = "1 << 14")]
     pub max_recv_data: usize,
+}
+
+impl NotarizeParamsBuilder {
+    pub fn headers(
+        &mut self,
+        headers: impl IntoIterator<Item = (impl AsRef<str>, impl AsRef<str>)>,
+    ) -> &mut Self {
+        self.headers = Some(
+            headers
+                .into_iter()
+                .map(|(name, value)| (name.as_ref().to_string(), value.as_ref().to_string()))
+                .collect(),
+        );
+        self
+    }
 }
 
 pub type RedactionConfigFn = Arc<dyn Fn(&Transcript) -> RedactionConfig + Send + Sync>;

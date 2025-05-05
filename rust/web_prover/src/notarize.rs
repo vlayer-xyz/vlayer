@@ -1,7 +1,7 @@
-use std::{collections::HashMap, str};
+use std::str;
 
 use anyhow::{Context, Result};
-use http_body_util::Full;
+use http_body_util::{BodyExt, Full};
 use hyper::{Request, StatusCode, body::Bytes};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
@@ -14,7 +14,7 @@ use tlsn_prover::{Prover, ProverConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 use tracing::debug;
 
-use crate::{NotarizeParams, RedactionConfig};
+use crate::{Method, NotarizeParams, RedactionConfig};
 
 const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
 
@@ -29,6 +29,7 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
         uri,
         headers,
         body,
+        method,
         redaction_config_fn,
         max_sent_data,
         max_recv_data,
@@ -82,7 +83,7 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
 
     tokio::spawn(connection);
 
-    let request = prepare_request(&server_domain, &uri, &headers, body)?;
+    let request = prepare_request(&server_domain, &uri, &headers, method, body)?;
 
     debug!("Starting an MPC TLS connection with the server");
 
@@ -90,7 +91,14 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
 
     debug!("Got a response from the server: {}", response.status());
 
-    assert!(response.status() == StatusCode::OK);
+    let status = response.status();
+    if status != StatusCode::OK {
+        let body = response.collect().await?.to_bytes();
+        let body = String::from_utf8_lossy(&body);
+        anyhow::bail!(
+            "Failed to notarize: server responded with status '{status}', body: '{body}'",
+        );
+    }
 
     let prover = prover_task.await??;
 
@@ -120,11 +128,13 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
 fn prepare_request(
     server_domain: &str,
     uri: &str,
-    headers: &HashMap<String, String>,
+    headers: impl IntoIterator<Item = (impl AsRef<str>, impl AsRef<str>)>,
+    method: Method,
     body: impl AsRef<[u8]>,
 ) -> Result<Request<Full<Bytes>>, hyper::http::Error> {
     let mut request_builder = Request::builder()
         .uri(uri)
+        .method(method)
         .header("Host", server_domain)
         .header("Accept", "*/*")
         .header("Accept-Encoding", "identity")
@@ -132,7 +142,7 @@ fn prepare_request(
         .header("User-Agent", USER_AGENT);
 
     for (k, v) in headers {
-        request_builder = request_builder.header(k, v);
+        request_builder = request_builder.header(k.as_ref(), v.as_ref());
     }
 
     request_builder.body(Full::new(Bytes::from(body.as_ref().to_vec())))
@@ -147,7 +157,8 @@ mod tests {
         let request = prepare_request(
             "lotr-api.online",
             "/auth_header_require?param1=value1&param2=value2",
-            &HashMap::from([("Authorization".to_string(), "s3cret_t0ken".to_string())]),
+            [("Authorization", "s3cret_t0ken")],
+            Method::GET,
             "abc",
         )
         .unwrap();
