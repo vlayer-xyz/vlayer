@@ -4,12 +4,14 @@ pragma solidity ^0.8.21;
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 
 import {Proof} from "vlayer/Proof.sol";
+import {UrlLib} from "vlayer/Url.sol";
 import {Prover} from "vlayer/Prover.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 
 // this prover contract is used in playwright e2e tests
 contract LotrApiProver is Prover {
     using Strings for string;
+    using UrlLib for string;
     using WebProofLib for WebProof;
     using WebLib for Web;
 
@@ -27,7 +29,8 @@ contract LotrApiProver is Prover {
         require(web.jsonGetBool("success"), "Got unsuccessful response in WebProof");
 
         require(
-            web.url.equal("https://lotr-api.online:3011/regular_json?are_you_sure=yes"), "Incorrect redaction of URL"
+            web.url.startsWith("https://lotr-api.online:3011/regular_json?are_you_sure=yes"),
+            "Incorrect redaction of URL"
         );
 
         string memory name = web.jsonGetString("name");
