@@ -18,6 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           submodules: recursive
       - name: Install Rust prerequisites
         uses: ./.github/actions/rust-prerequisites
