@@ -284,7 +284,7 @@ jobs:
         id: tags
         run: |
           tags="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.vlayer_release }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
-          if [ "${{ inputs.vlayer_release }}" = "nightly" ]; then
+          if [ "${{ inputs.vlayer_release }}" = "stable" ]; then
             tags="${tags},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           fi
           echo "TAGS=$tags" >> $GITHUB_ENV
