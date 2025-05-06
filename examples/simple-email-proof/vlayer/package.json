@@ -34,8 +34,9 @@
     "react-router": "^7.1.5",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.5",
+    "viem": "2.27.0",
     "wagmi": "2.14.16",
-    "viem": "2.27.0"
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "postcss": "^8.4.47",

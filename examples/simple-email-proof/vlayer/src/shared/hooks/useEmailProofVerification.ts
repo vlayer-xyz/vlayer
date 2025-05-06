@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useAccount,
+  useBalance,
+} from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
@@ -8,6 +13,7 @@ import { AbiStateMutability, ContractFunctionArgs } from "viem";
 import { useNavigate } from "react-router";
 import debug from "debug";
 import { AlreadyMintedError } from "../errors/appErrors";
+import { ensureBalance } from "../lib/ethFaucet";
 
 const log = debug("vlayer:email-proof-verification");
 
@@ -27,6 +33,8 @@ enum ProofVerificationStep {
 }
 
 export const useEmailProofVerification = () => {
+  const { address } = useAccount();
+  const { data: balance } = useBalance({ address });
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<ProofVerificationStep>(
     ProofVerificationStep.MINT,
@@ -52,7 +60,7 @@ export const useEmailProofVerification = () => {
   const { data: proof, error: provingError } =
     useWaitForProvingResult(proofHash);
 
-  const verifyProofOnChain = () => {
+  const verifyProofOnChain = async () => {
     setCurrentStep(ProofVerificationStep.VERIFYING_ON_CHAIN);
 
     if (!proof) {
@@ -69,6 +77,8 @@ export const useEmailProofVerification = () => {
         "verify"
       >,
     };
+
+    await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
 
     writeContract(contractArgs);
   };

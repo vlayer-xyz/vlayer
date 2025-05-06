@@ -14,7 +14,7 @@ export const HodlerForm = ({
   networkChain: string;
   token: string;
   holderAddress: string;
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void | Promise<void>;
   isLoading: boolean;
   loadingLabel: string;
   submitLabel: string;
@@ -22,7 +22,11 @@ export const HodlerForm = ({
   balance?: string;
 }) => {
   return (
-    <form onSubmit={onSubmit}>
+    <form
+      onSubmit={(e) => {
+        void onSubmit(e);
+      }}
+    >
       <div className="mb-4 w-full block">
         <label
           htmlFor="networkChain"
