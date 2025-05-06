@@ -50,7 +50,7 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
           <motion.div>
             <Button
               color="violet"
-              data-testid="start-page-button"
+              data-testid="redirect-button"
               variant={"soft"}
               style={{
                 gridColumn: "1 / 5",

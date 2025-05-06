@@ -50,8 +50,8 @@ export class Extension {
     await expect(errorMessage).toHaveText(expectedErrorMessage);
   }
 
-  async expectRequestWebProofButtonToBeVisible() {
-    const redirectButton = this.page.getByTestId("start-page-button");
+  async expectRedirectButtonToBeVisible() {
+    const redirectButton = this.page.getByTestId("redirect-button");
     await expect(redirectButton).toBeVisible();
   }
 
