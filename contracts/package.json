@@ -4,6 +4,6 @@
     "lint-fix:solidity": "solhint './*/{src,script}/**/*.sol' --fix --noPrompt && forge fmt ./*/{src,script,test}"
   },
   "devDependencies": {
-    "solhint": "^5.0.5"
+    "solhint": "5.0.5"
   }
 }

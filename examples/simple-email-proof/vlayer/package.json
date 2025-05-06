@@ -50,7 +50,7 @@
     "@vitejs/plugin-react": "^4.3.3",
     "globals": "^15.11.0",
     "playwright": "1.48.0",
-    "solhint": "^5.0.5",
+    "solhint": "5.0.5",
     "typescript": "^5.5.4",
     "vite": "^5.4.9"
   },
