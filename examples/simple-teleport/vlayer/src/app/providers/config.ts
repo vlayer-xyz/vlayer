@@ -1,12 +1,17 @@
 import { http, createConfig } from "wagmi";
-import { optimismSepolia, anvil } from "wagmi/chains";
+import { optimismSepolia, anvil, sepolia } from "wagmi/chains";
 
 const wagmiConfig = createConfig({
   chains:
-    import.meta.env.VITE_CHAIN_NAME === "anvil" ? [anvil] : [optimismSepolia],
+    import.meta.env.VITE_CHAIN_NAME === "anvil"
+      ? [anvil]
+      : import.meta.env.VITE_CHAIN_NAME === "sepolia"
+        ? [sepolia]
+        : [optimismSepolia],
   transports: {
     [anvil.id]: http(),
     [optimismSepolia.id]: http(),
+    [sepolia.id]: http(),
   },
 });
 
