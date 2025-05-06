@@ -126,7 +126,7 @@ runs:
       working-directory: ./examples/${{ inputs.example_name }}/vlayer
 
     - name: Deploy to Vercel
-      if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
       shell: bash
       env:
         VERCEL_ENV: production
