@@ -1,16 +1,17 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useAccount } from "wagmi";
 import { useProver } from "../../shared/hooks/useProver";
 import { useNavigate } from "react-router";
 import { getStepPath } from "../../app/router/steps";
 import { StepKind } from "../../app/router/types";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
+import { tokensToProve } from "../../shared/lib/utils";
+
 export const WelcomePage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { address } = useAccount();
-
+  const defaultTokenHolder = import.meta.env
+    .VITE_DEFAULT_TOKEN_HOLDER as `0x${string}`;
   const { callProver, result } = useProver();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -18,7 +19,7 @@ export const WelcomePage = () => {
     setIsLoading(true);
     const formData = new FormData(e.target as HTMLFormElement);
     const holderAddress = formData.get("holderAddress") as `0x${string}`;
-    void callProver([holderAddress]);
+    void callProver([holderAddress, tokensToProve]);
   };
 
   useEffect(() => {
@@ -28,17 +29,17 @@ export const WelcomePage = () => {
     }
   }, [result]);
 
-  if (!address) {
+  if (!defaultTokenHolder) {
     return <ConnectWallet />;
   }
 
   return (
     <HodlerForm
-      holderAddress={address}
+      holderAddress={defaultTokenHolder}
       onSubmit={handleSubmit}
       isLoading={isLoading}
       loadingLabel="Loading..."
-      submitLabel="Show balance"
+      submitLabel="Show cross-chain balance"
       isEditable={true}
     />
   );

@@ -43,12 +43,19 @@ const whaleBadgeNFTAddress = await waitForContractDeploy({
   hash: deployWhaleBadgeHash,
 });
 
-const tokensToCheck: { addr: Address; chainId: bigint; blockNumber: bigint }[] =
-  (teleportConfig.prover.erc20Addresses.split(",") || []).map((addr, i) => ({
+const tokensToCheck: {
+  addr: Address;
+  chainId: bigint;
+  blockNumber: bigint;
+  balance: bigint;
+}[] = (teleportConfig.prover.erc20Addresses.split(",") || []).map(
+  (addr, i) => ({
     addr: addr as Address,
     chainId: BigInt(teleportConfig.prover.erc20ChainIds.split(",")[i]),
     blockNumber: BigInt(teleportConfig.prover.erc20BlockNumbers.split(",")[i]),
-  }));
+    balance: BigInt(0),
+  }),
+);
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,

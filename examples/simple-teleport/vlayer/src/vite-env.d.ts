@@ -10,6 +10,8 @@ interface ImportMetaEnv {
   readonly VITE_PROVER_ERC20_HOLDER_ADDR: Address;
   readonly VITE_VLAYER_API_TOKEN: Address;
   readonly VITE_SENTRY_DSN: string;
+  readonly VITE_TOKENS_TO_CHECK: string;
+  readonly VITE_DEFAULT_TOKEN_HOLDER: Address;
 }
 
 interface ImportMeta {
