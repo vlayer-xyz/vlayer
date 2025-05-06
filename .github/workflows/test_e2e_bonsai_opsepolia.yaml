@@ -124,7 +124,7 @@ jobs:
 
           # JWT auth related
           jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.E2E_VLAYER_API_TOKEN_MAINNET }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
           # Proving related
           proving_mode: "prod"
@@ -150,7 +150,7 @@ jobs:
 
           # JWT auth related
           jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.E2E_VLAYER_API_TOKEN_MAINNET }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
           # Proving related
           proving_mode: "prod"
@@ -176,7 +176,7 @@ jobs:
 
           # JWT auth related
           jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.E2E_VLAYER_API_TOKEN_MAINNET }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
           # Proving related
           proving_mode: "prod"
@@ -202,7 +202,7 @@ jobs:
 
           # JWT auth related
           jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.E2E_VLAYER_API_TOKEN_MAINNET }}
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
           # Proving related
           proving_mode: "prod"
