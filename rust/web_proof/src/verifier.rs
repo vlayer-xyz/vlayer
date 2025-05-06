@@ -188,7 +188,10 @@ mod tests {
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof, CONFIG).err().unwrap(),
+                verify_and_parse(web_proof, Config {
+                    body_redaction_mode: BodyRedactionMode::Disabled,
+                    url_test_mode: UrlTestMode::Prefix,
+                }).err().unwrap(),
                 WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestUrlParam, err)) if err == "param1: v*****"
             ),);
         }
@@ -200,7 +203,10 @@ mod tests {
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof, CONFIG).err().unwrap(),
+                verify_and_parse(web_proof, Config {
+                    body_redaction_mode: BodyRedactionMode::Disabled,
+                    url_test_mode: UrlTestMode::Prefix,
+                }).err().unwrap(),
                 WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestHeader, err)) if err == "connection: c****"
             ));
         }
@@ -212,7 +218,10 @@ mod tests {
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof, CONFIG).err().unwrap(),
+                verify_and_parse(web_proof, Config {
+                    body_redaction_mode: BodyRedactionMode::Disabled,
+                    url_test_mode: UrlTestMode::Prefix,
+                }).err().unwrap(),
                 WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseHeader, err)) if err == "Date: ****************************T"
             ));
         }
@@ -224,7 +233,10 @@ mod tests {
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof, CONFIG).err().unwrap(),
+                verify_and_parse(web_proof, Config {
+                    body_redaction_mode: BodyRedactionMode::Disabled,
+                    url_test_mode: UrlTestMode::Prefix,
+                }).err().unwrap(),
                 WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseBody, err)) if err == "$.name: T***********"
             ));
         }

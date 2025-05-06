@@ -8,8 +8,17 @@ use crate::redaction::RedactionElementType;
 #[derive(Error, Debug, Derivative)]
 #[derivative(PartialEq, Eq)]
 pub enum ParsingError {
+    #[error("No HTTP method in request")]
+    NoHttpMethodInRequest,
+
     #[error("No path in request")]
     NoPathInRequest,
+
+    #[error("Malformed request. No newline")]
+    MalformedRequestNoNewline,
+
+    #[error("Malformed request. First line mismatch after reconstruction")]
+    MalformedRequestReconstructionMismatch,
 
     #[error("From utf8 error: {0}")]
     FromUtf8(#[from] FromUtf8Error),
@@ -31,9 +40,14 @@ pub enum ParsingError {
     ),
 
     #[error(
-        "Response body contains redacted elements. This is unsafe. Please set the BodyRedactionMode to Enabled_UNSAFE to allow this."
+        "Response body contains redacted elements. This is unsafe. Please set the BodyRedactionMode to Enabled_UNSAFE to allow this"
     )]
     RedactionInResponseBody,
+
+    #[error(
+        "Redaction in first line of the request is forbidden when UrlTestMode is set to Full. Use Prefix to allow redaction"
+    )]
+    RedactionInFirstLine,
 
     #[error("{0} name is redacted: {1}")]
     RedactedName(RedactionElementType, String),

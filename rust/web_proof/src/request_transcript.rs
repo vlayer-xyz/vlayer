@@ -55,7 +55,7 @@ mod tests {
         let transcript = RequestTranscript::new(vec![]);
         assert!(matches!(
             transcript.parse_url(UrlTestMode::Full),
-            Err(ParsingError::NoPathInRequest)
+            Err(ParsingError::NoHttpMethodInRequest)
         ));
     }
 

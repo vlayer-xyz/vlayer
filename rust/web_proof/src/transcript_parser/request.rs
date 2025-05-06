@@ -1,9 +1,10 @@
 use std::string::ToString;
 
-use httparse::{EMPTY_HEADER, Header, Request};
+use derive_new::new;
+use httparse::{EMPTY_HEADER, Request};
 use url::Url;
 
-use super::{MAX_HEADERS_NUMBER, convert_headers, replace_redacted_bytes};
+use super::{MAX_HEADERS_NUMBER, REDACTED_BYTE_CODE, convert_headers, replace_redacted_bytes};
 use crate::{
     errors::ParsingError,
     redaction::{
@@ -13,41 +14,84 @@ use crate::{
     web_proof::UrlTestMode,
 };
 
+#[derive(Debug, Eq, PartialEq, new)]
+pub struct ParsedRequest {
+    /// Such as `GET`.
+    pub method: String,
+    /// Such as `https://example.com/path`.
+    pub url: String,
+    /// Such as `1` for `HTTP/1.1`.
+    pub minor_http_version: u8,
+    pub headers: Vec<RedactedTranscriptNameValue>,
+}
+
+impl ParsedRequest {
+    pub fn first_line(&self) -> String {
+        format!("{} {} HTTP/1.{}", self.method, self.url, self.minor_http_version)
+    }
+}
+
 pub(crate) fn parse_request_and_validate_redaction(
     request: &[u8],
-    _url_test_mode: UrlTestMode,
+    url_test_mode: UrlTestMode,
 ) -> Result<String, ParsingError> {
     let request_primary_replacement =
         replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_PRIMARY);
-    let (path_primary, headers_primary) = parse_request(&request_primary_replacement)?;
+    let request_primary = parse_request(&request_primary_replacement)?;
 
     let request_secondary_replacement =
         replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_SECONDARY);
-    let (path_secondary, headers_secondary) = parse_request(&request_secondary_replacement)?;
+    let request_secondary = parse_request(&request_secondary_replacement)?;
+
+    let first_line = split_first_line(request)?;
+    if url_test_mode == UrlTestMode::Full && first_line.contains(&REDACTED_BYTE_CODE) {
+        return Err(ParsingError::RedactionInFirstLine);
+    }
+    if split_first_line(&request_primary_replacement)? != request_primary.first_line().as_bytes()
+        || split_first_line(&request_secondary_replacement)?
+            != request_secondary.first_line().as_bytes()
+    {
+        return Err(ParsingError::MalformedRequestReconstructionMismatch);
+    }
 
     validate_name_value_redaction(
-        &convert_headers(&headers_primary),
-        &convert_headers(&headers_secondary),
+        &request_primary.headers,
+        &request_secondary.headers,
         RedactionElementType::RequestHeader,
     )?;
 
     validate_name_value_redaction(
-        &convert_path(&path_primary)?,
-        &convert_path(&path_secondary)?,
+        &convert_path(&request_primary.url)?,
+        &convert_path(&request_secondary.url)?,
         RedactionElementType::RequestUrlParam,
     )?;
 
-    Ok(path_primary)
+    Ok(request_primary.url)
 }
 
-fn parse_request(request: &[u8]) -> Result<(String, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
+fn split_first_line(request: &[u8]) -> Result<&[u8], ParsingError> {
+    let first_newline_position = request
+        .windows(2)
+        .position(|n: &[u8]| n == "\r\n".as_bytes())
+        .ok_or(ParsingError::MalformedRequestNoNewline)?;
+    let (first_line, _) = request.split_at(first_newline_position);
+    Ok(first_line)
+}
+
+fn parse_request(request: &[u8]) -> Result<ParsedRequest, ParsingError> {
     let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
     let mut req = Request::new(&mut headers);
     req.parse(request)?;
 
-    let path = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
+    let method = req
+        .method
+        .ok_or(ParsingError::NoHttpMethodInRequest)?
+        .to_string();
+    let url = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
+    let version = req.version.ok_or(ParsingError::NoPathInRequest)?;
+    let headers = convert_headers(req.headers);
 
-    Ok((path, headers))
+    Ok(ParsedRequest::new(method, url, version, headers))
 }
 
 fn convert_path(path: &str) -> Result<Vec<RedactedTranscriptNameValue>, ParsingError> {
@@ -185,7 +229,7 @@ mod tests {
                     let request =
                         b"GET https://example.com/test.json?param=\0\0\0\0\0 HTTP/1.1\r\n\r\n";
                     let url =
-                        parse_request_and_validate_redaction(request, UrlTestMode::Full).unwrap();
+                        parse_request_and_validate_redaction(request, UrlTestMode::Prefix).unwrap();
                     assert_eq!(url, "https://example.com/test.json?param=*****");
                 }
 
@@ -194,7 +238,7 @@ mod tests {
                     let request =
                             b"GET https://example.com/test.json?param1=\0\0\0\0\0&param2=value2&param3=\0\0\0 HTTP/1.1\r\n\r\n";
                     let url =
-                        parse_request_and_validate_redaction(request, UrlTestMode::Full).unwrap();
+                        parse_request_and_validate_redaction(request, UrlTestMode::Prefix).unwrap();
                     assert_eq!(
                         url,
                         "https://example.com/test.json?param1=*****&param2=value2&param3=***"
@@ -257,7 +301,7 @@ mod tests {
                 fn partially_redacted_url_param_value() {
                     let request =
                             b"GET https://example.com/test.json?param1=value\0&param2=value2 HTTP/1.1\r\n\r\n";
-                    let err = parse_request_and_validate_redaction(request, UrlTestMode::Full)
+                    let err = parse_request_and_validate_redaction(request, UrlTestMode::Prefix)
                         .unwrap_err();
                     assert!(matches!(
                         err,
@@ -272,7 +316,7 @@ mod tests {
                 fn partially_redacted_url_param_name() {
                     let request =
                             b"GET https://example.com/test.json?param\0=value1&param2=value2 HTTP/1.1\r\n\r\n";
-                    let err = parse_request_and_validate_redaction(request, UrlTestMode::Full)
+                    let err = parse_request_and_validate_redaction(request, UrlTestMode::Prefix)
                         .unwrap_err();
                     assert!(matches!(
                         err,
@@ -284,7 +328,7 @@ mod tests {
                 fn fully_redacted_url_param_name() {
                     let request =
                             b"GET https://example.com/test.json?\0\0\0\0\0\0=value1&param2=value2 HTTP/1.1\r\n\r\n";
-                    let err = parse_request_and_validate_redaction(request, UrlTestMode::Full)
+                    let err = parse_request_and_validate_redaction(request, UrlTestMode::Prefix)
                         .unwrap_err();
                     assert!(matches!(
                         err,
@@ -296,7 +340,7 @@ mod tests {
                 fn fully_redacted_url_param_name_and_value() {
                     let request =
                             b"GET https://example.com/test.json?\0\0\0\0\0\0\0\0\0\0\0\0&param2=value2 HTTP/1.1\r\n\r\n";
-                    let err = parse_request_and_validate_redaction(request, UrlTestMode::Full)
+                    let err = parse_request_and_validate_redaction(request, UrlTestMode::Prefix)
                         .unwrap_err();
                     assert!(matches!(
                         err,
