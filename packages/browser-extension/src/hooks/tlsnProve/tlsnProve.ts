@@ -8,6 +8,7 @@ import {
   TlsnProveNon200ResponseError,
   type RedactionConfig,
 } from "../../web-proof-commons";
+import pRetry from "p-retry";
 
 import { redact } from "./redaction/redact";
 import { HTTPMethod } from "lib/HttpMethods";
@@ -40,12 +41,6 @@ interface TLSNWorker {
   Presentation: new (config: PresentationConfig) => Promise<TPresentation>;
 }
 
-// tlsn-wasm needs to run in a worker
-const worker = new Worker(new URL("./tlsnWorker.ts", import.meta.url), {
-  type: "module",
-});
-const { init, Prover, Presentation } = wrap(worker) as unknown as TLSNWorker;
-
 export async function tlsnProve(
   notaryUrl: string,
   hostname: string,
@@ -65,77 +60,99 @@ export async function tlsnProve(
     recv: string;
   };
 }> {
-  try {
-    await init({ loggingLevel: "Debug" });
-    const notary = NotaryServer.from(notaryUrl);
+  const attemptTlsnProve = async () => {
+    try {
+      // tlsn-wasm needs to run in a worker
+      const worker = new Worker(new URL("./tlsnWorker.ts", import.meta.url), {
+        type: "module",
+      });
+      const { init, Prover, Presentation } = wrap(
+        worker,
+      ) as unknown as TLSNWorker;
 
-    const request = {
-      url: notarizeRequestUrl,
-      method: method as Method,
-      headers: formattedHeaders?.headers,
-      body: requestBody,
-    };
-    log("request size is gonna be", calculateRequestSize(request));
-    const prover = await new Prover({
-      serverDns: hostname,
-      maxSentData: calculateRequestSize(request),
-      maxRecvData: DEFAULT_MAX_RECV_DATA,
-    });
+      await init({ loggingLevel: "Debug" });
+      const notary = NotaryServer.from(notaryUrl);
 
-    const sessionUrl = await notary.sessionUrl();
-    await prover.setup(sessionUrl);
+      const request = {
+        url: notarizeRequestUrl,
+        method: method as Method,
+        headers: formattedHeaders?.headers,
+        body: requestBody,
+      };
+      log("request size is gonna be", calculateRequestSize(request));
+      const prover = await new Prover({
+        serverDns: hostname,
+        maxSentData: calculateRequestSize(request),
+        maxRecvData: DEFAULT_MAX_RECV_DATA,
+      });
 
-    const res = await prover.sendRequest(wsProxyUrl, request);
-    if (res.status < 200 || res.status >= 300) {
-      throw new TlsnProveNon200ResponseError();
+      const sessionUrl = await notary.sessionUrl();
+      await prover.setup(sessionUrl);
+
+      const res = await prover.sendRequest(wsProxyUrl, request);
+      if (res.status < 200 || res.status >= 300) {
+        throw new TlsnProveNon200ResponseError();
+      }
+      const proverTranscript = await prover.transcript();
+
+      const transcript = {
+        recv: new TextDecoder().decode(new Uint8Array(proverTranscript.recv)),
+        sent: new TextDecoder().decode(new Uint8Array(proverTranscript.sent)),
+      };
+
+      log("Transcript", transcript);
+
+      const commit = redact(transcript, redactionConfig);
+
+      log("Commit", commit);
+      const notarizationOutputs = await prover.notarize(commit);
+
+      const presentation = await new Presentation({
+        attestationHex: notarizationOutputs.attestation,
+        secretsHex: notarizationOutputs.secrets,
+        notaryUrl: notarizationOutputs.notaryUrl,
+        websocketProxyUrl: notarizationOutputs.websocketProxyUrl,
+        reveal: commit,
+      });
+
+      const presentationJson = await presentation.json();
+      const decodedProof = await presentation.verify();
+      log("Decoded proof", decodedProof);
+
+      const decodedTranscript = new Transcript({
+        sent: decodedProof?.transcript.sent,
+        recv: decodedProof?.transcript.recv,
+      });
+      log("Decoded transcript", decodedTranscript);
+
+      return {
+        presentationJson,
+        decodedTranscript: {
+          sent: decodedTranscript.sent(),
+          recv: decodedTranscript.recv(),
+        },
+      };
+    } catch (e) {
+      log("Error while proving TLSN", e);
+      if (e instanceof TlsnProveNon200ResponseError) {
+        throw e;
+      }
+      throw new TlsnProveError({
+        message: "An error occurred while proving TLSN",
+        name: "TLSN_PROVE_ERROR",
+      });
     }
-    const proverTranscript = await prover.transcript();
+  };
 
-    const transcript = {
-      recv: new TextDecoder().decode(new Uint8Array(proverTranscript.recv)),
-      sent: new TextDecoder().decode(new Uint8Array(proverTranscript.sent)),
-    };
-
-    log("Transcript", transcript);
-
-    const commit = redact(transcript, redactionConfig);
-
-    log("Commit", commit);
-    const notarizationOutputs = await prover.notarize(commit);
-
-    const presentation = await new Presentation({
-      attestationHex: notarizationOutputs.attestation,
-      secretsHex: notarizationOutputs.secrets,
-      notaryUrl: notarizationOutputs.notaryUrl,
-      websocketProxyUrl: notarizationOutputs.websocketProxyUrl,
-      reveal: commit,
-    });
-
-    const presentationJson = await presentation.json();
-    const decodedProof = await presentation.verify();
-    log("Decoded proof", decodedProof);
-
-    const decodedTranscript = new Transcript({
-      sent: decodedProof?.transcript.sent,
-      recv: decodedProof?.transcript.recv,
-    });
-    log("Decoded transcript", decodedTranscript);
-
-    return {
-      presentationJson,
-      decodedTranscript: {
-        sent: decodedTranscript.sent(),
-        recv: decodedTranscript.recv(),
-      },
-    };
-  } catch (e) {
-    log("Error while proving TLSN", e);
-    if (e instanceof TlsnProveNon200ResponseError) {
-      throw e;
-    }
-    throw new TlsnProveError({
-      message: "An error occurred while proving TLSN",
-      name: "TLSN_PROVE_ERROR",
-    });
-  }
+  return pRetry(attemptTlsnProve, {
+    retries: 4,
+    factor: 2,
+    minTimeout: 4000,
+    randomize: true,
+    onFailedAttempt: (error) => {
+      log(
+        `Attempt ${error.attemptNumber} failed. There are ${error.retriesLeft} retries left.`,
+      );
+    },
+  });
 }
