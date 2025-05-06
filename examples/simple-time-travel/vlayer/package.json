@@ -45,7 +45,7 @@
     "daisyui": "^4.12.14",
     "playwright": "1.48.0",
     "react-router": "^7.1.5",
-    "solhint": "^5.0.5",
+    "solhint": "5.0.5",
     "typescript": "^5.5.4",
     "vite": "^5.4.9",
     "autoprefixer": "^10.4.20",
