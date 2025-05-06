@@ -90,6 +90,9 @@ const { prover, verifier } = await deployVlayerContracts({
 });
 
 console.log("📨 Prover tx hash:", prover);
+console.log("teleportConfig.tokenHolder:", teleportConfig.tokenHolder);
+console.log("tokensToCheck:", tokensToCheck);
+console.log("chainId:", chain.id);
 
 const proofHash = await vlayer.prove({
   address: prover,
