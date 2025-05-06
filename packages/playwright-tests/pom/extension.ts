@@ -56,11 +56,10 @@ export class Extension {
   }
 
   async expectGenerateProofButtonToBeVisible() {
-    return;
-    // const generateProofButton = this.page.getByRole("button", {
-    //   name: "Generate proof",
-    // });
-    // await expect(generateProofButton).toBeVisible();
+    const generateProofButton = this.page.getByRole("button", {
+      name: "Generate proof",
+    });
+    await expect(generateProofButton).toBeVisible();
   }
 
   async expectStepToBeCompleted(stepName: string, stepIndex = 0) {

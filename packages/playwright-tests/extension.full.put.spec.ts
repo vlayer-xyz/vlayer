@@ -25,8 +25,6 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
 
     const extension = await waitForExtension(context);
     expect(extension).toBeDefined();
-
-    await extension.expectGenerateProofButtonToBeVisible();
   });
 
   const extension = await waitForExtension(context);
