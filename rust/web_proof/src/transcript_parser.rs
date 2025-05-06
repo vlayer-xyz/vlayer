@@ -1,149 +1,23 @@
-use std::{io::Read, string::ToString};
+use std::string::ToString;
 
-use chunked_transfer::Decoder;
-use httparse::{EMPTY_HEADER, Header, Request, Response, Status};
-use mime::Mime;
-use url::Url;
+use httparse::Header;
 
 use crate::{
-    errors::ParsingError,
-    redaction::{
-        REDACTED_BYTE_CODE, REDACTION_REPLACEMENT_CHAR_PRIMARY,
-        REDACTION_REPLACEMENT_CHAR_SECONDARY, RedactedTranscriptNameValue, RedactionElementType,
-        validate_name_value_redaction,
-    },
-    utils::{
-        bytes::{all_match, replace_bytes},
-        json::json_to_redacted_transcript,
-    },
-    web_proof::BodyRedactionMode,
+    redaction::{REDACTED_BYTE_CODE, RedactedTranscriptNameValue},
+    utils::bytes::replace_bytes,
 };
+
+mod request;
+mod response;
+
+pub(crate) use request::parse_request_and_validate_redaction;
+pub(crate) use response::parse_response_and_validate_redaction;
 
 const MAX_HEADERS_NUMBER: usize = 40;
 const CONTENT_TYPE: &str = "Content-Type";
 
-pub(crate) fn parse_request_and_validate_redaction(request: &[u8]) -> Result<String, ParsingError> {
-    let request_primary_replacement =
-        replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_PRIMARY);
-    let (path_primary, headers_primary) = parse_request(&request_primary_replacement)?;
-
-    let request_secondary_replacement =
-        replace_redacted_bytes(request, REDACTION_REPLACEMENT_CHAR_SECONDARY);
-    let (path_secondary, headers_secondary) = parse_request(&request_secondary_replacement)?;
-
-    validate_name_value_redaction(
-        &convert_headers(&headers_primary),
-        &convert_headers(&headers_secondary),
-        RedactionElementType::RequestHeader,
-    )?;
-
-    validate_name_value_redaction(
-        &convert_path(&path_primary)?,
-        &convert_path(&path_secondary)?,
-        RedactionElementType::RequestUrlParam,
-    )?;
-
-    Ok(path_primary)
-}
-
-fn parse_request(request: &[u8]) -> Result<(String, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
-    let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
-    let mut req = Request::new(&mut headers);
-    req.parse(request)?;
-
-    let path = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
-
-    Ok((path, headers))
-}
-
-pub(crate) fn parse_response_and_validate_redaction(
-    response: &[u8],
-    redaction_mode: BodyRedactionMode,
-) -> Result<String, ParsingError> {
-    let response_primary_replacement =
-        replace_redacted_bytes(response, REDACTION_REPLACEMENT_CHAR_PRIMARY);
-    let (body_primary_offset, headers_primary) = parse_response(&response_primary_replacement)?;
-
-    let response_secondary_replacement =
-        replace_redacted_bytes(response, REDACTION_REPLACEMENT_CHAR_SECONDARY);
-    let (body_secondary_offset, headers_secondary) =
-        parse_response(&response_secondary_replacement)?;
-
-    validate_name_value_redaction(
-        &convert_headers(&headers_primary),
-        &convert_headers(&headers_secondary),
-        RedactionElementType::ResponseHeader,
-    )?;
-
-    validate_content_type_and_charset(&headers_primary)?;
-
-    let body_primary = &response_primary_replacement[body_primary_offset..];
-    let body_secondary = &response_secondary_replacement[body_secondary_offset..];
-
-    let body_primary = handle_chunked_transfer_encoding(
-        &convert_headers(&headers_primary),
-        &String::from_utf8(body_primary.to_vec())?,
-    )?;
-    let body_secondary = handle_chunked_transfer_encoding(
-        &convert_headers(&headers_secondary),
-        &String::from_utf8(body_secondary.to_vec())?,
-    )?;
-
-    validate_name_value_redaction(
-        &json_to_redacted_transcript(&body_primary)?,
-        &json_to_redacted_transcript(&body_secondary)?,
-        RedactionElementType::ResponseBody,
-    )?;
-
-    if redaction_mode == BodyRedactionMode::Disabled {
-        if body_primary_offset != body_secondary_offset {
-            return Err(ParsingError::RedactionInResponseBody);
-        }
-        let original_body = &response[body_primary_offset..];
-        if original_body.contains(&REDACTED_BYTE_CODE) {
-            return Err(ParsingError::RedactionInResponseBody);
-        }
-    }
-
-    Ok(body_primary)
-}
-
 fn replace_redacted_bytes(input: &[u8], replacement_char: char) -> Vec<u8> {
     replace_bytes(input, REDACTED_BYTE_CODE, replacement_char as u8)
-}
-
-fn handle_chunked_transfer_encoding(
-    headers: &[RedactedTranscriptNameValue],
-    body: &str,
-) -> Result<String, ParsingError> {
-    let transfer_encoding_header = headers
-        .iter()
-        .find(|header| header.name.eq_ignore_ascii_case("Transfer-Encoding"));
-
-    match transfer_encoding_header {
-        Some(header) if header.value.eq_ignore_ascii_case(b"chunked") => {
-            let mut decoder = Decoder::new(body.as_bytes());
-            let mut decoded_body = String::new();
-            decoder.read_to_string(&mut decoded_body)?;
-            Ok(decoded_body)
-        }
-        Some(header) if header.value.eq_ignore_ascii_case(b"identity") => Ok(body.to_string()),
-        Some(header) => Err(ParsingError::UnsupportedTransferEncoding(
-            String::from_utf8_lossy(header.value.as_ref()).to_string(),
-        )),
-        None => Ok(body.to_string()),
-    }
-}
-
-fn parse_response(response: &[u8]) -> Result<(usize, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
-    let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
-    let mut res = Response::new(&mut headers);
-    let body_index = match res.parse(response)? {
-        Status::Complete(t) => t,
-        Status::Partial => return Err(ParsingError::Partial),
-    };
-
-    Ok((body_index, headers))
 }
 
 fn convert_headers(headers: &[Header]) -> Vec<RedactedTranscriptNameValue> {
@@ -154,42 +28,6 @@ fn convert_headers(headers: &[Header]) -> Vec<RedactedTranscriptNameValue> {
             value: header.value.to_vec(),
         })
         .collect()
-}
-
-fn convert_path(path: &str) -> Result<Vec<RedactedTranscriptNameValue>, ParsingError> {
-    Ok(Url::parse(path)?
-        .query_pairs()
-        .map(|param| RedactedTranscriptNameValue {
-            name: param.0.to_string(),
-            value: param.1.to_string().into_bytes(),
-        })
-        .collect())
-}
-
-fn validate_content_type_and_charset(headers: &[Header]) -> Result<(), ParsingError> {
-    let content_type_header = headers
-        .iter()
-        .find(|header| header.name.eq_ignore_ascii_case(CONTENT_TYPE));
-
-    if let Some(header) = content_type_header {
-        let content_type = String::from_utf8_lossy(header.value).to_string();
-        if all_match(content_type.as_bytes(), REDACTION_REPLACEMENT_CHAR_PRIMARY as u8) {
-            return Ok(());
-        }
-
-        let mime: Mime = content_type.parse()?;
-
-        if mime.type_() != "application" || mime.subtype() != "json" {
-            return Err(ParsingError::InvalidContentType(content_type));
-        }
-
-        if let Some(charset) = mime.get_param("charset") {
-            if !charset.as_str().eq_ignore_ascii_case("utf-8") {
-                return Err(ParsingError::InvalidCharset(content_type));
-            }
-        }
-    }
-    Ok(())
 }
 
 #[cfg(test)]
