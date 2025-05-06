@@ -31,7 +31,7 @@ pub enum ParsingError {
     ),
 
     #[error(
-        "Response body contain redacted elements. This is unsafe. Please set the BodyRedactionMode to Enabled_UNSAFE to allow this."
+        "Response body contains redacted elements. This is unsafe. Please set the BodyRedactionMode to Enabled_UNSAFE to allow this."
     )]
     RedactionInResponseBody,
 
