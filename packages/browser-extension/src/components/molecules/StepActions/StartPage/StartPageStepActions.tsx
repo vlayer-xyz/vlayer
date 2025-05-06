@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { Text, Grid } from "@radix-ui/themes";
 import { StepStatus } from "constants/step";
 import { Button } from "components/atoms";
@@ -36,6 +36,9 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
       console.error("Error during opening app:", error);
     });
   };
+
+  useEffect(handleClick, []);
+
   return (
     <AnimatePresence>
       {!isVisited && status == StepStatus.Current && (
