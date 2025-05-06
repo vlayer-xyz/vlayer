@@ -7,6 +7,7 @@ edition = "2024"
 alloy-dyn-abi = { workspace = true }
 bincode = { workspace = true }
 chunked_transfer = { workspace = true }
+derivative = { workspace = true }
 derive-new = { workspace = true }
 hex = { workspace = true }
 httparse = { workspace = true }

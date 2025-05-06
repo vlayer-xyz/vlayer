@@ -5161,6 +5161,7 @@ dependencies = [
  "alloy-dyn-abi",
  "bincode",
  "chunked_transfer",
+ "derivative",
  "derive-new",
  "hex",
  "httparse",

@@ -53,6 +53,36 @@ impl WebProof {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UrlTestMode {
+    Full,
+    Prefix,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BodyRedactionMode {
+    Disabled,
+    EnabledUnsafe,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Config {
+    pub body_redaction_mode: BodyRedactionMode,
+    pub url_test_mode: UrlTestMode,
+}
+
+impl Config {
+    pub fn new(
+        body_redaction_mode: impl Into<BodyRedactionMode>,
+        url_test_mode: impl Into<UrlTestMode>,
+    ) -> Self {
+        Self {
+            body_redaction_mode: body_redaction_mode.into(),
+            url_test_mode: url_test_mode.into(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct PresentationJsonMeta {

@@ -7,7 +7,7 @@ use url::{ParseError, Url};
 use crate::{
     errors::ParsingError,
     web::Web,
-    web_proof::{VerificationError, WebProof},
+    web_proof::{Config, VerificationError, WebProof},
 };
 
 #[derive(Error, Debug)]
@@ -34,13 +34,13 @@ pub enum WebProofError {
     ConversionToPemFormat(#[from] pkcs8::spki::Error),
 }
 
-pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
+pub fn verify_and_parse(web_proof: WebProof, config: Config) -> Result<Web, WebProofError> {
     let (request, response, server_name, notary_pub_key) = web_proof.verify()?;
 
     let web = Web {
         url: request.parse_url()?,
         server_name: server_name.to_string(),
-        body: response.parse_body()?,
+        body: response.parse_body(config.body_redaction_mode)?,
         notary_pub_key: to_pem_format(&notary_pub_key)?,
     };
 
@@ -75,10 +75,19 @@ mod tests {
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::{fixtures::load_web_proof_fixture, redaction::RedactionElementType};
+    use crate::{
+        fixtures::load_web_proof_fixture,
+        redaction::RedactionElementType,
+        web_proof::{BodyRedactionMode, UrlTestMode},
+    };
 
     const TEST_URL: &str =
         "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken";
+
+    const CONFIG: Config = Config {
+        body_redaction_mode: BodyRedactionMode::Disabled,
+        url_test_mode: UrlTestMode::Full,
+    };
 
     mod verify_and_parse {
         use k256::PublicKey;
@@ -95,7 +104,7 @@ mod tests {
         fn correct_url_extracted() {
             let web_proof = load_web_proof_fixture();
 
-            let web = verify_and_parse(web_proof).unwrap();
+            let web = verify_and_parse(web_proof, CONFIG).unwrap();
 
             assert_eq!(web.url, TEST_URL);
         }
@@ -106,7 +115,7 @@ mod tests {
                 serde_json::from_str(WEB_PROOF_IDENTITY_NAME_CHANGED).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof).err().unwrap(),
+                verify_and_parse(web_proof, CONFIG).err().unwrap(),
                 WebProofError::Verification(VerificationError::Presentation(err)) if err.to_string() == "presentation error: server identity error caused by: server identity proof error: certificate: invalid server certificate"
             ));
         }
@@ -115,7 +124,7 @@ mod tests {
         fn correct_server_name_extracted() {
             let web_proof = load_web_proof_fixture();
 
-            let web = verify_and_parse(web_proof).unwrap();
+            let web = verify_and_parse(web_proof, CONFIG).unwrap();
 
             assert_eq!(web.server_name, "lotr-api.online");
         }
@@ -124,7 +133,7 @@ mod tests {
         fn correct_body_extracted() {
             let web_proof = load_web_proof_fixture();
 
-            let web = verify_and_parse(web_proof).unwrap();
+            let web = verify_and_parse(web_proof, CONFIG).unwrap();
 
             assert_eq!(
                 web.body,
@@ -135,7 +144,7 @@ mod tests {
         #[test]
         fn correct_notary_pub_key() {
             let web_proof = load_web_proof_fixture();
-            let web = verify_and_parse(web_proof).unwrap();
+            let web = verify_and_parse(web_proof, CONFIG).unwrap();
 
             assert_eq!(
                 PublicKey::from_public_key_pem(&web.notary_pub_key).unwrap(),
@@ -145,11 +154,15 @@ mod tests {
 
         #[test]
         fn success_all_redaction_turned_on() {
+            let config = Config {
+                body_redaction_mode: BodyRedactionMode::EnabledUnsafe,
+                url_test_mode: UrlTestMode::Prefix,
+            };
             let web_proof =
                 read_fixture("./testdata/0.1.0-alpha.8/web_proof_all_redaction_types.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
-            let web = verify_and_parse(web_proof).unwrap();
+            let web = verify_and_parse(web_proof, config).unwrap();
 
             let body = &web.body;
             let parsed: Value = serde_json::from_str(body).unwrap();
@@ -175,7 +188,7 @@ mod tests {
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof).err().unwrap(),
+                verify_and_parse(web_proof, CONFIG).err().unwrap(),
                 WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestUrlParam, err)) if err == "param1: v*****"
             ),);
         }
@@ -187,7 +200,7 @@ mod tests {
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof).err().unwrap(),
+                verify_and_parse(web_proof, CONFIG).err().unwrap(),
                 WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::RequestHeader, err)) if err == "connection: c****"
             ));
         }
@@ -199,7 +212,7 @@ mod tests {
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof).err().unwrap(),
+                verify_and_parse(web_proof, CONFIG).err().unwrap(),
                 WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseHeader, err)) if err == "Date: ****************************T"
             ));
         }
@@ -211,7 +224,7 @@ mod tests {
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
-                verify_and_parse(web_proof).err().unwrap(),
+                verify_and_parse(web_proof, CONFIG).err().unwrap(),
                 WebProofError::Parsing(ParsingError::PartiallyRedactedValue(RedactionElementType::ResponseBody, err)) if err == "$.name: T***********"
             ));
         }

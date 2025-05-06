@@ -16,6 +16,7 @@ use crate::{
         bytes::{all_match, replace_bytes},
         json::json_to_redacted_transcript,
     },
+    web_proof::BodyRedactionMode,
 };
 
 const MAX_HEADERS_NUMBER: usize = 40;
@@ -57,14 +58,16 @@ fn parse_request(request: &[u8]) -> Result<(String, [Header; MAX_HEADERS_NUMBER]
 
 pub(crate) fn parse_response_and_validate_redaction(
     response: &[u8],
+    redaction_mode: BodyRedactionMode,
 ) -> Result<String, ParsingError> {
     let response_primary_replacement =
         replace_redacted_bytes(response, REDACTION_REPLACEMENT_CHAR_PRIMARY);
-    let (body_primary, headers_primary) = parse_response(&response_primary_replacement)?;
+    let (body_primary_offset, headers_primary) = parse_response(&response_primary_replacement)?;
 
     let response_secondary_replacement =
         replace_redacted_bytes(response, REDACTION_REPLACEMENT_CHAR_SECONDARY);
-    let (body_secondary, headers_secondary) = parse_response(&response_secondary_replacement)?;
+    let (body_secondary_offset, headers_secondary) =
+        parse_response(&response_secondary_replacement)?;
 
     validate_name_value_redaction(
         &convert_headers(&headers_primary),
@@ -74,8 +77,8 @@ pub(crate) fn parse_response_and_validate_redaction(
 
     validate_content_type_and_charset(&headers_primary)?;
 
-    let body_primary = &response_primary_replacement[body_primary..];
-    let body_secondary = &response_secondary_replacement[body_secondary..];
+    let body_primary = &response_primary_replacement[body_primary_offset..];
+    let body_secondary = &response_secondary_replacement[body_secondary_offset..];
 
     let body_primary = handle_chunked_transfer_encoding(
         &convert_headers(&headers_primary),
@@ -86,12 +89,20 @@ pub(crate) fn parse_response_and_validate_redaction(
         &String::from_utf8(body_secondary.to_vec())?,
     )?;
 
-    if !body_primary.trim().is_empty() || !body_secondary.trim().is_empty() {
-        validate_name_value_redaction(
-            &json_to_redacted_transcript(&body_primary)?,
-            &json_to_redacted_transcript(&body_secondary)?,
-            RedactionElementType::ResponseBody,
-        )?;
+    validate_name_value_redaction(
+        &json_to_redacted_transcript(&body_primary)?,
+        &json_to_redacted_transcript(&body_secondary)?,
+        RedactionElementType::ResponseBody,
+    )?;
+
+    if redaction_mode == BodyRedactionMode::Disabled {
+        if body_primary_offset != body_secondary_offset {
+            return Err(ParsingError::RedactionInResponseBody);
+        }
+        let original_body = &response[body_primary_offset..];
+        if original_body.contains(&REDACTED_BYTE_CODE) {
+            return Err(ParsingError::RedactionInResponseBody);
+        }
     }
 
     Ok(body_primary)
@@ -325,7 +336,11 @@ mod tests {
                     fn no_header_redaction() {
                         let response =
                             b"HTTP/1.1 200 OK\r\ncontent-type: application/json\r\n\r\n{}";
-                        let body = parse_response_and_validate_redaction(response).unwrap();
+                        let body = parse_response_and_validate_redaction(
+                            response,
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap();
                         assert_eq!(body, "{}");
                     }
 
@@ -333,14 +348,22 @@ mod tests {
                     fn fully_redacted_header_value() {
                         let response =
                             b"HTTP/1.1 200 OK\r\nContent-Type: \0\0\0\0\0\0\0\0\0\0\r\n\r\n{}";
-                        let body = parse_response_and_validate_redaction(response).unwrap();
+                        let body = parse_response_and_validate_redaction(
+                            response,
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap();
                         assert_eq!(body, "{}");
                     }
 
                     #[test]
                     fn no_redaction_explicit_utf8_charset() {
                         let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{}";
-                        let body = parse_response_and_validate_redaction(response).unwrap();
+                        let body = parse_response_and_validate_redaction(
+                            response,
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap();
                         assert_eq!(body, "{}");
                     }
                 }
@@ -365,8 +388,11 @@ mod tests {
                             + "\"nested_number\": 99.99\r\n"
                             + "}\r\n"
                             + "}";
-                        let body =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                        let body = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap();
                         assert_eq!(
                             body,
                             trim_start(
@@ -390,9 +416,14 @@ mod tests {
                             + "HTTP/1.1 200 OK\r\n"
                             + "Content-Type: application/json\r\n"
                             + "\r\n";
-                        let body =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap();
-                        assert_eq!(body, "");
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
+                        assert!(
+                            matches!(err, ParsingError::Json(err) if err.to_string() == "EOF while parsing a value at line 1 column 0")
+                        );
                     }
 
                     #[test]
@@ -412,8 +443,11 @@ mod tests {
                             + "\"nested_number\": 99.99\r\n"
                             + "}\r\n"
                             + "}";
-                        let body =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                        let body = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::EnabledUnsafe,
+                        )
+                        .unwrap();
                         assert_eq!(
                             body,
                             trim_start(
@@ -448,8 +482,11 @@ mod tests {
                             + "\"nested_number\": 99.99\r\n"
                             + "}\r\n"
                             + "}";
-                        let body =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                        let body = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::EnabledUnsafe,
+                        )
+                        .unwrap();
                         assert_eq!(
                             body,
                             trim_start(
@@ -474,8 +511,11 @@ mod tests {
                             + "Content-Type: application/json\r\n"
                             + "\r\n"
                             + "[{\"string\": \"\0\0\0\0\0\"}]";
-                        let body =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap();
+                        let body = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::EnabledUnsafe,
+                        )
+                        .unwrap();
                         assert_eq!(body, trim_start(r#"[{"string": "*****"}]"#));
                     }
                 }
@@ -590,7 +630,11 @@ mod tests {
                     fn partially_redacted_header_value() {
                         let response =
                             b"HTTP/1.1 200 OK\r\nContent-Type: text/plai\0\r\n\r\nHello, world!";
-                        let err = parse_response_and_validate_redaction(response).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response,
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(
                             err,
                             ParsingError::PartiallyRedactedValue(
@@ -604,7 +648,11 @@ mod tests {
                     fn partially_redacted_header_name() {
                         let response =
                             b"HTTP/1.1 200 OK\r\nContent-Typ\0: text/plain\r\n\r\nHello, world!";
-                        let err = parse_response_and_validate_redaction(response).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response,
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(
                             err,
                             ParsingError::RedactedName(RedactionElementType::ResponseHeader, err_string) if err_string == "Content-Typ*: text/plain"
@@ -615,7 +663,11 @@ mod tests {
                     fn fully_redacted_header_name() {
                         let response =
                         b"HTTP/1.1 200 OK\r\n\0\0\0\0\0\0\0\0\0\0\0\0: text/plain\r\n\r\nHello, world!";
-                        let err = parse_response_and_validate_redaction(response).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response,
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(
                             err,
                             ParsingError::RedactedName(RedactionElementType::ResponseHeader, err_string) if err_string == "************: text/plain"
@@ -626,7 +678,11 @@ mod tests {
                     fn fully_redacted_header_name_and_value() {
                         let response =
                         b"HTTP/1.1 200 OK\r\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\nHello, world!";
-                        let err = parse_response_and_validate_redaction(response).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response,
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
                     }
                 }
@@ -650,9 +706,14 @@ mod tests {
                             + "\"nested_number\": 99.99\r\n"
                             + "}\r\n"
                             + "}";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
-                        assert!(matches!(err, ParsingError::Json(_)));
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
+                        assert!(
+                            matches!(err, ParsingError::Json(err) if err.to_string() == "expected value at line 3 column 11")
+                        );
                     }
 
                     #[test]
@@ -672,8 +733,11 @@ mod tests {
                             + "\"nested_number\": 99.99\r\n"
                             + "}\r\n"
                             + "}";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(err, ParsingError::Json(_)));
                     }
 
@@ -685,12 +749,50 @@ mod tests {
                             + "Content-Length: 136\r\n"
                             + "\r\n"
                             + "{\"string\0\": \"Hello\"}";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(
                             err,
                             ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.string*: Hello"
                         ));
+                    }
+
+                    #[test]
+                    fn invalid_json() {
+                        let response = "".to_string()
+                            + "HTTP/1.1 200 OK\r\n"
+                            + "Content-Type: application/json\r\n"
+                            + "Content-Length: 136\r\n"
+                            + "\r\n"
+                            + "}";
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
+                        assert!(
+                            matches!(err, ParsingError::Json(err) if err.to_string() == "expected value at line 1 column 1")
+                        );
+                    }
+
+                    #[test]
+                    fn empty_body() {
+                        let response = "".to_string()
+                            + "HTTP/1.1 200 OK\r\n"
+                            + "Content-Type: application/json\r\n"
+                            + "Content-Length: 136\r\n"
+                            + "\r\n";
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
+                        assert!(
+                            matches!(err, ParsingError::Json(err) if err.to_string() == "EOF while parsing a value at line 1 column 0")
+                        );
                     }
 
                     #[test]
@@ -701,8 +803,11 @@ mod tests {
                             + "Content-Length: 136\r\n"
                             + "\r\n"
                             + "{\"object\": {\"nested_string\0\":\"Hello\"}}";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(
                             err,
                             ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.object.nested_string*: Hello"
@@ -717,8 +822,11 @@ mod tests {
                             + "Content-Length: 136\r\n"
                             + "\r\n"
                             + "{\"\0\0\0\0\0\0\": \"Hello\"}";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         println!("{err:?}");
                         assert!(matches!(
                             err,
@@ -734,8 +842,11 @@ mod tests {
                             + "Content-Length: 136\r\n"
                             + "\r\n"
                             + "{\"\0\0\0\0\0\0\": {}}";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(
                             err,
                             ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: "
@@ -750,8 +861,11 @@ mod tests {
                             + "Content-Length: 136\r\n"
                             + "\r\n"
                             + "{\"\0\0\0\0\0\0\": []}";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
                         assert!(matches!(
                             err,
                             ParsingError::RedactedName(RedactionElementType::ResponseBody, err_string) if err_string == "$.******: "
@@ -764,8 +878,11 @@ mod tests {
                             + "HTTP/1.1 200 OK\r\n"
                             + "Content-Type: text/plain\r\n"
                             + "\r\n";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
 
                         assert!(matches!(
                             err,
@@ -777,7 +894,11 @@ mod tests {
                     fn invalid_content_type_charset_utf16() {
                         let response = b"HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=UTF-16\r\n\r\n{}";
 
-                        let err = parse_response_and_validate_redaction(response).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response,
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
 
                         assert!(matches!(
                             err,
@@ -791,13 +912,41 @@ mod tests {
                             + "HTTP/1.1 200 OK\r\n"
                             + "Content-Type: application/json; charset=ISO-8859-1\r\n"
                             + "\r\n";
-                        let err =
-                            parse_response_and_validate_redaction(response.as_bytes()).unwrap_err();
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
 
                         assert!(matches!(
                             err,
                             ParsingError::InvalidCharset(err_string) if err_string == "application/json; charset=ISO-8859-1"
                         ));
+                    }
+
+                    #[test]
+                    fn fully_redacted_string_value_with_disabled_body_redaction() {
+                        let response = "".to_string()
+                            + "HTTP/1.1 200 OK\r\n"
+                            + "Content-Type: application/json\r\n"
+                            + "Content-Length: 136\r\n"
+                            + "\r\n"
+                            + "{\r\n"
+                            + "\"string\": \"\0\0\0\0\0\0\0\0\0\0\0\0\0\",\r\n"
+                            + "\"number\": 42,\r\n"
+                            + "\"boolean\": true,\r\n"
+                            + "\"array\": [1, 2, 3, \"four\"],\r\n"
+                            + "\"object\": {\r\n"
+                            + "\"nested_string\": \"Nested\",\r\n"
+                            + "\"nested_number\": 99.99\r\n"
+                            + "}\r\n"
+                            + "}";
+                        let err = parse_response_and_validate_redaction(
+                            response.as_bytes(),
+                            BodyRedactionMode::Disabled,
+                        )
+                        .unwrap_err();
+                        assert_eq!(err, ParsingError::RedactionInResponseBody);
                     }
                 }
             }
