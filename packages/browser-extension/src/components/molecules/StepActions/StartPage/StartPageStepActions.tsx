@@ -38,7 +38,9 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
   };
 
   useEffect(() => {
-    if (!isVisited && status == StepStatus.Current) handleClick();
+    if (!isVisited && status == StepStatus.Current) {
+      handleClick();
+    }
   }, [isVisited, status]);
 
   return (
