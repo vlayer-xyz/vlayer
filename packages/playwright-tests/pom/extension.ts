@@ -16,11 +16,7 @@ export class Extension {
   }
 
   async redirect() {
-    const button = this.getRedirectButton();
-    const [newPage] = await Promise.all([
-      this.context.waitForEvent("page"),
-      button.click(),
-    ]);
+    const [newPage] = await Promise.all([this.context.waitForEvent("page")]);
     return new Webpage(newPage, this.context);
   }
 
