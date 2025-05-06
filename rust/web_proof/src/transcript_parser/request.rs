@@ -1,4 +1,4 @@
-use std::string::ToString;
+use std::{str::FromStr, string::ToString};
 
 use derive_new::new;
 use httparse::{EMPTY_HEADER, Request};
@@ -17,7 +17,7 @@ use crate::{
 #[derive(Debug, Eq, PartialEq, new)]
 pub struct ParsedRequest {
     /// Such as `GET`.
-    pub method: String,
+    pub method: http::Method,
     /// Such as `https://example.com/path`.
     pub url: String,
     /// Such as `1` for `HTTP/1.1`.
@@ -83,10 +83,11 @@ fn parse_request(request: &[u8]) -> Result<ParsedRequest, ParsingError> {
     let mut req = Request::new(&mut headers);
     req.parse(request)?;
 
-    let method = req
+    let method_str = req
         .method
         .ok_or(ParsingError::NoHttpMethodInRequest)?
         .to_string();
+    let method = http::Method::from_str(&method_str)?;
     let url = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
     let version = req.version.ok_or(ParsingError::NoPathInRequest)?;
     let headers = convert_headers(req.headers);

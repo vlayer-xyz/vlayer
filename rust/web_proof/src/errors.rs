@@ -1,6 +1,7 @@
 use std::string::FromUtf8Error;
 
 use derivative::Derivative;
+use http::method::InvalidMethod;
 use thiserror::Error;
 
 use crate::redaction::RedactionElementType;
@@ -19,6 +20,13 @@ pub enum ParsingError {
 
     #[error("Malformed request. First line mismatch after reconstruction")]
     MalformedRequestReconstructionMismatch,
+
+    #[error("Invalid HTTP method")]
+    InvalidHttpMethod(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        InvalidMethod,
+    ),
 
     #[error("From utf8 error: {0}")]
     FromUtf8(#[from] FromUtf8Error),

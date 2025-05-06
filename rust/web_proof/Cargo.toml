@@ -10,6 +10,7 @@ chunked_transfer = { workspace = true }
 derivative = { workspace = true }
 derive-new = { workspace = true }
 hex = { workspace = true }
+http = { workspace = true }
 httparse = { workspace = true }
 k256 = { workspace = true }
 mime = { workspace = true }
