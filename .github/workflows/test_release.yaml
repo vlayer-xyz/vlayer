@@ -52,7 +52,7 @@ jobs:
         env:
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets[matrix.vlayer_release.private_key_index] }}
           JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
-          VLAYER_API_TOKEN: ${{ secrets.DEPLOYED_VLAYER_API_TOKEN }}
+          VLAYER_API_TOKEN: ${{ secrets.TEST_RELEASE_VLAYER_API_TOKEN_TESTNET }}
           WS_PROXY_URL: wss://test-wsproxy.vlayer.xyz/jwt
           PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
           VLAYER_RELEASE: ${{ matrix.vlayer_release.channel }}
