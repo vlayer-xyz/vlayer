@@ -38,6 +38,15 @@ impl From<(String, String)> for RedactedTranscriptNameValue {
     }
 }
 
+impl<'a> From<&httparse::Header<'a>> for RedactedTranscriptNameValue {
+    fn from(header: &httparse::Header<'a>) -> Self {
+        Self {
+            name: header.name.to_string(),
+            value: header.value.to_vec(),
+        }
+    }
+}
+
 #[derive(Debug, Display, PartialEq, Eq)]
 pub enum RedactionElementType {
     #[strum(to_string = "request header")]

@@ -19,11 +19,5 @@ fn replace_redacted_bytes(input: &[u8], replacement_char: char) -> Vec<u8> {
 }
 
 fn convert_headers(headers: &[Header]) -> Vec<RedactedTranscriptNameValue> {
-    headers
-        .iter()
-        .map(|header| RedactedTranscriptNameValue {
-            name: header.name.to_string(),
-            value: header.value.to_vec(),
-        })
-        .collect()
+    headers.iter().map(Into::into).collect()
 }
