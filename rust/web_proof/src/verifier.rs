@@ -38,7 +38,7 @@ pub fn verify_and_parse(web_proof: WebProof, config: Config) -> Result<Web, WebP
     let (request, response, server_name, notary_pub_key) = web_proof.verify()?;
 
     let web = Web {
-        url: request.parse_url()?,
+        url: request.parse_url(config.url_test_mode)?,
         server_name: server_name.to_string(),
         body: response.parse_body(config.body_redaction_mode)?,
         notary_pub_key: to_pem_format(&notary_pub_key)?,
