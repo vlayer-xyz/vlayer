@@ -2,7 +2,7 @@
 
 ## What is Redaction?
 
-TLSN’s redaction feature lets you **hide sensitive portions** of an HTTPS transcript from the Prover. Common use cases include removing cookies, authorization headers, or API tokens before generating a Web Proof. At the same time, everything you **leave visible** is still **cryptographically verified** for integrity.
+Redaction feature lets you **hide sensitive portions** of an HTTPS transcript from the Prover. Common use cases include removing cookies, authorization headers, or API tokens before generating a Web Proof. At the same time, everything you **leave visible** is still **cryptographically verified** for integrity.
 
 > ⚠️ **Warning!** Unsafe byte-range redaction can introduce ambiguities and vulnerabilities. Strategies to avoid these risks and safely apply redaction are described below.
 
@@ -53,7 +53,7 @@ Details on how to prepare a WebProof with redacted URL can be found [here](../ja
 
 ### Enforcing URL Integrity
 
-To guard against such URL redaction issues, the Prover contract provides two verification modes. They limit the way url can be redacted.
+To guard against URL redaction issues, the Prover contract provides two verification modes. They limit the way url can be redacted.
 
 #### 1. Full-URL verification
 
@@ -78,7 +78,7 @@ function main(WebProof calldata webProof) {
 ```
 
 * Assumes the prefix (“example.com/user?name=”) is correct.
-* Treats everything after that prefix as opaque and untrusted.
+* Treats everything after that prefix as untrusted.
 * Ensures that sensitive suffix data (e.g. user IDs) remains hidden, while protecting contract logic from tampering.
 
 ### Header Redaction
