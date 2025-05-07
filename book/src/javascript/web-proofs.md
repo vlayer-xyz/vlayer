@@ -162,7 +162,7 @@ By default, the transcript is not redacted at all and redaction of each HTTP req
 
 ### URL Redaction
 
-TODO
+TODO - it's unclear for me how to redact url leaving only the prefix unredacted using the current js `notarize` function.
 
 
 ### Header Redaction
