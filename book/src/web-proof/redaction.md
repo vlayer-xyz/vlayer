@@ -1,116 +1,88 @@
 # Redaction
 
-The TLSN protocol allows for redacting (hiding) parts of the HTTPS transcript from the `Prover`—i.e., excluding certain sensitive parts (e.g., cookies, authorization headers, API tokens) from the generated Web Proof—while still cryptographically proving that the rest of the transcript (the revealed parts) is valid.
+## What is Redaction?
 
-Different redaction modes have important security implications you should understand. Learn more in the [Security model](#security-model) section.
+TLSN’s redaction feature lets you **hide sensitive portions** of an HTTPS transcript from the Prover. Common use cases include removing cookies, authorization headers, or API tokens before generating a Web Proof. At the same time, everything you **leave visible** is still **cryptographically verified** for integrity.
+
+> ⚠️ **Warning!** Unsafe byte-range redaction can introduce ambiguities and vulnerabilities. Strategies to avoid these risks and safely apply redaction are described below.
 
 To learn how to enable and configure redaction using the vlayer SDK, see the [Redaction](../../javascript/web-proofs.md#redaction) section in our JavaScript documentation.
 
+### Currently supported redaction targets:
+* URL path
+* Request headers
+* Response headers
+
+> **Note:** Redaction of the response body is currently supported only in *unsafe* mode, which demands special security concerns. More details will be provided in a future book update.
+
 ---
 
-## Partial redaction
+## Security Model
 
-Each value must be either fully redacted or not redacted at all. The Solidity methods `webProof.verify(Url)` and `webProof.verifyWithUrlPrefix(UrlPrefix)` validate that these conditions are met. This ensures that the structure of the transcript cannot be altered by a malicious client.
+### Why Caution Is Needed?
 
-After redacting a JSON string value for a given `"key"`, `web.jsonGetString("key")` returns a string in which each byte is replaced by the `*` character.
+In [TLSN](https://tlsnotary.org/), the foundation for Web Proofs, redaction is performed over raw byte ranges. This means the transcript is treated as an unstructured byte stream, without awareness of HTTP headers, query parameters, or other protocol elements.
 
----
-
-## Security model
-
-A limitation of the current redaction process is that it does not incorporate HTTP semantics. In TLSN, redaction operates on raw byte ranges rather than structured protocol elements.
-
-For example:
+For example, this TLSN function redacts bytes from 2 to 4.
 
 ```js
 redact(2, 4)
 ```
 
-This low-level approach makes it possible to redact partial tokens or split meaningful fields across redaction boundaries.
+This low-level approach makes it possible to redact partial tokens or split meaningful fields across redaction boundaries. Let’s examine a specific case.
 
-Consider the following path:
 
-```
-/user?name=John&surname=Smith
-```
+### Url Redaction
 
-could be redacted with `js` as:
+Consider the following redacted URL path:
 
 ```
 /user?name=Jo*****rname=Smith
 ```
 
-If a redaction is applied without awareness of parameter structure, it may inadvertently redact only part of a value or key, breaking the semantics of the query string. Although such partial redactions are rejected by vlayer, there are edge cases we can't detect because the original values are hidden, and the redacted version appears valid. For instance:
+This redacted form could correspond to multiple original inputs, such as:
 
 ```
-/user?name=******************
+/user?name=John&surname=Smith
+/user?name=JohnathansLongName
 ```
 
-is indistinguishable from a valid redaction.
+Without access to the hidden portion, it's impossible to determine which original URL the redacted version came from. This ambiguity arises because the redaction process operates on raw byte ranges of the same length, regardless of the underlying structure or semantics of the data.
 
-### Implications
+Details on how to prepare a WebProof with redacted URL can be found [here](../javascript/web-proofs.md#url-redaction).
 
-This means a malicious actor can:
+### Enforcing URL Integrity
 
-- Remove query parameters
-- Remove JSON fields
-- Change JSON structure so that a field value appears under a different key
-  - Fields can be moved both up and down the tree
+To guard against such URL redaction issues, the Prover contract provides two verification modes. They limit the way url can be redacted.
 
----
+#### 1. Full-URL verification
 
-## How to mitigate risks
+Use the `verify` function to check the integrity of the entire, unredacted URL. Example:
 
-### Request headers, body, and response headers
+```solidity
+function main(WebProof calldata webProof) {
+    Web memory web = webProof.verify("example.com/user?name=John&surname=Smith")
+    ...
+}
+```
 
-We do **not** expose these on the Web object, so even if they are parsed incorrectly, the Prover cannot access them.
+#### 2. URL prefix verification
 
----
+Use the `verifyWithUrlPrefix` function to validate that the redacted URL starts with a known prefix. Example:
 
-### Request URL
+```solidity
+function main(WebProof calldata webProof) {
+    Web memory web = webProof.verifyWithUrlPrefix("example.com/user?name=")
+    ...
+}
+```
 
-- **If you can avoid redacting the URL**:  
-  Set `UrlTestMode` to `Full` and use:
+* Assumes the prefix (“example.com/user?name=”) is correct.
+* Treats everything after that prefix as opaque and untrusted.
+* Ensures that sensitive suffix data (e.g. user IDs) remains hidden, while protecting contract logic from tampering.
 
-  ```js
-  verify(Url)
-  ```
+### Header Redaction
 
-- **If you must redact the URL**:  
-  Set `UrlTestMode` to `Prefix` and use:
+[PROBLEMATIC HEADER REDACTION EXAMPLE]
 
-  ```js
-  verifyWithUrlPrefix(UrlPrefix)
-  ```
-
-  You must treat all characters after the first redaction character as untrusted, since they can be manipulated.
-
----
-
-### Response JSON body
-
-- **If you can avoid redaction**:  
-  Set:
-
-  ```js
-  BodyRedactionMode = "Disabled"
-  ```
-
-  This allows TLSN to verify that the body is valid, well-formed JSON.
-
-- **If you must redact JSON body**:  
-  Set:
-
-  ```js
-  BodyRedactionMode = "Enabled_UNSAFE"
-  ```
-
-  “UNSAFE” has a Rust-like meaning: **you** are responsible for ensuring safety. You **must** check:
-
-  - All fields in your JSON schema are required (no optional fields)
-  - Arrays have fixed, known-in-advance sizes (to avoid `[1, 2, 3]` ⇒ `[1, ****]`)
-  - All required fields are present
-
-These rules help prevent structural manipulation attacks, such as injecting or hiding malicious fields.
-
-Use this mode **only as a last resort**, as it’s hard to apply safely in real-world production data.
+Both `verify` and `verifyWithUrlPrefix` functions handle header redactions in the same way. Details on how to prepare a WebProof with redacted headers can be found [here](../javascript/web-proofs.md#header-redaction).
