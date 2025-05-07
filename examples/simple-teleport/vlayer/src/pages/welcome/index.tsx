@@ -6,8 +6,9 @@ import { StepKind } from "../../app/router/types";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
 import { tokensToProve } from "../../shared/lib/utils";
-
+import { useAccount } from "wagmi";
 export const WelcomePage = () => {
+  const { address } = useAccount();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const defaultTokenHolder = import.meta.env
@@ -29,7 +30,7 @@ export const WelcomePage = () => {
     }
   }, [result]);
 
-  if (!defaultTokenHolder) {
+  if (!address) {
     return <ConnectWallet />;
   }
 
