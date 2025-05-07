@@ -5,7 +5,9 @@ The core limitation of redaction in TLSN is that it's not semantics-aware.
 Redaction in TLSN works on the level of byte ranges.
 E.g. `redact(2, 4)`.
 
-In a perfect world - redaction would be aware of the structure of HTTP request/response and be available through a semantics API like: `redactRequestHeader("User-Agent)` or `redactResponseJSONBodyField("sender.uuid")`.
+In an ideal world, redaction would understand the structure of HTTP requests/responses and offer a semantic API, such as:
+- `redactRequestHeader("User-Agent")`
+- `redactResponseJSONBodyField("sender.uuid")`
 
 Therefore - user can spill redaction over the lexer tokens borders. E.g. `/user?name=John&surname=Smith` can be redacted as: `/user?name=Jo*****rname=Smith`. And while it only makes sense to redact full values and the example above is rejected by us as invalid because of partial redaction - there are examples that we can't reject as we don't see the values before redaction and redacted value looks legit. 
 
