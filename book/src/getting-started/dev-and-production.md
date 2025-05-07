@@ -62,13 +62,6 @@ bun run devnet:down
 ```
 It is useful in case of any Docker configuration change. 
 
-#### Outside of the vlayer project
-
-Download and run vlayer [Docker Compose](https://install.vlayer.xyz/devnet) to start services:
-```sh
-docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
-```
-
 ### Available Services
 
 | Service            | Endpoint                       | Description                                 |
