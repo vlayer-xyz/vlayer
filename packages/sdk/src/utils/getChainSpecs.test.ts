@@ -1,5 +1,5 @@
 import { sepolia } from "viem/chains";
-import { getChainSpecs } from "./createContext";
+import { getChainSpecs } from "./getChainSpecs";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("viem", () => {
