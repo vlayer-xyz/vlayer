@@ -62,15 +62,8 @@ test("web proof flow", async ({ page, context }) => {
     expect(extension).toBeDefined();
   });
 
-  await test.step("Clicking extension redirect button should open x.com", async () => {
-    const extension = await sidePanel(context);
-    expect(extension).toBeDefined();
-
-    const redirectButton = extension.getByTestId("start-page-button");
-    const [newPage] = await Promise.all([
-      context.waitForEvent("page"),
-      redirectButton.click(),
-    ]);
+  await test.step("Extension should automatically open x.com", async () => {
+    const newPage = await context.waitForEvent("page");
 
     await expect(newPage).toHaveURL("https://x.com/home");
   });

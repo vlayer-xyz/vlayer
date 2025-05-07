@@ -28,7 +28,6 @@ test("Full flow from opening sidepanel to redirection", async ({
 
     const extension = await waitForExtension(context);
     expect(extension).toBeDefined();
-    await extension.expectRequestWebProofButtonToBeVisible();
   });
 
   const extension = await waitForExtension(context);
