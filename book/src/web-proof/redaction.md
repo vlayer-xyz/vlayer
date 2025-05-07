@@ -64,6 +64,8 @@ function main(WebProof calldata webProof) {
 }
 ```
 
+This mode eliminates URL redaction issues by disallowing any redaction of the URL.
+
 #### 2. URL prefix verification
 
 Use the `verifyWithUrlPrefix` function to validate that the redacted URL starts with a known prefix. Example:
