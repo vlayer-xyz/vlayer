@@ -1,14 +1,16 @@
 import { FormEvent, useEffect, useState } from "react";
 import verifierSpec from "../../../../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
 import { useLocalStorage } from "usehooks-ts";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
 import { parseProverResult, tokensToProve } from "../../shared/lib/utils";
 import { AlreadyMintedError } from "../../shared/errors/appErrors";
+import { ensureBalance } from "../../shared/lib/ethFaucet";
 
 export const ConfirmMintPage = () => {
   const { address } = useAccount();
+  const { data: balance } = useBalance();
   const navigate = useNavigate();
   const {
     writeContract,
@@ -44,10 +46,11 @@ export const ConfirmMintPage = () => {
     }
   }, [mintError]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const [proof, owner, tokens] = parseProverResult(proverResult);
     setIsLoading(true);
+    await ensureBalance(address as `0x${string}`, balance?.value ?? 0n);
     writeContract({
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
       abi: verifierSpec.abi,
@@ -62,7 +65,7 @@ export const ConfirmMintPage = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={(e) => void handleSubmit(e)}>
       <p className="desc w-full text-center">
         NFT of holding USDC across {tokensToProve.length} chains
       </p>
