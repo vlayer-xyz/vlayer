@@ -1,4 +1,7 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Context;
 use clap::{Args as ClapArgs, Parser, Subcommand};
@@ -147,9 +150,9 @@ fn decode_jwt(args: Decode) -> Result<()> {
 }
 
 fn parse_decoding_key(path: impl AsRef<Path>) -> Result<DecodingKey> {
-    let pub_key = fs::read(public_key_path)
-        .with_context(|| format!("public key {} not found", public_key_path.display()))?;
-    DecodingKey::from_rsa_pem(&x).map_err(Error::Jwt)
+    let pub_key = fs::read(path.as_ref())
+        .with_context(|| format!("public key {} not found", path.as_ref().display()))?;
+    DecodingKey::from_rsa_pem(&pub_key).map_err(Error::Jwt)
 }
 
 fn parse_host(host: impl AsRef<str>) -> Result<(String, u16)> {
