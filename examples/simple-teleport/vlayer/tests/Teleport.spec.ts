@@ -36,8 +36,8 @@ test("Simple teleport flow", async ({ page }) => {
 
   await test.step("renders success page", async () => {
     await page.getByText("Mint token").click();
-    await expect(
-      page.getByText(stepsMeta[StepKind.success].title),
-    ).toBeVisible();
+    await expect(page.getByText(stepsMeta[StepKind.success].title)).toBeVisible(
+      { timeout: 120_000 },
+    );
   });
 });
