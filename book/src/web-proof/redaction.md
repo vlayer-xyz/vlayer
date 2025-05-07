@@ -18,7 +18,7 @@ After redacting a JSON string value for a given `"key"`, `web.jsonGetString("key
 
 ## Security model
 
-A current limitation of the redaction process is that it is not aware of HTTP semantics.
+The limitation of the current redaction process is that it does not incorporate HTTP semantics.
 
 Redaction in TLSN works at the level of byte ranges.  
 For example:
