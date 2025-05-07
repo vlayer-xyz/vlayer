@@ -71,8 +71,9 @@ struct Encode {
 #[derive(Debug, ClapArgs)]
 struct Decode {
     /// Path to public key used for verifying JWT signature
+    /// If unspecified, will not validate the signature
     #[arg(short, long)]
-    public_key: PathBuf,
+    public_key: Option<PathBuf>,
 
     /// JWT to decode
     jwt: String,
@@ -123,15 +124,26 @@ fn encode_jwt(args: Encode) -> Result<()> {
 
 #[allow(clippy::needless_pass_by_value)]
 fn decode_jwt(args: Decode) -> Result<()> {
-    let pub_key = fs::read(&args.public_key)
-        .with_context(|| format!("public key {} not found", args.public_key.display()))?;
-    let pub_key = DecodingKey::from_rsa_pem(&pub_key)?;
+    let pub_key = args
+        .public_key
+        .as_ref()
+        .map(|public_key| {
+            fs::read(public_key)
+                .with_context(|| format!("public key {} not found", public_key.display()))
+                .map_err(Error::Anyhow)
+                .and_then(|x| DecodingKey::from_rsa_pem(&x).map_err(Error::Jwt))
+        })
+        .transpose()?;
 
     let header = decode_header(&args.jwt)?;
 
     info!("{header:#?}");
 
-    let validation = Validation::new(Algorithm::RS256);
+    let mut validation = Validation::new(Algorithm::RS256);
+    let pub_key = pub_key.unwrap_or_else(|| {
+        validation.insecure_disable_signature_validation();
+        DecodingKey::from_secret(b"")
+    });
     let claims: TokenData<Claims> = decode(&args.jwt, &pub_key, &validation)?;
 
     info!("{:#?}", claims.claims);
