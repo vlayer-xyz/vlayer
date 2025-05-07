@@ -164,7 +164,7 @@ The Web Proof feature is based on the [TLSNotary](https://tlsnotary.org/) protoc
 
 From privacy perspective, it is important to note that the *Notary* server never has access to the plaintext transcript of the connection and therefore, *Notary* can never steal client data and pretend to be client. Furthermore, the transcript can be redacted (i.e. certain parts can be removed) by the client, making these parts of the communication not accessible by `Prover` and vlayer infrastructure running the `Prover`.
 
-### [Redaction](./redaction.md)
+### [Redaction](../web-proof/redaction.md)
 
 ### Trust Assumptions
 
