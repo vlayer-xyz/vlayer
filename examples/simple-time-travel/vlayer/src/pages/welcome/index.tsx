@@ -15,12 +15,12 @@ export const WelcomePage = () => {
 
   const { callProver, result } = useProver();
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     const formData = new FormData(e.target as HTMLFormElement);
     const holderAddress = formData.get("holderAddress") as `0x${string}`;
-    void callProver([holderAddress]);
+    await callProver([holderAddress]);
   };
 
   useEffect(() => {

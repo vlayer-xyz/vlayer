@@ -1,13 +1,16 @@
 import { FormEvent, useEffect, useState } from "react";
 import verifierSpec from "../../../../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
 import { useLocalStorage } from "usehooks-ts";
-import { useWriteContract } from "wagmi";
+import { useAccount, useBalance, useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
 import { HodlerForm } from "../../shared/forms/HodlerForm";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
 import { AlreadyMintedError } from "../../shared/errors/appErrors";
+import { ensureBalance } from "../../shared/lib/ethFaucet";
 
 export const ShowBalancePage = () => {
+  const { address } = useAccount();
+  const { data: currentBalance } = useBalance({ address });
   const navigate = useNavigate();
   const {
     writeContract,
@@ -52,7 +55,7 @@ export const ShowBalancePage = () => {
     }
   }, [mintError]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const [proof, owner, balance] = JSON.parse(proverResult) as [
       unknown,
@@ -60,6 +63,7 @@ export const ShowBalancePage = () => {
       string,
     ];
     setIsLoading(true);
+    await ensureBalance(address as `0x${string}`, currentBalance?.value ?? 0n);
     writeContract({
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
       abi: verifierSpec.abi,

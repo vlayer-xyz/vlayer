@@ -12,9 +12,3 @@ export class AlreadyMintedError extends AppError {
     );
   }
 }
-
-export class FaucetError extends AppError {
-  constructor() {
-    super("FaucetError", "Failed to fund account.");
-  }
-}
