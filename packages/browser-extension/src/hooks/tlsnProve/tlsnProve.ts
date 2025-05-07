@@ -40,12 +40,6 @@ interface TLSNWorker {
   Presentation: new (config: PresentationConfig) => Promise<TPresentation>;
 }
 
-// tlsn-wasm needs to run in a worker
-const worker = new Worker(new URL("./tlsnWorker.ts", import.meta.url), {
-  type: "module",
-});
-const { init, Prover, Presentation } = wrap(worker) as unknown as TLSNWorker;
-
 export async function tlsnProve(
   notaryUrl: string,
   hostname: string,
@@ -66,6 +60,14 @@ export async function tlsnProve(
   };
 }> {
   try {
+    // tlsn-wasm needs to run in a worker
+    const worker = new Worker(new URL("./tlsnWorker.ts", import.meta.url), {
+      type: "module",
+    });
+    const { init, Prover, Presentation } = wrap(
+      worker,
+    ) as unknown as TLSNWorker;
+
     await init({ loggingLevel: "Debug" });
     const notary = NotaryServer.from(notaryUrl);
 
