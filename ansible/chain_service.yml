@@ -57,5 +57,7 @@
         chain_worker_max_back_propagation_blocks: "{{ item.chain_worker_max_back_propagation_blocks }}"
         chain_worker_max_head_blocks: "{{ item.chain_worker_max_head_blocks }}"
         chain_worker_confirmations: "{{ item.chain_worker_confirmations }}"
+        chain_worker_bonsai_api_url: "{{ item.chain_worker_bonsai_api_url }}"
+        chain_worker_bonsai_api_key: "{{ item.chain_worker_bonsai_api_key }}"
       loop: "{{ chain_workers }}"
       no_log: true
