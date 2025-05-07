@@ -168,6 +168,7 @@ TODO - it's unclear for me how to redact url leaving only the prefix unredacted 
 ### Header Redaction
 
 You can redact specific headers from both the request and the response. To do so, use `request.headers`, `request.headers_except`, `response.headers`, or `response.headers_except` with a header name (e.g. `Authorization`, `Cookie`).
+
 #### Redact specifc headers
 
 ```ts
@@ -180,7 +181,7 @@ notarize("https://api.example.com/profile", "GET", "Proof", [
 ])
 ```
 
-#### Redact all request headers
+#### Redact all headers
 
 ```ts
 notarize("https://api.example.com/profile", "GET", "Proof", [
