@@ -32,7 +32,7 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${{ secrets.PRODUCTION_DEPLOYER_SSH_KEY }}"
 
-          ansible-playbook -i hosts.yml prover.yml --limit "stable_fake_prover" \
+          ansible-playbook -i hosts.yml prover.yml --limit "stable_fake_prover,stable_prod_prover" \
             --vault-password-file <(echo '${{ secrets.ANSIBLE_PRODUCTION_VAULT_PASSWORD }}')
       - name: Clean up manually added ssh keys
         if: always()
