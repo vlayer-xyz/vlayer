@@ -49,8 +49,6 @@ This redacted form could correspond to multiple original inputs, such as:
 
 Without access to the hidden portion, it's impossible to determine which original URL the redacted version came from. This ambiguity arises because the redaction process operates on raw byte ranges of the same length, regardless of the underlying structure or semantics of the data.
 
-Details on how to prepare a WebProof with redacted URL can be found [here](../javascript/web-proofs.md#url-redaction).
-
 ### Enforcing URL Integrity
 
 To guard against URL redaction issues, the Prover contract provides two verification modes. They limit the way url can be redacted.
@@ -80,6 +78,8 @@ function main(WebProof calldata webProof) {
 * Assumes the prefix (“example.com/user?name=”) is correct.
 * Treats everything after that prefix as untrusted.
 * Ensures that sensitive suffix data (e.g. user IDs) remains hidden, while protecting contract logic from tampering.
+
+Details on how to prepare a WebProof with redacted URL can be found [here](../javascript/web-proofs.md#url-redaction).
 
 ### Header Redaction
 
