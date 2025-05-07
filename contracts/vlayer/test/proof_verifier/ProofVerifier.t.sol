@@ -70,7 +70,7 @@ contract ProofVerifier_Verify_Tests is Test {
     }
 
     function test_blockFromFuture() public {
-        assumptions.settleBlockNumber = block.number;
+        assumptions.settleBlockNumber = block.number + 1;
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
 
         vm.expectRevert("Invalid block number: block from future");

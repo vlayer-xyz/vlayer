@@ -44,7 +44,11 @@ abstract contract ProofVerifierBase is IProofVerifier {
         require(proof.callAssumptions.functionSelector == selector, "Invalid selector");
 
         require(proof.callAssumptions.settleChainId == block.chainid, "Invalid chain id");
-        require(proof.callAssumptions.settleBlockNumber < block.number, "Invalid block number: block from future");
+        // When we use fake proofs - they are fast and sometimes can happen within a single block time.
+        // In that case, we do proving on block X. When we later try to estimate gas - the node is still mining block X + 1,
+        // so gas estimation happens on block X and fails if we don't support equality here.
+        // On-chain - it will always be less as the actual verification will happen in the future block X + N.
+        require(proof.callAssumptions.settleBlockNumber <= block.number, "Invalid block number: block from future");
         require(
             proof.callAssumptions.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS >= block.number,
             "Invalid block number: block too old"
