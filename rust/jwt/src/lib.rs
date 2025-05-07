@@ -13,7 +13,7 @@ use strum::{Display, EnumString};
 pub enum Environment {
     #[default]
     Test,
-    Mainnet,
+    Production,
 }
 
 #[derive(Builder, Debug, Clone, Serialize, Deserialize)]
@@ -124,17 +124,17 @@ mod tests {
     }
 
     #[test]
-    fn decodes_as_mainnet() {
+    fn decodes_as_production() {
         let jwt = token(&TokenArgs {
             secret: JWT_SECRET,
             host: None,
             port: None,
             invalid_after: 0,
             subject: "1234",
-            environment: Some(Environment::Mainnet),
+            environment: Some(Environment::Production),
         });
         let token_data: TokenData<Claims> =
             decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
-        assert_eq!(token_data.claims.environment, Some(Environment::Mainnet));
+        assert_eq!(token_data.claims.environment, Some(Environment::Production));
     }
 }

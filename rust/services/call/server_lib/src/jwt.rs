@@ -57,7 +57,7 @@ impl IntoResponse for Error {
 
 const fn proof_mode_from_environment(environment: Environment) -> ProofMode {
     match environment {
-        Environment::Mainnet => ProofMode::Groth16,
+        Environment::Production => ProofMode::Groth16,
         Environment::Test => ProofMode::Fake,
     }
 }
@@ -73,7 +73,7 @@ mod tests {
             .with_proof_mode(ProofMode::Groth16)
             .build()
             .unwrap();
-        let environment = Some(Environment::Mainnet);
+        let environment = Some(Environment::Production);
         let result = validate_environment(&config, environment);
         assert!(result.is_ok());
     }
@@ -117,7 +117,7 @@ mod tests {
             .with_proof_mode(ProofMode::Fake)
             .build()
             .unwrap();
-        let environment = Some(Environment::Mainnet);
+        let environment = Some(Environment::Production);
         let result = validate_environment(&config, environment);
         assert!(result.is_err());
     }

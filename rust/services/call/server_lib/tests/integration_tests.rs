@@ -599,7 +599,7 @@ mod server_tests {
             let claims = ClaimsBuilder::default()
                 .exp(ts)
                 .sub("1234".to_string())
-                .environment(Environment::Mainnet)
+                .environment(Environment::Production)
                 .build()
                 .unwrap();
             let token = encode(&Header::default(), &claims, &key).unwrap();
@@ -611,7 +611,7 @@ mod server_tests {
             assert_eq!(StatusCode::BAD_REQUEST, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
-                json!({ "error": "Invalid environment in JWT: mainnet, prover server proof mode: fake" }),
+                json!({ "error": "Invalid environment in JWT: production, prover server proof mode: fake" }),
             );
         }
 
