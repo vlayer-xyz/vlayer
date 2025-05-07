@@ -3,8 +3,8 @@ on:
   pull_request:
   merge_group:
   push:
-    branches:
-      - main
+    # branches:
+      # - main
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
     needs: changes
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
+    # if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
