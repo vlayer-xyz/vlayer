@@ -8,12 +8,6 @@ on:
       - examples/simple-web-proof/**
       - .github/workflows/deploy_simple_web_proof.yaml
       - bash/e2e-web-proof-example-test.sh
-  push:
-    paths:
-      - examples/simple-web-proof/**
-      - .github/workflows/deploy_simple_web_proof.yaml
-    branches:
-      - main
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
