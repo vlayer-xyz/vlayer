@@ -127,12 +127,7 @@ fn decode_jwt(args: Decode) -> Result<()> {
     let pub_key = args
         .public_key
         .as_ref()
-        .map(|public_key| {
-            fs::read(public_key)
-                .with_context(|| format!("public key {} not found", public_key.display()))
-                .map_err(Error::Anyhow)
-                .and_then(|x| DecodingKey::from_rsa_pem(&x).map_err(Error::Jwt))
-        })
+        .map(parse_decoding_key)
         .transpose()?;
 
     let header = decode_header(&args.jwt)?;
@@ -149,6 +144,12 @@ fn decode_jwt(args: Decode) -> Result<()> {
     info!("{:#?}", claims.claims);
 
     Ok(())
+}
+
+fn parse_decoding_key(path: impl AsRef<Path>) -> Result<DecodingKey> {
+    let pub_key = fs::read(public_key_path)
+        .with_context(|| format!("public key {} not found", public_key_path.display()))?;
+    DecodingKey::from_rsa_pem(&x).map_err(Error::Jwt)
 }
 
 fn parse_host(host: impl AsRef<str>) -> Result<(String, u16)> {
