@@ -113,6 +113,8 @@ const verificationHash = await ethClient.writeContract({
   account,
 });
 
+console.log("📨 Verification tx hash:", verificationHash);
+
 const receipt = await ethClient.waitForTransactionReceipt({
   hash: verificationHash,
   confirmations,
