@@ -89,7 +89,8 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
-console.log("📨 Prover tx hash:", prover);
+console.log("📨 Prover:", prover);
+console.log("Verifier:", verifier);
 console.log("teleportConfig.tokenHolder:", teleportConfig.tokenHolder);
 console.log("tokensToCheck:", tokensToCheck);
 console.log("chainId:", chain.id);
