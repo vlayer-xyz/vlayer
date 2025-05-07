@@ -9,7 +9,8 @@ In an ideal world, redaction would understand the structure of HTTP requests/res
 - `redactRequestHeader("User-Agent")`
 - `redactResponseJSONBodyField("sender.uuid")`
 
-Therefore - user can spill redaction over the lexer tokens borders. E.g. `/user?name=John&surname=Smith` can be redacted as: `/user?name=Jo*****rname=Smith`. And while it only makes sense to redact full values and the example above is rejected by us as invalid because of partial redaction - there are examples that we can't reject as we don't see the values before redaction and redacted value looks legit. 
+Because TLSN uses byte-based redaction, it's possible to break tokens across boundaries.
+For instance, a URL like `/user?name=John&surname=Smith` could be redacted as `/user?name=Jo*****rname=Smith`. Although such partial redactions are rejected by vlayer, there are edge cases we can't reject because the original values are hidden from us, and the redacted version appears valid.
 
 `/user?name=******************` is indistinguishable from a valid redaction.
 
