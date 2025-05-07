@@ -13,7 +13,7 @@ contract WebProverTest is VTest {
 
     function test_verifiesWebProofAndRetrievesScreenName() public {
         WebProof memory webProof = WebProof(
-            vm.readFile("testdata/0.1.0-alpha.8/web_proof.json")
+            vm.readFile("testdata/web_proof.json")
         );
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
@@ -30,9 +30,7 @@ contract WebProverTest is VTest {
 
     function test_failedVerificationBecauseOfInvlidNotaryPublicKey() public {
         WebProof memory webProof = WebProof(
-            vm.readFile(
-                "testdata/0.1.0-alpha.8/web_proof_invalid_notary_pub_key.json"
-            )
+            vm.readFile("testdata/web_proof_invalid_notary_pub_key.json")
         );
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);

@@ -98,7 +98,7 @@ mod tests {
         use crate::fixtures::{NOTARY_PUB_KEY_PEM_EXAMPLE, read_fixture};
 
         const WEB_PROOF_IDENTITY_NAME_CHANGED: &str =
-            include_str!(".././testdata/0.1.0-alpha.8/web_proof_identity_name_changed.json");
+            include_str!(".././testdata/web_proof_identity_name_changed.json");
 
         #[test]
         fn correct_url_extracted() {
@@ -158,8 +158,7 @@ mod tests {
                 body_redaction_mode: BodyRedactionMode::EnabledUnsafe,
                 url_test_mode: UrlTestMode::Prefix,
             };
-            let web_proof =
-                read_fixture("./testdata/0.1.0-alpha.8/web_proof_all_redaction_types.json");
+            let web_proof = read_fixture("./testdata/web_proof_all_redaction_types.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             let web = verify_and_parse(web_proof, config).unwrap();
@@ -182,9 +181,7 @@ mod tests {
 
         #[test]
         fn fail_request_url_partial_redaction() {
-            let web_proof = read_fixture(
-                "./testdata/0.1.0-alpha.8/web_proof_request_url_partial_redaction.json",
-            );
+            let web_proof = read_fixture("./testdata/web_proof_request_url_partial_redaction.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
@@ -197,9 +194,8 @@ mod tests {
         }
         #[test]
         fn fail_request_header_partial_redaction() {
-            let web_proof = read_fixture(
-                "./testdata/0.1.0-alpha.8/web_proof_request_header_partial_redaction.json",
-            );
+            let web_proof =
+                read_fixture("./testdata/web_proof_request_header_partial_redaction.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
@@ -212,9 +208,8 @@ mod tests {
         }
         #[test]
         fn fail_response_header_partial_redaction() {
-            let web_proof = read_fixture(
-                "./testdata/0.1.0-alpha.8/web_proof_response_header_partial_redaction.json",
-            );
+            let web_proof =
+                read_fixture("./testdata/web_proof_response_header_partial_redaction.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(
@@ -227,9 +222,8 @@ mod tests {
         }
         #[test]
         fn fail_response_body_json_value_partial_redaction() {
-            let web_proof = read_fixture(
-                "./testdata/0.1.0-alpha.8/web_proof_response_json_partial_redaction.json",
-            );
+            let web_proof =
+                read_fixture("./testdata/web_proof_response_json_partial_redaction.json");
             let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
             assert!(matches!(

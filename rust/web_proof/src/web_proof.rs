@@ -141,7 +141,7 @@ mod tests {
     use crate::fixtures::{NOTARY_PUB_KEY_PEM_EXAMPLE, load_web_proof_fixture};
 
     const WEB_PROOF_BAD_SIGNATURE: &str =
-        include_str!(".././testdata/0.1.0-alpha.8/web_proof_bad_signature.json");
+        include_str!(".././testdata/web_proof_bad_signature.json");
 
     #[test]
     fn serialize_deserialize_web_proof() {
