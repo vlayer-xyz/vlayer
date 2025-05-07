@@ -18,35 +18,29 @@ After redacting a JSON string value for a given `"key"`, `web.jsonGetString("key
 
 ## Security model
 
-The limitation of the current redaction process is that it does not incorporate HTTP semantics.
+A limitation of the current redaction process is that it does not incorporate HTTP semantics. In TLSN, redaction operates on raw byte ranges rather than structured protocol elements.
 
-Redaction in TLSN works at the level of byte ranges.  
 For example:
 
 ```js
 redact(2, 4)
 ```
 
-In an ideal world, redaction would understand the structure of HTTP requests/responses and offer a semantic API, such as:
+This low-level approach makes it possible to redact partial tokens or split meaningful fields across redaction boundaries.
 
-- `redactRequestHeader("User-Agent")`
-- `redactResponseJSONBodyField("sender.uuid")`
-
-However, because TLSN uses byte-based redaction, it's possible to break tokens across boundaries.
-
-For example, a URL like:
+Consider the following path:
 
 ```
 /user?name=John&surname=Smith
 ```
 
-could be redacted as:
+could be redacted with `js` as:
 
 ```
 /user?name=Jo*****rname=Smith
 ```
 
-Although such partial redactions are rejected by vlayer, there are edge cases we can't detect because the original values are hidden, and the redacted version appears valid. For instance:
+If a redaction is applied without awareness of parameter structure, it may inadvertently redact only part of a value or key, breaking the semantics of the query string. Although such partial redactions are rejected by vlayer, there are edge cases we can't detect because the original values are hidden, and the redacted version appears valid. For instance:
 
 ```
 /user?name=******************
@@ -56,7 +50,7 @@ is indistinguishable from a valid redaction.
 
 ### Implications
 
-This means an attacker can:
+This means a malicious actor can:
 
 - Remove query parameters
 - Remove JSON fields
