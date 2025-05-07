@@ -8,7 +8,7 @@ contract WebProofLibWrapper {
     using WebProofLib for WebProof;
 
     function verify(WebProof calldata webProof, string memory dataUrl) public view returns (Web memory) {
-        return webProof.verify(dataUrl, WebProofLib.BodyRedactionMode.Disabled);
+        return webProof.verify(dataUrl);
     }
 }
 

@@ -36,25 +36,36 @@ library WebProofLib {
     string private constant NOTARY_PUB_KEY =
         "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
 
-    function verify(WebProof memory webProof, string memory url, BodyRedactionMode bodyRedactionMode)
-        internal
-        view
-        returns (Web memory)
-    {
-        Web memory web = recover(webProof, UrlTestMode.Full, bodyRedactionMode);
+    function verify(WebProof memory webProof, string memory url) internal view returns (Web memory) {
+        Web memory web = recover(webProof, UrlTestMode.Full, BodyRedactionMode.Disabled);
         verifyNotaryKey(web.notaryPubKey);
         require(web.url.equal(url), "URL mismatch");
         return web;
     }
 
-    function verifyWithUrlPrefix(WebProof memory webProof, string memory urlPrefix, BodyRedactionMode bodyRedactionMode)
+    function verifyWithUrlPrefix(WebProof memory webProof, string memory urlPrefix)
         internal
         view
         returns (Web memory)
     {
-        Web memory web = recover(webProof, UrlTestMode.Prefix, bodyRedactionMode);
+        Web memory web = recover(webProof, UrlTestMode.Prefix, BodyRedactionMode.Disabled);
         verifyNotaryKey(web.notaryPubKey);
         require(web.url.startsWith(urlPrefix), "URL prefix mismatch");
+        return web;
+    }
+
+    function unsafeVerifyWithRedactedBody(
+        WebProof memory webProof,
+        string memory urlOrUrlPrefix,
+        UrlTestMode urlTestMode
+    ) internal view returns (Web memory) {
+        Web memory web = recover(webProof, UrlTestMode.Prefix, BodyRedactionMode.Enabled_UNSAFE);
+        verifyNotaryKey(web.notaryPubKey);
+        if (urlTestMode == UrlTestMode.Full) {
+            require(web.url.equal(urlOrUrlPrefix), "URL mismatch");
+        } else if (urlTestMode == UrlTestMode.Prefix) {
+            require(web.url.startsWith(urlOrUrlPrefix), "URL prefix mismatch");
+        }
         return web;
     }
 

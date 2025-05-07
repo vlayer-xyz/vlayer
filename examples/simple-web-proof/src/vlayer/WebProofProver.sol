@@ -17,7 +17,7 @@ contract WebProofProver is Prover {
         view
         returns (Proof memory, string memory, address)
     {
-        Web memory web = webProof.verify(DATA_URL, WebProofLib.BodyRedactionMode.Disabled);
+        Web memory web = webProof.verify(DATA_URL);
 
         string memory screenName = web.jsonGetString("screen_name");
 
