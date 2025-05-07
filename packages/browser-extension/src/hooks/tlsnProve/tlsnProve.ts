@@ -64,7 +64,9 @@ export async function tlsnProve(
     const worker = new Worker(new URL("./tlsnWorker.ts", import.meta.url), {
       type: "module",
     });
-    const { init, Prover, Presentation } = wrap(worker) as unknown as TLSNWorker;
+    const { init, Prover, Presentation } = wrap(
+      worker,
+    ) as unknown as TLSNWorker;
 
     await init({ loggingLevel: "Debug" });
     const notary = NotaryServer.from(notaryUrl);
