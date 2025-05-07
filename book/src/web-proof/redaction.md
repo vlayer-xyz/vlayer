@@ -1,6 +1,6 @@
 # Redaction
 
-The core problem with redaction how it's done in TLSN is that it's not semantics aware. 
+The core limitation of redaction in TLSN is that it's not semantics-aware.
 
 Redaction in TLSN works on the level of byte ranges.
 E.g. `redact(2, 4)`.
