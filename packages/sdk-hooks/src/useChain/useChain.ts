@@ -1,4 +1,4 @@
-import { getChainSpecs } from "@vlayer/sdk/config";
+import { getChainSpecs } from "@vlayer/sdk";
 import { useEffect, useMemo, useState } from "react";
 import type { Chain } from "viem";
 import { useChainId, useChains } from "wagmi";

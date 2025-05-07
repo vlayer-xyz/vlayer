@@ -1,0 +1,1 @@
+export { getChainSpecs } from "./getChainSpecs";

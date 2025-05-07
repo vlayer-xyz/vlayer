@@ -9,7 +9,7 @@ import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { Chain } from "viem";
 import { ErrorBoundary } from "react-error-boundary";
 import { AppErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
-import { getChainSpecs } from "@vlayer/sdk/config";
+import { getChainSpecs } from "@vlayer/sdk";
 
 const queryClient = new QueryClient();
 const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;

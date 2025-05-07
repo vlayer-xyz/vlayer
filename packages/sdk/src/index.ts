@@ -7,3 +7,5 @@ export * from "./api/lib/types";
 export * from "./web-proof-commons/utils";
 export * from "./web-proof-commons/types/message";
 export * from "./web-proof-commons/error";
+
+export * from "./utils";
