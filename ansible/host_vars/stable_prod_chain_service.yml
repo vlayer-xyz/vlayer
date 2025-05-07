@@ -1,0 +1,34 @@
+---
+ansible_host: 3.137.189.162
+ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHwOO7evt4ufEBRYqhJ7P2FPWsOO2RCk4R7h/s4FIo2s
+ansible_user: ubuntu
+vlayer_quicknode_api_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  30346430393432336662386466633364663634336163373430616138333431376533363533363233
+  6132363630613532313839313134383037313961353138340a396462303539376531653166393936
+  30353934333836653262626632653065323364386563303631356339326431623633393833643139
+  3763383161376435350a383964363838636431633532376537346666343439666565336465393066
+  39313234383930336434343664306161623866623261326463373635613665663633663630373836
+  3036366431616532383235356339346538646431306133663465
+chain_workers:
+  - chain_worker_identifier: ethereum
+    chain_worker_rpc_url: https://clean-proud-spring.quiknode.pro/{{ vlayer_quicknode_api_key }}
+    chain_worker_chain_id: 1
+    chain_worker_proof_mode: groth16
+    chain_worker_max_back_propagation_blocks: 10
+    chain_worker_max_head_blocks: 10
+    chain_worker_confirmations: 8
+  # - chain_worker_identifier: base-sepolia
+  #   chain_worker_rpc_url: https://clean-proud-spring.quiknode.pro/{{ vlayer_quicknode_api_key }}
+  #   chain_worker_chain_id: 84532
+  #   chain_worker_proof_mode: groth16
+  #   chain_worker_max_back_propagation_blocks: 10
+  #   chain_worker_max_head_blocks: 10
+  #   chain_worker_confirmations: 8
+  # - chain_worker_identifier: optimism-sepolia
+  #   chain_worker_rpc_url: https://clean-proud-spring.quiknode.pro/{{ vlayer_quicknode_api_key }}
+  #   chain_worker_chain_id: 11155420
+  #   chain_worker_proof_mode: groth16
+  #   chain_worker_max_back_propagation_blocks: 10
+  #   chain_worker_max_head_blocks: 10
+  #   chain_worker_confirmations: 8
