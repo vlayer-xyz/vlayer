@@ -57,36 +57,6 @@ This means a malicious actor can:
 - Change JSON structure so that a field value appears under a different key
   - Fields can be moved both up and down the tree
 
-#### Example: JSON body manipulation
-
-Original JSON:
-
-```json
-{
-    "outer": "",
-    "nested": {
-        "first": "malicious_value"
-    },
-    "first": "real_value",
-    "second": ""
-}
-```
-
-Redacted JSON (illustrative):
-
-```json
-{
-    "outer": "** 
-************* 
-********first: "malicious_value" 
-****** 
-************************ 
-    "second": ""
-}
-```
-
-If the Prover later queries `.first`, it will return `malicious_value`.
-
 ---
 
 ## How to mitigate risks
