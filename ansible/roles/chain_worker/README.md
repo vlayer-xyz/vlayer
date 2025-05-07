@@ -8,6 +8,7 @@ Typically, more than 1 chain worker would be installed on a single machine.
 
 | Name | Purpose |
 | --- | --- |
+| `vlayer_release_channel` | Stable or nightly release channel. |
 | `chain_worker_identifier` | An identifier for distinguishing multiple workers running on a single machine. |
 | `chain_worker_rust_log` | An array of log levels for constructing [`RUST_LOG`](https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html). |
 | `chain_worker_db_path` | Where is the DB located. |

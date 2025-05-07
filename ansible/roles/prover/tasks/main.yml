@@ -21,7 +21,7 @@
     mode: '644'
   notify: "Restart vlayer"
 
-# We're installing a most-recent nightly version every time.
+# We're installing a most-recent nightly or stable version every time.
 - name: Install vlayer # noqa: no-changed-when
   ansible.builtin.shell: |
     export PATH="$PATH:~/.foundry/bin"

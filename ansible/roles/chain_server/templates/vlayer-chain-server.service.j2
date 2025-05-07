@@ -17,7 +17,7 @@ SyslogFacility=local0
 Environment=RUST_LOG={{ chain_server_rust_log | join(',') }}
 Environment=VLAYER_LOG_FORMAT=json
 Environment=DB_PATH={{ chain_server_db_path }}
-ExecStart=/opt/vlayer/chain_server --listen-addr {{ chain_server_host }}:{{ chain_server_port }}
+ExecStart=/home/{{ ansible_user }}/.vlayer/bin/chain_server --listen-addr {{ chain_server_host }}:{{ chain_server_port }}
 
 [Install]
 WantedBy=multi-user.target
