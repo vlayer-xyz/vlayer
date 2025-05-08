@@ -1,0 +1,3 @@
+[submodule "examples/simple-teleport/vlayer/help/lib/forge-std"]
+	path = examples/simple-teleport/vlayer/help/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
