@@ -78,13 +78,11 @@ function main(WebProof calldata webProof) {
 ```
 
 * Assumes the prefix (“example.com/user?name=”) is correct.
-* Treats everything after that prefix as untrusted.
+* Treats everything after that prefix as untrusted (it can be redacted).
 * Ensures that sensitive suffix data (e.g. user IDs) remains hidden, while protecting contract logic from tampering.
 
 Details on how to prepare a WebProof with redacted URL can be found [here](../javascript/web-proofs.md#url-redaction).
 
 ### Header Redaction
-
-[PROBLEMATIC HEADER REDACTION EXAMPLE]
 
 Both `verify` and `verifyWithUrlPrefix` functions handle header redactions in the same way. Details on how to prepare a WebProof with redacted headers can be found [here](../javascript/web-proofs.md#header-redaction).
