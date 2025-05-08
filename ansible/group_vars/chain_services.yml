@@ -6,5 +6,3 @@ chain_server_rust_log:
   - info
 chain_services_db_path: "/data/chain_db"
 vlayer_release_channel: stable
-chain_worker_bonsai_api_url: ""
-chain_worker_bonsai_api_key: ""
