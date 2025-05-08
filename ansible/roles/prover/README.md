@@ -10,6 +10,8 @@ Installs the vlayer Prover server.
 | `vlayer_prover_port` | The port to bind to. |
 | `vlayer_release_channel` | Stable or nightly release channel. |
 | `vlayer_prover_rpc_urls` | A list of RPC urls for the Prover. |
+| `vlayer_prover_gas_meter_url` | Optional url to the gas meter endpoint. |
+| `vlayer_prover_chain_proof_url` | Optional url to the chain proof server. |
 | `vlayer_proof_type` | Type of proof - `fake` or `groth16`. |
 | `vlayer_bonsai_api_url` | API url for Bonsai, required for real proofs. |
 | `vlayer_bonsai_api_key` | API key for Bonsai, required for real proofs. |
