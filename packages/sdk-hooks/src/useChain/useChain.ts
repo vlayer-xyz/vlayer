@@ -44,7 +44,7 @@ export const useChain = (
         return;
       }
 
-      if (wagmiChain === configChain) {
+      if (wagmiChainId === chain.id) {
         setChain(chain);
         setError(null);
       } else {
@@ -57,7 +57,7 @@ export const useChain = (
       setChain(null);
       setError(`Chain ${configChain} is not supported`);
     }
-  }, [wagmiChain, configChain]);
+  }, [wagmiChainId, configChain, wagmiChain]);
 
   return { chain, error };
 };
