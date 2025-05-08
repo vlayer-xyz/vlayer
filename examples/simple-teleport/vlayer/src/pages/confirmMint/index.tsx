@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import verifierSpec from "../../../../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
 import { useLocalStorage } from "usehooks-ts";
-import { useAccount, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useWriteContract } from "wagmi";
 import { useNavigate } from "react-router";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
 import { parseProverResult, tokensToProve } from "../../shared/lib/utils";
@@ -9,6 +9,7 @@ import { AlreadyMintedError } from "../../shared/errors/appErrors";
 
 export const ConfirmMintPage = () => {
   const { address } = useAccount();
+  const { data: balance } = useBalance({ address: address as `0x${string}` });
   const navigate = useNavigate();
   const {
     writeContract,
@@ -56,6 +57,8 @@ export const ConfirmMintPage = () => {
       args: [proof, owner, tokens],
     });
   };
+  // estimated price for Sepolia verification tx
+  const enoughBalance = balance?.value && balance.value > 3000000000000000n;
 
   if (!holderAddress) {
     return <ConnectWallet />;
@@ -101,6 +104,19 @@ export const ConfirmMintPage = () => {
           {isLoading ? "Minting..." : "Mint token"}
         </button>
       </div>
+      {!enoughBalance && (
+        <p className="text-red-400 text-center mt-4">
+          Insufficient balance in your wallet. <br />
+          Please fund your account with{" "}
+          <a
+            href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
+            target="_blank"
+            className="font-bold"
+          >
+            ETH Sepolia Faucet
+          </a>
+        </p>
+      )}
     </form>
   );
 };
