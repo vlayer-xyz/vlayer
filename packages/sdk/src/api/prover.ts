@@ -103,7 +103,7 @@ export async function waitForProof<
   url: string,
   token?: string,
   numberOfRetries: number = 900,
-  sleepDuration: number = 1000,
+  sleepDuration: number = 3000,
 ): Promise<ProofDataWithMetrics> {
   for (let retry = 0; retry < numberOfRetries; retry++) {
     const { state, data, metrics } = await getProofReceipt(hash, url, token);
