@@ -24,6 +24,8 @@ forge-std = "1.9.4"
 risc0-ethereum = { version = "2.0.0", url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v2.0.0-soldeer/contracts.zip" }
 
 [rpc_endpoints]
+ethereum = "https://eth.llamarpc.com"
+optimism = "https://mainnet.optimism.io"
 base = "https://mainnet.base.org"
 
 arbitrum-sepolia = "https://sepolia-rollup.arbitrum.io/rpc"

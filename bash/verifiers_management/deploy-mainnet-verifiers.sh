@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-NETWORKS=( "optimism-sepolia" )
+# Base mainnet is not yet supported as part of vlayer mainnet environment
+NETWORKS=( "ethereum" "optimism" )
 
 set -ueo pipefail
 
