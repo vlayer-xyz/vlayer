@@ -57,7 +57,8 @@ export const ConfirmMintPage = () => {
       args: [proof, owner, tokens],
     });
   };
-  const enoughBalance = balance?.value && balance.value > 0n;
+  // estimated price for Sepolia verification tx
+  const enoughBalance = balance?.value && balance.value > 3000000000000000n;
 
   if (!holderAddress) {
     return <ConnectWallet />;
@@ -99,11 +100,7 @@ export const ConfirmMintPage = () => {
         />
       </div>
       <div className="mt-5 flex justify-center">
-        <button
-          type="submit"
-          id="nextButton"
-          disabled={isLoading || !enoughBalance}
-        >
+        <button type="submit" id="nextButton" disabled={isLoading}>
           {isLoading ? "Minting..." : "Mint token"}
         </button>
       </div>
