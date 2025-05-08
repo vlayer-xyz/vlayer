@@ -22,34 +22,3 @@ function startup_chain_worker() {
 
     popd > /dev/null
 }
-
-function wait_for_chain_worker_sync() {
-    local rpc_url="$1" chain_id="$2" first_block="$3" last_block="$4"
-
-    echo "Waiting for chain worker sync... chain_id=${chain_id} first_block=${first_block} last_block=${last_block}"
-
-    for i in $(seq 1 20); do
-        local reply result first_block_synced last_block_synced
-        reply=$(curl -s -X POST 127.0.0.1:3001 \
-            --retry-connrefused --retry 5 --retry-delay 0 --retry-max-time 30 \
-            -H "Content-Type: application/json" \
-            --data '{"jsonrpc": "2.0", "id": 0, "method": "v_getSyncStatus", "params": ['"${chain_id}"']}')
-        result=$(echo "${reply}" | jq ".result")
-
-        if [[ "${result}" != "null" ]]; then
-            first_block_synced=$( [[ "${first_block}" == "latest" ]] || echo "${result}" | jq "(.first_block <= ${first_block})" )
-            last_block_synced=$( [[ "${last_block}" == "latest" ]] || echo "${result}" | jq "(.last_block >= ${last_block})" )
-
-            if [[ "${first_block_synced}" == "true" && "${last_block_synced}" == "true" ]]; then
-                echo "Chain ${chain_id} worker synced ${result}"
-                return
-            fi
-        fi
-
-        echo "Syncing ... ${result}"
-        sleep 10
-    done
-
-    echo "Failed to sync chain ${chain_id} worker" >&2
-    exit 1
-}

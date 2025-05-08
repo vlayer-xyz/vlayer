@@ -75,10 +75,6 @@ function startup_chain_services() {
     done
 
     startup_chain_server ${db_path}
-
-    for args in "$@"; do
-        wait_for_chain_worker_sync $args
-    done
 }
 
 function startup_vlayer() {
