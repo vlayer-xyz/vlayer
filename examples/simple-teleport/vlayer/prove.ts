@@ -70,6 +70,7 @@ const proofHash = await vlayer.prove({
   functionName: "crossChainBalanceOf",
   args: [teleportConfig.tokenHolder, tokensToCheck],
   chainId: chain.id,
+  gasLimit: config.gasLimit,
 });
 const result = await vlayer.waitForProvingResult({ hash: proofHash });
 console.log("Proof:", result[0]);

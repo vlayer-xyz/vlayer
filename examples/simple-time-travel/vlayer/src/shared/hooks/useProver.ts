@@ -15,6 +15,7 @@ export const useProver = () => {
     proverAbi: proverSpec.abi,
     functionName: "averageBalanceOf",
     chainId: 31337,
+    gasLimit: Number(import.meta.env.VITE_GAS_LIMIT),
   });
 
   const { data: result, error: provingResultError } =

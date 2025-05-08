@@ -54,6 +54,7 @@ const provingHash = await vlayer.prove({
   functionName: "averageBalanceOf",
   args: [timeTravelConfig.tokenOwner],
   chainId: ethClient.chain.id,
+  gasLimit: config.gasLimit,
 });
 
 console.log("Waiting for proving result: ");

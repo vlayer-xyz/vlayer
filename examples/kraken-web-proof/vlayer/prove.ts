@@ -63,6 +63,7 @@ const hash = await vlayer.prove({
     },
   ],
   chainId: chain.id,
+  gasLimit: config.gasLimit,
 });
 const result = await vlayer.waitForProvingResult({ hash });
 const [proof, avgPrice] = result;
