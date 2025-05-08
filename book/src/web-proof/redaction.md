@@ -21,7 +21,7 @@ To learn how to enable and configure redaction using the vlayer SDK, see the [Re
 
 ### Why Caution Is Needed?
 
-In [TLSN](https://tlsnotary.org/), the foundation for Web Proofs, redaction is performed over raw byte ranges. This means the transcript is treated as an unstructured byte stream, without awareness of HTTP headers, query parameters, or other protocol elements.
+In [TLSN Protocol](https://tlsnotary.org/), the foundation for Web Proofs, redaction is performed over raw byte ranges. This means the transcript is treated as an unstructured byte stream, without awareness of HTTP headers, query parameters, or other protocol elements.
 
 For example, this TLSN function redacts bytes from 2 to 4.
 
@@ -29,7 +29,7 @@ For example, this TLSN function redacts bytes from 2 to 4.
 redact(2, 4)
 ```
 
-This low-level approach makes it possible to redact partial tokens or split meaningful fields across redaction boundaries. Let’s examine a specific case.
+Let’s take a closer look at security nuances of specific cases.
 
 
 ### URL Redaction
@@ -37,7 +37,7 @@ This low-level approach makes it possible to redact partial tokens or split mean
 Consider the following redacted URL path (`*` stands for redacted character):
 
 ```
-/user?name=Jo*****rname=Smith
+/user?name=******************
 ```
 
 This redacted form could correspond to multiple original inputs, such as:
