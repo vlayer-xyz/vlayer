@@ -20,12 +20,18 @@ pub struct Config {
 /// `Client` implementation which fetches proofs from server via JSON RPC.
 pub struct RpcClient {
     rpc_client: RawRpcClient,
+    poll_interval: Duration,
+    timeout: Duration,
 }
 
 impl RpcClient {
     pub fn new(config: &Config) -> Self {
         let rpc_client = RawRpcClient::new(&config.url);
-        Self { rpc_client }
+        Self {
+            rpc_client,
+            poll_interval: config.poll_interval,
+            timeout: config.timeout,
+        }
     }
 }
 
