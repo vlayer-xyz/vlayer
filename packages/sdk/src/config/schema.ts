@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { envToConfig } from "./utils/envToConfig";
 
-export const POSSIBLE_VLAYER_ENVS = ["testnet", "dev"] as const;
+export const POSSIBLE_VLAYER_ENVS = ["mainnet", "testnet", "dev"] as const;
 export const POSSIBLE_CLIENT_AUTH_MODES = ["wallet", "envPrivateKey"] as const;
 export const stringBoolean = z
   .enum(["true", "false"])
