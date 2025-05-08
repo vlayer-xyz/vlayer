@@ -13,7 +13,7 @@ export const DEFAULT_CONFIG = {
     wsProxyUrl: "wss://test-wsproxy.vlayer.xyz",
   },
   [ProofEnv.PROD]: {
-    proverUrl: "https://stable-fake-prover.vlayer.xyz",
+    proverUrl: "https://stable-prod-prover.vlayer.xyz",
     notaryUrl: "https://test-notary.vlayer.xyz",
     wsProxyUrl: "wss://test-wsproxy.vlayer.xyz",
   },
