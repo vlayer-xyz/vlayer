@@ -92,7 +92,7 @@ export const createVlayerClient = (
     >({
       hash,
       numberOfRetries = 900,
-      sleepDuration = 1000,
+      sleepDuration = 3000,
     }: {
       hash: BrandedHash<T, F>;
       numberOfRetries?: number;
