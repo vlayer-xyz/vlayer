@@ -17,7 +17,7 @@ export const getChainSpecs = (chainName: string): Chain => {
   try {
     chain = chains[chainName as keyof typeof chains];
   } catch {
-    throw Error(`Cannot import ${chainName} from viem/chains`);
+    throw new Error(`Cannot import ${chainName} from viem/chains`);
   }
 
   if (!chain || !isChain(chain)) {
