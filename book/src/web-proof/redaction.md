@@ -34,7 +34,7 @@ This low-level approach makes it possible to redact partial tokens or split mean
 
 ### URL Redaction
 
-Consider the following redacted URL path:
+Consider the following redacted URL path (`*` stands for redacted character):
 
 ```
 /user?name=Jo*****rname=Smith
@@ -47,7 +47,7 @@ This redacted form could correspond to multiple original inputs, such as:
 /user?name=JohnathansLongName
 ```
 
-Without access to the hidden portion, it's impossible to determine which original URL the redacted version came from. This ambiguity arises because the redaction process operates on raw byte ranges of the same length, regardless of the underlying structure or semantics of the data.
+Without access to the hidden portion, it is impossible to determine the original URL from the redacted version. This ambiguity arises because the redaction process operates on raw byte ranges of the same length. As a result, only the number of redacted bytes is known, while the structure of the redacted path remains unknown.
 
 ### Enforcing URL Integrity
 
