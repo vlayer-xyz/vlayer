@@ -55,7 +55,7 @@ To guard against URL redaction issues, the Prover contract provides two verifica
 
 #### 1. Full-URL verification
 
-Use the `verify` function to check the integrity of the entire, unredacted URL. Example:
+Use the `verify` function to check the integrity of the entire, unredacted URL. This mode resolves URL redaction issues by completely disallowing URL redaction. Example:
 
 ```solidity
 function main(WebProof calldata webProof) {
@@ -63,8 +63,6 @@ function main(WebProof calldata webProof) {
     ...
 }
 ```
-
-This mode eliminates URL redaction issues by disallowing any redaction of the URL.
 
 #### 2. URL prefix verification
 
