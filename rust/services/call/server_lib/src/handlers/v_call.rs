@@ -42,16 +42,9 @@ pub async fn v_call(
     if !found_existing {
         tokio::spawn(async move {
             let span = info_span!("http", id = req_id.to_string());
-            proof::generate(
-                call,
-                host,
-                gas_meter_client,
-                state.clone(),
-                call_hash,
-                config.chain_proof_config.clone(),
-            )
-            .instrument(span)
-            .await
+            proof::generate(call, host, gas_meter_client, state.clone(), call_hash)
+                .instrument(span)
+                .await
         });
     }
 
