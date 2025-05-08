@@ -160,14 +160,10 @@ The vlayer browser extension supports fine-grained [redaction](../features/web.m
 
 By default, the transcript is not redacted at all and redaction of each HTTP request/response part needs to be configured to enable redaction.
 
-### URL Redaction
-
-TODO - it's unclear for me how to redact url leaving only the prefix unredacted using the current js `notarize` function.
-
 
 ### Header Redaction
 
-You can redact specific headers from both the request and the response. To do so, use `request.headers`, `request.headers_except`, `response.headers`, or `response.headers_except` with a header name (e.g. `Authorization`, `Cookie`).
+You can redact specific headers from both the request and the response. To do so, use `request.headers`, `request.headers_except`, `response.headers`, or `response.headers_except` with a header name (e.g. `Authorization`, `Cookie`). Using `headers` or `headers_except` allows you to control which HTTP headers are redacted: either by explicitly specifying the headers to remove, or by redacting all except a given subset.
 
 #### Redact specifc headers
 
@@ -176,6 +172,17 @@ notarize("https://api.example.com/profile", "GET", "Proof", [
   {
     request: {
       headers: ["Authorization", "Cookie"], // redact only these headers
+    },
+  },
+])
+```
+
+#### Keep only selected headers
+```ts
+notarize("https://api.example.com/profile", "GET", "Proof", [
+  {
+    request: {
+      headers_except: ["User-Agent"], // keep only User-Agent
     },
   },
 ])
@@ -193,16 +200,34 @@ notarize("https://api.example.com/profile", "GET", "Proof", [
 ])
 ```
 
-#### Keep only selected headers
+### URL Redaction
+
+You can redact specific query parameters from a URL. Use `url_query` to redact only selected parameters, or `url_query_except` to redact all parameters except those you specify.
+
+#### Redact specifc queries
+
 ```ts
 notarize("https://api.example.com/profile", "GET", "Proof", [
   {
     request: {
-      headers_except: ["User-Agent"], // keep only User-Agent
+      url_query: ["id"], // redact only "id" query parameter
     },
   },
 ])
 ```
+
+#### Keep only selected queries
+```ts
+notarize("https://api.example.com/profile", "GET", "Proof", [
+  {
+    request: {
+      url_query_except: ["id"], // keep only the "id" query parameter
+    },
+  },
+])
+```
+
+Keep in mind though that because of the safety reasons (described [here](../web-proof/redaction.md#security-model)), only either the full, unredacted URL or a URL starting with a specified prefix can be verified.
 
 ### WebSocket proxy
 
