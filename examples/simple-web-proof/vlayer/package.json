@@ -8,14 +8,17 @@
     "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "prove:mainnet": "VLAYER_ENV=mainnet bun run prove.ts",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
+    "deploy:mainnet": "VLAYER_ENV=mainnet bun run deploy.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
     "test-web:dev": "TEST_MODE=headed VLAYER_ENV=dev bun run playwright test",
     "test-web:testnet": "echo \"No tests specified yet\"",
     "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
     "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
+    "web:mainnet": "VLAYER_ENV=mainnet bun run deploy.ts && vite",
     "test:unit": "vitest --run"
   },
   "dependencies": {
