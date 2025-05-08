@@ -11,7 +11,7 @@ import {ProofVerifierRouter} from "../src/proof_verifier/ProofVerifierRouter.sol
 
 bytes32 constant VLAYER_STABLE_SALT = keccak256("sepolia.vlayer.xyz");
 
-contract VlayerDeployer is Script {
+contract TestnetVlayerDeployer is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         address admin = vm.envAddress("REPOSITORY_CONTRACT_ADMIN_ADDRESS");

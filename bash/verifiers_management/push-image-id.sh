@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+NETWORKS=( "base" "sepolia" "base-sepolia" "optimism-sepolia" "arbitrum-sepolia" "worldchain-sepolia" )
 
 set -ueo pipefail
 
@@ -12,4 +13,7 @@ REPOSITORY_ADDRESS=$(jq -r <"${CONTRACTS_DIR}/deployed_contracts.json" '.contrac
 cd "${CONTRACTS_DIR}"
 
 cleanup
-REPOSITORY_CONTRACT_ADDRESS=${REPOSITORY_ADDRESS} run_forge_script "${SCRIPT_INVOCATION}"
+
+for NETWORK in "${NETWORKS[@]}" ; do
+  REPOSITORY_CONTRACT_ADDRESS=${REPOSITORY_ADDRESS} run_forge_script "${SCRIPT_INVOCATION}" "${NETWORK}"
+done
