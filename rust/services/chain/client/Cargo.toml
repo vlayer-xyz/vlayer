@@ -13,6 +13,7 @@ thiserror = { workspace = true }
 
 # RPC client dependencies (disabled for guest)
 parking_lot = { workspace = true }
+tokio = { workspace = true, optional = true }
 
 # Fake client dependencies (disabled for guest)
 provider = { workspace = true, optional = true }
@@ -28,7 +29,7 @@ tokio = { workspace = true, features = ["rt", "macros"] }
 
 [features]
 fake = ["provider", "risc0-zkp"]
-rpc = ["serde_json", "server_utils", "tracing"]
+rpc = ["serde_json", "server_utils", "tracing", "tokio"]
 
 [lints]
 workspace = true
