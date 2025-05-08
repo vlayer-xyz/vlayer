@@ -21,6 +21,13 @@ Environment=DB_PATH={{ chain_worker_db_path }}
 Environment=RPC_URL={{ chain_worker_rpc_url }}
 Environment=CHAIN_ID={{ chain_worker_chain_id }}
 Environment=PROOF_MODE={{ chain_worker_proof_mode }}
+{% if chain_worker_bonsai_api_url is defined and chain_worker_bonsai_api_url != '' %}
+Environment=BONSAI_API_URL={{ chain_worker_bonsai_api_url }}
+{% endif %}
+{% if chain_worker_bonsai_api_url is defined and chain_worker_bonsai_api_url != '' %}
+Environment=BONSAI_API_URL={{ chain_worker_bonsai_api_url }}
+{% endif %}
+Environment=BONSAI_API_KEY={{ chain_worker_bonsai_api_key }}
 Environment=MAX_BACK_PROPAGATION_BLOCKS={{ chain_worker_max_back_propagation_blocks }}
 Environment=MAX_HEAD_BLOCKS={{ chain_worker_max_head_blocks }}
 Environment=CONFIRMATIONS={{ chain_worker_confirmations }}

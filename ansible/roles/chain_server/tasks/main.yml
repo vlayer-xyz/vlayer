@@ -1,6 +1,17 @@
 ---
-- name: Install log configuration
-  ansible.builtin.import_tasks: logs.yml
+- name: Install Foundryup
+  ansible.builtin.shell: |
+    set -ueo pipefail
+    curl -L https://foundry.paradigm.xyz | bash
+  args:
+    creates: ~/.foundry/bin/foundryup
+    executable: /bin/bash
+
+- name: Install Foundry
+  ansible.builtin.shell: ~/.foundry/bin/foundryup
+  args:
+    executable: /bin/bash
+    creates: ~/.foundry/bin/forge
 
 - name: Install vlayerup
   ansible.builtin.shell: |
@@ -9,6 +20,9 @@
   args:
     creates: ~/.vlayer/bin/vlayerup
     executable: /bin/bash
+
+- name: Install log configuration
+  ansible.builtin.import_tasks: logs.yml
 
 # We're installing a most-recent nightly or stable version every time.
 - name: Install chain server binary # noqa: no-changed-when

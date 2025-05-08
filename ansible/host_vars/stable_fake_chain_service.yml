@@ -1,0 +1,34 @@
+---
+ansible_host: 3.23.103.195
+ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFLhxYu/uWkT28D3T9Ue3QO6xKdUAojA4/wo0gj2Q3Dg
+ansible_user: ubuntu
+vlayer_quicknode_api_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  30336562373832393466363365613835373531633763623361353063666133363866393239373461
+  3234313865393736623763623637643831373038393033340a336233666134366137653963663834
+  35353666356363366465346362383736353331623434356135306235393431393261373766643334
+  6435363531613734630a396133616131313962363663346231336134383065656165643638343739
+  61323765346638303237613639373863643365373236323039336562346537336462316164646336
+  6638303262643364353863656338393438613231353731666330
+chain_workers:
+  - chain_worker_identifier: ethereum-sepolia
+    chain_worker_rpc_url: https://fragrant-small-sheet.ethereum-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
+    chain_worker_chain_id: 11155111
+    chain_worker_proof_mode: fake
+    chain_worker_max_back_propagation_blocks: 10
+    chain_worker_max_head_blocks: 10
+    chain_worker_confirmations: 8
+  - chain_worker_identifier: base-sepolia
+    chain_worker_rpc_url: https://fragrant-small-sheet.base-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
+    chain_worker_chain_id: 84532
+    chain_worker_proof_mode: fake
+    chain_worker_max_back_propagation_blocks: 10
+    chain_worker_max_head_blocks: 10
+    chain_worker_confirmations: 8
+  - chain_worker_identifier: optimism-sepolia
+    chain_worker_rpc_url: https://fragrant-small-sheet.optimism-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
+    chain_worker_chain_id: 11155420
+    chain_worker_proof_mode: fake
+    chain_worker_max_back_propagation_blocks: 10
+    chain_worker_max_head_blocks: 10
+    chain_worker_confirmations: 8

@@ -1,4 +1,4 @@
-# Updates the chain services with a latest nightly vlayer release,
+# Updates the chain services with a latest stable vlayer release,
 # after a successful release.
 name: Deploy Chain Services
 on:
