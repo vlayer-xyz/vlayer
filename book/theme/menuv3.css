@@ -8,7 +8,7 @@
 
 #stickyBottom {
   position: sticky;
-  bottom: 0;
+  bottom: -10px;
   width: 100%;
   background-color: var(--sidebar-bg);
   color: var(--sidebar-fg);
