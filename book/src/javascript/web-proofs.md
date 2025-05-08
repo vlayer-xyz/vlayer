@@ -63,7 +63,7 @@ const hash = await vlayer.proveWeb({
 
 The above snippet:
 * Opens vlayer browser extension and guides the user through the steps defined above. The Web Proof is generated using vlayer default *Notary* server and WebSocket proxy (see section [WebSocket proxy](#role-of-websocket-proxy) below for more details).
-* Once the Web Proof is successfully generated, it is submitted to prover contract:
+* Once the Web Proof is successfully generated, it is submitted to Prover contract:
   * with address `0x70997970c51812dc3a010c7d01b50e0d17dc79c8`,
   * whose interface is defined by `proverAbi`,
   * calling `functionName` function of the contract,
@@ -156,38 +156,78 @@ function prove(webProof) {
 
 ### Redaction
 
-vlayer browser extension supports redaction, i.e. hiding certain parts of the HTTPS transcript in the generated Web Proof (see section [Redaction](../features/web.md#redaction) for protocol details). In order to configure how the extension redacts the transcript, we can pass the following additional configuration to `notarize` step:
-
-```ts
-  notarize(
-    'https://api.x.com/1.1/account/settings.json', 
-    'GET', 
-    'Generate Proof of Twitter profile',
-    [
-      {
-        request: {
-          headers: ["cookie"],
-        },
-      }, {
-        request: {
-          url_query_except: [],
-        },
-      }, {
-        response: {
-          json_body_except: ["screen_name"],
-        },
-      }, {
-        response: {
-          headers: ["x-example-header"],
-        },
-      },
-    ],
-  )
-```
-
-In the above snippet, the last argument to `notarize` is a list of items, where a single item defines a single part of HTTP request/response that can be redacted. Each item comes in two flavours - the basic one which defines the items that will be redacted and the `*_except` one, which defines the items that *will not* be redacted. For example, `request: { headers: ["cookie"] }` will redact a single request header with name `cookie` and `request: { headers_except: ["cookie"] }` will redact all the other headers *except* `cookie` (we could pass an empty array `request: { headers_except: [] }` to redact all request headers).
+The vlayer browser extension supports fine-grained [redaction](../features/web.md#redaction) of specific components of HTTPS requests and responses when generating Web Proofs. You can configure redaction using the `notarize` step.
 
 By default, the transcript is not redacted at all and redaction of each HTTP request/response part needs to be configured to enable redaction.
+
+
+### Header Redaction
+
+You can redact specific headers from both the request and the response. To do so, use `request.headers`, `request.headers_except`, `response.headers`, or `response.headers_except` with a header name (e.g. `Authorization`, `Cookie`). Using `headers` or `headers_except` allows you to control which HTTP headers are redacted: either by explicitly specifying the headers to remove, or by redacting all except a given subset.
+
+#### Redact specifc headers
+
+```ts
+notarize("https://api.example.com/profile", "GET", "Proof", [
+  {
+    request: {
+      headers: ["Authorization", "Cookie"], // redact only these headers
+    },
+  },
+])
+```
+
+#### Keep only selected headers
+```ts
+notarize("https://api.example.com/profile", "GET", "Proof", [
+  {
+    request: {
+      headers_except: ["User-Agent"], // keep only User-Agent
+    },
+  },
+])
+```
+
+#### Redact all headers
+
+```ts
+notarize("https://api.example.com/profile", "GET", "Proof", [
+  {
+    response: {
+      headers_except: [], // redact everything
+    },
+  },
+])
+```
+
+### URL Redaction
+
+You can redact specific query parameters from a URL. Use `url_query` to redact only selected parameters, or `url_query_except` to redact all parameters except those you specify.
+
+#### Redact specifc queries
+
+```ts
+notarize("https://api.example.com/profile", "GET", "Proof", [
+  {
+    request: {
+      url_query: ["id"], // redact only "id" query parameter
+    },
+  },
+])
+```
+
+#### Keep only selected queries
+```ts
+notarize("https://api.example.com/profile", "GET", "Proof", [
+  {
+    request: {
+      url_query_except: ["id"], // keep only the "id" query parameter
+    },
+  },
+])
+```
+
+Keep in mind though that because of the safety reasons (described [here](../web-proof/redaction.md#security-model)), only either the full, unredacted URL or a URL starting with a specified prefix can be verified.
 
 ### WebSocket proxy
 
