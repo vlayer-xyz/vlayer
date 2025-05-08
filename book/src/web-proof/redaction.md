@@ -51,7 +51,7 @@ Without access to the hidden portion, it is impossible to determine the original
 
 ### Enforcing URL Integrity
 
-To guard against URL redaction issues, the Prover contract provides two verification modes. They limit the way url can be redacted.
+To guard against URL redaction issues, `WebProof` provides two verification modes. They limit the way url can be redacted.
 
 #### 1. Full-URL verification
 
