@@ -3,13 +3,14 @@ use std::{collections::HashMap, net::SocketAddr as RawSocketAddr};
 use alloy_primitives::{ChainId, hex::ToHexExt};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
+use chain_client::ChainClientConfig;
 use common::GuestElf;
 use derive_more::From;
 use risc0_zkp::core::digest::Digest;
 use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
 use thiserror::Error;
 
-use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
+use crate::gas_meter::Config as GasMeterConfig;
 
 #[derive(Debug, Error)]
 #[error("Missing required config field: {0}")]
@@ -20,7 +21,7 @@ pub struct Config {
     pub socket_addr: RawSocketAddr,
     pub rpc_urls: HashMap<ChainId, String>,
     pub proof_mode: ProofMode,
-    pub chain_proof_config: Option<ChainProofConfig>,
+    pub chain_client_config: Option<ChainClientConfig>,
     pub max_calldata_size: usize,
     pub call_guest_elf: GuestElf,
     pub chain_guest_ids: Box<[Digest]>,
@@ -30,10 +31,6 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn chain_proof_url(&self) -> Option<&str> {
-        self.chain_proof_config.as_ref().map(|x| x.url.as_str())
-    }
-
     pub fn call_guest_id_hex(&self) -> String {
         self.call_guest_elf.id.encode_hex_with_prefix()
     }
@@ -86,7 +83,7 @@ pub struct ConfigBuilder {
     socket_addr: SocketAddr,
     rpc_urls: RpcUrls,
     proof_mode: ProofMode,
-    chain_proof_config: Option<ChainProofConfig>,
+    chain_client_config: Option<ChainClientConfig>,
     max_calldata_size: MaxCalldataSize,
     call_guest_elf: Option<GuestElf>,
     chain_guest_ids: Option<Box<[Digest]>>,
@@ -112,11 +109,11 @@ impl ConfigBuilder {
     }
 
     #[must_use]
-    pub fn with_chain_proof_config(
+    pub fn with_chain_client_config(
         mut self,
-        chain_proof_config: impl Into<Option<ChainProofConfig>>,
+        chain_client_config: impl Into<Option<ChainClientConfig>>,
     ) -> Self {
-        self.chain_proof_config = chain_proof_config.into();
+        self.chain_client_config = chain_client_config.into();
         self
     }
 
@@ -184,7 +181,7 @@ impl ConfigBuilder {
             socket_addr,
             rpc_urls,
             proof_mode,
-            chain_proof_config,
+            chain_client_config,
             max_calldata_size,
             call_guest_elf,
             chain_guest_ids,
@@ -201,7 +198,7 @@ impl ConfigBuilder {
             socket_addr: socket_addr.0,
             rpc_urls: rpc_urls.0,
             proof_mode,
-            chain_proof_config,
+            chain_client_config,
             max_calldata_size: max_calldata_size.0,
             call_guest_elf,
             chain_guest_ids,

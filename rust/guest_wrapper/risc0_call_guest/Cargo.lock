@@ -1216,6 +1216,7 @@ dependencies = [
  "chain_common",
  "derive-new",
  "parking_lot",
+ "serde",
  "thiserror 2.0.11",
 ]
 

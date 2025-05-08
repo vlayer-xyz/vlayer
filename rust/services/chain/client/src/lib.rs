@@ -17,7 +17,7 @@ pub use fake::FakeClient;
 #[cfg(feature = "fake")]
 pub use fake::PartiallySyncedClient;
 #[cfg(feature = "rpc")]
-pub use rpc::RpcClient;
+pub use rpc::{Config as ChainClientConfig, RpcClient};
 
 #[cfg(test)]
 mod tests;

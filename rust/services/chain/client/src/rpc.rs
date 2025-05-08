@@ -1,10 +1,21 @@
+use std::time::Duration;
+
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
 use chain_common::{ChainProof, GetChainProof, GetSyncStatus, RpcChainProof, SyncStatus};
+use derive_new::new;
+use serde::{Deserialize, Serialize};
 use server_utils::rpc::Client as RawRpcClient;
 use tracing::info;
 
 use crate::{Client, Error};
+
+#[derive(new, Serialize, Deserialize, Clone, Debug)]
+pub struct Config {
+    pub url: String,
+    pub poll_interval: Duration,
+    pub timeout: Duration,
+}
 
 /// `Client` implementation which fetches proofs from server via JSON RPC.
 pub struct RpcClient {
@@ -12,8 +23,8 @@ pub struct RpcClient {
 }
 
 impl RpcClient {
-    pub fn new(base_url: impl AsRef<str>) -> Self {
-        let rpc_client = RawRpcClient::new(base_url.as_ref());
+    pub fn new(config: &Config) -> Self {
+        let rpc_client = RawRpcClient::new(&config.url);
         Self { rpc_client }
     }
 }

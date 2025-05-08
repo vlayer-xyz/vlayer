@@ -59,7 +59,7 @@ async fn build_host(
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls.clone())
         .with_chain_guest_id(config.chain_guest_id())
-        .with_chain_proof_url(config.chain_proof_url())?
+        .with_chain_client_config(config.chain_client_config.clone())?
         .with_start_chain_id(chain_id)?
         .with_prover_contract_addr(prover_contract_addr)
         .await

@@ -8,6 +8,7 @@ alloy-primitives = { workspace = true }
 async-trait = { workspace = true }
 chain_common = { workspace = true }
 derive-new = { workspace = true }
+serde = { workspace = true }
 thiserror = { workspace = true }
 
 # RPC client dependencies (disabled for guest)
