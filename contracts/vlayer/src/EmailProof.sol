@@ -5,6 +5,7 @@ import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 import {ChainIdLibrary} from "./proof_verifier/ChainId.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
 import {TestnetStableDeployment} from "./TestnetStableDeployment.sol";
+import {MainnetStableDeployment} from "./MainnetStableDeployment.sol";
 
 struct DnsRecord {
     string name;
@@ -43,6 +44,11 @@ library EmailProofLib {
             require(
                 keccak256(unverifiedEmail.verificationData.pubKey) == TEST_DNS_PUBLIC_KEY_HASH,
                 "Not a valid VDNS hardcoded key"
+            );
+        } else if (ChainIdLibrary.isMainnet()) {
+            require(
+                MainnetStableDeployment.repository().isDnsKeyValid(unverifiedEmail.verificationData.pubKey),
+                "Not a valid VDNS public key"
             );
         } else {
             require(
