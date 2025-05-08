@@ -4,7 +4,7 @@
 
 Redaction feature lets you **hide sensitive portions** of an HTTPS transcript from the Prover. Common use cases include removing cookies, authorization headers, or API tokens before generating a Web Proof. At the same time, everything you **leave visible** is still **cryptographically verified** for integrity.
 
-> ⚠️ **Warning!** Unsafe byte-range redaction can introduce ambiguities and vulnerabilities. Strategies to avoid these risks and safely apply redaction are described below.
+> ⚠️ **Warning!** Unsafe byte-range redaction can introduce ambiguities and vulnerabilities. This guide explains how to use redaction safely.
 
 To learn how to enable and configure redaction using the vlayer SDK, see the [Redaction](../../javascript/web-proofs.md#redaction) section in our JavaScript documentation.
 
@@ -32,7 +32,7 @@ redact(2, 4)
 This low-level approach makes it possible to redact partial tokens or split meaningful fields across redaction boundaries. Let’s examine a specific case.
 
 
-### Url Redaction
+### URL Redaction
 
 Consider the following redacted URL path:
 
@@ -85,4 +85,4 @@ Details on how to prepare a WebProof with redacted URL can be found [here](../ja
 
 ### Header Redaction
 
-Both `verify` and `verifyWithUrlPrefix` functions handle header redactions in the same way. Details on how to prepare a WebProof with redacted headers can be found [here](../javascript/web-proofs.md#header-redaction).
+Both `verify` and `verifyWithUrlPrefix` functions handle header redactions in the same way, and no additional precautions are required to use them safely. Details on how to prepare a WebProof with redacted headers can be found [here](../javascript/web-proofs.md#header-redaction).
