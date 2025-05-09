@@ -347,8 +347,8 @@ describe("NotarizeStepActions", () => {
     });
     mocks.useTlsnProver.mockReturnValue({
       isProving: false,
+      isProvingDone: true,
       error: null,
-      proof: "Some proof",
     });
     rerender();
     act(() => {

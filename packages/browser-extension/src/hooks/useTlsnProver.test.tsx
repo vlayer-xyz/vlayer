@@ -16,13 +16,13 @@ describe("useTlsnProver", () => {
         },
       );
       act(() => {
-        result.current.proof = { someProof: "data" };
         result.current.isProving = true;
+        result.current.isProvingDone = true;
         result.current.error = "Some error occurred";
       });
 
-      expect(result.current.proof).toStrictEqual({ someProof: "data" });
-      expect(result.current.isProving).toBeTruthy();
+      expect(result.current.isProvingDone).toEqual(true);
+      expect(result.current.isProving).toEqual(true);
       expect(result.current.error).toBe("Some error occurred");
 
       act(() => {
@@ -33,8 +33,8 @@ describe("useTlsnProver", () => {
         rerenderHook();
       });
 
-      expect(result.current.proof).toBeNull();
-      expect(result.current.isProving).toBeFalsy();
+      expect(result.current.isProvingDone).toEqual(false);
+      expect(result.current.isProving).toEqual(false);
       expect(result.current.error).toBeNull();
     });
   });
