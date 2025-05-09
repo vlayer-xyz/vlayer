@@ -12,7 +12,7 @@ const findChainById = (
   if (!chain) {
     return undefined;
   }
-  return chain.name.toLowerCase();
+  return chain.name;
 };
 
 export const useChain = (
