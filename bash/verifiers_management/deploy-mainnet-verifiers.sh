@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-# Base mainnet is not yet supported as part of vlayer mainnet environment
-NETWORKS=( "ethereum" "optimism" )
+NETWORKS=( "ethereum" "optimism" "base")
 
 set -ueo pipefail
 
