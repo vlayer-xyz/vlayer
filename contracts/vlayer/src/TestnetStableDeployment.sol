@@ -16,7 +16,7 @@ library TestnetStableDeployment {
         Groth16ProofVerifier groth16ProofVerifier =
             Groth16ProofVerifier(address(0x7E231CfC3e3B549633D5AD61C30f07Dd4d408ad3));
         ProofVerifierRouter proofVerifierRouter =
-            ProofVerifierRouter(address(0xD89b5DCb085819a91488F886B84cEd9E5c8C3e42));
+            ProofVerifierRouter(address(0x8972b6fF413AC04e61e19f07d7F3BD980D0Cc321));
 
         return (fakeProofVerifier, groth16ProofVerifier, proofVerifierRouter);
     }
