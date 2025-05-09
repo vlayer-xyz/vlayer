@@ -24,12 +24,19 @@ const responseSchema = z.object({
 });
 
 const checkExtensionInstalled = async () => {
-  const response = await chrome.runtime.sendMessage<unknown, unknown>(
-    vlayerPovingExtensionId,
-    {
-      message: "ping",
-    },
-  );
+  let response;
+
+  try {
+    response = await chrome.runtime.sendMessage<unknown, unknown>(
+      vlayerPovingExtensionId,
+      {
+        message: "ping",
+      },
+    );
+  } catch {
+    return false;
+  }
+
   const parsedResponse = responseSchema.safeParse(response);
 
   if (parsedResponse.success) {
