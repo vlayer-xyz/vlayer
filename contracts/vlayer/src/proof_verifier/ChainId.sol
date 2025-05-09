@@ -36,16 +36,13 @@ library ChainIdLibrary {
             || block.chainid == 11155420; // Optimism Sepolia
     }
 
-    function isBaseMainnet() internal view returns (bool) {
-        return block.chainid == 8453; // Base
-    }
-
     function isMainnet() internal view returns (bool) {
         return block.chainid == 1 // Ethereum
             || block.chainid == 10 // Optimism
             || block.chainid == 137 // Polygon
             || block.chainid == 324 // zkSync
             || block.chainid == 480 // Worldchain
+            || block.chainid == 8453 // Base
             || block.chainid == 42161 // Arbitrum One
             || block.chainid == 42170 // Arbitrum Nova
             || block.chainid == 59144; // Linea

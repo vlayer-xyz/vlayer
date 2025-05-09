@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-NETWORKS=( "base" "sepolia" "base-sepolia" "optimism-sepolia" "arbitrum-sepolia" "worldchain-sepolia" )
+NETWORKS=( "sepolia" "base-sepolia" "optimism-sepolia" "arbitrum-sepolia" "worldchain-sepolia" )
 
 set -ueo pipefail
 

@@ -6,7 +6,7 @@
     },
     {
       "contractName": "FakeProofVerifier",
-      "contractAddress": "0x66aAF85f8F39dc16Da4A93CDC315B0Fa5013BcEC"
+      "contractAddress": "0x768938416C4Cbf0DDD5E30dc87Fb27602019D593"
     },
     {
       "contractName": "Groth16ProofVerifier",
@@ -14,7 +14,8 @@
     },
     {
       "contractName": "ProofVerifierRouter",
-      "contractAddress": "0x871F89D5871AdEE4C6A6E3F918825692b30FeBbD"
+      "contractAddress": "0x747ca564E228ed97438D94d09C53C8F9d040D2c5"
     }
   ]
 }
+

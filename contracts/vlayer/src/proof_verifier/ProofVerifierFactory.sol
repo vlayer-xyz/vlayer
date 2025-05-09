@@ -8,7 +8,6 @@ import {IProofVerifier} from "./IProofVerifier.sol";
 import {ImageID} from "../ImageID.sol";
 import {Repository} from "../Repository.sol";
 import {TestnetStableDeployment} from "../TestnetStableDeployment.sol";
-import {BaseMainnetStableDeployment} from "../BaseMainnetStableDeployment.sol";
 import {MainnetStableDeployment} from "../MainnetStableDeployment.sol";
 
 library ProofVerifierFactory {
@@ -18,11 +17,8 @@ library ProofVerifierFactory {
             repository.addImageIdSupport(ImageID.RISC0_CALL_GUEST_ID);
             return new FakeProofVerifier(repository);
         } else if (ChainIdLibrary.isMainnet()) {
-            (IProofVerifier groth16ProofVerifier) = MainnetStableDeployment.verifiers();
+            IProofVerifier groth16ProofVerifier = MainnetStableDeployment.verifiers();
             return groth16ProofVerifier;
-        } else if (ChainIdLibrary.isBaseMainnet()) {
-            (,, ProofVerifierRouter proofVerifierRouter) = BaseMainnetStableDeployment.verifiers();
-            return proofVerifierRouter;
         } else if (ChainIdLibrary.isTestnet()) {
             (,, ProofVerifierRouter proofVerifierRouter) = TestnetStableDeployment.verifiers();
             return proofVerifierRouter;
