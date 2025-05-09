@@ -4,7 +4,6 @@ import {
   isSupportedBrowser,
   checkExtensionInstalled,
 } from "../utils";
-import { UseExtensionError } from "../errors";
 export const useExtension = () => {
   const [hasExtensionInstalled, setHasExtensionInstalled] = useState(false);
   // Using error state to throw error in useEffect because ErrorBoundary does not catch errors from async functions like isExtensionReady
@@ -39,12 +38,6 @@ export const useExtension = () => {
     );
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (error) {
-      throw new UseExtensionError(error);
-    }
-  }, [error]);
 
   return { hasExtensionInstalled };
 };

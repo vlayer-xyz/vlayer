@@ -19,12 +19,6 @@ export class FaucetError extends AppError {
   }
 }
 
-export class UseExtensionError extends AppError {
-  constructor(message: string) {
-    super("UseExtensionError", message);
-  }
-}
-
 export class WebProofError extends AppError {
   constructor(message: string) {
     super("WebProofError", message);
