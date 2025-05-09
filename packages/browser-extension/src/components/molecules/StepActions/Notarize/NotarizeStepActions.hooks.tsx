@@ -12,14 +12,18 @@ const ONE_SECOND = 1000;
 export const PROVING_PROGRESS_HIDE_DELAY = 2 * ONE_SECOND;
 export const CALLOUT_DEBOUNCE_TIME = 1.5 * ONE_SECOND;
 const useProveButton = () => {
-  const { prove, isProving: isWebProving, proof } = useTlsnProver();
+  const {
+    prove,
+    isProving: isWebProving,
+    isProvingDone: isWebProvingDone,
+  } = useTlsnProver();
   return {
     onButtonClick: () => {
       prove().catch((error) => {
         console.error("error generating tlsn proof", error);
       });
     },
-    isButtonVisible: !isWebProving && !proof,
+    isButtonVisible: !(isWebProving || isWebProvingDone),
   };
 };
 
@@ -123,8 +127,8 @@ const useProvingStatus = () => {
 const useRedirectCallout = () => {
   const {
     isProving: isWebProving,
+    isProvingDone: isWebProvingDone,
     error: isWebProvingError,
-    proof,
   } = useTlsnProver();
   const { error: isZkProvingError } = useZkProvingState();
   const [isRedirectCalloutVisible, setIsRedirectCalloutVisible] =
@@ -146,7 +150,7 @@ const useRedirectCallout = () => {
     if (isWebProving) {
       setIsRedirectCalloutVisible(true);
     }
-    if (!isWebProving && !proof) {
+    if (!isWebProving && !isWebProvingDone) {
       setIsRedirectCalloutVisible(false);
     }
     if (timeout === 0) {
@@ -157,7 +161,7 @@ const useRedirectCallout = () => {
     }
   }, [
     isWebProving,
-    JSON.stringify(proof),
+    isWebProvingDone,
     timeout,
     setIsRedirectCalloutVisible,
     isWebProvingError,

@@ -28,15 +28,15 @@ import { match, P } from "ts-pattern";
 
 const TlsnProofContext = createContext({
   prove: async () => {},
-  proof: null as object | null,
   isProving: false,
+  isProvingDone: false,
   error: null as string | null,
   resetTlsnProving: () => {},
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
-  const [proof, setProof] = useState<object | null>(null);
   const [isProving, setIsProving] = useState(false);
+  const [isProvingDone, setIsProvingDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formattedHeaders, setFormattedHeaders] = useState<{
     headers: Record<string, string>;
@@ -119,6 +119,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         redactionConfig,
         provenUrl.body,
       );
+      setIsProvingDone(true);
       // mutable ref is need here to avoid stale closure
       if (isProvingReference.current === false) {
         return;
@@ -146,7 +147,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   }, [provenUrl, formattedHeaders, provingSessionConfig]);
 
   const resetTlsnProving = useCallback(() => {
-    setProof(null);
+    setIsProvingDone(false);
     setIsProving(false);
     setError(null);
   }, []);
@@ -155,8 +156,8 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     <TlsnProofContext.Provider
       value={{
         prove,
-        proof,
         isProving,
+        isProvingDone,
         error,
         resetTlsnProving,
       }}
