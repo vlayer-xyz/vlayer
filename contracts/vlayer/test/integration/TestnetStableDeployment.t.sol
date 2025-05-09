@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import {Test} from "forge-std-1.9.4/src/Test.sol";
 import {Create2} from "@openzeppelin-contracts-5.0.1/utils/Create2.sol";
 
-import {VLAYER_STABLE_SALT} from "../../script/VlayerDeployer.s.sol";
+import {VLAYER_STABLE_SALT} from "../../script/TestnetVlayerDeployer.s.sol";
 
 import {Repository} from "../../src/Repository.sol";
 import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";

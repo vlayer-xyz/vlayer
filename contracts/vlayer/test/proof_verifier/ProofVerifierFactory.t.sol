@@ -37,7 +37,7 @@ contract VerifierFactory_Tests is Test {
         vm.chainId(1);
 
         IProofVerifier verifier = ProofVerifierFactory.produce();
-        assert(verifier == IProofVerifier(address(0)));
+        assert(verifier == IProofVerifier(address(0x963576398e80AC566e32b42E19C86A6580C3E7A1)));
     }
 
     function test_devnetSupportsLatestImageID() public {

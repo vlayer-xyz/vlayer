@@ -6,6 +6,7 @@ import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 import {ChainIdLibrary} from "./proof_verifier/ChainId.sol";
 import {UrlLib} from "./Url.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
+import {MainnetStableDeployment} from "./MainnetStableDeployment.sol";
 import {TestnetStableDeployment} from "./TestnetStableDeployment.sol";
 
 struct WebProof {
@@ -87,6 +88,8 @@ library WebProofLib {
     function verifyNotaryKey(string memory pubKey) internal view {
         if (ChainIdLibrary.isTestEnv()) {
             require(NOTARY_PUB_KEY.equal(pubKey), "Invalid notary public key");
+        } else if (ChainIdLibrary.isMainnet()) {
+            require(MainnetStableDeployment.repository().isNotaryKeyValid(pubKey), "Invalid notary public key");
         } else {
             require(TestnetStableDeployment.repository().isNotaryKeyValid(pubKey), "Invalid notary public key");
         }
