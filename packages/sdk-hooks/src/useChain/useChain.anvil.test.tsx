@@ -4,7 +4,7 @@ import { useChain } from "./useChain";
 
 import { sepolia, anvil } from "viem/chains";
 
-describe("useChain", () => {
+describe("useChain with anvil", () => {
   beforeEach(() => {
     vi.mock("wagmi", () => ({
       useChainId: () => anvil.id,
@@ -32,7 +32,7 @@ describe("useChain", () => {
     expect(result.current.chain).toBeNull();
     expect(error).toBeDefined();
     expect(error).toBe(
-      "Chains mismatched. Wallet chain: anvil is not equal to env chain: sepolia",
+      "Chains mismatched. Wallet chain: Anvil is not equal to env chain: sepolia",
     );
   });
 
