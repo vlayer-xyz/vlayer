@@ -48,6 +48,7 @@ const hash = await vlayer.prove({
   proverAbi: proverSpec.abi,
   functionName: "main",
   chainId: chain.id,
+  gasLimit: config.gasLimit,
   args: [
     await preverifyEmail({
       mimeEmail,

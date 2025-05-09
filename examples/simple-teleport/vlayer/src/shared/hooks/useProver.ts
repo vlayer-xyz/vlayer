@@ -14,6 +14,7 @@ export const useProver = () => {
     address: import.meta.env.VITE_PROVER_ADDRESS,
     proverAbi: proverSpec.abi,
     functionName: "crossChainBalanceOf",
+    gasLimit: Number(import.meta.env.VITE_GAS_LIMIT),
   });
 
   const { data: result, error: provingResultError } =

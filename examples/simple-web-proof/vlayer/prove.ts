@@ -74,6 +74,7 @@ async function testSuccessProvingAndVerification({
       twitterUserAddress,
     ],
     chainId: chain.id,
+    gasLimit: config.gasLimit,
   });
   const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
@@ -144,6 +145,7 @@ async function testFailedProving({
         twitterUserAddress,
       ],
       chainId: chain.id,
+      gasLimit: config.gasLimit,
     });
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");

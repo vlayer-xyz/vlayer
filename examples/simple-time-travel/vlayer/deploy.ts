@@ -40,4 +40,5 @@ await writeEnvVariables(".env", {
   VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_PROVER_ERC20_HOLDER_ADDR: timeTravelConfig.tokenOwner,
+  VITE_GAS_LIMIT: config.gasLimit,
 });
