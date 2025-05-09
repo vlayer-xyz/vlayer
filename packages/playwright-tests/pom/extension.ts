@@ -62,6 +62,13 @@ export class Extension {
     await expect(generateProofButton).toBeVisible();
   }
 
+  async expectGenerateProofButtonToBeHidden() {
+    const generateProofButton = this.page.getByRole("button", {
+      name: "Generate proof",
+    });
+    await expect(generateProofButton).toBeHidden();
+  }
+
   async expectStepToBeCompleted(stepName: string, stepIndex = 0) {
     const step = this.page.getByTestId(`step-${stepName}`).nth(stepIndex);
     await expect(step).toHaveAttribute("data-status", "completed");
