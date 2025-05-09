@@ -9,6 +9,7 @@ import { z } from "zod";
 export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
   startPage: "startPage",
+  redirect: "redirect",
   notarize: "notarize",
   extractVariables: "extractVariables",
   clickButton: "clickButton",
@@ -145,6 +146,7 @@ export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
   | WebProofStepStartPage
+  | WebProofStepRedirect
   | WebProofStepExtractVariables
   | WebProofStepClickButton;
 
@@ -167,6 +169,14 @@ export type WebProofStepNotarize = BrandedStep<
 
 export type WebProofStepStartPage = BrandedStep<
   typeof EXTENSION_STEP.startPage,
+  {
+    url: Url;
+    label: string;
+  }
+>;
+
+export type WebProofStepRedirect = BrandedStep<
+  typeof EXTENSION_STEP.redirect,
   {
     url: Url;
     label: string;

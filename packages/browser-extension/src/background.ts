@@ -244,6 +244,7 @@ const validateProofRequest = (
     message.payload.steps.forEach(({ step, url }) => {
       match({ step, url })
         .with({ step: EXTENSION_STEP.startPage }, ({ url }) => assertUrl(url))
+        .with({ step: EXTENSION_STEP.redirect }, ({ url }) => assertUrl(url))
         .with(
           {
             step: P.union(EXTENSION_STEP.notarize, EXTENSION_STEP.expectUrl),

@@ -4,6 +4,7 @@ import React from "react";
 import { ExpectUrlStepActions } from "./ExpectUrl";
 import { NotarizeStepActions } from "./Notarize";
 import { StartPageStepActions } from "./StartPage";
+import { RedirectStepActions } from "./Redirect";
 import { StepStatus } from "constants/step";
 import { EXTENSION_STEP, ExtensionStep } from "src/web-proof-commons";
 
@@ -31,6 +32,14 @@ export const StepActions: React.FC<{
         ))
         .with(EXTENSION_STEP.startPage, () => (
           <StartPageStepActions
+            isVisited={false}
+            link={link || ""}
+            buttonText={buttonText || ""}
+            status={status}
+          />
+        ))
+        .with(EXTENSION_STEP.redirect, () => (
+          <RedirectStepActions
             isVisited={false}
             link={link || ""}
             buttonText={buttonText || ""}
