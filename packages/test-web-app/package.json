@@ -16,7 +16,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",
     "vite-tsconfig-paths": "^5.0.1",
-    "viem": "2.27.0"
+    "viem": "2.22.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
@@ -32,6 +32,6 @@
     "vite": "^5.0.0"
   },
   "overrides": {
-    "viem": "2.27.0"
+    "viem": "2.22.10"
   }
 }

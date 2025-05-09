@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@vlayer/sdk": "workspace:*",
-    "viem": "2.27.0"
+    "viem": "2.22.10"
   },
   "peerDependencies": {
     "typescript": "^5.5.4"
@@ -23,6 +23,6 @@
     "typescript": "^5.5.3"
   },
   "overrides": {
-    "viem": "2.27.0"
+    "viem": "2.22.10"
   }
 }
