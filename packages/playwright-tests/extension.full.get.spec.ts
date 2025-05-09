@@ -69,6 +69,10 @@ test("Full flow from opening sidepanel to redirection", async ({
     await webpage.expectRequestZkProofButtonToBeVisible();
   });
 
+  await test.step("Prove button should disappear after generating webproof", async () => {
+    await extension.expectGenerateProofButtonToBeHidden();
+  });
+
   await test.step("Request and response should be displayed with correctly redacted headers", async () => {
     await webpage.expectContainText(
       "redacted-request",
