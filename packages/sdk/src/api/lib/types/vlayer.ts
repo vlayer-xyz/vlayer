@@ -49,7 +49,6 @@ export type CallHash = z.infer<typeof callHashSchema>;
 export enum ProofState {
   Queued = "queued",
   AllocateGas = "allocate_gas",
-  ChainProof = "chain_proof",
   Preflight = "preflight",
   Proving = "proving",
   Done = "done",
@@ -118,7 +117,6 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
     metrics: z.custom<Metrics>(),
     state: z.enum([
       ProofState.AllocateGas,
-      ProofState.ChainProof,
       ProofState.Preflight,
       ProofState.Proving,
     ]),
@@ -129,7 +127,6 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
     state: z.enum([
       ProofState.Done,
       ProofState.AllocateGas,
-      ProofState.ChainProof,
       ProofState.Preflight,
       ProofState.Proving,
       ProofState.Queued,

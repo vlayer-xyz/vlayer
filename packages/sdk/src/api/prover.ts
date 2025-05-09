@@ -82,9 +82,6 @@ const handleErrors = ({ status, state, error }: ProofReceipt) => {
       .with(ProofState.AllocateGas, () => {
         throw new Error(`Allocating gas failed with error: ${error}`);
       })
-      .with(ProofState.ChainProof, () => {
-        throw new Error(`Waiting for chain proof failed with error: ${error}`);
-      })
       .with(ProofState.Preflight, () => {
         throw new Error(`Preflight failed with error: ${error}`);
       })
