@@ -7,6 +7,7 @@
     "devnet:up": "docker compose --file docker-compose.devnet.yaml up -d",
     "devnet:down": "docker compose --file docker-compose.devnet.yaml down",
     "lint:solidity": "solhint '../src/**/*.sol'",
+    "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
     "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",

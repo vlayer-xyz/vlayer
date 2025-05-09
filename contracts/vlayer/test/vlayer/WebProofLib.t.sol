@@ -18,7 +18,7 @@ contract WebProverTest is VTest {
     string public constant DATA_URL = "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken";
 
     function test_revertsIf_notaryKeyIsInvalid() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/0.1.0-alpha.8/web_proof_invalid_notary_pub_key.json"));
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
@@ -28,7 +28,7 @@ contract WebProverTest is VTest {
     }
 
     function test_verifiesWebProof() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/0.1.0-alpha.8/web_proof.json"));
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
 
         callProver();
 
@@ -39,7 +39,7 @@ contract WebProverTest is VTest {
     }
 
     function test_incorrectUrl() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/0.1.0-alpha.8/web_proof.json"));
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
 
         callProver();
 
@@ -73,7 +73,7 @@ contract WebProverTest is VTest {
     }
 
     function test_missingPartInSerializedWebProof() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/0.1.0-alpha.8/web_proof_missing_part.json"));
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_part.json"));
 
         callProver();
 
