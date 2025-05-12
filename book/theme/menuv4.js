@@ -5,6 +5,12 @@ document.querySelectorAll("ol.chapter> li.chapter-item").forEach((el) => {
   }
 })
 
+const items = document.querySelectorAll('li.chapter-item');
+const target = Array.from(items).find(li => li.textContent.includes('Appendix'));
+if(target && !window.location.pathname.includes("appendix")) {
+  target.classList.remove('expanded');
+}
+
 // Create the sticky div with link to Discord Support
 const stickyDiv = document.createElement('div');
 stickyDiv.id = 'stickyBottom';
