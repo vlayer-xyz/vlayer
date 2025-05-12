@@ -188,11 +188,11 @@ forks = [
 ]
 
 # https://docs.unichain.org/docs/technical-information/network-information
-# https://docs.unichain.org/docs/technical-information/contract-addresses
+# https://l2beat.com/scaling/projects/unichain
 [[chains]]
 name = "unichain"
 id = 130
-op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0x318A642db9e24A85318B8BF18eFd5287BA38643B" } }
+op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0xD5D0e176be44E61eaB3Cf1FA8153758dF603376f" } }
 forks = [{ spec = "GRANITE", activation = { Block = 0 } }]
 
 # endregion mainnets
