@@ -34,6 +34,9 @@ ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
 {{- ' --gas-meter-url ' ~ vlayer_prover_gas_meter_url }}
 {{- ' --gas-meter-api-key ' ~ vlayer_prover_gas_meter_api_key -}}
 {% endif %}
+{% if vlayer_prover_chain_proof_url is defined %}
+{{- ' --chain-proof-url ' ~ vlayer_prover_chain_proof_url -}}
+{% endif %}
 {{- ' --jwt-public-key ' ~ vlayer_jwt_public_key_location }}
 
 [Install]
