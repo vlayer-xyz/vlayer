@@ -66,6 +66,10 @@ export const useEmailProofVerification = () => {
   const { data: proof, error: provingError } =
     useWaitForProvingResult(proofHash);
 
+  if (provingError) {
+    throw new CallProverError(provingError.message);
+  }
+
   const verifyProofOnChain = async () => {
     setCurrentStep(ProofVerificationStep.VERIFYING_ON_CHAIN);
 
