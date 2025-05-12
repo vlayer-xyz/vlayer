@@ -12,7 +12,7 @@ use crate::ProofMode;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Prover {
-    mode: ProofMode,
+    pub mode: ProofMode,
 }
 
 #[derive(Debug, Error, Derivative)]
