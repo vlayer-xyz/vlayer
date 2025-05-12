@@ -25,7 +25,6 @@ function startup_chain_worker() {
 
 function wait_for_chain_worker_sync() {
     local rpc_url="$1" chain_id="$2" first_block="$3" last_block="$4"
-    local rpc_url="http://127.0.0.1:3001"
     local max_retries=20
     local sleep_seconds=10
     local retry_count=5
