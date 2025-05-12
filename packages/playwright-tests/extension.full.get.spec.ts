@@ -65,6 +65,8 @@ test("Full flow from opening sidepanel to redirection", async ({
     await extension.expectCountDown();
 
     await webpage.expectWebProof();
+
+    await extension.expectCountDownToBeHidden();
   });
 
   await test.step("Zk prove button should appear after receiving webProof", async () => {

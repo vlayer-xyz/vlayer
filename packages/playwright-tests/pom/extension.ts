@@ -78,6 +78,11 @@ export class Extension {
     const countdown = this.page.getByText(/You will be redirected back in/i);
     await expect(countdown).toBeVisible();
   }
+
+  async expectCountDownToBeHidden() {
+    const countdown = this.page.getByText(/You will be redirected back in/i);
+    await expect(countdown).toBeHidden();
+  }
 }
 
 export const waitForExtension = async (context: BrowserContext) => {
