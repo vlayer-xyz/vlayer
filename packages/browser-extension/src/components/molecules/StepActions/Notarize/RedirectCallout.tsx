@@ -14,13 +14,11 @@ export const RedirectCallout: FC<{ show: boolean; timeout: number }> = ({
         <Callout.Icon>
           <InfoCircledIcon />
         </Callout.Icon>
-        {show && (
-          <Callout.Text>
-            You will be redirected back in{" "}
-            <b data-testid="timeout">{timeout}</b> second
-            {timeout !== 1 ? "s" : ""}.
-          </Callout.Text>
-        )}
+        <Callout.Text>
+          You will be redirected back in <b data-testid="timeout">{timeout}</b>{" "}
+          second
+          {timeout !== 1 ? "s" : ""}.
+        </Callout.Text>
       </Callout.Root>
     </AnimatedContainer>
   );
