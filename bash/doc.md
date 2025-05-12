@@ -1,0 +1,216 @@
+# Setup Phase in E2E Tests
+
+## Overview
+
+The setup phase in end-to-end (E2E) tests initializes the necessary services, configurations, and components required for testing the vlayer system. This phase ensures that tests run in a controlled environment that simulates real-world conditions.
+
+## Key Components
+
+### 1. Environment Configuration
+
+The setup phase begins by configuring the environment:
+
+```bash
+# Environment variables setup
+VLAYER_HOME=$(git rev-parse --show-toplevel)
+export PATH="${VLAYER_HOME}/target/debug:${PATH}"
+
+# Load environment variables
+[ -f "${VLAYER_HOME}/.env.local" ] && source "${VLAYER_HOME}/.env.local"
+
+# Set default values
+VLAYER_ENV=${VLAYER_ENV:-dev}
+BUILD_CLI=${BUILD_CLI:-1}
+```
+
+- `VLAYER_HOME` points to the root directory of the vlayer project
+- Environment variables from `.env.local` are loaded if the file exists
+- Default values are set for environment-specific configurations
+
+### 2. Helper Scripts
+
+The setup phase sources several helper scripts that provide utility functions:
+
+```bash
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/proving_mode.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/build-packages.sh"
+```
+
+These scripts provide functions for the following stages of e2e testing:
+
+1. **Environment Setup:**
+
+   - [`set_proving_mode`](lib/proving_mode.sh): Configures proving mode (dev/prod)
+   - [`generate_ts_bindings`](lib/utils.sh): Generates TypeScript bindings for contracts
+   - [`build_sdk`](lib/build-packages.sh): Builds the SDK package
+
+2. **Service Initialization:**
+
+   - [`ensure_services_built`](run_services/lib.sh): Compiles the required service binaries (call_server, chain_server, worker, dns_server) if `BUILD_SERVICES` = `1`
+   - [`startup_chain_worker`](run_services/chain_worker.sh): Starts chain worker processes
+   - [`startup_chain_server`](run_services/lib.sh): Starts the chain server for RPC communication
+   - [`startup_vlayer`](run_services/lib.sh): Starts the vlayer REST server
+   - [`startup_vdns_server`](run_services/lib.sh): Starts the DNS server
+   - [`startup_chain_services`](run_services/lib.sh): Coordinates starting all chain-related services
+   - [`wait_for_port_and_pid`](common.sh): Waits for services to be ready on specific ports
+
+   The service initialization follows a specific sequence: first `ensure_services_built` compiles all service binaries, then Docker services are started, followed by chain workers, chain server, vlayer server, and finally the DNS server.
+
+3. **Test Environment Preparation:**
+
+   - [`generate_vlayer_init_config`](lib/e2e.sh): Creates configuration for vlayer initialization
+   - [`ensure_cli_built`](lib/e2e.sh): Ensures the CLI is built
+   - [`init_template`](lib/e2e.sh): Initializes the test template
+
+4. **Test Execution:**
+
+   - [`silent_unless_fails`](lib/io.sh): Controls output of command execution
+   - [`run_prover_script`](lib/e2e.sh): Runs the prover script
+
+5. **Cleanup:**
+   - [`cleanup`](run_services/cleanup.sh): Cleans up all services and temporary files
+   - [`kill_service`](common.sh): Terminates specific services by PID
+
+### 3. Proving Mode Configuration
+
+```bash
+set_proving_mode
+```
+
+The proving mode determines how proofs are generated and verified:
+
+- `dev` mode uses fake proofs for faster testing
+- `prod` mode uses production-grade proofs (Bonsai)
+
+This configuration affects both the server and worker components:
+
+- Sets `SERVER_PROOF_ARG` (fake/groth16)
+- Sets `WORKER_PROOF_ARG` (fake/succinct)
+
+### 4. TypeScript Bindings and SDK Generation
+
+```bash
+generate_ts_bindings
+build_sdk
+```
+
+These steps ensure that:
+
+- The TypeScript bindings for smart contracts are up-to-date
+- The SDK is built with the latest changes
+
+### 5. Service Startup
+
+```bash
+DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op notary-server"
+source ${VLAYER_HOME}/bash/run-services.sh
+```
+
+This starts the required services:
+
+- `anvil-l1`: Local Ethereum L1 node
+- `anvil-l2-op`: Local Optimism L2 node
+- `notary-server`: Server for proof verification
+
+The service startup orchestrates:
+
+1. Docker containers for blockchain nodes
+2. Chain workers for block processing
+3. Chain server for RPC communication
+4. vlayer server for proof generation and verification
+
+### 6. Chain Worker Configuration
+
+Chain workers are configured based on the test environment:
+
+- In devnet (Anvil), the worker connects to `http://localhost:8545` with chain ID `31337`
+- In testnet, the worker connects to external RPC endpoints with their respective chain IDs
+
+Workers are started with parameters:
+
+```bash
+RUST_LOG=${RUST_LOG:-info} ./target/debug/worker \
+    --db-path "${db_path}" \
+    --rpc-url "${rpc_url}" \
+    --chain-id "${chain_id}" \
+    --proof-mode "${WORKER_PROOF_ARG}" \
+    --confirmations "${CONFIRMATIONS:-1}" \
+    --max-head-blocks "${MAX_HEAD_BLOCKS:-10}" \
+    --max-back-propagation-blocks "${MAX_BACK_PROPAGATION_BLOCKS:-10}"
+```
+
+### 7. Test Environment Preparation
+
+```bash
+cd $(mktemp -d)
+generate_vlayer_init_config
+ensure_cli_built
+init_template
+```
+
+These steps:
+
+1. Create a temporary directory for testing
+2. Generate the vlayer initialization configuration ([`generate_vlayer_init_config`](lib/e2e.sh))
+3. Ensure the CLI tool is built ([`ensure_cli_built`](lib/e2e.sh))
+4. Initialize a test template with the example code ([`init_template`](lib/e2e.sh))
+
+## Workflow Sequence
+
+1. **Environment Setup**: Load environment variables and configurations
+2. **Dependencies Setup**: Source helper scripts and set proving mode
+3. **Build Assets**: Generate TypeScript bindings and build the SDK
+4. **Start Services**: Launch required Docker containers and services
+5. **Prepare Test Environment**: Create temporary directory and initialize example
+6. **Run Tests**: Execute the test logic (varies by test script)
+7. **Cleanup**: Remove temporary files and stop services
+
+## Example Usage
+
+A typical E2E test script follows this pattern:
+
+```bash
+#!/usr/bin/env bash
+set -ueo pipefail
+
+# Import helpers
+VLAYER_HOME=$(git rev-parse --show-toplevel)
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
+
+# Setup phase
+set_proving_mode
+generate_ts_bindings
+build_sdk
+
+# Start services
+source ${VLAYER_HOME}/bash/run-services.sh
+
+# Prepare test environment
+cd $(mktemp -d)
+generate_vlayer_init_config
+init_template
+
+# Run tests
+pushd $EXAMPLE
+silent_unless_fails forge build
+run_prover_script
+popd
+
+# Cleanup
+cleanup
+```
+
+## Key Configurables
+
+| Variable                      | Default | Description                      |
+| ----------------------------- | ------- | -------------------------------- |
+| `VLAYER_ENV`                  | `dev`   | Environment type (dev/prod)      |
+| `PROVING_MODE`                | `dev`   | Proving mode (dev/prod)          |
+| `CONFIRMATIONS`               | `1`     | Number of confirmations required |
+| `MAX_HEAD_BLOCKS`             | `10`    | Maximum head blocks to process   |
+| `MAX_BACK_PROPAGATION_BLOCKS` | `10`    | Maximum back propagation blocks  |
+| `BUILD_CLI`                   | `1`     | Whether to build the CLI         |
