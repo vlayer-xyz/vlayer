@@ -1,8 +1,8 @@
-# Setup Phase in E2E Tests
+# E2E Testing
 
 ## Overview
 
-The setup phase in end-to-end (E2E) tests initializes the necessary services, configurations, and components required for testing the vlayer system. This phase ensures that tests run in a controlled environment that simulates real-world conditions.
+This document describes the complete end-to-end (E2E) testing flow for the vlayer system. E2E tests provide comprehensive validation by initializing all necessary services, configurations, and components, running test scenarios, and cleaning up resources. This ensures tests run in a controlled environment that simulates real-world conditions.
 
 ## Key Components
 
@@ -49,7 +49,7 @@ These scripts provide functions for the following stages of e2e testing:
 
 2. **Service Initialization:**
 
-   - [`ensure_services_built`](run_services/lib.sh): Compiles the required service binaries (call_server, chain_server, worker, dns_server) if `BUILD_SERVICES` = `1`
+   - [`ensure_services_built`](run_services/lib.sh): Compiles the required service binaries (call_server, chain_server, worker, dns_server) if `BUILD_SERVICES` equals `1`
    - [`startup_chain_worker`](run_services/chain_worker.sh): Starts chain worker processes
    - [`startup_chain_server`](run_services/lib.sh): Starts the chain server for RPC communication
    - [`startup_vlayer`](run_services/lib.sh): Starts the vlayer REST server
@@ -206,11 +206,26 @@ cleanup
 
 ## Key Configurables
 
-| Variable                      | Default | Description                      |
-| ----------------------------- | ------- | -------------------------------- |
-| `VLAYER_ENV`                  | `dev`   | Environment type (dev/prod)      |
-| `PROVING_MODE`                | `dev`   | Proving mode (dev/prod)          |
-| `CONFIRMATIONS`               | `1`     | Number of confirmations required |
-| `MAX_HEAD_BLOCKS`             | `10`    | Maximum head blocks to process   |
-| `MAX_BACK_PROPAGATION_BLOCKS` | `10`    | Maximum back propagation blocks  |
-| `BUILD_CLI`                   | `1`     | Whether to build the CLI         |
+The following environment variables can be passed to the e2e-test.sh script to customize its behavior:
+
+| Variable                      | Default        | Description                                                                                              | Passed to Script? |
+| ----------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- | ----------------- |
+| `VLAYER_ENV`                  | `dev`          | Environment type (dev/prod)                                                                              | ✓                 |
+| `PROVING_MODE`                | `dev`          | Proving mode (dev/prod)                                                                                  | ✓                 |
+| `BUILD_SERVICES`              | `1`            | Controls whether service binaries are compiled; set to `0` to skip compilation if binaries already exist | ✓                 |
+| `BUILD_CLI`                   | `1`            | Whether to build the CLI                                                                                 | ✓                 |
+| `EXAMPLE`                     | _Required_     | Name of the example to test (must be set)                                                                | ✓                 |
+| `CONFIRMATIONS`               | `1`            | Number of confirmations required for chain workers                                                       | ✓                 |
+| `MAX_HEAD_BLOCKS`             | `10`           | Maximum head blocks to process in chain workers                                                          | ✓                 |
+| `MAX_BACK_PROPAGATION_BLOCKS` | `10`           | Maximum back propagation blocks in chain workers                                                         | ✓                 |
+| `VLAYER_TMP_DIR`              | auto-generated | Directory for temporary files                                                                            | ✓                 |
+| `CHAIN_NAME`                  | `anvil`        | Chain to use (anvil or a testnet like optimismSepolia)                                                   | ✓                 |
+
+For prod mode with external chains, these additional variables are required:
+
+| Variable             | Default                   | Description            | Required When       |
+| -------------------- | ------------------------- | ---------------------- | ------------------- |
+| `BONSAI_API_URL`     | `https://api.bonsai.xyz/` | URL for Bonsai API     | `PROVING_MODE=prod` |
+| `BONSAI_API_KEY`     | None                      | API key for Bonsai     | `PROVING_MODE=prod` |
+| `QUICKNODE_API_KEY`  | None                      | API key for QuickNode  | `CHAIN_NAME!=anvil` |
+| `QUICKNODE_ENDPOINT` | None                      | Endpoint for QuickNode | `CHAIN_NAME!=anvil` |
