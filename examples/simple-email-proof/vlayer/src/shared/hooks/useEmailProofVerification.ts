@@ -5,7 +5,11 @@ import {
   useAccount,
   useBalance,
 } from "wagmi";
-import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
+import {
+  useCallProver,
+  useWaitForProvingResult,
+  useChain,
+} from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
@@ -16,6 +20,7 @@ import {
   AlreadyMintedError,
   NoProofError,
   CallProverError,
+  UseChainError,
 } from "../errors/appErrors";
 import { ensureBalance } from "../lib/ethFaucet";
 
@@ -48,6 +53,13 @@ export const useEmailProofVerification = () => {
     hash: txHash,
   });
 
+  const { chain, error: chainError } = useChain(
+    import.meta.env.VITE_CHAIN_NAME,
+  );
+  if (chainError) {
+    throw new UseChainError(chainError);
+  }
+
   const {
     callProver,
     data: proofHash,
@@ -57,6 +69,7 @@ export const useEmailProofVerification = () => {
     proverAbi: proverSpec.abi,
     functionName: "main",
     gasLimit: Number(import.meta.env.VITE_GAS_LIMIT),
+    chainId: chain?.id,
   });
 
   if (callProverError) {
