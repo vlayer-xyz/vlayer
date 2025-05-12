@@ -1221,7 +1221,6 @@ dependencies = [
  "parking_lot",
  "serde",
  "thiserror 2.0.11",
- "u64_range",
 ]
 
 [[package]]

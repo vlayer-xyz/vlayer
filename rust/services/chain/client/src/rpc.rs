@@ -123,29 +123,23 @@ fn blocks_behind(sync_status: SyncStatus, block_numbers: &[BlockNumber]) -> u64 
 mod tests {
     use super::*;
 
-    // Helper function to create a NonEmptyRange from RangeInclusive<u64>
-    // Panics if the range is empty
-    fn r(range: RangeInclusive<u64>) -> NonEmptyRange {
-        NonEmptyRange::from_range(range)
-    }
-
     #[test]
     fn head_behind() {
-        assert_eq!(blocks_behind(r(0..=1), &[2]), 1);
+        assert_eq!(blocks_behind((0..=1).into(), &[2]), 1);
     }
 
     #[test]
     fn tail_behind() {
-        assert_eq!(blocks_behind(r(1..=1), &[0]), 1);
+        assert_eq!(blocks_behind((1..=1).into(), &[0]), 1);
     }
 
     #[test]
     fn just_synced() {
-        assert_eq!(blocks_behind(r(0..=1), &[0, 1]), 0);
+        assert_eq!(blocks_behind((0..=1).into(), &[0, 1]), 0);
     }
 
     #[test]
     fn success() {
-        assert_eq!(blocks_behind(r(0..=10), &[1]), 0);
+        assert_eq!(blocks_behind((0..=10).into(), &[1]), 0);
     }
 }

@@ -53,7 +53,7 @@ mod tests {
             .expect("update_chain failed");
         assert_eq!(
             v_sync_status(chain_db, chain_id).await.unwrap(),
-            SyncStatus {
+            RpcSyncStatus {
                 first_block: 0,
                 last_block: 0
             }

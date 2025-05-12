@@ -232,7 +232,6 @@ mod tests {
         use std::sync::Arc;
 
         use chain_client::PartiallySyncedClient;
-        use chain_common::SyncStatus;
         use ethers_core::types::{Bytes, U64};
         use ethers_providers::MockProvider;
         use optimism::client::factory::cached;
@@ -263,7 +262,7 @@ mod tests {
             let start_chain_provider = mock_provider(prover_contract_code_results);
             let providers = CachedMultiProvider::from_provider(CHAIN_ID, start_chain_provider);
             let chain_client =
-                Box::new(PartiallySyncedClient::new(SyncStatus::new(0..=LATEST_INDEXED_BLOCK)));
+                Box::new(PartiallySyncedClient::new((0..=LATEST_INDEXED_BLOCK).into()));
             let op_client_factory = Box::new(cached::Factory::default());
             WithStartChainId {
                 start_chain_id: CHAIN_ID,
