@@ -42,9 +42,9 @@ lazy_static! {
     static ref base_sepolia_url: String =
         format!("https://base-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref world_sepolia_url: String =
-        format!("https://world-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://worldchain-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref world_mainnet_url: String =
-        format!("https://world-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://worldchain-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
     static ref unichain_sepolia_url: String =
         format!("https://unichain-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref unichain_mainnet_url: String =
