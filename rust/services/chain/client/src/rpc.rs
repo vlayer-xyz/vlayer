@@ -10,7 +10,7 @@ use tracing::{error, info};
 
 use crate::{Client, Error};
 
-#[derive(new, Serialize, Deserialize, Clone, Debug)]
+#[derive(new, Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Config {
     pub url: String,
     pub poll_interval: Duration,
