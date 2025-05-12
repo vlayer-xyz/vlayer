@@ -24,6 +24,14 @@ export const chainToTeleportConfig: Record<string, TeleportConfig> = {
       erc20BlockNumbers: "25181931",
     },
   },
+  mainnet: {
+    tokenHolder: "0xacD03D601e5bB1B275Bb94076fF46ED9D753435A",
+    prover: {
+      erc20Addresses: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
+      erc20ChainIds: "10",
+      erc20BlockNumbers: "135720596",
+    },
+  },
 };
 
 export const getTeleportConfig = (chainName: string): TeleportConfig => {
