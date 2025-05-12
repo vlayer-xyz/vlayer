@@ -62,6 +62,8 @@ test("Full flow from opening sidepanel to redirection", async ({
   await test.step("Click button should generate webproof", async () => {
     await extension.generateWebProof();
 
+    await extension.expectCountDown();
+
     await webpage.expectWebProof();
   });
 
