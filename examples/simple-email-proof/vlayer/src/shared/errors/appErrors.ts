@@ -30,3 +30,9 @@ export class CallProverError extends AppError {
     super("CallProverError", message);
   }
 }
+
+export class UseChainError extends AppError {
+  constructor(message: string) {
+    super("UseChainError", message);
+  }
+}
