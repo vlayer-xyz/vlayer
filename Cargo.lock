@@ -1077,7 +1077,7 @@ dependencies = [
  "ark-poly 0.5.0",
  "ark-serialize 0.5.0",
  "ark-std 0.5.0",
- "educe 0.6.0",
+ "educe",
  "fnv",
  "hashbrown 0.15.2",
  "itertools 0.13.0",
@@ -1137,7 +1137,7 @@ dependencies = [
  "ark-std 0.5.0",
  "arrayvec",
  "digest 0.10.7",
- "educe 0.6.0",
+ "educe",
  "itertools 0.13.0",
  "num-bigint",
  "num-traits",
@@ -1251,7 +1251,7 @@ dependencies = [
  "ark-ff 0.5.0",
  "ark-serialize 0.5.0",
  "ark-std 0.5.0",
- "educe 0.6.0",
+ "educe",
  "fnv",
  "hashbrown 0.15.2",
 ]
@@ -1266,7 +1266,7 @@ dependencies = [
  "ark-ff 0.5.0",
  "ark-relations",
  "ark-std 0.5.0",
- "educe 0.6.0",
+ "educe",
  "num-bigint",
  "num-integer",
  "num-traits",
@@ -1458,93 +1458,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-channel"
-version = "1.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81953c529336010edd6d8e358f886d9581267795c61b19475b71314bffa46d35"
-dependencies = [
- "concurrent-queue",
- "event-listener 2.5.3",
- "futures-core",
-]
-
-[[package]]
-name = "async-channel"
-version = "2.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89b47800b0be77592da0afd425cc03468052844aff33b84e33cc696f64e77b6a"
-dependencies = [
- "concurrent-queue",
- "event-listener-strategy",
- "futures-core",
- "pin-project-lite",
-]
-
-[[package]]
-name = "async-executor"
-version = "1.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30ca9a001c1e8ba5149f91a74362376cc6bc5b919d92d988668657bd570bdcec"
-dependencies = [
- "async-task",
- "concurrent-queue",
- "fastrand",
- "futures-lite",
- "slab",
-]
-
-[[package]]
-name = "async-global-executor"
-version = "2.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05b1b633a2115cd122d73b955eadd9916c18c8f510ec9cd1686404c60ad1c29c"
-dependencies = [
- "async-channel 2.3.1",
- "async-executor",
- "async-io",
- "async-lock",
- "blocking",
- "futures-lite",
- "once_cell",
-]
-
-[[package]]
-name = "async-io"
-version = "2.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43a2b323ccce0a1d90b449fd71f2a06ca7faa7c54c2751f06c9bd851fc061059"
-dependencies = [
- "async-lock",
- "cfg-if",
- "concurrent-queue",
- "futures-io",
- "futures-lite",
- "parking",
- "polling",
- "rustix",
- "slab",
- "tracing",
- "windows-sys 0.59.0",
-]
-
-[[package]]
-name = "async-lock"
-version = "3.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff6e472cdea888a4bd64f342f09b3f50e1886d32afe8df3d663c01140b811b18"
-dependencies = [
- "event-listener 5.4.0",
- "event-listener-strategy",
- "pin-project-lite",
-]
-
-[[package]]
 name = "async-priority-channel"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acde96f444d31031f760c5c43dc786b97d3e1cb2ee49dd06898383fe9a999758"
 dependencies = [
- "event-listener 4.0.3",
+ "event-listener",
 ]
 
 [[package]]
@@ -1556,32 +1475,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.93",
-]
-
-[[package]]
-name = "async-std"
-version = "1.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "730294c1c08c2e0f85759590518f6333f0d5a0a766a27d519c1b244c3dfd8a24"
-dependencies = [
- "async-channel 1.9.0",
- "async-global-executor",
- "async-io",
- "async-lock",
- "crossbeam-utils",
- "futures-channel",
- "futures-core",
- "futures-io",
- "futures-lite",
- "gloo-timers 0.3.0",
- "kv-log-macro",
- "log",
- "memchr",
- "once_cell",
- "pin-project-lite",
- "pin-utils",
- "slab",
- "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -1607,12 +1500,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-task"
-version = "4.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b75356056920673b02621b35afd0f7dda9306d03c79a30f5c56c44cf256e3de"
-
-[[package]]
 name = "async-trait"
 version = "0.1.85"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1621,19 +1508,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.93",
-]
-
-[[package]]
-name = "async-tungstenite"
-version = "0.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5682ea0913e5c20780fe5785abacb85a411e7437bf52a1bedb93ddb3972cb8dd"
-dependencies = [
- "futures-io",
- "futures-util",
- "log",
- "pin-project-lite",
- "tungstenite 0.16.0",
 ]
 
 [[package]]
@@ -2290,15 +2164,6 @@ checksum = "0d8c1fef690941d3e7788d328517591fecc684c084084702d6ff1641e993699a"
 
 [[package]]
 name = "block-buffer"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
-dependencies = [
- "generic-array",
-]
-
-[[package]]
-name = "block-buffer"
 version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
@@ -2340,19 +2205,6 @@ dependencies = [
  "mpt",
  "serde",
  "thiserror 2.0.11",
-]
-
-[[package]]
-name = "blocking"
-version = "1.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "703f41c54fc768e63e091340b424302bb1c29ef4aa0c7f10fe849dfb114d29ea"
-dependencies = [
- "async-channel 2.3.1",
- "async-task",
- "futures-io",
- "futures-lite",
- "piper",
 ]
 
 [[package]]
@@ -2908,7 +2760,7 @@ dependencies = [
  "nom",
  "quick-error 2.0.1",
  "rsa",
- "sha-1 0.10.1",
+ "sha-1",
  "sha2",
  "slog",
 ]
@@ -4351,7 +4203,7 @@ version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
 dependencies = [
- "block-buffer 0.10.4",
+ "block-buffer",
  "const-oid",
  "crypto-common",
  "subtle",
@@ -4572,23 +4424,11 @@ dependencies = [
 
 [[package]]
 name = "educe"
-version = "0.4.23"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f0042ff8246a363dbe77d2ceedb073339e85a804b9a47636c6e016a9a32c05f"
-dependencies = [
- "enum-ordinalize 3.1.15",
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "educe"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d7bc049e1bd8cdeb31b68bbd586a9464ecf9f3944af3958a7a9d0f8b9799417"
 dependencies = [
- "enum-ordinalize 4.3.0",
+ "enum-ordinalize",
  "proc-macro2",
  "quote",
  "syn 2.0.93",
@@ -4739,19 +4579,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1e6a265c649f3f5979b601d26f1d05ada116434c87741c9493cb56218f76cbc"
 dependencies = [
  "heck 0.5.0",
- "proc-macro2",
- "quote",
- "syn 2.0.93",
-]
-
-[[package]]
-name = "enum-ordinalize"
-version = "3.1.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1bf1fa3f06bbff1ea5b1a9c7b14aa992a39657db60a2759457328d7e058f49ee"
-dependencies = [
- "num-bigint",
- "num-traits",
  "proc-macro2",
  "quote",
  "syn 2.0.93",
@@ -5166,39 +4993,12 @@ dependencies = [
 
 [[package]]
 name = "event-listener"
-version = "2.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
-
-[[package]]
-name = "event-listener"
 version = "4.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b215c49b2b248c855fb73579eb1f4f26c38ffdc12973e20e07b91d78d5646e"
 dependencies = [
  "concurrent-queue",
  "parking",
- "pin-project-lite",
-]
-
-[[package]]
-name = "event-listener"
-version = "5.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3492acde4c3fc54c845eaab3eed8bd00c7a7d881f78bfc801e43a93dec1331ae"
-dependencies = [
- "concurrent-queue",
- "parking",
- "pin-project-lite",
-]
-
-[[package]]
-name = "event-listener-strategy"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c3e4e0dd3673c1139bf041f3008816d9cf2946bbfac2945c09e523b8d7b05b2"
-dependencies = [
- "event-listener 5.4.0",
  "pin-project-lite",
 ]
 
@@ -6330,19 +6130,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e5c1b78ca4aae1ac06c48a526a655760685149f0d465d21f37abfe57ce075c6"
 
 [[package]]
-name = "futures-lite"
-version = "2.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5edaec856126859abb19ed65f39e90fea3a9574b9707f13539acf4abf7eb532"
-dependencies = [
- "fastrand",
- "futures-core",
- "futures-io",
- "parking",
- "pin-project-lite",
-]
-
-[[package]]
 name = "futures-locks"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6381,7 +6168,7 @@ version = "3.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f288b0a4f20f9a56b5d1da57e2227c661b7b16168e2f72365f57b63326e29b24"
 dependencies = [
- "gloo-timers 0.2.6",
+ "gloo-timers",
  "send_wrapper 0.4.0",
 ]
 
@@ -6438,7 +6225,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tlsn-core",
- "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95)",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6168663)",
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.19",
@@ -6778,18 +6565,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gloo-timers"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbb143cf96099802033e0d4f4963b19fd2e0b728bcf076cd9cf7f6634f092994"
-dependencies = [
- "futures-channel",
- "futures-core",
- "js-sys",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "group"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6997,12 +6772,6 @@ name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
-
-[[package]]
-name = "hermit-abi"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbf6a919d6cf397374f7dfeeea91d974c7c0a7221d0d0f4f20d859d329e53fcc"
 
 [[package]]
 name = "hermit-abi"
@@ -8144,15 +7913,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "kv-log-macro"
-version = "1.0.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0de8b303297635ad57c9f5059fd9cee7a47f8e8daa09df0fcd07dd39fb22977f"
-dependencies = [
- "log",
-]
-
-[[package]]
 name = "lalrpop"
 version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8384,9 +8144,6 @@ name = "log"
 version = "0.4.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
-dependencies = [
- "value-bag",
-]
 
 [[package]]
 name = "lru"
@@ -9260,8 +9017,8 @@ dependencies = [
 
 [[package]]
 name = "notary-client"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -9279,10 +9036,10 @@ dependencies = [
 
 [[package]]
 name = "notary-server"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
- "async-tungstenite 0.28.2",
+ "async-tungstenite",
  "axum 0.8.1",
  "axum-core 0.5.0",
  "axum-macros",
@@ -10142,17 +9899,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
-name = "piper"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96c8c490f422ef9a4efd2cb5b42b76c8613d7e7dfc1caf667b8a3350a5acc066"
-dependencies = [
- "atomic-waker",
- "fastrand",
- "futures-io",
-]
-
-[[package]]
 name = "pkcs1"
 version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10205,21 +9951,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51bae2ac328883f7acdfea3d66a7c35751187f870bc81f94563733a154d7a670"
 dependencies = [
  "plotters-backend",
-]
-
-[[package]]
-name = "polling"
-version = "3.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a604568c3202727d1507653cb121dbd627a58684eb09a820fd746bee38b4442f"
-dependencies = [
- "cfg-if",
- "concurrent-queue",
- "hermit-abi 0.4.0",
- "pin-project-lite",
- "rustix",
- "tracing",
- "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -10799,9 +10530,9 @@ dependencies = [
 
 [[package]]
 name = "rangeset"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45cdc7f1ad5ef57b2fbb140c170c9d32ed93ea7a9a1e3d0cf67a248912aeaf12"
+checksum = "1fc7af00a06ad692080d87495a904677592c662610edb82b4fc8782f4ed2f01f"
 dependencies = [
  "serde",
 ]
@@ -12319,19 +12050,6 @@ dependencies = [
 
 [[package]]
 name = "sha-1"
-version = "0.9.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99cd6713db3cf16b6c84e06321e049a9b9f699826e16096d23bbcc44d15d51a6"
-dependencies = [
- "block-buffer 0.9.0",
- "cfg-if",
- "cpufeatures",
- "digest 0.9.0",
- "opaque-debug",
-]
-
-[[package]]
-name = "sha-1"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f5058ada175748e33390e40e872bd0fe59a19f265d0158daa551c5a88a76009c"
@@ -13424,8 +13142,8 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tlsn-cipher"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "aes 0.8.4",
  "async-trait",
@@ -13437,8 +13155,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-common"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "async-trait",
  "derive_builder 0.12.0",
@@ -13466,8 +13184,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-core"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "bcs",
  "bimap",
@@ -13486,15 +13204,15 @@ dependencies = [
  "thiserror 1.0.69",
  "tiny-keccak",
  "tlsn-tls-core",
- "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95)",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6168663)",
  "web-time 0.2.4",
  "webpki-roots 0.26.7",
 ]
 
 [[package]]
 name = "tlsn-deap"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "async-trait",
  "futures",
@@ -13510,8 +13228,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-hmac-sha256"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -13525,8 +13243,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-hmac-sha256-circuits"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "mpz-circuits",
  "tracing",
@@ -13534,8 +13252,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-key-exchange"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "async-trait",
  "derive_builder 0.12.0",
@@ -13557,8 +13275,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-mpc-tls"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "aes 0.8.4",
  "aes-gcm",
@@ -13593,15 +13311,14 @@ dependencies = [
  "tlsn-key-exchange",
  "tlsn-tls-backend",
  "tlsn-tls-core",
- "tlsn-utils-aio",
  "tokio",
  "tracing",
 ]
 
 [[package]]
 name = "tlsn-prover"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -13634,8 +13351,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-backend"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "async-trait",
  "futures",
@@ -13645,8 +13362,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-client"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "aes-gcm",
  "async-trait",
@@ -13668,8 +13385,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-client-async"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "bytes",
  "futures",
@@ -13681,8 +13398,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-core"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "futures",
  "hmac",
@@ -13709,32 +13426,12 @@ dependencies = [
 [[package]]
 name = "tlsn-utils"
 version = "0.1.0"
-source = "git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95#6650a956d3597d3a662fd9c15a64a1651afac399"
-
-[[package]]
-name = "tlsn-utils-aio"
-version = "0.1.0"
-source = "git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95#6650a956d3597d3a662fd9c15a64a1651afac399"
-dependencies = [
- "async-std",
- "async-trait",
- "async-tungstenite 0.16.1",
- "bytes",
- "futures",
- "futures-util",
- "rayon",
- "serde",
- "thiserror 1.0.69",
- "tokio",
- "tokio-serde",
- "tokio-util",
- "wasm-bindgen-futures",
-]
+source = "git+https://github.com/tlsnotary/tlsn-utils?rev=6168663#6168663495281f2c1b2c1734dc276cecc4d36ef1"
 
 [[package]]
 name = "tlsn-verifier"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -13820,21 +13517,6 @@ checksum = "5f6d0975eaace0cf0fcadee4e4aaa5da15b5c079146f2cffb67c113be122bf37"
 dependencies = [
  "rustls 0.23.20",
  "tokio",
-]
-
-[[package]]
-name = "tokio-serde"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "911a61637386b789af998ee23f50aa30d5fd7edcec8d6d3dedae5e5815205466"
-dependencies = [
- "bincode",
- "bytes",
- "educe 0.4.23",
- "futures-core",
- "futures-sink",
- "pin-project 1.1.7",
- "serde",
 ]
 
 [[package]]
@@ -14203,25 +13885,6 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
 name = "tungstenite"
-version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ad3713a14ae247f22a728a0456a545df14acf3867f905adff84be99e23b3ad1"
-dependencies = [
- "base64 0.13.1",
- "byteorder",
- "bytes",
- "http 0.2.12",
- "httparse",
- "log",
- "rand 0.8.5",
- "sha-1 0.9.8",
- "thiserror 1.0.69",
- "url",
- "utf-8",
-]
-
-[[package]]
-name = "tungstenite"
 version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e3dac10fd62eaf6617d3a904ae222845979aec67c615d1c842b4002c7666fb9"
@@ -14585,12 +14248,6 @@ name = "valuable"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
-
-[[package]]
-name = "value-bag"
-version = "1.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ef4c4aa54d5d05a279399bfa921ec387b7aba77caf7a682ae8d86785b8fdad2"
 
 [[package]]
 name = "vcpkg"
@@ -15027,7 +14684,7 @@ dependencies = [
  "tlsn-common",
  "tlsn-core",
  "tlsn-prover",
- "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95)",
+ "tlsn-utils 0.1.0 (git+https://github.com/tlsnotary/tlsn-utils?rev=6168663)",
  "tokio",
  "tokio-util",
  "tracing",
@@ -15492,7 +15149,7 @@ version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed39ff9f8b2eda91bf6390f9f49eee93d655489e15708e3bb638c1c4f07cecb4"
 dependencies = [
- "async-tungstenite 0.28.2",
+ "async-tungstenite",
  "async_io_stream",
  "bitflags 2.6.0",
  "futures-core",
