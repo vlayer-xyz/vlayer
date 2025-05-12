@@ -11,7 +11,7 @@ library MainnetStableDeployment {
 
     function verifiers() internal pure returns (Groth16ProofVerifier) {
         Groth16ProofVerifier groth16ProofVerifier =
-            Groth16ProofVerifier(address(0x963576398e80AC566e32b42E19C86A6580C3E7A1));
+            Groth16ProofVerifier(address(0x5553CF6Ce25E3f80fad2866f6230346159eCD89c));
 
         return (groth16ProofVerifier);
     }
