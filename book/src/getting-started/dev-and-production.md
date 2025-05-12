@@ -37,6 +37,17 @@ The Test Prover operates in [`FAKE` mode](/getting-started/dev-and-production.ht
 | Notary             | `https://test-notary.vlayer.xyz` | TLS Notary server                            |
 | WebSocket Proxy    | `https://test-wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary |
 
+## Mainnet
+
+### Public Mainnet Services
+
+| Service            | Endpoint                         | Description                                  |
+|--------------------|----------------------------------|----------------------------------------------|
+| Prover             | `https://stable-prod-prover.vlayer.xyz` | zkEVM prover for vlayer contracts     |
+| Indexer            | `https://chainservice.vlayer.xyz` | Storage proof indexer                |
+| Notary             | `https://notary.vlayer.xyz` | TLS Notary server                            |
+| WebSocket Proxy    | `https://wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary |
+
 ## Devnet
 
 Devnet allows you to run the full stack locally, including anvil and all required vlayer nodes.
