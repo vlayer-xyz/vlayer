@@ -1,12 +1,11 @@
-# Environments: Devnet & Testnet
+# Devnet, Testnet & Mainnet
 
 The vlayer network consists of several types of nodes: provers, indexers, notaries, and proxies. These nodes are essential for executing vlayer smart contract features, including Time Travel, Teleport, and proofs for Email and Web.
 
-Currently, two environments are supported:
+Currently, vlayer supports the following environments:
 - **testnet**: public environment supporting multiple L1 and L2 testnets.
 - **devnet**: local environment that runs with Docker Compose, providing all necessary services for development.
-
-The production network release is scheduled for Q1 2025.
+- **mainnet**: main public network supporting Ethereum Mainnet, Base, Optimism, and Arbitrum.
 
 ## Testnet
 
@@ -41,6 +40,18 @@ The Test Prover operates in [`FAKE` mode](/getting-started/dev-and-production.ht
 
 Devnet allows you to run the full stack locally, including anvil and all required vlayer nodes.
 
+## Mainnet
+The Mainnet Prover operates in [`GROTH16` mode](/getting-started/dev-and-production.html#prover-modes) and works with the following chains:
+
+| chain | time travel | teleport | email/web |
+|---------|-------------|----------|-----------|
+| mainnet | ✅        | ✅      | ✅         |
+| base | ✅         | ✅      | ✅         |
+| optimism | ✅         | ✅      | ✅         |
+| arbitrum | ✅         | ✅      | ✅         |
+
+✅ Supported, 🚧 In progress
+
 ### Starting Devnet
 
 #### Prerequisites
@@ -73,13 +84,6 @@ It is useful in case of any Docker configuration change.
 | Indexer            | `http://127.0.0.1:3001`        | Storage proof indexer                       |
 | Notary             | `http://127.0.0.1:7047`        | TLS Notary server                           |
 | WebSocket Proxy    | `http://127.0.0.1:3003`       | Proxying websocket connections              |
-
-### Stopping Devnet
-
-To stop all running services:
-```bash
-docker compose down
-```
 
 ### Clearing Cache
 
