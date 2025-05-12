@@ -4,3 +4,4 @@ vlayer_rust_log:
   - call_engine=debug
 vlayer_jwt_public_key_location: /home/{{ ansible_user }}/.vlayer/jwt.key.pub
 prover_nginx_ssl_certificate: "fake-prover.vlayer.xyz"
+vlayer_prover_chain_proof_url: "https://test-chainservice.vlayer.xyz"
