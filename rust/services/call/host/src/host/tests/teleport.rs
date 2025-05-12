@@ -1,7 +1,10 @@
+use std::time::{Duration, SystemTime};
+
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{ChainId, b256};
 use call_common::{ExecutionLocation, RevmDB};
 use call_engine::verifier::teleport::fetch_latest_confirmed_l2_block;
+use ethers_core::types::U64;
 use jsonrpsee::http_client::HttpClientBuilder;
 use optimism::{
     IClient, NumHash,
@@ -9,7 +12,7 @@ use optimism::{
     client::http,
     types::SequencerOutput,
 };
-use provider::{EthersProviderFactory, ProviderFactory};
+use provider::{BlockTag, EthersProviderFactory, ProviderFactory};
 
 use crate::{
     db::provider::ProviderDb,
@@ -34,6 +37,51 @@ fn create_anchor_state_registry(
 
     let registry = AnchorStateRegistry::new(dest_chain_spec.anchor_state_registry, db);
     Ok(registry)
+}
+
+async fn check_anchor_state_freshness(
+    src_chain: Chain,
+    dest_chain: Chain,
+    max_age_hours: u64,
+) -> anyhow::Result<()> {
+    let factory = EthersProviderFactory::new(rpc_urls());
+    let src = factory.create(src_chain.id())?;
+    let dest = factory.create(dest_chain.id())?;
+
+    let current_block = src.get_latest_block_number()?;
+    let registry =
+        create_anchor_state_registry((src_chain.id(), current_block).into(), dest_chain.id())?;
+    let commitment = registry.get_latest_confirmed_l2_commitment()?;
+
+    let block = match dest.get_block_header(BlockTag::Number(U64::from(commitment.block_number)))? {
+        Some(b) => b,
+        None => anyhow::bail!("No block found for number {}", commitment.block_number),
+    };
+
+    ensure_block_fresh(block.timestamp(), max_age_hours, src_chain, dest_chain)?;
+    Ok(())
+}
+
+fn ensure_block_fresh(
+    ts_secs: u64,
+    max_age_hours: u64,
+    src_chain: Chain,
+    dest_chain: Chain,
+) -> anyhow::Result<()> {
+    let block_time = SystemTime::UNIX_EPOCH + Duration::from_secs(ts_secs);
+    let block_age = SystemTime::now().duration_since(block_time)?;
+    let max_age = Duration::from_secs(3600 * max_age_hours);
+    let age_hours = block_age.as_secs_f64() / 3600.0;
+
+    anyhow::ensure!(
+        block_age <= max_age,
+        "Latest finalized block for {} -> {} is too old: {:.2}h (max {}h)",
+        src_chain.named().unwrap(),
+        dest_chain.named().unwrap(),
+        age_hours,
+        max_age_hours,
+    );
+    Ok(())
 }
 
 mod anchor_state_registry {
@@ -118,6 +166,100 @@ mod anchor_state_registry {
             hash = "34184ca6e9f0d6f2c3c30e953b40981bab5faee02ae249d026ecea7250651703",
             block = 16_681_148
         );
+    }
+
+    mod freshness {
+        use super::*;
+
+        const MAX_AGE_HOURS: u64 = 170;
+
+        mod sepolia {
+            use super::*;
+
+            #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
+            async fn optimism() -> anyhow::Result<()> {
+                check_anchor_state_freshness(
+                    Chain::sepolia(),
+                    Chain::optimism_sepolia(),
+                    MAX_AGE_HOURS,
+                )
+                .await
+            }
+
+            #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
+            async fn base() -> anyhow::Result<()> {
+                check_anchor_state_freshness(Chain::sepolia(), Chain::base_sepolia(), MAX_AGE_HOURS)
+                    .await
+            }
+
+            #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
+            async fn world() -> anyhow::Result<()> {
+                check_anchor_state_freshness(
+                    Chain::sepolia(),
+                    Chain::from_named(NamedChain::WorldSepolia),
+                    MAX_AGE_HOURS,
+                )
+                .await
+            }
+
+            #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "This test is ignored because AnchorStateRegistry is not updated on unichain docs"]
+            async fn unichain() -> anyhow::Result<()> {
+                check_anchor_state_freshness(
+                    Chain::sepolia(),
+                    Chain::from_named(NamedChain::UnichainSepolia),
+                    MAX_AGE_HOURS,
+                )
+                .await
+            }
+        }
+
+        mod mainnet {
+            use super::*;
+
+            #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
+            async fn optimism() -> anyhow::Result<()> {
+                check_anchor_state_freshness(
+                    Chain::mainnet(),
+                    Chain::optimism_mainnet(),
+                    MAX_AGE_HOURS,
+                )
+                .await
+            }
+
+            #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
+            async fn base() -> anyhow::Result<()> {
+                check_anchor_state_freshness(Chain::mainnet(), Chain::base_mainnet(), MAX_AGE_HOURS)
+                    .await
+            }
+
+            #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
+            async fn world() -> anyhow::Result<()> {
+                check_anchor_state_freshness(
+                    Chain::mainnet(),
+                    Chain::from_named(NamedChain::World),
+                    MAX_AGE_HOURS,
+                )
+                .await
+            }
+
+            #[tokio::test(flavor = "multi_thread")]
+            #[ignore = "unichain mainnet endpoint currently not supported on alchemy"]
+            async fn unichain() -> anyhow::Result<()> {
+                check_anchor_state_freshness(
+                    Chain::mainnet(),
+                    Chain::from_named(NamedChain::Unichain),
+                    MAX_AGE_HOURS,
+                )
+                .await
+            }
+        }
     }
 }
 
