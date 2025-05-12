@@ -210,12 +210,17 @@ pub struct SyncStatus(NonEmptyRange);
 
 impl From<RangeInclusive<BlockNumber>> for SyncStatus {
     fn from(range: RangeInclusive<BlockNumber>) -> Self {
-        Self(NonEmptyRange::from_range(range))
+        #[allow(clippy::unwrap_used)]
+        Self(NonEmptyRange::try_from_range(range).unwrap())
     }
 }
 
 impl From<RpcSyncStatus> for SyncStatus {
     fn from(sync_status: RpcSyncStatus) -> Self {
-        Self(NonEmptyRange::from_range(sync_status.first_block..=sync_status.last_block))
+        Self(
+            #[allow(clippy::unwrap_used)]
+            NonEmptyRange::try_from_range(sync_status.first_block..=sync_status.last_block)
+                .unwrap(),
+        )
     }
 }
