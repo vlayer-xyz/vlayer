@@ -51,7 +51,7 @@ debug = "full"
 lto = false # debug + LTO leads to ICE in 1.84: https://github.com/rust-lang/rust/issues/135332
 
 [workspace.dependencies]
-alloy-chains = "0.1.42"
+alloy-chains = "0.2.0"
 alloy-dyn-abi = "=0.8.20"
 alloy-eips = { version = "0.11.0", features = ["serde"] }
 alloy-consensus = { version = "0.11.0", features = ["serde"] }
