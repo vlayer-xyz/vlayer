@@ -9,7 +9,7 @@ vlayer allows smart contracts to be executed [off-chain](/advanced/prover.html).
 ### Sections
 **Getting Started**
 
-To get started with vlayer, [install vlayer](/getting-started/installation.html), set up your [first project](/getting-started/first-steps.html) and check out the explainer section to learn [how vlayer works](/getting-started/how-it-works.html). Finally take a look into [devnet & testnet](/getting-started/dev-and-production.html) to learn about vlayer environments. 
+To get started with vlayer, [install vlayer](/getting-started/installation.html), set up your [first project](/getting-started/first-steps.html) and check out the explainer section to learn [how vlayer works](/getting-started/how-it-works.html). Finally take a look into [devnet, testnet & mainnet](/getting-started/dev-and-production.html) to learn about vlayer environments. 
 
 **Features**
 

@@ -4,7 +4,7 @@ The easiest way to install vlayer is by using `vlayerup`, the vlayer toolchain i
 ## Supported Platforms
 **Linux**: Only Ubuntu 24.04 LTS or newer versions with x86_64 CPU architecture are supported. Other Linux distributions may work but are not officially supported.
 
-**Mac**: Macs with Intel CPUs are not supported. Use an M1/M2/M3 mac.
+**Mac**: Macs with Intel CPUs are not supported. Use a Mac with Apple Silicon.
 
 ## Prerequisites
 Before working with vlayer, ensure the following tools are installed:
