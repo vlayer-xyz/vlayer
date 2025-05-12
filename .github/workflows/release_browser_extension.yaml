@@ -14,6 +14,7 @@ jobs:
   release-browser-extension:
     name: Release Browser Extension
     environment: Production
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     env:
       # https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl

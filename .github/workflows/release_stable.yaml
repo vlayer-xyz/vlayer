@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - rust/version/Cargo.toml
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
