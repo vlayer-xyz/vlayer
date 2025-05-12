@@ -25,13 +25,19 @@ function startup_chain_worker() {
 
 function wait_for_chain_worker_sync() {
     local rpc_url="$1" chain_id="$2" first_block="$3" last_block="$4"
+    local rpc_url="http://127.0.0.1:3001"
+    local max_retries=20
+    local sleep_seconds=10
+    local retry_count=5
+    local retry_delay=0
+    local retry_max_time=30
 
     echo "Waiting for chain worker sync... chain_id=${chain_id} first_block=${first_block} last_block=${last_block}"
 
-    for i in $(seq 1 20); do
+    for i in $(seq 1 $max_retries); do
         local reply result first_block_synced last_block_synced
-        reply=$(curl -s -X POST 127.0.0.1:3001 \
-            --retry-connrefused --retry 5 --retry-delay 0 --retry-max-time 30 \
+        reply=$(curl -s -X POST "${rpc_url}" \
+            --retry-connrefused --retry "$retry_count" --retry-delay "$retry_delay" --retry-max-time "$retry_max_time" \
             -H "Content-Type: application/json" \
             --data '{"jsonrpc": "2.0", "id": 0, "method": "v_getSyncStatus", "params": ['"${chain_id}"']}')
         result=$(echo "${reply}" | jq ".result")
@@ -47,9 +53,10 @@ function wait_for_chain_worker_sync() {
         fi
 
         echo "Syncing ... ${result}"
-        sleep 10
+        sleep "$sleep_seconds"
     done
 
     echo "Failed to sync chain ${chain_id} worker" >&2
     exit 1
 }
+
