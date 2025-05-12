@@ -42,16 +42,9 @@ pub async fn v_call(
     if !found_existing {
         tokio::spawn(async move {
             let span = info_span!("http", id = req_id.to_string());
-            proof::generate(
-                call,
-                host,
-                gas_meter_client,
-                state.clone(),
-                call_hash,
-                config.chain_proof_config.clone(),
-            )
-            .instrument(span)
-            .await
+            proof::generate(call, host, gas_meter_client, state.clone(), call_hash)
+                .instrument(span)
+                .await
         });
     }
 
@@ -66,7 +59,7 @@ async fn build_host(
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls.clone())
         .with_chain_guest_id(config.chain_guest_id())
-        .with_chain_proof_url(config.chain_proof_url())?
+        .with_chain_client_config(config.chain_client_config.clone())?
         .with_start_chain_id(chain_id)?
         .with_prover_contract_addr(prover_contract_addr)
         .await

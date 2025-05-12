@@ -4,9 +4,9 @@ use std::time::Duration;
 
 use alloy_primitives::ChainId;
 use call_server_lib::{
-    Config, ConfigBuilder, ProofMode, chain_proof::Config as ChainProofConfig,
-    gas_meter::Config as GasMeterConfig, serve,
+    Config, ConfigBuilder, ProofMode, gas_meter::Config as GasMeterConfig, serve,
 };
+use chain_client::ChainClientConfig;
 use clap::{ArgAction, Parser};
 use common::{GlobalArgs, extract_rpc_url_token, init_tracing};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
@@ -75,14 +75,14 @@ impl Cli {
                 self.chain_proof_timeout.unwrap_or_default(),
             )))
             .map(|(url, (poll_interval, timeout))| {
-                ChainProofConfig::new(url, poll_interval, timeout)
+                ChainClientConfig::new(url, poll_interval, timeout)
             });
         let jwt_config: Option<JwtConfig> = self.jwt_args.try_into()?;
         Ok(ConfigBuilder::default()
             .with_call_guest_elf(&CALL_GUEST_ELF)
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
             .with_semver(api_version)
-            .with_chain_proof_config(chain_proof_config)
+            .with_chain_client_config(chain_proof_config)
             .with_gas_meter_config(gas_meter_config)
             .with_rpc_mappings(self.rpc_url)
             .with_proof_mode(proof_mode)

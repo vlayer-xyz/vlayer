@@ -10,17 +10,6 @@ function setup_tmp_dir() {
     fi
 }
 
-function get_latest_block() {
-    local rpc_url=$1
-    local block_hex=$(curl -s ${rpc_url} \
-        -X POST \
-        -H "Content-Type: application/json" \
-        --data '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}' \
-        | jq -r ".result"
-    )
-    printf "%d\n" "${block_hex}"
-}
-
 function startup_vdns_server() {
     echo "Starting VDNS server"
     pushd "${VLAYER_HOME}"
@@ -75,10 +64,6 @@ function startup_chain_services() {
     done
 
     startup_chain_server ${db_path}
-
-    for args in "$@"; do
-        wait_for_chain_worker_sync $args
-    done
 }
 
 function startup_vlayer() {

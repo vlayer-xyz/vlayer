@@ -8,8 +8,8 @@
 //!     ║ `with_chain_guest_id` – add chain guest ELF ID to context
 //!     ║
 //!     ╚> `WithChainGuestId`
-//!         ║ `with_chain_proof_url` - create chain proof client from the given URL
-//!         ║ or mock it using RPC providers abd chain guest ELF ID
+//!         ║ `with_chain_client_config` - create chain proof client from the given config
+//!         ║ or mock it using RPC providers and chain guest ELF ID
 //!         ║
 //!         ╚>`WithChainClient`
 //!            ║ `with_start_chain_id` - sets the chain ID where the execution starts
@@ -27,6 +27,7 @@ use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
 use call_common::ExecutionLocation;
+use chain_client::ChainClientConfig;
 use provider::{Address, BlockNumber, CachedMultiProvider, EthersProviderFactory};
 use risc0_zkvm::sha::Digest;
 use tracing::warn;
@@ -91,19 +92,19 @@ impl WithProviders {
 }
 
 impl WithChainGuestId {
-    pub fn with_chain_proof_url(
+    pub fn with_chain_client_config(
         self,
-        chain_proof_url: Option<&str>,
+        chain_client_config: Option<ChainClientConfig>,
     ) -> Result<WithChainClient, Error> {
         let WithChainGuestId {
             providers,
             chain_guest_id,
             op_client_factory,
         } = self;
-        let chain_client: Box<dyn chain_client::Client> = match chain_proof_url.as_ref() {
-            Some(url) => Box::new(chain_client::RpcClient::new(url)),
+        let chain_client: Box<dyn chain_client::Client> = match chain_client_config {
+            Some(config) => Box::new(chain_client::RpcClient::new(&config)),
             None => {
-                warn!("Chain proof sever URL not provided. Running with mock server");
+                warn!("Chain client config not provided. Running with mock server");
                 Box::new(chain_client::FakeClient::new(providers.clone(), chain_guest_id))
             }
         };

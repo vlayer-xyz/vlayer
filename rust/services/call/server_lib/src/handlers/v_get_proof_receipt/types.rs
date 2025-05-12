@@ -13,7 +13,6 @@ use crate::{
 pub enum State {
     Queued,
     AllocateGas,
-    ChainProof,
     Preflight,
     Proving,
     Done,
@@ -50,7 +49,6 @@ impl From<&ProofState> for State {
         match value {
             ProofState::Queued => Self::Queued,
             ProofState::AllocateGasPending | ProofState::AllocateGasError(..) => Self::AllocateGas,
-            ProofState::ChainProofPending | ProofState::ChainProofError(..) => Self::ChainProof,
             ProofState::PreflightPending | ProofState::PreflightError(..) => Self::Preflight,
             ProofState::ProvingPending | ProofState::ProvingError(..) => Self::Proving,
             ProofState::Done(..) => Self::Done,

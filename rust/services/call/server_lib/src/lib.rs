@@ -1,4 +1,3 @@
-pub mod chain_proof;
 pub mod config;
 pub mod gas_meter;
 pub mod jwt;

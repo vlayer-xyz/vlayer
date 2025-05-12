@@ -197,7 +197,7 @@ mod server_tests {
                     .as_ref()
                     .ok()
                     .and_then(|(state, success, _)| match state {
-                        State::ChainProof | State::Preflight | State::Proving => {
+                        State::Preflight | State::Proving => {
                             if !success {
                                 None
                             } else {

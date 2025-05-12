@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, sync::Arc};
+use std::{collections::HashMap, fmt::Display, sync::Arc, time::Duration};
 
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
@@ -17,7 +17,7 @@ pub use fake::FakeClient;
 #[cfg(feature = "fake")]
 pub use fake::PartiallySyncedClient;
 #[cfg(feature = "rpc")]
-pub use rpc::RpcClient;
+pub use rpc::{Config as ChainClientConfig, RpcClient};
 
 #[cfg(test)]
 mod tests;
@@ -51,6 +51,24 @@ pub enum Error {
     },
     #[error("Chain {0} not supported")]
     UnsupportedChain(ChainId),
+    #[error(
+        "Waiting for chain proof timed out. chain_id={chain_id} block_numbers={block_numbers:?} timeout={timeout:?} sync_status={sync_status:?}"
+    )]
+    Timeout {
+        chain_id: ChainId,
+        block_numbers: Vec<BlockNumber>,
+        timeout: Duration,
+        sync_status: SyncStatus,
+    },
+    #[error(
+        "Chain {chain_id} is too far behind. Behind {behind} blocks. Block numbers: {block_numbers:?}. Sync status: {sync_status:?}"
+    )]
+    TooFarBehind {
+        chain_id: ChainId,
+        behind: u64,
+        block_numbers: Vec<BlockNumber>,
+        sync_status: SyncStatus,
+    },
     #[error("{0}")]
     Other(String),
 }

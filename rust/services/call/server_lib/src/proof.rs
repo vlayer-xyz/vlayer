@@ -5,7 +5,6 @@ use tracing::{error, info, instrument};
 
 pub use crate::proving::RawData;
 use crate::{
-    chain_proof::{self, Config as ChainProofConfig, Error as ChainProofError},
     gas_meter::{Client as GasMeterClient, Error as GasMeterError},
     handlers::State as AppState,
     metrics::Metrics,
@@ -18,8 +17,6 @@ use crate::{
 pub enum Error {
     #[error("Gas meter error: {0}")]
     AllocateGas(#[from] GasMeterError),
-    #[error("Chain proof error: {0}")]
-    ChainProof(#[from] ChainProofError),
     #[error("Preflight error: {0}")]
     Preflight(#[from] PreflightError),
     #[error("Proving error: {0}")]
@@ -32,8 +29,6 @@ pub enum State {
     Queued,
     AllocateGasPending,
     AllocateGasError(Box<Error>),
-    ChainProofPending,
-    ChainProofError(Box<Error>),
     PreflightPending,
     PreflightError(Box<Error>),
     ProvingPending,
@@ -45,10 +40,7 @@ impl State {
     pub const fn is_err(&self) -> bool {
         matches!(
             self,
-            State::AllocateGasError(..)
-                | State::ChainProofError(..)
-                | State::PreflightError(..)
-                | State::ProvingError(..)
+            State::AllocateGasError(..) | State::PreflightError(..) | State::ProvingError(..)
         )
     }
 
@@ -62,7 +54,6 @@ impl State {
     pub const fn err(&self) -> Option<&Error> {
         match self {
             State::AllocateGasError(err)
-            | State::ChainProofError(err)
             | State::PreflightError(err)
             | State::ProvingError(err) => Some(err),
             _ => None,
@@ -100,7 +91,6 @@ pub async fn generate(
     gas_meter_client: impl GasMeterClient,
     state: AppState,
     call_hash: CallHash,
-    chain_proof_config: Option<ChainProofConfig>,
 ) {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
@@ -116,7 +106,7 @@ pub async fn generate(
         .map_err(Error::AllocateGas)
     {
         Ok(()) => {
-            set_state(&state, call_hash, State::ChainProofPending);
+            set_state(&state, call_hash, State::PreflightPending);
         }
         Err(err) => {
             error!("Gas meter failed with error: {err}");
@@ -124,20 +114,6 @@ pub async fn generate(
             return;
         }
     };
-
-    match chain_proof::await_ready(&host, chain_proof_config)
-        .await
-        .map_err(Error::ChainProof)
-    {
-        Ok(()) => {
-            set_state(&state, call_hash, State::PreflightPending);
-        }
-        Err(err) => {
-            error!("Chain proof failed with error: {err}");
-            set_state(&state, call_hash, State::ChainProofError(err.into()));
-            return;
-        }
-    }
 
     let preflight_result =
         match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics)

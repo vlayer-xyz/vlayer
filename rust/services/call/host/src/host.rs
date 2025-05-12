@@ -15,7 +15,6 @@ use call_engine::{
         travel_call::{self, IVerifier},
     },
 };
-use chain_client::Client as ChainClient;
 use common::{GuestElf, verifier::zk_proof};
 pub use config::Config;
 use derive_new::new;
@@ -134,17 +133,6 @@ impl Host {
             time_travel::Verifier::new(chain_client.clone(), chain_proof_verifier);
         let teleport_verifier = teleport::Verifier::new(op_client_factory);
         travel_call::Verifier::new(time_travel_verifier, teleport_verifier)
-    }
-
-    pub async fn chain_proof_ready(&self) -> Result<bool, AwaitingChainProofError> {
-        let Some(ref chain_client) = self.chain_client else {
-            return Ok(true); // No chain service, so no chain proof to wait for
-        };
-        let latest_indexed_block = chain_client
-            .get_sync_status(self.start_execution_location.chain_id)
-            .await?
-            .last_block;
-        Ok(latest_indexed_block >= self.start_execution_location.block_number)
     }
 
     #[instrument(skip_all)]
