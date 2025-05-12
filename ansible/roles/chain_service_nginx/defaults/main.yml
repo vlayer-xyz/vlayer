@@ -1,2 +1,2 @@
-chain_service_nginx_ip_rate_limit_per_minute: 30
-chain_service_nginx_ip_rate_limit_burst: 5
+chain_service_nginx_ip_rate_limit_per_minute: 60
+chain_service_nginx_ip_rate_limit_burst: 30
