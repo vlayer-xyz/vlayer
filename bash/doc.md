@@ -1,8 +1,8 @@
-# E2E Testing
+# E2E Testing Setup
 
 ## Overview
 
-This document describes the complete end-to-end (E2E) testing flow for the vlayer system. E2E tests provide comprehensive validation by initializing all necessary services, configurations, and components, running test scenarios, and cleaning up resources. This ensures tests run in a controlled environment that simulates real-world conditions.
+This document describes the setup phase of end-to-end (E2E) testing for the vlayer system as implemented in the `e2e-test.sh` script. The setup phase initializes all necessary services, configurations, and components required for testing.
 
 ## Key Components
 
@@ -168,45 +168,9 @@ These steps:
 6. **Run Tests**: Execute the test logic (varies by test script)
 7. **Cleanup**: Remove temporary files and stop services
 
-## Example Usage
-
-A typical E2E test script follows this pattern:
-
-```bash
-#!/usr/bin/env bash
-set -ueo pipefail
-
-# Import helpers
-VLAYER_HOME=$(git rev-parse --show-toplevel)
-source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
-
-# Setup phase
-set_proving_mode
-generate_ts_bindings
-build_sdk
-
-# Start services
-source ${VLAYER_HOME}/bash/run-services.sh
-
-# Prepare test environment
-cd $(mktemp -d)
-generate_vlayer_init_config
-init_template
-
-# Run tests
-pushd $EXAMPLE
-silent_unless_fails forge build
-run_prover_script
-popd
-
-# Cleanup
-cleanup
-```
-
 ## Key Configurables
 
-The following environment variables can be passed to the e2e-test.sh script to customize its behavior:
+The following environment variables can be passed to the `e2e-test.sh` script to customize its behavior:
 
 | Variable                      | Default        | Description                                                                                              | Passed to Script? |
 | ----------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- | ----------------- |
@@ -229,3 +193,4 @@ For prod mode with external chains, these additional variables are required:
 | `BONSAI_API_KEY`     | None                      | API key for Bonsai     | `PROVING_MODE=prod` |
 | `QUICKNODE_API_KEY`  | None                      | API key for QuickNode  | `CHAIN_NAME!=anvil` |
 | `QUICKNODE_ENDPOINT` | None                      | Endpoint for QuickNode | `CHAIN_NAME!=anvil` |
+
