@@ -10,6 +10,7 @@ chain_common = { workspace = true }
 derive-new = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+u64_range = { workspace = true }
 
 # RPC client dependencies (disabled for guest)
 parking_lot = { workspace = true }

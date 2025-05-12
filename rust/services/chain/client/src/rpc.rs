@@ -2,7 +2,9 @@ use std::{cmp::max, time::Duration};
 
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
-use chain_common::{ChainProof, GetChainProof, GetSyncStatus, RpcChainProof, SyncStatus};
+use chain_common::{
+    ChainProof, GetChainProof, GetSyncStatus, RpcChainProof, RpcSyncStatus, SyncStatus,
+};
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::rpc::Client as RawRpcClient;
@@ -43,7 +45,7 @@ impl RpcClient {
         loop {
             let sync_status = self.get_sync_status(chain_id).await?;
             info!(chain_id, ?sync_status, "Sync status");
-            let lag = blocks_behind(&sync_status, block_numbers);
+            let lag = blocks_behind(sync_status, block_numbers);
             info!(chain_id, ?lag, "Sync lag");
             if lag == 0 {
                 break;
@@ -100,20 +102,20 @@ impl Client for RpcClient {
 
         let params = GetSyncStatus::new(chain_id);
         let result_value = self.rpc_client.call(params).await.map_err(Error::from)?;
-        let sync_status: SyncStatus = serde_json::from_value(result_value)?;
+        let sync_status: RpcSyncStatus = serde_json::from_value(result_value)?;
 
         info!("Sync status for chain {chain_id}: {sync_status:?}");
-        Ok(sync_status)
+        Ok(sync_status.into())
     }
 }
 
 #[allow(clippy::unwrap_used)]
-fn blocks_behind(sync_status: &SyncStatus, block_numbers: &[BlockNumber]) -> u64 {
+fn blocks_behind(sync_status: SyncStatus, block_numbers: &[BlockNumber]) -> u64 {
     assert!(!block_numbers.is_empty(), "block_numbers cannot be empty");
     let first_block_number = block_numbers.iter().min().unwrap();
     let last_block_number = block_numbers.iter().max().unwrap();
-    let backprop_behind = sync_status.first_block.saturating_sub(*first_block_number);
-    let head_behind = last_block_number.saturating_sub(sync_status.last_block);
+    let backprop_behind = sync_status.start().saturating_sub(*first_block_number);
+    let head_behind = last_block_number.saturating_sub(sync_status.end());
     max(backprop_behind, head_behind)
 }
 
@@ -121,23 +123,29 @@ fn blocks_behind(sync_status: &SyncStatus, block_numbers: &[BlockNumber]) -> u64
 mod tests {
     use super::*;
 
+    // Helper function to create a NonEmptyRange from RangeInclusive<u64>
+    // Panics if the range is empty
+    fn r(range: RangeInclusive<u64>) -> NonEmptyRange {
+        NonEmptyRange::from_range(range)
+    }
+
     #[test]
     fn head_behind() {
-        assert_eq!(blocks_behind(&SyncStatus::new(0, 1), &[2]), 1);
+        assert_eq!(blocks_behind(r(0..=1), &[2]), 1);
     }
 
     #[test]
     fn tail_behind() {
-        assert_eq!(blocks_behind(&SyncStatus::new(1, 1), &[0]), 1);
+        assert_eq!(blocks_behind(r(1..=1), &[0]), 1);
     }
 
     #[test]
     fn just_synced() {
-        assert_eq!(blocks_behind(&SyncStatus::new(0, 1), &[0, 1]), 0);
+        assert_eq!(blocks_behind(r(0..=1), &[0, 1]), 0);
     }
 
     #[test]
     fn success() {
-        assert_eq!(blocks_behind(&SyncStatus::new(0, 10), &[1]), 0);
+        assert_eq!(blocks_behind(r(0..=10), &[1]), 0);
     }
 }

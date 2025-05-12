@@ -27,7 +27,7 @@ impl NonEmptyRange {
     }
 
     /// Panics if the range is empty
-    fn from_range(range: RangeInclusive<u64>) -> Self {
+    pub fn from_range(range: RangeInclusive<u64>) -> Self {
         assert!(range.start() <= range.end());
         Self {
             start: *range.start(),

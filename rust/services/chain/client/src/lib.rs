@@ -163,9 +163,9 @@ impl Client for CachedClient {
     async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, Error> {
         match self.cache.get(&chain_id) {
             Some((blocks, _)) if !blocks.is_empty() => {
-                Ok(SyncStatus::new(*blocks.first().unwrap(), *blocks.last().unwrap()))
+                Ok((*blocks.first().unwrap()..=*blocks.last().unwrap()).into())
             }
-            _ => Ok(SyncStatus::default()),
+            _ => Err(Error::UnsupportedChain(chain_id)),
         }
     }
 }

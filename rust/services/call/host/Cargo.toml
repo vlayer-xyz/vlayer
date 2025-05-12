@@ -31,6 +31,7 @@ seal = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }
+u64_range = { workspace = true }
 
 [dev-dependencies]
 alloy-sol-types = { workspace = true }
