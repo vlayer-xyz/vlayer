@@ -158,7 +158,6 @@ These steps:
 3. Ensure the CLI tool is built ([`ensure_cli_built`](lib/e2e.sh))
 4. Initialize a test template with the example code ([`init_template`](lib/e2e.sh))
 
-
 ## Key Configurables
 
 The following environment variables can be passed to the `e2e-test.sh` script to customize its behavior:
@@ -184,4 +183,3 @@ For prod mode with external chains, these additional variables are required:
 | `BONSAI_API_KEY`     | None                      | API key for Bonsai     | `PROVING_MODE=prod` |
 | `QUICKNODE_API_KEY`  | None                      | API key for QuickNode  | `CHAIN_NAME!=anvil` |
 | `QUICKNODE_ENDPOINT` | None                      | Endpoint for QuickNode | `CHAIN_NAME!=anvil` |
-

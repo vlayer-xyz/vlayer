@@ -1,13 +1,16 @@
 # Summary
+
 [Introduction](./introduction.md)
 
 - [Getting Started]()
+
   - [Installation](./getting-started/installation.md)
   - [First Steps](./getting-started/first-steps.md)
   - [How it works](./getting-started/how-it-works.md)
   - [Devnet & Testnet](./getting-started/dev-and-production.md)
 
 - [Features]()
+
   - [Time travel](./features/time-travel.md)
   - [Teleport](./features/teleport.md)
   - [Web proof](./features/web.md)
@@ -18,6 +21,7 @@
   - [JSON and Regex](./features/json-and-regex.md)
 
 - [Advanced]()
+
   - [Prover](./advanced/prover.md)
   - [Verifier](./advanced/verifier.md)
   - [Global variables](./advanced/prover-global-variables.md)
@@ -28,7 +32,9 @@
   - [React](./javascript/react-hooks.md)
   - [Web proofs](./javascript/web-proofs.md)
   - [Email proofs](./javascript/email-proofs.md)
+
 ---
+
 - [Appendix]()
   - [Contributing](./appendix/contributing/overview.md)
     - [Rust](./appendix/contributing/rust.md)
@@ -49,3 +55,4 @@
     - [Email Proofs](./appendix/architecture/email_proof.md)
   - [JSON-RPC API](./appendix/api.md)
   - [Proof composition](./appendix/proof_composition.md)
+  - [E2E Tests](./appendix/e2e-tests/e2e-test-setup.md)
