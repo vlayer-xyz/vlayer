@@ -8,12 +8,10 @@ alloy-primitives = { workspace = true }
 async-trait = { workspace = true }
 chain_common = { workspace = true }
 derive-new = { workspace = true }
-serde = { workspace = true }
 thiserror = { workspace = true }
 
 # RPC client dependencies (disabled for guest)
 parking_lot = { workspace = true }
-tokio = { workspace = true, optional = true }
 
 # Fake client dependencies (disabled for guest)
 provider = { workspace = true, optional = true }
@@ -29,7 +27,7 @@ tokio = { workspace = true, features = ["rt", "macros"] }
 
 [features]
 fake = ["provider", "risc0-zkp"]
-rpc = ["serde_json", "server_utils", "tracing", "tokio"]
+rpc = ["serde_json", "server_utils", "tracing"]
 
 [lints]
 workspace = true

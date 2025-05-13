@@ -8,7 +8,7 @@ use std::{
 use alloy_primitives::{B256, BlockNumber, ChainId};
 use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
-use chain_common::{ChainProofReceipt, RpcChainProof, RpcSyncStatus};
+use chain_common::{ChainProofReceipt, RpcChainProof, SyncStatus};
 use chain_trie::{UnverifiedChainTrie, verify_chain_trie};
 use derive_more::Debug;
 use derive_new::new;
@@ -68,10 +68,13 @@ impl ChainInfo {
     }
 }
 
-impl From<ChainInfo> for RpcSyncStatus {
+impl From<ChainInfo> for SyncStatus {
     fn from(chain_info: ChainInfo) -> Self {
         let block_range = chain_info.block_range();
-        Self::new(block_range.start(), block_range.end())
+        Self {
+            first_block: block_range.start(),
+            last_block: block_range.end(),
+        }
     }
 }
 

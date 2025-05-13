@@ -1,5 +1,3 @@
-use std::ops::RangeInclusive;
-
 use alloy_primitives::{BlockNumber, ChainId};
 use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
@@ -14,7 +12,6 @@ use risc0_zkvm::{
 use serde::{Deserialize, Serialize};
 use serde_with::{hex::Hex, serde_as};
 use thiserror::Error;
-use u64_range::NonEmptyRange;
 
 pub mod verifier;
 
@@ -200,27 +197,7 @@ impl Method for GetSyncStatus {
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, new)]
-pub struct RpcSyncStatus {
+pub struct SyncStatus {
     pub first_block: BlockNumber,
     pub last_block: BlockNumber,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Deref, Copy)]
-pub struct SyncStatus(NonEmptyRange);
-
-impl From<RangeInclusive<BlockNumber>> for SyncStatus {
-    fn from(range: RangeInclusive<BlockNumber>) -> Self {
-        #[allow(clippy::unwrap_used)]
-        Self(NonEmptyRange::try_from_range(range).unwrap())
-    }
-}
-
-impl From<RpcSyncStatus> for SyncStatus {
-    fn from(sync_status: RpcSyncStatus) -> Self {
-        Self(
-            #[allow(clippy::unwrap_used)]
-            NonEmptyRange::try_from_range(sync_status.first_block..=sync_status.last_block)
-                .unwrap(),
-        )
-    }
 }

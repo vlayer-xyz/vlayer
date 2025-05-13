@@ -2882,7 +2882,6 @@ dependencies = [
  "parking_lot 0.12.3",
  "provider",
  "risc0-zkp",
- "serde",
  "serde_json",
  "server_utils",
  "thiserror 2.0.11",
@@ -2910,7 +2909,6 @@ dependencies = [
  "serde",
  "serde_with",
  "thiserror 2.0.11",
- "u64_range",
 ]
 
 [[package]]

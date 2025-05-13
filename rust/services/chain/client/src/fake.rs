@@ -41,7 +41,10 @@ impl Client for FakeClient {
             .map_err(|_| Error::UnsupportedChain(chain_id))?
             .get_latest_block_number()
             .map_err(Error::other)?;
-        Ok((0..=last_block).into())
+        Ok(SyncStatus {
+            first_block: 0,
+            last_block,
+        })
     }
 }
 
@@ -58,6 +61,6 @@ impl Client for PartiallySyncedClient {
     }
 
     async fn get_sync_status(&self, _: ChainId) -> Result<SyncStatus, Error> {
-        Ok(self.status)
+        Ok(self.status.clone())
     }
 }

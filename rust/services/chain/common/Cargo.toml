@@ -20,7 +20,6 @@ risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 serde_with = { workspace = true, features = ["macros", "hex"] }
 thiserror = { workspace = true }
-u64_range = { workspace = true }
 
 [features]
 testing = []
