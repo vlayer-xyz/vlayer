@@ -56,14 +56,5 @@ export const useProver = () => {
     }
   }, [result]);
 
-  useEffect(() => {
-    if (provingError || provingResultError) {
-      console.log(
-        "error: ",
-        provingError?.message || provingResultError?.message,
-      );
-    }
-  }, [provingError, provingResultError]);
-
   return { callProver, provingHash, result };
 };
