@@ -53,7 +53,7 @@ jobs:
               - 'ansible/**'
               - 'bun.lock'
             workflow-changes:
-              - '.github/workflows/test_e2e_testnet.yaml'
+              - '.github/workflows/test_e2e_bonsai_opsepolia.yaml'
               - '.github/actions/test-e2e/**'
 
   build-binaries:

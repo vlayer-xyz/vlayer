@@ -1,12 +1,11 @@
-# Environments: Devnet & Testnet
+# Devnet, Testnet & Mainnet
 
 The vlayer network consists of several types of nodes: provers, indexers, notaries, and proxies. These nodes are essential for executing vlayer smart contract features, including Time Travel, Teleport, and proofs for Email and Web.
 
-Currently, two environments are supported:
+Currently, vlayer supports the following environments:
 - **testnet**: public environment supporting multiple L1 and L2 testnets.
 - **devnet**: local environment that runs with Docker Compose, providing all necessary services for development.
-
-The production network release is scheduled for Q1 2025.
+- **mainnet**: main public network supporting Ethereum Mainnet, Base, Optimism, and Arbitrum.
 
 ## Testnet
 
@@ -74,19 +73,32 @@ It is useful in case of any Docker configuration change.
 | Notary             | `http://127.0.0.1:7047`        | TLS Notary server                           |
 | WebSocket Proxy    | `http://127.0.0.1:3003`       | Proxying websocket connections              |
 
-### Stopping Devnet
-
-To stop all running services:
-```bash
-docker compose down
-```
-
 ### Clearing Cache
 
 Cached proofs for time travel and teleport are stored in `./chain_db` and can be deleted manually:
 ```bash
 rm -rf ./chain_db
 ```
+
+## Mainnet
+The Mainnet Prover operates in [`GROTH16` mode](/getting-started/dev-and-production.html#prover-modes) and works with the following chains:
+
+| chain | time travel | teleport | email/web |
+|---------|-------------|----------|-----------|
+| mainnet | ✅        | ✅      | ✅         |
+| base | ✅         | ✅      | ✅         |
+| optimism | ✅         | ✅      | ✅         |
+
+✅ Supported, 🚧 In progress
+
+### Public Mainnet Services
+
+| Service            | Endpoint                         | Description                                  |
+|--------------------|----------------------------------|----------------------------------------------|
+| Prover             | `https://stable-prod-prover.vlayer.xyz` | zkEVM prover for vlayer contracts     |
+| Indexer            | `https://chainservice.vlayer.xyz` | Storage proof indexer                |
+| Notary             | `https://notary.vlayer.xyz` | TLS Notary server                            |
+| WebSocket Proxy    | `https://wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary |
 
 ## Prover Modes
 

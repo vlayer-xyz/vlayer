@@ -5,7 +5,7 @@
   - [Installation](./getting-started/installation.md)
   - [First Steps](./getting-started/first-steps.md)
   - [How it works](./getting-started/how-it-works.md)
-  - [Devnet & Testnet](./getting-started/dev-and-production.md)
+  - [Devnet, Testnet & Mainnet](./getting-started/dev-and-production.md)
 
 - [Features]()
   - [Time travel](./features/time-travel.md)

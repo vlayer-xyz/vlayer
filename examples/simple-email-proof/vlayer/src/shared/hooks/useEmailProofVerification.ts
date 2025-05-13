@@ -5,24 +5,26 @@ import {
   useAccount,
   useBalance,
 } from "wagmi";
-import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
+import {
+  useCallProver,
+  useWaitForProvingResult,
+  useChain,
+} from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import { AbiStateMutability, ContractFunctionArgs } from "viem";
 import { useNavigate } from "react-router";
 import debug from "debug";
-import { AlreadyMintedError } from "../errors/appErrors";
+import {
+  AlreadyMintedError,
+  NoProofError,
+  CallProverError,
+  UseChainError,
+} from "../errors/appErrors";
 import { ensureBalance } from "../lib/ethFaucet";
 
 const log = debug("vlayer:email-proof-verification");
-
-class NoProofError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "NoProofError";
-  }
-}
 
 enum ProofVerificationStep {
   MINT = "Mint",
@@ -51,15 +53,35 @@ export const useEmailProofVerification = () => {
     hash: txHash,
   });
 
-  const { callProver, data: proofHash } = useCallProver({
+  const { chain, error: chainError } = useChain(
+    import.meta.env.VITE_CHAIN_NAME,
+  );
+  if (chainError) {
+    throw new UseChainError(chainError);
+  }
+
+  const {
+    callProver,
+    data: proofHash,
+    error: callProverError,
+  } = useCallProver({
     address: import.meta.env.VITE_PROVER_ADDRESS,
     proverAbi: proverSpec.abi,
     functionName: "main",
     gasLimit: Number(import.meta.env.VITE_GAS_LIMIT),
+    chainId: chain?.id,
   });
+
+  if (callProverError) {
+    throw new CallProverError(callProverError.message);
+  }
 
   const { data: proof, error: provingError } =
     useWaitForProvingResult(proofHash);
+
+  if (provingError) {
+    throw new CallProverError(provingError.message);
+  }
 
   const verifyProofOnChain = async () => {
     setCurrentStep(ProofVerificationStep.VERIFYING_ON_CHAIN);

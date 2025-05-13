@@ -61,10 +61,10 @@ In order to use the testnet, you will need to provide a couple of secrets.
 
 Firstly, create `vlayer/.env.testnet.local` - this is where you will put all your secret keys in.
 
-Sign up or Log in to [dashboard.vlayer.xyz](https://dashboard.vlayer.xyz) and generate a new Json Web Token (JWT).
+Sign up or Log in to [dashboard.vlayer.xyz](https://dashboard.vlayer.xyz) and generate a new testnet Json Web Token (JWT).
 
 <div style="text-align: center;">
-  <img src="/images/dashboard-jwt.jpg" alt="Generating JWT in dashboard.vlayer.xyz" />
+  <img src="/images/tokens-dashboard.gif" alt="Generating JWT in dashboard.vlayer.xyz" />
 </div>
 
 Copy generated token (it won't be visible ever again) and save it in `vlayer/.env.testnet.local` 
@@ -106,6 +106,38 @@ Once the devnet is up, run the example from within the `vlayer` directory:
 
 ```sh
 bun run prove:dev
+```
+
+### Production
+In order to use the production, you will need to provide a couple of secrets.
+
+Firstly, create `vlayer/.env.mainnet.local` - this is where you will put all your secret keys in.
+
+Sign up or Log in to [dashboard.vlayer.xyz](https://dashboard.vlayer.xyz) and generate a new production Json Web Token (JWT).
+
+<div style="text-align: center;">
+  <img src="/images/tokens-dashboard.gif" alt="Generating JWT in dashboard.vlayer.xyz" />
+</div>
+
+Copy generated token (it won't be visible ever again) and save it in `vlayer/.env.mainnet.local` 
+
+```sh
+VLAYER_API_TOKEN=...
+```
+
+Next provide a private key for deploying example contracts and sending transactions to the verifier in the `vlayer/.env.mainnet.local` file as
+
+```sh
+EXAMPLES_TEST_PRIVATE_KEY=0x....
+```
+
+By default, `optimism` is configured in the `vlayer/.env.mainnet` file. However, you can override this setting to use [other chains](/getting-started/dev-and-production.html#production).
+
+To change the desired network, set the `CHAIN_NAME` and `JSON_RPC_URL` environment variables in `vlayer/.env.mainnet.local`.
+
+Once configured, run the example from within the `vlayer` directory using:
+```sh
+bun run prove:mainnet
 ```
 
 ## Web Proof example

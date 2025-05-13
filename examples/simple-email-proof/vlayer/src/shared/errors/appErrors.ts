@@ -18,3 +18,21 @@ export class FaucetError extends AppError {
     super("FaucetError", "Failed to fund account.");
   }
 }
+
+export class NoProofError extends AppError {
+  constructor(message: string) {
+    super("NoProofError", message);
+  }
+}
+
+export class CallProverError extends AppError {
+  constructor(message: string) {
+    super("CallProverError", message);
+  }
+}
+
+export class UseChainError extends AppError {
+  constructor(message: string) {
+    super("UseChainError", message);
+  }
+}
