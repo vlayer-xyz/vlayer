@@ -4,6 +4,7 @@ export class AppError extends Error {
     this.name = name;
   }
 }
+
 export class AlreadyMintedError extends AppError {
   constructor() {
     super(
@@ -16,5 +17,17 @@ export class AlreadyMintedError extends AppError {
 export class FaucetError extends AppError {
   constructor() {
     super("FaucetError", "Failed to fund account.");
+  }
+}
+
+export class UseChainError extends AppError {
+  constructor(message: string) {
+    super("UseChainError", message);
+  }
+}
+
+export class CallProverError extends AppError {
+  constructor(message: string) {
+    super("CallProverError", message);
   }
 }
