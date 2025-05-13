@@ -1,5 +1,6 @@
 use call_engine::{GuestOutputError, evm::env::factory::Error as EvmEnvFactoryError};
 use host_utils::{ProverError, proving};
+use provider::{Address, BlockNumber};
 use thiserror::Error;
 
 pub mod preflight;
@@ -30,8 +31,8 @@ pub enum BuilderError {
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] chain_client::Error),
 
-    #[error("Prover contract not deployed")]
-    ProverContractNotDeployed,
+    #[error("Prover contract {0} is not deployed on block {1}")]
+    ProverContractNotDeployed(Address, BlockNumber),
 
     #[error("Prover: {0}")]
     Prover(#[from] ProverError),

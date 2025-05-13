@@ -161,7 +161,7 @@ impl WithStartChainId {
 
         let latest_rpc_block = providers.get_latest_block_number(start_chain_id)?;
         if !prover_contract_deployed(latest_rpc_block)? {
-            return Err(Error::ProverContractNotDeployed);
+            return Err(Error::ProverContractNotDeployed(prover_contract_addr, latest_rpc_block));
         }
 
         let sync_status = chain_client.get_sync_status(start_chain_id).await;
