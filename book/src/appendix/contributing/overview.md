@@ -19,7 +19,6 @@ Let's build something great together!
 
 ## Getting Started
 - Fork the repository on GitHub.
-- Explore the main areas of contribution in our [documentation](https://book.vlayer.xyz) to see where you can make the most impact with vlayer.
 
 ## Making a Contribution
 We welcome:
