@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   useCallProver,
   useWaitForProvingResult,
@@ -10,8 +10,7 @@ import { WebProofConfig, ProveArgs } from "@vlayer/sdk";
 import { Abi, ContractFunctionName } from "viem";
 import { startPage, expectUrl, notarize } from "@vlayer/sdk/web_proof";
 import webProofProver from "../../../out/WebProofProver.sol/WebProofProver";
-import { useHandleSyncChainError } from "./useHandleSyncChainError";
-import { WebProofError } from "../errors";
+import { WebProofError, ChainSyncError } from "../errors";
 
 const webProofConfig: WebProofConfig<Abi, string> = {
   proverCallCommitment: {
@@ -64,7 +63,11 @@ export const useTwitterAccountProof = () => {
     import.meta.env.VITE_CHAIN_NAME,
   );
 
-  useHandleSyncChainError(syncChainError);
+  useEffect(() => {
+    if (syncChainError) {
+      throw new ChainSyncError(syncChainError.message);
+    }
+  }, [syncChainError?.message]);
 
   const vlayerProverConfig: Omit<
     ProveArgs<Abi, ContractFunctionName<Abi>>,

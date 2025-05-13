@@ -20,9 +20,9 @@ import {
   AlreadyMintedError,
   NoProofError,
   CallProverError,
+  ChainSyncError,
 } from "../errors/appErrors";
 import { ensureBalance } from "../lib/ethFaucet";
-import { useHandleSyncChainError } from "./useHandleSyncChainError";
 
 const log = debug("vlayer:email-proof-verification");
 
@@ -57,7 +57,11 @@ export const useEmailProofVerification = () => {
     import.meta.env.VITE_CHAIN_NAME,
   );
 
-  useHandleSyncChainError(chainError);
+  useEffect(() => {
+    if (chainError) {
+      throw new ChainSyncError(chainError.message);
+    }
+  }, [chainError?.message]);
 
   const {
     callProver,

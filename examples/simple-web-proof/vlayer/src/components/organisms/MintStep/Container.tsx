@@ -12,9 +12,8 @@ import { useLocalStorage } from "usehooks-ts";
 import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebProofVerifier";
 import { MintStepPresentational } from "./Presentational";
 import { ensureBalance } from "../../../utils/ethFaucet";
-import { AlreadyMintedError } from "../../../errors";
+import { AlreadyMintedError, ChainSyncError } from "../../../errors";
 import { useSyncChain } from "@vlayer/react";
-import { useHandleSyncChainError } from "../../../hooks/useHandleSyncChainError";
 
 export const MintStep = () => {
   const navigate = useNavigate();
@@ -35,7 +34,11 @@ export const MintStep = () => {
     import.meta.env.VITE_CHAIN_NAME,
   );
 
-  useHandleSyncChainError(syncChainError);
+  useEffect(() => {
+    if (syncChainError) {
+      throw new ChainSyncError(syncChainError.message);
+    }
+  }, [syncChainError?.message]);
 
   useEffect(() => {
     if (proverResult) {
