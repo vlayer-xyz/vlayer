@@ -19,7 +19,7 @@ pub(crate) struct PrivateKeyArgs {
 }
 
 #[derive(Debug, Parser)]
-#[command(version)]
+#[command(version = version::version())]
 pub(crate) struct Cli {
     #[arg(
         long,
