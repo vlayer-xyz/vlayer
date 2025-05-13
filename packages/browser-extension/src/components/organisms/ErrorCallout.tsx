@@ -11,6 +11,9 @@ export const useErrorCallout = () => {
     if (error) {
       setIsErrorCalloutVisible(true);
     }
+    if (!error) {
+      setIsErrorCalloutVisible(false);
+    }
   }, [error]);
   return {
     isErrorCalloutVisible,
