@@ -3,6 +3,7 @@ use std::time::{Duration, SystemTime};
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{ChainId, b256};
 use call_common::{ExecutionLocation, RevmDB};
+use call_db::ProviderDb;
 use call_engine::verifier::teleport::fetch_latest_confirmed_l2_block;
 use ethers_core::types::U64;
 use jsonrpsee::http_client::HttpClientBuilder;
@@ -14,10 +15,7 @@ use optimism::{
 };
 use provider::{BlockTag, EthersProviderFactory, ProviderFactory};
 
-use crate::{
-    db::provider::ProviderDb,
-    test_harness::rpc::{quicknode_op_sepolia_url, rpc_urls},
-};
+use crate::test_harness::rpc::{quicknode_op_sepolia_url, rpc_urls};
 
 fn get_db(location: ExecutionLocation) -> anyhow::Result<impl RevmDB> {
     let provider_factory = EthersProviderFactory::new(rpc_urls());

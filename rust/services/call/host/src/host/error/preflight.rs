@@ -7,7 +7,7 @@ use call_engine::{
 use revm::primitives::{EVMError, HaltReason, SuccessReason};
 use thiserror::Error;
 
-use crate::{db::HostDbError, into_input};
+use crate::{into_input, HostDbError};
 
 #[derive(Error, Debug)]
 pub enum Error {

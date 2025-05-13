@@ -16,7 +16,9 @@ members = [
     "rust/provider",
     "rust/range",
     "rust/server_utils",
+    "rust/services/call/anchor_status",
     "rust/services/call/common",
+    "rust/services/call/db",
     "rust/services/call/engine",
     "rust/services/call/guest",
     "rust/services/call/host",
@@ -195,6 +197,7 @@ block_header = { path = "rust/block_header" }
 block_trie = { path = "rust/services/chain/block_trie" }
 seal = { path = "rust/services/call/seal" }
 call_common = { path = "rust/services/call/common" }
+call_db = { path = "rust/services/call/db" }
 call_precompiles = { path = "rust/services/call/precompiles" }
 call_engine = { path = "rust/services/call/engine" }
 call_guest = { path = "rust/services/call/guest" }

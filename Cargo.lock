@@ -2565,6 +2565,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "call_anchor_status"
+version = "0.1.0"
+dependencies = [
+ "alloy-chains 0.2.0",
+ "alloy-primitives 0.8.20",
+ "anyhow",
+ "call_common",
+ "call_engine",
+ "call_host",
+ "chain",
+ "ethers-core",
+ "jsonrpsee",
+ "optimism",
+ "provider",
+ "revm",
+ "tokio",
+]
+
+[[package]]
 name = "call_common"
 version = "0.1.0"
 dependencies = [
@@ -2574,6 +2593,19 @@ dependencies = [
  "call_precompiles",
  "revm",
  "serde",
+]
+
+[[package]]
+name = "call_db"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives 0.8.20",
+ "block_header",
+ "call_common",
+ "mpt",
+ "provider",
+ "revm",
+ "thiserror 2.0.11",
 ]
 
 [[package]]
@@ -2647,6 +2679,7 @@ dependencies = [
  "block_header",
  "bytes",
  "call_common",
+ "call_db",
  "call_engine",
  "chain",
  "chain_client",
@@ -13159,6 +13192,7 @@ dependencies = [
  "alloy-sol-types",
  "alloy-trie",
  "block_header",
+ "call_db",
  "call_engine",
  "call_host",
  "call_precompiles",

@@ -1,0 +1,22 @@
+[package]
+name = "call_anchor_status"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+alloy-chains = { workspace = true }
+alloy-primitives = { workspace = true }
+anyhow = { workspace = true }
+call_common = { workspace = true }
+call_engine = { workspace = true }
+call_host = { workspace = true }
+chain = { workspace = true }
+ethers-core = { workspace = true }
+jsonrpsee = { workspace = true }
+optimism = { workspace = true }
+provider = { workspace = true }
+revm = { workspace = true }
+tokio = { version = "1.37.0", features = ["full"] }
+
+[lints]
+workspace = true

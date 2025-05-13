@@ -1,5 +1,5 @@
 use block_header::{EvmBlockHeader, ForgeBlockHeader, Hashable};
-use call_host::db::proof::ProofDb;
+use call_db::ProofDb;
 use ethers_core::types::BlockNumber as BlockTag;
 use forge::revm::primitives::{
     Account, Address, B256, Bytes, EvmState, U256,

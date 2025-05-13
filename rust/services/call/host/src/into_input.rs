@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use block_header::EvmBlockHeader;
+use call_db::{ProofDb, ProofDbError};
 use call_engine::evm::{
     env::cached::CachedEvmEnv,
     input::{EvmInput, MultiEvmInput},
@@ -9,15 +10,12 @@ use common::Hashable;
 use mpt::{EMPTY_ROOT_HASH, MerkleTrie, Node};
 use thiserror::Error;
 
-use crate::db::{
-    HostDb,
-    proof::{self, ProofDb},
-};
+use crate::HostDb;
 
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("ProofDB: {0}")]
-    ProofDB(#[from] proof::Error),
+    ProofDB(#[from] ProofDbError),
     #[error("State root mismatch")]
     StateRootMismatch,
     #[error("Can't unwrap EvmEnv Arc as it still has {0} strong references")]
@@ -66,10 +64,10 @@ mod test {
 
     use alloy_primitives::B256;
     use block_header::EthBlockHeader;
+    use call_db::ProofDb;
     use mpt::{MerkleTrie, Node};
 
     use super::into_input;
-    use crate::db::proof::ProofDb;
 
     #[test]
     fn into_input_empty_trie() {
