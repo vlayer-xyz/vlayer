@@ -42,9 +42,8 @@ fn check_anchor_state_liveliness(
     dest_chain: Chain,
     max_age_seconds: u64,
 ) -> anyhow::Result<()> {
-    let factory = EthersProviderFactory::new(rpc_urls());
-    let src = factory.create(src_chain.id())?;
-    let dest = factory.create(dest_chain.id())?;
+    let src = PROVIDER_FACTORY.create(src_chain.id())?;
+    let dest = PROVIDER_FACTORY.create(dest_chain.id())?;
     let current_block = src.get_latest_block_number()?;
     let registry =
         create_anchor_state_registry((src_chain.id(), current_block).into(), dest_chain.id())?;
