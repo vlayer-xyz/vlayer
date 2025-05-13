@@ -113,14 +113,14 @@ This starts the required services:
 
 - `anvil-l1`: Local Ethereum L1 node
 - `anvil-l2-op`: Local Optimism L2 node
-- `notary-server`: Server for proof verification
+- `notary-server`: Notary server
 
 The service startup orchestrates:
 
 1. Docker containers for blockchain nodes
-2. Chain workers for block processing
-3. Chain server for RPC communication
-4. vlayer server for proof generation and verification
+2. Chain workers for precomputing chain proofs
+3. Chain server for making chain proofs available over JSON-RPC
+4. vlayer server for call proof generation
 
 ### 6. Chain Worker Configuration
 
