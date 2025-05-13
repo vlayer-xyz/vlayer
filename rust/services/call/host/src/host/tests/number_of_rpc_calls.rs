@@ -4,18 +4,16 @@ use alloy_chains::NamedChain::{Mainnet, OptimismSepolia};
 use alloy_primitives::address;
 use call_common::ExecutionLocation;
 use call_engine::{evm::env::cached::CachedEvmEnv, travel_call};
+use call_rpc::rpc_cache_path;
 use provider::{CachedMultiProvider, CachedProvider, profiling};
 
 use crate::{
     Call,
     evm_env::factory::HostEvmEnvFactory,
     host::tests::call,
-    test_harness::{
-        contracts::{
-            time_travel::{self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
-            usdt::{self, IERC20::balanceOfCall, USDT},
-        },
-        rpc_cache_path,
+    test_harness::contracts::{
+        time_travel::{self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
+        usdt::{self, IERC20::balanceOfCall, USDT},
     },
 };
 

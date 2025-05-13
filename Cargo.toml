@@ -24,6 +24,7 @@ members = [
     "rust/services/call/host",
     "rust/services/call/optimism",
     "rust/services/call/precompiles",
+    "rust/services/call/rpc",
     "rust/services/call/seal",
     "rust/services/call/server",
     "rust/services/call/server_lib",
@@ -202,6 +203,7 @@ call_precompiles = { path = "rust/services/call/precompiles" }
 call_engine = { path = "rust/services/call/engine" }
 call_guest = { path = "rust/services/call/guest" }
 call_host = { path = "rust/services/call/host" }
+call_rpc = { path = "rust/services/call/rpc" }
 call_server = { path = "rust/services/call/server" }
 call_server_lib = { path = "rust/services/call/server_lib" }
 optimism = { path = "rust/services/call/optimism" }

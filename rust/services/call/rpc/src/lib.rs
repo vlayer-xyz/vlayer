@@ -3,18 +3,11 @@ use std::{collections::HashMap, env};
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::ChainId;
 use dotenvy::dotenv;
-use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
-use provider::{BlockNumber, CachedMultiProvider, CachedProviderFactory};
-
-use crate::BuilderError;
-
-// To activate recording, set UPDATE_SNAPSHOTS to true.
-// Recording creates new test data directory and writes return data from Alchemy into files in that directory.
-const UPDATE_SNAPSHOTS: bool = false;
 
 fn get_alchemy_key() -> String {
     dotenv().ok();
+    #[allow(clippy::expect_used)]
     env::var("ALCHEMY_KEY").expect(
         "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
     )
@@ -22,6 +15,7 @@ fn get_alchemy_key() -> String {
 
 fn get_quicknode_key() -> String {
     dotenv().ok();
+    #[allow(clippy::expect_used)]
     env::var("QUICKNODE_KEY").expect(
         "To use sequencer client you need to set QUICKNODE_KEY in an .env file. See .env.example",
     )
@@ -111,27 +105,4 @@ pub fn rpc_urls() -> HashMap<ChainId, String> {
         (NamedChain::AnvilHardhat.into(), anvil_url.clone()),
         (OP_ANVIL, op_anvil_url.clone()),
     ])
-}
-
-pub fn block_tag_to_block_number(
-    multi_provider: &CachedMultiProvider,
-    chain_id: ChainId,
-    block_tag: BlockTag,
-) -> Result<BlockNumber, BuilderError> {
-    match block_tag {
-        BlockTag::Latest => Ok(multi_provider
-            .get_block_header(chain_id, BlockTag::Latest)?
-            .number()),
-        BlockTag::Number(block_no) => Ok(block_no.as_u64()),
-        _ => panic!("Only Latest and specific block numbers are supported, got {block_tag:?}"),
-    }
-}
-
-pub fn create_multi_provider(test_name: &str) -> CachedMultiProvider {
-    let rpc_cache_paths = rpc_cache_paths(test_name);
-    let maybe_ethers_provider_factory =
-        UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
-    let provider_factory =
-        CachedProviderFactory::new(rpc_cache_paths, maybe_ethers_provider_factory);
-    CachedMultiProvider::from_factory(provider_factory)
 }

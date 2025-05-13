@@ -2681,6 +2681,7 @@ dependencies = [
  "call_common",
  "call_db",
  "call_engine",
+ "call_rpc",
  "chain",
  "chain_client",
  "chain_common",
@@ -2727,6 +2728,18 @@ dependencies = [
  "url",
  "urlpattern",
  "web_proof",
+]
+
+[[package]]
+name = "call_rpc"
+version = "0.1.0"
+dependencies = [
+ "alloy-chains 0.2.0",
+ "alloy-primitives 0.8.20",
+ "dotenvy",
+ "ethers-core",
+ "lazy_static",
+ "provider",
 ]
 
 [[package]]

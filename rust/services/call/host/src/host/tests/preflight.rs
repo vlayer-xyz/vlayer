@@ -172,6 +172,7 @@ mod view {
 }
 
 mod teleport {
+    use call_rpc::OP_ANVIL;
     use optimism::client::factory::cached;
 
     use super::*;
@@ -182,7 +183,6 @@ mod teleport {
             TOKEN,
         },
         preflight_with_teleport,
-        rpc::OP_ANVIL,
     };
 
     #[tokio::test(flavor = "multi_thread")]

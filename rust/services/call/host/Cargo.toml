@@ -13,6 +13,7 @@ bytes = { workspace = true }
 call_common = { workspace = true }
 call_db = { workspace = true }
 call_engine = { workspace = true }
+call_rpc = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true, features = ["fake", "rpc"] }
 chain_common = { workspace = true }

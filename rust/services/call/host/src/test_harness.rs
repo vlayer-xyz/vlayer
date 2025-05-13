@@ -1,17 +1,21 @@
+use alloy_primitives::ChainId;
 use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
+use call_rpc::{rpc_cache_paths, rpc_urls};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use optimism::client::factory::cached;
-use provider::CachedMultiProvider;
-use rpc::create_multi_provider;
-pub use rpc::{block_tag_to_block_number, rpc_cache_path, rpc_cache_paths};
+use provider::{BlockNumber, BlockTag, CachedMultiProvider, CachedProviderFactory};
+// pub use rpc::{rpc_cache_path, rpc_cache_paths};
 pub use types::ExecutionLocation;
 
 use crate::{BuilderError, Call, Config, Error, Host, PreflightResult};
 
 pub mod contracts;
-pub mod rpc;
 mod types;
+
+// To activate recording, set UPDATE_SNAPSHOTS to true.
+// Recording creates new test data directory and writes return data from Alchemy into files in that directory.
+const UPDATE_SNAPSHOTS: bool = false;
 
 pub async fn preflight<C>(
     test_name: &str,
@@ -86,4 +90,27 @@ fn create_host(
         op_client_factory,
         config,
     )
+}
+
+fn block_tag_to_block_number(
+    multi_provider: &CachedMultiProvider,
+    chain_id: ChainId,
+    block_tag: BlockTag,
+) -> Result<BlockNumber, BuilderError> {
+    match block_tag {
+        BlockTag::Latest => Ok(multi_provider
+            .get_block_header(chain_id, BlockTag::Latest)?
+            .number()),
+        BlockTag::Number(block_no) => Ok(block_no.as_u64()),
+        _ => panic!("Only Latest and specific block numbers are supported, got {block_tag:?}"),
+    }
+}
+
+fn create_multi_provider(test_name: &str) -> CachedMultiProvider {
+    let rpc_cache_paths = rpc_cache_paths(test_name);
+    let maybe_ethers_provider_factory =
+        UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
+    let provider_factory =
+        CachedProviderFactory::new(rpc_cache_paths, maybe_ethers_provider_factory);
+    CachedMultiProvider::from_factory(provider_factory)
 }
