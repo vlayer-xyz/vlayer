@@ -31,8 +31,8 @@ export class WebProofError extends AppError {
   }
 }
 
-export class UseChainError extends AppError {
+export class ChainSyncError extends AppError {
   constructor(message: string) {
-    super("UseChainError", message);
+    super("ChainSyncError", message);
   }
 }
