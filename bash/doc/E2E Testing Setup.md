@@ -158,15 +158,6 @@ These steps:
 3. Ensure the CLI tool is built ([`ensure_cli_built`](lib/e2e.sh))
 4. Initialize a test template with the example code ([`init_template`](lib/e2e.sh))
 
-## Workflow Sequence
-
-1. **Environment Setup**: Load environment variables and configurations
-2. **Dependencies Setup**: Source helper scripts and set proving mode
-3. **Build Assets**: Generate TypeScript bindings and build the SDK
-4. **Start Services**: Launch required Docker containers and services
-5. **Prepare Test Environment**: Create temporary directory and initialize example
-6. **Run Tests**: Execute the test logic (varies by test script)
-7. **Cleanup**: Remove temporary files and stop services
 
 ## Key Configurables
 
