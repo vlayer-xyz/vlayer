@@ -27,7 +27,7 @@ export const chainToTimeTravelConfig: Record<string, TimeTravelConfig> = {
   },
   optimism: {
     tokenOwner: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-    usdcTokenAddr: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    usdcTokenAddr: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
     prover: {
       endBlock: "latest",
       travelRange: BigInt(10),
