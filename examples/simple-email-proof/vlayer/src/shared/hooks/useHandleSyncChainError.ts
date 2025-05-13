@@ -1,7 +1,7 @@
 import { ChainSwitchError } from "@vlayer/react";
 import { ChainNotSupportedError } from "@vlayer/react";
 import { P, match } from "ts-pattern";
-import { AppError } from "../errors";
+import { AppError } from "../errors/appErrors";
 import { MissingChainError } from "@vlayer/react";
 import { useEffect } from "react";
 

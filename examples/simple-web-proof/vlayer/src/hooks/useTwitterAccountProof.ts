@@ -126,5 +126,10 @@ export const useTwitterAccountProof = () => {
     isWebProofPending,
     callProver,
     result,
+    error:
+      callProverError ||
+      waitForProvingResultError ||
+      webProofError ||
+      syncChainError,
   };
 };
