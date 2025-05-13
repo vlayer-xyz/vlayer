@@ -28,7 +28,6 @@ use std::collections::HashMap;
 use alloy_primitives::ChainId;
 use call_common::ExecutionLocation;
 use chain_client::ChainClientConfig;
-use chain_common::SyncStatus;
 use provider::{Address, BlockNumber, CachedMultiProvider, EthersProviderFactory};
 use risc0_zkvm::sha::Digest;
 use tracing::warn;
@@ -180,7 +179,7 @@ impl WithStartChainId {
         };
 
         let start_block_number =
-            compute_start_block_number(latest_rpc_block, prover_contract_deployed, sync_status)?;
+            compute_start_block_number(latest_rpc_block, prover_contract_deployed, &sync_status)?;
         let start_exec_location = (start_chain_id, start_block_number).into();
 
         Ok(WithStartExecLocation {
@@ -195,10 +194,10 @@ impl WithStartChainId {
 fn compute_start_block_number(
     latest_rpc_block: BlockNumber,
     prover_contract_deployed: impl Fn(BlockNumber) -> Result<bool, Error>,
-    sync_status: SyncStatus,
+    sync_status: &chain_common::SyncStatus,
 ) -> Result<BlockNumber, Error> {
-    if prover_contract_deployed(sync_status.end())? {
-        Ok(sync_status.end())
+    if prover_contract_deployed(sync_status.last_block)? {
+        Ok(sync_status.last_block)
     } else {
         Ok(latest_rpc_block)
     }
@@ -232,6 +231,7 @@ mod tests {
         use std::sync::Arc;
 
         use chain_client::PartiallySyncedClient;
+        use chain_common::SyncStatus;
         use ethers_core::types::{Bytes, U64};
         use ethers_providers::MockProvider;
         use optimism::client::factory::cached;
@@ -262,7 +262,7 @@ mod tests {
             let start_chain_provider = mock_provider(prover_contract_code_results);
             let providers = CachedMultiProvider::from_provider(CHAIN_ID, start_chain_provider);
             let chain_client =
-                Box::new(PartiallySyncedClient::new((0..=LATEST_INDEXED_BLOCK).into()));
+                Box::new(PartiallySyncedClient::new(SyncStatus::new(0, LATEST_INDEXED_BLOCK)));
             let op_client_factory = Box::new(cached::Factory::default());
             WithStartChainId {
                 start_chain_id: CHAIN_ID,

@@ -4,6 +4,7 @@ use chain::{CHAIN_ID_TO_CHAIN_SPEC, ChainSpec};
 use chain_client::{ChainClientConfig, Client, Error, RpcClient};
 use server_utils::rpc::Error as RpcError;
 use tokio::time::sleep;
+use u64_range::NonEmptyRange;
 
 const TEST_URL: &str = "https://test-chainservice.vlayer.xyz";
 const PROD_URL: &str = "https://chainservice.vlayer.xyz";
@@ -23,7 +24,8 @@ pub async fn main() -> anyhow::Result<()> {
 fn create_client(url: &str) -> RpcClient {
     let config = ChainClientConfig {
         url: url.to_string(),
-        ..Default::default()
+        poll_interval: Duration::from_secs(0),
+        timeout: Duration::from_secs(0),
     };
     RpcClient::new(&config)
 }
@@ -40,7 +42,10 @@ async fn check_server_sync_status(client: &RpcClient) {
 async fn print_sync_status(client: &RpcClient, chain: &ChainSpec) {
     match client.get_sync_status(chain.id()).await {
         Ok(range) => {
-            println!("✅ Chain: {} {}, Range: {}", chain.id(), chain.name(), *range);
+            #[allow(clippy::expect_used)]
+            let range = NonEmptyRange::try_from_range(range.first_block..=range.last_block)
+                .expect("Range is non-empty");
+            println!("✅ Chain: {} {}, Range: {}", chain.id(), chain.name(), range);
         }
         Err(Error::Rpc(RpcError::JsonRpc(value))) => {
             println!("❌ Rpc error {}: {}", chain.name(), value);

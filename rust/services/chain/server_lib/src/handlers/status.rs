@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use alloy_primitives::ChainId;
-use chain_common::RpcSyncStatus;
+use chain_common::SyncStatus;
 use chain_db::ChainDb;
 use parking_lot::RwLock;
 
@@ -11,7 +11,7 @@ use crate::error::AppError;
 pub async fn v_sync_status(
     chain_db: Arc<RwLock<ChainDb>>,
     chain_id: ChainId,
-) -> Result<RpcSyncStatus, AppError> {
+) -> Result<SyncStatus, AppError> {
     chain_db
         .read()
         .get_chain_info(chain_id)?
@@ -53,7 +53,7 @@ mod tests {
             .expect("update_chain failed");
         assert_eq!(
             v_sync_status(chain_db, chain_id).await.unwrap(),
-            RpcSyncStatus {
+            SyncStatus {
                 first_block: 0,
                 last_block: 0
             }
