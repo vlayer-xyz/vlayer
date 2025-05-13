@@ -163,6 +163,13 @@ async fn main() {
     let mode = cli.mode;
     let config: HostConfig = cli.into();
 
+    if config.proof_mode == ProofMode::Groth16 {
+        error!(
+            "Groth16 proof mode is not supported by chain workers as they need to compose proofs. Use succinct or fake"
+        );
+        std::process::exit(1);
+    }
+
     if config.proof_mode == ProofMode::Fake {
         set_risc0_dev_mode();
     }
