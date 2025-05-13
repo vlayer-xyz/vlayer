@@ -11,7 +11,7 @@ use call_db::ProviderDb;
 use call_rpc::rpc_urls;
 use chain::optimism::ChainSpec;
 use optimism::anchor_state_registry::AnchorStateRegistry;
-use provider::{BlockTag, EthersProviderFactory, ProviderFactory};
+use provider::{BlockTag, EthersProviderFactory, EvmBlockHeader, ProviderFactory};
 
 const MAX_AGE_HOURS: u64 = 170;
 const BASE_MAX_AGE_HOURS: u64 = 80;
@@ -37,6 +37,12 @@ fn create_anchor_state_registry(
     Ok(registry)
 }
 
+fn age_in_hours(block: &Box<dyn EvmBlockHeader>) -> anyhow::Result<f64> {
+    let block_time = SystemTime::UNIX_EPOCH + Duration::from_secs(block.timestamp());
+    let age = SystemTime::now().duration_since(block_time)?;
+    Ok(age.as_secs_f64() / 3600.0)
+}
+
 fn check_anchor_state_liveliness(
     src_chain: Chain,
     dest_chain: Chain,
@@ -44,19 +50,25 @@ fn check_anchor_state_liveliness(
 ) -> anyhow::Result<()> {
     let src = PROVIDER_FACTORY.create(src_chain.id())?;
     let dest = PROVIDER_FACTORY.create(dest_chain.id())?;
-    let current_block = src.get_latest_block_number()?;
-    let registry =
-        create_anchor_state_registry((src_chain.id(), current_block).into(), dest_chain.id())?;
+    let current_src_chain_block = src.get_latest_block_number()?;
+    let registry = create_anchor_state_registry(
+        (src_chain.id(), current_src_chain_block).into(),
+        dest_chain.id(),
+    )?;
     let commitment = registry.get_latest_confirmed_l2_commitment()?;
-    let Some(block) = dest.get_block_header(BlockTag::Number(commitment.block_number.into()))?
+    let Some(current_dest_chain_block) =
+        dest.get_block_header(BlockTag::Number(commitment.block_number.into()))?
     else {
-        bail!("No block found for number {}", commitment.block_number)
+        bail!(
+            "Block {} on destination chain {} not found",
+            commitment.block_number,
+            dest_chain.named().unwrap(),
+        )
     };
-    let block_time = SystemTime::UNIX_EPOCH + Duration::from_secs(block.timestamp());
-    let block_age = SystemTime::now().duration_since(block_time)?;
-    let block_age_secs = block_age.as_secs();
-    let block_age_hours = block_age_secs as f64 / 3600.0;
+    let block_age_hours = age_in_hours(&current_dest_chain_block)?;
+    let block_age_secs = (block_age_hours * 3600.0) as u64;
     let max_age_hours = max_age_seconds as f64 / 3600.0;
+
     ensure!(
         block_age_secs <= max_age_seconds,
         "Latest finalized block for {} -> {} is too old: {:.2}h (max {:.2}h)",
