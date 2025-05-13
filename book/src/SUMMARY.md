@@ -10,14 +10,13 @@
   - [Devnet, Testnet & Mainnet](./getting-started/dev-and-production.md)
 
 - [Features]()
-
-  - [Time travel](./features/time-travel.md)
-  - [Teleport](./features/teleport.md)
   - [Web proof](./features/web.md)
     - [Custom data source](./web-proof/quickstart-guide.md)
     - [Server-side](./web-proof/server-side.md)
     - [Redaction](./web-proof/redaction.md)
   - [Email proof](./features/email.md)
+  - [Time travel](./features/time-travel.md)
+  - [Teleport](./features/teleport.md)
   - [JSON and Regex](./features/json-and-regex.md)
 
 - [Advanced]()
