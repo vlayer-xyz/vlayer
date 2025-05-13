@@ -9,9 +9,6 @@ pub enum Error {
     #[error("Builder: {0}")]
     Builder(#[from] BuilderError),
 
-    #[error("Proving: {0}")]
-    AwaitingChainProof(#[from] AwaitingChainProofError),
-
     #[error("Preflight: {0}")]
     Preflight(#[from] preflight::Error),
 
@@ -38,12 +35,6 @@ pub enum BuilderError {
 
     #[error("Prover: {0}")]
     Prover(#[from] ProverError),
-}
-
-#[derive(Error, Debug)]
-pub enum AwaitingChainProofError {
-    #[error("Chain Proof Client error: {0}")]
-    ChainProofClient(#[from] chain_client::Error),
 }
 
 #[derive(Error, Debug)]
