@@ -1,22 +1,22 @@
 import {
-  useChain,
   useCallProver,
   useWaitForProvingResult,
+  useSyncChain,
 } from "@vlayer/react";
 import proverSpec from "../../../../out/SimpleTeleportProver.sol/SimpleTeleportProver";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { UseChainError, CallProverError } from "../errors/appErrors";
+import { ChainSyncError, CallProverError } from "../errors/appErrors";
 
 export const useProver = () => {
   const [, setProverResult] = useLocalStorage("proverResult", "");
 
-  const { chain, error: chainError } = useChain(
+  const { chain, error: chainError } = useSyncChain(
     import.meta.env.VITE_CHAIN_NAME,
   );
 
   if (chainError) {
-    throw new UseChainError(chainError);
+    throw new ChainSyncError(chainError.message);
   }
 
   const {
@@ -44,7 +44,6 @@ export const useProver = () => {
 
   useEffect(() => {
     if (result && Array.isArray(result)) {
-      console.log("result", result);
       setProverResult(
         JSON.stringify(result, (key, value) => {
           if (typeof value === "bigint") {
