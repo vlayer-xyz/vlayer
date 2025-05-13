@@ -1,5 +1,5 @@
 use alloy_primitives::ChainId;
-use call_host::{Error as HostError, Host};
+use call_host::{BuilderError, Host};
 use provider::Address;
 use tracing::{Instrument, info, info_span};
 use types::{Call, CallContext, CallHash, Result as VCallResult};
@@ -55,15 +55,14 @@ async fn build_host(
     config: &Config,
     chain_id: ChainId,
     prover_contract_addr: Address,
-) -> std::result::Result<Host, HostError> {
+) -> std::result::Result<Host, BuilderError> {
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls.clone())
         .with_chain_guest_id(config.chain_guest_id())
         .with_chain_client_config(config.chain_client_config.clone())?
         .with_start_chain_id(chain_id)?
         .with_prover_contract_addr(prover_contract_addr)
-        .await
-        .map_err(HostError::Builder)?
+        .await?
         .build(config.into())?;
     Ok(host)
 }
