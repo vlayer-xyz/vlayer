@@ -53,9 +53,10 @@ async fn check_anchor_state_freshness(
         create_anchor_state_registry((src_chain.id(), current_block).into(), dest_chain.id())?;
     let commitment = registry.get_latest_confirmed_l2_commitment()?;
 
-    let block = match dest.get_block_header(BlockTag::Number(U64::from(commitment.block_number)))? {
-        Some(b) => b,
-        None => anyhow::bail!("No block found for number {}", commitment.block_number),
+    let Some(block) =
+        dest.get_block_header(BlockTag::Number(U64::from(commitment.block_number)))?
+    else {
+        anyhow::bail!("No block found for number {}", commitment.block_number)
     };
 
     ensure_block_fresh(block.timestamp(), max_age_hours, src_chain, dest_chain)?;
