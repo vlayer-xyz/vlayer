@@ -2,12 +2,16 @@ use std::process;
 
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::ChainId;
+use anyhow::bail;
 use call_common::{ExecutionLocation, RevmDB};
 use call_db::ProviderDb;
 use call_rpc::rpc_urls;
 use chain::optimism::ChainSpec;
 use optimism::anchor_state_registry::AnchorStateRegistry;
 use provider::{BlockTag, EthersProviderFactory, ProviderFactory};
+
+const MAX_AGE_HOURS: u64 = 170;
+const BASE_MAX_AGE_HOURS: u64 = 80;
 
 fn get_db(location: ExecutionLocation) -> anyhow::Result<impl RevmDB> {
     let provider_factory = EthersProviderFactory::new(rpc_urls());
@@ -41,7 +45,7 @@ fn check_anchor_state_freshness(
     let commitment = registry.get_latest_confirmed_l2_commitment()?;
     let Some(block) = dest.get_block_header(BlockTag::Number(commitment.block_number.into()))?
     else {
-        anyhow::bail!("No block found for number {}", commitment.block_number)
+        bail!("No block found for number {}", commitment.block_number)
     };
     ensure_block_fresh(block.timestamp(), max_age_hours, src_chain, dest_chain)?;
     Ok(())
