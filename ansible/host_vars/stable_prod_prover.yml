@@ -28,9 +28,8 @@ vlayer_alchemy_api_key: !vault |
   6164386166343532386262626237643763623366376537663030
 vlayer_prover_rpc_urls:
  - "1:https://eth-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
- - "8453:https://base-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
- - "10:https://opt-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
- - "8453:https://base-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "8453:https://omniscient-flashy-frog.base-mainnet.quiknode.pro/{{ vlayer_quicknode_api_key }}"
+ - "10:https://omniscient-flashy-frog.optimism.quiknode.pro/{{ vlayer_quicknode_api_key }}"
  - "42161:https://arb-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "42170:https://arbnova-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "137:https://polygon-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
