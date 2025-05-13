@@ -1,0 +1,15 @@
+[package]
+name = "chain_status"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = { workspace = true }
+chain = { workspace = true }
+chain_client = { workspace = true, features = ["rpc"] }
+server_utils = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+u64_range = { workspace = true }
+
+[lints]
+workspace = true

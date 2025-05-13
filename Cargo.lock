@@ -3032,6 +3032,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "chain_status"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chain",
+ "chain_client",
+ "server_utils",
+ "tokio",
+ "u64_range",
+]
+
+[[package]]
 name = "chain_test_utils"
 version = "0.1.0"
 dependencies = [
