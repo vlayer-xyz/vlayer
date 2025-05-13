@@ -115,7 +115,7 @@ forks = [
 [[chains]]
 name = "base"
 id = 8453
-op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0xdB9091e48B1C42992A1213e6916184f9eBDbfEDf", structure = { type = "v1", value = { game_type = "Cannon" } } } }
+op_spec = { anchor_chain = 1, anchor_state_registry = { address = "0x496286e5eE7758de84Dd17e6d2d97afC2ACE4cc7", structure = { type = "v1", value = { game_type = "Cannon" } } } }
 forks = [
     { spec = "REGOLITH", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1704992401 } },

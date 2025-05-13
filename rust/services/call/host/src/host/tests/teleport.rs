@@ -250,7 +250,7 @@ mod anchor_state_registry {
             }
 
             #[tokio::test(flavor = "multi_thread")]
-            #[ignore = "unichain mainnet endpoint currently not supported on alchemy"]
+            #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
             async fn unichain() -> anyhow::Result<()> {
                 check_anchor_state_freshness(
                     Chain::mainnet(),
