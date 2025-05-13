@@ -33,6 +33,7 @@ members = [
     "rust/services/chain/host",
     "rust/services/chain/server",
     "rust/services/chain/server_lib",
+    "rust/services/chain/status",
     "rust/services/chain/test_utils",
     "rust/services/chain/worker",
     "rust/services/dns/server",
@@ -209,6 +210,7 @@ chain_host = { path = "rust/services/chain/host" }
 chain_server = { path = "rust/services/chain/server" }
 chain_server_lib = { path = "rust/services/chain/server_lib" }
 chain_common = { path = "rust/services/chain/common" }
+chain_status = { path = "rust/services/chain/status" }
 chain_test_utils = { path = "rust/services/chain/test_utils" }
 chain_worker = { path = "rust/services/chain/worker" }
 common = { path = "rust/common" }
