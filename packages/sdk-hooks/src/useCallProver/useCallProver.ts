@@ -22,7 +22,8 @@ export const useCallProver = (
   // read vlayer client from context
   const { vlayerClient } = useProofContext();
   // read chainId from wagmi
-  const chainId = useChainId();
+  const wagmiChainId = useChainId();
+  const chainId = proveArgs.chainId ?? wagmiChainId;
 
   // state
   const [status, setStatus] = useState<ProverStatus>(ProverStatus.Idle);
