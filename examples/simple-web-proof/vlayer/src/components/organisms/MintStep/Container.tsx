@@ -13,6 +13,8 @@ import webProofProofVerifier from "../../../../../out/WebProofVerifier.sol/WebPr
 import { MintStepPresentational } from "./Presentational";
 import { ensureBalance } from "../../../utils/ethFaucet";
 import { AlreadyMintedError } from "../../../errors";
+import { useSyncChain } from "@vlayer/react";
+import { useHandleSyncChainError } from "../../../hooks/useHandleSyncChainError";
 
 export const MintStep = () => {
   const navigate = useNavigate();
@@ -28,6 +30,12 @@ export const MintStep = () => {
   const { status } = useWaitForTransactionReceipt({
     hash: txHash,
   });
+
+  const { chain, error: syncChainError } = useSyncChain(
+    import.meta.env.VITE_CHAIN_NAME,
+  );
+
+  useHandleSyncChainError(syncChainError);
 
   useEffect(() => {
     if (proverResult) {
@@ -53,12 +61,13 @@ export const MintStep = () => {
     const proofData = JSON.parse(proverResult) as Parameters<
       typeof writeContract
     >[0]["args"];
-    console.log("proofData", proofData);
+
     const writeContractArgs: Parameters<typeof writeContract>[0] = {
       address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
       abi: webProofProofVerifier.abi,
       functionName: "verify",
       args: proofData,
+      chainId: chain?.id,
     };
 
     try {
