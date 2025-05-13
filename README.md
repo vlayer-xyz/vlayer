@@ -23,3 +23,6 @@ By contributing, you agree that your contributions will be licensed under the Bu
 We would like to acknowledge the following open-source projects that inspired and provided a foundation for this work:
 
 * [Steel](https://crates.io/crates/risc0-steel) - Hardened off-chain Execution for EVM dapps
+
+## Security Audits
+- ✅ [Veridise Audit Report (Q2 2025)](./audits/audit-2025-q2-veridise.pdf)
