@@ -8,8 +8,10 @@ alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 call_common = { workspace = true }
+call_db = { workspace = true }
 call_engine = { workspace = true }
 call_host = { workspace = true }
+call_rpc = { workspace = true }
 chain = { workspace = true }
 ethers-core = { workspace = true }
 jsonrpsee = { workspace = true }
