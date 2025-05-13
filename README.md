@@ -1,7 +1,11 @@
 # vlayer
-vlayer provides tools and infrastructure that give smart contracts super powers like [time travel](https://book.vlayer.xyz/features/time-travel.html) to past blocks, [teleport](https://book.vlayer.xyz/features/teleport.html) to different chains, access to real data from the [web](https://book.vlayer.xyz/features/web.html), and [email](https://book.vlayer.xyz/features/email.html).
+vlayer enables developers to extract, verify and integrate real-world data into Ethereum smart contracts. Our technology is powered by Zero Knowledge Proofs (ZKP) and Multi-Party Computation (MPC), allowing you to securely verify private data without exposing sensitive information. 
 
-vlayer allows smart contracts to be executed [off-chain](https://book.vlayer.xyz//advanced/prover.html). The result of the execution can then be used by [on-chain contracts](https://book.vlayer.xyz/advanced/verifier.html).
+Our four core features include: 
+- [Web Proofs](https://book.vlayer.xyz/features/web.html): Access verified web data, including APIs and websites, in your smart contracts 
+- [Email Proofs](https://book.vlayer.xyz/features/email.html): Tap into email content from your smart contracts and use it on-chain
+- [Time Travel](https://book.vlayer.xyz/features/time-travel.html): Leverage historical on-chain data in your smart contracts
+- [Teleport](https://book.vlayer.xyz/features/teleport.html): Execute a smart contract across different EVM-comptable blockchain networks
 
 ## Getting started
 
