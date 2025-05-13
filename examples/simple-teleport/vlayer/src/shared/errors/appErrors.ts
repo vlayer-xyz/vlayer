@@ -12,3 +12,15 @@ export class AlreadyMintedError extends AppError {
     );
   }
 }
+
+export class CallProverError extends AppError {
+  constructor(message: string) {
+    super("CallProverError", message);
+  }
+}
+
+export class UseChainError extends AppError {
+  constructor(message: string) {
+    super("UseChainError", message);
+  }
+}
