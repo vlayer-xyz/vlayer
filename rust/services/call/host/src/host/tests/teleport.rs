@@ -39,7 +39,7 @@ fn create_anchor_state_registry(
     Ok(registry)
 }
 
-async fn check_anchor_state_freshness(
+fn check_anchor_state_freshness(
     src_chain: Chain,
     dest_chain: Chain,
     max_age_hours: u64,
@@ -185,14 +185,12 @@ mod anchor_state_registry {
                     Chain::optimism_sepolia(),
                     MAX_AGE_HOURS,
                 )
-                .await
             }
 
             #[tokio::test(flavor = "multi_thread")]
             #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
             async fn base() -> anyhow::Result<()> {
                 check_anchor_state_freshness(Chain::sepolia(), Chain::base_sepolia(), MAX_AGE_HOURS)
-                    .await
             }
 
             #[tokio::test(flavor = "multi_thread")]
@@ -203,7 +201,6 @@ mod anchor_state_registry {
                     Chain::from_named(NamedChain::WorldSepolia),
                     MAX_AGE_HOURS,
                 )
-                .await
             }
 
             #[tokio::test(flavor = "multi_thread")]
@@ -214,7 +211,6 @@ mod anchor_state_registry {
                     Chain::from_named(NamedChain::UnichainSepolia),
                     MAX_AGE_HOURS,
                 )
-                .await
             }
         }
 
@@ -229,14 +225,12 @@ mod anchor_state_registry {
                     Chain::optimism_mainnet(),
                     MAX_AGE_HOURS,
                 )
-                .await
             }
 
             #[tokio::test(flavor = "multi_thread")]
             #[ignore = "This test is ignored because it requires alchemy Api key set in .env file"]
             async fn base() -> anyhow::Result<()> {
                 check_anchor_state_freshness(Chain::mainnet(), Chain::base_mainnet(), MAX_AGE_HOURS)
-                    .await
             }
 
             #[tokio::test(flavor = "multi_thread")]
@@ -247,7 +241,6 @@ mod anchor_state_registry {
                     Chain::from_named(NamedChain::World),
                     MAX_AGE_HOURS,
                 )
-                .await
             }
 
             #[tokio::test(flavor = "multi_thread")]
@@ -258,7 +251,6 @@ mod anchor_state_registry {
                     Chain::from_named(NamedChain::Unichain),
                     MAX_AGE_HOURS,
                 )
-                .await
             }
         }
     }
