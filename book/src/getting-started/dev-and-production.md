@@ -88,7 +88,6 @@ The Mainnet Prover operates in [`GROTH16` mode](/getting-started/dev-and-product
 | mainnet | ✅        | ✅      | ✅         |
 | base | ✅         | ✅      | ✅         |
 | optimism | ✅         | ✅      | ✅         |
-| arbitrum | ✅         | ✅      | ✅         |
 
 ✅ Supported, 🚧 In progress
 
