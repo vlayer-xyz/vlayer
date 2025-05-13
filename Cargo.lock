@@ -2579,6 +2579,7 @@ dependencies = [
  "chain",
  "ethers-core",
  "jsonrpsee",
+ "lazy_static",
  "optimism",
  "provider",
  "revm",
