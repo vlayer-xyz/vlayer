@@ -2,7 +2,9 @@ name: Prepare Release PR
 
 on:
   push:
-    # Trigger on push to any branch
+    branches:
+      - main
+
 permissions:
   contents: write
   pull-requests: write
@@ -53,9 +55,11 @@ jobs:
 
           echo "NEW_VERSION: $NEW_VERSION"
 
-          echo "PREVIOUS_TAG=${PREVIOUS_TAG}" >> $GITHUB_ENV
-          echo "LATEST_COMMIT=${LATEST_COMMIT}" >> $GITHUB_ENV
-          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+          {
+            echo "PREVIOUS_TAG=${PREVIOUS_TAG}"
+            echo "LATEST_COMMIT=${LATEST_COMMIT}"
+            echo "NEW_VERSION=${NEW_VERSION}"
+          } >> $GITHUB_ENV
 
       - name: Prepare Release Notes
         env:
@@ -87,7 +91,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(version): bump version to ${{ env.NEW_VERSION }}"
-          author: Arkadiusz Konior <akonior@gmail.com>
+          author: <akonior@gmail.com>
           branch: release/v${{ env.NEW_VERSION }}
           title: "chore(version): bump version to ${{ env.NEW_VERSION }}"
           body-path: ${{ env.RELEASE_NOTES_FILE }}
