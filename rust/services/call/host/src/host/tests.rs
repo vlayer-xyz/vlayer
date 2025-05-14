@@ -3,7 +3,6 @@ use call_engine::Call;
 
 mod number_of_rpc_calls;
 mod preflight;
-mod teleport;
 mod with_guest;
 
 use alloy_primitives::Address;

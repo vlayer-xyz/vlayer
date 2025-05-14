@@ -7,9 +7,7 @@ edition = "2024"
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true }
 dotenvy = { workspace = true }
-ethers-core = { workspace = true }
 lazy_static = { workspace = true }
-provider = { workspace = true }
 
 [lints]
 workspace = true

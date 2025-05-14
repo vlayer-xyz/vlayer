@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 alloy-primitives = { workspace = true }
 block_header = { workspace = true }
-call_common = { workspace = true }
 mpt = { workspace = true }
 provider = { workspace = true }
 revm = { workspace = true }
