@@ -3,7 +3,7 @@ name: Prepare Release PR
 on:
   push:
     branches:
-      # - main
+      - main
 
 permissions:
   contents: write
