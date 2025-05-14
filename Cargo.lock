@@ -6331,6 +6331,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "gas_price_checker"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "anyhow",
+ "reqwest 0.12.12",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "generate_fixtures"
 version = "0.1.0"
 dependencies = [
