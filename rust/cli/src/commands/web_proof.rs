@@ -7,7 +7,7 @@ use thiserror::Error;
 use tracing::debug;
 use web_prover::{
     Method, NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
-    generate_web_proof,
+    NotaryConfigBuilder, NotaryConfigBuilderError, generate_web_proof,
 };
 
 #[derive(Debug, PartialEq, Eq, EnumString)]
@@ -36,6 +36,8 @@ pub(crate) enum InputError {
     InvalidHeaderFormat(String),
     #[error("Invalid notarize params: {0}")]
     NotarizeParams(#[from] NotarizeParamsBuilderError),
+    #[error("Invalid notary config: {0}")]
+    NotaryConfig(#[from] NotaryConfigBuilderError),
 }
 
 /// Generates a web-based proof for the specified request
@@ -152,14 +154,15 @@ fn parse_notary_url(url_str: &str) -> Result<NotaryConfig> {
         port,
     } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https, Scheme::Http])?;
 
-    let path_prefix = url
-        .path()
-        .trim_start_matches('/')
-        .trim_end_matches('/')
-        .to_string();
+    let path_prefix = url.path().trim_start_matches('/').trim_end_matches('/');
     let enable_tls = scheme == Scheme::Https;
 
-    let config = NotaryConfig::new(host, port, path_prefix, enable_tls);
+    let config = NotaryConfigBuilder::default()
+        .host(host)
+        .port(port)
+        .path_prefix(path_prefix)
+        .enable_tls(enable_tls)
+        .build()?;
 
     debug!("notary config: {config:#?}");
 

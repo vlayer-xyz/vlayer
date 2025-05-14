@@ -11,8 +11,8 @@ use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
 use web_proof::web_proof::{PresentationJSON, WebProof};
 use web_prover::{
-    NotarizeParamsBuilder, NotaryConfig, RedactionConfig, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,
-    generate_web_proof,
+    NotarizeParamsBuilder, NotaryConfigBuilder, RedactionConfig, TLSN_VERSION,
+    TLSN_VERSION_WITH_V_PREFIX, generate_web_proof,
 };
 
 const PROJECT_DIR: &str = env!("CARGO_MANIFEST_DIR");
@@ -58,7 +58,12 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
     info!("Generate web proof using local notary");
     let presentation = generate_web_proof(
         NotarizeParamsBuilder::default()
-            .notary_config(NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false))
+            .notary_config(
+                NotaryConfigBuilder::default()
+                    .host(NOTARY_HOST)
+                    .port(NOTARY_PORT)
+                    .build()?,
+            )
             .server_domain(SERVER_DOMAIN)
             .server_host(SERVER_HOST)
             .server_port(SERVER_PORT)
@@ -114,12 +119,14 @@ async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::err
     info!("Generate web proof using remote notary");
     let presentation = generate_web_proof(
         NotarizeParamsBuilder::default()
-            .notary_config(NotaryConfig::new(
-                REMOTE_NOTARY_HOST.into(),
-                REMOTE_NOTARY_PORT,
-                TLSN_VERSION_WITH_V_PREFIX.into(),
-                true,
-            ))
+            .notary_config(
+                NotaryConfigBuilder::default()
+                    .host(REMOTE_NOTARY_HOST)
+                    .port(REMOTE_NOTARY_PORT)
+                    .path_prefix(TLSN_VERSION_WITH_V_PREFIX)
+                    .enable_tls(true)
+                    .build()?,
+            )
             .server_domain(SERVER_DOMAIN)
             .server_host(SERVER_HOST)
             .server_port(SERVER_PORT)
@@ -215,7 +222,12 @@ async fn generate_web_proofs_with_redaction_config(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let presentation = generate_web_proof(
         NotarizeParamsBuilder::default()
-            .notary_config(NotaryConfig::new(NOTARY_HOST.into(), NOTARY_PORT, "".into(), false))
+            .notary_config(
+                NotaryConfigBuilder::default()
+                    .host(NOTARY_HOST)
+                    .port(NOTARY_PORT)
+                    .build()?,
+            )
             .server_domain(SERVER_DOMAIN)
             .server_host(SERVER_HOST)
             .server_port(SERVER_PORT)

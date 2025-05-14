@@ -8,7 +8,7 @@ use constcat::concat;
 pub use notarize::notarize;
 pub use params::{
     Method, NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
-    RedactionConfigFn,
+    NotaryConfigBuilder, NotaryConfigBuilderError, RedactionConfigFn,
 };
 pub use presentation::create_presentation_with_redaction;
 use rangeset::RangeSet;
