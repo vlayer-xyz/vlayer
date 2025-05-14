@@ -7,7 +7,7 @@ edition = "2024"
 derive_builder = { workspace = true }
 jsonwebtoken = { workspace = true }
 serde = { workspace = true }
-strum = { workspace = true }
+strum = { workspace = true, features = ["derive"] }
 
 [lints]
 workspace = true
