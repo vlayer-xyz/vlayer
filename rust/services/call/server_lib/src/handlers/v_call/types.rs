@@ -19,9 +19,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     #[error("Invalid field: {0}")]
     FieldValidation(#[from] FieldValidationError),
-    #[error("Gas meter error: {0}")]
+    #[error("Gas meter: {0}")]
     GasMeter(#[from] GasMeterError),
-    #[error("Host builder error: {0}")]
+    #[error("Host builder: {0}")]
     HostBuilder(#[from] BuilderError),
 }
 

@@ -14,7 +14,7 @@ type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("RPC error: {0}")]
+    #[error(transparent)]
     Rpc(#[from] RpcError),
 }
 

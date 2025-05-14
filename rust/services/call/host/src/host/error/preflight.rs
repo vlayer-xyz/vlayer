@@ -11,10 +11,7 @@ use crate::{db::HostDbError, into_input};
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Calldata too large: {0} bytes")]
-    CalldataTooLargeError(usize),
-
-    #[error("Execution error: {0}")]
+    #[error(transparent)]
     Execution(#[from] ExecutionError),
 
     #[error("Creating input: {0}")]
@@ -34,7 +31,7 @@ pub enum ExecutionError {
     #[error("EVM error: {0}")]
     EvmError(#[from] EVMError<HostDbError>),
 
-    #[error("EVM transact error: {0}")]
+    #[error(transparent)]
     TransactError(#[from] TransactError),
 
     #[error("Failed to get EvmEnv: {0}")]
@@ -69,12 +66,12 @@ impl From<GuestExecutionError> for Error {
 #[derive(Debug, Error, PartialEq)]
 pub enum TransactError {
     #[error(
-        "contract execution stopped ({0:?}): No data was returned. Please check that your prover contract address is correct and the prover contract method is returning data"
+        "Contract execution stopped ({0:?}): No data was returned. Please check that your prover contract address is correct and the prover contract method is returning data"
     )]
     Stop(SuccessReason),
-    #[error("{0}")]
+    #[error(transparent)]
     Revert(RevertError),
-    #[error("contract execution halted: {0:?}")]
+    #[error("Contract execution halted: {0:?}")]
     Halt(HaltReason),
 }
 
@@ -92,11 +89,11 @@ impl From<GuestTransactError> for TransactError {
 
 #[derive(Debug, Error, PartialEq)]
 pub enum RevertError {
-    #[error("revert: <empty>")]
+    #[error("Transaction reverted: <empty>")]
     EmptyRevert,
-    #[error("revert: {0:?}")]
+    #[error("Transaction reverted: {0:?}")]
     Revert(GenericRevertReason),
-    #[error("raw bytes revert: {0}")]
+    #[error("Transaction reverted with non-UTF-8 bytes: {0}")]
     RawBytes(Bytes),
 }
 

@@ -15,11 +15,11 @@ use crate::{
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Gas meter error: {0}")]
+    #[error("Allocating gas: {0}")]
     AllocateGas(#[from] GasMeterError),
-    #[error("Preflight error: {0}")]
+    #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
-    #[error("Proving error: {0}")]
+    #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
 }
 

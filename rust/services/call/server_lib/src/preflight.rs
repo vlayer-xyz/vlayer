@@ -13,9 +13,9 @@ use crate::{
 pub enum Error {
     #[error(transparent)]
     Preflight(#[from] PreflightError),
-    #[error("Gas meter error: {0}")]
+    #[error("Refunding gas: {0}")]
     GasMeter(#[from] GasMeterError),
-    #[error("Metrics error: {0}")]
+    #[error("Metrics: {0}")]
     Metrics(#[from] MetricsError),
 }
 

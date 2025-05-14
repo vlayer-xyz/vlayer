@@ -16,12 +16,12 @@ use crate::{
 pub enum Error {
     #[error(transparent)]
     Proving(#[from] ProvingError),
-    #[error("Gas meter error: {0}")]
-    GasMeter(#[from] GasMeterError),
-    #[error("Metrics error: {0}")]
+    #[error("Refunding gas: {0}")]
+    RefundingGas(#[from] GasMeterError),
+    #[error("Metrics: {0}")]
     Metrics(#[from] MetricsError),
-    #[error("Seal error: {0}")]
-    Seal(#[from] seal::Error),
+    #[error("Encoding seal: {0}")]
+    EncodingSeal(#[from] seal::Error),
 }
 
 pub async fn await_proving(
