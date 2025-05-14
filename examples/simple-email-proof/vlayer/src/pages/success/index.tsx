@@ -1,10 +1,12 @@
 import { Link, useSearchParams } from "react-router";
 import { truncateHashOrAddr } from "../../shared/lib/utils";
+import { useAccount } from "wagmi";
 export const SuccessContainer = () => {
   const [searchParams] = useSearchParams();
   const txHash = searchParams.get("txHash");
   const domain = searchParams.get("domain");
   const recipient = searchParams.get("recipient");
+  const account = useAccount();
 
   return (
     <>
@@ -12,7 +14,11 @@ export const SuccessContainer = () => {
         Your <b>{domain}</b> NFT was minted to {truncateHashOrAddr(recipient)}
         <br />
         <a
-          href={`https://optimism-sepolia.blockscout.com/tx/${txHash}`}
+          href={
+            account.chain?.blockExplorers?.default.name === "Etherscan"
+              ? `${account.chain?.blockExplorers?.default.url}/token/${txHash}`
+              : `${account.chain?.blockExplorers?.default.url}/tx/${txHash}`
+          }
           target="_blank"
           rel="noreferrer"
           className="text-violet-500 font-bold block mt-5"
