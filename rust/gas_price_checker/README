@@ -5,11 +5,11 @@ A simple Rust command-line tool that fetches the current Ethereum gas price from
 ## Usage
 
 ```sh
-cargo run -- <RPC_URL> [THRESHOLD_GWEI]
+cargo run -- <RPC_URL> <THRESHOLD_GWEI>
 ```
 
-- <RPC_URL>: The HTTP(S) URL of your Ethereum JSON-RPC endpoint.
-- [THRESHOLD_GWEI]: Optional. A floating-point gas-price threshold in Gwei. Defaults to 10.0 if omitted.
+- `<RPC_URL>`: The HTTP(S) URL of your Ethereum JSON-RPC endpoint.
+- `<THRESHOLD_GWEI>`: Optional. A floating-point gas-price threshold in Gwei. Defaults to 10.0 if omitted.
 
 ## Example
 
@@ -19,7 +19,7 @@ cargo run -- https://eth-sepolia.g.alchemy.com/v2/<API_KEY> 5
 
 This will:
 
-1. Query eth_gasPrice on the Sepolia testnet via your Alchemy endpoint.
+1. Query `eth_gasPrice` on the Sepolia testnet via your Alchemy endpoint.
 2. Print the current gas price in Gwei.
 3. Exit with 0 if the price is ≤ 5 Gwei, or with a non-zero code if it’s higher.
 
@@ -32,7 +32,7 @@ Gas price: 2.3456 gwei
 
 ## How It Works
 
-1. Sends a JSON-RPC eth_gasPrice request using reqwest.
-2. Parses the returned hex string into a U256 (from alloy_primitives).
+1. Sends a JSON-RPC eth_gasPrice request using `reqwest`.
+2. Parses the returned hex string into a U`256 (from `alloy_primitives`).
 3. Converts Wei → Gwei and compares against the threshold.
 4. Prints a colored status and returns the appropriate exit code.
