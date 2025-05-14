@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  prepare_release-pr:
+  prepare-release-pr:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
