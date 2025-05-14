@@ -17,6 +17,13 @@ function deploy_contracts(){
 
 function verify_deployment_is_stable_across_networks(){
   local stable_deployment=$(cat deployed_contracts.json | jq -r)
+  
+  if ! find "${CONTRACTS_DIR}/broadcast/${DEPLOYER_SCRIPT}" -type f -name "run-latest.json" 2>/dev/null | grep -q . ; then
+    echo
+    echo "No run-latest.json found, skipping verification (most likely contracts already deployed)"
+    return
+  fi
+
   for network_txs in $(find "${CONTRACTS_DIR}/broadcast/${DEPLOYER_SCRIPT}" -type f -name "run-latest.json") ; do
     result=$(jq <"${network_txs}" -r '{contracts: .transactions | map({contractName: .contractName, contractAddress: .contractAddress})}')
     if [[ "${stable_deployment}" != "${result}" ]] ; then
