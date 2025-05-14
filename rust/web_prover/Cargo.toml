@@ -5,11 +5,13 @@ edition = "2024"
 
 [features]
 integration-tests = []
+tlsn-jwt = []
 
 [dependencies]
 anyhow = { workspace = true }
 bincode = { workspace = true }
 constcat = { workspace = true }
+derivative = { workspace = true }
 derive_builder = { workspace = true }
 derive_more = { workspace = true }
 hex = { workspace = true }

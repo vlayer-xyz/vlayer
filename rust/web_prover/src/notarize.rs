@@ -35,12 +35,21 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
         max_recv_data,
     } = params;
 
-    let notary_client = NotaryClient::builder()
+    let mut notary_client_builder = NotaryClient::builder();
+
+    notary_client_builder
         .host(notary_config.host)
         .port(notary_config.port)
         .path_prefix(notary_config.path_prefix)
-        .enable_tls(notary_config.enable_tls)
-        .build()?;
+        .enable_tls(notary_config.enable_tls);
+
+    #[cfg(feature = "tlsn-jwt")]
+    #[cfg(not(clippy))]
+    if let Some(jwt) = notary_config.jwt {
+        notary_client_builder.jwt(jwt);
+    }
+
+    let notary_client = notary_client_builder.build()?;
 
     let notarization_request = NotarizationRequest::builder()
         .max_sent_data(max_sent_data)
