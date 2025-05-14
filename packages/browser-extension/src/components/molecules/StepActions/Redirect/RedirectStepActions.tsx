@@ -17,7 +17,7 @@ export const RedirectStepActions: FC<RedirectStepActionProps> = ({
     if (!isVisited && status == StepStatus.Current) {
       window.location.href = link;
     }
-  }, [isVisited, status]);
+  }, [isVisited, link, status]);
 
   return <></>;
 };

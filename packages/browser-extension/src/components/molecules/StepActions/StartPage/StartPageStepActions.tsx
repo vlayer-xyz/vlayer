@@ -34,7 +34,7 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
         console.error("Error during opening app:", error);
       });
     }
-  }, [isVisited, status]);
+  }, [isVisited, link, status]);
 
   return <></>;
 };
