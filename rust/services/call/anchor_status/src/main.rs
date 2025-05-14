@@ -15,20 +15,22 @@ use optimism::anchor_state_registry::AnchorStateRegistry;
 use provider::{BlockTag, EthersProviderFactory, EvmBlockHeader, ProviderFactory};
 
 const ALLOWED_BLOCK_AGE_HOURS_DEVIATION: u64 = 5;
-const SEVEN_DAYS_IN_HOURS: u64 = 7 * 24;
-const THREE_AND_A_HALF_DAYS_IN_HOURS: u64 = 3 * 24 + 12;
+
+// hours
+const SEVEN_DAYS: u64 = 7 * 24;
+const THREE_AND_A_HALF_DAYS: u64 = 3 * 24 + 12;
 
 lazy_static::lazy_static! {
     static ref PROVIDER_FACTORY: EthersProviderFactory = EthersProviderFactory::new(rpc_urls());
-    static ref EXPECTED_BLOCK_AGE_HOURS_MAP: HashMap<u64, u64> = HashMap::from([
-        (Chain::optimism_sepolia().id(), SEVEN_DAYS_IN_HOURS),
-        (Chain::base_sepolia().id(), THREE_AND_A_HALF_DAYS_IN_HOURS),
-        (Chain::from_named(NamedChain::WorldSepolia).id(), THREE_AND_A_HALF_DAYS_IN_HOURS),
-        (Chain::from_named(NamedChain::UnichainSepolia).id(), SEVEN_DAYS_IN_HOURS),
-        (Chain::optimism_mainnet().id(), SEVEN_DAYS_IN_HOURS),
-        (Chain::base_mainnet().id(), THREE_AND_A_HALF_DAYS_IN_HOURS),
-        (Chain::from_named(NamedChain::World).id(), THREE_AND_A_HALF_DAYS_IN_HOURS),
-        (Chain::from_named(NamedChain::Unichain).id(), SEVEN_DAYS_IN_HOURS),
+    static ref CHAIN_TO_FINALISATION_TIME: HashMap<u64, u64> = HashMap::from([
+        (Chain::optimism_sepolia().id(), SEVEN_DAYS),
+        (Chain::base_sepolia().id(), THREE_AND_A_HALF_DAYS),
+        (Chain::from_named(NamedChain::WorldSepolia).id(), THREE_AND_A_HALF_DAYS),
+        (Chain::from_named(NamedChain::UnichainSepolia).id(), SEVEN_DAYS),
+        (Chain::optimism_mainnet().id(), SEVEN_DAYS),
+        (Chain::base_mainnet().id(), THREE_AND_A_HALF_DAYS),
+        (Chain::from_named(NamedChain::World).id(), THREE_AND_A_HALF_DAYS),
+        (Chain::from_named(NamedChain::Unichain).id(), SEVEN_DAYS),
     ]);
 }
 
@@ -56,9 +58,9 @@ fn age_in_hours(block: &Box<dyn EvmBlockHeader>) -> anyhow::Result<f64> {
 }
 
 fn expected_block_age_hours(dest_chain: &Chain) -> u64 {
-    *EXPECTED_BLOCK_AGE_HOURS_MAP
+    *CHAIN_TO_FINALISATION_TIME
         .get(&dest_chain.id())
-        .unwrap_or(&168) // default to 7 days if not found
+        .expect(&format!("No finalisation time found for chain {}", dest_chain.named().unwrap()))
 }
 
 fn is_within_expected_block_age(
