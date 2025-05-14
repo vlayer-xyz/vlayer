@@ -102,7 +102,8 @@ jobs:
         with:
           token: ${{ steps.app_token.outputs.token }}
           commit-message: "chore(version): bump version to ${{ env.NEW_VERSION }}"
-          author: Vlayer GitHub Automation <41898282+github-actions[bot]@users.noreply.github.com>
+          committer: Vlayer GitHub Automation <211681916+vlayer-github-automation[bot]@users.noreply.github.com>
+          author: Vlayer GitHub Automation <211681916+vlayer-github-automation[bot]@users.noreply.github.com>
           branch: release/v${{ env.NEW_VERSION }}
           title: "chore(version): bump version to ${{ env.NEW_VERSION }}"
           body-path: ${{ env.RELEASE_NOTES_FILE }}
