@@ -92,7 +92,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(version): bump version to ${{ env.NEW_VERSION }}"
-          author: github-actions[bot]@users.noreply.github.com
+          author: GitHub Actions <github-actions@users.noreply.github.com>
           branch: release/v${{ env.NEW_VERSION }}
           title: "chore(version): bump version to ${{ env.NEW_VERSION }}"
           body-path: ${{ env.RELEASE_NOTES_FILE }}
