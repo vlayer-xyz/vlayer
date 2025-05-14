@@ -5,7 +5,7 @@ pragma solidity ^0.8.21;
 import {console, Script} from "forge-std-1.9.4/src/Script.sol";
 import {Repository} from "../src/Repository.sol";
 import {Groth16ProofVerifier} from "../src/proof_verifier/Groth16ProofVerifier.sol";
-import {Deploy2} from "./Deploy2.sol";
+import {Deploy2} from "./utils/Deploy2.sol";
 
 bytes32 constant VLAYER_STABLE_SALT = keccak256("mainnet.vlayer.xyz");
 
@@ -20,7 +20,7 @@ contract MainnetVlayerDeployer is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        Repository repository = getOrDeployRepository(admin, owner);
+        Repository repository = getOrDeployKeyRegistry(admin, owner);
         console.log("REPOSITORY_ADDRESS=%s", address(repository));
 
         Groth16ProofVerifier groth16ProofVerifier = getOrDeployGroth16ProofVerifier(repository);
@@ -29,7 +29,7 @@ contract MainnetVlayerDeployer is Script {
         vm.stopBroadcast();
     }
 
-    function getOrDeployRepository(address admin, address owner) internal returns (Repository) {
+    function getOrDeployKeyRegistry(address admin, address owner) internal returns (Repository) {
         bytes memory constructorArgs = abi.encode(admin, owner);
         bytes memory creationCode = abi.encodePacked(type(Repository).creationCode, constructorArgs);
 
