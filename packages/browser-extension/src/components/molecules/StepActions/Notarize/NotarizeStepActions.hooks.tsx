@@ -145,13 +145,7 @@ const useRedirectCallout = () => {
     if (isWebProving) {
       setIsRedirectCalloutVisible(true);
     }
-    if (
-      !isWebProving ||
-      isWebProvingDone ||
-      timeout === 0 ||
-      isWebProvingError ||
-      isZkProvingError
-    ) {
+    if (timeout === 0 || isWebProvingError || isZkProvingError) {
       setIsRedirectCalloutVisible(false);
     }
   }, [
