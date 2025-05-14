@@ -11,12 +11,10 @@ call_common = { workspace = true }
 call_db = { workspace = true }
 call_rpc = { workspace = true }
 chain = { workspace = true }
-jsonrpsee = { workspace = true }
 lazy_static = { workspace = true }
 optimism = { workspace = true }
 provider = { workspace = true }
-revm = { workspace = true }
-tokio = { version = "1.37.0", features = ["full"] }
+tokio = { workspace = true }
 
 [lints]
 workspace = true

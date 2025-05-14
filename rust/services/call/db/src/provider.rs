@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used)]
+
 use std::{
     collections::HashMap,
     sync::{Arc, RwLock},
@@ -5,9 +7,10 @@ use std::{
 
 use alloy_primitives::{Address, B256, U256};
 use provider::BlockingProvider;
+#[allow(clippy::disallowed_types)]
 use revm::{
-    primitives::{AccountInfo, Bytecode, KECCAK_EMPTY},
     DatabaseRef,
+    primitives::{AccountInfo, Bytecode, KECCAK_EMPTY},
 };
 use thiserror::Error;
 
@@ -43,6 +46,7 @@ impl ProviderDb {
 impl DatabaseRef for ProviderDb {
     type Error = Error;
 
+    #[allow(clippy::disallowed_types)]
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>> {
         let proof = self
             .provider
@@ -50,6 +54,7 @@ impl DatabaseRef for ProviderDb {
         if proof.code_hash == B256::ZERO {
             return Ok(None);
         }
+        #[allow(clippy::expect_used)]
         self.code_hashes
             .write()
             .expect("poisoned lock")
@@ -62,10 +67,12 @@ impl DatabaseRef for ProviderDb {
         }))
     }
 
+    #[allow(clippy::disallowed_types)]
     fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode> {
         if code_hash == KECCAK_EMPTY {
             return Ok(Bytecode::new());
         }
+        #[allow(clippy::expect_used)]
         let contract_address = *self
             .code_hashes
             .read()
@@ -78,6 +85,7 @@ impl DatabaseRef for ProviderDb {
         Ok(Bytecode::new_raw(code.0.into()))
     }
 
+    #[allow(clippy::disallowed_types)]
     fn storage_ref(&self, address: Address, index: U256) -> Result<U256> {
         let storage = self
             .provider
@@ -85,6 +93,7 @@ impl DatabaseRef for ProviderDb {
         Ok(storage)
     }
 
+    #[allow(clippy::disallowed_types)]
     fn block_hash_ref(&self, number: u64) -> Result<B256> {
         let header = self
             .provider

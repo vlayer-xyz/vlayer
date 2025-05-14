@@ -27,7 +27,7 @@ use risc0_zkvm::{ProveInfo, SessionStats, sha::Digest};
 use seal::EncodableReceipt;
 use tracing::instrument;
 
-use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
+use crate::{HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
 
 mod builder;
 mod config;

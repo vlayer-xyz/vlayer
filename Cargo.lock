@@ -2575,11 +2575,9 @@ dependencies = [
  "call_db",
  "call_rpc",
  "chain",
- "jsonrpsee",
  "lazy_static",
  "optimism",
  "provider",
- "revm",
  "tokio",
 ]
 

@@ -51,6 +51,7 @@ fn create_anchor_state_registry(
     Ok(registry)
 }
 
+#[allow(clippy::borrowed_box)]
 fn age_in_hours(block: &Box<dyn EvmBlockHeader>) -> anyhow::Result<f64> {
     let block_time = SystemTime::UNIX_EPOCH + Duration::from_secs(block.timestamp());
     let age = SystemTime::now().duration_since(block_time)?;
@@ -58,11 +59,11 @@ fn age_in_hours(block: &Box<dyn EvmBlockHeader>) -> anyhow::Result<f64> {
 }
 
 fn expected_block_age_hours(dest_chain: &Chain) -> u64 {
-    *CHAIN_TO_FINALISATION_TIME
-        .get(&dest_chain.id())
-        .expect(&format!("No finalisation time found for chain {}", dest_chain.named().unwrap()))
+    #[allow(clippy::unwrap_used)]
+    *CHAIN_TO_FINALISATION_TIME.get(&dest_chain.id()).unwrap()
 }
 
+#[allow(clippy::cast_precision_loss)]
 fn is_within_expected_block_age(
     block_age_hours: f64,
     expected_hours: u64,
@@ -79,14 +80,16 @@ fn check_anchor_state_liveliness(src_chain: Chain, dest_chain: Chain) -> anyhow:
     let registry =
         create_anchor_state_registry((src_chain.id(), current_block).into(), dest_chain.id())?;
     let commitment = registry.get_latest_confirmed_l2_commitment()?;
+
+    #[allow(clippy::unwrap_used)]
+    let src_name = src_chain.named().unwrap();
+    #[allow(clippy::unwrap_used)]
+    let dest_name = dest_chain.named().unwrap();
+
     let Some(current_dest_chain_block) =
         dest.get_block_header(BlockTag::Number(commitment.block_number.into()))?
     else {
-        bail!(
-            "No block {} on destination chain {}",
-            commitment.block_number,
-            dest_chain.named().unwrap(),
-        )
+        bail!("No block {} on destination chain {dest_name}", commitment.block_number)
     };
     let block_age_hours = age_in_hours(&current_dest_chain_block)?;
     let expected_hours = expected_block_age_hours(&dest_chain);
@@ -96,9 +99,7 @@ fn check_anchor_state_liveliness(src_chain: Chain, dest_chain: Chain) -> anyhow:
             expected_hours,
             ALLOWED_BLOCK_AGE_HOURS_DEVIATION
         ),
-        "Block for {} -> {} is not within expected age range: {:.2}h (expected: {}±{}h)",
-        src_chain.named().unwrap(),
-        dest_chain.named().unwrap(),
+        "Block for {src_name} -> {dest_name} is not within expected age range: {:.2}h (expected: {}±{}h)",
         block_age_hours,
         expected_hours,
         ALLOWED_BLOCK_AGE_HOURS_DEVIATION,
@@ -107,12 +108,14 @@ fn check_anchor_state_liveliness(src_chain: Chain, dest_chain: Chain) -> anyhow:
 }
 
 #[tokio::main]
+#[allow(clippy::unwrap_used)]
 pub async fn main() -> anyhow::Result<()> {
     let src_chain_to_dest_chain = vec![
         (Chain::sepolia(), Chain::optimism_sepolia()),
         (Chain::sepolia(), Chain::base_sepolia()),
         (Chain::sepolia(), Chain::from_named(NamedChain::WorldSepolia)),
-        (Chain::sepolia(), Chain::from_named(NamedChain::UnichainSepolia)),
+        // Currently, we don't have an up-to-date `AnchorStateRegistry address for Unichain Sepolia.
+        // (Chain::sepolia(), Chain::from_named(NamedChain::UnichainSepolia)),
         (Chain::mainnet(), Chain::optimism_mainnet()),
         (Chain::mainnet(), Chain::base_mainnet()),
         (Chain::mainnet(), Chain::from_named(NamedChain::World)),
@@ -120,11 +123,9 @@ pub async fn main() -> anyhow::Result<()> {
     ];
     let mut any_failed = false;
     for (src, dest) in src_chain_to_dest_chain {
-        print!(
-            "Checking anchor liveliness for {} -> {}... ",
-            src.named().unwrap(),
-            dest.named().unwrap()
-        );
+        let src_name = src.named().unwrap();
+        let dest_name = dest.named().unwrap();
+        print!("Checking anchor liveliness for {src_name} -> {dest_name}... ");
         match check_anchor_state_liveliness(src, dest) {
             Ok(()) => println!("OK"),
             Err(e) => {
