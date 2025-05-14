@@ -17,11 +17,22 @@ jobs:
   prepare-release-pr:
     runs-on: ubuntu-latest
     steps:
+
+      - name: Generate a token for the template repository
+        id: app_token
+        uses: actions/create-github-app-token@v1.9.3
+        with:
+          owner: "vlayer-xyz"
+          repositories: "vlayer"
+          app-id: ${{ secrets.VLAYER_GITHUB_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.VLAYER_GITHUB_AUTOMATION_APP_SECRET }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
 
       - name: Fetch all tags
         run: git fetch --tags --force
@@ -89,9 +100,10 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app_token.outputs.token }}
           commit-message: "chore(version): bump version to ${{ env.NEW_VERSION }}"
-          author: GitHub Actions <github-actions@users.noreply.github.com>
+          committer: Vlayer GitHub Automation <211681916+vlayer-github-automation[bot]@users.noreply.github.com>
+          author: Vlayer GitHub Automation <211681916+vlayer-github-automation[bot]@users.noreply.github.com>
           branch: release/v${{ env.NEW_VERSION }}
           title: "chore(version): bump version to ${{ env.NEW_VERSION }}"
           body-path: ${{ env.RELEASE_NOTES_FILE }}
