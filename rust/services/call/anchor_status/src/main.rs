@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     process,
     time::{Duration, SystemTime},
 };
@@ -13,11 +14,22 @@ use chain::optimism::ChainSpec;
 use optimism::anchor_state_registry::AnchorStateRegistry;
 use provider::{BlockTag, EthersProviderFactory, EvmBlockHeader, ProviderFactory};
 
-const MAX_AGE_HOURS: u64 = 170;
-const BASE_MAX_AGE_HOURS: u64 = 80;
+const ALLOWED_BLOCK_AGE_HOURS_DEVIATION: u64 = 5;
+const SEVEN_DAYS_IN_HOURS: u64 = 7 * 24;
+const THREE_AND_A_HALF_DAYS_IN_HOURS: u64 = 3 * 24 + 12;
 
 lazy_static::lazy_static! {
     static ref PROVIDER_FACTORY: EthersProviderFactory = EthersProviderFactory::new(rpc_urls());
+    static ref EXPECTED_BLOCK_AGE_HOURS_MAP: HashMap<u64, u64> = HashMap::from([
+        (Chain::optimism_sepolia().id(), SEVEN_DAYS_IN_HOURS),
+        (Chain::base_sepolia().id(), THREE_AND_A_HALF_DAYS_IN_HOURS),
+        (Chain::from_named(NamedChain::WorldSepolia).id(), THREE_AND_A_HALF_DAYS_IN_HOURS),
+        (Chain::from_named(NamedChain::UnichainSepolia).id(), SEVEN_DAYS_IN_HOURS),
+        (Chain::optimism_mainnet().id(), SEVEN_DAYS_IN_HOURS),
+        (Chain::base_mainnet().id(), THREE_AND_A_HALF_DAYS_IN_HOURS),
+        (Chain::from_named(NamedChain::World).id(), THREE_AND_A_HALF_DAYS_IN_HOURS),
+        (Chain::from_named(NamedChain::Unichain).id(), SEVEN_DAYS_IN_HOURS),
+    ]);
 }
 
 fn get_db(location: ExecutionLocation) -> anyhow::Result<impl RevmDB> {
@@ -43,39 +55,51 @@ fn age_in_hours(block: &Box<dyn EvmBlockHeader>) -> anyhow::Result<f64> {
     Ok(age.as_secs_f64() / 3600.0)
 }
 
-fn check_anchor_state_liveliness(
-    src_chain: Chain,
-    dest_chain: Chain,
-    max_age_seconds: u64,
-) -> anyhow::Result<()> {
+fn expected_block_age_hours(dest_chain: &Chain) -> u64 {
+    *EXPECTED_BLOCK_AGE_HOURS_MAP
+        .get(&dest_chain.id())
+        .unwrap_or(&168) // default to 7 days if not found
+}
+
+fn is_within_expected_block_age(
+    block_age_hours: f64,
+    expected_hours: u64,
+    allowed_deviation: u64,
+) -> bool {
+    (expected_hours as f64 - allowed_deviation as f64) <= block_age_hours
+        && block_age_hours <= (expected_hours as f64 + allowed_deviation as f64)
+}
+
+fn check_anchor_state_liveliness(src_chain: Chain, dest_chain: Chain) -> anyhow::Result<()> {
     let src = PROVIDER_FACTORY.create(src_chain.id())?;
     let dest = PROVIDER_FACTORY.create(dest_chain.id())?;
-    let current_src_chain_block = src.get_latest_block_number()?;
-    let registry = create_anchor_state_registry(
-        (src_chain.id(), current_src_chain_block).into(),
-        dest_chain.id(),
-    )?;
+    let current_block = src.get_latest_block_number()?;
+    let registry =
+        create_anchor_state_registry((src_chain.id(), current_block).into(), dest_chain.id())?;
     let commitment = registry.get_latest_confirmed_l2_commitment()?;
     let Some(current_dest_chain_block) =
         dest.get_block_header(BlockTag::Number(commitment.block_number.into()))?
     else {
         bail!(
-            "Block {} on destination chain {} not found",
+            "No block {} on destination chain {}",
             commitment.block_number,
             dest_chain.named().unwrap(),
         )
     };
     let block_age_hours = age_in_hours(&current_dest_chain_block)?;
-    let block_age_secs = (block_age_hours * 3600.0) as u64;
-    let max_age_hours = max_age_seconds as f64 / 3600.0;
-
+    let expected_hours = expected_block_age_hours(&dest_chain);
     ensure!(
-        block_age_secs <= max_age_seconds,
-        "Latest finalized block for {} -> {} is too old: {:.2}h (max {:.2}h)",
+        is_within_expected_block_age(
+            block_age_hours,
+            expected_hours,
+            ALLOWED_BLOCK_AGE_HOURS_DEVIATION
+        ),
+        "Block for {} -> {} is not within expected age range: {:.2}h (expected: {}±{}h)",
         src_chain.named().unwrap(),
         dest_chain.named().unwrap(),
         block_age_hours,
-        max_age_hours,
+        expected_hours,
+        ALLOWED_BLOCK_AGE_HOURS_DEVIATION,
     );
     Ok(())
 }
@@ -92,8 +116,6 @@ pub async fn main() -> anyhow::Result<()> {
         (Chain::mainnet(), Chain::from_named(NamedChain::World)),
         (Chain::mainnet(), Chain::from_named(NamedChain::Unichain)),
     ];
-    let max_age_hours = 170;
-    let max_age_seconds = max_age_hours * 3600;
     let mut any_failed = false;
     for (src, dest) in src_chain_to_dest_chain {
         print!(
@@ -101,10 +123,10 @@ pub async fn main() -> anyhow::Result<()> {
             src.named().unwrap(),
             dest.named().unwrap()
         );
-        match check_anchor_state_liveliness(src, dest, max_age_seconds) {
+        match check_anchor_state_liveliness(src, dest) {
             Ok(()) => println!("OK"),
             Err(e) => {
-                println!("STALE or ERROR: {e}");
+                println!("error: {e}");
                 any_failed = true;
             }
         }
