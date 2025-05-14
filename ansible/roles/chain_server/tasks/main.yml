@@ -34,7 +34,7 @@
   async: 600  # 10 minutes to complete
   poll: 10  # check every 10 seconds
   retries: 2
-  notify: "Restart vlayer"
+  notify: "Restart chain server"
 
 - name: Install service file
   become: true
@@ -43,7 +43,7 @@
     src: vlayer-chain-server.service.j2
     dest: /etc/systemd/system/vlayer-chain-server.service
     mode: '644'
-  notify: "Restart vlayer"
+  notify: "Restart chain server"
 
 - name: Enable and start the vlayer service
   become: true

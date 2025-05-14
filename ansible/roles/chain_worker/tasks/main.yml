@@ -24,7 +24,7 @@
   async: 600  # 10 minutes to complete
   poll: 10  # check every 10 seconds
   retries: 2
-  notify: "Restart vlayer"
+  notify: "Restart {{ chain_worker_identifier }} chain worker"
 
 - name: Install service file
   become: true
@@ -33,7 +33,7 @@
     src: vlayer-chain-worker.service.j2
     dest: /etc/systemd/system/vlayer-chain-worker-{{ chain_worker_identifier }}.service
     mode: '644'
-  notify: "Restart vlayer"
+  notify: "Restart {{ chain_worker_identifier }} chain worker"
 
 - name: Enable and start the vlayer service
   become: true
