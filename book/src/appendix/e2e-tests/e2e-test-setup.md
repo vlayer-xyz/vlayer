@@ -43,36 +43,36 @@ These scripts provide functions for the following stages of e2e testing:
 
 1. **Environment Setup:**
 
-   - [`set_proving_mode`](../../../../bash/lib/proving_mode.sh): Configures proving mode (dev/prod)
-   - [`generate_ts_bindings`](../../../../bash/lib/utils.sh): Generates TypeScript bindings for contracts
-   - [`build_sdk`](../../../../bash/lib/build-packages.sh): Builds the SDK package
+   - [`set_proving_mode`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/proving_mode.sh): Configures proving mode (dev/prod)
+   - [`generate_ts_bindings`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/utils.sh): Generates TypeScript bindings for contracts
+   - [`build_sdk`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/build-packages.sh): Builds the SDK package
 
 2. **Service Initialization:**
 
-   - [`ensure_services_built`](../../../../bash/run_services/lib.sh): Compiles the required service binaries (call_server, chain_server, worker, dns_server) if `BUILD_SERVICES` equals `1`
-   - [`startup_chain_worker`](../../../../bash/run_services/chain_worker.sh): Starts chain worker processes
-   - [`startup_chain_server`](../../../../bash/run_services/lib.sh): Starts the chain server for RPC communication
-   - [`startup_vlayer`](../../../../bash/run_services/lib.sh): Starts the vlayer REST server
-   - [`startup_vdns_server`](../../../../bash/run_services/lib.sh): Starts the DNS server
-   - [`startup_chain_services`](../../../../bash/run_services/lib.sh): Coordinates starting all chain-related services
-   - [`wait_for_port_and_pid`](../../../../bash/common.sh): Waits for services to be ready on specific ports
+   - [`ensure_services_built`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/run_services/lib.sh): Compiles the required service binaries (call_server, chain_server, worker, dns_server) if `BUILD_SERVICES` equals `1`
+   - [`startup_chain_worker`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/run_services/chain_worker.sh): Starts chain worker processes
+   - [`startup_chain_server`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/run_services/lib.sh): Starts the chain server for RPC communication
+   - [`startup_vlayer`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/run_services/lib.sh): Starts the vlayer REST server
+   - [`startup_vdns_server`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/run_services/lib.sh): Starts the DNS server
+   - [`startup_chain_services`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/run_services/lib.sh): Coordinates starting all chain-related services
+   - [`wait_for_port_and_pid`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/common.sh): Waits for services to be ready on specific ports
 
    The service initialization follows a specific sequence: first `ensure_services_built` compiles all service binaries, then Docker services are started, followed by chain workers, chain server, vlayer server, and finally the DNS server.
 
 3. **Test Environment Preparation:**
 
-   - [`generate_vlayer_init_config`](../../../../bash/lib/e2e.sh): Creates configuration for vlayer initialization
-   - [`ensure_cli_built`](../../../../bash/lib/e2e.sh): Ensures the CLI is built
-   - [`init_template`](../../../../bash/lib/e2e.sh): Initializes the test template
+   - [`generate_vlayer_init_config`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/e2e.sh): Creates configuration for vlayer initialization
+   - [`ensure_cli_built`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/e2e.sh): Ensures the CLI is built
+   - [`init_template`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/e2e.sh): Initializes the test template
 
 4. **Test Execution:**
 
-   - [`silent_unless_fails`](../../../../bash/lib/io.sh): Controls output of command execution
-   - [`run_prover_script`](../../../../bash/lib/e2e.sh): Runs the prover script
+   - [`silent_unless_fails`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/io.sh): Controls output of command execution
+   - [`run_prover_script`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/e2e.sh): Runs the prover script
 
 5. **Cleanup:**
-   - [`cleanup`](../../../../bash/run_services/cleanup.sh): Cleans up all services and temporary files
-   - [`kill_service`](../../../../bash/common.sh): Terminates specific services by PID
+   - [`cleanup`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/run_services/cleanup.sh): Cleans up all services and temporary files
+   - [`kill_service`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/common.sh): Terminates specific services by PID
 
 ### 3. Proving Mode Configuration
 
@@ -154,9 +154,9 @@ init_template
 These steps:
 
 1. Create a temporary directory for testing
-2. Generate the vlayer initialization configuration ([`generate_vlayer_init_config`](../../../../bash/lib/e2e.sh))
-3. Ensure the CLI tool is built ([`ensure_cli_built`](../../../../bash/lib/e2e.sh))
-4. Initialize a test template with the example code ([`init_template`](../../../../bash/lib/e2e.sh))
+2. Generate the vlayer initialization configuration ([`generate_vlayer_init_config`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/e2e.sh))
+3. Ensure the CLI tool is built ([`ensure_cli_built`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/e2e.sh))
+4. Initialize a test template with the example code ([`init_template`](http://github.com/vlayer-xyz/vlayer/blob/main/bash/lib/e2e.sh))
 
 ## Key Configurables
 
