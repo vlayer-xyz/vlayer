@@ -26,7 +26,7 @@ fn main() -> anyhow::Result<()> {
         println!("✅ Gas price is low enough → OK");
         Ok(())
     } else {
-        println!("❌ Gas price is too high → SKIP");
+        println!("❌ Gas price is too high");
         process::exit(1);
     }
 }
@@ -59,7 +59,7 @@ fn fetch_gas_price(rpc_url: &str) -> anyhow::Result<f64> {
         .context("No 'result' field in response or not a string")?;
 
     if gas_price_hex.is_empty() {
-        bail!("Error: Failed to fetch gas price");
+        bail!("Error: 'gas_price_hex' is empty");
     }
 
     let gas_price_wei =
