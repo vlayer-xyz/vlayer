@@ -6,6 +6,7 @@ members = [
     "rust/cli",
     "rust/common",
     "rust/email_proof",
+    "rust/gas_price_checker",
     "rust/generate_fixtures",
     "rust/guest_wrapper",
     "rust/guest_wrapper/build_utils",
@@ -215,6 +216,7 @@ chain_test_utils = { path = "rust/services/chain/test_utils" }
 chain_worker = { path = "rust/services/chain/worker" }
 common = { path = "rust/common" }
 email_proof = { path = "rust/email_proof" }
+gas_price_checker = { path = "rust/gas_price_checker" }
 guest_build_utils = { path = "rust/guest_wrapper/build_utils" }
 guest_wrapper = { path = "rust/guest_wrapper" }
 host_utils = { path = "rust/host_utils" }

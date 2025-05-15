@@ -1,0 +1,37 @@
+# Gas Price Checker
+
+A simple Rust command-line tool that fetches the current Ethereum gas price from a JSON-RPC endpoint and compares it against a user-defined threshold. If the gas price is at or below the threshold, the program exits successfully; otherwise, it exits with a non-zero code.
+
+## Usage
+
+```sh
+cargo run -- <RPC_URL> <THRESHOLD_GWEI>
+```
+
+- `<RPC_URL>`: The HTTP(S) URL of your Ethereum JSON-RPC endpoint.
+- `<THRESHOLD_GWEI>`: Optional. A floating-point gas-price threshold in Gwei. Defaults to 10.0 if omitted.
+
+## Example
+
+```sh
+cargo run -- https://eth-sepolia.g.alchemy.com/v2/<API_KEY> 5
+```
+
+This will:
+
+1. Query `eth_gasPrice` on the Sepolia testnet via your Alchemy endpoint.
+2. Print the current gas price in Gwei.
+3. Exit with 0 if the price is ≤ 5 Gwei, or with a non-zero code if it’s higher.
+
+Sample output:
+
+```sh
+Gas price: 2.3456 gwei
+✅ Gas price is low enough → OK
+```
+
+## How It Works
+
+1. Sends a JSON-RPC `eth_gasPrice` request using `reqwest`.
+3. Converts Wei → Gwei and compares against the threshold.
+4. Prints a status and returns the appropriate exit code.

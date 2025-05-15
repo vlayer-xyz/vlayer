@@ -1,0 +1,9 @@
+[package]
+name = "gas_price_checker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+reqwest = { workspace = true, features = ["json", "blocking", "rustls-tls"] }
+serde_json = { workspace = true }
