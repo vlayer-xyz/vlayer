@@ -17,12 +17,15 @@ members = [
     "rust/provider",
     "rust/range",
     "rust/server_utils",
+    "rust/services/call/anchor_status",
     "rust/services/call/common",
+    "rust/services/call/db",
     "rust/services/call/engine",
     "rust/services/call/guest",
     "rust/services/call/host",
     "rust/services/call/optimism",
     "rust/services/call/precompiles",
+    "rust/services/call/rpc",
     "rust/services/call/seal",
     "rust/services/call/server",
     "rust/services/call/server_lib",
@@ -52,7 +55,7 @@ debug = "full"
 lto = false # debug + LTO leads to ICE in 1.84: https://github.com/rust-lang/rust/issues/135332
 
 [workspace.dependencies]
-alloy-chains = "0.1.42"
+alloy-chains = "0.2.0"
 alloy-dyn-abi = "=0.8.20"
 alloy-eips = { version = "0.11.0", features = ["serde"] }
 alloy-consensus = { version = "0.11.0", features = ["serde"] }
@@ -196,10 +199,12 @@ block_header = { path = "rust/block_header" }
 block_trie = { path = "rust/services/chain/block_trie" }
 seal = { path = "rust/services/call/seal" }
 call_common = { path = "rust/services/call/common" }
+call_db = { path = "rust/services/call/db" }
 call_precompiles = { path = "rust/services/call/precompiles" }
 call_engine = { path = "rust/services/call/engine" }
 call_guest = { path = "rust/services/call/guest" }
 call_host = { path = "rust/services/call/host" }
+call_rpc = { path = "rust/services/call/rpc" }
 call_server = { path = "rust/services/call/server" }
 call_server_lib = { path = "rust/services/call/server_lib" }
 optimism = { path = "rust/services/call/optimism" }

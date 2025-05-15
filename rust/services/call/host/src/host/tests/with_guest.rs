@@ -42,16 +42,14 @@ mod erc20 {
 }
 
 mod teleport {
+    use call_rpc::OP_ANVIL;
     use optimism::client::factory::cached;
 
     use super::*;
-    use crate::test_harness::{
-        contracts::teleport::{
-            BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT,
-            SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
-            TOKEN,
-        },
-        rpc::OP_ANVIL,
+    use crate::test_harness::contracts::teleport::{
+        BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT,
+        SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
+        TOKEN,
     };
 
     #[tokio::test(flavor = "multi_thread")]

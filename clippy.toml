@@ -20,6 +20,4 @@ disallowed-types = [
     # parking_lot create offers more efficient and posion-free synchronization primitives
     { path = "std::sync::Condvar", reason = "use parking_lot::Condvar instead" },
     { path = "std::sync::Once", reason = "use parking_lot::Once instead" },
-    # We have a custom helper trait that restricts error types
-    { path = "revm::DatabaseRef", reason = "use call_common::Database for bounds. Ignore when implementing the trait" },
 ]

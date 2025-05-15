@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use call_common::ExecutionLocation;
+use call_db::ProofDb;
 use call_engine::{
     evm::env::{
         EvmEnv,
@@ -13,7 +14,7 @@ use derive_new::new;
 use provider::CachedMultiProvider;
 use revm::db::CacheDB;
 
-use crate::db::{HostDb, proof::ProofDb};
+use crate::HostDb;
 
 #[derive(new)]
 pub(crate) struct HostEvmEnvFactory {

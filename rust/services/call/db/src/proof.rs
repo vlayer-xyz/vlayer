@@ -4,24 +4,21 @@ use alloy_primitives::{Address, B256, BlockNumber, Bytes, U256};
 use block_header::EvmBlockHeader;
 use mpt::{KeccakMerkleTrie as MerkleTrie, ParseNodeError};
 use provider::{BlockingProvider, EIP1186Proof};
-#[allow(clippy::disallowed_types)]
 use revm::{
     DatabaseRef,
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
 };
 use thiserror::Error;
 
-use super::provider::ProviderDb;
+use crate::provider::ProviderDb;
 
 #[derive(Default, Debug)]
 struct State {
     accounts: HashMap<Address, HashSet<U256>>,
     contracts: HashMap<B256, Bytes>,
-    // Numbers of all block hashes requested by `blockhash(number)` calls.
     block_hash_numbers: HashSet<u64>,
 }
 
-/// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
 #[derive(Debug)]
 pub struct ProofDb {
     db: ProviderDb,
@@ -30,13 +27,12 @@ pub struct ProofDb {
 
 #[allow(clippy::expect_used)]
 impl DatabaseRef for ProofDb {
-    type Error = super::provider::Error;
+    type Error = crate::provider::ProviderDbError;
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let basic = self.db.basic_ref(address)?;
         let mut state = self.state.write().expect("poisoned lock");
         state.accounts.entry(address).or_default();
-
         Ok(basic)
     }
 
@@ -44,7 +40,6 @@ impl DatabaseRef for ProofDb {
         let code = self.db.code_by_hash_ref(code_hash)?;
         let mut state = self.state.write().expect("poisoned lock");
         state.contracts.insert(code_hash, code.original_bytes());
-
         Ok(code)
     }
 
@@ -52,7 +47,6 @@ impl DatabaseRef for ProofDb {
         let storage = self.db.storage_ref(address, index)?;
         let mut state = self.state.write().expect("poisoned lock");
         state.accounts.entry(address).or_default().insert(index);
-
         Ok(storage)
     }
 
@@ -60,7 +54,6 @@ impl DatabaseRef for ProofDb {
         let block_hash = self.db.block_hash_ref(number)?;
         let mut state = self.state.write().expect("poisoned lock");
         state.block_hash_numbers.insert(number);
-
         Ok(block_hash)
     }
 }
@@ -79,7 +72,7 @@ pub enum Error {
 
 #[allow(clippy::expect_used)]
 impl ProofDb {
-    pub(crate) fn new(provider: Arc<dyn BlockingProvider>, block_number: u64) -> Self {
+    pub fn new(provider: Arc<dyn BlockingProvider>, block_number: u64) -> Self {
         let state = RwLock::new(State::default());
         Self {
             state,
@@ -87,12 +80,12 @@ impl ProofDb {
         }
     }
 
-    pub(crate) fn contracts(&self) -> Vec<Bytes> {
+    pub fn contracts(&self) -> Vec<Bytes> {
         let state = self.state.read().expect("poisoned lock");
         state.contracts.values().cloned().collect()
     }
 
-    pub(crate) fn fetch_ancestors(&self) -> Result<Vec<Box<dyn EvmBlockHeader>>, Error> {
+    pub fn fetch_ancestors(&self) -> Result<Vec<Box<dyn EvmBlockHeader>>, Error> {
         let state = self.state.read().expect("poisoned lock");
         let provider = &self.db.provider;
         let mut ancestors = Vec::new();
@@ -107,9 +100,7 @@ impl ProofDb {
         Ok(ancestors)
     }
 
-    pub(crate) fn prepare_state_storage_tries(
-        &self,
-    ) -> Result<(MerkleTrie, Vec<MerkleTrie>), Error> {
+    pub fn prepare_state_storage_tries(&self) -> Result<(MerkleTrie, Vec<MerkleTrie>), Error> {
         let proofs = self.fetch_proofs()?;
         let state_trie = Self::state_trie(&proofs)?;
         let storage_tries = Self::storage_tries(&proofs)?;
@@ -148,3 +139,5 @@ impl ProofDb {
             .collect()
     }
 }
+
+pub use self::Error as ProofDbError;

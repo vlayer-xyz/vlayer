@@ -1,0 +1,13 @@
+[package]
+name = "call_rpc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+alloy-chains = { workspace = true }
+alloy-primitives = { workspace = true }
+dotenvy = { workspace = true }
+lazy_static = { workspace = true }
+
+[lints]
+workspace = true

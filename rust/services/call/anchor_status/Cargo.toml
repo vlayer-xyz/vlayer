@@ -1,0 +1,20 @@
+[package]
+name = "call_anchor_status"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+alloy-chains = { workspace = true }
+alloy-primitives = { workspace = true }
+anyhow = { workspace = true }
+call_common = { workspace = true }
+call_db = { workspace = true }
+call_rpc = { workspace = true }
+chain = { workspace = true }
+lazy_static = { workspace = true }
+optimism = { workspace = true }
+provider = { workspace = true }
+tokio = { workspace = true }
+
+[lints]
+workspace = true
