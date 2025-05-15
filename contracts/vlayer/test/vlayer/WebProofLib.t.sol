@@ -51,7 +51,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                'Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert("URL mismatch")))'
+                'Preflight: Transaction reverted: ContractError(Revert(Revert("URL mismatch")))'
             );
         }
     }
@@ -67,7 +67,7 @@ contract WebProverTest is VTest {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(
-                reason, "Preflight: Execution error: EVM error: missing field `presentationJson` at line 1 column 2"
+                reason, "Preflight: EVM error: missing field `presentationJson` at line 1 column 2"
             );
         }
     }
@@ -84,7 +84,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Preflight: Execution error: EVM error: Verification error: Deserialization error: Hex decode error: Odd number of digits"
+                "Preflight: EVM error: Verification error: Deserialization error: Hex decode error: Odd number of digits"
             );
         }
     }
