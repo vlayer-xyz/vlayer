@@ -47,7 +47,7 @@ jobs:
 
       - name: Run web_prover rust tests
         run: |
-          cargo test --locked --all-features --package web_prover
+          cargo test --locked --features integration-tests --package web_prover
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUST_LOG: info
