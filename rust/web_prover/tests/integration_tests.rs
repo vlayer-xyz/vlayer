@@ -5,23 +5,37 @@ mod integration_tests {
     use regex::Regex;
     use tlsn_core::{connection::ServerName, presentation::Presentation};
     use web_prover::{
-        Method, NotarizeParamsBuilder, NotaryConfig, RedactionConfig, generate_web_proof,
-        verify_presentation,
+        Method, NotarizeParamsBuilder, NotaryConfig, NotaryConfigBuilder, RedactionConfig,
+        generate_web_proof, verify_presentation,
     };
 
     const MAX_SENT_DATA_TOO_LOW: usize = 100;
     const MAX_RECV_DATA_TOO_LOW: usize = 100;
 
+    fn notary_config() -> NotaryConfig {
+        NotaryConfigBuilder::default()
+            .host("127.0.0.1")
+            .port(7047)
+            .build()
+            .unwrap()
+    }
+
+    fn notary_params_builder() -> NotarizeParamsBuilder {
+        let mut builder = NotarizeParamsBuilder::default();
+        builder
+            .notary_config(notary_config())
+            .server_domain("lotr-api.online")
+            .server_host("127.0.0.1")
+            .server_port(3011_u16)
+            .headers([("Authorization", "s3cret_t0ken")]);
+        builder
+    }
+
     #[tokio::test]
     async fn test_limits_too_low() {
         let web_proof_result = generate_web_proof(
-            NotarizeParamsBuilder::default()
-                .notary_config(NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false))
-                .server_domain("lotr-api.online")
-                .server_host("127.0.0.1")
-                .server_port(3011_u16)
+            notary_params_builder()
                 .uri("/auth_header_require")
-                .headers([("Authorization", "s3cret_t0ken")])
                 .body("body content")
                 .max_sent_data(MAX_SENT_DATA_TOO_LOW)
                 .max_recv_data(MAX_RECV_DATA_TOO_LOW)
@@ -36,13 +50,8 @@ mod integration_tests {
     #[tokio::test]
     async fn test_full_roundtrip() {
         let web_proof_result = generate_web_proof(
-            NotarizeParamsBuilder::default()
-                .notary_config(NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false))
-                .server_domain("lotr-api.online")
-                .server_host("127.0.0.1")
-                .server_port(3011_u16)
+            notary_params_builder()
                 .uri("/auth_header_require")
-                .headers([("Authorization", "s3cret_t0ken")])
                 .body("body content")
                 .build()
                 .unwrap(),
@@ -80,13 +89,8 @@ mod integration_tests {
     #[tokio::test]
     async fn test_redaction() {
         let web_proof_result = generate_web_proof(
-            NotarizeParamsBuilder::default()
-                .notary_config(NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false))
-                .server_domain("lotr-api.online")
-                .server_host("127.0.0.1")
-                .server_port(3011_u16)
+            notary_params_builder()
                 .uri("/auth_header_require?param1=value1&param2=value2")
-                .headers([("Authorization", "s3cret_t0ken")])
                 .redaction_config_fn(|_| RedactionConfig {
                     sent: RangeSet::from([0..10, 20..30, 100..200]),
                     recv: RangeSet::from([0..10, 20..30, 100..200]),
@@ -118,11 +122,7 @@ mod integration_tests {
     #[tokio::test]
     async fn test_post_with_no_redaction() {
         let body = serde_json::to_vec(&serde_json::json!({"name": "Saruman"})).unwrap();
-        let params = NotarizeParamsBuilder::default()
-            .notary_config(NotaryConfig::new("127.0.0.1".into(), 7047, "".into(), false))
-            .server_domain("lotr-api.online")
-            .server_host("127.0.0.1")
-            .server_port(3011_u16)
+        let params = notary_params_builder()
             .uri("/auth_header_require")
             .headers([("Authorization", "s3cret_t0ken"), ("content-type", "application/json")])
             .body(body)

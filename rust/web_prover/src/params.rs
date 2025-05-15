@@ -2,22 +2,24 @@ use std::{collections::BTreeMap, str, sync::Arc};
 
 use derive_builder::Builder;
 use derive_more::Debug;
-use derive_new::new;
 pub use hyper::http::Method;
 use rangeset::RangeSet;
 use tlsn_core::transcript::Transcript;
 
 use crate::RedactionConfig;
 
-#[derive(Debug, Clone, new, Default)]
+#[derive(Debug, Clone, Builder)]
 pub struct NotaryConfig {
     /// Notary host (domain name or IP)
+    #[builder(setter(into))]
     pub host: String,
     /// Notary port
     pub port: u16,
     /// Notary API path
+    #[builder(setter(into), default)]
     pub path_prefix: String,
     /// Whether to use TLS for notary connection
+    #[builder(default)]
     pub enable_tls: bool,
 }
 
