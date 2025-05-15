@@ -12,6 +12,7 @@ export const EXTENSION_STEP = {
   redirect: "redirect",
   notarize: "notarize",
   extractVariables: "extractVariables",
+  userAction: "userAction",
   clickButton: "clickButton",
 } as const;
 
@@ -164,6 +165,7 @@ export type WebProofStep =
   | WebProofStepStartPage
   | WebProofStepRedirect
   | WebProofStepExtractVariables
+  | WebProofStepUserAction
   | WebProofStepClickButton;
 
 export type UrlPattern = Branded<string, "UrlPattern">;
@@ -213,6 +215,16 @@ export type WebProofStepExtractVariables = BrandedStep<
     label: string;
     url: UrlPattern;
     variables: Variables;
+  }
+>;
+
+export type WebProofStepUserAction = BrandedStep<
+  typeof EXTENSION_STEP.userAction,
+  {
+    label: string;
+    url: UrlPattern;
+    text: string;
+    image?: string;
   }
 >;
 
