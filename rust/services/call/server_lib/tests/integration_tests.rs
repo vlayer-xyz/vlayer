@@ -309,7 +309,14 @@ mod server_tests {
 
             assert_json_include!(actual: result, expected: json!({
                 "state": "preflight",
-                "error": "Preflight error: Execution error: EVM transact error: revert: <empty>",
+                "error": "Preflight: Transaction reverted: <empty>. This can happen for multiple reasons:
+    - Call to contract with no code. Please make sure the prover contract address is correct.
+    - Calling revert() or require() without a revert reason.
+    - Assertions without a revert reason: assert(false).
+    - Out-of-Gas exceptions.
+    - Invalid opcodes (e.g. division by zero).
+    - Some precompile errors.
+    ",
                 "status": 0,
                 "metrics": {},
             }));
