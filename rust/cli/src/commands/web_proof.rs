@@ -154,7 +154,7 @@ fn parse_notary_url(url_str: &str) -> Result<NotaryConfig> {
         port,
     } = ValidatedUrl::try_from_url(url_str, &[Scheme::Https, Scheme::Http])?;
 
-    let path_prefix = url.path().trim_start_matches('/').trim_end_matches('/');
+    let path_prefix = url.path().trim_matches('/');
     let enable_tls = scheme == Scheme::Https;
 
     let config = NotaryConfigBuilder::default()
