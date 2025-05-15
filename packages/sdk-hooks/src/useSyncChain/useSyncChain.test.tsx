@@ -39,7 +39,7 @@ describe("useChain with anvil", () => {
 
     expect(result.current.error).toBeNull();
     expect(chain).toBeDefined();
-    expect(chain?.name).toBe("Anvil");
+    expect(chain?.id).toBe(anvil.id);
   });
 
   test("fail with meaningful error when switch fails", () => {
