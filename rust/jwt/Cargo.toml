@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 derive_builder = { workspace = true }
-jsonwebtoken = { workspace = true }
+jwt-simple = { workspace = true }
 serde = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 
