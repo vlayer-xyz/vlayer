@@ -12,7 +12,6 @@ export const EXTENSION_STEP = {
   redirect: "redirect",
   notarize: "notarize",
   extractVariables: "extractVariables",
-  clickButton: "clickButton",
 } as const;
 
 export enum ZkProvingStatus {
@@ -146,9 +145,8 @@ export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
   | WebProofStepStartPage
-  | WebProofStepRedirect
   | WebProofStepExtractVariables
-  | WebProofStepClickButton;
+  | WebProofStepRedirect;
 
 export type UrlPattern = Branded<string, "UrlPattern">;
 
@@ -197,15 +195,6 @@ export type WebProofStepExtractVariables = BrandedStep<
     label: string;
     url: UrlPattern;
     variables: Variables;
-  }
->;
-
-export type WebProofStepClickButton = BrandedStep<
-  typeof EXTENSION_STEP.clickButton,
-  {
-    label: string;
-    url: UrlPattern;
-    selector: string;
   }
 >;
 
