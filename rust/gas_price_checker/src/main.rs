@@ -4,6 +4,8 @@ use anyhow::{bail, Context};
 use reqwest::blocking::Client;
 use serde_json::{from_str, json, Value};
 
+const DEFAULT_GAS_PRICE_THRESHOLD: f64 = 10.0;
+
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = env::args().collect();
 
@@ -15,8 +17,8 @@ fn main() -> anyhow::Result<()> {
     let rpc_url = &args[1];
     let threshold_gwei = args
         .get(2)
-        .map(|s| s.parse::<f64>().unwrap_or(10.0))
-        .unwrap_or(10.0);
+        .and_then(|s| s.parse::<f64>().ok())
+        .unwrap_or(DEFAULT_GAS_PRICE_THRESHOLD);
 
     let gas_price_gwei = fetch_gas_price(rpc_url)?;
 
@@ -62,8 +64,9 @@ fn fetch_gas_price(rpc_url: &str) -> anyhow::Result<f64> {
         bail!("Error: 'gas_price_hex' is empty");
     }
 
-    let gas_price_wei =
-        u64::from_str_radix(gas_price_hex.trim_start_matches("0x"), 16).unwrap() as f64;
+    let gas_price_wei = u64::from_str_radix(gas_price_hex.trim_start_matches("0x"), 16)
+        .context(format!("Failed to parse gas price hex: {}", gas_price_hex))?
+        as f64;
     let gas_price_gwei = gas_price_wei / 1e9;
 
     Ok(gas_price_gwei)
