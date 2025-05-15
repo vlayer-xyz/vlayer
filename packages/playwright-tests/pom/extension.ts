@@ -73,6 +73,16 @@ export class Extension {
     const step = this.page.getByTestId(`step-${stepName}`).nth(stepIndex);
     await expect(step).toHaveAttribute("data-status", "completed");
   }
+
+  async expectCountDown() {
+    const countdown = this.page.getByText(/You will be redirected back in/i);
+    await expect(countdown).toBeVisible();
+  }
+
+  async expectCountDownToBeHidden() {
+    const countdown = this.page.getByText(/You will be redirected back in/i);
+    await expect(countdown).toBeHidden();
+  }
 }
 
 export const waitForExtension = async (context: BrowserContext) => {

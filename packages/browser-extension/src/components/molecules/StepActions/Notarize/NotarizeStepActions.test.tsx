@@ -19,6 +19,8 @@ const mocks = vi.hoisted(() => {
   };
 });
 
+const SECOND = 1000;
+
 vi.mock("hooks/useZkProvingState", () => ({
   useZkProvingState: mocks.useZkProvingState,
 }));
@@ -330,7 +332,7 @@ describe("NotarizeStepActions", () => {
       }),
     );
     act(() => {
-      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
+      vi.advanceTimersByTime(SECOND);
     });
     expect(result.current.isRedirectCalloutVisible).toBe(true);
 
@@ -343,17 +345,10 @@ describe("NotarizeStepActions", () => {
       />,
     );
     act(() => {
-      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
-    });
-    mocks.useTlsnProver.mockReturnValue({
-      isProving: false,
-      isProvingDone: true,
-      error: null,
+      vi.advanceTimersByTime(SECOND);
     });
     rerender();
-    act(() => {
-      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
-    });
+
     expect(result.current.isRedirectCalloutVisible).toBe(true);
 
     const redirectCallout = screen.getByTestId("redirect-callout");

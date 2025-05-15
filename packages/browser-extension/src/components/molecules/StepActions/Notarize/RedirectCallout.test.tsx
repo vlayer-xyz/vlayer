@@ -12,11 +12,10 @@ import { RedirectCallout } from "./RedirectCallout";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { ExtensionInternalMessageType } from "../../../../web-proof-commons";
 import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
-import {
-  CALLOUT_DEBOUNCE_TIME,
-  useNotarizeStepActions,
-} from "./NotarizeStepActions.hooks";
+import { useNotarizeStepActions } from "./NotarizeStepActions.hooks";
 import { StepStatus } from "constants/step";
+
+const SECOND = 1000;
 
 const mocks = vi.hoisted(() => ({
   useTlsnProver: vi.fn(),
@@ -85,30 +84,11 @@ describe("RedirectCallout", () => {
       result.current.redirectTimeout,
     );
 
-    act(() => {
-      vi.advanceTimersByTime(CALLOUT_DEBOUNCE_TIME);
-    });
-
-    act(() => {
-      rerenderHook();
-      rerenderComponent(
-        <RedirectCallout
-          show={result.current.isRedirectCalloutVisible}
-          timeout={result.current.redirectTimeout}
-        />,
-      );
-    });
-
     const redirectMessage = screen.getByText(/You will be redirected back in/i);
     const timoutText = within(redirectMessage).getByTestId("timeout");
 
-    expect(timoutText).toHaveTextContent(
-      (DEFAULT_REDIRECT_DELAY_SECONDS - 1).toString(),
-    );
-
     for (let i = DEFAULT_REDIRECT_DELAY_SECONDS; i > 0; i--) {
       act(() => {
-        vi.advanceTimersByTime(1000);
         rerenderHook();
         rerenderComponent(
           <RedirectCallout
@@ -118,11 +98,15 @@ describe("RedirectCallout", () => {
         );
       });
 
-      expect(timoutText).toHaveTextContent((i - 1).toString());
+      expect(timoutText).toHaveTextContent(i.toString());
+
+      act(() => {
+        vi.advanceTimersByTime(SECOND);
+      });
     }
 
     act(() => {
-      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(SECOND);
     });
 
     expect(sendMessageToServiceWorker).toHaveBeenCalledWith({

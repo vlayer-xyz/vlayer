@@ -131,18 +131,13 @@ const useRedirectCallout = () => {
     error: isWebProvingError,
   } = useTlsnProver();
   const { error: isZkProvingError } = useZkProvingState();
+
   const [isRedirectCalloutVisible, setIsRedirectCalloutVisible] =
-    useDebounceValue(false, CALLOUT_DEBOUNCE_TIME);
+    useState(false);
+
   const redirectDelay =
     import.meta.env.REDIRECT_DELAY_SECONDS || DEFAULT_REDIRECT_DELAY_SECONDS;
   const [timeout, setTimeout] = useState(redirectDelay);
-
-  // reset timeout when web proving stops
-  useEffect(() => {
-    if (!isWebProving) {
-      setTimeout(redirectDelay);
-    }
-  }, [isWebProving, redirectDelay]);
 
   // redirection callout should be visible when web proving starts
   // and stay till redirection or error
@@ -150,20 +145,13 @@ const useRedirectCallout = () => {
     if (isWebProving) {
       setIsRedirectCalloutVisible(true);
     }
-    if (!isWebProving && !isWebProvingDone) {
-      setIsRedirectCalloutVisible(false);
-    }
-    if (timeout === 0) {
-      setIsRedirectCalloutVisible(false);
-    }
-    if (isWebProvingError || isZkProvingError) {
+    if (timeout === 0 || isWebProvingError || isZkProvingError) {
       setIsRedirectCalloutVisible(false);
     }
   }, [
     isWebProving,
     isWebProvingDone,
     timeout,
-    setIsRedirectCalloutVisible,
     isWebProvingError,
     isZkProvingError,
   ]);
