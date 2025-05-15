@@ -276,7 +276,7 @@ mod tests {
         async fn prover_contract_not_deployed() {
             let builder = builder(&[b""]); // empty contract code at latest RPC block
             let res = builder.with_prover_contract_addr(Address::default()).await;
-            assert!(matches!(res, Err(Error::ProverContractNotDeployed)));
+            assert!(matches!(res, Err(Error::ProverContractNotDeployed(_, _))));
         }
 
         #[tokio::test(flavor = "multi_thread")]
