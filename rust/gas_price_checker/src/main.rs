@@ -1,12 +1,10 @@
 use std::{env, process};
 
-use alloy_primitives::U256;
-use anyhow::{anyhow, bail, Context};
-use reqwest::Client;
-use serde_json::{json, Value};
+use anyhow::{bail, Context};
+use reqwest::blocking::Client;
+use serde_json::{from_str, json, Value};
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
@@ -20,7 +18,7 @@ async fn main() -> anyhow::Result<()> {
         .map(|s| s.parse::<f64>().unwrap_or(10.0))
         .unwrap_or(10.0);
 
-    let gas_price_gwei = fetch_gas_price(rpc_url).await?;
+    let gas_price_gwei = fetch_gas_price(rpc_url)?;
 
     println!("Gas price: {:.4} gwei", gas_price_gwei);
 
@@ -33,7 +31,7 @@ async fn main() -> anyhow::Result<()> {
     }
 }
 
-async fn fetch_gas_price(rpc_url: &str) -> anyhow::Result<f64> {
+fn fetch_gas_price(rpc_url: &str) -> anyhow::Result<f64> {
     let client = Client::new();
 
     let request_body = json!({
@@ -48,34 +46,25 @@ async fn fetch_gas_price(rpc_url: &str) -> anyhow::Result<f64> {
         .header("Content-Type", "application/json")
         .json(&request_body)
         .send()
-        .await
         .context("Failed to make RPC request")?;
 
-    let response_text = response.text().await?;
+    let response_text = response.text()?;
     println!("Raw response: {}", response_text);
 
-    let response_json: Value =
-        serde_json::from_str(&response_text).context("Failed to parse JSON response")?;
+    let response_json: Value = from_str(&response_text).context("Failed to parse JSON response")?;
 
     let gas_price_hex = response_json
         .get("result")
         .and_then(|v| v.as_str())
         .context("No 'result' field in response or not a string")?;
 
-    if gas_price_hex.is_empty() || gas_price_hex == "null" {
+    if gas_price_hex.is_empty() {
         bail!("Error: Failed to fetch gas price");
     }
 
-    let gas_price_wei = U256::from_str_radix(gas_price_hex.trim_start_matches("0x"), 16)
-        .map_err(|e| anyhow!("Failed to parse hex gas price: {}", e))?;
-
-    let as_str = gas_price_wei.to_string();
-    let wei_f64: f64 = as_str
-        .parse()
-        .context("Failed to parse gas price string into f64")?;
-    let gas_price_gwei = wei_f64 / 1e9;
-
-    dbg!(gas_price_gwei);
+    let gas_price_wei =
+        u64::from_str_radix(gas_price_hex.trim_start_matches("0x"), 16).unwrap() as f64;
+    let gas_price_gwei = gas_price_wei / 1e9;
 
     Ok(gas_price_gwei)
 }
