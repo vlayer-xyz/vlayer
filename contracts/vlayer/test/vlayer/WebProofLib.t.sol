@@ -49,10 +49,7 @@ contract WebProverTest is VTest {
         returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(
-                reason,
-                'Preflight: Transaction reverted: ContractError(Revert(Revert("URL mismatch")))'
-            );
+            assertEq(reason, 'Preflight: Transaction reverted: ContractError(Revert(Revert("URL mismatch")))');
         }
     }
 
@@ -66,9 +63,7 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(
-                reason, "Preflight: EVM error: missing field `presentationJson` at line 1 column 2"
-            );
+            assertEq(reason, "Preflight: EVM error: missing field `presentationJson` at line 1 column 2");
         }
     }
 
