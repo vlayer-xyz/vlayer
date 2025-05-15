@@ -14,7 +14,7 @@ pub enum Error {
     #[error(transparent)]
     Preflight(#[from] PreflightError),
     #[error("Refunding gas: {0}")]
-    GasMeter(#[from] GasMeterError),
+    RefundingGas(#[from] GasMeterError),
     #[error("Metrics: {0}")]
     Metrics(#[from] MetricsError),
 }
