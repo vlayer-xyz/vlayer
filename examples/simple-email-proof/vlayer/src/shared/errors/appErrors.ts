@@ -36,3 +36,9 @@ export class UseChainError extends AppError {
     super("UseChainError", message);
   }
 }
+
+export class PreverifyError extends AppError {
+  constructor(message: string) {
+    super("PreverifyError", message);
+  }
+}
