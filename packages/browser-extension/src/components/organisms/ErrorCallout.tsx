@@ -8,9 +8,7 @@ export const useErrorCallout = () => {
   const [isErrorCalloutVisible, setIsErrorCalloutVisible] = useState(false);
   const { error } = useTlsnProver();
   useEffect(() => {
-    if (error) {
-      setIsErrorCalloutVisible(true);
-    }
+    setIsErrorCalloutVisible(!!error);
   }, [error]);
   return {
     isErrorCalloutVisible,
