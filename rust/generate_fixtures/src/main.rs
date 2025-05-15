@@ -11,17 +11,14 @@ use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::EnvFilter;
 use web_proof::web_proof::{PresentationJSON, WebProof};
 use web_prover::{
-    NotarizeParamsBuilder, NotaryConfig, RedactionConfig, TLSN_VERSION, TLSN_VERSION_WITH_V_PREFIX,
-    generate_web_proof,
+    NotarizeParamsBuilder, NotaryConfig, RedactionConfig, TLSN_VERSION, generate_web_proof,
 };
 
 const PROJECT_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
 const NOTARY_HOST: &str = "127.0.0.1";
 const NOTARY_PORT: u16 = 7047;
-
-const REMOTE_NOTARY_HOST: &str = "notary.pse.dev";
-const REMOTE_NOTARY_PORT: u16 = 443;
+const NOTARY_PORT_CUSTOM_KEY: u16 = 7048;
 
 const SERVER_DOMAIN: &str = "lotr-api.online";
 const SERVER_HOST: &str = "127.0.0.1";
@@ -46,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     check_notary_version().await?;
 
     generate_valid_web_proof_local_notary().await?;
-    generate_valid_web_proof_remote_notary().await?;
+    generate_valid_web_proof_with_custom_notary_key().await?;
     generate_web_proofs_with_redaction().await?;
 
     info!("Generate fixtures script completed successfully.");
@@ -62,7 +59,8 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
             .server_domain(SERVER_DOMAIN)
             .server_host(SERVER_HOST)
             .server_port(SERVER_PORT)
-            .uri("/regular_json?are_you_sure=yes&auth=s3cret_t0ken")
+            .uri("https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken")
+            .headers(vec![] as Vec<(&str, &str)>)
             .build()
             .unwrap(),
     )
@@ -70,38 +68,27 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
 
     let web_proof = to_web_proof(&presentation)?;
 
-    write_to_file(&format!("../web_proof/testdata/{TLSN_VERSION}/web_proof.json"), &web_proof)
-        .await?;
+    write_to_file("../web_proof/testdata/web_proof.json", &web_proof).await?;
 
-    write_to_file(
-        &format!("../../contracts/vlayer/testdata/{TLSN_VERSION}/web_proof.json"),
-        &web_proof,
-    )
-    .await?;
-
-    write_to_file(
-        &format!("../../examples/simple-web-proof/testdata/{TLSN_VERSION}/web_proof.json"),
-        &web_proof,
-    )
-    .await?;
+    write_to_file("../../contracts/vlayer/testdata/web_proof.json", &web_proof).await?;
 
     let presentation_json_with_corrupted_data = corrupt_data(&presentation)?;
 
     write_to_file(
-        &format!("../../contracts/vlayer/testdata/{TLSN_VERSION}/web_proof_missing_part.json"),
+        "../../contracts/vlayer/testdata/web_proof_missing_part.json",
         &presentation_json_with_corrupted_data,
     )
     .await?;
 
     write_to_file(
-        &format!("../web_proof/testdata/{TLSN_VERSION}/web_proof_identity_name_changed.json"),
+        "../web_proof/testdata/web_proof_identity_name_changed.json",
         &modify(&web_proof, |value| value["identity"]["name"] = "example.com".into()),
     )
     .await
     .unwrap();
 
     write_to_file(
-        &format!("../web_proof/testdata/{TLSN_VERSION}/web_proof_bad_signature.json"),
+        "../web_proof/testdata/web_proof_bad_signature.json",
         &modify(&web_proof, |value| value["attestation"]["signature"]["data"] = json!([])),
     )
     .await
@@ -110,20 +97,22 @@ async fn generate_valid_web_proof_local_notary() -> Result<(), Box<dyn std::erro
     Ok(())
 }
 
-async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::error::Error>> {
-    info!("Generate web proof using remote notary");
+async fn generate_valid_web_proof_with_custom_notary_key() -> Result<(), Box<dyn std::error::Error>>
+{
+    info!("Generate web proof using notary with custom key");
     let presentation = generate_web_proof(
         NotarizeParamsBuilder::default()
             .notary_config(NotaryConfig::new(
-                REMOTE_NOTARY_HOST.into(),
-                REMOTE_NOTARY_PORT,
-                TLSN_VERSION_WITH_V_PREFIX.into(),
-                true,
+                NOTARY_HOST.into(),
+                NOTARY_PORT_CUSTOM_KEY,
+                "".into(),
+                false,
             ))
             .server_domain(SERVER_DOMAIN)
             .server_host(SERVER_HOST)
             .server_port(SERVER_PORT)
             .uri("https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken")
+            .headers(vec![] as Vec<(&str, &str)>)
             .build()
             .unwrap(),
     )
@@ -132,17 +121,13 @@ async fn generate_valid_web_proof_remote_notary() -> Result<(), Box<dyn std::err
     let web_proof = to_web_proof(&presentation)?;
 
     write_to_file(
-        &format!(
-            "../../contracts/vlayer/testdata/{TLSN_VERSION}/web_proof_invalid_notary_pub_key.json"
-        ),
+        "../../contracts/vlayer/testdata/web_proof_invalid_notary_pub_key.json",
         &web_proof,
     )
     .await?;
 
     write_to_file(
-        &format!(
-            "../../examples/simple-web-proof/testdata/{TLSN_VERSION}/web_proof_invalid_notary_pub_key.json"
-        ),
+        "../../examples/simple-web-proof/testdata/web_proof_invalid_notary_pub_key.json",
         &web_proof,
     )
     .await?;
@@ -158,7 +143,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
             sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
         },
-        &format!("../web_proof/testdata/{TLSN_VERSION}/web_proof_all_redaction_types.json"),
+        "../web_proof/testdata/web_proof_all_redaction_types.json",
     )
     .await?;
 
@@ -167,9 +152,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
             sent: RangeSet::from([0..56, 61..161, 166..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
         },
-        &format!(
-            "../web_proof/testdata/{TLSN_VERSION}/web_proof_request_url_partial_redaction.json"
-        ),
+        "../web_proof/testdata/web_proof_request_url_partial_redaction.json",
     )
     .await?;
 
@@ -178,9 +161,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
             sent: RangeSet::from([0..55, 61..162, 166..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
         },
-        &format!(
-            "../web_proof/testdata/{TLSN_VERSION}/web_proof_request_header_partial_redaction.json"
-        ),
+        "../web_proof/testdata/web_proof_request_header_partial_redaction.json",
     )
     .await?;
 
@@ -189,9 +170,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
             sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 414..463, 475..transcript.received().len()]),
         },
-        &format!(
-            "../web_proof/testdata/{TLSN_VERSION}/web_proof_response_header_partial_redaction.json"
-        ),
+        "../web_proof/testdata/web_proof_response_header_partial_redaction.json",
     )
     .await?;
 
@@ -200,9 +179,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
             sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 415..464, 475..transcript.received().len()]),
         },
-        &format!(
-            "../web_proof/testdata/{TLSN_VERSION}/web_proof_response_json_partial_redaction.json"
-        ),
+        "../web_proof/testdata/web_proof_response_json_partial_redaction.json",
     )
     .await?;
 

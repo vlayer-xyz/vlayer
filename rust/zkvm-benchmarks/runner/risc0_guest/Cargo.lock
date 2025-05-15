@@ -3373,9 +3373,9 @@ dependencies = [
 
 [[package]]
 name = "rangeset"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45cdc7f1ad5ef57b2fbb140c170c9d32ed93ea7a9a1e3d0cf67a248912aeaf12"
+checksum = "1fc7af00a06ad692080d87495a904677592c662610edb82b4fc8782f4ed2f01f"
 dependencies = [
  "serde",
 ]
@@ -4592,8 +4592,8 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tlsn-core"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "bcs",
  "bimap",
@@ -4619,8 +4619,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-core"
-version = "0.1.0-alpha.9"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.9#328c2af1623f742e49ab62f49dcde606f933056f"
+version = "0.1.0-alpha.10"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
 dependencies = [
  "futures",
  "hmac",
@@ -4639,7 +4639,7 @@ dependencies = [
 [[package]]
 name = "tlsn-utils"
 version = "0.1.0"
-source = "git+https://github.com/tlsnotary/tlsn-utils?rev=6650a95#6650a956d3597d3a662fd9c15a64a1651afac399"
+source = "git+https://github.com/tlsnotary/tlsn-utils?rev=6168663#6168663495281f2c1b2c1734dc276cecc4d36ef1"
 
 [[package]]
 name = "tokio"
