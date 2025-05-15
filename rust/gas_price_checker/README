@@ -32,7 +32,6 @@ Gas price: 2.3456 gwei
 
 ## How It Works
 
-1. Sends a JSON-RPC eth_gasPrice request using `reqwest`.
-2. Parses the returned hex string into a U`256 (from `alloy_primitives`).
+1. Sends a JSON-RPC `eth_gasPrice` request using `reqwest`.
 3. Converts Wei → Gwei and compares against the threshold.
-4. Prints a colored status and returns the appropriate exit code.
+4. Prints a status and returns the appropriate exit code.
