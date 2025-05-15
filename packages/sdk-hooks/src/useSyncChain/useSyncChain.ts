@@ -1,19 +1,7 @@
 import { getChainSpecs } from "@vlayer/sdk";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Chain } from "viem";
-import { useAccount, useChains, useSwitchChain } from "wagmi";
-
-const findChainById = (
-  chains: readonly [Chain, ...Chain[]],
-  chainId: number,
-) => {
-  const chain = chains.find((chain) => chain.id === chainId);
-
-  if (!chain) {
-    return undefined;
-  }
-  return chain.name;
-};
+import { useAccount, useSwitchChain } from "wagmi";
 
 export class ChainSwitchError extends Error {
   constructor(chainName: string) {
@@ -60,11 +48,6 @@ export const useSyncChain = (
   const [error, setError] = useState<Error | null>(null);
   const [switched, setSwitched] = useState<boolean>(false);
   const { chainId: wagmiChainId } = useAccount();
-  const wagmiChains = useChains();
-
-  const wagmiChain = useMemo(() => {
-    return wagmiChainId ? findChainById(wagmiChains, wagmiChainId) : undefined;
-  }, [wagmiChainId, wagmiChains]);
 
   useEffect(() => {
     if (configChain === undefined) {
@@ -103,7 +86,7 @@ export const useSyncChain = (
       setError(new ChainNotSupportedError(configChain));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wagmiChainId, configChain, wagmiChain]);
+  }, [wagmiChainId, configChain]);
 
   return { chain, error, switched };
 };
