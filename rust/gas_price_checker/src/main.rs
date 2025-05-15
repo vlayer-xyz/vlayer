@@ -64,6 +64,8 @@ fn fetch_gas_price(rpc_url: &str) -> anyhow::Result<f64> {
         bail!("Error: 'gas_price_hex' is empty");
     }
 
+    // NOTE: casting u64 to f64 will round values >2^53. Gas prices in wei are typically < 1e11
+    // and should stay far below 2^53, so converting to f64 is safe for this use case.
     let gas_price_wei = u64::from_str_radix(gas_price_hex.trim_start_matches("0x"), 16)
         .context(format!("Failed to parse gas price hex: {}", gas_price_hex))?
         as f64;
