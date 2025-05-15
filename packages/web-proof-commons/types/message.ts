@@ -212,7 +212,7 @@ export type WebProofStepClickButton = BrandedStep<
 type Header = [string, string];
 export type Headers = Header[];
 
-type Variables = Variable[];
+export type Variables = Variable[];
 export type Variable = {
   name: string;
   path: string;
