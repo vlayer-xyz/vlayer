@@ -19,7 +19,7 @@ use common::{GuestElf, verifier::zk_proof};
 pub use config::Config;
 use derive_new::new;
 use error::preflight;
-pub use error::{AwaitingChainProofError, BuilderError, Error, ProvingError};
+pub use error::{BuilderError, Error, ProvingError};
 use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;

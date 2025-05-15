@@ -41,7 +41,7 @@ mod usdt {
 
     #[tokio::test(flavor = "multi_thread")]
     #[should_panic(
-        expected = "called `Result::unwrap()` on an `Err` value: Execution error: EVM error: transaction validation error: call gas cost exceeds the gas limit"
+        expected = "called `Result::unwrap()` on an `Err` value: EVM error: transaction validation error: call gas cost exceeds the gas limit"
     )]
     async fn fails_when_no_gas() {
         let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();

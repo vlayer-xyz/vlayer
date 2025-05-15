@@ -4,7 +4,7 @@ use serde::Serialize;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Int conversion error: {0}")]
+    #[error("Int conversion: {0}")]
     TryFromInt(#[from] TryFromIntError),
 }
 

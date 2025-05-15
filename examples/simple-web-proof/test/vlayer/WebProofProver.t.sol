@@ -45,7 +45,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                'Preflight: Execution error: EVM transact error: revert: ContractError(Revert(Revert("Invalid notary public key")))'
+                'Preflight: Transaction reverted: ContractError(Revert(Revert("Invalid notary public key")))'
             );
         }
     }

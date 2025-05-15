@@ -161,7 +161,7 @@ impl WithStartChainId {
 
         let latest_rpc_block = providers.get_latest_block_number(start_chain_id)?;
         if !prover_contract_deployed(latest_rpc_block)? {
-            return Err(Error::ProverContractNotDeployed);
+            return Err(Error::ProverContractNotDeployed(prover_contract_addr, latest_rpc_block));
         }
 
         let sync_status = chain_client.get_sync_status(start_chain_id).await;
@@ -276,7 +276,7 @@ mod tests {
         async fn prover_contract_not_deployed() {
             let builder = builder(&[b""]); // empty contract code at latest RPC block
             let res = builder.with_prover_contract_addr(Address::default()).await;
-            assert!(matches!(res, Err(Error::ProverContractNotDeployed)));
+            assert!(matches!(res, Err(Error::ProverContractNotDeployed(_, _))));
         }
 
         #[tokio::test(flavor = "multi_thread")]

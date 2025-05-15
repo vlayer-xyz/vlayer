@@ -3,7 +3,7 @@ use alloy_primitives::{B256, ChainId, hex::ToHexExt, keccak256};
 use alloy_rlp::RlpEncodable;
 use call_common::ExecutionLocation;
 use call_engine::Call as EngineCall;
-use call_host::{Call as HostCall, Error as HostError};
+use call_host::{BuilderError, Call as HostCall};
 use common::Hashable;
 use derive_more::From;
 use derive_new::new;
@@ -19,10 +19,10 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     #[error("Invalid field: {0}")]
     FieldValidation(#[from] FieldValidationError),
-    #[error("Gas meter error: {0}")]
+    #[error("Gas meter: {0}")]
     GasMeter(#[from] GasMeterError),
-    #[error("Host error: {0}")]
-    Host(#[from] HostError),
+    #[error("Host builder: {0}")]
+    HostBuilder(#[from] BuilderError),
 }
 
 impl From<Error> for ErrorObjectOwned {
@@ -33,7 +33,7 @@ impl From<Error> for ErrorObjectOwned {
                 error.to_string(),
                 None,
             ),
-            Error::Host(..) | Error::GasMeter(..) => ErrorObjectOwned::owned::<()>(
+            Error::HostBuilder(..) | Error::GasMeter(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),
                 None,
