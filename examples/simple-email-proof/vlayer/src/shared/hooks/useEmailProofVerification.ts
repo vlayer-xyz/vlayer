@@ -21,6 +21,7 @@ import {
   NoProofError,
   CallProverError,
   UseChainError,
+  PreverifyError,
 } from "../errors/appErrors";
 import { ensureBalance } from "../lib/ethFaucet";
 
@@ -106,15 +107,20 @@ export const useEmailProofVerification = () => {
     writeContract(contractArgs);
   };
 
+  const [preverifyError, setPreverifyError] = useState<Error | null>(null);
   const startProving = async (emlContent: string) => {
     setCurrentStep(ProofVerificationStep.SENDING_TO_PROVER);
 
-    const email = await preverifyEmail({
-      mimeEmail: emlContent,
-      dnsResolverUrl: import.meta.env.VITE_DNS_SERVICE_URL,
-      token: import.meta.env.VITE_VLAYER_API_TOKEN,
-    });
-    await callProver([email]);
+    try {
+      const email = await preverifyEmail({
+        mimeEmail: emlContent,
+        dnsResolverUrl: import.meta.env.VITE_DNS_SERVICE_URL,
+        token: import.meta.env.VITE_VLAYER_API_TOKEN,
+      });
+      await callProver([email]);
+    } catch (error) {
+      setPreverifyError(error as Error);
+    }
     setCurrentStep(ProofVerificationStep.WAITING_FOR_PROOF);
   };
 
@@ -143,6 +149,12 @@ export const useEmailProofVerification = () => {
       throw new Error(verificationError.message);
     }
   }, [verificationError]);
+
+  useEffect(() => {
+    if (preverifyError) {
+      throw new PreverifyError(preverifyError.message);
+    }
+  }, [preverifyError]);
 
   return {
     currentStep,
