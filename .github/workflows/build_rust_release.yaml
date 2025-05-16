@@ -1,0 +1,189 @@
+name: Build Rust binaries for releasing
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      vlayer_release:
+        description: "Release type (nightly or stable)"
+        required: true
+        type: string
+    outputs:
+      vlayer_build:
+        value: ${{ jobs.build-x86_64-unknown-linux-gnu-release.outputs.vlayer_build }}
+  pull_request:
+    paths:
+      - ".github/actions/build-guest-artifacts/action.yml"
+      - ".github/actions/replace-guest-artifacts/action.yml"
+      - ".github/workflows/build_rust_release.yaml"
+  push:
+    branches:
+      - main
+    # Typically we run most workflows on `main` without narrowing down.
+    # This workflow however is resource-heavy (includes a macOS build),
+    # so we narrow it down.
+    paths:
+      - ".github/actions/build-guest-artifacts/action.yml"
+      - ".github/actions/replace-guest-artifacts/action.yml"
+      - ".github/workflows/build_rust_release.yaml"
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-guest-wrapper:
+    name: Build guest wrapper and save guest replacements for later use
+    runs-on: aws-linux-medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build guest artifacts
+        uses: ./.github/actions/build-guest-artifacts
+
+  build-x86_64-unknown-linux-gnu-release:
+    name: Build release for x86_64-unknown-linux-gnu
+    needs: [build-guest-wrapper]
+    runs-on: aws-linux-medium
+    outputs:
+      vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
+    env:
+      target: x86_64-unknown-linux-gnu
+      suffix: linux-amd64
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Replace guest artifacts
+        uses: ./.github/actions/replace-guest-artifacts
+
+      - name: "Build binaries"
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          VLAYER_RELEASE: ${{ inputs.vlayer_release || 'dev' }}
+          RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
+        run: |
+          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server
+
+      - name: "Print build version"
+        id: vlayer_build
+        run: |
+          BUILD=$(./target/${{ env.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
+          echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
+      - name: Package and upload release binaries
+        uses: ./.github/actions/package-release-binaries
+        with:
+          output_file_suffix: "${{ env.suffix }}.tar.gz"
+          target: "${{ env.target }}"
+
+  build-x86_64-unknown-linux-musl-release:
+    name: Build release for x86_64-unknown-linux-musl
+    needs: [build-guest-wrapper]
+    runs-on: aws-linux-medium
+    outputs:
+      vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
+    env:
+      target: x86_64-unknown-linux-musl
+      suffix: linux-amd64-musl
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        uses: ./.github/actions/rust-prerequisites
+        with:
+          target: x86_64-unknown-linux-musl
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Replace guest artifacts
+        uses: ./.github/actions/replace-guest-artifacts
+
+      - name: Check nixpkgs inputs
+        uses: DeterminateSystems/flake-checker-action@v9
+        with:
+          flake-lock-path: ./.github/nix/flake.lock
+          check-outdated: false
+          fail-mode: true
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v15
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: "Build binaries"
+        env:
+          VLAYER_RELEASE: ${{ inputs.vlayer_release || 'dev' }}
+          RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
+        run: |
+          nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server -p dns_server"
+
+      - name: "Print build version"
+        id: vlayer_build
+        run: |
+          BUILD=$(./target/${{ env.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
+          echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
+      - name: Package and upload release binaries
+        uses: ./.github/actions/package-release-binaries
+        with:
+          output_file_suffix: "${{ env.suffix }}.tar.gz"
+          target: "${{ env.target }}"
+
+  build-darwin-arm64-release:
+    name: Build release for aarch64-apple-darwin
+    needs: [build-guest-wrapper]
+    runs-on: macos-14-xlarge
+    outputs:
+      vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
+    env:
+      target: aarch64-apple-darwin
+      suffix: darwin-arm64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Darwin prerequisites
+        uses: ./.github/actions/darwin-prerequisites
+
+      - name: Install Rust prerequisites
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Replace guest artifacts
+        uses: ./.github/actions/replace-guest-artifacts
+
+      - name: "Build binaries"
+        env:
+          VLAYER_RELEASE: ${{ inputs.vlayer_release || 'dev' }}
+          RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
+        run: |
+          cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server -p dns_server
+
+      - name: "Print build version"
+        id: vlayer_build
+        run: |
+          BUILD=$(./target/${{ env.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
+          echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
+      - name: Package and upload release binaries
+        uses: ./.github/actions/package-release-binaries
+        with:
+          output_file_suffix: "${{ env.suffix }}.tar.gz"
+          target: "${{ env.target }}"

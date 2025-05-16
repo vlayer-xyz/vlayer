@@ -1,0 +1,42 @@
+name: Lint TS
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  lint-ts:
+    name: Lint TS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      # mocking is need for contract build to pass
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
+      # contracts need to be built to run the linter
+      - name: Run Forge build vlayer
+        working-directory: ./contracts/vlayer
+        run: |
+          forge soldeer install
+          forge build --sizes
+      - name: Run Forge build fixtures
+        working-directory: ./contracts/fixtures
+        run: |
+          forge soldeer install
+          forge build --sizes
+      - name: Build abi types
+        run: ./bash/build-ts-types.sh
+      - name: Run ESLint
+        run: bash/lint/ts.sh
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096

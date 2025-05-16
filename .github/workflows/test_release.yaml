@@ -1,0 +1,92 @@
+name: Test Release
+on:
+  workflow_run:
+    workflows: ["Deploy Stable Provers"]
+    types: [completed]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/test_release.yaml"
+      - "docker/docker-compose.devnet.yaml"
+      - "bash/test-release-local-prover.sh"
+      - "bash/test-release-remote-prover.sh"
+      - "bash/test-js-sdk-release.sh"
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+jobs:
+  test-release-anvil:
+    name: Test release on anvil and local prover
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          submodules: recursive
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Test local prover
+        run: bash/test-release-local-prover.sh
+
+  test-release-sepolia:
+    strategy:
+      fail-fast: false
+      matrix:
+        vlayer_release:
+          - channel: nightly
+            private_key_index: EXAMPLES_TEST_RELEASE_PRIVATE_KEY
+          - channel: stable
+            private_key_index: EXAMPLES_TEST_RELEASE_PRIVATE_KEY_2
+    name: Test release on OP Sepolia and remote prover
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          submodules: recursive
+      - name: Test remote prover
+        env:
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets[matrix.vlayer_release.private_key_index] }}
+          JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+          VLAYER_API_TOKEN: ${{ secrets.TEST_RELEASE_VLAYER_API_TOKEN_TESTNET }}
+          WS_PROXY_URL: wss://test-wsproxy.vlayer.xyz/jwt
+          PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          VLAYER_RELEASE: ${{ matrix.vlayer_release.channel }}
+
+        run: bash/test-release-remote-prover.sh
+      - name: Handle Playwright Reports
+        uses: ./.github/actions/handle-playwright-reports
+        if: ${{ !cancelled() }}
+        with:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          EXAMPLES_PATH: /vlayer-test-release/examples/
+          GITHUB_TOKEN: ${{ github.token }}
+          ARTIFACT_RETENTION_DAYS: "30"
+          REPORT_PATH: "vlayer-test-release/examples/**/vlayer/playwright-report/"
+          PR_NUMBER: ${{ github.event.number }}
+          DEPLOY_TYPE: "examples"
+          CONTEXT: "test-release-sepolia-${{ matrix.vlayer_release.channel }}"
+
+  test-release-js-sdk:
+    name: Test JS SDK release
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          submodules: recursive
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/docker-compose.devnet.yaml
+          services: |
+            vlayer-call-server
+      - name: Test js sdk release
+        run: bash/test-js-sdk-release.sh

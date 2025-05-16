@@ -1,0 +1,109 @@
+name: Prepare Release PR
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  prepare-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a token for the template repository
+        id: app_token
+        uses: actions/create-github-app-token@v1.9.3
+        with:
+          owner: "vlayer-xyz"
+          repositories: "vlayer"
+          app-id: ${{ secrets.VLAYER_GITHUB_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.VLAYER_GITHUB_AUTOMATION_APP_SECRET }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
+
+      - name: Fetch all tags
+        run: git fetch --tags --force
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@11df97af8e8102fd60b60a77dfbf58d40cd843b8 # v1.10.1
+        with:
+          toolchain: nightly,1.85
+          cache: false
+
+      - name: Calculate new version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREVIOUS_TAG=$(git tag --sort=-creatordate | grep '^v[0-9]' | head -n 1)
+          LATEST_COMMIT=$(git rev-parse HEAD)
+
+          echo "PREVIOUS_TAG: $PREVIOUS_TAG"
+          echo "LATEST_COMMIT: $LATEST_COMMIT"
+
+          if [[ "$PREVIOUS_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR=${BASH_REMATCH[1]}
+            MINOR=${BASH_REMATCH[2]}
+            PATCH=${BASH_REMATCH[3]}
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          else
+            echo "Error: PREVIOUS_TAG is not a valid semantic version."
+            exit 1
+          fi
+
+          echo "NEW_VERSION: $NEW_VERSION"
+
+          {
+            echo "PREVIOUS_TAG=${PREVIOUS_TAG}"
+            echo "LATEST_COMMIT=${LATEST_COMMIT}"
+            echo "NEW_VERSION=${NEW_VERSION}"
+          } >> $GITHUB_ENV
+
+      - name: Prepare Release Notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_NOTES=$(gh api repos/${{ github.repository }}/releases/generate-notes \
+            -f tag_name=v${{ env.NEW_VERSION }} \
+            -f target_commitish=${{ env.LATEST_COMMIT }} \
+            -f previous_tag_name=${{ env.PREVIOUS_TAG }} \
+            --jq .body)
+
+          echo "RELEASE_NOTES: $RELEASE_NOTES"
+
+          RELEASE_NOTES_FILE=$(mktemp /tmp/release_notes_XXXXXX)
+          echo "$RELEASE_NOTES" > $RELEASE_NOTES_FILE
+          echo "Stored release notes in temporary file: $RELEASE_NOTES_FILE"
+
+          echo "RELEASE_NOTES_FILE=${RELEASE_NOTES_FILE}" >> $GITHUB_ENV
+
+      - name: Update Cargo.toml
+        run: |
+          sed -i "s/^version = \".*\"/version = \"${{ env.NEW_VERSION }}\"/" rust/version/Cargo.toml
+          echo "Updated Cargo.toml with new version: ${{ env.NEW_VERSION }}"
+          cargo update -p version
+          git diff
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.app_token.outputs.token }}
+          commit-message: "chore(version): bump version to ${{ env.NEW_VERSION }}"
+          committer: Vlayer GitHub Automation <211681916+vlayer-github-automation[bot]@users.noreply.github.com>
+          author: Vlayer GitHub Automation <211681916+vlayer-github-automation[bot]@users.noreply.github.com>
+          branch: release/v${{ env.NEW_VERSION }}
+          title: "chore(version): bump version to ${{ env.NEW_VERSION }}"
+          body-path: ${{ env.RELEASE_NOTES_FILE }}
+          draft: true

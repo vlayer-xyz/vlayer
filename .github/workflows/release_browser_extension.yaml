@@ -1,0 +1,136 @@
+# This workflow uploads the latest nightly extension to the Chrome Web Store,
+# and requests it to be published - after a successful review.
+
+name: Release Browser Extension
+on:
+  workflow_run:
+    workflows: ["Release stable"]
+    types: [completed]
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+jobs:
+  release-browser-extension:
+    name: Release Browser Extension
+    environment: Production
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      # https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl
+      EXTENSION_ID: "jbchhcgphfokabmfacnkafoeeeppjmpl"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      # The extension is built and uploaded to S3 during the nightly release workflow.
+      # We download it, and read its version for later use.
+      - name: Download latest nightly extension archive
+        run: |
+          curl -L https://install.vlayer.xyz/browser-extension --output browser-extension.tar.gz
+          tar -xvf ./browser-extension.tar.gz
+          rm browser-extension.tar.gz
+      # The version will be in the `x.y.z` format.
+      - name: Read nightly version from the manifest
+        run: |
+          NIGHTLY_VERSION=$(
+            jq -r '.version' browser-extension/manifest.json
+          )
+          echo "NIGHTLY_VERSION=${NIGHTLY_VERSION}" >> $GITHUB_ENV
+
+      # https://developer.chrome.com/docs/webstore/using-api#refresh_your_access_token
+      - name: Refresh Chrome Web Store API access token
+        env:
+          CLIENT_ID: ${{ secrets.CHROME_WEB_STORE_API_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CHROME_WEB_STORE_API_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CHROME_WEB_STORE_API_REFRESH_TOKEN }}
+        run: |
+          CHROME_WEB_STORE_API_ACCESS_TOKEN=$(
+            curl "https://oauth2.googleapis.com/token" \
+              -d "client_secret=${CLIENT_SECRET}" \
+              -d "grant_type=refresh_token" \
+              -d "refresh_token=${REFRESH_TOKEN}" \
+              -d "client_id=${CLIENT_ID}" | \
+            jq -r '.access_token'
+          )
+          echo "::add-mask::$CHROME_WEB_STORE_API_ACCESS_TOKEN"
+          echo "CHROME_WEB_STORE_API_ACCESS_TOKEN=${CHROME_WEB_STORE_API_ACCESS_TOKEN}" >> $GITHUB_ENV
+
+      # We read the previously-uploaded extension version from the store.
+      # It will be in the `x.y.z.a` format.
+      - name: Read published version of the extension from the store
+        run: |
+          PUBLISHED_VERSION=$(
+            curl -X GET \
+              "https://www.googleapis.com/chromewebstore/v1.1/items/${EXTENSION_ID}?projection=DRAFT" \
+              -H "Authorization: Bearer $CHROME_WEB_STORE_API_ACCESS_TOKEN" \
+              -H "Accept: application/json" \
+              | jq -r '.crxVersion'
+          )
+          echo "PUBLISHED_VERSION=${PUBLISHED_VERSION}" >> $GITHUB_ENV
+
+      # We need to specify a new `version` of the extension.
+      # We can't use our manifest `version_name`,
+      # because the nightly date and commit hash tags are incompatible with the version format:
+      # https://developer.chrome.com/docs/extensions/reference/manifest/version
+      #
+      # We also can't use the first three numbers of the semver version,
+      # because we want upload many nightly versions without bumping any of the three numbers.
+      # That's why we start with the first three numbers of the version,
+      # and bump the fourth number during each upload to mark a new version.
+      #
+      # Visual summary:
+      # `0.1.0.11` + `0.1.0-nightly-123-xyz` = `0.1.0.12`
+      # `0.1.0.11` + `0.3.2-nightly-456-qwe` = `0.3.2.0`
+      - name: Calculate new version number
+        run: |
+          # Split versions into components
+          IFS='.' read -ra NIGHTLY_PARTS <<< "$NIGHTLY_VERSION"
+          IFS='.' read -ra PUBLISHED_PARTS <<< "$PUBLISHED_VERSION"
+
+          # Default fourth number to 0
+          FOURTH_NUMBER=0
+
+          # Check if first three numbers match
+          if [ "${NIGHTLY_PARTS[0]}" = "${PUBLISHED_PARTS[0]}" ] && \
+             [ "${NIGHTLY_PARTS[1]}" = "${PUBLISHED_PARTS[1]}" ] && \
+             [ "${NIGHTLY_PARTS[2]}" = "${PUBLISHED_PARTS[2]}" ]; then
+            # If same version, increment the fourth number
+            FOURTH_NUMBER=$((PUBLISHED_PARTS[3] + 1))
+          fi
+
+          # Construct new version
+          NEW_VERSION="${NIGHTLY_PARTS[0]}.${NIGHTLY_PARTS[1]}.${NIGHTLY_PARTS[2]}.${FOURTH_NUMBER}"
+          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+          echo "Calculated new version: ${NEW_VERSION}"
+
+      # Update the manifest with the new desired `version`.
+      # `version_name` remains unchanged.
+      - name: Update manifest with new version
+        run: |
+          cd browser-extension
+          jq -c --arg version "$NEW_VERSION" \
+            '.version = $version' manifest.json > manifest.json.tmp
+          mv manifest.json.tmp manifest.json
+
+      # Chrome Web Store expects a .zip
+      - name: Create new zip file
+        run: zip -r new-extension.zip ./browser-extension
+
+      - name: Upload to Chrome Web Store
+        run: |
+          curl -X PUT \
+            -H "Authorization: Bearer $CHROME_WEB_STORE_API_ACCESS_TOKEN" \
+            -T new-extension.zip \
+            -f \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/${EXTENSION_ID}"
+
+      - name: Publish to Chrome Web Store
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer $CHROME_WEB_STORE_API_ACCESS_TOKEN" \
+            -H "Content-Length: 0" \
+            -f \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/${EXTENSION_ID}/publish"

@@ -1,0 +1,172 @@
+name: E2E test
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'rust/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'bash/**'
+              - 'contracts/**'
+              - 'test_contracts/**'
+              - 'examples/**'
+              - 'packages/**'
+              - 'docker/**'
+              - 'ansible/**'
+              - 'bun.lock'
+              - '.github/workflows/test_e2e.yaml'
+              - '.github/actions/test-e2e/**'
+
+  build-binaries:
+    name: Build binaries
+    needs: changes
+    runs-on: aws-linux-medium
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: bash/check-llvm-clang.sh
+
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
+
+      - name: Create reusable Cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: test-e2e
+      - name: Build binaries
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RISC0_USE_DOCKER: 1
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: |
+          cargo build --bin vlayer --bin call_server --bin chain_server --bin worker --bin dns_server
+          mkdir target_debug
+          mv ${CARGO_TARGET_DIR}/debug/{vlayer,call_server,chain_server,worker,dns_server} target_debug/
+
+      - name: Push binaries
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: target-debug
+          path: target_debug
+          if-no-files-found: error
+          retention-days: 3
+
+  test-e2e-simple:
+    name: E2E test (simple)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple"
+
+  test-e2e-simple-web-proof:
+    name: E2E test (simple-web-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-web-proof"
+
+  test-e2e-simple-email-proof:
+    name: E2E test (simple-email-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-email-proof"
+
+  test-e2e-simple-teleport:
+    name: E2E test (simple-teleport)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-teleport"
+
+  test-e2e-simple-time-travel:
+    name: E2E test (simple-time-travel)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-time-travel"
+
+  test-e2e-kraken-web-proof:
+    name: E2E test (kraken-web-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    if: needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "kraken-web-proof"

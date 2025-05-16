@@ -1,0 +1,99 @@
+name: Lint Rust
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  lint-rust:
+    name: Lint Rust
+    runs-on: aws-linux-medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 2
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+
+      - name: Create reusable Cargo target dir (Host)
+        id: cargo_target_host
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: lint-rust-host
+      - name: Run Host lints
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_host.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          RUSTFLAGS: "-Dwarnings"
+        run: |
+          cargo +nightly fmt --check
+          cargo sort --check --grouped --workspace
+          cargo clippy --all-targets --all-features --locked
+
+      - name: Create reusable Cargo target dir (Call Guest)
+        id: cargo_target_call_guest
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: lint-rust-call-guest
+      - name: Run Risc0 Call Guest lints
+        working-directory: rust/guest_wrapper/risc0_call_guest
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_call_guest.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          RUSTFLAGS: "-Dwarnings"
+        run: |
+          cargo +nightly fmt --check
+          cargo sort --check --grouped
+          cargo clippy --all-targets --all-features --locked
+
+      - name: Create reusable Cargo target dir (Chain Guest)
+        id: cargo_target_chain_guest
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: lint-rust-chain-guest
+      - name: Run Risc0 Chain Guest lints
+        working-directory: rust/guest_wrapper/risc0_chain_guest
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_chain_guest.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          RUSTFLAGS: "-Dwarnings"
+        run: |
+          cargo +nightly fmt --check
+          cargo sort --check --grouped
+          cargo clippy --all-targets --all-features --locked
+
+      - name: Run cargo deny
+        working-directory: rust/cli
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_host.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: cargo deny check bans
+
+      - name: Detect unused dependencies
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target_host.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+        run: cargo machete
+
+      - name: Check chain guest ELF ID
+        run: ./bash/check-elf-id.sh
