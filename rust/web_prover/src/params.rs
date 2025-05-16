@@ -1,5 +1,6 @@
 use std::{collections::BTreeMap, str, sync::Arc};
 
+use derivative::Derivative;
 use derive_builder::Builder;
 use derive_more::Debug;
 pub use hyper::http::Method;
@@ -8,7 +9,8 @@ use tlsn_core::transcript::Transcript;
 
 use crate::RedactionConfig;
 
-#[derive(Debug, Clone, Builder)]
+#[derive(Derivative, Clone, Builder)]
+#[derivative(Debug)]
 pub struct NotaryConfig {
     /// Notary host (domain name or IP)
     #[builder(setter(into))]
@@ -21,6 +23,11 @@ pub struct NotaryConfig {
     /// Whether to use TLS for notary connection
     #[builder(default)]
     pub enable_tls: bool,
+    /// JWT authentication token if any
+    #[cfg(feature = "tlsn-jwt")]
+    #[builder(setter(into))]
+    #[derivative(Debug = "ignore")]
+    pub jwt: Option<String>,
 }
 
 #[derive(Builder, Clone, Debug)]

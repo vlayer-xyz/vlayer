@@ -41,7 +41,7 @@ pub(crate) enum InputError {
 }
 
 /// Generates a web-based proof for the specified request
-#[derive(Clone, Debug, Parser)]
+#[derive(Clone, Parser, Debug)]
 pub(crate) struct WebProofArgs {
     /// Full URL of the request to notarize
     #[arg(long)]
@@ -187,6 +187,7 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
 
     fn try_from(value: WebProofArgs) -> Result<Self> {
         let ProvenUrl { host, port } = parse_proven_url(&value.url)?;
+
         // If host is not provided fallback to host extracted from url
         let fallback_host = value.host.unwrap_or(host.clone());
 
@@ -213,11 +214,8 @@ impl TryFrom<WebProofArgs> for NotarizeParams {
 
         debug!("headers: {headers:#?}");
 
-        let notary_config = if let Some(notary_url) = value.notary {
-            parse_notary_url(&notary_url)?
-        } else {
-            parse_notary_url(DEFAULT_NOTARY_URL)?
-        };
+        let notary_url = value.notary.unwrap_or(DEFAULT_NOTARY_URL.to_string());
+        let notary_config = parse_notary_url(&notary_url)?;
 
         let mut notarize_params_builder = NotarizeParamsBuilder::default();
         notarize_params_builder
