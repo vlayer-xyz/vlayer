@@ -50,16 +50,12 @@ const isNotarizeStepCompleted = hasProof;
 const isExtractVariablesStepReady = () => true;
 const isExtractVariablesStepCompleted = () => true;
 
-const isClickButtonStepReady = () => true;
-const isClickButtonStepCompleted = () => true;
-
 const checkStepCompletion = {
   startPage: isStartPageStepCompleted,
   redirect: isRedirectStepCompleted,
   expectUrl: isExpectUrlStepCompleted,
   notarize: isNotarizeStepCompleted,
   extractVariables: isExtractVariablesStepCompleted,
-  clickButton: isClickButtonStepCompleted,
 };
 
 const checkStepReadiness = {
@@ -68,7 +64,6 @@ const checkStepReadiness = {
   expectUrl: isExpectUrlStepReady,
   notarize: isNotarizeStepReady,
   extractVariables: isExtractVariablesStepReady,
-  clickButton: isClickButtonStepReady,
 };
 
 const calculateStepStatus = ({
