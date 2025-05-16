@@ -5,9 +5,8 @@ import { ExpectUrlStepActions } from "./ExpectUrl";
 import { NotarizeStepActions } from "./Notarize";
 import { StartPageStepActions } from "./StartPage";
 import { RedirectStepActions } from "./Redirect";
+import { UserActionStepActions } from "./UserAction";
 import { EXTENSION_STEP } from "src/web-proof-commons";
-
-import { UserActionStepActions } from "components/molecules/StepActions/UserAction/UserActionStepActions.tsx";
 import { StepProps } from "../Step";
 
 export const StepActions: React.FC<StepProps> = ({
