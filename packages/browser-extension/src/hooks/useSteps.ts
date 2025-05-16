@@ -41,6 +41,9 @@ const isStartPageStepCompleted = isUrlVisited;
 const isRedirectStepReady = () => true;
 const isRedirectStepCompleted = isUrlVisited;
 
+const isUserActionStepReady = () => true;
+const isUserActionStepCompleted = () => false;
+
 const isExpectUrlStepReady = () => true;
 const isExpectUrlStepCompleted = isUrlVisited;
 
@@ -56,6 +59,7 @@ const isClickButtonStepCompleted = () => true;
 const checkStepCompletion = {
   startPage: isStartPageStepCompleted,
   redirect: isRedirectStepCompleted,
+  userAction: isUserActionStepCompleted,
   expectUrl: isExpectUrlStepCompleted,
   notarize: isNotarizeStepCompleted,
   extractVariables: isExtractVariablesStepCompleted,
@@ -65,6 +69,7 @@ const checkStepCompletion = {
 const checkStepReadiness = {
   startPage: isStartPageStepReady,
   redirect: isRedirectStepReady,
+  userAction: isUserActionStepReady,
   expectUrl: isExpectUrlStepReady,
   notarize: isNotarizeStepReady,
   extractVariables: isExtractVariablesStepReady,

@@ -7,6 +7,7 @@ import { StartPageStepActions } from "./StartPage";
 import { RedirectStepActions } from "./Redirect";
 import { StepStatus } from "constants/step";
 import { EXTENSION_STEP, ExtensionStep } from "src/web-proof-commons";
+import { UserActionStepActions } from "./UserAction";
 
 export const StepActions: React.FC<{
   kind: ExtensionStep;
@@ -46,10 +47,14 @@ export const StepActions: React.FC<{
             status={status}
           />
         ))
-        .with(EXTENSION_STEP.userAction, () => {
-          console.warn("Unsupported step type:", kind);
-          return <></>;
-        })
+        .with(EXTENSION_STEP.userAction, () => (
+          <UserActionStepActions
+            isVisited={false}
+            link={link ||""}
+            buttonText={buttonText || ""}
+            status={status}
+            />
+        ))
         .with(
           P.union(EXTENSION_STEP.extractVariables, EXTENSION_STEP.clickButton),
           () => {
