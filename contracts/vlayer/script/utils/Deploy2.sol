@@ -9,7 +9,7 @@ library Deploy2 {
     // The CREATE2 deterministic deployer contract: https://book.getfoundry.sh/guides/deterministic-deployments-using-create2#getting-started
     address public constant CREATE2_DEPLOYER_CONTRACT = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
-    function getOrDeploy(bytes memory creationCode, bytes32 salt) public returns (address) {
+    function getOrDeploy(bytes memory creationCode, bytes32 salt) internal returns (address) {
         address computed = Deploy2.compute(salt, creationCode);
         if (computed.code.length == 0) {
             return Deploy2.deploy(salt, creationCode);
