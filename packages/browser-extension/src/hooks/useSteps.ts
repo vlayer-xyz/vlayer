@@ -38,6 +38,9 @@ const hasProof = (
 const isStartPageStepReady = () => true;
 const isStartPageStepCompleted = isUrlVisited;
 
+const isRedirectStepReady = () => true;
+const isRedirectStepCompleted = isUrlVisited;
+
 const isExpectUrlStepReady = () => true;
 const isExpectUrlStepCompleted = isUrlVisited;
 
@@ -52,6 +55,7 @@ const isClickButtonStepCompleted = () => true;
 
 const checkStepCompletion = {
   startPage: isStartPageStepCompleted,
+  redirect: isRedirectStepCompleted,
   expectUrl: isExpectUrlStepCompleted,
   notarize: isNotarizeStepCompleted,
   extractVariables: isExtractVariablesStepCompleted,
@@ -60,6 +64,7 @@ const checkStepCompletion = {
 
 const checkStepReadiness = {
   startPage: isStartPageStepReady,
+  redirect: isRedirectStepReady,
   expectUrl: isExpectUrlStepReady,
   notarize: isNotarizeStepReady,
   extractVariables: isExtractVariablesStepReady,
