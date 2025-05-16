@@ -56,6 +56,28 @@ jobs:
               - '.github/workflows/test_e2e_bonsai_opsepolia.yaml'
               - '.github/actions/test-e2e/**'
 
+  check-gas:
+    name: Check Gas Price
+    runs-on: ubuntu-latest
+    outputs:
+      gas-ok: ${{ steps.set-result.outputs.gas-ok }}
+    steps:
+      - name: Download gas_price_checker from S3
+        run: |
+          curl -sSf -o gas_price_checker ${{ vars.GAS_PRICE_CHECKER_BINARY_URL }}
+          chmod +x gas_price_checker
+      
+      - name: Run gas price checker
+        id: check
+        continue-on-error: true
+        run: |
+          ./gas_price_checker https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }} 5
+    
+      - name: Set gas check result
+        id: set-result
+        run: |
+          echo "gas-ok=${{ steps.check.outcome == 'success' }}" >>"$GITHUB_OUTPUT"
+
   build-binaries:
     name: Build binaries
     needs: changes
@@ -112,7 +134,8 @@ jobs:
 
   test-e2e-bonsai-opsepolia-simple:
     name: E2E test (simple) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
+    needs: [changes, check-gas,build-binaries]
+    if: needs.check-gas.outputs.gas-ok == 'true'
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
