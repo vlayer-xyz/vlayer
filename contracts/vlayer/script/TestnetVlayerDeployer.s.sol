@@ -8,6 +8,7 @@ import {Repository} from "../src/Repository.sol";
 import {FakeProofVerifier} from "../src/proof_verifier/FakeProofVerifier.sol";
 import {Groth16ProofVerifier} from "../src/proof_verifier/Groth16ProofVerifier.sol";
 import {ProofVerifierRouter} from "../src/proof_verifier/ProofVerifierRouter.sol";
+import {Deploy2} from "./utils/Deploy2.sol";
 
 bytes32 constant VLAYER_STABLE_SALT = keccak256("sepolia.vlayer.xyz");
 
@@ -22,36 +23,58 @@ contract TestnetVlayerDeployer is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        Repository repository = deployKeyRegistry(admin, owner);
+        Repository repository = getOrDeployKeyRegistry(admin, owner);
+        console.log("REPOSITORY_ADDRESS=%s", address(repository));
 
-        FakeProofVerifier fakeProofVerifier = deployFakeProofVerifier(repository);
-        Groth16ProofVerifier groth16ProofVerifier = deployGroth16ProofVerifier(repository);
-        ProofVerifierRouter proofVerifierRouter = deployProofVerifierRouter(fakeProofVerifier, groth16ProofVerifier);
+        FakeProofVerifier fakeProofVerifier = getOrDeployFakeProofVerifier(repository);
+        console.log("FAKE_PROOF_VERIFIER_ADDRESS=%s", address(fakeProofVerifier));
+
+        Groth16ProofVerifier groth16ProofVerifier = getOrDeployGroth16ProofVerifier(repository);
+        console.log("GROTH16_PROOF_VERIFIER_ADDRESS=%s", address(groth16ProofVerifier));
+
+        ProofVerifierRouter proofVerifierRouter =
+            getOrDeployProofVerifierRouter(fakeProofVerifier, groth16ProofVerifier);
+        console.log("PROOF_VERIFIER_ROUTER_ADDRESS=%s", address(proofVerifierRouter));
 
         vm.stopBroadcast();
-
-        console.log("REPOSITORY_ADDRESS=%s", address(repository));
-        console.log("FAKE_PROOF_VERIFIER_ADDRESS=%s", address(fakeProofVerifier));
-        console.log("GROTH16_PROOF_VERIFIER_ADDRESS=%s", address(groth16ProofVerifier));
-        console.log("PROOF_VERIFIER_ROUTER_ADDRESS=%s", address(proofVerifierRouter));
     }
 
-    function deployKeyRegistry(address admin, address owner) internal returns (Repository) {
-        return new Repository{salt: VLAYER_STABLE_SALT}(admin, owner);
+    function getOrDeployKeyRegistry(address admin, address owner) internal returns (Repository) {
+        bytes memory constructorArgs = abi.encode(admin, owner);
+        bytes memory creationCode = abi.encodePacked(type(Repository).creationCode, constructorArgs);
+
+        address addr = Deploy2.getOrDeploy(creationCode, VLAYER_STABLE_SALT);
+
+        return Repository(addr);
     }
 
-    function deployFakeProofVerifier(Repository repository) internal returns (FakeProofVerifier) {
-        return new FakeProofVerifier{salt: VLAYER_STABLE_SALT}(repository);
+    function getOrDeployFakeProofVerifier(Repository repository) internal returns (FakeProofVerifier) {
+        bytes memory constructorArgs = abi.encode(repository);
+        bytes memory creationCode = abi.encodePacked(type(FakeProofVerifier).creationCode, constructorArgs);
+
+        address addr = Deploy2.getOrDeploy(creationCode, VLAYER_STABLE_SALT);
+
+        return FakeProofVerifier(addr);
     }
 
-    function deployGroth16ProofVerifier(Repository repository) internal returns (Groth16ProofVerifier) {
-        return new Groth16ProofVerifier{salt: VLAYER_STABLE_SALT}(repository);
+    function getOrDeployGroth16ProofVerifier(Repository repository) internal returns (Groth16ProofVerifier) {
+        bytes memory constructorArgs = abi.encode(repository);
+        bytes memory creationCode = abi.encodePacked(type(Groth16ProofVerifier).creationCode, constructorArgs);
+
+        address addr = Deploy2.getOrDeploy(creationCode, VLAYER_STABLE_SALT);
+
+        return Groth16ProofVerifier(addr);
     }
 
-    function deployProofVerifierRouter(FakeProofVerifier fakeProofVerifier, Groth16ProofVerifier groth16ProofVerifier)
-        internal
-        returns (ProofVerifierRouter)
-    {
-        return new ProofVerifierRouter{salt: VLAYER_STABLE_SALT}(fakeProofVerifier, groth16ProofVerifier);
+    function getOrDeployProofVerifierRouter(
+        FakeProofVerifier fakeProofVerifier,
+        Groth16ProofVerifier groth16ProofVerifier
+    ) internal returns (ProofVerifierRouter) {
+        bytes memory constructorArgs = abi.encode(fakeProofVerifier, groth16ProofVerifier);
+        bytes memory creationCode = abi.encodePacked(type(ProofVerifierRouter).creationCode, constructorArgs);
+
+        address addr = Deploy2.getOrDeploy(creationCode, VLAYER_STABLE_SALT);
+
+        return ProofVerifierRouter(addr);
     }
 }
