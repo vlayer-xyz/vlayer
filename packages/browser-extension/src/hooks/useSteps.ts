@@ -118,6 +118,7 @@ export const calculateSteps = ({
       accumulator[accumulator.length - 1]?.status !== StepStatus.Completed;
 
     const mappedStep = {
+      step: currentStep,
       label: currentStep.label,
       link: currentStep.url,
       kind: currentStep.step,

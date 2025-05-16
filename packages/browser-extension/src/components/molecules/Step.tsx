@@ -7,9 +7,10 @@ import { Separator } from "components/atoms/Separator";
 import { StepActions } from "components/molecules/StepActions/StepActions";
 import styles from "./Step.module.css";
 import { match } from "ts-pattern";
-import { ExtensionStep } from "src/web-proof-commons";
+import { ExtensionStep, WebProofStep } from "src/web-proof-commons";
 
-type StepProps = {
+export type StepProps = {
+  step: WebProofStep;
   label: string;
   status: StepStatus;
   index: number;
@@ -17,6 +18,7 @@ type StepProps = {
   link?: string;
   kind: ExtensionStep;
 };
+
 const StepStatusIndicator = (props: StepProps) => {
   return (
     <Flex
