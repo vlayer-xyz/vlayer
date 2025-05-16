@@ -28,15 +28,14 @@ jobs:
           cd rust/gas_price_checker
           cargo build --release --target x86_64-unknown-linux-gnu --package gas_price_checker
 
-      - name: Install AWS CLI
-        run: |
-          pip install awscli
-
-      - name: Upload binary to S3
+      - name: Push binary to AWS S3
+        uses: mostlytyped/s3-put-action@v1.0.0
+        with:
+          args: ""
         env:
-          AWS_ACCESS_KEY_ID: ${{ vars.AWS_DEVELOPMENT_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_DEVELOPMENT_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_BUCKET: ${{ vars.AWS_DEVELOPMENT_BUCKET }}
-        run: |
-          aws s3 cp rust/gas_price_checker/target/x86_64-unknown-linux-gnu/release/gas_price_checker s3://$AWS_BUCKET/gas_price_checker --region $AWS_REGION
+          AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
+          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          LOCAL_FILE: rust/gas_price_checker/target/x86_64-unknown-linux-gnu/release/gas_price_checker
+          REMOTE_FILE: gas_price_checker
