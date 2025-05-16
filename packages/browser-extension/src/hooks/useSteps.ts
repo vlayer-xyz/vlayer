@@ -186,7 +186,7 @@ export const useSteps = (): Step[] => {
     .exhaustive();
 
   useEffect(() => {
-    calculateSteps({
+    void calculateSteps({
       stepsSetup,
       history,
       isZkProvingDone,

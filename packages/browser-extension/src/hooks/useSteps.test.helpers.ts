@@ -5,7 +5,7 @@ import { calculateSteps } from "./useSteps";
 import chalk from "chalk";
 import { steps } from "./useSteps.test.data.ts";
 
-export const expectedStatuses = ({
+export const expectedStatuses = async ({
   input,
   output,
 }: {
@@ -15,10 +15,12 @@ export const expectedStatuses = ({
   };
   output: StepStatus[];
 }) => {
-  calculateSteps({
-    stepsSetup: steps,
-    ...input,
-  }).forEach((step, index) => {
+  (
+    await calculateSteps({
+      stepsSetup: steps,
+      ...input,
+    })
+  ).forEach((step, index) => {
     expect(step.status).toEqual(output[index]);
   });
 };
