@@ -63,9 +63,14 @@ jobs:
       gas-ok: ${{ steps.set-result.outputs.gas-ok }}
     steps:
       - name: Download gas_price_checker from S3
-        run: |
-          curl -sSf -o gas_price_checker ${{ vars.GAS_PRICE_CHECKER_BINARY_URL }}
-          chmod +x gas_price_checker
+        uses: keithweaver/aws-s3-github-action@v1.0.0
+        with:
+          command: cp
+          source: "s3://${{ vars.AWS_BUCKET }}/gas_price_checker"
+          destination: ./gas_price_checker
+          aws_access_key_id: ${{ vars.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: eu-north-1
       
       - name: Run gas price checker
         id: check
