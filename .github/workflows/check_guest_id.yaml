@@ -1,0 +1,52 @@
+name: Check guest ID
+on:
+  workflow_dispatch:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  check-guest-id:
+    name: Check guest ID
+    runs-on: aws-linux-medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: v1.0.1
+          submodules: recursive
+
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+
+      - name: Build guest artifacts
+        uses: ./.github/actions/build-guest-artifacts
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: guest-artifacts
+          path: guest_artifacts
+
+      - name: Check guest ID on mainnet
+        shell: bash
+        run: |
+          ETH_RPC_URL="https://eth-mainnet.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+
+          IMAGE_ID=$(grep -o '0x[a-fA-F0-9]\{64\}' ./guest_artifacts/ImageID.sol)
+          echo "IMAGE_ID: $IMAGE_ID"
+
+          REPOSITORY_ADDRESS=$(python3 -c "import sys, re; print(re.search(r'Repository\(address\((0x[a-fA-F0-9]{40})\)\)', sys.stdin.read()).group(1))" < ./contracts/vlayer/src/MainnetStableDeployment.sol )
+          echo "REPOSITORY_ADDRESS: $REPOSITORY_ADDRESS"
+
+          RESULT=$(cast call --rpc-url $ETH_RPC_URL $REPOSITORY_ADDRESS "isImageSupported(bytes32)(bool)" $IMAGE_ID)
+          echo "RESULT: $RESULT"
+
+          if [ "$RESULT" != "true" ]; then
+            echo "::error::Image ID is not supported on mainnet!"
+            exit 1
+          fi
+
+          echo "Image ID is supported on mainnet."
