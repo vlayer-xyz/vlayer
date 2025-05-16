@@ -16,9 +16,6 @@ export const StepActions: React.FC<StepProps> = ({
   status,
   step,
 }) => {
-  if (step.step === "userAction") {
-    console.log(step.image);
-  }
   return (
     <>
       {match(step)
@@ -51,8 +48,6 @@ export const StepActions: React.FC<StepProps> = ({
         ))
         .with({ step: EXTENSION_STEP.userAction }, (step) => (
           <UserActionStepActions
-            isVisited={false}
-            link={link || ""}
             status={status}
             text={step.text}
             image={step.image}
