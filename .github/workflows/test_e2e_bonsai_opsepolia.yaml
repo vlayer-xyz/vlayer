@@ -139,7 +139,7 @@ jobs:
 
   test-e2e-bonsai-opsepolia-simple:
     name: E2E test (simple) with Bonsai and OP Sepolia
-    needs: [changes, check-gas, build-binaries]
+    needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
