@@ -71,13 +71,13 @@ jobs:
           aws_access_key_id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: eu-north-1
-      
+
       - name: Run gas price checker
         id: check
         continue-on-error: true
         run: |
           ./gas_price_checker https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }} 5
-    
+
       - name: Set gas check result
         id: set-result
         run: |
@@ -139,7 +139,7 @@ jobs:
 
   test-e2e-bonsai-opsepolia-simple:
     name: E2E test (simple) with Bonsai and OP Sepolia
-    needs: [changes, check-gas,build-binaries]
+    needs: [changes, check-gas, build-binaries]
     if: needs.check-gas.outputs.gas-ok == 'true'
     runs-on: aws-linux-medium
     steps:
