@@ -1,0 +1,73 @@
+name: Test contracts
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      relevant-changes: ${{ steps.filter.outputs.relevant-changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            relevant-changes:
+              - 'bash/**'
+              - 'contracts/**'
+              - 'examples/**'
+              - '.github/actions/contracts-prerequisites/action.yml'
+              - '.github/workflows/test_contracts.yaml'
+
+  test-contracts:
+    name: Test contracts
+    needs: changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
+
+      - name: Run Forge build vlayer
+        working-directory: ./contracts/vlayer
+        run: |
+          forge --version
+
+          forge soldeer install
+          forge build --sizes
+
+      - name: Run Forge build fixtures
+        working-directory: ./contracts/fixtures
+        run: |
+          forge soldeer install
+          forge build --sizes
+
+      - name: Run Forge tests
+        working-directory: ./contracts/vlayer
+        env:
+          FOUNDRY_PROFILE: no-vlayer
+        run: |
+          forge test -vvv

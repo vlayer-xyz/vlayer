@@ -1,0 +1,18 @@
+name: Build extension
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+jobs:
+  build-extension:
+    name: Build browser extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build extension
+        uses: ./.github/actions/build-extension
+        with:
+          version_name: 0.0.0-test
