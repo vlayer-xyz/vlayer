@@ -2,6 +2,7 @@ import { StepStatus } from "src/constants";
 import React, { FC } from "react";
 import { Flex, Text } from "@radix-ui/themes";
 import { UserActionButton } from "components/molecules/StepActions/UserAction/UserActionButton.tsx";
+import { Image } from "components/atoms/Image.tsx";
 
 type UserActionStepActionProps = {
   isVisited: boolean;
@@ -21,9 +22,9 @@ export const UserActionStepActions: FC<UserActionStepActionProps> = ({
     <>
       {isVisible && (
         <Flex direction="column" gap={"4"}>
-          {image && <img src={image} alt="User action instruction" />}
+          {image && <Image src={image} alt="User action instruction" />}
           <Text>{text}</Text>
-          <UserActionButton isVisible={isVisible} onClick={() => {}}>
+          <UserActionButton isVisible onClick={() => {}}>
             Proceed
           </UserActionButton>
         </Flex>
