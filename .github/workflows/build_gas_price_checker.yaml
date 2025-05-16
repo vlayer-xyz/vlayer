@@ -18,15 +18,13 @@ jobs:
       - name: Install Rust prerequisites
         id: rust_pre
         uses: ./.github/actions/rust-prerequisites
-        with:
-          target: x86_64-unknown-linux-gnu
 
-      - name: Build release binary (Linux x86_64)
+      - name: Build release binary
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           cd rust/gas_price_checker
-          cargo build --release --target x86_64-unknown-linux-gnu --package gas_price_checker
+          cargo build --release --package gas_price_checker
 
       - name: Push binary to AWS S3
         uses: mostlytyped/s3-put-action@v1.0.0
@@ -37,5 +35,5 @@ jobs:
           AWS_BUCKET: ${{ vars.AWS_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          LOCAL_FILE: rust/gas_price_checker/target/x86_64-unknown-linux-gnu/release/gas_price_checker
+          LOCAL_FILE: ./target/release/gas_price_checker
           REMOTE_FILE: gas_price_checker
