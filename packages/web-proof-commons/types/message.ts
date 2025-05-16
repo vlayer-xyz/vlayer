@@ -224,6 +224,10 @@ export type WebProofStepUserAction = BrandedStep<
     label: string;
     url: UrlPattern;
     text: string;
+    action: {
+      selector: string;
+      expected: string | boolean;
+    };
     image?: string;
   }
 >;
