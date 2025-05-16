@@ -2,7 +2,7 @@ import {
   type Variables,
   EXTENSION_STEP,
   type WebProofStepExtractVariables,
-} from "src/web-proof-commons";
+} from "../../../web-proof-commons";
 
 export const extractVariables = (
   url: string,

@@ -1,7 +1,7 @@
 import {
   EXTENSION_STEP,
   type WebProofStepUserAction,
-} from "src/web-proof-commons";
+} from "../../../web-proof-commons";
 
 export const userAction = (
   url: string,
