@@ -16,6 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: v1.0.1
           submodules: recursive
 
       - name: Install contracts prerequisites
