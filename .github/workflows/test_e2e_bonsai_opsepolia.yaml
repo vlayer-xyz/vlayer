@@ -76,7 +76,7 @@ jobs:
         id: check
         continue-on-error: true
         run: |
-          ./gas_price_checker https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }} 5
+          ./gas_price_checker https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }} 20
 
       - name: Set gas check result
         id: set-result
@@ -238,5 +238,32 @@ jobs:
 
           # Chain related
           chain_name: "optimismSepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+
+  test-e2e-bonsai-opsepolia-simple-teleport:
+    name: E2E test (simple-teleport) with Bonsai and OP Sepolia
+    needs: [changes, check-gas, build-binaries]
+    if: needs.check-gas.outputs.gas-ok == 'true'
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        with:
+          example: "simple-teleport"
+
+          # JWT auth related
+          jwt_auth: "on"
+          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
+
+          # Proving related
+          proving_mode: "prod"
+          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+
+          # Chain related
+          chain_name: "optimism"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
