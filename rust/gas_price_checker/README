@@ -5,7 +5,7 @@ A simple Rust command-line tool that fetches the current Ethereum gas price from
 ## Usage
 
 ```sh
-cargo run -- <RPC_URL> <THRESHOLD_GWEI>
+cargo run -- <RPC_URL> [THRESHOLD_GWEI]
 ```
 
 - `<RPC_URL>`: The HTTP(S) URL of your Ethereum JSON-RPC endpoint.
