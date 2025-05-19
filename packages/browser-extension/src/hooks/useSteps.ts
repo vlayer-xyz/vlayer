@@ -204,11 +204,21 @@ export const useSteps = (): Step[] => {
     .exhaustive();
 
   useEffect(() => {
-    void calculateSteps({
-      stepsSetup,
-      history,
-      isZkProvingDone,
-    }).then(setSteps);
+    let isCancelled = false;
+    (async () => {
+      const steps = await calculateSteps({
+        stepsSetup,
+        history,
+        isZkProvingDone,
+      });
+      if (!isCancelled) {
+        setSteps(steps);
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [stepsSetup, history, isZkProvingDone]);
 
   useNotifyOnStepCompleted(stepsSetup, steps);
