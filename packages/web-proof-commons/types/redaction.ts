@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { WebProofStepNotarize, WebProverSessionConfig } from "./message";
+
 export const RedactRequestHeadersSchema = z.object({
   request: z.object({
     headers: z.array(z.string()),
@@ -182,8 +183,6 @@ export const RedactionItemsArray = z
   .refine(ensureNoRequestUrlQueryParamConflict, {
     message: "Cannot have both request url_query and request url_query_except",
   });
-
-export type RedactionItemsArray = z.infer<typeof RedactionItemsArray>;
 
 export type RedactionConfig = RedactionItem[];
 
