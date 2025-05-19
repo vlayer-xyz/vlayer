@@ -78,7 +78,7 @@ const canMatchElementOnPage = async (
   }
 
   if (typeof step.action.expected === "boolean") {
-    return step.action.expected === Boolean(elementText);
+    return step.action.expected === (elementText !== null);
   }
   return matchTextOnPage(elementText, step.action.expected);
 };
