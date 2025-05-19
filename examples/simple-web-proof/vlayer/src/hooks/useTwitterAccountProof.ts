@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   useCallProver,
   useWaitForProvingResult,
   useWebProof,
-  useChain,
+  useSyncChain,
 } from "@vlayer/react";
 import { useLocalStorage } from "usehooks-ts";
 import { WebProofConfig, ProveArgs } from "@vlayer/sdk";
 import { Abi, ContractFunctionName } from "viem";
 import { startPage, expectUrl, notarize } from "@vlayer/sdk/web_proof";
-import { UseChainError, WebProofError } from "../errors";
 import webProofProver from "../../../out/WebProofProver.sol/WebProofProver";
+import { WebProofError, ChainSyncError } from "../errors";
 
 const webProofConfig: WebProofConfig<Abi, string> = {
   proverCallCommitment: {
@@ -48,8 +48,6 @@ const webProofConfig: WebProofConfig<Abi, string> = {
 };
 
 export const useTwitterAccountProof = () => {
-  const [error, setError] = useState<Error | null>(null);
-
   const {
     requestWebProof,
     webProof,
@@ -61,14 +59,15 @@ export const useTwitterAccountProof = () => {
     throw new WebProofError(webProofError.message);
   }
 
-  const { chain, error: chainError } = useChain(
+  const { chain, error: syncChainError } = useSyncChain(
     import.meta.env.VITE_CHAIN_NAME,
   );
+
   useEffect(() => {
-    if (chainError) {
-      setError(new UseChainError(chainError));
+    if (syncChainError) {
+      throw new ChainSyncError(syncChainError.message);
     }
-  }, [chainError]);
+  }, [syncChainError?.message]);
 
   const vlayerProverConfig: Omit<
     ProveArgs<Abi, ContractFunctionName<Abi>>,
@@ -130,6 +129,10 @@ export const useTwitterAccountProof = () => {
     isWebProofPending,
     callProver,
     result,
-    error,
+    error:
+      callProverError ||
+      waitForProvingResultError ||
+      webProofError ||
+      syncChainError,
   };
 };
