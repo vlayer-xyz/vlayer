@@ -205,7 +205,7 @@ export const useSteps = (): Step[] => {
 
   useEffect(() => {
     let isCancelled = false;
-    (async () => {
+    void (async () => {
       const steps = await calculateSteps({
         stepsSetup,
         history,
