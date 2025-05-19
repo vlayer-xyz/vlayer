@@ -54,6 +54,13 @@ const hasProof = (
   return isZkProvingDone;
 };
 
+function matchTextOnPage(actual: string | null, expected: string) {
+  if (actual === null) {
+    return false;
+  }
+  return actual.trim() === expected.trim();
+}
+
 const canMatchElementOnPage = async (
   browsingHistory: BrowsingHistoryItem[],
   step: WebProofStepUserAction,
@@ -62,11 +69,18 @@ const canMatchElementOnPage = async (
     return false;
   }
 
-  const element = await getElementOnPage(step.action.selector);
-  if (typeof step.action.expected === "boolean") {
-    return step.action.expected === !!element;
+  let elementText: string | null;
+  try {
+    elementText = await getElementOnPage(step.action.selector);
+  } catch (e) {
+    console.error(`Error getting element ${step.action.selector} on page:`, e);
+    return false;
   }
-  return element === step.action.expected;
+
+  if (typeof step.action.expected === "boolean") {
+    return step.action.expected === Boolean(elementText);
+  }
+  return matchTextOnPage(elementText, step.action.expected);
 };
 
 const isStartPageStepReady = () => true;
