@@ -54,10 +54,14 @@ const hasProof = (
   return isZkProvingDone;
 };
 
-const isUserStepCompleted = async (
-  _browsingHistory: BrowsingHistoryItem[],
+const canMatchElementOnPage = async (
+  browsingHistory: BrowsingHistoryItem[],
   step: WebProofStepUserAction,
 ) => {
+  if (!isUrlVisited(browsingHistory, step)) {
+    return false;
+  }
+
   const element = await getElementOnPage(step.action.selector);
   if (typeof step.action.expected === "boolean") {
     return step.action.expected === !!element;
@@ -73,7 +77,7 @@ const isRedirectStepCompleted = isUrlVisited;
 
 const isUserActionStepReady = () => true;
 
-const isUserActionStepCompleted = isUserStepCompleted;
+const isUserActionStepCompleted = canMatchElementOnPage;
 
 const isExpectUrlStepReady = () => true;
 const isExpectUrlStepCompleted = isUrlVisited;
