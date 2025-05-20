@@ -9,13 +9,6 @@ function get_examples() {
         "kraken-web-proof"
     )
 
-    # "simple-teleport" is not enabled on testnet as we still need to deploy chain workers
-    if [[ -n ${VLAYER_ENV:-} ]]; then
-        if [[ "$VLAYER_ENV" == "testnet" ]]; then
-            EXAMPLE_LIST=("${EXAMPLE_LIST[@]/simple-teleport}")
-        fi
-    fi
-
     if [[ -n ${EXAMPLE:-} ]]; then
         if ! [[ " ${EXAMPLE_LIST[*]} " == *" $EXAMPLE "* ]]; then
             echo "Error: Invalid EXAMPLE_NAME '$EXAMPLE'. Valid options are: ${EXAMPLE_LIST[*]}" >&2
