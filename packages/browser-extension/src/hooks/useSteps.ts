@@ -14,7 +14,7 @@ import { match, P } from "ts-pattern";
 import { LOADING } from "@vlayer/extension-hooks";
 import { useNotifyOnStepCompleted } from "hooks/useNotifyOnStepCompleted.ts";
 import { useEffect, useState } from "react";
-import { getElementOnPage } from "lib/scripting.ts";
+import { getActiveTabUrl, getElementOnPage } from "lib/activeTabContext.ts";
 
 type StepCompletionCheck<T extends WebProofStep> = (
   browsingHistory: BrowsingHistoryItem[],
@@ -37,7 +37,7 @@ const isUrlRequestCompleted = (
   });
 };
 
-const isUrlVisited = (
+const wasUrlVisited = (
   browsingHistory: BrowsingHistoryItem[],
   step: { url: UrlPattern },
 ): boolean => {
@@ -54,47 +54,48 @@ const hasProof = (
   return isZkProvingDone;
 };
 
-function matchTextOnPage(actual: string | null, expected: string) {
-  if (actual === null) {
+const isActiveTabUrlMatching = async (expectedUrl: string) => {
+  const currentUrl = await getActiveTabUrl();
+  if (!currentUrl) {
     return false;
   }
-  return actual.trim() === expected.trim();
-}
+  return new URLPattern(expectedUrl).test(currentUrl);
+};
 
 const canMatchElementOnPage = async (
-  browsingHistory: BrowsingHistoryItem[],
+  _browsingHistory: BrowsingHistoryItem[],
   step: WebProofStepUserAction,
 ) => {
-  if (!isUrlVisited(browsingHistory, step)) {
+  if (!(await isActiveTabUrlMatching(step.url))) {
     return false;
   }
 
-  let elementText: string | null;
+  let element: Element | null;
   try {
-    elementText = await getElementOnPage(step.action.selector);
+    element = await getElementOnPage(step.action.selector);
   } catch (e) {
     console.error(`Error getting element ${step.action.selector} on page:`, e);
     return false;
   }
 
-  if (typeof step.action.expected === "boolean") {
-    return step.action.expected === (elementText !== null);
+  if (!step.action.shouldExist) {
+    return element === null;
   }
-  return matchTextOnPage(elementText, step.action.expected);
+  return element !== null;
 };
 
 const isStartPageStepReady = () => true;
-const isStartPageStepCompleted = isUrlVisited;
+const isStartPageStepCompleted = wasUrlVisited;
 
 const isRedirectStepReady = () => true;
-const isRedirectStepCompleted = isUrlVisited;
+const isRedirectStepCompleted = wasUrlVisited;
 
 const isUserActionStepReady = () => true;
 
 const isUserActionStepCompleted = canMatchElementOnPage;
 
 const isExpectUrlStepReady = () => true;
-const isExpectUrlStepCompleted = isUrlVisited;
+const isExpectUrlStepCompleted = wasUrlVisited;
 
 const isNotarizeStepReady = isUrlRequestCompleted;
 const isNotarizeStepCompleted = hasProof;

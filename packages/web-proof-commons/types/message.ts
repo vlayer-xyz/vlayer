@@ -226,7 +226,7 @@ export type WebProofStepUserAction = BrandedStep<
     text: string;
     action: {
       selector: string;
-      expected: string | boolean;
+      shouldExist: boolean;
     };
     image?: string;
   }
