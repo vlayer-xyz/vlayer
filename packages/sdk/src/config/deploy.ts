@@ -11,7 +11,7 @@ import {
 import { getChainConfirmations } from "./utils/getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
-import { v_versions } from "../api/v_versions";
+import { v_versions } from "../api/prover";
 import type { VlayerContextConfig } from "./types";
 import { AccountNotSetError } from "./errors";
 

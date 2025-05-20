@@ -1,5 +1,5 @@
 import { Metrics } from "@vlayer/sdk";
-import { prove, waitForProof } from "../../sdk/src/api/prover";
+import { prove, waitForProof } from "@vlayer/sdk/prover";
 import { getConfig, createContext, deployProver } from "@vlayer/sdk/config";
 import { Benchmark, GasWithCycles } from "./types";
 import { benchmark as noopBenchmark } from "./benches/noop";

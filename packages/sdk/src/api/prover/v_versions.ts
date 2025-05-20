@@ -1,9 +1,9 @@
 import {
   handleProverResponseError,
   handleAuthErrors,
-} from "./lib/handleErrors";
-import { InvalidProverResponseError } from "./lib/errors";
-import { validateJrpcResponse } from "./lib/jrpc";
+} from "../lib/handleErrors";
+import { InvalidProverResponseError } from "../lib/errors";
+import { validateJrpcResponse } from "../lib/jrpc";
 import { versionsSchema, type Versions } from "types/vlayer";
 import debug from "debug";
 

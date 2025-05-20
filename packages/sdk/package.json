@@ -13,6 +13,10 @@
     "./config": {
       "import": "./dist/config/index.js",
       "types": "./dist/config/index.d.ts"
+    },
+    "./prover": {
+      "import": "./dist/api/prover/index.js",
+      "types": "./dist/api/prover/index.d.ts"
     }
   },
   "version": "0.1.0",
