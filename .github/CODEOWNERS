@@ -2,7 +2,7 @@
 
 
 # Files with additional security requirements.
-/packages/browser-extension/src/manifest.json @marekkirejczyk @vlayer-xyz/devops @vlayer-xyz/secops
+/packages/browser-extension/src/manifest.json @marekkirejczyk @vlayer-xyz/devops
 
 
 # Audited files - 07 February 2025 - a76361451c47dbef25db03f61d2b0e26e0c5d940
