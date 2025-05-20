@@ -26,7 +26,7 @@ const mockActiveTab = (activeTabContext: TestActiveTab) => {
   if (activeTabContext.innerHTML) {
     document.body.innerHTML = activeTabContext.innerHTML;
   }
-  // @eslint-disable-next-line @typescript-eslint/unbound-method
+  // @eslint-disable-next-line
   vi.mocked(browser.tabs.query).mockResolvedValue([
     { id: "test-id", ...activeTabContext } as Tabs.Tab,
   ]);
