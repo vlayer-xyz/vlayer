@@ -51,6 +51,11 @@ function set_chain_worker_args() {
             CHAIN_WORKER_ARGS+=(
                 "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420"
             )
+        elif [ "${EXAMPLE_NAME:-}" == "simple-teleport" ]; then
+            CHAIN_WORKER_ARGS+=(
+                "https://${QUICKNODE_ENDPOINT}.ethereum-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155111"
+                "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420"
+            )
         fi
     fi
 }
