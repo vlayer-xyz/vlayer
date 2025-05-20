@@ -11,6 +11,7 @@ export const MintNFT = ({
     <>
       <div className="mt-5 flex justify-center">
         <button
+          disabled={currentStep != "Mint"}
           type="button"
           id="nextButton"
           data-testid="mint-nft-button"
