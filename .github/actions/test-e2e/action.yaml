@@ -83,12 +83,21 @@ runs:
       shell: bash
 
     # Configure RPC endpoints
-    - name: Configure RPC endpoints
+    - name: Configure RPC endpoint based on chain
       if: ${{ inputs.quicknode_api_key != '' }}
       run: |
-        echo "QUICKNODE_ENDPOINT=dry-alpha-tab" >> $GITHUB_ENV
-        echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
-        echo "JSON_RPC_URL=https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+        if [[ "${{ inputs.chain_name }}" == "optimismSepolia" ]]; then
+          echo "QUICKNODE_ENDPOINT=dry-alpha-tab" >> $GITHUB_ENV
+          echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+          echo "JSON_RPC_URL=https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+        elif [[ "${{ inputs.chain_name }}" == "sepolia" ]]; then
+          echo "QUICKNODE_ENDPOINT=sepolia-endpoint" >> $GITHUB_ENV
+          echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+          echo "JSON_RPC_URL=https://dry-alpha-tab.sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+        else
+          echo "Unsupported chain: ${{ inputs.chain_name }}"
+          exit 1
+        fi
       shell: bash
 
     - name: Run e2e test for ${{ inputs.example }}
