@@ -71,6 +71,7 @@ impl New {
     #[allow(clippy::unused_self)]
     #[must_use]
     pub fn with_rpc_urls(self, rpc_urls: HashMap<ChainId, String>) -> WithProviders {
+        tracing::info!("Creating provider factory with RPC URLs: {:?}", rpc_urls);
         let provider_factory = EthersProviderFactory::new(rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
         let op_client_factory = Box::new(optimism::client::factory::http::Factory::new(rpc_urls));
@@ -83,6 +84,7 @@ impl New {
 
 impl WithProviders {
     pub fn with_chain_guest_id(self, chain_guest_id: Digest) -> WithChainGuestId {
+        tracing::info!("Adding chain guest ID: {:?}", chain_guest_id);
         WithChainGuestId {
             providers: self.providers,
             op_client_factory: self.op_client_factory,
@@ -96,6 +98,7 @@ impl WithChainGuestId {
         self,
         chain_client_config: Option<ChainClientConfig>,
     ) -> Result<WithChainClient, Error> {
+        tracing::info!("Configuring chain client with config: {:?}", chain_client_config);
         let WithChainGuestId {
             providers,
             chain_guest_id,
@@ -118,6 +121,7 @@ impl WithChainGuestId {
 
 impl WithChainClient {
     pub fn with_start_chain_id(self, start_chain_id: ChainId) -> Result<WithStartChainId, Error> {
+        tracing::info!("Setting start chain ID: {:?}", start_chain_id);
         let WithChainClient {
             chain_client,
             providers,
