@@ -13,11 +13,7 @@ export const SuccessPage = () => {
         <div>
           Here is your NFT:{" "}
           <a
-            href={
-              account.chain?.blockExplorers?.default.name === "Etherscan"
-                ? `${account.chain?.blockExplorers?.default.url}/token/${txHash}`
-                : `${account.chain?.blockExplorers?.default.url}/tx/${txHash}`
-            }
+            href={`${account.chain?.blockExplorers?.default.url}/tx/${txHash}`}
             className="text-blue-700 text-center text-block font-bold"
           >
             {shortenAndFormatHash(txHash)}
