@@ -73,10 +73,11 @@ const hash = await vlayer.prove({
   chainId: chain.id,
   gasLimit: config.gasLimit,
 });
-const result = await vlayer.waitForProvingResult({ hash });
+const { proof: result, metrics } = await vlayer.waitForProvingResult({ hash });
 const [proof, owner, balance] = result;
 
 console.log("Proof result:", result);
+console.log(`Metrics: ${JSON.stringify(metrics)}`);
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia
 const gas = await ethClient.estimateContractGas({
   address: verifier,

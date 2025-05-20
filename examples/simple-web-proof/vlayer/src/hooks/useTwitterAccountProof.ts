@@ -95,6 +95,7 @@ export const useTwitterAccountProof = () => {
   const {
     isPending: isWaitingForProvingResult,
     data: result,
+    metrics,
     error: waitForProvingResultError,
   } = useWaitForProvingResult(hash);
 
@@ -104,6 +105,7 @@ export const useTwitterAccountProof = () => {
 
   const [, setWebProof] = useLocalStorage("webProof", "");
   const [, setProverResult] = useLocalStorage("proverResult", "");
+  const [, setMetrics] = useLocalStorage("metrics", "");
 
   useEffect(() => {
     if (webProof) {
@@ -118,6 +120,13 @@ export const useTwitterAccountProof = () => {
       setProverResult(JSON.stringify(result));
     }
   }, [JSON.stringify(result)]);
+
+  useEffect(() => {
+    if (metrics) {
+      console.log(`metrics: ${JSON.stringify(metrics)}`);
+      setMetrics(JSON.stringify(metrics));
+    }
+  }, [JSON.stringify(metrics)]);
 
   return {
     requestWebProof,

@@ -16,7 +16,7 @@ import {
   type PresentationJSON,
 } from "../../web-proof-commons";
 import { type ContractFunctionArgsWithout } from "types/viem";
-import { type ProveArgs } from "types/vlayer";
+import { type ProveArgs, type Metrics } from "types/vlayer";
 import {
   HttpAuthorizationError,
   httpAuthorizationErrorWithNote,
@@ -97,9 +97,12 @@ export const createVlayerClient = (
       hash: BrandedHash<T, F>;
       numberOfRetries?: number;
       sleepDuration?: number;
-    }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
+    }): Promise<{
+      proof: ContractFunctionReturnType<T, AbiStateMutability, F>;
+      metrics: Metrics;
+    }> => {
       try {
-        const { data } = await waitForProof(
+        const { data, metrics } = await waitForProof(
           hash,
           url,
           token,
@@ -122,11 +125,14 @@ export const createVlayerClient = (
 
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
 
-        return [data.proof, ...result] as ContractFunctionReturnType<
-          T,
-          AbiStateMutability,
-          F
-        >;
+        return {
+          proof: [data.proof, ...result] as ContractFunctionReturnType<
+            T,
+            AbiStateMutability,
+            F
+          >,
+          metrics,
+        };
       } catch (error) {
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
 

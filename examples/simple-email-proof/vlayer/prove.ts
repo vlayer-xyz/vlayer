@@ -57,8 +57,9 @@ const hash = await vlayer.prove({
     }),
   ],
 });
-const result = await vlayer.waitForProvingResult({ hash });
+const { proof: result, metrics } = await vlayer.waitForProvingResult({ hash });
 
+console.log(`Metrics: ${JSON.stringify(metrics)}`);
 console.log("Verifying...");
 
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia

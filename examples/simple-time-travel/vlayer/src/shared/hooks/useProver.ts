@@ -37,8 +37,11 @@ export const useProver = () => {
     throw new CallProverError(provingError.message);
   }
 
-  const { data: result, error: provingResultError } =
-    useWaitForProvingResult(provingHash);
+  const {
+    data: result,
+    metrics,
+    error: provingResultError,
+  } = useWaitForProvingResult(provingHash);
 
   if (provingResultError) {
     throw new CallProverError(provingResultError.message);
@@ -57,6 +60,12 @@ export const useProver = () => {
       );
     }
   }, [result]);
+
+  useEffect(() => {
+    if (metrics) {
+      console.log(`metrics: ${JSON.stringify(metrics)}`);
+    }
+  }, [metrics]);
 
   return { callProver, provingHash, result };
 };

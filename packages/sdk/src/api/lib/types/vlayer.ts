@@ -94,7 +94,10 @@ export type VlayerClient = {
     hash: BrandedHash<T, F>;
     numberOfRetries?: number;
     sleepDuration?: number;
-  }) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
+  }) => Promise<{
+    proof: ContractFunctionReturnType<T, AbiStateMutability, F>;
+    metrics: Metrics;
+  }>;
 
   proveWeb: <T extends Abi, F extends ContractFunctionName<T>>(args: {
     address: Hex;

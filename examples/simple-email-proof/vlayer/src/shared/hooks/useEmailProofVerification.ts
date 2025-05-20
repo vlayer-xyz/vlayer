@@ -80,8 +80,11 @@ export const useEmailProofVerification = () => {
     throw new CallProverError(callProverError.message);
   }
 
-  const { data: proof, error: provingError } =
-    useWaitForProvingResult(proofHash);
+  const {
+    data: proof,
+    metrics,
+    error: provingError,
+  } = useWaitForProvingResult(proofHash);
 
   if (provingError) {
     throw new CallProverError(provingError.message);
@@ -133,6 +136,12 @@ export const useEmailProofVerification = () => {
       void verifyProofOnChain();
     }
   }, [proof]);
+
+  useEffect(() => {
+    if (metrics) {
+      console.log(`Metrics: ${JSON.stringify(metrics)}`);
+    }
+  }, [metrics]);
 
   useEffect(() => {
     if (status === "success" && proof) {

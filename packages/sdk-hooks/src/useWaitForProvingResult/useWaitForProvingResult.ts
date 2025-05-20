@@ -1,4 +1,4 @@
-import type { BrandedHash } from "@vlayer/sdk";
+import { type BrandedHash, type Metrics } from "@vlayer/sdk";
 import { useState, useEffect } from "react";
 import { useProofContext } from "../context";
 import type { Abi } from "viem";
@@ -19,6 +19,7 @@ export const useWaitForProvingResult = (
   );
   const [error, setError] = useState<Error | null>(null);
   const [result, setResult] = useState<unknown>(null);
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
   useEffect(() => {
     if (!hash) {
       return;
@@ -26,9 +27,10 @@ export const useWaitForProvingResult = (
     setStatus(WaitForProvingResultStatus.Pending);
     vlayerClient
       .waitForProvingResult({ hash })
-      .then((result) => {
+      .then(({ proof, metrics }) => {
         setStatus(WaitForProvingResultStatus.Ready);
-        setResult(result);
+        setResult(proof);
+        setMetrics(metrics);
       })
       .catch((e) => {
         setError(e as Error);
@@ -44,5 +46,6 @@ export const useWaitForProvingResult = (
     isReady: status === WaitForProvingResultStatus.Ready,
     isError: status === WaitForProvingResultStatus.Error,
     data: result,
+    metrics,
   };
 };
