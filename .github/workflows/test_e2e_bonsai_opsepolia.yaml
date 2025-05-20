@@ -77,9 +77,10 @@ jobs:
 
       - name: Make gas_price_checker executable
         run: chmod +x ./tmp/gas_price_checker
-      
+
       - name: Run gas price checker
         id: check
+        continue-on-error: true
         run: ./tmp/gas_price_checker "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" 20
 
       - name: Set gas check result

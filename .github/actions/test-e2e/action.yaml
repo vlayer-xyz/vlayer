@@ -6,20 +6,20 @@ inputs:
     description: "The E2E test example to run"
     required: true
 
-# Auth token related
+  # Auth token related
   jwt_auth:
     description: "JWT auth - 'on' or 'off'"
     required: false
-    default: 'off'
+    default: "off"
   vlayer_api_token:
     description: "Required if jwt_auth is 'on'"
     required: false
 
-# Proving related - fake or prod (Bonsai)
+  # Proving related - fake or prod (Bonsai)
   proving_mode:
     description: "Proving mode - 'prod' (Bonsai) or 'dev' (fake)"
     required: true
-    default: 'dev'
+    default: "dev"
   bonsai_api_url:
     description: "Required if proving_mode is 'prod'"
     required: false
@@ -27,11 +27,11 @@ inputs:
     description: "Required if proving_mode is 'prod'"
     required: false
 
-# Chain related - anvil or testnet.
+  # Chain related - anvil or testnet.
   chain_name:
     description: "'anvil' or testnet like 'optimismSepolia'"
     required: true
-    default: 'anvil'
+    default: "anvil"
   testnet_private_key_location:
     description: "Required for chain testnets."
     required: false
@@ -97,6 +97,7 @@ runs:
         BUILD_SERVICES: 0
         BUILD_CLI: 0
         EXAMPLE: ${{ inputs.example }}
+        VLAYER_ENV: ${{ inputs.chain_name == 'anvil' && 'dev' || 'testnet' }}
 
         # JWT auth related
         JWT_AUTH: ${{ inputs.jwt_auth }}
@@ -109,7 +110,12 @@ runs:
 
         # Chain related
         CHAIN_NAME: ${{ inputs.chain_name }}
-      run: bash/e2e-test.sh
+      run: |
+        echo "::group::Environment Configuration"
+        echo "VLAYER_ENV: $VLAYER_ENV"
+        echo "CHAIN_NAME: $CHAIN_NAME"
+        echo "::endgroup::"
+        bash/e2e-test.sh
       shell: bash
 
     - name: Upload logs for previewing
