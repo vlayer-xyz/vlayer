@@ -257,6 +257,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Run E2E Test
         uses: ./.github/actions/test-e2e
+        env:
+          RUST_LOG: info
         with:
           example: "simple-teleport"
 
