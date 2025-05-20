@@ -34,7 +34,7 @@ The Test Prover operates in [`FAKE` mode](/getting-started/dev-and-production.ht
 | Nightly Prover     | `https://nightly-fake-prover.vlayer.xyz` | Nightly version of the zkEVM prover  |
 | Indexer            | `https://test-chainservice.vlayer.xyz` | Storage proof indexer                |
 | Notary             | `https://test-notary.vlayer.xyz` | TLS Notary server                            |
-| WebSocket Proxy    | `https://test-wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary |
+| WebSocket Proxy    | `wss://test-wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary |
 
 ## Devnet
 
@@ -71,7 +71,7 @@ It is useful in case of any Docker configuration change.
 | Prover             | `http://127.0.0.1:3000`        | zkEVM prover for vlayer contracts           |
 | Indexer            | `http://127.0.0.1:3001`        | Storage proof indexer                       |
 | Notary             | `http://127.0.0.1:7047`        | TLS Notary server                           |
-| WebSocket Proxy    | `http://127.0.0.1:3003`       | Proxying websocket connections              |
+| WebSocket Proxy    | `ws://127.0.0.1:3003`       | Proxying websocket connections              |
 
 ### Clearing Cache
 
@@ -98,7 +98,7 @@ The Mainnet Prover operates in [`GROTH16` mode](/getting-started/dev-and-product
 | Prover             | `https://stable-prod-prover.vlayer.xyz` | zkEVM prover for vlayer contracts     |
 | Indexer            | `https://chainservice.vlayer.xyz` | Storage proof indexer                |
 | Notary             | `https://notary.vlayer.xyz` | TLS Notary server                            |
-| WebSocket Proxy    | `https://wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary |
+| WebSocket Proxy    | `wss://wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary |
 
 ## Prover Modes
 
