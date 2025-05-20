@@ -1,13 +1,14 @@
 import { useWebProof } from "./useWebproof/useWebProof";
 import { ProofProvider } from "./context";
 import { useCallProver } from "./useCallProver/useCallProver";
-import { useSyncChain } from "./useSyncChain/useSyncChain";
+import { useChain } from "./useChain/useChain";
 import { useWaitForProvingResult } from "./useWaitForProvingResult/useWaitForProvingResult";
+
 export {
   ProofProvider,
   useWebProof,
   useCallProver,
   useWaitForProvingResult,
-  useSyncChain,
+  useChain,
 };
 export * from "./types";
