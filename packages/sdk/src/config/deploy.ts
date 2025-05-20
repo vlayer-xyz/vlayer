@@ -116,7 +116,7 @@ export const deployVlayerContracts = async ({
 
   console.log("Deploying prover contract...");
   try {
-    const proverSim = await ethClient.simulateContract({
+    await ethClient.simulateContract({
       chain,
       account,
       address: "0x0000000000000000000000000000000000000000",
@@ -146,7 +146,7 @@ export const deployVlayerContracts = async ({
 
   console.log("Deploying verifier contract...");
   try {
-    const verifierSim = await ethClient.simulateContract({
+    await ethClient.simulateContract({
       chain,
       account,
       address: "0x0000000000000000000000000000000000000000",
