@@ -20,9 +20,9 @@ export class FaucetError extends AppError {
   }
 }
 
-export class ChainSyncError extends AppError {
+export class UseChainError extends AppError {
   constructor(message: string) {
-    super("ChainSyncError", message);
+    super("UseChainError", message);
   }
 }
 

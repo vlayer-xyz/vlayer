@@ -8,7 +8,7 @@ import {
 import {
   useCallProver,
   useWaitForProvingResult,
-  useSyncChain,
+  useChain,
 } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
@@ -20,8 +20,8 @@ import {
   AlreadyMintedError,
   NoProofError,
   CallProverError,
+  UseChainError,
   PreverifyError,
-  ChainSyncError,
 } from "../errors/appErrors";
 import { ensureBalance } from "../lib/ethFaucet";
 
@@ -54,15 +54,12 @@ export const useEmailProofVerification = () => {
     hash: txHash,
   });
 
-  const { chain, error: chainError } = useSyncChain(
+  const { chain, error: chainError } = useChain(
     import.meta.env.VITE_CHAIN_NAME,
   );
-
-  useEffect(() => {
-    if (chainError) {
-      throw new ChainSyncError(chainError.message);
-    }
-  }, [chainError?.message]);
+  if (chainError) {
+    throw new UseChainError(chainError);
+  }
 
   const {
     callProver,
