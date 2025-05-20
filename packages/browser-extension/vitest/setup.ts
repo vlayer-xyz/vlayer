@@ -108,8 +108,14 @@ const mockWebextensionPolyfill = (
           executeScript: vi
             .fn()
             .mockImplementation(
-              async ({ func, args }): Promise<Scripting.InjectionResult[]> => [
-                { frameId: 0, result: func(...args) },
+              async ({
+                func,
+                args,
+              }: {
+                func: (...args: unknown[]) => unknown;
+                args: unknown[];
+              }): Promise<Scripting.InjectionResult[]> => [
+                await Promise.resolve({ frameId: 0, result: func(...args) }),
               ],
             ),
         },

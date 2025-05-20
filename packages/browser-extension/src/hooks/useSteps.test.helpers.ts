@@ -20,7 +20,7 @@ export type StepTestCase = {
   output: StepStatus[];
 };
 
-function mockActiveTab(activeTabContext: TestActiveTab) {
+const mockActiveTab = (activeTabContext: TestActiveTab) => {
   vi.clearAllMocks();
 
   if (activeTabContext.innerHTML) {
@@ -29,7 +29,7 @@ function mockActiveTab(activeTabContext: TestActiveTab) {
   vi.mocked(browser.tabs.query).mockResolvedValue([
     { id: "test-id", ...activeTabContext } as Tabs.Tab,
   ]);
-}
+};
 
 export const expectedStatuses = async ({ input, output }: StepTestCase) => {
   if (input.activeTabContext) {
