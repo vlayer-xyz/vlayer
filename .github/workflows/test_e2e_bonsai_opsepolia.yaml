@@ -242,7 +242,7 @@ jobs:
   test-e2e-bonsai-opsepolia-simple-teleport:
     name: E2E test (simple-teleport) with Bonsai and OP Sepolia
     needs: [changes, check-gas, build-binaries]
-    if: needs.check-gas.outputs.gas-ok == 'success'
+    if: needs.check-gas.outputs.gas-ok == 'true'
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
