@@ -21,6 +21,11 @@ if (config.chainName === "anvil") {
 
 const { chain, ethClient, account, proverUrl, confirmations } =
   createContext(config);
+console.log("chain", chain);
+console.log("ethClient", ethClient);
+console.log("account", account);
+console.log("proverUrl", proverUrl);
+console.log("confirmations", confirmations);
 
 if (!account) {
   throw new Error(
