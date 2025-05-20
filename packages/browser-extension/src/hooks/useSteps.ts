@@ -62,7 +62,7 @@ const isActiveTabUrlMatching = async (expectedUrl: string) => {
   return new URLPattern(expectedUrl).test(currentUrl);
 };
 
-const canMatchElementOnPage = async (
+const isExpectedDomElementState = async (
   _browsingHistory: BrowsingHistoryItem[],
   step: WebProofStepUserAction,
 ) => {
@@ -92,7 +92,7 @@ const isRedirectStepCompleted = wasUrlVisited;
 
 const isUserActionStepReady = () => true;
 
-const isUserActionStepCompleted = canMatchElementOnPage;
+const isUserActionStepCompleted = isExpectedDomElementState;
 
 const isExpectUrlStepReady = () => true;
 const isExpectUrlStepCompleted = wasUrlVisited;
