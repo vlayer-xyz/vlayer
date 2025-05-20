@@ -79,7 +79,7 @@ jobs:
         run: chmod +x ./tmp/gas_price_checker
       
       - name: Run gas price checker
-        run: ./tmp/gas_price_checker <RPC_URL> 20
+        run: ./tmp/gas_price_checker "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" 20
 
   build-binaries:
     name: Build binaries
