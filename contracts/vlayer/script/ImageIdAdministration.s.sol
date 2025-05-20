@@ -6,6 +6,7 @@ import {console, Script} from "forge-std-1.9.4/src/Script.sol";
 
 import {ImageID} from "../src/ImageID.sol";
 import {IImageIdRepository} from "../src/Repository.sol";
+import {MainnetStableDeployment} from "../src/MainnetStableDeployment.sol";
 
 contract AddSupportForCurrentImageId is Script {
     function run() external {
@@ -32,6 +33,25 @@ contract AddImageIdSupport is Script {
         vm.startBroadcast(ownerPrivateKey);
         repository.addImageIdSupport(imageId);
         vm.stopBroadcast();
+    }
+}
+
+contract VerifyImageIdSupported is Script {
+    function run() external view {
+        IImageIdRepository repository = IImageIdRepository(MainnetStableDeployment.repository());
+
+        bytes32 imageId = ImageID.RISC0_CALL_GUEST_ID;
+
+        console.log("REPOSITORY_ADDRESS=%s", address(repository));
+        console.log("IMAGE_ID=");
+        console.logBytes32(imageId);
+
+        if (!repository.isImageSupported(imageId)) {
+            console.log("Image ID is NOT supported");
+            revert("Image ID must be supported");
+        }
+
+        console.log("Image ID is supported");
     }
 }
 
