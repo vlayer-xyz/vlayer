@@ -5,6 +5,7 @@ use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use chain_client::ChainClientConfig;
 use common::GuestElf;
+use derivative::Derivative;
 use derive_more::From;
 use risc0_zkp::core::digest::Digest;
 use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
@@ -16,7 +17,8 @@ use crate::gas_meter::Config as GasMeterConfig;
 #[error("Missing required config field: {0}")]
 pub struct Error(String);
 
-#[derive(Clone)]
+#[derive(Clone, Derivative)]
+#[derivative(Debug)]
 pub struct Config {
     pub socket_addr: RawSocketAddr,
     pub rpc_urls: HashMap<ChainId, String>,
@@ -27,6 +29,7 @@ pub struct Config {
     pub chain_guest_ids: Box<[Digest]>,
     pub semver: String,
     pub gas_meter_config: Option<GasMeterConfig>,
+    #[derivative(Debug = "ignore")]
     pub jwt_config: Option<JwtConfig>,
 }
 

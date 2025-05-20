@@ -19,6 +19,7 @@ chain = { workspace = true }
 chain_client = { workspace = true }
 common = { workspace = true }
 dashmap = { workspace = true }
+derivative = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 hex = { workspace = true }
