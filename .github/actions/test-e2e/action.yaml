@@ -91,7 +91,7 @@ runs:
           echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
           echo "JSON_RPC_URL=https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
         elif [[ "${{ inputs.chain_name }}" == "sepolia" ]]; then
-          echo "QUICKNODE_ENDPOINT=sepolia-endpoint" >> $GITHUB_ENV
+          echo "QUICKNODE_ENDPOINT=dry-alpha-tab" >> $GITHUB_ENV
           echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
           echo "JSON_RPC_URL=https://dry-alpha-tab.ethereum-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
         else
