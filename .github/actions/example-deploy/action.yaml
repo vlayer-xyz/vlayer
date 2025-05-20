@@ -125,20 +125,20 @@ runs:
         fi
       working-directory: ./examples/${{ inputs.example_name }}/vlayer
 
-    # - name: Deploy to Vercel
-    #   if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
-    #   shell: bash
-    #   env:
-    #     VERCEL_ENV: production
-    #     VERCEL_TOKEN: ${{ inputs.vercel_token }}
-    #     VERCEL_PROJECT_ID: ${{ inputs.vercel_project_id }}
-    #     VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
-    #     GITHUB_TOKEN: "${{ inputs.github_token }}"
-    #     EXAMPLE_NAME: ${{ inputs.example_name }}
-    #   run: bash/vercel/deploy-example.sh
+    - name: Deploy to Vercel
+      if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+      shell: bash
+      env:
+        VERCEL_ENV: production
+        VERCEL_TOKEN: ${{ inputs.vercel_token }}
+        VERCEL_PROJECT_ID: ${{ inputs.vercel_project_id }}
+        VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
+        GITHUB_TOKEN: "${{ inputs.github_token }}"
+        EXAMPLE_NAME: ${{ inputs.example_name }}
+      run: bash/vercel/deploy-example.sh
     - name: Deploy to Vercel (PR Preview)
       id: deploy-vercel-preview
-      if: github.event_name == 'push'
+      if: github.event_name == 'pull_request'
       shell: bash
       env:
         VERCEL_ENV: preview

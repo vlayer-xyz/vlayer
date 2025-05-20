@@ -1,6 +1,5 @@
 name: Deploy simple-teleport example
 on:
-  push:
   workflow_run:
     workflows: ["Deploy Stable Provers"]
     types: [completed]
