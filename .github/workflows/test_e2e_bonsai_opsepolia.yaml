@@ -81,6 +81,12 @@ jobs:
       - name: Run gas price checker
         run: ./tmp/gas_price_checker "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" 20
 
+      - name: Set gas check result
+        id: set-result
+        run: |
+          # writes "true" if exit code was 0, else "false"
+          echo "gas-ok=${{ steps.check.outcome == 'success' }}" >>"$GITHUB_OUTPUT"
+
   build-binaries:
     name: Build binaries
     needs: changes
