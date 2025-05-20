@@ -58,7 +58,7 @@ jobs:
 
   check-gas:
     name: Check gas price
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-medium
     outputs:
       gas-ok: ${{ steps.set-result.outputs.gas-ok }}
     steps:
