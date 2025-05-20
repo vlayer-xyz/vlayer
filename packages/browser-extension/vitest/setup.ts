@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
+import { type Scripting } from "webextension-polyfill";
 
 const mockStore = function () {
   const store = new Map<string, unknown>();
@@ -102,6 +103,15 @@ const mockWebextensionPolyfill = (
           onActivated: {
             addListener: vi.fn().mockImplementation(() => {}),
           },
+        },
+        scripting: {
+          executeScript: vi
+            .fn()
+            .mockImplementation(
+              async ({ func, args }): Promise<Scripting.InjectionResult[]> => [
+                { frameId: 0, result: func(...args) },
+              ],
+            ),
         },
         sidePanel: {
           setPanelBehavior: vi.fn().mockImplementation(() => {}),

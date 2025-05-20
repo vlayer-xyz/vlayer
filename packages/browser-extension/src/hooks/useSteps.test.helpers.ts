@@ -1,20 +1,40 @@
 import { BrowsingHistoryItem } from "../state/history.ts";
 import { StepStatus } from "constants/step.ts";
-import { expect } from "vitest";
+import { expect, vi } from "vitest";
 import { calculateSteps } from "./useSteps";
 import chalk from "chalk";
 import { steps } from "./useSteps.test.data.ts";
+import browser, { type Tabs } from "webextension-polyfill";
 
-export const expectedStatuses = async ({
-  input,
-  output,
-}: {
+type TestActiveTab = Partial<Tabs.Tab> & {
+  innerHTML?: string;
+};
+
+export type StepTestCase = {
   input: {
+    id: string;
     isZkProvingDone: boolean;
     history: BrowsingHistoryItem[];
+    activeTabContext?: TestActiveTab;
   };
   output: StepStatus[];
-}) => {
+};
+
+function mockActiveTab(activeTabContext: TestActiveTab) {
+  vi.clearAllMocks();
+
+  if (activeTabContext.innerHTML) {
+    document.body.innerHTML = activeTabContext.innerHTML;
+  }
+  vi.mocked(browser.tabs.query).mockResolvedValue([
+    { id: "test-id", ...activeTabContext } as Tabs.Tab,
+  ]);
+}
+
+export const expectedStatuses = async ({ input, output }: StepTestCase) => {
+  if (input.activeTabContext) {
+    mockActiveTab(input.activeTabContext);
+  }
   (
     await calculateSteps({
       stepsSetup: steps,
@@ -23,6 +43,8 @@ export const expectedStatuses = async ({
   ).forEach((step, index) => {
     expect(step.status).toEqual(output[index]);
   });
+
+  vi.clearAllMocks();
 };
 
 export const testTitle = ({
