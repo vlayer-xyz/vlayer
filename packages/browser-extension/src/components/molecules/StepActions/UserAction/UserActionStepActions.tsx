@@ -2,16 +2,15 @@ import { StepStatus } from "src/constants";
 import React, { FC } from "react";
 import { Flex, Text } from "@radix-ui/themes";
 import { Image } from "components/atoms/Image.tsx";
+import { WebProofStepUserAction } from "src/web-proof-commons/types/message";
 
 type UserActionStepActionProps = {
   status: StepStatus;
-  text: string;
-  image?: string;
+  instruction: WebProofStepUserAction["instruction"];
 };
 export const UserActionStepActions: FC<UserActionStepActionProps> = ({
   status,
-  text,
-  image,
+  instruction: { text, image },
 }) => {
   const isVisible = status === StepStatus.Current;
   return (

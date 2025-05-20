@@ -48,8 +48,7 @@ export const StepActions: React.FC<StepProps> = ({
         .with({ step: EXTENSION_STEP.userAction }, (step) => (
           <UserActionStepActions
             status={status}
-            text={step.text}
-            image={step.image}
+            instruction={step.instruction}
           />
         ))
         .with(

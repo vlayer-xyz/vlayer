@@ -72,16 +72,19 @@ const isExpectedDomElementState = async (
 
   let element: Element | null;
   try {
-    element = await getElementOnPage(step.action.selector);
+    element = await getElementOnPage(step.assertion.domElement);
   } catch (e) {
-    console.error(`Error getting element ${step.action.selector} on page:`, e);
+    console.error(
+      `Error getting element ${step.assertion.domElement} on page:`,
+      e,
+    );
     return false;
   }
 
-  if (!step.action.shouldExist) {
-    return element === null;
+  if (element === null) {
+    return step.assertion.require.notExist;
   }
-  return element !== null;
+  return step.assertion.require.exist;
 };
 
 const isStartPageStepReady = () => true;

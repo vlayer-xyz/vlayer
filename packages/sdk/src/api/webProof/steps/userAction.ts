@@ -6,19 +6,20 @@ import {
 export const userAction = (
   url: string,
   label: string,
-  text: string,
-  action: {
-    selector: string;
-    expected: string | boolean;
+  instruction: {
+    text: string;
+    image?: string;
   },
-  image?: string,
+  assertion: {
+    domElement: string;
+    require: { exist: true } | { notExist: true };
+  },
 ) => {
   return {
     url,
     label,
-    text,
-    action,
-    image,
+    instruction,
+    assertion,
     step: EXTENSION_STEP.userAction,
   } as WebProofStepUserAction;
 };

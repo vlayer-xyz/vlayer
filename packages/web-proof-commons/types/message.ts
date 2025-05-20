@@ -223,12 +223,16 @@ export type WebProofStepUserAction = BrandedStep<
   {
     label: string;
     url: UrlPattern;
-    text: string;
-    action: {
-      selector: string;
-      shouldExist: boolean;
+    instruction: {
+      text: string;
+      image?: string;
     };
-    image?: string;
+    assertion: {
+      domElement: string;
+      require:
+        | { exist: true; notExist: never }
+        | { notExist: true; exist: never };
+    };
   }
 >;
 

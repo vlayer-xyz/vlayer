@@ -23,10 +23,12 @@ export const steps = [
     url: "https://example.com/*/expect",
     label: "Expect user action",
     step: "userAction",
-    text: "Click here now",
-    action: {
-      selector: "button[data-clicked='true']",
-      shouldExist: true,
+    instruction: {
+      text: "Click here now",
+    },
+    assertion: {
+      domElement: "button[data-clicked='true']",
+      require: { exist: true },
     },
   },
   {
