@@ -97,7 +97,6 @@ runs:
         BUILD_SERVICES: 0
         BUILD_CLI: 0
         EXAMPLE: ${{ inputs.example }}
-        VLAYER_ENV: ${{ inputs.chain_name == 'anvil' && 'dev' || 'testnet' }}
 
         # JWT auth related
         JWT_AUTH: ${{ inputs.jwt_auth }}
