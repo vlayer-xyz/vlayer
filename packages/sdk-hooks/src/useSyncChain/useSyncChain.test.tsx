@@ -86,6 +86,7 @@ describe("useChain with anvil", () => {
     expect(result.current.error).toBeNull();
     expect(chain).toBeDefined();
     expect(result.current.switched).toBe(true);
+    expect(result.current.chain?.id).toBe(optimismSepolia.id);
   });
 
   test("fail with meaningful error when env chain is undefined", () => {

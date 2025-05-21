@@ -341,6 +341,9 @@
     "packages/sdk-hooks": {
       "name": "@vlayer/react",
       "version": "0.1.0",
+      "dependencies": {
+        "ts-pattern": "^5.7.1",
+      },
       "devDependencies": {
         "@testing-library/dom": "^10.4.0",
         "@testing-library/jest-dom": "^6.6.3",
@@ -2814,6 +2817,8 @@
     "@vlayer/extension-hooks/@testing-library/react": ["@testing-library/react@15.0.7", "", { "dependencies": { "@babel/runtime": "^7.12.5", "@testing-library/dom": "^10.0.0", "@types/react-dom": "^18.0.0" }, "peerDependencies": { "@types/react": "^18.0.0", "react": "^18.0.0", "react-dom": "^18.0.0" }, "optionalPeers": ["@types/react"] }, "sha512-cg0RvEdD1TIhhkm1IeYMQxrzy0MtUNfa3minv4MjbgcYzJAZ7yD0i0lwoPOTPr+INtiXFezt2o8xMSnyHhEn2Q=="],
 
     "@vlayer/react/@types/bun": ["@types/bun@1.2.13", "", { "dependencies": { "bun-types": "1.2.13" } }, "sha512-u6vXep/i9VBxoJl3GjZsl/BFIsvML8DfVDO0RYLEwtSZSp981kEO1V5NwRcO1CPJ7AmvpbnDCiMKo3JvbDEjAg=="],
+
+    "@vlayer/react/ts-pattern": ["ts-pattern@5.7.1", "", {}, "sha512-EGs8PguQqAAUIcQfK4E9xdXxB6s2GK4sJfT/vcc9V1ELIvC4LH/zXu2t/5fajtv6oiRCxdv7BgtVK3vWgROxag=="],
 
     "@vlayer/sdk/@types/bun": ["@types/bun@1.2.13", "", { "dependencies": { "bun-types": "1.2.13" } }, "sha512-u6vXep/i9VBxoJl3GjZsl/BFIsvML8DfVDO0RYLEwtSZSp981kEO1V5NwRcO1CPJ7AmvpbnDCiMKo3JvbDEjAg=="],
 

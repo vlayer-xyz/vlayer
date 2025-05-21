@@ -30,5 +30,8 @@
   "scripts": {
     "build": "bun tsc --project tsconfig.build.json && bun tsc-alias",
     "test:unit": "vitest --run"
+  },
+  "dependencies": {
+    "ts-pattern": "^5.7.1"
   }
 }
