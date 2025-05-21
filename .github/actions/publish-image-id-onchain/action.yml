@@ -21,5 +21,4 @@ runs:
       env:
         DRY_RUN: ${{ inputs.dry_run }}
         REPOSITORY_CONTRACT_OWNER_PRIVATE_KEY: ${{ inputs.private_key }}
-      run: bash/verifiers_management/push-image-id.sh
-        
+      run: bash/verifiers_management/push-testnet-image-id.sh

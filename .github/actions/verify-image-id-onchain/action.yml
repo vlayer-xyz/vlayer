@@ -33,4 +33,4 @@ runs:
 
     - name: Verify ImageID on chains
       shell: bash
-      run: bash/verifiers_management/verify-image-id.sh
+      run: bash/verifiers_management/verify-mainnet-image-id.sh
