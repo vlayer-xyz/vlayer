@@ -8,7 +8,9 @@ import {
   ChainNotSupportedError,
   MissingConfigChainError,
 } from "./errors";
+import { debug } from "debug";
 
+const log = debug("vlayer:sdk-hooks:useSyncChain");
 /**
  * @description This hook is used to make sure the chain in the environment variable is the same as the chain in the wallet.
  * @param configChain - The chain name in the environment variable.
@@ -66,10 +68,11 @@ export const useSyncChain = (
         { chainId: chain.id },
         {
           onError: (e) => {
-            console.error(e);
+            log("error switching chain", e);
             dispatch({ type: "CHAIN_SWITCH_ERROR", payload: chain.name });
           },
           onSuccess: () => {
+            log("success switching chain", chain);
             dispatch({ type: "CHAIN_SWITCHED", payload: chain });
           },
         },

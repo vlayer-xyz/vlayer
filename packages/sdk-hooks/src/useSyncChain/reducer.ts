@@ -6,8 +6,12 @@ import {
   ChainNotSupportedError,
   ChainSwitchError,
 } from "./errors";
+import { debug } from "debug";
+
+const log = debug("vlayer:sdk-hooks:useSyncChain:reducer");
 
 export const reducer = (state: ChainState, action: ChainAction): ChainState => {
+  log("useSyncChain reducer", state, action);
   return match(action)
     .with({ type: "NO_CHAIN" }, () => ({
       ...state,
