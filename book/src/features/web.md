@@ -4,6 +4,8 @@ Existing web applications including finance, social media, government, ecommerce
 With vlayer, you can leverage **this data** in smart contracts.
 
 ## Web Proofs
+
+<!-- FEEDBACK: What does it mean that small subset of the required data is published on-chain? It is encrypted, right? Or maybe we can call it encrypted, verified transcript? -->
 Web Proofs provide cryptographic proof of web data served by any HTTPS server, allowing developers to use this data in smart contracts. Only a small subset of the required data is published on-chain.
 
 Web Proofs ensure that the data received has not been tampered with. Without Web Proofs, proving this on-chain is difficult, especially when aiming for an automated and trusted solution.
@@ -39,6 +41,8 @@ contract WebProofProver is Prover {
     }
 }
 ```
+
+<!-- FEEDBACK: It might be worh explaining what happens with the vlayer solidity extensions, precompiles not mentioned -->
 
 What happens in the above code?  
 
@@ -92,6 +96,8 @@ This approach is ideal for proving access to **social media activity**, **person
 > The next steps are explained in the [Running Examples](../getting-started/first-steps.md#running-examples-locally) and [Quickstart Guide](/web-proof/quickstart-guide.html).
 
 ### Server-side
+
+<!-- FEEDBACK: Could mention a way the vlayer notarizes the process of the communication on server-side, for client-side we know that extension intercepts requests. -->
 
 The server-side method is intended for proving data retrieved from HTTP requests that are either public or authenticated via token. It’s a great fit for APIs such as AI models, fintech services, or any backend integration where browser cookie is not required.
 
@@ -160,13 +166,22 @@ A *Notary* is a third-party server that participates in a two-sided Transport La
 
 ## Security Considerations
 
+<!-- FEEDBACK: It seems like super important paragraph. We might consider making a seperate section out of it -->
+
 The Web Proof feature is based on the [TLSNotary](https://tlsnotary.org/) protocol. Web data is retrieved from an HTTP endpoint and it's integrity and authenticity during the HTTP session is verified using the TLS protocol (the "S" in HTTPS), which secures most modern encrypted connections on the Internet. Web Proofs ensure the integrity and authenticity of web data after the HTTPS session finishes by extending the TLS protocol. *Notary*, joins the HTTPS session between the client and the server and can cryptographically certify its contents.
+
+<!-- FEEDBACK: maybe mention MPC (which is kinda buzzword) similarly as in TLSNotary:  MPC provides cryptographic guarantees, allowing the Verifier to authenticate the TLS transcript without requiring external trust or revealing the complete data to anyone  -->
 
 From privacy perspective, it is important to note that the *Notary* server never has access to the plaintext transcript of the connection and therefore, *Notary* can never steal client data and pretend to be client. Furthermore, the transcript can be redacted (i.e. certain parts can be removed) by the client, making these parts of the communication not accessible by `Prover` and vlayer infrastructure running the `Prover`.
 
+
+<!-- FEEDBACK: Do we need empty paragraph like this, maybe just directly redirect to the proper section?-->
 ### [Redaction](../web-proof/redaction.md)
 
 ### Trust Assumptions
+
+<!-- FEEDBACK: - What are the plans for the offload of the assumption from vlayer, like in the case of Notary server. Like many notaries run by different entitties?
+- we have just launched the production, shouldn’t we update prod trust assumptions, or show where we on them in the roadmap -->
 
 It is important to understand that the *Notary* is a trusted party in the above setup. Since the *Notary* certifies the data, a malicious *Notary* could collude with a malicious client to create fake proofs that would still be successfully verified by `Prover`. Currently vlayer runs it's own *Notary* server, which means that vlayer needs to be trusted to certify HTTPS sessions.
 

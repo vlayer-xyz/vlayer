@@ -1,5 +1,7 @@
 # Time travel 
 
+<!-- FEEDBACK: very general note - do we need to generate the ZK proof for that case, or just verifiable proof is enough? Core idea: ZK enables up to succinctly roll up to the EVM with storage usage minimized -->
+
 ## Access to historical data 
 Unfortunately, direct access to the historical state from within smart contracts is not possible. 
 Smart contracts only have access to the current state of the current block. 

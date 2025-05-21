@@ -3,6 +3,8 @@
 ## Ethereum ecosystem of chains
 The Ethereum ecosystem is fragmented, consisting of various EVM chains such as Base, Arbitrum, Optimism, and many more. Developing applications that interact with multiple chains used to be challenging, but Teleport makes it easy.
 
+<!-- FEEDBACK: It might be worth higlighting on which chain we can resolve the teleport -->
+
 ## Teleporting betweens chains
 `setChain(uint chainId, uint blockNo)` function, available in Prover contracts, allows to switch the context of execution to another chain (teleport).  It takes two arguments:
 * `chainId`, which specifies the chain in the context of which the next function call will be executed
@@ -21,6 +23,8 @@ Erc20Token[] memory tokens = [
     Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954) // optimism
 ];
 ```
+
+<!-- FEEDBACK: Here we are revealing the sum of balances x-chains, no ZK paradigm here, in a sense it suffices to know that we are over some amount, not necessarily know the value. And this could be checked by prover who just returns boolean flag -->
 
 ```solidity
 contract SimpleTeleportProver is Prover {

@@ -76,6 +76,8 @@ We provide functions to match and capture a substring using regular expressions:
 - `matches` checks if a string matches a regular expression and returns `true` if a match is found;
 - `capture` checks if a string matched a regular expression and returns an array of strings. First string is the whole matched text, followed by the captures.
 
+<!-- FEEDBACK: That super useful info highly impacting the UX for our clients (shorter proofs), might be worth distinguising more tips like this into seperate section. -->
+
 ## Regex size optimization
 Internally, the regular expression is compiled into a [DFA](https://en.wikipedia.org/wiki/Deterministic_finite_automaton).
 The size of the DFA is determined by the regular expression itself, and it can get quite large even for seemingly simple patterns.
