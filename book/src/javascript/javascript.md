@@ -1,3 +1,8 @@
+<!-- FEEDBACK: 
+  - That is the main part of the book, that devs would be interested in, some other name?
+  - might be worth changing examples here to one of the mentioned examples before like `simple-web-proof` for X, now abstract args are passed in Vanilla JS and React -->
+
+
 # Vanilla JS/TS
 ## JavaScript
 A common way to interact with blockchain is to make calls and send transactions from JavaScript, most often from a web browser. vlayer provides developer friendly JavaScript/TypeScript API - vlayer SDK. It combines well with the standard way of interacting with smart contracts. 

@@ -21,6 +21,8 @@ const vlayer = createVlayerClient()
 
 Next, we can define how the vlayer extension should generate the Web Proof. We do this in a declarative way, by specifying the steps the extension should guide the user through.
 
+
+<!-- FEEDBACK: Can we declare multiple scenarios? Or tree-like branching scenario? -->
 ```ts
 import {
   createWebProofRequest,
@@ -73,6 +75,7 @@ The above snippet:
 To learn more details about the Web Proof feature, please see the [Web Proof section](../features/web.md).
 
 ### Low-level API
+<!-- FEEDBACK: we are mentioning notary, wsproxy but this is part of the architecture, concept of the whole webproof flow, some top-level diagram would be useful -->
 
 While the vlayer client method `proveWeb` described above provides a convenient interface to both the vlayer browser extension and the prover contract, we also provide methods that can access each of them separately.
 
@@ -163,6 +166,8 @@ By default, the transcript is not redacted at all and redaction of each HTTP req
 
 ### Header Redaction
 
+<!-- FEEDBACK: wouldn't it better to point things that won’t be redacted (redaction by default) -->
+
 You can redact specific headers from both the request and the response. To do so, use `request.headers`, `request.headers_except`, `response.headers`, or `response.headers_except` with a header name (e.g. `Authorization`, `Cookie`). Using `headers` or `headers_except` allows you to control which HTTP headers are redacted: either by explicitly specifying the headers to remove, or by redacting all except a given subset.
 
 #### Redact specifc headers
@@ -230,6 +235,8 @@ notarize("https://api.example.com/profile", "GET", "Proof", [
 Keep in mind though that because of the safety reasons (described [here](../web-proof/redaction.md#security-model)), only either the full, unredacted URL or a URL starting with a specified prefix can be verified.
 
 ### WebSocket proxy
+
+<!-- FEEDBACK: why it is mentioned here? that is not the part of JS setup, it is a concept thing -->
 
 The WebSocket proxy is required in the Web Proofs setup to allow the vlayer extension to access the low-level TLS connection of the HTTPS request for which we are generating a Web Proof (browsers do not provide this access by default). The default WebSocket proxy, `wss://test-wsproxy.vlayer.xyz`, used in our SDK and hosted by vlayer, supports a limited number of domains.
 
