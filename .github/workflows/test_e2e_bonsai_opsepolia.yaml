@@ -214,12 +214,8 @@ jobs:
           jwt_auth: "on"
           vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
-          # Proving related
-          proving_mode: "prod"
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-
           # Chain related
           chain_name: "sepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          chain_service_url: "https://test-chainservice.vlayer.xyz"

@@ -38,6 +38,12 @@ inputs:
   quicknode_api_key:
     description: "Required for chain testnets."
     required: false
+
+  # Chain service URL - optional external chain service
+  chain_service_url:
+    description: "External chain service URL (optional)"
+    required: false
+
 runs:
   using: "composite"
   steps:
@@ -118,6 +124,7 @@ runs:
 
         # Chain related
         CHAIN_NAME: ${{ inputs.chain_name }}
+        CHAIN_SERVICE_URL: ${{ inputs.chain_service_url }}
       run: |
         echo "::group::Environment Configuration"
         echo "VLAYER_ENV: $VLAYER_ENV"

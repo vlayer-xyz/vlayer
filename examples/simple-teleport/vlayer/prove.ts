@@ -1,13 +1,7 @@
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/SimpleTeleportProver.sol/SimpleTeleportProver";
 import verifierSpec from "../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
-import whaleBadgeNFTSpec from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
-import {
-  createContext,
-  deployVlayerContracts,
-  getConfig,
-  waitForContractDeploy,
-} from "@vlayer/sdk/config";
+import { createContext, getConfig } from "@vlayer/sdk/config";
 import { type Address } from "viem";
 import { loadFixtures } from "./loadFixtures";
 import { getTeleportConfig } from "./constants";
@@ -29,7 +23,7 @@ console.log("confirmations", confirmations);
 
 if (!account) {
   throw new Error(
-    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables"
   );
 }
 const vlayer = createVlayerClient({
@@ -37,16 +31,16 @@ const vlayer = createVlayerClient({
   token: config.token,
 });
 console.log("⏳ Deploying helper contracts...");
-const deployWhaleBadgeHash = await ethClient.deployContract({
-  abi: whaleBadgeNFTSpec.abi,
-  bytecode: whaleBadgeNFTSpec.bytecode.object,
-  account,
-});
+// const deployWhaleBadgeHash = await ethClient.deployContract({
+//   abi: whaleBadgeNFTSpec.abi,
+//   bytecode: whaleBadgeNFTSpec.bytecode.object,
+//   account,
+// });
 
-const whaleBadgeNFTAddress = await waitForContractDeploy({
-  client: ethClient,
-  hash: deployWhaleBadgeHash,
-});
+// const whaleBadgeNFTAddress = await waitForContractDeploy({
+//   client: ethClient,
+//   hash: deployWhaleBadgeHash,
+// });
 
 const tokensToCheck: {
   addr: Address;
@@ -62,13 +56,15 @@ const tokensToCheck: {
   }),
 );
 
-const { prover, verifier } = await deployVlayerContracts({
-  proverSpec,
-  verifierSpec,
-  proverArgs: [],
-  verifierArgs: [whaleBadgeNFTAddress],
-});
+// const { prover, verifier } = await deployVlayerContracts({
+//   proverSpec,
+//   verifierSpec,
+//   proverArgs: [],
+//   verifierArgs: [whaleBadgeNFTAddress],
+// });
 
+const prover = "0xabb1853ea215da0f315846ae76fc69cbcefa73e0";
+const verifier = "0x6b3cf322d42e06efa10b469c13ecba0de41bcfb1";
 
 console.log("Prover:", prover);
 console.log("Verifier:", verifier);

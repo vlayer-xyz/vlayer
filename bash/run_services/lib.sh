@@ -3,7 +3,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/chain_worker.sh"
 
 function setup_tmp_dir() {
-    if [[ -z "${VLAYER_TMP_DIR:-}" ]] ; then
+    if [[ -z "${VLAYER_TMP_DIR:-}" ]]; then
         VLAYER_TMP_DIR=$(mktemp -d -t vlayer-$(basename $0).XXXXX)
     else
         VLAYER_TMP_DIR=$(realpath "${VLAYER_TMP_DIR}")
@@ -21,12 +21,12 @@ function startup_vdns_server() {
     fi
 
     RUST_LOG=info \
-    ./target/debug/dns_server \
+        ./target/debug/dns_server \
         ${args[@]+"${args[@]}"} \
         >>"${LOGS_DIR}/dns_server.out" &
 
     DNS_SERVER=$!
-    
+
     echo "DNS server started with PID ${DNS_SERVER}."
     wait_for_port_and_pid 3002 "${DNS_SERVER}" 30m "dns server"
 
@@ -40,7 +40,7 @@ function startup_chain_server() {
     pushd "${VLAYER_HOME}"
 
     RUST_LOG=info \
-    ./target/debug/chain_server \
+        ./target/debug/chain_server \
         --db-path "${db_path}" \
         >>"${LOGS_DIR}/chain_server.out" &
 
@@ -53,13 +53,13 @@ function startup_chain_server() {
 }
 
 function startup_chain_services() {
-    if [[ -z "$@" ]] ; then
+    if [[ -z "$@" ]]; then
         return 0
     fi
 
     local db_path="${VLAYER_TMP_DIR}/chain_db"
 
-    for args in "$@"; do 
+    for args in "$@"; do
         startup_chain_worker ${db_path} $args &
     done
 
@@ -68,7 +68,7 @@ function startup_chain_services() {
 
 function startup_vlayer() {
     local proof_arg=$1
-    shift # shift input params, since the second (and last) arg is an array of external_urls 
+    shift # shift input params, since the second (and last) arg is an array of external_urls
     local external_urls=("$@")
 
     echo "Starting vlayer REST server"
@@ -84,14 +84,16 @@ function startup_vlayer() {
         args+=("--jwt-public-key" "./docker/fixtures/jwt-authority.key.pub") # JWT public key
     fi
 
-    if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
+    if [[ -n "${CHAIN_SERVICE_URL:-}" ]]; then
+        args+=("--chain-proof-url" "${CHAIN_SERVICE_URL}")
+    elif [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
         args+=("--chain-proof-url" "http://localhost:3001")
     fi
 
     RUST_LOG=info \
-    BONSAI_API_URL="${BONSAI_API_URL}" \
-    BONSAI_API_KEY="${BONSAI_API_KEY}" \
-    ./target/debug/call_server \
+        BONSAI_API_URL="${BONSAI_API_URL}" \
+        BONSAI_API_KEY="${BONSAI_API_KEY}" \
+        ./target/debug/call_server \
         ${args[@]} \
         ${external_urls[@]+"${external_urls[@]}"} \
         >>"${LOGS_DIR}/vlayer_serve.out" &
@@ -105,7 +107,7 @@ function startup_vlayer() {
 }
 
 function ensure_services_built() {
-    if [[ "${BUILD_SERVICES}" == "1" ]] ; then
+    if [[ "${BUILD_SERVICES}" == "1" ]]; then
         pushd "${VLAYER_HOME}"
         silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker --bin dns_server
         popd
