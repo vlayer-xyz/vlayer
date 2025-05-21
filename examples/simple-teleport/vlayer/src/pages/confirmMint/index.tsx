@@ -8,8 +8,19 @@ import { parseProverResult, tokensToProve } from "../../shared/lib/utils";
 import { AlreadyMintedError } from "../../shared/errors/appErrors";
 import { Chain, optimismSepolia } from "viem/chains";
 import { match } from "ts-pattern";
+import { useSyncChain } from "@vlayer/react";
+import { debug } from "debug";
+const log = debug("vlayer:examples:simple-teleport:confirmMint");
+
 export const ConfirmMintPage = () => {
-  const { address, chain } = useAccount();
+  const { address } = useAccount();
+  const { chain, error: chainError } = useSyncChain(
+    import.meta.env.VITE_CHAIN_NAME,
+  );
+  log("running on chain", chain);
+  if (chainError) {
+    throw new Error(chainError.message);
+  }
   const { data: balance } = useBalance({ address: address as `0x${string}` });
   const navigate = useNavigate();
   const {
