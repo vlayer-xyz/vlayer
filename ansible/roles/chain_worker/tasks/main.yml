@@ -24,7 +24,6 @@
   async: 600  # 10 minutes to complete
   poll: 10  # check every 10 seconds
   retries: 2
-  notify: "Restart chain worker {{ chain_worker_identifier }}"
   when: not vlayerup_executed | default(false)
 - name: Mark vlayerup as executed
   ansible.builtin.set_fact:
@@ -37,7 +36,6 @@
     src: vlayer-chain-worker.service.j2
     dest: /etc/systemd/system/vlayer-chain-worker-{{ chain_worker_identifier }}.service
     mode: '644'
-  notify: "Restart chain worker {{ chain_worker_identifier }}"
 
 - name: Enable and start the vlayer service
   become: true
@@ -46,3 +44,10 @@
     name: vlayer-chain-worker-{{ chain_worker_identifier }}
     enabled: true
     state: started
+
+- name: Restart chain worker {{ chain_worker_identifier }}
+  become: true
+  ansible.builtin.systemd_service:
+    name: vlayer-chain-worker-{{ chain_worker_identifier }}
+    state: restarted
+    daemon_reload: true

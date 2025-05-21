@@ -1,11 +1,4 @@
 ---
-- name: Restart chain server
-  become: true
-  ansible.builtin.systemd_service:
-    name: vlayer-chain-server
-    state: restarted
-    daemon_reload: true
-
 - name: Restart rsyslog
   become: true
   ansible.builtin.systemd_service:
