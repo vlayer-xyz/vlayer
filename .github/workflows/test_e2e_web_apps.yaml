@@ -1,4 +1,4 @@
-name: E2E example web apps test
+name: E2E web apps
 
 on:
   pull_request:
@@ -90,10 +90,9 @@ jobs:
           retention-days: 3
 
   test-e2e-web-apps:
-    name: E2E web apps test
+    name: E2E web apps
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -107,11 +106,13 @@ jobs:
           ]
     steps:
       - name: Checkout repository
+        if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
+        if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
         uses: ./.github/actions/test-e2e-web-apps
         with:
           example: "${{ matrix.example }}"
@@ -121,10 +122,9 @@ jobs:
           playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
 
   test-e2e-web-apps-jwt:
-    name: E2E web apps test with JWT authentication enabled
+    name: E2E web apps with JWT
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -138,11 +138,13 @@ jobs:
           ]
     steps:
       - name: Checkout repository
+        if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
+        if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
         uses: ./.github/actions/test-e2e-web-apps
         with:
           example: "${{ matrix.example }}"
