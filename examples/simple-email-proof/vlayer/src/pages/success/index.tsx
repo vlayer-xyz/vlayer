@@ -14,11 +14,7 @@ export const SuccessContainer = () => {
         Your <b>{domain}</b> NFT was minted to {truncateHashOrAddr(recipient)}
         <br />
         <a
-          href={
-            account.chain?.blockExplorers?.default.name === "Etherscan"
-              ? `${account.chain?.blockExplorers?.default.url}/token/${txHash}`
-              : `${account.chain?.blockExplorers?.default.url}/tx/${txHash}`
-          }
+          href={`${account.chain?.blockExplorers?.default.url}/tx/${txHash}`}
           target="_blank"
           rel="noreferrer"
           className="text-violet-500 font-bold block mt-5"
