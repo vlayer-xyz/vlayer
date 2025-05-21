@@ -4,6 +4,7 @@ The easiest way to install vlayer is by using `vlayerup`, the vlayer toolchain i
 ## Supported Platforms
 **Linux**: Only Ubuntu 24.04 LTS or newer versions with x86_64 CPU architecture are supported. Other Linux distributions may work but are not officially supported.
 
+<!-- FEEDBACK:  What are OS prerequisites for Macs?-->
 **Mac**: Macs with Intel CPUs are not supported. Use a Mac with Apple Silicon.
 
 ## Prerequisites
@@ -22,6 +23,8 @@ curl -SL https://install.vlayer.xyz | bash
 
 This will install `vlayerup` and make it available in your CLI.
 Occasionally, vlayerup might require an upgrade. To update it, simply run the same command again.
+
+<!-- FEEDBACK:  we might add integrity verification, it is sth that foundry book has-->
 
 ## Using vlayerup
 Running `vlayerup` will install the latest (nightly) precompiled binary of vlayer:

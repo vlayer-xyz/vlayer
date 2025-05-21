@@ -16,15 +16,21 @@ Run this command to initialize a new vlayer project:
 vlayer init project-name
 ```
 
+<!-- FEEDBACK: Until installing not sure what is the difference between “sample contracts” and “example project” with example prover and verifier contracts. Probably we could be more specific here -->
+
 It creates a folder with sample contracts.
 
 ### Adding to an existing project
+<!-- FEEDBACK: https://github.com/ZeframLou/foundry-template# taking this template I got error: "No src field found in foundy.toml". Maybe some info about expected toml fields or its general structure would be a good idea here? Nevertheless, that's sth I could have easily fixed.
+  -->
 Use the `--existing` flag to initialize vlayer within your existing [Foundry](https://getfoundry.sh/) project:
 ```bash
 cd ./your-project && vlayer init --existing
 ```
 
 ### Example project
+
+<!-- FEEDBACK: Running simple-web-proof creates simple directory -->
 
 To initialize a vlayer project with example prover and verifier contracts, use the `--template` flag as shown below:
 
@@ -40,6 +46,8 @@ The following templates are available for quick project setup:
 - `simple-time-travel`: Prove the average ERC20 token balance across multiple block numbers.
 - `simple-web-proof`: Mint an NFT to the owner of a specific X/Twitter handle using Web Proofs.
 - `kraken-web-proof`: Generate server-side web proof of ETH to USD exchange rate and store it on-chain
+
+<!-- FEEDBACK: remappings.txt and soldeer.lock not mentioned to be added  -->
 
 ## Directory structure
 The vlayer directory structure resembles a typical Foundry project but with two additional folders: `src/vlayer` and `vlayer`.
@@ -72,9 +80,16 @@ Firstly, create `vlayer/.env.testnet.local` - this is where you will put all you
 
 Sign up or Log in to [dashboard.vlayer.xyz](https://dashboard.vlayer.xyz) and generate a new testnet Json Web Token (JWT).
 
+<!-- FEEDBACK: Imho users shouldn't be aware that we have private Backoffice section, see .gif -->
+
 <div style="text-align: center;">
   <img src="/images/tokens-dashboard.gif" alt="Generating JWT in dashboard.vlayer.xyz" />
 </div>
+
+<!-- FEEDBACK: 
+    - maybe a more detailed explanation why we need to generate a JWT?
+    - we need it to access vlayer proving infrastracture abstract
+ -->
 
 Copy generated token (it won't be visible ever again) and save it in `vlayer/.env.testnet.local` 
 
@@ -102,20 +117,24 @@ bun run prove:testnet
 ```
 
 ### Local devnet
-Running examples on a local devnet requires deploying a local instance of the prover and anvil.
+Running examples on a local devnet requires deploying a local instance of the prover on anvil.
 If you want to run on local environment, use [Docker](/getting-started/dev-and-production.html#devnet): 
 
 ```bash
 $ bun run devnet:up
 ```
 
-This command will start all required services in the background.
+This command will start all required [services](/getting-started/dev-and-production.html#available-services) in the background.
 
 Once the devnet is up, run the example from within the `vlayer` directory:
+
+<!-- FEEDBACK: what are we actually proving (mocking) by running bun run prove:dev  -->
 
 ```sh
 bun run prove:dev
 ```
+
+<!-- FEEDBACK: There is an easy way to set up devnet explorer, basing on Blockscout -->
 
 ### Production
 In order to use the production, you will need to provide a couple of secrets.
@@ -151,6 +170,11 @@ bun run prove:mainnet
 
 ## Web Proof example
 
+<!-- FEEDBACK: How to get Gas? Which is necessary for minting X web proof NFT
+    - on devnet, to get such a gas one needs to transfer from one of the predefined Anvil faucet addresses
+    - what for testnet or production?
+    - or maybe it would be easier to setup theirs wallet address in env -->
+
 First, install the vlayer browser extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) (works with Chrome and Brave browsers).
 For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
 
@@ -171,3 +195,7 @@ bun run deploy:testnet # deploy to testnet
 > ❗️ Ensure the contracts are recompiled after every change with `forge build`
 
 The app will be available at `http://localhost:5174` and will display buttons that will let you interact with the extension and vlayer server (open browser developer console to see the app activity).
+
+<!-- FEEDBACK: it might be worth adding some info about possibility to lookup easily Twitter NFT on local devnet of blockscout
+      - it could be easily setup following instructions from: https://github.com/blockscout/blockscout/tree/master/docker-compose
+ -->

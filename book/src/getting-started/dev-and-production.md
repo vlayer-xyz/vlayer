@@ -28,6 +28,8 @@ The Test Prover operates in [`FAKE` mode](/getting-started/dev-and-production.ht
 
 ### Public Testnet Services
 
+<!-- FEEDBACK: I was thinking about some more in-depth description of the vlayer auxiliary services. Maybe some seperate section with ref here? -->
+
 | Service            | Endpoint                         | Description                                  |
 |--------------------|----------------------------------|----------------------------------------------|
 | Prover             | `https://stable-fake-prover.vlayer.xyz` | zkEVM prover for vlayer contracts     |
