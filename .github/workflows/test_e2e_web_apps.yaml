@@ -89,65 +89,199 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-web-apps:
-    name: E2E web apps
+  test-e2e-web-apps-simple:
+    name: E2E web apps (simple)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    strategy:
-      fail-fast: false
-      matrix:
-        example:
-          [
-            simple,
-            simple-email-proof,
-            simple-web-proof,
-            simple-time-travel,
-            simple-teleport,
-          ]
     steps:
       - name: Checkout repository
-        if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
-        if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
         uses: ./.github/actions/test-e2e-web-apps
         with:
-          example: "${{ matrix.example }}"
+          example: "simple"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
 
-  test-e2e-web-apps-jwt:
-    name: E2E web apps with JWT
+  test-e2e-web-apps-simple-email-proof:
+    name: E2E web apps (simple-email-proof)
     needs: [changes, build-binaries]
     runs-on: aws-linux-medium
-    strategy:
-      fail-fast: false
-      matrix:
-        example:
-          [
-            simple,
-            simple-email-proof,
-            simple-web-proof,
-            simple-time-travel,
-            simple-teleport,
-          ]
     steps:
       - name: Checkout repository
-        if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Run E2E Web Apps Test Action
-        if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
         uses: ./.github/actions/test-e2e-web-apps
         with:
-          example: "${{ matrix.example }}"
+          example: "simple-email-proof"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+
+  test-e2e-web-apps-simple-web-proof:
+    name: E2E web apps (simple-web-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps
+        with:
+          example: "simple-web-proof"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+
+  test-e2e-web-apps-simple-time-travel:
+    name: E2E web apps (simple-time-travel)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps
+        with:
+          example: "simple-time-travel"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+
+  test-e2e-web-apps-simple-teleport:
+    name: E2E web apps (simple-teleport)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps
+        with:
+          example: "simple-teleport"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+
+  test-e2e-web-apps-jwt-simple:
+    name: E2E web apps with JWT (simple)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps
+        with:
+          example: "simple"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          jwt_auth: "on"
+          vlayer_api_token: ${{ vars.VLAYER_API_TOKEN }}
+
+  test-e2e-web-apps-jwt-simple-email-proof:
+    name: E2E web apps with JWT (simple-email-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps
+        with:
+          example: "simple-email-proof"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          jwt_auth: "on"
+          vlayer_api_token: ${{ vars.VLAYER_API_TOKEN }}
+
+  test-e2e-web-apps-jwt-simple-web-proof:
+    name: E2E web apps with JWT (simple-web-proof)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps
+        with:
+          example: "simple-web-proof"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          jwt_auth: "on"
+          vlayer_api_token: ${{ vars.VLAYER_API_TOKEN }}
+
+  test-e2e-web-apps-jwt-simple-time-travel:
+    name: E2E web apps with JWT (simple-time-travel)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps
+        with:
+          example: "simple-time-travel"
+          vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          jwt_auth: "on"
+          vlayer_api_token: ${{ vars.VLAYER_API_TOKEN }}
+
+  test-e2e-web-apps-jwt-simple-teleport:
+    name: E2E web apps with JWT (simple-teleport)
+    needs: [changes, build-binaries]
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run E2E Web Apps Test Action
+        uses: ./.github/actions/test-e2e-web-apps
+        with:
+          example: "simple-teleport"
           vercel_project_id: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}

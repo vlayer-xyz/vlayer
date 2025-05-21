@@ -3,12 +3,6 @@ description: Call ImageIdAdministration VerifyImageIdSupported with fresh ImageI
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref }}
-        submodules: recursive
-
     - name: Install contracts prerequisites
       uses: ./.github/actions/contracts-prerequisites
 
@@ -21,6 +15,7 @@ runs:
         path: guest-artifacts
 
     - name: Copy ImageID to contracts
+      shell: bash
       run: |
         rm contracts/vlayer/src/ImageID.sol
         cp guest-artifacts/ImageID.sol contracts/vlayer/src/ImageID.sol
