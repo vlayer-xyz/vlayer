@@ -1,3 +1,5 @@
+<!-- FEEDBACK: header names mismatch por. <Prover Global Variables> vs Global Variables in summary-->
+
 # Prover Global Variables
 
 In the global namespace, Solidity provides special variables and functions that primarily offer information about blocks, transactions, and gas.
@@ -8,6 +10,8 @@ Since Prover contracts operate in the vlayer zkEVM environment, some variables a
 vlayer extends Solidity with features like [time traveling](/features/time-travel.html) between block numbers and [teleporting](/features/teleport.html) to other chains. As a result, the values returned by `block.number` and `block.chainId` are influenced by these features.
 
 Initially, `block.number` returns one of the recently mined blocks in the settlement chain, known as the settlement block.
+
+<!-- FEEDBACK: this 256 thershold is just for mainnet? 256 blocks on fast L2s might be a few seconds, much faster than ZK proof generation -->
 
 Typically, the prover will use the most recent block. However, proving takes time, and up to 256 blocks can be mined between the start of the proving process and the final on-chain settlement. Proofs for blocks older than 256 blocks will fail to verify. Additionally, a malicious prover might try to manipulate the last block number. Therefore, the guarantee is that the settlement block is no more than 256 blocks old. In the future, the number of blocks allowed to be mined during proving may be significantly increased.
 

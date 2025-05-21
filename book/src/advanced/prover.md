@@ -4,9 +4,18 @@ vlayer `Prover` contracts are almost the same as regular Solidity smart contract
 
 - **Access to Off-Chain Data:** `Prover` contracts accept data from multiple sources through features such as [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email proofs](/features/email.html), and [web proofs](/features/web.html). This allows claims to be verified on-chain without exposing all input the data.
 
+<!-- FEEDBACK: one could think that Verifier also works on zkEVM, this "where the proofs of computation ..." were a bit confusing for me. -->
 - **Execution Environment:** The `Prover` code executes on the vlayer zkEVM, where the proofs of computation are subsequently verified by the on-chain `Verifier` contract. Unlike the on-chain contract, the `Prover` does not have access to the current block. It can only access previously mined blocks. Under the hood, vlayer generates zero-knowledge proofs of the `Prover`'s execution.
 
 ## Prover in-depth
+
+<!-- FEEDBACK: Few questions that I was looking answers in more details here:
+- Why Prover shall be deployed before the use? Could it be explained
+- What happens with the Solidity extensions? How comes they are interpreted?
+- What gives prover super powers? We inherit the interface and what?
+- Where the proof is stored?
+- Are the verified args the part of the proof?
+ -->
 
 ### Prover parent contract
 Any contract function can be run in the vlayer prover, but to access the additional features listed above, the contract should inherit from the `Prover` contract and any function can be used as a proving function.
