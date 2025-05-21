@@ -5,7 +5,6 @@ export const SuccessPage = () => {
   const account = useAccount();
   const [searchParams] = useSearchParams();
   const txHash = searchParams.get("txHash");
-  console.log(account.chain);
 
   return (
     <>
@@ -13,11 +12,7 @@ export const SuccessPage = () => {
         <div>
           Here is your NFT:{" "}
           <a
-            href={
-              account.chain?.blockExplorers?.default.name === "Etherscan"
-                ? `${account.chain?.blockExplorers?.default.url}/token/${txHash}`
-                : `${account.chain?.blockExplorers?.default.url}/tx/${txHash}`
-            }
+            href={`${account.chain?.blockExplorers?.default.url}/tx/${txHash}`}
             className="text-blue-700 text-center text-block font-bold"
           >
             {shortenAndFormatHash(txHash)}
