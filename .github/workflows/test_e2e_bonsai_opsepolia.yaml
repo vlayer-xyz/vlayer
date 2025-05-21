@@ -210,11 +210,6 @@ jobs:
         with:
           example: "simple-teleport"
 
-          # JWT auth related
-          jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
-
-          # Chain related
           chain_name: "sepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
