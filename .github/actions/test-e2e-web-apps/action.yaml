@@ -97,6 +97,7 @@ runs:
 
     - name: Run E2E test
       shell: bash
+      if: inputs.jwt_auth == 'off'
       env:
         PROVING_MODE: "dev"
         VLAYER_ENV: dev
@@ -105,7 +106,21 @@ runs:
         BUILD_CLI: 0
         EXAMPLE: ${{ inputs.example }}
         PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
-        JWT_AUTH: "${{ inputs.jwt_auth }}"
+        JWT_AUTH: ${{ inputs.jwt_auth }}
+      run: xvfb-run bash/e2e-web-apps-test.sh
+
+    - name: Run E2E test with JWT authentication enabled
+      shell: bash
+      if: inputs.jwt_auth == 'on'
+      env:
+        PROVING_MODE: "dev"
+        VLAYER_ENV: dev
+        VLAYER_TMP_DIR: ./artifacts
+        BUILD_SERVICES: 0
+        BUILD_CLI: 0
+        EXAMPLE: ${{ inputs.example }}
+        PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
+        JWT_AUTH: ${{ inputs.jwt_auth }}
         VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
       run: xvfb-run bash/e2e-web-apps-test.sh
 
