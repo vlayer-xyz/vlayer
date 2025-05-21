@@ -1,0 +1,36 @@
+name: Verify image ID on mainnet chains
+description: Call ImageIdAdministration VerifyImageIdSupported with fresh ImageId
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
+        submodules: recursive
+
+    - name: Install contracts prerequisites
+      uses: ./.github/actions/contracts-prerequisites
+
+    - name: Build guest artifacts
+      uses: ./.github/actions/build-guest-artifacts
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: guest-artifacts
+        path: guest-artifacts
+
+    - name: Copy ImageID to contracts
+      run: |
+        rm contracts/vlayer/src/ImageID.sol
+        cp guest-artifacts/ImageID.sol contracts/vlayer/src/ImageID.sol
+
+    - name: Install dependencies
+      working-directory: contracts/vlayer
+      shell: bash
+      run: |
+        forge soldeer install
+
+    - name: Verify ImageID on chains
+      shell: bash
+      run: bash/verifiers_management/verify-mainnet-image-id.sh
