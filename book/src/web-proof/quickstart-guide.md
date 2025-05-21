@@ -102,6 +102,8 @@ A correctly generated web proof is stored in your browser's `localStorage` under
 
 ## Generating ZK proof in the prover 
 
+<!-- FEEDBACK: Some further explanation what happens on the way Extensions <> Prover <> Bonzai might be useful, also explaining what are the benefits of such a step, comparing with just pushing WebProof -->
+
 After obtaining the Web Proof via the browser extension, it must be sent to the vlayer prover contract.
 That is performed by `callProver()` function in `vlayer/src/components/organisms/ProveStep/Container.tsx`. 
 Through vlayer sdk proof is injected into prover contract: `src/vlayer/WebProofProver.sol`. Make sure that proper URL is checked there:
