@@ -1,0 +1,25 @@
+name: Verify image ID on mainnet chains
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "release/**"
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  verify-image-id-onchain:
+    name: Verify image ID on mainnet chains
+    runs-on: aws-linux-medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          submodules: recursive
+
+      - name: Verify image ID on mainnet chains
+        uses: ./.github/actions/verify-image-id-onchain
