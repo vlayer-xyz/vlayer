@@ -5,7 +5,7 @@ import browser from "webextension-polyfill";
 import { useNotifyOnStepCompleted } from "hooks/useSteps.ts";
 import { renderHook } from "@testing-library/react";
 import { Step, StepStatus } from "src/constants";
-import { MessageFromExtensionType } from "src/web-proof-commons/types/message.ts";
+import { ExtensionInternalMessageType } from "src/web-proof-commons/types/message.ts";
 
 describe("calculateSteps unit", () => {
   testData.forEach((testCase) => {
@@ -49,7 +49,7 @@ describe("sending message on step completion", () => {
     expect(messageSenderSpy).toHaveBeenCalledTimes(steps.length);
     for (let i = 0; i < steps.length; i++) {
       expect(messageSenderSpy).nthCalledWith(i + 1, {
-        type: MessageFromExtensionType.StepCompleted,
+        type: ExtensionInternalMessageType.StepCompleted,
         payload: {
           index: i,
           step: steps[i],
