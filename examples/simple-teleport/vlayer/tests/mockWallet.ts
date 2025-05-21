@@ -5,27 +5,16 @@ import { http } from "viem";
 import { anvil, optimismSepolia, sepolia } from "viem/chains";
 import { getConfig } from "@vlayer/sdk/config";
 
-const { privateKey, chainName } = getConfig();
-let chain;
-switch (chainName) {
-  case "anvil":
-    chain = anvil;
-    break;
-  case "sepolia":
-    chain = sepolia;
-    break;
-  case "optimismSepolia":
-    chain = optimismSepolia;
-    break;
-  default:
-    chain = optimismSepolia;
-}
+const { privateKey } = getConfig();
 
 export const useMockWallet = (page: Page) => {
   return installMockWallet({
     page,
     account: privateKeyToAccount(privateKey),
-    defaultChain: chain,
-    transports: { [chain.id]: http() },
+    transports: {
+      [anvil.id]: http(),
+      [sepolia.id]: http(),
+      [optimismSepolia.id]: http(),
+    },
   });
 };

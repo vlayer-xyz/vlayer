@@ -1,7 +1,7 @@
 import { getChainSpecs } from "@vlayer/sdk";
 import { useEffect, useReducer } from "react";
 import type { Chain } from "viem";
-import { useChainId, useSwitchChain } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 import { reducer } from "./reducer";
 import {
   ChainSwitchError,
@@ -11,6 +11,7 @@ import {
 import { debug } from "debug";
 
 const log = debug("vlayer:sdk-hooks:useSyncChain");
+
 /**
  * @description This hook is used to make sure the chain in the environment variable is the same as the chain in the wallet.
  * @param configChain - The chain name in the environment variable.
@@ -39,7 +40,7 @@ export const useSyncChain = (
     error: null,
     switched: false,
   });
-  const wagmiChainId = useChainId();
+  const { chainId: wagmiChainId } = useAccount();
 
   useEffect(() => {
     if (configChain === undefined) {
