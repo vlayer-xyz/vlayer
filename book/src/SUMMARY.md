@@ -26,7 +26,6 @@
   - [Email proofs](./javascript/email-proofs.md)
 
 - [Advanced]()
-
   - [Prover](./advanced/prover.md)
   - [Verifier](./advanced/verifier.md)
   - [Global variables](./advanced/prover-global-variables.md)
