@@ -1,0 +1,150 @@
+name: "Run E2E Web Apps Test"
+description: "Runs an E2E web apps test for a given example"
+
+inputs:
+  example:
+    description: "The E2E test example to run"
+    required: true
+  playwright_test_x_com_auth_token:
+    description: "Token to authenticate Playwright tests for x.com (cookie from x.com)"
+    required: false
+    default: ""
+  vercel_project_id:
+    description: "Vercel Project ID for Playwright reports"
+    required: true
+  vercel_org_id:
+    description: "Vercel Organization ID"
+    required: true
+  vercel_token:
+    description: "Vercel API Token"
+    required: true
+  artifact_retention_days:
+    description: "Number of days to retain artifacts"
+    required: false
+    default: "30"
+  jwt_auth:
+    description: "Enable JWT authentication"
+    required: false
+    default: "off"
+  vlayer_api_token:
+    description: "Vlayer API token (required if jwt_auth is set)"
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Rust prerequisites
+      id: rust_pre
+      uses: ./.github/actions/rust-prerequisites
+
+    - name: Install Risc0 prerequisites
+      uses: ./.github/actions/risc0
+
+    - name: Download binaries
+      uses: actions/download-artifact@v4
+      with:
+        name: target-debug
+        path: target/debug
+
+    - name: Make downloaded binaries executable
+      run: sudo chmod +x target/debug/*
+      shell: bash
+
+    - name: Install contracts prerequisites
+      uses: ./.github/actions/contracts-prerequisites
+
+    - name: Install TypeScript prerequisites
+      uses: ./.github/actions/ts-prerequisites
+
+    - name: Mock ImageId.sol
+      run: ./bash/mock-imageid.sh
+      shell: bash
+
+    - name: Install dependencies with Bun
+      shell: bash
+      run: bun install --frozen-lockfile
+
+    - name: Build SDK
+      shell: bash
+      working-directory: ./packages/sdk
+      run: bun run build
+
+    - name: Build SDK Hooks
+      shell: bash
+      working-directory: ./packages/sdk-hooks
+      run: bun run build
+
+    - name: Install Playwright browsers
+      shell: bash
+      run: bunx playwright install --with-deps chromium
+
+    - name: Check clang and LLVM version
+      shell: bash
+      env:
+        EXPECTED_LLVM_VERSION: "18.1"
+      run: bash/check-llvm-clang.sh
+
+    - name: Install contracts' dependencies
+      shell: bash
+      working-directory: ./contracts/vlayer
+      run: forge soldeer install
+
+    - name: Run E2E test
+      shell: bash
+      if: inputs.jwt_auth == 'off'
+      env:
+        PROVING_MODE: "dev"
+        VLAYER_ENV: dev
+        VLAYER_TMP_DIR: ./artifacts
+        BUILD_SERVICES: 0
+        BUILD_CLI: 0
+        EXAMPLE: ${{ inputs.example }}
+        PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
+        JWT_AUTH: ${{ inputs.jwt_auth }}
+      run: xvfb-run bash/e2e-web-apps-test.sh
+
+    - name: Run E2E test with JWT authentication enabled
+      shell: bash
+      if: inputs.jwt_auth == 'on'
+      env:
+        PROVING_MODE: "dev"
+        VLAYER_ENV: dev
+        VLAYER_TMP_DIR: ./artifacts
+        BUILD_SERVICES: 0
+        BUILD_CLI: 0
+        EXAMPLE: ${{ inputs.example }}
+        PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ inputs.playwright_test_x_com_auth_token }}
+        JWT_AUTH: ${{ inputs.jwt_auth }}
+        VLAYER_API_TOKEN: ${{ inputs.vlayer_api_token }}
+      run: xvfb-run bash/e2e-web-apps-test.sh
+
+    - name: Display Logs
+      if: always()
+      shell: bash
+      run: |
+        for log_file in $(find ./artifacts/logs -type f); do
+          echo "=== Contents of $log_file ==="
+          cat "$log_file"
+          echo "============================="
+        done
+
+    - name: Handle Playwright Reports
+      uses: ./.github/actions/handle-playwright-reports
+      if: ${{ !cancelled() }}
+      with:
+        VERCEL_PROJECT_ID: ${{ inputs.vercel_project_id }}
+        VERCEL_ORG_ID: ${{ inputs.vercel_org_id }}
+        VERCEL_TOKEN: ${{ inputs.vercel_token }}
+        EXAMPLES_PATH: /examples/
+        GITHUB_TOKEN: ${{ github.token }}
+        ARTIFACT_RETENTION_DAYS: ${{ inputs.artifact_retention_days }}
+        REPORT_PATH: "examples/**/vlayer/playwright-report/"
+        PR_NUMBER: ${{ github.event.number }}
+        DEPLOY_TYPE: "examples"
+        CONTEXT: "test-e2e-web-apps-devnet-jwt-${{ inputs.jwt_auth}}-${{ inputs.example }}"
