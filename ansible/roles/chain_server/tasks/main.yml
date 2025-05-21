@@ -35,6 +35,10 @@
   poll: 10  # check every 10 seconds
   retries: 2
   notify: "Restart chain server"
+  when: not vlayerup_executed | default(false)
+- name: Mark vlayerup as executed
+  ansible.builtin.set_fact:
+    vlayerup_executed: true
 
 - name: Install service file
   become: true
