@@ -1,7 +1,7 @@
 import { getChainSpecs } from "@vlayer/sdk";
 import { useEffect, useReducer } from "react";
 import type { Chain } from "viem";
-import { useAccount, useSwitchChain } from "wagmi";
+import { useChainId, useSwitchChain } from "wagmi";
 import { reducer } from "./reducer";
 import {
   ChainSwitchError,
@@ -39,7 +39,7 @@ export const useSyncChain = (
     error: null,
     switched: false,
   });
-  const { chainId: wagmiChainId } = useAccount();
+  const wagmiChainId = useChainId();
 
   useEffect(() => {
     if (configChain === undefined) {
