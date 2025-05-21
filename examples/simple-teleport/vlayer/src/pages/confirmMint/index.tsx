@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import verifierSpec from "../../../../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
 import { useLocalStorage } from "usehooks-ts";
 import { useAccount, useBalance, useWriteContract } from "wagmi";
@@ -6,9 +6,10 @@ import { useNavigate } from "react-router";
 import { ConnectWallet } from "../../shared/components/ConnectWallet";
 import { parseProverResult, tokensToProve } from "../../shared/lib/utils";
 import { AlreadyMintedError } from "../../shared/errors/appErrors";
-
+import { Chain, optimismSepolia } from "viem/chains";
+import { match } from "ts-pattern";
 export const ConfirmMintPage = () => {
-  const { address } = useAccount();
+  const { address, chain } = useAccount();
   const { data: balance } = useBalance({ address: address as `0x${string}` });
   const navigate = useNavigate();
   const {
@@ -104,19 +105,38 @@ export const ConfirmMintPage = () => {
           {isLoading ? "Minting..." : "Mint token"}
         </button>
       </div>
-      {!enoughBalance && (
-        <p className="text-red-400 text-center mt-4">
-          Insufficient balance in your wallet. <br />
-          Please fund your account with{" "}
-          <a
-            href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
-            target="_blank"
-            className="font-bold"
-          >
-            ETH Sepolia Faucet
-          </a>
-        </p>
-      )}
+      {!enoughBalance && chain && <FaucetInfo chain={chain} />}
     </form>
+  );
+};
+
+const getFaucetUrl = (chainId: number) => {
+  return match(chainId)
+    .with(
+      optimismSepolia.id,
+      () => "https://cloud.google.com/application/web3/faucet/ethereum/sepolia",
+    )
+    .otherwise(() => null);
+};
+
+const FaucetInfo = ({ chain }: { chain: Chain }) => {
+  const faucet = useMemo(() => getFaucetUrl(chain.id), [chain.id]);
+  return (
+    <p className="text-red-400 text-center mt-4">
+      Insufficient balance in your wallet. <br />
+      {faucet ? (
+        <>
+          Please fund your account with{" "}
+          <a href={faucet} target="_blank" className="font-bold">
+            {chain.name} Faucet
+          </a>
+        </>
+      ) : (
+        <>
+          Please fill your wallet with {chain.nativeCurrency.name} from
+          {chain.name}
+        </>
+      )}
+    </p>
   );
 };
