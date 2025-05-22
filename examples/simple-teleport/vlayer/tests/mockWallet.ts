@@ -6,7 +6,7 @@ import { anvil, optimismSepolia, sepolia } from "viem/chains";
 import { getConfig } from "@vlayer/sdk/config";
 
 const { privateKey } = getConfig();
-
+console.log("private key", privateKeyToAccount(privateKey));
 export const useMockWallet = (page: Page) => {
   return installMockWallet({
     page,
