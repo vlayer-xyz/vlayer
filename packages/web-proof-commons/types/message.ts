@@ -45,6 +45,7 @@ export enum ExtensionInternalMessageType {
   ProofError = "ProofError",
   ProofProcessing = "ProofProcessing",
   ResetTlsnProving = "ResetTlsnProving",
+  StepCompleted = "StepCompleted",
 }
 
 export enum MessageFromExtensionType {
@@ -54,6 +55,7 @@ export enum MessageFromExtensionType {
   ProofError = "ProofError",
   ProofProcessing = "ProofProcessing",
   Pong = "Pong",
+  StepCompleted = "StepCompleted",
 }
 
 export type LegacyMessage = {
@@ -107,6 +109,13 @@ export type ExtensionInternalMessage =
     }
   | {
       type: ExtensionInternalMessageType.ResetTlsnProving;
+    }
+  | {
+      type: ExtensionInternalMessageType.StepCompleted;
+      payload: {
+        index: number;
+        step: WebProofStep;
+      };
     };
 
 export type MessageFromExtension =
@@ -131,6 +140,13 @@ export type MessageFromExtension =
       type: MessageFromExtensionType.ProofProcessing;
       payload: {
         progress?: number;
+      };
+    }
+  | {
+      type: MessageFromExtensionType.StepCompleted;
+      payload: {
+        index: number;
+        step: WebProofStep;
       };
     };
 

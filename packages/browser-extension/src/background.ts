@@ -69,6 +69,7 @@ browser.runtime.onMessage.addListener(async (message: unknown) => {
         type: P.union(
           ExtensionInternalMessageType.ProofDone,
           ExtensionInternalMessageType.ProofError,
+          ExtensionInternalMessageType.StepCompleted,
         ),
       },
       () => {

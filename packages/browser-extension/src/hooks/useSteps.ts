@@ -5,9 +5,9 @@ import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
 import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 import { useZkProvingState } from "./useZkProvingState";
 import { URLPattern } from "urlpattern-polyfill";
-import { P } from "ts-pattern";
-import { match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 import { LOADING } from "@vlayer/extension-hooks";
+import { useNotifyOnStepCompleted } from "hooks/useNotifyOnStepCompleted.ts";
 
 const isUrlRequestCompleted = (
   browsingHistory: BrowsingHistoryItem[],
@@ -138,9 +138,13 @@ export const useSteps = (): Step[] => {
     .with({ steps: P.array(P.any) }, ({ steps }) => steps)
     .exhaustive();
 
-  return calculateSteps({
+  const steps = calculateSteps({
     stepsSetup,
     history,
     isZkProvingDone,
   });
+
+  useNotifyOnStepCompleted(stepsSetup, steps);
+
+  return steps;
 };
