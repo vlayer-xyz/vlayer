@@ -150,17 +150,22 @@ impl WithStartChainId {
         self,
         prover_contract_addr: Address,
     ) -> Result<WithStartExecLocation, Error> {
-        let prover_contract_deployed =
-            check_prover_contract(&self.providers, self.start_chain_id, prover_contract_addr);
+        let WithStartChainId {
+            start_chain_id,
+            chain_client,
+            providers,
+            op_client_factory,
+        } = self;
 
-        let latest_rpc_block = self
-            .providers
-            .get_latest_block_number(self.start_chain_id)?;
+        let prover_contract_deployed =
+            check_prover_contract(&providers, start_chain_id, prover_contract_addr);
+
+        let latest_rpc_block = providers.get_latest_block_number(start_chain_id)?;
         if !prover_contract_deployed(latest_rpc_block)? {
             return Err(Error::ProverContractNotDeployed(prover_contract_addr, latest_rpc_block));
         }
 
-        let sync_status = self.chain_client.get_sync_status(self.start_chain_id).await;
+        let sync_status = chain_client.get_sync_status(start_chain_id).await;
         let Ok(sync_status) = sync_status else {
             // `prover_contract_deployed`` borrows `providers`` and borrow checker only works on code blocks level and not on lines level
             // Therefore we need to drop manually before we can return providers
@@ -168,21 +173,21 @@ impl WithStartChainId {
             // If chain service is not available, we fallback to a degraded mode (no teleport or time travel)
             return Ok(WithStartExecLocation {
                 chain_client: None,
-                start_exec_location: (self.start_chain_id, latest_rpc_block).into(),
-                providers: self.providers,
-                op_client_factory: self.op_client_factory,
+                start_exec_location: (start_chain_id, latest_rpc_block).into(),
+                providers,
+                op_client_factory,
             });
         };
 
         let start_block_number =
             compute_start_block_number(latest_rpc_block, prover_contract_deployed, &sync_status)?;
-        let start_exec_location = (self.start_chain_id, start_block_number).into();
+        let start_exec_location = (start_chain_id, start_block_number).into();
 
         Ok(WithStartExecLocation {
-            chain_client: Some(self.chain_client),
+            chain_client: Some(chain_client),
             start_exec_location,
-            providers: self.providers,
-            op_client_factory: self.op_client_factory,
+            providers,
+            op_client_factory,
         })
     }
 }
@@ -216,10 +221,7 @@ fn check_prover_contract(
     chain_id: ChainId,
     address: Address,
 ) -> impl Fn(BlockNumber) -> Result<bool, Error> + '_ {
-    move |block_num| {
-        let code = provider.get_code(chain_id, address, block_num)?;
-        Ok(!code.is_empty())
-    }
+    move |block_num| Ok(!provider.get_code(chain_id, address, block_num)?.is_empty())
 }
 
 #[cfg(test)]
