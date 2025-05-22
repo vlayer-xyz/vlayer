@@ -37,7 +37,6 @@ await writeEnvVariables(".env", {
   VITE_VERIFIER_ADDRESS: verifier,
   VITE_CHAIN_NAME: config.chainName,
   VITE_PROVER_URL: config.proverUrl,
-  VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_PROVER_ERC20_HOLDER_ADDR: timeTravelConfig.tokenOwner,
   VITE_GAS_LIMIT: config.gasLimit,
