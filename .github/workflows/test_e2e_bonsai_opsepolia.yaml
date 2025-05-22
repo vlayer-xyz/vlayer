@@ -81,7 +81,9 @@ jobs:
       - name: Run gas price checker
         id: check
         continue-on-error: true
-        run: ./tmp/gas_price_checker "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" 20
+        env:
+          GAS_PRICE_THRESHOLD: 20
+        run: ./tmp/gas_price_checker "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" $GAS_PRICE_THRESHOLD
 
       - name: Set gas check result
         id: set-result
@@ -209,7 +211,6 @@ jobs:
           RUST_LOG: info
         with:
           example: "simple-teleport"
-
           chain_name: "sepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
