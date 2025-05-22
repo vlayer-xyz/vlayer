@@ -58,7 +58,7 @@ jobs:
 
   # The gas price on the Ethereum Sepolia network can vary significantly.
   # To prevent running tests when gas prices are prohibitively high, this job checks the current gas price.
-  # If the gas price exceeds a predefined threshold, the test is skipped avoid running out of test eth.
+  # If the gas price exceeds a predefined threshold, the test is skipped to avoid running out of test eth.
   check-gas:
     name: Check gas price
     runs-on: aws-linux-medium
