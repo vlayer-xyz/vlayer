@@ -1,4 +1,4 @@
-name: E2E test with Bonsai and OP Sepolia
+name: E2E test with Sepolia
 
 # This workflow has additional constraints to run on `main`,
 # because it uses external API resources.
