@@ -66,10 +66,5 @@ async fn build_host(
         .with_prover_contract_addr(prover_contract_addr)
         .await?
         .build(config.into())?;
-
-    tracing::info!(
-        "Host built successfully with start location: {:?}",
-        host.start_execution_location()
-    );
     Ok(host)
 }
