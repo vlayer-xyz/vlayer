@@ -20,8 +20,8 @@ pub enum Error {
         hash_in_input: B256,
         proven_hash: B256,
     },
-    #[error("Attempted time travel while chain service is not available")]
-    ChainServiceNotAvailable,
+    #[error("Attempted time travel while chain service for chain: {chain_id} is not available")]
+    ChainServiceNotAvailable { chain_id: ChainId },
 }
 
 pub type Result = std::result::Result<(), Error>;
@@ -46,7 +46,7 @@ impl<C: chain_client::Client, V: chain_common::verifier::IVerifier> IVerifier fo
             return Ok(());
         }
         let Some(ref client) = self.chain_client else {
-            return Err(Error::ChainServiceNotAvailable);
+            return Err(Error::ChainServiceNotAvailable { chain_id });
         };
         let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
         let chain_proof = client.get_chain_proof(chain_id, block_numbers).await?;
