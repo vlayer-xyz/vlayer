@@ -2,12 +2,12 @@ source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
 CHAIN_NAME=${CHAIN_NAME:-anvil}
 
 declare -A NETWORK_IDS=(
-    [ethereum - mainnet]=1
-    [ethereum - sepolia]=11155111
-    [optimism]=10
-    [optimism - sepolia]=11155420
-    [base - mainnet]=8453
-    [base - sepolia]=84532
+    ["ethereum-mainnet"]=1
+    ["ethereum-sepolia"]=11155111
+    ["optimism"]=10
+    ["optimism-sepolia"]=11155420
+    ["base-mainnet"]=8453
+    ["base-sepolia"]=84532
 )
 
 ANVIL_RPC_URL="http://localhost:8545"
@@ -16,8 +16,7 @@ ANVIL_CHAIN_ID="31337"
 get_quiknode_url() {
     local network="$1"
     local id="${NETWORK_IDS[$network]}"
-    local domain="${network//-/.}"
-    echo "https://${QUICKNODE_ENDPOINT}.${domain}.quiknode.pro/${QUICKNODE_API_KEY}"
+    echo "https://${QUICKNODE_ENDPOINT}.${network}.quiknode.pro/${QUICKNODE_API_KEY}"
 }
 
 function set_proof_mode() {
