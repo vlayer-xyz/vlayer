@@ -123,12 +123,7 @@ runs:
         # Chain related
         CHAIN_NAME: ${{ inputs.chain_name }}
         CHAIN_SERVICE_URL: ${{ inputs.chain_service_url }}
-      run: |
-        echo "::group::Environment Configuration"
-        echo "VLAYER_ENV: $VLAYER_ENV"
-        echo "CHAIN_NAME: $CHAIN_NAME"
-        echo "::endgroup::"
-        bash/e2e-test.sh
+      run: bash/e2e-test.sh
       shell: bash
 
     - name: Upload logs for previewing
