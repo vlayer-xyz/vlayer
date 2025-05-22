@@ -4,6 +4,7 @@ use alloy_primitives::ChainId;
 use auto_impl::auto_impl;
 use derive_new::new;
 use thiserror::Error;
+use tracing::info;
 use url::ParseError;
 
 use super::{EthersClient, cache::CachedProvider};
@@ -50,6 +51,7 @@ impl ProviderFactory for EthersProviderFactory {
             .get(&chain_id)
             .ok_or(Error::NoRpcUrl(chain_id))?;
 
+        info!("url: {}", url);
         let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
 
         Ok(Box::new(EthersProvider::new(client)))
