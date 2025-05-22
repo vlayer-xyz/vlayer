@@ -73,7 +73,12 @@ export const HodlerForm = ({
         </select>
       </div>
       {balance && (
-        <div className="mb-4 w-full block text-black">Balance: {balance}</div>
+        <div className="mb-4 w-full block text-black">
+          Average balance (between blocks {import.meta.env.VITE_START_BLOCK} and{" "}
+          {import.meta.env.VITE_END_BLOCK}):
+          <br />
+          {balance}
+        </div>
       )}
       <div className="mt-5 flex justify-center">
         <button type="submit" id="nextButton" disabled={isLoading}>
