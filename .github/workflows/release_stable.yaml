@@ -32,8 +32,24 @@ jobs:
             echo "needs_releasing=false" >> $GITHUB_OUTPUT
           fi
 
-  release:
+  verify-image-id-onchain:
+    name: Verify image ID on mainnet chains
     needs: [check-if-needs-releasing]
+    if: needs.check-if-needs-releasing.outputs.needs_releasing == 'true'
+    runs-on: aws-linux-medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          submodules: recursive
+
+      - name: Verify image ID on mainnet chains
+        uses: ./.github/actions/verify-image-id-onchain
+
+  release:
+    needs: [check-if-needs-releasing, verify-image-id-onchain]
     if: needs.check-if-needs-releasing.outputs.needs_releasing == 'true'
     uses: ./.github/workflows/release.yaml
     with:
