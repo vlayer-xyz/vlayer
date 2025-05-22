@@ -29,7 +29,7 @@ console.log("confirmations", confirmations);
 
 if (!account) {
   throw new Error(
-    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables"
+    "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
   );
 }
 const vlayer = createVlayerClient({
