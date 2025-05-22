@@ -1,19 +1,13 @@
 import { BrowsingHistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
-import {
-  ExtensionInternalMessageType,
-  UrlPattern,
-  WebProofStep,
-} from "../web-proof-commons";
+import { UrlPattern, WebProofStep } from "../web-proof-commons";
 import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
 import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 import { useZkProvingState } from "./useZkProvingState";
 import { URLPattern } from "urlpattern-polyfill";
-import { P } from "ts-pattern";
-import { match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 import { LOADING } from "@vlayer/extension-hooks";
-import { useRef } from "react";
-import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker.ts";
+import { useNotifyOnStepCompleted } from "hooks/useNotifyOnStepCompleted.ts";
 
 const isUrlRequestCompleted = (
   browsingHistory: BrowsingHistoryItem[],
@@ -131,30 +125,6 @@ export const calculateSteps = ({
     };
     return [...accumulator, mappedStep];
   }, [] as Step[]);
-};
-
-export const useNotifyOnStepCompleted = (
-  stepsSetup: WebProofStep[],
-  currentStepsProgress: Step[],
-) => {
-  const completedSteps = useRef(0);
-
-  const completedStepsCount = currentStepsProgress.filter(
-    (step) => step.status === StepStatus.Completed,
-  ).length;
-
-  if (completedStepsCount > completedSteps.current) {
-    for (let i = completedSteps.current; i < completedStepsCount; i++) {
-      void sendMessageToServiceWorker({
-        type: ExtensionInternalMessageType.StepCompleted,
-        payload: {
-          index: i,
-          step: stepsSetup[i],
-        },
-      });
-    }
-    completedSteps.current = completedStepsCount;
-  }
 };
 
 export const useSteps = (): Step[] => {
