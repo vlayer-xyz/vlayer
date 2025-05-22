@@ -3,3 +3,4 @@ export * from "./createContext";
 export * from "./deploy";
 export * from "./writeEnvVariables";
 export * from "./types";
+export * from "./contractCodeVerifier";

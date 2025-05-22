@@ -13,6 +13,8 @@
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "deploy:mainnet": "VLAYER_ENV=mainnet bun run deploy.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
+    "verifyContracts:mainnet": "VLAYER_ENV=mainnet bun run verifyContracts.ts",
+    "verifyContracts:testnet": "VLAYER_ENV=testnet bun run verifyContracts.ts",
     "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
     "test-web:dev": "TEST_MODE=headed VLAYER_ENV=dev bun run playwright test",
     "test-web:testnet": "echo \"No tests specified yet\"",
