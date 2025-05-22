@@ -10,6 +10,9 @@ declare -A NETWORK_IDS=(
     [base - sepolia]=84532
 )
 
+ANVIL_RPC_URL="http://localhost:8545"
+ANVIL_CHAIN_ID="31337"
+
 get_quiknode_url() {
     local network="$1"
     local id="${NETWORK_IDS[$network]}"
@@ -53,7 +56,7 @@ function set_chain_worker_args() {
     CHAIN_WORKER_ARGS=()
 
     if [[ "$CHAIN_NAME" == "anvil" && "${EXAMPLE_NAME:-}" == "simple-time-travel" ]]; then
-        CHAIN_WORKER_ARGS=("http://localhost:8545" "31337")
+        CHAIN_WORKER_ARGS=("${ANVIL_RPC_URL}" "${ANVIL_CHAIN_ID}")
         return 0
     fi
 
