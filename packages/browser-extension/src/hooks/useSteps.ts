@@ -13,8 +13,9 @@ import { URLPattern } from "urlpattern-polyfill";
 import { match, P } from "ts-pattern";
 import { LOADING } from "@vlayer/extension-hooks";
 import { useNotifyOnStepCompleted } from "hooks/useNotifyOnStepCompleted.ts";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getActiveTabUrl, getElementOnPage } from "lib/activeTabContext.ts";
+import { useIntervalCalls } from "@vlayer/extension-hooks";
 
 type StepCompletionCheck<T extends WebProofStep> = (
   browsingHistory: BrowsingHistoryItem[],
@@ -207,23 +208,19 @@ export const useSteps = (): Step[] => {
     .with({ steps: P.array(P.any) }, ({ steps }) => steps)
     .exhaustive();
 
-  useEffect(() => {
-    let isCancelled = false;
-    void (async () => {
-      const steps = await calculateSteps({
-        stepsSetup,
-        history,
-        isZkProvingDone,
-      });
-      if (!isCancelled) {
-        setSteps(steps);
-      }
-    })();
+  const recalculateSteps = useCallback(async () => {
+    const steps = await calculateSteps({
+      stepsSetup,
+      history,
+      isZkProvingDone,
+    });
+    setSteps(steps);
+  }, [history, isZkProvingDone, stepsSetup]);
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [stepsSetup, history, isZkProvingDone]);
+  const RECALCULATE_STEPS_TIMEOUT = 100;
+  useIntervalCalls(recalculateSteps, RECALCULATE_STEPS_TIMEOUT);
+
+  useEffect(() => void recalculateSteps(), [recalculateSteps]);
 
   useNotifyOnStepCompleted(stepsSetup, steps);
 
