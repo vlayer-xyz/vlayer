@@ -39,7 +39,7 @@
 }
 
 #nextButton {
-  @apply btn w-[188px] px-4 bg-[#915bf8] rounded-lg border-none text-white hover:bg-[#915bf8]/80 hover:text-white
+  @apply btn w-[250px] px-4 bg-[#915bf8] rounded-lg border-none text-white hover:bg-[#915bf8]/80 hover:text-white
 }
 
 .header {
