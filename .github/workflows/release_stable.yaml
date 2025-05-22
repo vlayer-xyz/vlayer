@@ -31,6 +31,8 @@ jobs:
           else
             echo "needs_releasing=false" >> $GITHUB_OUTPUT
           fi
+      - name: Verify image ID on mainnet chains
+        uses: ./.github/actions/verify-image-id-onchain
 
   release:
     needs: [check-if-needs-releasing]
