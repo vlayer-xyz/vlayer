@@ -4,7 +4,6 @@ use alloy_primitives::ChainId;
 use auto_impl::auto_impl;
 use derive_new::new;
 use thiserror::Error;
-use tracing::info;
 use url::ParseError;
 
 use super::{EthersClient, cache::CachedProvider};
