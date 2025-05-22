@@ -37,25 +37,17 @@ function set_external_rpc_urls() {
 }
 
 function set_chain_worker_args() {
+    CONFIRMATIONS=${CONFIRMATIONS:-1}
     CHAIN_WORKER_ARGS=()
-    if [[ "${CHAIN_NAME}" == "anvil" ]]; then
-        CONFIRMATIONS=${CONFIRMATIONS:-1}
-        if [[ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]]; then
-            CHAIN_WORKER_ARGS=(
-                "http://localhost:8545 31337"
-            )
-        fi
+
+    if [[ "$CHAIN_NAME" == "anvil" && "${EXAMPLE_NAME:-}" == "simple-time-travel" ]]; then
+        CHAIN_WORKER_ARGS=("http://localhost:8545 31337")
     else
-        CONFIRMATIONS=${CONFIRMATIONS:-1}
-        if [ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]; then
-            CHAIN_WORKER_ARGS+=(
-                "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420"
-            )
-        elif [ "${EXAMPLE_NAME:-}" == "simple-teleport" ]; then
-            CHAIN_WORKER_ARGS+=(
-                "https://${QUICKNODE_ENDPOINT}.ethereum-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155111"
-                "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420"
-            )
-        fi
+        local endpoint_prefix="https://${QUICKNODE_ENDPOINT}"
+        local endpoint_suffix="quiknode.pro/${QUICKNODE_API_KEY}"
+        CHAIN_WORKER_ARGS=(
+            "$endpoint_prefix.ethereum-sepolia.$endpoint_suffix 11155111"
+            "$endpoint_prefix.optimism-sepolia.$endpoint_suffix 11155420"
+        )
     fi
 }
