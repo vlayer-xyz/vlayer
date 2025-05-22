@@ -39,7 +39,6 @@ inputs:
     description: "Required for chain testnets."
     required: false
 
-  # Chain service URL - optional external chain service
   chain_service_url:
     description: "External chain service URL (optional)"
     required: false
@@ -79,7 +78,6 @@ runs:
       run: forge soldeer install
       shell: bash
 
-    # Load testnet private key for testnets
     - name: Read testnet private key
       if: ${{ inputs.testnet_private_key_location != '' }}
       run: |
@@ -88,8 +86,7 @@ runs:
         echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
       shell: bash
 
-    # Configure RPC endpoints
-    - name: Configure RPC endpoint based on chain
+    - name: Configure RPC endpoints
       if: ${{ inputs.quicknode_api_key != '' }}
       run: |
         if [[ "${{ inputs.chain_name }}" == "optimismSepolia" ]]; then
