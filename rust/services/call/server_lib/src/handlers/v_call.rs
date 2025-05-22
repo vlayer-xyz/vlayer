@@ -56,9 +56,6 @@ async fn build_host(
     chain_id: ChainId,
     prover_contract_addr: Address,
 ) -> std::result::Result<Host, BuilderError> {
-    tracing::info!("Building host with config: {:?}", config);
-    tracing::info!("Chain ID: {:?}", chain_id);
-    tracing::info!("Prover contract address: {:?}", prover_contract_addr);
     tracing::info!("RPC URLs: {:?}", config.rpc_urls);
 
     let host = Host::builder()

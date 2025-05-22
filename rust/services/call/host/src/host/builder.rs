@@ -84,7 +84,6 @@ impl New {
 
 impl WithProviders {
     pub fn with_chain_guest_id(self, chain_guest_id: Digest) -> WithChainGuestId {
-        tracing::info!("Adding chain guest ID: {:?}", chain_guest_id);
         WithChainGuestId {
             providers: self.providers,
             op_client_factory: self.op_client_factory,
@@ -98,7 +97,6 @@ impl WithChainGuestId {
         self,
         chain_client_config: Option<ChainClientConfig>,
     ) -> Result<WithChainClient, Error> {
-        tracing::info!("Configuring chain client with config: {:?}", chain_client_config);
         let WithChainGuestId {
             providers,
             chain_guest_id,
@@ -121,7 +119,6 @@ impl WithChainGuestId {
 
 impl WithChainClient {
     pub fn with_start_chain_id(self, start_chain_id: ChainId) -> Result<WithStartChainId, Error> {
-        tracing::info!("Setting start chain ID: {:?}", start_chain_id);
         let WithChainClient {
             chain_client,
             providers,
@@ -153,18 +150,12 @@ impl WithStartChainId {
         self,
         prover_contract_addr: Address,
     ) -> Result<WithStartExecLocation, Error> {
-        tracing::info!(
-            "Checking prover contract at address {:?} on chain {}",
-            prover_contract_addr,
-            self.start_chain_id
-        );
         let prover_contract_deployed =
             check_prover_contract(&self.providers, self.start_chain_id, prover_contract_addr);
 
         let latest_rpc_block = self
             .providers
             .get_latest_block_number(self.start_chain_id)?;
-        tracing::info!("Latest RPC block: {}", latest_rpc_block);
         if !prover_contract_deployed(latest_rpc_block)? {
             return Err(Error::ProverContractNotDeployed(prover_contract_addr, latest_rpc_block));
         }
@@ -226,9 +217,7 @@ fn check_prover_contract(
     address: Address,
 ) -> impl Fn(BlockNumber) -> Result<bool, Error> + '_ {
     move |block_num| {
-        tracing::info!("Checking contract code at block {} on chain {}", block_num, chain_id);
         let code = provider.get_code(chain_id, address, block_num)?;
-        tracing::info!("Contract code length: {}", code.len());
         Ok(!code.is_empty())
     }
 }
