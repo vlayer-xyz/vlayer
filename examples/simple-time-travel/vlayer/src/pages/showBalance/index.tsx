@@ -50,8 +50,12 @@ export const ShowBalancePage = () => {
     if (mintError) {
       if (mintError.message.includes("already been minted")) {
         throw new AlreadyMintedError();
+      } else if (mintError.message.includes("User rejected the request")) {
+        setIsLoading(false);
+        console.log("User rejected the request");
+      } else {
+        throw new Error(mintError.message);
       }
-      throw new Error(mintError.message);
     }
   }, [mintError]);
 
@@ -85,7 +89,7 @@ export const ShowBalancePage = () => {
       onSubmit={handleSubmit}
       isLoading={isLoading}
       balance={balance}
-      loadingLabel="Minting..."
+      loadingLabel="Please sign transaction"
       submitLabel="Generate Proof NFT"
       isEditable={false}
     />
