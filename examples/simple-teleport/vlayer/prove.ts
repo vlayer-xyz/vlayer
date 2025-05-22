@@ -21,11 +21,6 @@ if (config.chainName === "anvil") {
 
 const { chain, ethClient, account, proverUrl, confirmations } =
   createContext(config);
-console.log("chain", chain);
-console.log("ethClient", ethClient);
-console.log("account", account);
-console.log("proverUrl", proverUrl);
-console.log("confirmations", confirmations);
 
 if (!account) {
   throw new Error(
@@ -81,7 +76,6 @@ const proofHash = await vlayer.prove({
   gasLimit: config.gasLimit,
 });
 
-console.log("Proof hash:", proofHash);
 const result = await vlayer.waitForProvingResult({ hash: proofHash });
 console.log("Proof:", result[0]);
 console.log("⏳ Verifying...");
