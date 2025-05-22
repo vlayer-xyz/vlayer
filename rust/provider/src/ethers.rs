@@ -21,9 +21,7 @@ pub struct EthersProvider<T: JsonRpcClient> {
 #[allow(clippy::expect_used)]
 fn block_on<F: Future>(f: F) -> F::Output {
     let handle = Handle::try_current().expect("no tokio runtime");
-    let result = tokio::task::block_in_place(|| handle.block_on(f));
-    tracing::debug!("RPC call completed");
-    result
+    tokio::task::block_in_place(|| handle.block_on(f))
 }
 
 impl<T: JsonRpcClient> BlockingProvider for EthersProvider<T> {
