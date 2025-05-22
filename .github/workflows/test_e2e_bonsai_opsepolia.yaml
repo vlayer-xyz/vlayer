@@ -56,6 +56,9 @@ jobs:
               - '.github/workflows/test_e2e_bonsai_opsepolia.yaml'
               - '.github/actions/test-e2e/**'
 
+  # The gas price on the Ethereum Sepolia network can vary significantly.
+  # To prevent running tests when gas prices are prohibitively high, this job checks the current gas price.
+  # If the gas price exceeds a predefined threshold, the test is skipped avoid running out of test eth.
   check-gas:
     name: Check gas price
     runs-on: aws-linux-medium
@@ -78,7 +81,7 @@ jobs:
       - name: Make gas_price_checker executable
         run: chmod +x ./tmp/gas_price_checker
 
-      - name: Run gas price checker
+      - name: Execute gas price checker
         id: check
         continue-on-error: true
         env:
