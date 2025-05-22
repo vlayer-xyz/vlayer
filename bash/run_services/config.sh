@@ -1,24 +1,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
 CHAIN_NAME=${CHAIN_NAME:-anvil}
 
-declare -A NETWORK_IDS=(
-    ["ethereum-mainnet"]=1
-    ["ethereum-sepolia"]=11155111
-    ["optimism"]=10
-    ["optimism-sepolia"]=11155420
-    ["base-mainnet"]=8453
-    ["base-sepolia"]=84532
-)
-
-ANVIL_RPC_URL="http://localhost:8545"
-ANVIL_CHAIN_ID="31337"
-
-get_quiknode_url() {
-    local network="$1"
-    local id="${NETWORK_IDS[$network]}"
-    echo "https://${QUICKNODE_ENDPOINT}.${network}.quiknode.pro/${QUICKNODE_API_KEY}"
-}
-
+# Set the SERVER_PROOF_MODE variable based on the mode
 function set_proof_mode() {
     if [[ "${PROVING_MODE}" == "dev" ]]; then
         SERVER_PROOF_ARG="fake"
@@ -27,6 +10,7 @@ function set_proof_mode() {
         SERVER_PROOF_ARG="groth16"
         WORKER_PROOF_ARG="succinct"
 
+        # Check that BONSAI_API_URL and BONSAI_API_KEY are not empty in prod mode
         if [[ -z "$BONSAI_API_URL" || -z "$BONSAI_API_KEY" ]]; then
             echo "Error: BONSAI_API_URL and BONSAI_API_KEY must be set in prod mode."
             usage
@@ -35,31 +19,38 @@ function set_proof_mode() {
 }
 
 function set_external_rpc_urls() {
-    if [[ "$CHAIN_NAME" == "anvil" ]]; then
-        return 0
-    fi
-    if [[ -z "$QUICKNODE_API_KEY" || -z "$QUICKNODE_ENDPOINT" ]]; then
-        echo "Error: QUICKNODE_API_KEY and QUICKNODE_ENDPOINT must be set in prod mode."
-        usage
-    fi
-    EXTERNAL_RPC_URLS=()
-    for network in "${!NETWORK_IDS[@]}"; do
-        EXTERNAL_RPC_URLS+=(
-            "--rpc-url" "${NETWORK_IDS[$network]}:$(get_quiknode_url "$network")"
+    if [[ "${CHAIN_NAME}" != "anvil" ]]; then
+        # Check that QUICKNODE_API_KEY and QUICKNODE_ENDPOINT are not empty
+        if [[ -z "$QUICKNODE_API_KEY" || -z "$QUICKNODE_ENDPOINT" ]]; then
+            echo "Error: QUICKNODE_API_KEY and QUICKNODE_ENDPOINT must be set in prod mode."
+            usage
+        fi
+        EXTERNAL_RPC_URLS=(
+            "--rpc-url" "1:https://${QUICKNODE_ENDPOINT}.quiknode.pro/${QUICKNODE_API_KEY}"
+            "--rpc-url" "11155111:https://${QUICKNODE_ENDPOINT}.ethereum-sepolia.quiknode.pro/${QUICKNODE_API_KEY}"
+            "--rpc-url" "10:https://${QUICKNODE_ENDPOINT}.optimism.quiknode.pro/${QUICKNODE_API_KEY}"
+            "--rpc-url" "11155420:https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY}"
+            "--rpc-url" "8453:https://${QUICKNODE_ENDPOINT}.base-mainnet.quiknode.pro/${QUICKNODE_API_KEY}"
+            "--rpc-url" "84532:https://${QUICKNODE_ENDPOINT}.base-sepolia.quiknode.pro/${QUICKNODE_API_KEY}"
         )
-    done
+    fi
 }
 
 function set_chain_worker_args() {
-    CONFIRMATIONS=${CONFIRMATIONS:-1}
     CHAIN_WORKER_ARGS=()
-
-    if [[ "$CHAIN_NAME" == "anvil" && "${EXAMPLE_NAME:-}" == "simple-time-travel" ]]; then
-        CHAIN_WORKER_ARGS=("${ANVIL_RPC_URL}" "${ANVIL_CHAIN_ID}")
-        return 0
+    if [[ "${CHAIN_NAME}" == "anvil" ]]; then
+        CONFIRMATIONS=${CONFIRMATIONS:-1}
+        if [[ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]]; then
+            CHAIN_WORKER_ARGS=(
+                "http://localhost:8545 31337"
+            )
+        fi
+    else
+        CONFIRMATIONS=${CONFIRMATIONS:-1}
+        if [ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]; then
+            CHAIN_WORKER_ARGS+=(
+                "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420"
+            )
+        fi
     fi
-
-    for network in "${!NETWORK_IDS[@]}"; do
-        CHAIN_WORKER_ARGS+=("$(get_quiknode_url "$network")" "${NETWORK_IDS[$network]}")
-    done
 }
