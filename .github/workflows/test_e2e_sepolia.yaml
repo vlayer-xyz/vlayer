@@ -57,7 +57,7 @@ jobs:
               - '.github/actions/test-e2e/**'
 
   check-gas:
-    name: Check Gas Price
+    name: Check gas price
     runs-on: ubuntu-latest
     outputs:
       gas-ok: ${{ steps.set-result.outputs.gas-ok }}
