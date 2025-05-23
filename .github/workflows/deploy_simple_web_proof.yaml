@@ -1,0 +1,125 @@
+name: Deploy simple-web-proof example
+on:
+  workflow_run:
+    workflows: ["Deploy Stable Provers"]
+    types: [completed]
+  pull_request:
+    paths:
+      - examples/simple-web-proof/**
+      - .github/workflows/deploy_simple_web_proof.yaml
+      - bash/e2e-web-proof-example-test.sh
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  deploy-simple-web-proof:
+    name: Deploy simple-web-proof example
+    runs-on: aws-linux-medium
+    outputs:
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Install, build and deploy example
+        id: deploy
+        uses: ./.github/actions/example-deploy
+        with:
+          example_name: simple-web-proof
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_project_id: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          json_rpc_url: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+          vlayer_api_token: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN_TESTNET }}
+          vite_sentry_dsn: "https://1afb2d9efb40a7ac94d0c8737ab8ffc4@o4508754893012992.ingest.de.sentry.io/4508760191795280"
+
+  e2e-test-web-apps-vercel:
+    name: E2E web apps test against testnet and vercel deployment
+    runs-on: aws-linux-medium
+    needs: [deploy-simple-web-proof]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build sdk
+        working-directory: ./packages/sdk
+        run: bun run build
+
+      - name: Build sdk-hooks
+        working-directory: ./packages/sdk-hooks
+        run: bun run build
+
+      - name: Install Playwright Browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: bash/check-llvm-clang.sh
+
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
+
+      # Stateful GH Runners have a separate testnet private key on disk,
+      # to allow concurrent runs of the workflow avoiding nonce issues.
+      # Here we load the key into a variable from a location on disk.
+      - name: Read testnet private key
+        shell: bash
+        run: |
+          EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
+          echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
+          echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
+
+      - name: Run e2e test
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          PROVING_MODE: "dev"
+          VLAYER_ENV: testnet
+          WEB_SERVER_URL: ${{needs.deploy-simple-web-proof.outputs.deployment_url}}
+          VLAYER_TMP_DIR: ./artifacts
+          PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+        run: xvfb-run bash/e2e-web-proof-example-test.sh
+
+      - name: Handle Playwright Reports
+        uses: ./.github/actions/handle-playwright-reports
+        if: ${{ !cancelled() }}
+        with:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          EXAMPLES_PATH: /examples/
+          GITHUB_TOKEN: ${{ github.token }}
+          ARTIFACT_RETENTION_DAYS: "30"
+          REPORT_PATH: "examples/**/vlayer/playwright-report/"
+          PR_NUMBER: ${{ github.event.number }}
+          DEPLOY_TYPE: "examples"
+          CONTEXT: "deploy-simple-web-proof"
+
+      - name: Display Logs
+        if: always()
+        run: |
+          for log_file in $(find ./artifacts/logs -type f); do	
+            echo "=== Contents of $log_file ==="	
+            cat "$log_file"	
+            echo "============================="	
+          done

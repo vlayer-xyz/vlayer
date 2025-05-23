@@ -1,0 +1,19 @@
+name: Lint JSON
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-json:
+    name: Lint JSON
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Lint JSON
+        run: bash/lint/json.sh
+        shell: bash
