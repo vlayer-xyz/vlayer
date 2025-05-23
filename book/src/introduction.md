@@ -10,6 +10,7 @@ Our four core features include:
 - [Time Travel](/features/time-travel.html): Leverage historical on-chain data in your smart contracts
 - [Teleport](/features/teleport.html): Execute a smart contract across different EVM-comptable blockchain networks
 
+<!-- FEEDBACK: Initially, stating that contracts might be executed off-chain was quite a confusing. Right off we redirect to the advanced section. Would consider removing it or editing. -->
 vlayer allows smart contracts to be executed [off-chain](/advanced/prover.html). The result of the execution can then be used by [on-chain contracts](/advanced/verifier.html).
 
 ## What are some real-world applications of vlayer?
@@ -42,3 +43,12 @@ Learn in-depth how:
  * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working.
  * [Global Variables](./advanced/prover-global-variables.md) are set.
  * [Tests](/advanced/tests.html) are run.
+
+ <!-- FEEDBACK: General points to the chapter:
+        - What about security guarantees?
+        - Why is it worth using vlayer? Is it a game changer?
+        - What is the message?
+            - Maybe directly point in 3rd person, that it makes your (devs) life easier
+            - Comparing with Foundry Book, reading between first two lines, their msg: Foundry does a job for you
+        - From Javascript - not sure what is there, it is SDK right, so likely the most important part to kick start projects, if one does not want to delve too much in details, rather just hack things out.
+  -->

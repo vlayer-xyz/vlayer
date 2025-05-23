@@ -239,3 +239,5 @@ The hook provides additional properties for tracking progress and managing UI up
 > ```
 > 
 > This command will download create a new project. Check out the `vlayer/src/components/EmlForm.tsx` file to see how vlayer React hooks are used.
+
+<!-- FEEDBACK: In vanilla we have a verification step, here not -->
