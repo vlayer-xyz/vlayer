@@ -22,13 +22,17 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
     const webpage = new Webpage(page, context);
 
     await webpage.clickButton("Request Web Proof");
+    await webpage.clickButton("Request Web Proof");
+    await webpage.clickButton("Request Web Proof");
 
     const extension = await waitForExtension(context);
     expect(extension).toBeDefined();
   });
 
   const extension = await waitForExtension(context);
-  const appPage = await extension.redirect();
+  const appPagePromise = extension.redirect();
+  await webpage.clickButton("Request Web Proof");
+  const appPage = await appPagePromise;
 
   await test.step("On 'redirect' click extension should open new browser tab for specified startPage url", async () => {
     await appPage.waitForURL(loginUrl);
