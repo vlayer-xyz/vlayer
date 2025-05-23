@@ -5,49 +5,59 @@ import { ExpectUrlStepActions } from "./ExpectUrl";
 import { NotarizeStepActions } from "./Notarize";
 import { StartPageStepActions } from "./StartPage";
 import { RedirectStepActions } from "./Redirect";
-import { StepStatus } from "constants/step";
-import { EXTENSION_STEP, ExtensionStep } from "src/web-proof-commons";
+import { UserActionStepActions } from "./UserAction";
+import { EXTENSION_STEP } from "src/web-proof-commons";
+import { StepProps } from "../Step";
 
-export const StepActions: React.FC<{
-  kind: ExtensionStep;
-  index: number;
-  link?: string;
-  label: string;
-  buttonText?: string;
-  status: StepStatus;
-}> = ({ kind, link, status, buttonText }) => {
+export const StepActions: React.FC<StepProps> = ({
+  kind,
+  link,
+  status,
+  step,
+}) => {
   return (
     <>
-      {match(kind)
-        .with(EXTENSION_STEP.expectUrl, () => (
+      {match(step)
+        .with({ step: EXTENSION_STEP.expectUrl }, () => (
           <ExpectUrlStepActions status={status} />
         ))
-        .with(EXTENSION_STEP.notarize, () => (
+        .with({ step: EXTENSION_STEP.notarize }, () => (
           <NotarizeStepActions
             isVisited={false}
             link={link || ""}
-            buttonText={buttonText || ""}
+            buttonText={""}
             status={status}
           />
         ))
-        .with(EXTENSION_STEP.startPage, () => (
+        .with({ step: EXTENSION_STEP.startPage }, () => (
           <StartPageStepActions
             isVisited={false}
             link={link || ""}
-            buttonText={buttonText || ""}
+            buttonText={""}
             status={status}
           />
         ))
-        .with(EXTENSION_STEP.redirect, () => (
+        .with({ step: EXTENSION_STEP.redirect }, () => (
           <RedirectStepActions
             isVisited={false}
             link={link || ""}
-            buttonText={buttonText || ""}
+            buttonText={""}
             status={status}
           />
         ))
+        .with({ step: EXTENSION_STEP.userAction }, (step) => (
+          <UserActionStepActions
+            status={status}
+            instruction={step.instruction}
+          />
+        ))
         .with(
-          P.union(EXTENSION_STEP.extractVariables, EXTENSION_STEP.clickButton),
+          {
+            step: P.union(
+              EXTENSION_STEP.extractVariables,
+              EXTENSION_STEP.clickButton,
+            ),
+          },
           () => {
             console.warn("Unsupported step type:", kind);
             return <></>;

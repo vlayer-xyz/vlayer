@@ -1,4 +1,8 @@
-import type { ExtensionStep, UrlPattern } from "src/web-proof-commons";
+import type {
+  ExtensionStep,
+  UrlPattern,
+  WebProofStep,
+} from "src/web-proof-commons";
 
 export enum StepStatus {
   Completed = "completed",
@@ -7,6 +11,7 @@ export enum StepStatus {
 }
 
 export type Step = {
+  step: WebProofStep;
   status: StepStatus;
   label: string;
   kind: ExtensionStep;
