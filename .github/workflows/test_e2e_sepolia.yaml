@@ -62,26 +62,42 @@ jobs:
     outputs:
       gas-ok: ${{ steps.set-result.outputs.gas-ok }}
     steps:
-      - name: Download gas_price_checker from S3
-        uses: keithweaver/aws-s3-github-action@v1.0.0
+      - name: Configure AWS creds
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          command: cp
-          source: "s3://${{ vars.AWS_BUCKET }}/gas_price_checker"
-          destination: ./gas_price_checker
-          aws_access_key_id: ${{ vars.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: eu-north-1
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
 
-      - name: Run gas price checker
-        id: check
-        continue-on-error: true
+      - name: Download gas_price_checker from S3
         run: |
-          ./gas_price_checker https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }} 5
+          aws s3 cp \
+            s3://${{ vars.AWS_BUCKET }}/gas_price_checker \
+            "$RUNNER_TEMP/gas_price_checker"
+      - name: Make gas_price_checker executable
+        run: sudo chmod +x "$RUNNER_TEMP/gas_price_checker"
+
+      - name: Run gas_price_checker
+        id: run-check
+        run: |
+          # allow failure so we can capture it
+          set +e
+          "$RUNNER_TEMP/gas_price_checker" \
+            "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" \
+            $GAS_PRICE_THRESHOLD
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >>"$GITHUB_OUTPUT"
+        env:
+          GAS_PRICE_THRESHOLD: 20
 
       - name: Set gas check result
         id: set-result
         run: |
-          echo "gas-ok=${{ steps.check.outcome == 'success' }}" >>"$GITHUB_OUTPUT"
+          if [ "${{ steps.run-check.outputs.exit_code }}" = "0" ]; then
+            echo "gas-ok=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "gas-ok=false" >>"$GITHUB_OUTPUT"
+          fi
 
   build-binaries:
     name: Build binaries
