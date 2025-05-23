@@ -112,6 +112,7 @@ runs:
 
         # Chain related
         CHAIN_NAME: ${{ inputs.chain_name }}
+        EXTERNAL_CHAIN_SERVICE_URL: ${{ inputs.external_chain_service_url }}
       run: bash/e2e-test.sh
       shell: bash
 
