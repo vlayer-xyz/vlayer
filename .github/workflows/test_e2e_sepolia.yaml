@@ -70,7 +70,7 @@ jobs:
       gas-ok: ${{ steps.set-result.outputs.gas-ok }}
     steps:
       - name: Configure AWS creds
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
