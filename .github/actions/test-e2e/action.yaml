@@ -38,6 +38,9 @@ inputs:
   quicknode_api_key:
     description: "Required for chain testnets."
     required: false
+  external_chain_service_url:
+    description: "External chain service URL (optional)"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -85,10 +88,20 @@ runs:
     # Configure RPC endpoints
     - name: Configure RPC endpoints
       if: ${{ inputs.quicknode_api_key != '' }}
+      env:
+        OPTIMISM_SEPOLIA_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}"
+        ETHEREUM_SEPOLIA_URL: "https://dry-alpha-tab.ethereum-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}"
       run: |
         echo "QUICKNODE_ENDPOINT=dry-alpha-tab" >> $GITHUB_ENV
         echo "QUICKNODE_API_KEY=${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
-        echo "JSON_RPC_URL=https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ inputs.quicknode_api_key }}" >> $GITHUB_ENV
+        if [[ "${{ inputs.chain_name }}" == "optimismSepolia" ]]; then
+          echo "JSON_RPC_URL=$OPTIMISM_SEPOLIA_URL" >> $GITHUB_ENV
+        elif [[ "${{ inputs.chain_name }}" == "sepolia" ]]; then
+          echo "JSON_RPC_URL=$ETHEREUM_SEPOLIA_URL" >> $GITHUB_ENV
+        else
+          echo "Unsupported chain: ${{ inputs.chain_name }}"
+          exit 1
+        fi
       shell: bash
 
     - name: Run e2e test for ${{ inputs.example }}
@@ -109,6 +122,7 @@ runs:
 
         # Chain related
         CHAIN_NAME: ${{ inputs.chain_name }}
+        EXTERNAL_CHAIN_SERVICE_URL: ${{ inputs.external_chain_service_url }}
       run: bash/e2e-test.sh
       shell: bash
 
