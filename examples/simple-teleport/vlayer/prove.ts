@@ -64,9 +64,6 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
-console.log("Prover:", prover);
-console.log("Verifier:", verifier);
-
 const proofHash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
