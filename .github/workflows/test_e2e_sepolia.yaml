@@ -4,7 +4,7 @@ name: E2E test with Sepolia
 # because it uses external API resources.
 
 # Default network for most E2E tests: Optimism Sepolia (faster & lower gas fees)
-# “simple-teleport” runs on both Optimism Sepolia and Ethereum Sepolia
+# "simple-teleport" runs on both Optimism Sepolia and Ethereum Sepolia
 # — but only when the on-chain gas price on Ethereum Sepolia is below our configured threshold.
 
 on:
@@ -65,7 +65,7 @@ jobs:
   # If the gas price exceeds a predefined threshold, the test is skipped to avoid running out of test eth.
   check-gas:
     name: Check gas price
-    runs-on: aws-linux-medium
+    runs-on: ubuntu-latest
     outputs:
       gas-ok: ${{ steps.set-result.outputs.gas-ok }}
     steps:
