@@ -276,4 +276,4 @@ jobs:
           chain_name: "sepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-          chain_service_url: "https://test-chainservice.vlayer.xyz"
+          external_chain_service_url: "https://test-chainservice.vlayer.xyz"
