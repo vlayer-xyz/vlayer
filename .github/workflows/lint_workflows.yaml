@@ -1,0 +1,44 @@
+name: Lint Workflows
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  prettier:
+    name: Prettier check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "16"
+
+      - name: Install Prettier
+        run: npm install --global prettier
+
+      - name: Check YAML Formatting
+        run: prettier --check .github/workflows/**/*.yaml
+
+  actionlint:
+    runs-on: ubuntu-latest
+    name: Actionlint check
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download actionlint
+        id: get_actionlint
+        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) 1.7.4
+        shell: bash
+      - name: Check workflow files
+        run: ${{ steps.get_actionlint.outputs.executable }}
+        shell: bash

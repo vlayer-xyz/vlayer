@@ -1,0 +1,49 @@
+name: Build examples
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-examples:
+    name: Build examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
+
+      - name: Forge build contracts
+        working-directory: ./contracts/vlayer
+        run: |
+          forge soldeer install
+          forge build
+
+      - name: Run tsc
+        run: bash/tsc-examples.sh
+  pack-examples:
+    name: Pack examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Package examples
+        run: ./bash/pack-examples.sh
