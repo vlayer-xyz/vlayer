@@ -82,6 +82,8 @@ export const MintStep = () => {
       setIsMinting(false);
       if (error.message.includes("User has already minted a TwitterNFT")) {
         throw new AlreadyMintedError();
+      } else if (error.message.includes("User rejected the request")) {
+        setIsMinting(false);
       } else {
         throw new Error(error.message);
       }
