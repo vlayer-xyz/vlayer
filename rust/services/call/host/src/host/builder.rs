@@ -71,7 +71,6 @@ impl New {
     #[allow(clippy::unused_self)]
     #[must_use]
     pub fn with_rpc_urls(self, rpc_urls: HashMap<ChainId, String>) -> WithProviders {
-        tracing::info!("Creating provider factory with RPC URLs: {:?}", rpc_urls);
         let provider_factory = EthersProviderFactory::new(rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
         let op_client_factory = Box::new(optimism::client::factory::http::Factory::new(rpc_urls));
