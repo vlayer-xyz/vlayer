@@ -102,6 +102,7 @@ runs:
           echo "Unsupported chain: ${{ inputs.chain_name }}"
           exit 1
         fi
+      shell: bash
 
     - name: Run e2e test for ${{ inputs.example }}
       env:
