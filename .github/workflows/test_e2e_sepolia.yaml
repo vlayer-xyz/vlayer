@@ -85,19 +85,27 @@ jobs:
       - name: Make gas_price_checker executable
         run: sudo chmod +x "$RUNNER_TEMP/gas_price_checker"
 
-      - name: Execute gas price checker
-        id: check
-        continue-on-error: true
+      - name: Run gas_price_checker
+        id: run-check
+        run: |
+          # allow failure so we can capture it
+          set +e
+          "$RUNNER_TEMP/gas_price_checker" \
+            "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" \
+            $GAS_PRICE_THRESHOLD
+          EXIT_CODE=$?
+          echo "exit_code=$EXIT_CODE" >>"$GITHUB_OUTPUT"
         env:
           GAS_PRICE_THRESHOLD: 20
-        run: |
-          $RUNNER_TEMP/gas_price_checker "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" $GAS_PRICE_THRESHOLD
 
       - name: Set gas check result
         id: set-result
         run: |
-          # writes "true" if exit code was 0, else "false"
-          echo "gas-ok=${{ steps.check.outcome == 'success' }}" >>"$GITHUB_OUTPUT"
+          if [ "${{ steps.run-check.outputs.exit_code }}" = "0" ]; then
+            echo "gas-ok=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "gas-ok=false" >>"$GITHUB_OUTPUT"
+          fi
 
   build-binaries:
     name: Build binaries
