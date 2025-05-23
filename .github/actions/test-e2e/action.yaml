@@ -38,7 +38,7 @@ inputs:
   quicknode_api_key:
     description: "Required for chain testnets."
     required: false
-  chain_service_url:
+  external_chain_service_url:
     description: "External chain service URL (optional)"
     required: false
 runs:
