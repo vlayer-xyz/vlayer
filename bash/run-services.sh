@@ -62,8 +62,12 @@ if [[ $VLAYER_ENV == "dev" ]]; then
     docker compose ${DOCKER_COMPOSE_FILES[@]} up -d --build --force-recreate $DOCKER_COMPOSE_SERVICES
 fi
 
-if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
+if [[ -n "${CHAIN_SERVICE_URL:-}" ]]; then
+  echo "Using external chain service at ${CHAIN_SERVICE_URL}"
+else
+  if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
     startup_chain_services "${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"
+  fi
 fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
