@@ -41,8 +41,11 @@ export const ConfirmMintPage = () => {
     if (mintError) {
       if (mintError.message.includes("already been minted")) {
         throw new AlreadyMintedError();
+      } else if (mintError.message.includes("User rejected the request")) {
+        setIsLoading(false);
+      } else {
+        throw new Error(mintError.message);
       }
-      throw new Error(mintError.message);
     }
   }, [mintError]);
 

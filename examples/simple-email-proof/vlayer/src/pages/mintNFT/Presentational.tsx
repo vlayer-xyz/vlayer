@@ -22,7 +22,11 @@ export const MintNFT = ({
       </div>
       {verificationError && (
         <div className="mt-5 flex justify-center">
-          <p className="text-red-500">{verificationError}</p>
+          <p className="text-red-500">
+            {verificationError.includes("User rejected the request")
+              ? "User rejected the request"
+              : verificationError}
+          </p>
         </div>
       )}
     </>
