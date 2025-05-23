@@ -8,6 +8,13 @@ function get_examples() {
         "simple-teleport"
         "kraken-web-proof"
     )
+    
+    # "simple-teleport" is not enabled on testnet
+    if [[ -n ${VLAYER_ENV:-} ]]; then
+        if [[ "$VLAYER_ENV" == "testnet" ]]; then
+            EXAMPLE_LIST=("${EXAMPLE_LIST[@]/simple-teleport/}")
+        fi
+    fi
 
     if [[ -n ${EXAMPLE:-} ]]; then
         if ! [[ " ${EXAMPLE_LIST[*]} " == *" $EXAMPLE "* ]]; then
