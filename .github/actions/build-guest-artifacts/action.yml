@@ -6,17 +6,37 @@ description: Builds guest artifacts - methods.rs and ELF binary.
 runs:
   using: "composite"
   steps:
+    - name: Trying to download guest artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: guest-artifacts
+        path: target/guest-artifacts
+        if-no-files-found: ignore
+      continue-on-error: true
+
+    - name: Check if guest artifacts exist
+      run: |
+        if [ -d "target/guest-artifacts" ] && [ "$(ls -A target/guest-artifacts)" ]; then
+          echo "Guest artifacts already exist. Skipping build action."
+          echo "STOP=true" >> $GITHUB_ENV
+        fi
+      shell: bash
+
     - name: Install Rust prerequisites
+      if: env.STOP != 'true'
       id: rust_pre
       uses: ./.github/actions/rust-prerequisites
 
     - name: Install Risc0 prerequisites
+      if: env.STOP != 'true'
       uses: ./.github/actions/risc0
 
     - name: Install contracts prerequisites
+      if: env.STOP != 'true'
       uses: ./.github/actions/contracts-prerequisites
 
     - name: "Build guest wrapper"
+      if: env.STOP != 'true'
       env:
         RISC0_USE_DOCKER: 1
         CARGO_TARGET_DIR: ${{ github.workspace }}/target
@@ -25,6 +45,7 @@ runs:
       shell: bash
 
     - name: "Save methods.rs and ELF binary"
+      if: env.STOP != 'true'
       run: |
         METHODS="$(find target -type f -name "methods.rs" -path '*/guest_wrapper-*/*')"
         if [ $(echo -e "$METHODS" | wc -l) = "1" ]; then
@@ -46,10 +67,10 @@ runs:
       shell: bash
 
     - name: Push guest artifacts
+      if: env.STOP != 'true'
       uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
       with:
         name: guest-artifacts
         path: target/assets
         if-no-files-found: error
         retention-days: 3
-        overwrite: true
