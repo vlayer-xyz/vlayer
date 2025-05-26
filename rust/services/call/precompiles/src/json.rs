@@ -13,7 +13,7 @@ mod path;
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
-pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
+pub fn get_string(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
     value
         .as_string()
@@ -22,7 +22,7 @@ pub(super) fn get_string(input: &Bytes) -> Result<Bytes> {
 }
 
 #[allow(clippy::unwrap_used)]
-pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
+pub fn get_int(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
     let numeric_value = match value {
         Variable::Number(ref num) => num.as_i64(),
@@ -33,7 +33,7 @@ pub(super) fn get_int(input: &Bytes) -> Result<Bytes> {
         .ok_or(map_to_fatal(format!("Expected type 'Number' at {path}, but found {value:?}")))
 }
 
-pub(super) fn get_bool(input: &Bytes) -> Result<Bytes> {
+pub fn get_bool(input: &Bytes) -> Result<Bytes> {
     let (value, path) = get_value(input)?;
     value
         .as_boolean()
