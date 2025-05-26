@@ -1,8 +1,13 @@
 use std::str;
 
 use anyhow::{Context, Result};
+use derive_more::{Deref, From, Into};
 use http_body_util::{BodyExt, Full};
-use hyper::{Request, StatusCode, body::Bytes};
+use hyper::{
+    Request as HttpRequest, StatusCode,
+    body::Bytes,
+    header::{self, HeaderName},
+};
 use hyper_util::rt::TokioIo;
 use notary_client::{Accepted, NotarizationRequest, NotaryClient};
 use tlsn_common::config::ProtocolConfig;
@@ -51,6 +56,8 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
 
     let notary_client = notary_client_builder.build()?;
 
+    debug!("preparing notarization request...");
+
     let notarization_request = NotarizationRequest::builder()
         .max_sent_data(max_sent_data)
         .max_recv_data(max_recv_data)
@@ -65,6 +72,8 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
         .await
         .context("Could not connect to notary. Make sure it is running.")?;
 
+    debug!("preparing notarization request done");
+
     let prover_config = ProverConfig::builder()
         .server_name(server_domain.as_ref())
         .protocol_config(
@@ -76,11 +85,17 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
         .crypto_provider(CryptoProvider::default())
         .build()?;
 
+    debug!("initializing prover...");
+
     let prover = Prover::new(prover_config)
         .setup(notary_connection.compat())
         .await?;
 
+    debug!("connecting to client on '{server_host}:{server_port}'");
+
     let client_socket = tokio::net::TcpStream::connect((server_host, server_port)).await?;
+
+    debug!("setting up MPC-TLS connection...");
 
     let (mpc_tls_connection, prover_fut) = prover.connect(client_socket.compat()).await?;
     let mpc_tls_connection = TokioIo::new(mpc_tls_connection.compat());
@@ -92,13 +107,15 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
 
     tokio::spawn(connection);
 
+    debug!("preparing request...");
+
     let request = prepare_request(&server_domain, &uri, &headers, method, body)?;
 
-    debug!("Starting an MPC TLS connection with the server");
+    debug!("starting an MPC TLS connection with the server");
 
-    let response = request_sender.send_request(request).await?;
+    let response = request_sender.send_request(request.into()).await?;
 
-    debug!("Got a response from the server: {}", response.status());
+    debug!("got a response from the server: {}", response.status());
 
     let status = response.status();
     if status != StatusCode::OK {
@@ -115,8 +132,8 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
 
     let transcript = prover.transcript();
 
-    debug!("Transcript sent: {:?}", str::from_utf8(transcript.sent()));
-    debug!("Transcript received: {:?}", str::from_utf8(transcript.received()));
+    debug!("transcript sent: {:?}", str::from_utf8(transcript.sent()));
+    debug!("transcript received: {:?}", str::from_utf8(transcript.received()));
 
     let mut builder = TranscriptCommitConfig::builder(transcript);
 
@@ -130,7 +147,9 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
     let request_config = RequestConfig::default();
 
     let (attestation, secrets) = Box::pin(prover.finalize(&request_config)).await?;
-    debug!("Finished notarizing");
+
+    debug!("finished notarizing");
+
     Ok((attestation, secrets, redaction_config))
 }
 
@@ -140,25 +159,56 @@ fn prepare_request(
     headers: impl IntoIterator<Item = (impl AsRef<str>, impl AsRef<str>)>,
     method: Method,
     body: impl AsRef<[u8]>,
-) -> Result<Request<Full<Bytes>>, hyper::http::Error> {
-    let mut request_builder = Request::builder()
-        .uri(uri)
-        .method(method)
-        .header("Host", server_domain)
-        .header("Accept", "*/*")
-        .header("Accept-Encoding", "identity")
-        .header("Connection", "close")
-        .header("User-Agent", USER_AGENT);
+) -> Result<Request> {
+    let mut request_builder = HttpRequest::builder().uri(uri).method(method);
+
+    let header_map = request_builder
+        .headers_mut()
+        .ok_or_else(|| anyhow::anyhow!("could not extract headers from RequestBuilder"))?;
 
     for (k, v) in headers {
-        request_builder = request_builder.header(k.as_ref(), v.as_ref());
+        let header_name = HeaderName::from_lowercase(k.as_ref().to_lowercase().as_bytes())?;
+        header_map.append(header_name, v.as_ref().parse()?);
     }
 
-    request_builder.body(Full::new(Bytes::from(body.as_ref().to_vec())))
+    for (name, value) in [
+        (header::HOST, server_domain),
+        (header::ACCEPT, "*/*"),
+        (header::ACCEPT_ENCODING, "identity"),
+        (header::CONNECTION, "close"),
+        (header::USER_AGENT, USER_AGENT),
+    ] {
+        header_map.entry(name).or_insert(value.parse()?);
+    }
+
+    let request: Request = request_builder
+        .body(Full::new(Bytes::from(body.as_ref().to_vec())))
+        .map(Into::into)?;
+
+    debug!("{request:#?}");
+
+    Ok(request)
+}
+
+#[derive(From, Into, Deref)]
+struct Request(HttpRequest<Full<Bytes>>);
+
+impl std::fmt::Debug for Request {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "uri: {}", self.0.uri())?;
+        writeln!(f, "method: {}", self.0.method())?;
+        writeln!(f, "headers:")?;
+        for (name, value) in self.0.headers() {
+            writeln!(f, "  {name}: {value:#?}")?;
+        }
+        write!(f, "body: {:?}", self.0.body())
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use hyper::header::HeaderValue;
+
     use super::*;
 
     #[test]
@@ -175,5 +225,26 @@ mod tests {
         let body = request.body();
 
         assert_eq!(r#"Full { data: Some(b"abc") }"#, format!("{body:?}"));
+    }
+
+    #[test]
+    fn should_not_set_default_headers_if_specified_by_the_user() {
+        let request = prepare_request(
+            "lotr-api.online",
+            "/",
+            [("User-Agent", "curl/1.0.0")],
+            Method::GET,
+            "",
+        )
+        .unwrap();
+
+        let headers: Vec<(&HeaderName, &HeaderValue)> = request
+            .headers()
+            .iter()
+            .filter(|&(name, _)| name == header::USER_AGENT)
+            .collect();
+
+        assert_eq!(headers.len(), 1);
+        assert_eq!(headers[0].1, "curl/1.0.0");
     }
 }
