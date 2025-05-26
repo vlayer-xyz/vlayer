@@ -9,7 +9,7 @@ use std::fmt::Display;
 use benchmarks::benchmarks;
 use derive_more::Debug;
 use derive_new::new;
-use risc0_zkvm::guest::env;
+use risc0_zkvm::guest::env::cycle_count;
 use serde::{Deserialize, Serialize};
 
 mod benchmarks;
@@ -34,23 +34,6 @@ impl Runner {
 impl Default for Runner {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-#[derive(Debug, Clone, new, Serialize, Deserialize, Eq, PartialEq)]
-pub struct BenchmarkResult {
-    pub name: String,
-    pub actual_cycles: u64,
-    pub snapshot_cycles: u64,
-}
-
-impl Display for BenchmarkResult {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}: {} cycles (snapshot: {} cycles)",
-            self.name, self.actual_cycles, self.snapshot_cycles
-        )
     }
 }
 
@@ -83,11 +66,28 @@ impl Benchmark {
     }
 
     fn run(self) -> BenchmarkResult {
-        let start = env::cycle_count();
+        let start = cycle_count();
         (self.workload)();
-        let end = env::cycle_count();
+        let end = cycle_count();
         let cycles = end - start;
 
         BenchmarkResult::new(self.name, cycles, self.snapshot_cycles)
+    }
+}
+
+#[derive(Debug, Clone, new, Serialize, Deserialize, Eq, PartialEq)]
+pub struct BenchmarkResult {
+    pub name: String,
+    pub actual_cycles: u64,
+    pub snapshot_cycles: u64,
+}
+
+impl Display for BenchmarkResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}: {} cycles (snapshot: {} cycles)",
+            self.name, self.actual_cycles, self.snapshot_cycles
+        )
     }
 }

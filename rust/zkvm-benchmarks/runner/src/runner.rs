@@ -53,17 +53,21 @@ fn detect_regression(result: &BenchmarkResult) -> Result<(), Error> {
 mod test {
     use super::*;
 
-    #[test]
-    fn slightly_more() {
-        let result = BenchmarkResult::new("".to_string(), 110, 100);
+    mod detect_regression {
+        use super::*;
 
-        assert!(detect_regression(&result).is_ok());
-    }
+        #[test]
+        fn slightly_more() {
+            let result = BenchmarkResult::new("".to_string(), 110, 100);
 
-    #[test]
-    fn regression() {
-        let result = BenchmarkResult::new("".to_string(), 111, 100);
+            assert!(detect_regression(&result).is_ok());
+        }
 
-        assert_eq!(detect_regression(&result).unwrap_err(), Error::Regression(result));
+        #[test]
+        fn regression() {
+            let result = BenchmarkResult::new("".to_string(), 111, 100);
+
+            assert_eq!(detect_regression(&result).unwrap_err(), Error::Regression(result));
+        }
     }
 }
