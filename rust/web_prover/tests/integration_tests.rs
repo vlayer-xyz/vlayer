@@ -69,10 +69,10 @@ mod integration_tests {
 
         assert_eq!(
             verification_result.sent,
-            "GET /auth_header_require HTTP/1.1\r\nhost: lotr-api.online\r\naccept: */*\r\naccept-encoding: identity\r\nconnection: close\r\nuser-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\r\nauthorization: s3cret_t0ken\r\ncontent-length: 12\r\n\r\nbody content"
+            "GET /auth_header_require HTTP/1.1\r\nauthorization: s3cret_t0ken\r\nhost: lotr-api.online\r\naccept: */*\r\naccept-encoding: identity\r\nconnection: close\r\nuser-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\r\ncontent-length: 12\r\n\r\nbody content"
         );
         let regex = Regex::new(
-            "^HTTP/1\\.1 200 OK\\r\\nAccess-Control-Allow-Credentials: true\\r\\nVary: \\*\\r\\nAccess-Control-Allow-Origin: \\*\\r\\nAccess-Control-Allow-Methods: GET\\r\\nAccess-Control-Allow-Headers: host, accept, accept-encoding, connection, user-agent, authorization, content-length\\r\\nAccess-Control-Expose-Headers: host, accept, accept-encoding, connection, user-agent, authorization, content-length\\r\\nContent-Type: application/json;charset=utf-8\\r\\nDate: [A-Za-z]{3}, \\d{2} [A-Za-z]{3} \\d{4} \\d{2}:\\d{2}:\\d{2} GMT\\r\\nContent-Length: \\d+\\r\\n\\r\\n\\{\"success\":true,\"name\":\"Tom Bombadil\",\"greeting\":\"Old Tom Bombadil is a merry fellow!\"}$",
+            "^HTTP/1\\.1 200 OK\\r\\nAccess-Control-Allow-Credentials: true\\r\\nVary: \\*\\r\\nAccess-Control-Allow-Origin: \\*\\r\\nAccess-Control-Allow-Methods: GET\\r\\nAccess-Control-Allow-Headers: authorization, host, accept, accept-encoding, connection, user-agent, content-length\\r\\nAccess-Control-Expose-Headers: authorization, host, accept, accept-encoding, connection, user-agent, content-length\\r\\nContent-Type: application/json;charset=utf-8\\r\\nDate: [A-Za-z]{3}, \\d{2} [A-Za-z]{3} \\d{4} \\d{2}:\\d{2}:\\d{2} GMT\\r\\nContent-Length: \\d+\\r\\n\\r\\n\\{\"success\":true,\"name\":\"Tom Bombadil\",\"greeting\":\"Old Tom Bombadil is a merry fellow!\"}$",
         );
         assert!(
             regex.unwrap().is_match(&verification_result.recv,),
@@ -111,11 +111,11 @@ mod integration_tests {
 
         assert_eq!(
             verification_result.sent,
-            "GET /auth_XXXXXXXXXXuire?paramXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXccept-encoding: identity\r\nconnection: close\r\nuser-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKitXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            "GET /auth_XXXXXXXXXXuire?paramXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXtr-api.online\r\naccept: */*\r\naccept-encoding: identity\r\nconnection: close\r\nuser-agent: Mozilla/5.0 (XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         );
         assert_eq!(
             verification_result.recv,
-            "HTTP/1.1 2XXXXXXXXXXess-ControXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXcess-Control-Allow-Methods: GET\r\nAccess-Control-Allow-Headers: host, accept, accept-encoding, connecXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            "HTTP/1.1 2XXXXXXXXXXess-ControXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXcess-Control-Allow-Methods: GET\r\nAccess-Control-Allow-Headers: authorization, host, accept, accept-eXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         );
     }
 
@@ -142,10 +142,10 @@ mod integration_tests {
 
         assert_eq!(
             verification_result.sent,
-            "POST /auth_header_require HTTP/1.1\r\nhost: lotr-api.online\r\naccept: */*\r\naccept-encoding: identity\r\nconnection: close\r\nuser-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\r\nauthorization: s3cret_t0ken\r\ncontent-type: application/json\r\ncontent-length: 18\r\n\r\n{\"name\":\"Saruman\"}"
+            "POST /auth_header_require HTTP/1.1\r\nauthorization: s3cret_t0ken\r\ncontent-type: application/json\r\nhost: lotr-api.online\r\naccept: */*\r\naccept-encoding: identity\r\nconnection: close\r\nuser-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36\r\ncontent-length: 18\r\n\r\n{\"name\":\"Saruman\"}"
         );
         let regex = Regex::new(
-            "^HTTP/1\\.1 200 OK\\r\\nAccess-Control-Allow-Credentials: true\\r\\nVary: \\*\\r\\nAccess-Control-Allow-Origin: \\*\\r\\nAccess-Control-Allow-Methods: POST\\r\\nAccess-Control-Allow-Headers: host, accept, accept-encoding, connection, user-agent, authorization, content-type, content-length\\r\\nAccess-Control-Expose-Headers: host, accept, accept-encoding, connection, user-agent, authorization, content-type, content-length\\r\\nContent-Type: application/json;charset=utf-8\\r\\nDate: [A-Za-z]{3}, \\d{2} [A-Za-z]{3} \\d{4} \\d{2}:\\d{2}:\\d{2} GMT\\r\\nContent-Length: \\d+\\r\\n\\r\\n\\{\"success\":true,\"greeting\":\"Hello, Saruman!\"}$",
+            "^HTTP/1\\.1 200 OK\\r\\nAccess-Control-Allow-Credentials: true\\r\\nVary: \\*\\r\\nAccess-Control-Allow-Origin: \\*\\r\\nAccess-Control-Allow-Methods: POST\\r\\nAccess-Control-Allow-Headers: authorization, content-type, host, accept, accept-encoding, connection, user-agent, content-length\\r\\nAccess-Control-Expose-Headers: authorization, content-type, host, accept, accept-encoding, connection, user-agent, content-length\\r\\nContent-Type: application/json;charset=utf-8\\r\\nDate: [A-Za-z]{3}, \\d{2} [A-Za-z]{3} \\d{4} \\d{2}:\\d{2}:\\d{2} GMT\\r\\nContent-Length: \\d+\\r\\n\\r\\n\\{\"success\":true,\"greeting\":\"Hello, Saruman!\"}$",
         );
         assert!(
             regex.unwrap().is_match(&verification_result.recv,),
