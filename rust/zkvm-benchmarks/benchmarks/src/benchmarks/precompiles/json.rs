@@ -45,24 +45,24 @@ fn create_nested_path(depth: usize, key_name: &str) -> String {
 
 pub fn benchmarks() -> Vec<Benchmark> {
     vec![
-        Benchmark::new("json_get_string_100b", || benchmark(JSON_100B, "key1"), 40_738),
-        Benchmark::new("json_get_string_1kb", || benchmark(JSON_1KB, "key1"), 214_246),
-        Benchmark::new("json_get_string_10kb", || benchmark(JSON_10KB, "key1"), 2_632_277),
-        Benchmark::new("json_get_string_100kb", || benchmark(JSON_100KB, "key1"), 31_363_990),
+        Benchmark::new("json_get_string_100b", || benchmark(JSON_100B, "key1"), 40_000),
+        Benchmark::new("json_get_string_1kb", || benchmark(JSON_1KB, "key1"), 214_000),
+        Benchmark::new("json_get_string_10kb", || benchmark(JSON_10KB, "key1"), 2_632_000),
+        Benchmark::new("json_get_string_100kb", || benchmark(JSON_100KB, "key1"), 31_363_000),
         Benchmark::new(
             "json_get_string_10k_1_level",
             || benchmark(JSON_10K_1_LVL, &JSON_1_LVL),
-            2_716_219,
+            2_716_000,
         ),
         Benchmark::new(
             "json_get_string_10k_10_level",
             || benchmark(JSON_10K_10_LVL, &JSON_10_LVL),
-            3_016_135,
+            3_016_000,
         ),
         Benchmark::new(
             "json_get_string_10k_100_level",
             || benchmark(JSON_10K_100_LVL, &JSON_100_LVL),
-            6_197_693,
+            6_197_000,
         ),
     ]
 }
