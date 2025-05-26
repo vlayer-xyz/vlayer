@@ -11,18 +11,18 @@ macro_rules! include_json {
     };
 }
 
-include_json!(JSON_100B, "100b.json");
-include_json!(JSON_1KB, "1kb.json");
-include_json!(JSON_10KB, "10kb.json");
-include_json!(JSON_100KB, "100kb.json");
-include_json!(JSON_10K_1_LVL, "10k_1_level.json");
-include_json!(JSON_10K_10_LVL, "10k_10_level.json");
-include_json!(JSON_10K_100_LVL, "10k_100_level.json");
+include_json!(JSON_100B_PATH, "100b.json");
+include_json!(JSON_1KB_PATH, "1kb.json");
+include_json!(JSON_10KB_PATH, "10kb.json");
+include_json!(JSON_100KB_PATH, "100kb.json");
+include_json!(JSON_10K_1_LVL_PATH, "10k_1_level.json");
+include_json!(JSON_10K_10_LVL_PATH, "10k_10_level.json");
+include_json!(JSON_10K_100_LVL_PATH, "10k_100_level.json");
 
 lazy_static::lazy_static! {
-    static ref JSON_1_LVL: String = create_nested_path(1, "key1");
-    static ref JSON_10_LVL: String = create_nested_path(10, "key1");
-    static ref JSON_100_LVL: String = create_nested_path(100, "key1");
+    static ref JSON_1_LVL_KEY: String = create_nested_key_path(1, "key1");
+    static ref JSON_10_LVL_KEY: String = create_nested_key_path(10, "key1");
+    static ref JSON_100_LVL_KEY: String = create_nested_key_path(100, "key1");
 }
 
 fn benchmark(json_body: &str, path: &str) {
@@ -30,7 +30,7 @@ fn benchmark(json_body: &str, path: &str) {
     let _ = get_string(&calldata).expect("get_string failed");
 }
 
-fn create_nested_path(depth: usize, key_name: &str) -> String {
+fn create_nested_key_path(depth: usize, key_name: &str) -> String {
     let mut path = String::new();
     for i in 1..=depth {
         path.push_str(&format!("level{i}"));
@@ -45,23 +45,23 @@ fn create_nested_path(depth: usize, key_name: &str) -> String {
 
 pub fn benchmarks() -> Vec<Benchmark> {
     vec![
-        Benchmark::new("json_get_string_100b", || benchmark(JSON_100B, "key1"), 40_000),
-        Benchmark::new("json_get_string_1kb", || benchmark(JSON_1KB, "key1"), 214_000),
-        Benchmark::new("json_get_string_10kb", || benchmark(JSON_10KB, "key1"), 2_632_000),
-        Benchmark::new("json_get_string_100kb", || benchmark(JSON_100KB, "key1"), 31_363_000),
+        Benchmark::new("json_get_string_100b", || benchmark(JSON_100B_PATH, "key1"), 40_000),
+        Benchmark::new("json_get_string_1kb", || benchmark(JSON_1KB_PATH, "key1"), 214_000),
+        Benchmark::new("json_get_string_10kb", || benchmark(JSON_10KB_PATH, "key1"), 2_632_000),
+        Benchmark::new("json_get_string_100kb", || benchmark(JSON_100KB_PATH, "key1"), 31_363_000),
         Benchmark::new(
             "json_get_string_10k_1_level",
-            || benchmark(JSON_10K_1_LVL, &JSON_1_LVL),
+            || benchmark(JSON_10K_1_LVL_PATH, &JSON_1_LVL_KEY),
             2_716_000,
         ),
         Benchmark::new(
             "json_get_string_10k_10_level",
-            || benchmark(JSON_10K_10_LVL, &JSON_10_LVL),
+            || benchmark(JSON_10K_10_LVL_PATH, &JSON_10_LVL_KEY),
             3_016_000,
         ),
         Benchmark::new(
             "json_get_string_10k_100_level",
-            || benchmark(JSON_10K_100_LVL, &JSON_100_LVL),
+            || benchmark(JSON_10K_100_LVL_PATH, &JSON_100_LVL_KEY),
             6_197_000,
         ),
     ]
