@@ -2,8 +2,8 @@ name: Verify image ID on mainnet chains
 on:
   workflow_dispatch:
   push:
-    branches:
-      - "release/**"
+    # branches:
+    #   - "release/**"
 
 concurrency:
   group: ${{ github.workflow }}
@@ -20,6 +20,9 @@ jobs:
         with:
           ref: ${{ github.ref }}
           submodules: recursive
+
+      - name: Verify image ID on mainnet chains
+        uses: ./.github/actions/verify-image-id-onchain
 
       - name: Verify image ID on mainnet chains
         uses: ./.github/actions/verify-image-id-onchain
