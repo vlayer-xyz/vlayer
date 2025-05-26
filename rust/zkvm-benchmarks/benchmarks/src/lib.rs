@@ -37,23 +37,6 @@ impl Default for Runner {
     }
 }
 
-#[derive(Debug, Clone, new, Serialize, Deserialize, Eq, PartialEq)]
-pub struct BenchmarkResult {
-    pub name: String,
-    pub actual_cycles: u64,
-    pub snapshot_cycles: u64,
-}
-
-impl Display for BenchmarkResult {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}: {} cycles (snapshot: {} cycles)",
-            self.name, self.actual_cycles, self.snapshot_cycles
-        )
-    }
-}
-
 #[derive(Debug)]
 struct Benchmark {
     name: String,
@@ -89,5 +72,22 @@ impl Benchmark {
         let cycles = end - start;
 
         BenchmarkResult::new(self.name, cycles, self.snapshot_cycles)
+    }
+}
+
+#[derive(Debug, Clone, new, Serialize, Deserialize, Eq, PartialEq)]
+pub struct BenchmarkResult {
+    pub name: String,
+    pub actual_cycles: u64,
+    pub snapshot_cycles: u64,
+}
+
+impl Display for BenchmarkResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}: {} cycles (snapshot: {} cycles)",
+            self.name, self.actual_cycles, self.snapshot_cycles
+        )
     }
 }
