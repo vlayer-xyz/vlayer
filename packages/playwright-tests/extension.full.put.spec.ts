@@ -17,6 +17,9 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
     expect(extension).toBeDefined();
   });
 
+  const extension = await waitForExtension(context);
+  const appPagePromise = extension.redirect();
+
   await test.step("Extension should stay ok after clicking request button multiple times", async () => {
     await page.goto(dappPutUrl);
     const webpage = new Webpage(page, context);
@@ -29,9 +32,6 @@ test("Full flow from opening sidepanel to redirection for /dapp-put", async ({
     expect(extension).toBeDefined();
   });
 
-  const extension = await waitForExtension(context);
-  const appPagePromise = extension.redirect();
-  await webpage.clickButton("Request Web Proof");
   const appPage = await appPagePromise;
 
   await test.step("On 'redirect' click extension should open new browser tab for specified startPage url", async () => {
