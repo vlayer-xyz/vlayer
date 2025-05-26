@@ -9,7 +9,7 @@ use std::fmt::Display;
 use benchmarks::benchmarks;
 use derive_more::Debug;
 use derive_new::new;
-use risc0_zkvm::guest::env;
+use risc0_zkvm::guest::env::cycle_count;
 use serde::{Deserialize, Serialize};
 
 mod benchmarks;
@@ -83,9 +83,9 @@ impl Benchmark {
     }
 
     fn run(self) -> BenchmarkResult {
-        let start = env::cycle_count();
+        let start = cycle_count();
         (self.workload)();
-        let end = env::cycle_count();
+        let end = cycle_count();
         let cycles = end - start;
 
         BenchmarkResult::new(self.name, cycles, self.snapshot_cycles)
