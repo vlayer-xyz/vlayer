@@ -72,7 +72,6 @@ pub fn benchmarks() -> Vec<Benchmark> {
             "json_get_string_10k_100_lvl",
             || benchmark_get_string(JSON_10K_LVL_100, &LVL_100_KEY),
             2_659_000,
-        ),
         Benchmark::new(
             "json_get_int_10kb",
             || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
