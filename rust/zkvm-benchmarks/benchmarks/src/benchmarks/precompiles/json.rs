@@ -4,18 +4,25 @@ use call_precompiles::json::get_string;
 
 use crate::Benchmark;
 
-// Include JSON files as string constants
-const JSON_100B: &str = include_str!("../../../assets/json/100b.json");
-const JSON_1KB: &str = include_str!("../../../assets/json/1kb.json");
-const JSON_10KB: &str = include_str!("../../../assets/json/10kb.json");
-const JSON_100KB: &str = include_str!("../../../assets/json/100kb.json");
-const JSON_10K_1_LEVEL: &str = include_str!("../../../assets/json/10k_1_level.json");
-const JSON_10K_10_LEVEL: &str = include_str!("../../../assets/json/10k_10_level.json");
-const JSON_10K_100_LEVEL: &str = include_str!("../../../assets/json/10k_100_level.json");
+macro_rules! include_json {
+    ($const_name:ident, $file:literal) => {
+        pub const $const_name: &str =
+            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/json/", $file));
+    };
+}
+
+include_json!(JSON_100B, "100b.json");
+include_json!(JSON_1KB, "1kb.json");
+include_json!(JSON_10KB, "10kb.json");
+include_json!(JSON_100KB, "100kb.json");
+include_json!(JSON_10K_1_LVL, "10k_1_level.json");
+include_json!(JSON_10K_10_LVL, "10k_10_level.json");
+include_json!(JSON_10K_100_LVL, "10k_100_level.json");
 
 lazy_static::lazy_static! {
-    static ref PATH_10_LEVELS: String = create_nested_path(10, "key1");
-    static ref PATH_100_LEVELS: String = create_nested_path(100, "key1");
+    static ref JSON_1_LVL: String = create_nested_path(1, "key1");
+    static ref JSON_10_LVL: String = create_nested_path(10, "key1");
+    static ref JSON_100_LVL: String = create_nested_path(100, "key1");
 }
 
 fn benchmark(json_body: &str, path: &str) {
@@ -44,17 +51,17 @@ pub fn benchmarks() -> Vec<Benchmark> {
         Benchmark::new("json_get_string_100kb", || benchmark(JSON_100KB, "key1"), 31_363_990),
         Benchmark::new(
             "json_get_string_10k_1_level",
-            || benchmark(JSON_10K_1_LEVEL, "level1.key1"),
+            || benchmark(JSON_10K_1_LVL, &JSON_1_LVL),
             2_716_219,
         ),
         Benchmark::new(
             "json_get_string_10k_10_level",
-            || benchmark(JSON_10K_10_LEVEL, &PATH_10_LEVELS),
+            || benchmark(JSON_10K_10_LVL, &JSON_10_LVL),
             3_016_135,
         ),
         Benchmark::new(
             "json_get_string_10k_100_level",
-            || benchmark(JSON_10K_100_LEVEL, &PATH_100_LEVELS),
+            || benchmark(JSON_10K_100_LVL, &JSON_100_LVL),
             6_197_693,
         ),
     ]
