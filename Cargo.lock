@@ -15788,6 +15788,7 @@ dependencies = [
  "derive-new",
  "derive_more 1.0.0",
  "email_proof",
+ "lazy_static",
  "mpt",
  "risc0-zkvm",
  "rsa",
