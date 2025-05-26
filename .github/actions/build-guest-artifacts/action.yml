@@ -52,3 +52,4 @@ runs:
         path: target/assets
         if-no-files-found: error
         retention-days: 3
+        overwrite: true
