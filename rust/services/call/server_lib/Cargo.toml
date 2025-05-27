@@ -15,6 +15,7 @@ axum = { workspace = true }
 call_common = { workspace = true }
 call_engine = { workspace = true }
 call_host = { workspace = true }
+clap = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 common = { workspace = true }
@@ -22,6 +23,7 @@ dashmap = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 hex = { workspace = true }
+humantime = { workspace = true }
 jsonrpsee = { workspace = true }
 mime = { workspace = true }
 provider = { workspace = true }
@@ -52,3 +54,6 @@ web_proof = { workspace = true, features = ["fixtures"] }
 
 [lints]
 workspace = true
+
+[features]
+force-gas-meter = []

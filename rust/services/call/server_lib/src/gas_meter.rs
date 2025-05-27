@@ -3,6 +3,7 @@ use std::time::Duration;
 use async_trait::async_trait;
 use auto_impl::auto_impl;
 use call_common::Metadata;
+use clap::Parser;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::rpc::{Client as RawRpcClient, Error as RpcError, Method};
@@ -11,6 +12,49 @@ use tracing::{error, info};
 use crate::{handlers::v_call::types::CallHash, token::Token};
 
 type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, Parser)]
+pub struct GasMeterArgs {
+    #[cfg(feature = "force-gas-meter")]
+    #[arg(long, group = "gas_meter", requires = "gas_meter_api_key", env)]
+    pub gas_meter_url: String,
+
+    #[cfg(not(feature = "force-gas-meter"))]
+    #[arg(long, group = "gas_meter", requires = "gas_meter_api_key", env)]
+    pub gas_meter_url: Option<String>,
+
+    #[arg(long, requires = "gas_meter", value_parser = humantime::parse_duration, default_value = "1h")]
+    pub gas_meter_ttl: Option<Duration>,
+
+    #[arg(long, requires = "gas_meter", env)]
+    pub gas_meter_api_key: Option<String>,
+}
+
+#[derive(new, Debug, Clone, Deserialize, Serialize)]
+pub struct Config {
+    pub url: String,
+    pub time_to_live: Duration,
+    pub api_key: Option<String>,
+}
+
+#[cfg(feature = "force-gas-meter")]
+impl From<GasMeterArgs> for Option<Config> {
+    fn from(args: GasMeterArgs) -> Self {
+        let url = args.gas_meter_url;
+        let ttl = args.gas_meter_ttl.unwrap_or_default();
+        let api_key = args.gas_meter_api_key;
+        Some(Config::new(url, ttl, api_key))
+    }
+}
+
+#[cfg(not(feature = "force-gas-meter"))]
+impl From<GasMeterArgs> for Option<Config> {
+    fn from(args: GasMeterArgs) -> Self {
+        args.gas_meter_url
+            .zip(Some(args.gas_meter_ttl.unwrap_or_default()))
+            .map(|(url, ttl)| Config::new(url, ttl, args.gas_meter_api_key))
+    }
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -58,13 +102,6 @@ pub struct SendMetadata {
 
 impl Method for SendMetadata {
     const METHOD_NAME: &str = "v_sendMetadata";
-}
-
-#[derive(new, Debug, Clone, Deserialize, Serialize)]
-pub struct Config {
-    pub url: String,
-    pub time_to_live: Duration,
-    pub api_key: Option<String>,
 }
 
 #[async_trait]

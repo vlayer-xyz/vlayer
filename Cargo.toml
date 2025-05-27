@@ -206,7 +206,7 @@ call_guest = { path = "rust/services/call/guest" }
 call_host = { path = "rust/services/call/host" }
 call_rpc = { path = "rust/services/call/rpc" }
 call_server = { path = "rust/services/call/server" }
-call_server_lib = { path = "rust/services/call/server_lib" }
+call_server_lib = { path = "rust/services/call/server_lib", default-features = false }
 optimism = { path = "rust/services/call/optimism" }
 chain = { path = "rust/chain" }
 chain_client = { path = "rust/services/chain/client" }

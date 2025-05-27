@@ -23,3 +23,6 @@ regex = { workspace = true }
 
 [lints]
 workspace = true
+
+[features]
+force-gas-meter = ["call_server_lib/force-gas-meter"]

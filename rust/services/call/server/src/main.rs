@@ -3,9 +3,7 @@ mod version;
 use std::time::Duration;
 
 use alloy_primitives::ChainId;
-use call_server_lib::{
-    Config, ConfigBuilder, ProofMode, gas_meter::Config as GasMeterConfig, serve,
-};
+use call_server_lib::{Config, ConfigBuilder, ProofMode, gas_meter::GasMeterArgs, serve};
 use chain_client::ChainClientConfig;
 use clap::{ArgAction, Parser};
 use common::{GlobalArgs, extract_rpc_url_token, init_tracing};
@@ -43,19 +41,8 @@ struct Cli {
     #[clap(flatten)]
     jwt_args: JwtArgs,
 
-    #[arg(
-        long,
-        group = "gas_meter",
-        requires_all = ["auth", "gas_meter_api_key"],
-        env
-    )]
-    gas_meter_url: Option<String>,
-
-    #[arg(long, requires = "gas_meter", value_parser = humantime::parse_duration, default_value = "1h")]
-    gas_meter_ttl: Option<Duration>,
-
-    #[arg(long, requires = "gas_meter", env)]
-    gas_meter_api_key: Option<String>,
+    #[clap(flatten)]
+    gas_meter_args: GasMeterArgs,
 
     #[clap(flatten)]
     global_args: GlobalArgs,
@@ -64,10 +51,6 @@ struct Cli {
 impl Cli {
     fn into_config(self, api_version: String) -> anyhow::Result<Config> {
         let proof_mode = self.proof.unwrap_or_default();
-        let gas_meter_config = self
-            .gas_meter_url
-            .zip(Some(self.gas_meter_ttl.unwrap_or_default()))
-            .map(|(url, ttl)| GasMeterConfig::new(url, ttl, self.gas_meter_api_key));
         let chain_proof_config = self
             .chain_proof_url
             .zip(Some((
@@ -83,12 +66,12 @@ impl Cli {
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
             .with_semver(api_version)
             .with_chain_client_config(chain_proof_config)
-            .with_gas_meter_config(gas_meter_config)
             .with_rpc_mappings(self.rpc_url)
             .with_proof_mode(proof_mode)
             .with_host(self.host)
             .with_port(self.port)
             .with_jwt_config(jwt_config)
+            .with_gas_meter_config(self.gas_meter_args)
             .build()?)
     }
 }
