@@ -28,6 +28,11 @@ lazy_static::lazy_static! {
     static ref LVL_100_KEY:String = create_nested_key_path(100, KEY);
 }
 
+fn benchmark_get_int(json_body: &str, path: &str) {
+    let calldata: Bytes = [json_body, path].abi_encode().into();
+    let _ = get_int(&calldata).expect("get_int failed");
+}
+
 fn create_nested_key_path(depth: usize, key_name: &str) -> String {
     let mut path = String::new();
     for i in 1..=depth {
@@ -76,6 +81,11 @@ pub fn benchmarks() -> Vec<Benchmark> {
             "json_get_int_10kb",
             || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
             3_896_399,
+        ),
+        Benchmark::new(
+            "json_get_int_10kb",
+            || benchmark_get_int(JSON_10K_1000_LVL_PATH, "key1"),
+            2_632_000,
         ),
     ]
 }
