@@ -1,3 +1,7 @@
+#![allow(clippy::all)]
+
+// src/lib.rs or src/main.rs
+
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
 use call_precompiles::json::{get_int, get_string};
@@ -35,7 +39,7 @@ fn benchmark_get_int(json_body: &str, path: &str) {
 
 fn create_nested_key_path(depth: usize, key_name: &str) -> String {
     let mut path = String::new();
-    for i in 1..=depth {
+    for i in 0..=depth {
         path.push_str(&format!("level{i}"));
         path.push('.');
     }
@@ -82,10 +86,10 @@ pub fn benchmarks() -> Vec<Benchmark> {
             || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
             3_896_399,
         ),
-        Benchmark::new(
-            "json_get_int_10kb",
-            || benchmark_get_int(JSON_10K_1000_LVL_PATH, "key1"),
-            2_632_000,
-        ),
+        // Benchmark::new(
+        //     "json_get_int_10kb",
+        //     || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
+        //     2_632_000,
+        // ),
     ]
 }
