@@ -20,5 +20,9 @@ rsa = { workspace = true }
 serde = { workspace = true }
 sha2 = { workspace = true }
 
+[build-dependencies]
+derive-new = { workspace = true }
+lazy_static = { workspace = true }
+
 [lints]
 workspace = true
