@@ -84,7 +84,9 @@ function startup_vlayer() {
         args+=("--jwt-public-key" "./docker/fixtures/jwt-authority.key.pub") # JWT public key
     fi
 
-    if [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
+    if [[ -n "${EXTERNAL_CHAIN_SERVICE_URL:-}" ]]; then
+        args+=("--chain-proof-url" "${EXTERNAL_CHAIN_SERVICE_URL}")
+    elif [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
         args+=("--chain-proof-url" "http://localhost:3001")
     fi
 
