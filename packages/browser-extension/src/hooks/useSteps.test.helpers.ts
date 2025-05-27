@@ -16,6 +16,7 @@ export type StepTestCase = {
     isZkProvingDone: boolean;
     history: BrowsingHistoryItem[];
     activeTabContext?: TestActiveTab;
+    alreadyCompletedStepsCount?: number;
   };
   output: StepStatus[];
 };
@@ -38,6 +39,7 @@ export const expectedStatuses = async ({ input, output }: StepTestCase) => {
   }
   (
     await calculateSteps({
+      alreadyCompletedStepsCount: 0,
       stepsSetup: steps,
       ...input,
     })
