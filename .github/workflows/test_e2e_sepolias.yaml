@@ -63,7 +63,7 @@ jobs:
   # The gas price on the Ethereum Sepolia network can vary significantly.
   # To prevent running tests when gas prices are prohibitively high, this job checks the current gas price.
   # If the gas price exceeds a predefined threshold, the test is skipped to avoid running out of test eth.
-  # Gas price checker is build using `build-gas-price-checker` job. It's code is in 
+  # Gas price checker is build using `build-gas-price-checker` job. It's code is in
   # `rust/zkvm-benchmarks/benchmarks/src/benchmarks/precompiles/gas_price_checker.rs`
   check-gas:
     name: Check gas price
