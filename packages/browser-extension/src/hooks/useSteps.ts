@@ -11,11 +11,10 @@ import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 import { useZkProvingState } from "./useZkProvingState";
 import { URLPattern } from "urlpattern-polyfill";
 import { match, P } from "ts-pattern";
-import { LOADING } from "@vlayer/extension-hooks";
+import { LOADING, useIntervalCalls } from "@vlayer/extension-hooks";
 import { useNotifyOnStepCompleted } from "hooks/useNotifyOnStepCompleted.ts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getActiveTabUrl, getElementOnPage } from "lib/activeTabContext.ts";
-import { useIntervalCalls } from "@vlayer/extension-hooks";
 
 type StepCompletionCheck<T extends WebProofStep> = (
   browsingHistory: BrowsingHistoryItem[],
@@ -137,16 +136,22 @@ const checkStepReadiness = {
 };
 
 const calculateStepStatus = async ({
+  wasCompletedBefore,
   hasUncompletedStep,
   step,
   history,
   isZkProvingDone,
 }: {
+  wasCompletedBefore: boolean;
   hasUncompletedStep: boolean;
   step: WebProofStep;
   history: BrowsingHistoryItem[];
   isZkProvingDone: boolean;
 }): Promise<StepStatus> => {
+  if (wasCompletedBefore) {
+    return StepStatus.Completed;
+  }
+
   //after uncompleted step all steps can only by further no need to calculate anything
   if (hasUncompletedStep) {
     return StepStatus.Further;
@@ -168,28 +173,33 @@ export const calculateSteps = async ({
   stepsSetup = [],
   history,
   isZkProvingDone,
+  alreadyCompletedStepsCount,
 }: {
   stepsSetup: WebProofStep[];
   history: BrowsingHistoryItem[];
   isZkProvingDone: boolean;
+  alreadyCompletedStepsCount: number;
 }) => {
   const steps: Step[] = [];
-
-  for (const currentStep of stepsSetup) {
+  for (let i = 0; i < stepsSetup.length; i++) {
+    const currentStep = stepsSetup[i];
     const hasUncompletedStep =
       steps.length > 0 && steps.at(-1)?.status !== StepStatus.Completed;
+
+    const status = await calculateStepStatus({
+      wasCompletedBefore: i < alreadyCompletedStepsCount,
+      hasUncompletedStep,
+      step: currentStep,
+      history,
+      isZkProvingDone,
+    });
 
     steps.push({
       step: currentStep,
       label: currentStep.label,
       link: currentStep.url,
       kind: currentStep.step,
-      status: await calculateStepStatus({
-        hasUncompletedStep,
-        step: currentStep,
-        history,
-        isZkProvingDone,
-      }),
+      status,
     });
   }
 
@@ -201,6 +211,7 @@ export const useSteps = (): Step[] => {
   const [history] = useBrowsingHistory();
   const { isDone: isZkProvingDone } = useZkProvingState();
   const [steps, setSteps] = useState<Step[]>([]);
+  const completedSteps = useRef(0);
 
   const stepsSetup = match(config)
     .with(LOADING, () => [])
@@ -210,10 +221,14 @@ export const useSteps = (): Step[] => {
 
   const recalculateSteps = useCallback(async () => {
     const steps = await calculateSteps({
+      alreadyCompletedStepsCount: completedSteps.current,
       stepsSetup,
       history,
       isZkProvingDone,
     });
+    completedSteps.current = steps.filter(
+      (step) => step.status === StepStatus.Completed,
+    ).length;
     setSteps(steps);
   }, [history, isZkProvingDone, stepsSetup]);
 
