@@ -179,9 +179,6 @@ export const RedactionItemsArray = z
   })
   .refine(ensureNoRequestUrlQueryParamConflict, {
     message: "Cannot have both request url_query and request url_query_except",
-  })
-  .refine(ensureNoRequestUrlQueryParamConflict, {
-    message: "Cannot have both request url_query and request url_query_except",
   });
 
 export type RedactionConfig = RedactionItem[];
