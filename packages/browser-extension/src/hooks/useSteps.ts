@@ -219,6 +219,12 @@ export const useSteps = (): Step[] => {
     .with({ steps: P.array(P.any) }, ({ steps }) => steps)
     .exhaustive();
 
+  useEffect(() => {
+    if (history.length === 0) {
+      completedSteps.current = 0;
+    }
+  }, [history]);
+
   const recalculateSteps = useCallback(async () => {
     const steps = await calculateSteps({
       alreadyCompletedStepsCount: completedSteps.current,
