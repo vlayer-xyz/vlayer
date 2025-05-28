@@ -18,6 +18,9 @@ Both types of contracts are developed using the [Solidity](https://soliditylang.
 
 
 ## vlayer contract execution
+
+<!-- FEEDBACK: What does it mean “executed off-chain”?? This was quite confusing for me. Why we call the Prover contract as it works off-chain? -->
+
 A typical vlayer execution flow has three steps:
 1. The application initiates a call to the Prover contract that is executed off-chain in the zkEVM. All the input for this call is private by default and is not published on-chain.
 1. The result of the computation is passed along with a proof to be executed in the on-chain contract. All the output returned from Prover contract is public and is published on-chain as parameters to the Verifier contract.

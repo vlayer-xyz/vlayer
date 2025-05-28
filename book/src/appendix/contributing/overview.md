@@ -2,6 +2,8 @@
 
 Welcome! 
 
+<!-- FEEDBACK: Is there a one general repository the one can contribute to? if so could be mentioned at the very beginnig, if not for each section some reflinks would be appreciated, I added link to the github repo in the topnav -->
+
 We're excited you're interested in contributing to vlayer. Whether you're here to fix bugs, improve the documentation, or suggest a new feature, your contributions make vlayer better for everyone. 
 
 This document outlines the process to get involved.
