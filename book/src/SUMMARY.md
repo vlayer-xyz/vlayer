@@ -19,18 +19,18 @@
   - [Teleport](./features/teleport.md)
   - [JSON and Regex](./features/json-and-regex.md)
 
+- [From JavaScript]()
+  - [Vanilla JS/TS](./javascript/javascript.md)
+  - [React](./javascript/react-hooks.md)
+  - [Web proofs](./javascript/web-proofs.md)
+  - [Email proofs](./javascript/email-proofs.md)
+
 - [Advanced]()
 
   - [Prover](./advanced/prover.md)
   - [Verifier](./advanced/verifier.md)
   - [Global variables](./advanced/prover-global-variables.md)
   - [Tests](./advanced/tests.md)
-
-- [From JavaScript]()
-  - [Vanilla JS/TS](./javascript/javascript.md)
-  - [React](./javascript/react-hooks.md)
-  - [Web proofs](./javascript/web-proofs.md)
-  - [Email proofs](./javascript/email-proofs.md)
 
 ---
 
