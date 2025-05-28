@@ -21,6 +21,9 @@ test("Full flow from opening sidepanel to redirection", async ({
   await page.goto(dappUrl);
   const webpage = new Webpage(page, context);
 
+  const extension = await waitForExtension(context);
+  const appPagePromise = extension.redirect();
+
   await test.step("Extension should stay ok after clicking request button multiple times", async () => {
     await webpage.clickButton("Request proof of being a wizard");
     await webpage.clickButton("Request proof of being a wizard");
@@ -30,8 +33,7 @@ test("Full flow from opening sidepanel to redirection", async ({
     expect(extension).toBeDefined();
   });
 
-  const extension = await waitForExtension(context);
-  const appPage = await extension.redirect();
+  const appPage = await appPagePromise;
 
   await test.step("On 'redirect' click extension should open new browser tab for specified startPage url", async () => {
     await appPage.waitForURL(loginUrl);
