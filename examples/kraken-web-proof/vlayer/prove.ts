@@ -9,6 +9,7 @@ import {
   deployVlayerContracts,
   writeEnvVariables,
 } from "@vlayer/sdk/config";
+import { spawn } from "child_process";
 
 const URL_TO_PROVE = "https://api.kraken.com/0/public/Ticker?pair=ETHUSD";
 
@@ -29,9 +30,14 @@ const vlayer = createVlayerClient({
 
 async function generateWebProof() {
   console.log("⏳ Generating web proof...");
-  const result =
-    await Bun.$`vlayer web-proof-fetch --notary ${notaryUrl} --url ${URL_TO_PROVE}`;
-  return result.stdout.toString();
+  const { stdout } = await runProcess("vlayer", [
+    "web-proof-fetch",
+    "--notary",
+    String(notaryUrl),
+    "--url",
+    URL_TO_PROVE,
+  ]);
+  return stdout;
 }
 
 console.log("⏳ Deploying contracts...");
@@ -59,7 +65,7 @@ const hash = await vlayer.prove({
   proverAbi: proverSpec.abi,
   args: [
     {
-      webProofJson: webProof.toString(),
+      webProofJson: String(webProof),
     },
   ],
   chainId: chain.id,
@@ -99,3 +105,30 @@ await ethClient.waitForTransactionReceipt({
 });
 
 console.log("✅ Verified!");
+
+function runProcess(
+  cmd: string,
+  args: string[],
+): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(cmd, args);
+    let stdout = "";
+    let stderr = "";
+    proc.stdout.on("data", (data) => {
+      stdout += data;
+    });
+    proc.stderr.on("data", (data) => {
+      stderr += data;
+    });
+    proc.on("close", (code) => {
+      if (code === 0) {
+        resolve({ stdout, stderr });
+      } else {
+        reject(new Error(`Process failed: ${stderr}`));
+      }
+    });
+    proc.on("error", (err) => {
+      reject(err);
+    });
+  });
+}
