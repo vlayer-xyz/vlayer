@@ -23,6 +23,9 @@ Environment='BONSAI_API_URL={{ vlayer_bonsai_api_url }}'
 {% if vlayer_bonsai_api_key is defined %}
 Environment='BONSAI_API_KEY={{ vlayer_bonsai_api_key }}'
 {% endif %}
+{% if vlayer_prover_gas_meter_api_key is defined %}
+Environment='GAS_METER_API_KEY={{ vlayer_prover_gas_meter_api_key }}'
+{% endif %}
 ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
 {{- ' --host ' ~ vlayer_prover_host if vlayer_prover_host is defined else '' }}
 {{- ' --port ' ~ vlayer_prover_port if vlayer_prover_port is defined else '' }}
@@ -32,7 +35,6 @@ ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
 {% endfor %}
 {% if vlayer_prover_gas_meter_url is defined %}
 {{- ' --gas-meter-url ' ~ vlayer_prover_gas_meter_url }}
-{{- ' --gas-meter-api-key ' ~ vlayer_prover_gas_meter_api_key -}}
 {% endif %}
 {% if vlayer_prover_chain_proof_url is defined %}
 {{- ' --chain-proof-url ' ~ vlayer_prover_chain_proof_url -}}
