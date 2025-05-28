@@ -3,6 +3,7 @@ use std::time::Duration;
 use async_trait::async_trait;
 use auto_impl::auto_impl;
 use call_common::Metadata;
+use derive_more::Debug;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::rpc::{Client as RawRpcClient, Error as RpcError, Method};
@@ -64,6 +65,7 @@ impl Method for SendMetadata {
 pub struct Config {
     pub url: String,
     pub time_to_live: Duration,
+    #[debug(skip)]
     pub api_key: Option<String>,
 }
 

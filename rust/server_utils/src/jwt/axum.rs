@@ -60,7 +60,7 @@ where
             return Err(Error::InvalidToken);
         }
 
-        let mut validation = Validation::new(state.algorithm);
+        let mut validation = Validation::new(state.algorithm.into());
         validation.validate_exp = true;
         let token_data = decode::<ClaimsExtractor<T>>(bearer.token(), &state.pub_key, &validation)
             .map_err(Error::Jwt)?;

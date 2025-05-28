@@ -1,0 +1,23 @@
+host = "127.0.0.1"
+port = 3000
+proof_mode = "fake"
+log_format = "plain"
+
+[[rpc_urls]]
+chain_id = 31337
+host = "127.0.0.1"
+port = 8545
+
+[chain_client]
+url = "https://test-chainservice.com"
+poll_interval = 5
+timeout = 240
+
+[auth]
+
+[auth.jwt]
+public_key = "../../../../docker/fixtures/jwt-authority.key.pub"
+algorithm = "rs256"
+
+[gas_meter]
+url = "https://dashboard.vlayer.xyz/api/webhooks/prover"

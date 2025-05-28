@@ -21,8 +21,10 @@ common = { workspace = true }
 dashmap = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
+guest_wrapper = { workspace = true }
 hex = { workspace = true }
 jsonrpsee = { workspace = true }
+jwt = { workspace = true }
 mime = { workspace = true }
 provider = { workspace = true }
 risc0-zkp = { workspace = true }
@@ -34,7 +36,12 @@ serde_with = { workspace = true, features = ["macros"] }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
-tower-http = { workspace = true, features = ["cors", "sensitive-headers", "validate-request"] }
+toml = { workspace = true }
+tower-http = { workspace = true, features = [
+    "cors",
+    "sensitive-headers",
+    "validate-request",
+] }
 tracing = { workspace = true }
 
 [dev-dependencies]

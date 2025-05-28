@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
+use derive_more::Debug;
 use derive_new::new;
 use jwt::{Algorithm, DecodingKey, Error as JwtError};
 use thiserror::Error;
@@ -15,8 +16,9 @@ pub struct Args {
     pub jwt_algorithm: Option<Algorithm>,
 }
 
-#[derive(new, Clone)]
+#[derive(new, Clone, Debug)]
 pub struct Config {
+    #[debug(skip)]
     pub public_key: DecodingKey,
     pub algorithm: Algorithm,
 }

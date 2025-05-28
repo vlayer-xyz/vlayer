@@ -1,10 +1,62 @@
+use std::path::Path;
+
 use derive_builder::Builder;
 pub use jsonwebtoken::{
-    Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation, decode, decode_header,
-    encode, errors::Error, get_current_timestamp,
+    Algorithm as JwtAlgorithm, DecodingKey, EncodingKey, Header, TokenData, Validation, decode,
+    decode_header, encode, errors::Error, get_current_timestamp,
 };
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, Display, EnumString)]
+#[serde(rename_all = "lowercase")]
+#[strum(ascii_case_insensitive)]
+pub enum Algorithm {
+    #[default]
+    RS256,
+    RS384,
+    RS512,
+    ES256,
+    ES384,
+    PS256,
+    PS384,
+    PS512,
+    EdDSA,
+}
+
+impl From<Algorithm> for JwtAlgorithm {
+    fn from(algorithm: Algorithm) -> Self {
+        match algorithm {
+            Algorithm::RS256 => Self::RS256,
+            Algorithm::RS384 => Self::RS384,
+            Algorithm::RS512 => Self::RS512,
+            Algorithm::ES256 => Self::ES256,
+            Algorithm::ES384 => Self::ES384,
+            Algorithm::PS256 => Self::PS256,
+            Algorithm::PS384 => Self::PS384,
+            Algorithm::PS512 => Self::PS512,
+            Algorithm::EdDSA => Self::EdDSA,
+        }
+    }
+}
+
+pub fn load_jwt_key(
+    public_key_path: impl AsRef<Path>,
+    algorithm: Algorithm,
+) -> anyhow::Result<DecodingKey> {
+    let bytes = std::fs::read(public_key_path.as_ref())?;
+    let key = match algorithm {
+        Algorithm::RS256
+        | Algorithm::RS384
+        | Algorithm::RS512
+        | Algorithm::PS256
+        | Algorithm::PS384
+        | Algorithm::PS512 => DecodingKey::from_rsa_pem(&bytes)?,
+        Algorithm::ES256 | Algorithm::ES384 => DecodingKey::from_ec_pem(&bytes)?,
+        Algorithm::EdDSA => DecodingKey::from_ed_pem(&bytes)?,
+    };
+    Ok(key)
+}
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, EnumString, Display)]
 #[serde(rename_all = "lowercase")]
