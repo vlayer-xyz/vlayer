@@ -2,7 +2,7 @@
 
 Welcome! 
 
-We're excited you're interested in contributing to vlayer. Whether you're here to fix bugs, improve the documentation, or suggest a new feature, your contributions make vlayer better for everyone. 
+We're excited you're interested in contributing to [vlayer repository](https://github.com/vlayer-xyz/vlayer). Whether you're here to fix bugs, improve the documentation, or suggest a new feature, your contributions make vlayer better for everyone. 
 
 This document outlines the process to get involved.
 
