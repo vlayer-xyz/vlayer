@@ -9,12 +9,12 @@ const REGEX_SIZE_LIMIT: usize = 1_000_000;
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
-pub(super) fn is_match(input: &Bytes) -> Result<Bytes> {
+pub fn is_match(input: &Bytes) -> Result<Bytes> {
     let (source, regex) = decode_args(input)?;
     Ok(regex.is_match(&source).abi_encode().into())
 }
 
-pub(super) fn capture(input: &Bytes) -> Result<Bytes> {
+pub fn capture(input: &Bytes) -> Result<Bytes> {
     let (source, regex) = decode_args(input)?;
     do_capture(&source, &regex)
         .map(|x| x.abi_encode().into())

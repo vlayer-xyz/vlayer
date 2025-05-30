@@ -2,7 +2,7 @@ pub mod email_proof;
 mod helpers;
 pub mod json;
 pub mod precompile;
-mod regex;
+pub mod regex;
 pub mod system;
 pub mod url_pattern;
 mod web_proof;
