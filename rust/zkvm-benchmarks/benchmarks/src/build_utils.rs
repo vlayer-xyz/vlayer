@@ -10,25 +10,25 @@ const DEPTH_1: usize = 1;
 const DEPTH_10: usize = 10;
 const DEPTH_100: usize = 100;
 
-enum Value {
+enum JsonValue {
     String(String),
     Integer(i64),
 }
 
 lazy_static! {
-    static ref STRING_VALUE: Value = string_value("value");
-    static ref INTEGER_VALUE: Value = int_value(1);
+    static ref STRING_VALUE: JsonValue = string_value("value");
+    static ref INTEGER_VALUE: JsonValue = int_value(1);
 }
 
-fn string_value(s: &str) -> Value {
-    Value::String(s.to_string())
+fn string_value(s: &str) -> JsonValue {
+    JsonValue::String(s.to_string())
 }
 
-const fn int_value(n: i64) -> Value {
-    Value::Integer(n)
+const fn int_value(n: i64) -> JsonValue {
+    JsonValue::Integer(n)
 }
 
-fn generate_json(target_size: usize, depth: usize, value: &Value) -> String {
+fn generate_json(target_size: usize, depth: usize, value: &JsonValue) -> String {
     let overhead = estimate_nesting_overhead(depth);
 
     // build flat body under (target_size - overhead)
@@ -47,14 +47,14 @@ fn estimate_nesting_overhead(depth: usize) -> usize {
     overhead
 }
 
-fn build_flat_body(body_size: usize, value: &Value) -> String {
+fn build_flat_body(body_size: usize, value: &JsonValue) -> String {
     let mut body = String::with_capacity(body_size);
     body.push('{');
     let mut i = 1;
     while body.len() < body_size {
         let entry = match value {
-            Value::String(s) => format!("\"key{i}\":\"{s}\","),
-            Value::Integer(n) => format!("\"key{i}\":{n},"),
+            JsonValue::String(s) => format!("\"key{i}\":\"{s}\","),
+            JsonValue::Integer(n) => format!("\"key{i}\":{n},"),
         };
         if body.len() + entry.len() + 1 > body_size {
             break;
@@ -78,6 +78,38 @@ fn build_nested_body(body: String, depth: usize) -> String {
         }
     }
     result
+}
+
+/// Generate text for benchmarking regex performance containing two distinct patterns:
+///
+/// 1. **Simple pattern**: The literal string `"needle"` - simple word matching
+/// 2. **Complex pattern**: SSN-style format `"123-45-6789"` - complex number pattern with character classes
+///
+/// The function places each pattern once at the beginning of the text, then pads the remainder
+/// with 'x' characters to reach the target size. This approach ensures consistent benchmark
+/// conditions while testing different regex complexity levels.
+///
+/// # Arguments
+/// * `size` - Target size of the generated text in bytes
+///
+/// # Returns
+/// A string containing both patterns followed by padding to reach the specified size
+pub fn generate_text_for_benchmarking_regex(size: usize) -> String {
+    let mut out = String::with_capacity(size);
+
+    // Calculate pattern size
+    let patterns = "needle 123-45-6789 ";
+    let pattern_size = patterns.len();
+
+    // Pad with 'x' characters first
+    let padding_size = size.saturating_sub(pattern_size);
+    out.push_str(&"x".repeat(padding_size));
+
+    // Add patterns at the end
+    out.push_str("needle "); // Simple pattern
+    out.push_str("123-45-6789 "); // Complex pattern
+
+    out
 }
 
 #[cfg(test)]

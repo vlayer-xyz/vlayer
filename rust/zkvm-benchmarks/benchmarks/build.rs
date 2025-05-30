@@ -11,7 +11,13 @@ struct JsonConfig {
     filename: &'static str,
     size_bytes: usize,
     nesting_depth: usize,
-    value: &'static Value,
+    value: &'static JsonValue,
+}
+
+#[derive(new)]
+struct RegexConfig {
+    filename: &'static str,
+    size_bytes: usize,
 }
 
 lazy_static! {
@@ -25,6 +31,12 @@ lazy_static! {
         JsonConfig::new("10kb_100_level.json", TEN_KB, DEPTH_100, &STRING_VALUE),
         JsonConfig::new("10kb_with_numbers.json", TEN_KB, DEPTH_0, &INTEGER_VALUE),
     ];
+    static ref REGEX_CONFIGS: Vec<RegexConfig> = vec![
+        RegexConfig::new("100b.txt", B_100),
+        RegexConfig::new("1kb.txt", KB),
+        RegexConfig::new("10kb.txt", TEN_KB),
+        RegexConfig::new("100kb.txt", HUNDRED_KB),
+    ];
 }
 
 fn main() {
@@ -34,11 +46,27 @@ fn main() {
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR is not set");
     let out = Path::new(&out_dir);
 
+    generate_json_files(out);
+    generate_regex_files(out);
+}
+
+fn write_file(out_dir: &Path, filename: &str, content: &str) {
+    #[allow(clippy::panic)]
+    fs::write(out_dir.join(filename), content)
+        .unwrap_or_else(|e| panic!("failed to write {filename}: {e}"));
+    println!("→ generated {}/{} ({} bytes)", out_dir.display(), filename, content.len());
+}
+
+fn generate_json_files(out_dir: &Path) {
     for config in JSON_CONFIGS.iter() {
         let json = generate_json(config.size_bytes, config.nesting_depth, config.value);
-        #[allow(clippy::panic)]
-        fs::write(out.join(config.filename), &json)
-            .unwrap_or_else(|e| panic!("failed to write {}: {e}", config.filename));
-        println!("→ generated {out_dir}/{} ({} bytes)", config.filename, json.len());
+        write_file(out_dir, config.filename, &json);
+    }
+}
+
+fn generate_regex_files(out_dir: &Path) {
+    for config in REGEX_CONFIGS.iter() {
+        let text = generate_text_for_benchmarking_regex(config.size_bytes);
+        write_file(out_dir, config.filename, &text);
     }
 }
