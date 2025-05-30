@@ -243,6 +243,30 @@ export const testData = [
   },
   {
     input: {
+      isZkProvingDone: false,
+      history: [
+        { url: "https://example.com/start", ready: true },
+        { url: "https://example.com/redirect", ready: true },
+        { url: "https://example.com/path/expect", ready: true },
+        { url: "https://example.com/notarize", ready: true },
+      ] as BrowsingHistoryItem[],
+      activeTabContext: {
+        url: "https://example.com/path/expect",
+        innerHTML: "<button data-clicked='false'>Click here now</button>",
+      },
+      alreadyCompletedStepsCount: 4,
+      id: "Once step was completed, it will stay completed",
+    },
+    output: [
+      StepStatus.Completed,
+      StepStatus.Completed,
+      StepStatus.Completed,
+      StepStatus.Completed,
+      StepStatus.Current,
+    ],
+  },
+  {
+    input: {
       isZkProvingDone: true,
       history: [
         { url: "https://example.com/start", ready: true },
