@@ -24,7 +24,7 @@ include_generated!(JSON_100KB, "100kb.json");
 include_generated!(JSON_10K_LVL_1, "10k_1_level.json");
 include_generated!(JSON_10K_LVL_10, "10k_10_level.json");
 include_generated!(JSON_10K_LVL_100, "10k_100_level.json");
-// include_generated!(JSON_10K_INT_VALUES, "10kb_with_numbers.json");
+include_generated!(JSON_10K_INT_VALUES, "10kb_with_numbers.json");
 
 lazy_static::lazy_static! {
     static ref LVL_1_KEY:  String = create_nested_key_path(1, KEY);
@@ -47,7 +47,7 @@ fn benchmark_get_string(json_body: &str, path: &str) {
     get_string(&calldata).expect("get_string failed");
 }
 
-fn _benchmark_get_int(json_body: &str, path: &str) {
+fn benchmark_get_int(json_body: &str, path: &str) {
     let calldata: Bytes = [json_body, path].abi_encode().into();
     get_int(&calldata).expect("get_int failed");
 }
@@ -77,10 +77,10 @@ pub fn benchmarks() -> Vec<Benchmark> {
             || benchmark_get_string(JSON_10K_LVL_100, &LVL_100_KEY),
             6_197_000,
         ),
-        // Benchmark::new(
-        //     "json_get_int_10kb",
-        //     || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
-        //     2_632_000,
-        // ),
+        Benchmark::new(
+            "json_get_int_10kb",
+            || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
+            3_896_399,
+        ),
     ]
 }
