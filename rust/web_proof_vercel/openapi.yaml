@@ -1,0 +1,89 @@
+openapi: 3.0.4
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    Vlayer server-side web-proof serverless function (for hackathons/testing only!)
+
+    Some useful links:
+    - [vlayer](https://github.com/vlayer-xyz/vlayer)
+  license:
+    name: Business Source License
+    url: https://github.com/vlayer-xyz/vlayer/blob/main/LICENSE
+  version: "1.1"
+servers:
+  - url: https://web-proof-vercel.vercel.app
+paths:
+  /api/handler:
+    post:
+      tags:
+        - pet
+      summary: Generate a web-proof
+      description: Generate a web-proof
+      requestBody:
+        description: Generate a web-proof
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebProof'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Presentation'
+        '503':
+          description: Invalid method
+        '400':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    WebProof:
+      type: object
+      properties:
+        url:
+          type: string
+          example: "https://data-api.binance.vision/api/v3/exchangeInfo?symbol=ETHUSDC"
+          description: Full URL of the request to notarize
+        host:
+          type: string
+          example: "127.0.0.1"
+          description: Host address, if different from the domain provided in URL
+        notary:
+          type: string
+          example: https://test-notary.vlayer.xyz
+          description: Full notary URL
+        method:
+          type: string
+          enum: [GET, POST]
+          description: HTTP method to use (GET by default)
+        headers:
+          type: array
+          items:
+            type: string
+            description: HTTP header
+            example: "Content-Type: application/json"
+          description: Additional headers for the HTTP request
+        data:
+          type: string
+          description: HTTP data to be sent with the request (the body)
+        max_sent_data:
+          type: integer
+          description: Max sent data (TLS notary config option)
+        max_recv_data:
+          type: integer
+          description: Max received data (TLS notary config option)
+      required: [url, headers]
+    Presentation:
+      type: object
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+

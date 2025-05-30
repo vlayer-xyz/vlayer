@@ -1,0 +1,23 @@
+[workspace]
+
+[package]
+name = "web_proof_vercel"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1"
+env_logger = "0.11"
+http = "1"
+openssl = { version = "0.10", features = ["vendored"] }
+reqwest = "0.12"
+tokio = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["raw_value"] }
+strum = { version = "0.26", features = ["derive"] }
+vercel_runtime = "1"
+web_prover = { path = "../web_prover" }
+
+[[bin]]
+name = "handler"
+path = "api/handler.rs"

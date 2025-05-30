@@ -7,7 +7,7 @@ edition = "2024"
 anyhow = { workspace = true }
 derivative = { workspace = true }
 risc0-zkvm = { workspace = true }
-strum = { workspace = true, features = ["derive"] }
+strum = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
