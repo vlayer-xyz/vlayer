@@ -6,7 +6,7 @@ use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
 use call_precompiles::json::{get_int, get_string};
 
-const KEY: &str = "level0.key1";
+const KEY: &str = "key1";
 
 use crate::Benchmark;
 
@@ -27,9 +27,9 @@ include_generated!(JSON_10K_LVL_100, "10k_100_level.json");
 // include_generated!(JSON_10K_INT_VALUES, "10kb_with_numbers.json");
 
 lazy_static::lazy_static! {
-    static ref LVL_1_KEY:  String = create_nested_key_path(1,  "key1");
-    static ref LVL_10_KEY: String = create_nested_key_path(10, "key1");
-    static ref LVL_100_KEY:String = create_nested_key_path(100,"key1");
+    static ref LVL_1_KEY:  String = create_nested_key_path(1, KEY);
+    static ref LVL_10_KEY: String = create_nested_key_path(10, KEY);
+    static ref LVL_100_KEY:String = create_nested_key_path(100, KEY);
 }
 
 fn create_nested_key_path(depth: usize, key_name: &str) -> String {
