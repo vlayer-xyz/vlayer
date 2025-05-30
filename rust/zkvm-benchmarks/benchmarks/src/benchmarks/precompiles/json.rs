@@ -50,28 +50,28 @@ fn benchmark_get_int(json_body: &str, path: &str) {
 
 pub fn benchmarks() -> Vec<Benchmark> {
     vec![
-        Benchmark::new("json_get_string_100b", || benchmark_get_string(JSON_100B, KEY), 40_000),
-        Benchmark::new("json_get_string_1kb", || benchmark_get_string(JSON_1KB, KEY), 214_000),
-        Benchmark::new("json_get_string_10kb", || benchmark_get_string(JSON_10KB, KEY), 2_632_000),
+        Benchmark::new("json_get_string_100b", || benchmark_get_string(JSON_100B, KEY), 38_000),
+        Benchmark::new("json_get_string_1kb", || benchmark_get_string(JSON_1KB, KEY), 210_000),
+        Benchmark::new("json_get_string_10kb", || benchmark_get_string(JSON_10KB, KEY), 2_620_000),
         Benchmark::new(
             "json_get_string_100kb",
             || benchmark_get_string(JSON_100KB, KEY),
-            31_363_000,
+            31_434_000,
         ),
         Benchmark::new(
             "json_get_string_10k_1_lvl",
             || benchmark_get_string(JSON_10K_LVL_1, &LVL_1_KEY),
-            2_716_000,
+            2_614_000,
         ),
         Benchmark::new(
             "json_get_string_10k_10_lvl",
             || benchmark_get_string(JSON_10K_LVL_10, &LVL_10_KEY),
-            3_016_000,
+            2_633_000,
         ),
         Benchmark::new(
             "json_get_string_10k_100_lvl",
             || benchmark_get_string(JSON_10K_LVL_100, &LVL_100_KEY),
-            6_197_000,
+            2_659_000,
         ),
         Benchmark::new(
             "json_get_int_10kb",
