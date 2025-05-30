@@ -1,6 +1,6 @@
 pub mod email_proof;
 mod helpers;
-mod json;
+pub mod json;
 pub mod precompile;
 mod regex;
 pub mod system;
