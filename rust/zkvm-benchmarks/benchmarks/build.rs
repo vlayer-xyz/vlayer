@@ -3,6 +3,18 @@ use std::{env, fs, path::Path};
 use derive_new::new;
 use lazy_static::lazy_static;
 
+include!("src/build_utils.rs");
+
+const B_100: usize = 100;
+const KB: usize = 1024;
+const TEN_KB: usize = 10 * KB;
+const HUNDRED_KB: usize = 100 * KB;
+
+const DEPTH_0: usize = 0;
+const DEPTH_1: usize = 1;
+const DEPTH_10: usize = 10;
+const DEPTH_100: usize = 100;
+
 #[derive(new)]
 struct JsonConfig {
     filename: &'static str,
@@ -12,13 +24,13 @@ struct JsonConfig {
 
 lazy_static! {
     static ref JSON_CONFIGS: Vec<JsonConfig> = vec![
-        JsonConfig::new("100b.json", 100, 0),
-        JsonConfig::new("1kb.json", 1024, 0),
-        JsonConfig::new("10kb.json", 10 * 1024, 0),
-        JsonConfig::new("100kb.json", 100 * 1024, 0),
-        JsonConfig::new("10k_1_level.json", 10 * 1024, 1),
-        JsonConfig::new("10k_10_level.json", 10 * 1024, 10),
-        JsonConfig::new("10k_100_level.json", 10 * 1024, 100),
+        JsonConfig::new("100b.json", B_100, DEPTH_0),
+        JsonConfig::new("1kb.json", KB, DEPTH_0),
+        JsonConfig::new("10kb.json", TEN_KB, DEPTH_0),
+        JsonConfig::new("100kb.json", HUNDRED_KB, DEPTH_0),
+        JsonConfig::new("10k_1_level.json", TEN_KB, DEPTH_1),
+        JsonConfig::new("10k_10_level.json", TEN_KB, DEPTH_10),
+        JsonConfig::new("10k_100_level.json", TEN_KB, DEPTH_100),
     ];
 }
 
@@ -36,38 +48,4 @@ fn main() {
             .unwrap_or_else(|e| panic!("failed to write {}: {}", config.filename, e));
         println!("→ generated {out_dir}/{} ({} bytes)", config.filename, json.len());
     }
-}
-
-fn generate_json(target_size: usize, depth: usize) -> String {
-    // estimate overhead of nesting
-    let mut overhead = 0;
-    for lvl in 0..=depth {
-        // each nesting adds {"levelN":<…>}
-        overhead += format!("{{\"level{lvl}\":").len() + 1;
-    }
-
-    // build flat body under (target_size - overhead)
-    let limit = target_size.saturating_sub(overhead);
-    let mut body = String::with_capacity(limit);
-    body.push('{');
-    let mut i = 1;
-    while body.len() < limit {
-        let entry = format!("\"key{i}\":\"value\",");
-        if body.len() + entry.len() + 1 > limit {
-            break;
-        }
-        body.push_str(&entry);
-        i += 1;
-    }
-    if body.ends_with(',') {
-        body.pop();
-    }
-    body.push('}');
-
-    // wrap in nested levels
-    let mut result = body;
-    for lvl in (0..=depth).rev() {
-        result = format!("{{\"level{lvl}\":{result}}}");
-    }
-    result
 }
