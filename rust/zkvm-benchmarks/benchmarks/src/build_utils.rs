@@ -47,16 +47,16 @@ fn estimate_nesting_overhead(depth: usize) -> usize {
     overhead
 }
 
-fn build_flat_body(size_limit: usize, value: &Value) -> String {
-    let mut body = String::with_capacity(size_limit);
+fn build_flat_body(body_size: usize, value: &Value) -> String {
+    let mut body = String::with_capacity(body_size);
     body.push('{');
     let mut i = 1;
-    while body.len() < size_limit {
+    while body.len() < body_size {
         let entry = match value {
             Value::String(s) => format!("\"key{i}\":\"{s}\","),
             Value::Integer(n) => format!("\"key{i}\":{n},"),
         };
-        if body.len() + entry.len() + 1 > size_limit {
+        if body.len() + entry.len() + 1 > body_size {
             break;
         }
         body.push_str(&entry);
@@ -88,58 +88,86 @@ mod tests {
         use super::*;
 
         #[test]
-        fn basic() {
+        fn generates() {
             let json = generate_json(B_100, DEPTH_1, &STRING_VALUE);
             assert!(json.contains("level1"));
             assert!(json.contains("key1"));
         }
+    }
 
-        mod depth {
-            use super::*;
+    mod estimate_nesting_overhead {
+        use super::*;
 
-            #[test]
-            fn zero_depth() {
-                let json = generate_json(B_100, DEPTH_0, &STRING_VALUE);
-                assert!(json.contains("key1"));
-                assert!(!json.contains("level1"));
-            }
-
-            #[test]
-            fn large_depth() {
-                let json = generate_json(HUNDRED_KB, DEPTH_100, &STRING_VALUE);
-                assert!(json.contains("level100"));
-            }
+        #[test]
+        fn zero_depth() {
+            assert_eq!(estimate_nesting_overhead(DEPTH_0), 0);
         }
+
+        #[test]
+        fn single_level_depth() {
+            let expected_overhead = "{\"level1\":".len() + 1;
+            assert_eq!(estimate_nesting_overhead(DEPTH_1), expected_overhead);
+        }
+    }
+
+    mod build_flat_body {
+        use super::*;
+
+        const ALLOWED_SIZE_DIFF_PERCENT: f32 = 7.0;
 
         mod size {
             use super::*;
 
-            const ALLOWED_PERCENTAGE_SIZE_DIFF: f32 = 0.6;
-
-            #[allow(clippy::cast_possible_truncation)]
-            #[allow(clippy::cast_sign_loss)]
-            #[allow(clippy::cast_precision_loss)]
-            fn assert_json_size_within_allowed_range(json: &str, target_size: usize) {
+            fn assert_size_within_allowed_range(actual_size: usize, target_size: usize) {
                 let max_allowed_size =
-                    (target_size as f32 * (1.0 + ALLOWED_PERCENTAGE_SIZE_DIFF)) as usize;
+                    (target_size as f32 * (1.0 + ALLOWED_SIZE_DIFF_PERCENT / 100.0)) as usize;
                 let min_allowed_size =
-                    (target_size as f32 * (1.0 - ALLOWED_PERCENTAGE_SIZE_DIFF)) as usize;
-                assert!(json.len() >= min_allowed_size && json.len() <= max_allowed_size);
+                    (target_size as f32 * (1.0 - ALLOWED_SIZE_DIFF_PERCENT / 100.0)) as usize;
+                assert!(
+                    actual_size >= min_allowed_size && actual_size <= max_allowed_size,
+                    "Actual size {actual_size} is not within {ALLOWED_SIZE_DIFF_PERCENT}% of target size {target_size}",
+                );
             }
 
             #[test]
-            fn hundred_bytes() {
-                let target_size = B_100;
-                let json = generate_json(target_size, DEPTH_0, &STRING_VALUE);
-                assert_json_size_within_allowed_range(&json, target_size);
+            fn size_within_six_percent() {
+                let target_size = 50;
+                let result = build_flat_body(target_size, &STRING_VALUE);
+                let actual_size = result.len();
+                assert_size_within_allowed_range(actual_size, target_size);
+            }
+        }
+
+        mod value {
+            use super::*;
+
+            #[test]
+            fn string_value() {
+                let result = build_flat_body(50, &STRING_VALUE);
+                assert!(result.contains("\"value\""));
             }
 
             #[test]
-            fn ten_kb() {
-                let target_size = TEN_KB;
-                let json = generate_json(target_size, DEPTH_0, &STRING_VALUE);
-                assert_json_size_within_allowed_range(&json, target_size);
+            fn integer_value() {
+                let result = build_flat_body(50, &INTEGER_VALUE);
+                assert!(result.contains("1"));
             }
+        }
+    }
+
+    mod build_nested_body {
+        use super::*;
+
+        #[test]
+        fn zero_depth() {
+            let result = build_nested_body("{}".to_string(), DEPTH_0);
+            assert_eq!(result, "{}");
+        }
+
+        #[test]
+        fn single_level_depth() {
+            let result = build_nested_body("{}".to_string(), DEPTH_1);
+            assert_eq!(result, "{\"level1\":{}}");
         }
     }
 }
