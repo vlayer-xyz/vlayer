@@ -28,6 +28,12 @@ The `onlyVerified` modifier takes two arguments:
 1. `Prover` contract address 
 2. the signature of the `Prover` function used to generate the proof
 
+Under the hood, `onlyVerified` reads the submitted Proof and public inputs from `msg.data`. It ensures that:
+- The proof is valid and passes verification
+- The public inputs match values returned from `Prover`
+- The proof was created by the specified `Prover` contract and the specified function
+This prevents invalid, tampered, or mismatched proofs from being accepted by the contract.
+
 ### Proof argument
 Passing `Proof` as the first argument to the *verification function* is mandatory. Note that even though the proof is not used directly in the body of the verified function, `onlyVerified` will have access to it via `msg.data`.
 

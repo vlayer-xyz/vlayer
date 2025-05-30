@@ -12,7 +12,7 @@ contract SimpleProver is Prover {
         TOKEN = _token;
     }
 
-    function balance(address _owner) public returns (Proof memory, address, uint256) {
+    function balance(address _owner) public view returns (Proof memory, address, uint256) {
         uint256 ownerBalance = TOKEN.balanceOf(_owner);
 
         return (proof(), _owner, ownerBalance);
