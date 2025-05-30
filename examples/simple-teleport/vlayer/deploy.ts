@@ -64,7 +64,6 @@ await writeEnvVariables(".env", {
   VITE_VERIFIER_ADDRESS: verifier,
   VITE_CHAIN_NAME: config.chainName,
   VITE_PROVER_URL: config.proverUrl,
-  VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_TOKENS_TO_CHECK: `"${JSON.stringify(tokensToCheck)}"`,
   VITE_DEFAULT_TOKEN_HOLDER: teleportConfig.tokenHolder,
