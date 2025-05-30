@@ -41,13 +41,4 @@ fn main() {
             .unwrap_or_else(|e| panic!("failed to write {}: {e}", config.filename));
         println!("→ generated {out_dir}/{} ({} bytes)", config.filename, json.len());
     }
-
-    let json_with_integer_value = generate_json(TEN_KB, DEPTH_0, &INTEGER_VALUE);
-    #[allow(clippy::panic)]
-    fs::write(out.join("10kb_with_numbers.json"), &json_with_integer_value)
-        .unwrap_or_else(|e| panic!("failed to write 10kb_with_numbers.json: {e}"));
-    println!(
-        "→ generated {out_dir}/10kb_with_numbers.json ({} bytes)",
-        json_with_integer_value.len()
-    );
 }

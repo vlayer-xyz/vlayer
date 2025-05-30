@@ -1,7 +1,3 @@
-#![allow(clippy::all)]
-
-// src/lib.rs or src/main.rs
-
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
 use call_precompiles::json::{get_int, get_string};
