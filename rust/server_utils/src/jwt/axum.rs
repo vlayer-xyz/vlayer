@@ -10,7 +10,7 @@ use axum_extra::{
 };
 use derive_more::Deref;
 use derive_new::new;
-use jwt::{Algorithm, DecodingKey, Error as JwtError, Validation, decode, decode_header};
+use jwt::{DecodingKey, Error as JwtError, JwtAlgorithm, Validation, decode, decode_header};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
@@ -32,7 +32,7 @@ pub enum Error {
 #[derive(new, Clone)]
 pub struct State {
     pub_key: DecodingKey,
-    algorithm: Algorithm,
+    algorithm: JwtAlgorithm,
 }
 
 const HEADER_TYP: &str = "JWT";
@@ -60,7 +60,7 @@ where
             return Err(Error::InvalidToken);
         }
 
-        let mut validation = Validation::new(state.algorithm.into());
+        let mut validation = Validation::new(state.algorithm);
         validation.validate_exp = true;
         let token_data = decode::<ClaimsExtractor<T>>(bearer.token(), &state.pub_key, &validation)
             .map_err(Error::Jwt)?;

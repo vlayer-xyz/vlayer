@@ -52,7 +52,7 @@ members = [
 
 [profile.release]
 debug = "full"
-lto = false # debug + LTO leads to ICE in 1.84: https://github.com/rust-lang/rust/issues/135332
+lto = false    # debug + LTO leads to ICE in 1.84: https://github.com/rust-lang/rust/issues/135332
 
 [workspace.dependencies]
 alloy-chains = "0.2.0"
@@ -60,7 +60,10 @@ alloy-dyn-abi = "=0.8.20"
 alloy-eips = { version = "0.11.0", features = ["serde"] }
 alloy-consensus = { version = "0.11.0", features = ["serde"] }
 alloy-json-abi = "=0.8.20"
-alloy-primitives = { version = "=0.8.20", default-features = false, features = ["serde", "tiny-keccak"] }
+alloy-primitives = { version = "=0.8.20", default-features = false, features = [
+    "serde",
+    "tiny-keccak",
+] }
 alloy-rlp = { version = "=0.3.11", default-features = false }
 alloy-rlp-derive = { version = "=0.3.11", default-features = false }
 alloy-serde = "0.11.0"
@@ -85,6 +88,7 @@ color-eyre = "0.6.3"
 sha3 = "0.10.8"
 colored = "3.0.0"
 comfy-table = "7.1.1"
+config = { version = "0.15.1", features = ["toml"] }
 digest = "0.10.7"
 cfg-if = "1.0.0"
 criterion = "0.5.1"
@@ -93,7 +97,13 @@ ctor = "0.2.8"
 dashmap = "6.1.0"
 delegate = "0.13.1"
 derive_builder = "0.12"
-derive_more = { version = "1.0.0", features = ["debug", "into", "from", "into_iterator", "deref"] }
+derive_more = { version = "1.0.0", features = [
+    "debug",
+    "into",
+    "from",
+    "into_iterator",
+    "deref",
+] }
 derive-new = "0.7.0"
 derivative = "2.2.0"
 dotenvy = "0.15.7"
@@ -125,7 +135,11 @@ indicatif = "0.17.8"
 inferno = "0.12.1"
 itertools = { version = "0.14.0" }
 jmespath = { git = "https://github.com/vlayer-xyz/jmespath.rs", rev = "5e7070f563bd4a81f242d51b648f2c677898b75d" }
-jsonrpsee = { version = "0.24.8", features = ["server-core", "macros", "http-client"] }
+jsonrpsee = { version = "0.24.8", features = [
+    "server-core",
+    "macros",
+    "http-client",
+] }
 jsonwebtoken = { version = "9.3.1", features = ["use_pem"] }
 lazy_static = "1.5.0"
 libmdbx = "0.5.3"
@@ -148,7 +162,9 @@ rangeset = { version = "0.1.1" }
 rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
-revm = { version = "=19.4.0", default-features = false, features = ["optimism"] }
+revm = { version = "=19.4.0", default-features = false, features = [
+    "optimism",
+] }
 risc0-build = "=2.1.1"
 risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "cf3d1381f076f1094455a0fc6ebd5bd172424d09" }
 risc0-zkp = { version = "=2.0.1", default-features = false }
@@ -180,14 +196,20 @@ tlsn-common = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alp
 tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.9" }
 tlsn-prover = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.9" }
 tlsn-utils = { git = "https://github.com/tlsnotary/tlsn-utils", rev = "6650a95" }
-tokio = { version = "1.43.0", default-features = false, features = ["rt-multi-thread"] }
+tokio = { version = "1.43.0", default-features = false, features = [
+    "rt-multi-thread",
+] }
 tokio-util = "0.7.13"
 toml = "0.8.19"
 tower = "0.5.2"
 tower-http = "0.6.2"
 tower-request-id = "0.3.0"
 tracing = { version = "0.1", default-features = false }
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"], default-features = false }
+tracing-subscriber = { version = "0.3", features = [
+    "env-filter",
+    "fmt",
+    "json",
+], default-features = false }
 quick-junit = "0.5.0"
 url = { version = "2.5", default-features = false }
 urlpattern = "0.3.0"

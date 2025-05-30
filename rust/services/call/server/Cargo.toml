@@ -10,6 +10,7 @@ call_server_lib = { workspace = true }
 chain_client = { workspace = true }
 clap = { workspace = true, features = ["derive", "env", "string"] }
 common = { workspace = true }
+config = { workspace = true }
 guest_wrapper = { workspace = true }
 hex = { workspace = true }
 humantime = { workspace = true }

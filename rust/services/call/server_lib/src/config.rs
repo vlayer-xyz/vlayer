@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::BTreeMap,
     net::{Ipv4Addr, SocketAddr as RawSocketAddr, SocketAddrV4},
     path::Path,
     str::FromStr,
@@ -10,16 +10,14 @@ use alloy_primitives::{ChainId, hex::ToHexExt};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use chain_client::ChainClientConfig;
-use common::GuestElf;
-use common::LogFormat;
-use derive_more::{Debug, From};
+use common::{GuestElf, LogFormat};
+use derive_more::{Debug, From, Into};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
 use jwt::{Algorithm, load_jwt_key};
 use risc0_zkp::core::digest::Digest;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
 use thiserror::Error;
-use tracing::{info, warn};
 
 use crate::gas_meter::Config as GasMeterConfig;
 
@@ -27,39 +25,74 @@ pub const CHAIN_CLIENT_POLL_INTERVAL: u64 = 5;
 pub const CHAIN_CLIENT_TIMEOUT: u64 = 240;
 pub const GAS_METER_TIME_TO_LIVE: u64 = 3600;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct GasMeterOptions {
     pub url: String,
+    pub api_key: String,
     pub time_to_live: Option<u64>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AuthOptions {
     Jwt(JwtOptions),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct JwtOptions {
     pub public_key: String,
     pub algorithm: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ChainClientOptions {
     pub url: String,
     pub poll_interval: Option<u64>,
     pub timeout: Option<u64>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct RpcUrl {
-    pub chain_id: ChainId,
-    pub host: String,
-    pub port: u16,
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum RpcUrlOrString {
+    RpcUrl(RpcUrl),
+    String(String),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Into)]
+#[into((ChainId, String))]
+pub struct RpcUrl {
+    pub chain_id: ChainId,
+    pub url: String,
+}
+
+impl FromStr for RpcUrl {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        if parts.len() < 2 {
+            anyhow::bail!("expected <chain-id>:<url>");
+        }
+        let chain_id: ChainId = parts[0]
+            .parse()
+            .map_err(|_| anyhow::anyhow!("Invalid chain ID: {}", parts[0]))?;
+        let url = parts[1].to_string();
+        Ok(Self { chain_id, url })
+    }
+}
+
+impl TryFrom<RpcUrlOrString> for RpcUrl {
+    type Error = anyhow::Error;
+
+    fn try_from(value: RpcUrlOrString) -> Result<Self, Self::Error> {
+        match value {
+            RpcUrlOrString::RpcUrl(rpc) => Ok(rpc),
+            RpcUrlOrString::String(s) => Self::from_str(&s),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ConfigOptions {
     /// Host
     pub host: String,
@@ -68,7 +101,8 @@ pub struct ConfigOptions {
     /// Proof mode to use. Possible values are ["fake", "groth16"]
     pub proof_mode: ProofMode,
     /// RPC mappings
-    pub rpc_urls: Vec<RpcUrl>,
+    #[serde(default)]
+    pub rpc_urls: Vec<RpcUrlOrString>,
     /// Chain client config
     pub chain_client: Option<ChainClientOptions>,
     /// Authentication
@@ -81,7 +115,7 @@ pub struct ConfigOptions {
 
 pub fn parse_config_file(path: impl AsRef<Path>) -> anyhow::Result<ConfigOptions> {
     let contents = std::fs::read_to_string(path.as_ref())?;
-    let config_opts = toml::from_str(&contents)?;
+    let config_opts: ConfigOptions = toml::from_str(&contents)?;
     Ok(config_opts)
 }
 
@@ -110,7 +144,7 @@ impl TryFrom<GasMeterOptions> for GasMeterConfig {
     type Error = anyhow::Error;
 
     fn try_from(opts: GasMeterOptions) -> Result<Self, Self::Error> {
-        let api_key = std::env::var("GAS_METER_API_KEY")?;
+        let api_key = opts.api_key;
         let time_to_live = Duration::from_secs(opts.time_to_live.unwrap_or(GAS_METER_TIME_TO_LIVE));
         Ok(Self::new(opts.url, time_to_live, Some(api_key)))
     }
@@ -122,13 +156,9 @@ impl TryFrom<JwtOptions> for JwtConfig {
     fn try_from(opts: JwtOptions) -> Result<Self, Self::Error> {
         let algorithm = Algorithm::from_str(&opts.algorithm)?;
         let public_key = load_jwt_key(&opts.public_key, algorithm)?;
-        info!(
-            "Using JWT-based authorization with public key '{}' and algorithm '{}'.",
-            opts.public_key, opts.algorithm
-        );
         Ok(Self {
             public_key,
-            algorithm,
+            algorithm: algorithm.into(),
         })
     }
 }
@@ -152,10 +182,6 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
     type Error = anyhow::Error;
 
     fn try_from(opts: ConfigOptionsWithVersion) -> Result<Self, Self::Error> {
-        if opts.config.auth.is_none() {
-            warn!("Running without authorization.");
-        }
-
         let gas_meter_config: Option<GasMeterConfig> =
             opts.config.gas_meter.map(TryInto::try_into).transpose()?;
         let jwt_config = opts
@@ -166,6 +192,12 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             })
             .transpose()?;
         let chain_client_config = opts.config.chain_client.map(Into::into);
+        let rpc_urls: Vec<RpcUrl> = opts
+            .config
+            .rpc_urls
+            .into_iter()
+            .map(TryInto::<RpcUrl>::try_into)
+            .collect::<Result<_, _>>()?;
 
         Ok(ConfigBuilder::default()
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
@@ -174,7 +206,7 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             .with_port(opts.config.port)
             .with_proof_mode(opts.config.proof_mode)
             .with_semver(opts.semver)
-            .with_rpc_mappings2(opts.config.rpc_urls)
+            .with_rpc_mappings(rpc_urls)
             .with_gas_meter_config(gas_meter_config)
             .with_jwt_config(jwt_config)
             .with_chain_client_config(chain_client_config)
@@ -190,7 +222,7 @@ pub struct Error(String);
 pub struct Config {
     pub socket_addr: RawSocketAddr,
     #[debug(skip)]
-    pub rpc_urls: HashMap<ChainId, String>,
+    pub rpc_urls: BTreeMap<ChainId, String>,
     pub proof_mode: ProofMode,
     pub chain_client_config: Option<ChainClientConfig>,
     pub max_calldata_size: usize,
@@ -228,11 +260,11 @@ impl Default for SocketAddr {
     }
 }
 
-pub struct RpcUrls(HashMap<ChainId, String>);
+pub struct RpcUrls(Vec<(ChainId, String)>);
 
 impl Default for RpcUrls {
     fn default() -> Self {
-        Self(HashMap::from([(TEST_CHAIN_ID, "http://localhost:8545".to_string())]))
+        Self(vec![(TEST_CHAIN_ID, "http://localhost:8545".to_string())])
     }
 }
 
@@ -285,23 +317,11 @@ impl ConfigBuilder {
     }
 
     #[must_use]
-    pub fn with_rpc_mappings2(mut self, mappings: impl IntoIterator<Item = RpcUrl>) -> Self {
-        self.rpc_urls.0.extend(mappings.into_iter().map(
-            |RpcUrl {
-                 chain_id,
-                 host,
-                 port,
-             }| (chain_id, format!("{host}:{port}")),
-        ));
-        self
-    }
-
-    #[must_use]
     pub fn with_rpc_mappings(
         mut self,
-        mappings: impl IntoIterator<Item = (ChainId, String)>,
+        mappings: impl IntoIterator<Item = impl Into<(ChainId, String)>>,
     ) -> Self {
-        self.rpc_urls.0.extend(mappings);
+        self.rpc_urls.0.extend(mappings.into_iter().map(Into::into));
         self
     }
 
@@ -368,10 +388,11 @@ impl ConfigBuilder {
         let call_guest_elf = call_guest_elf.ok_or(Error("call_guest_elf".into()))?;
         let chain_guest_ids = chain_guest_ids.ok_or(Error("chain_guest_ids".into()))?;
         let semver = semver.ok_or(Error("semver".into()))?;
+        let rpc_urls: BTreeMap<ChainId, String> = rpc_urls.0.into_iter().collect();
 
         Ok(Config {
             socket_addr: socket_addr.0,
-            rpc_urls: rpc_urls.0,
+            rpc_urls,
             proof_mode,
             chain_client_config,
             max_calldata_size: max_calldata_size.0,
@@ -410,19 +431,20 @@ pub(crate) mod tests {
 
     #[test]
     fn local_testnet_rpc_url_always_there() {
-        let config = config_builder().with_rpc_mappings(vec![]).build().unwrap();
+        let config = config_builder().build().unwrap();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://localhost:8545");
     }
 
     #[test]
     fn local_testnet_rpc_url_can_be_overwritten() {
-        let config = config_builder()
-            .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
-            .build()
-            .unwrap();
+        let rpc = RpcUrl {
+            chain_id: TEST_CHAIN_ID,
+            url: "http://127.0.0.1:8666".to_string(),
+        };
+        let config = config_builder().with_rpc_mappings([rpc]).build().unwrap();
 
-        assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "NEW");
+        assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://127.0.0.1:8666");
     }
 
     #[test]

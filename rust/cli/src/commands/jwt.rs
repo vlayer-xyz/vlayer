@@ -114,7 +114,7 @@ fn encode_jwt(args: Encode) -> Result<()> {
     info!("{claims:#?}");
 
     let header = Header {
-        alg: Algorithm::RS256,
+        alg: Algorithm::RS256.into(),
         ..Default::default()
     };
 
@@ -137,7 +137,7 @@ fn decode_jwt(args: Decode) -> Result<()> {
 
     info!("{header:#?}");
 
-    let mut validation = Validation::new(Algorithm::RS256);
+    let mut validation = Validation::new(Algorithm::RS256.into());
     let pub_key = pub_key.unwrap_or_else(|| {
         validation.insecure_disable_signature_validation();
         DecodingKey::from_secret(b"")

@@ -5,8 +5,7 @@ log_format = "plain"
 
 [[rpc_urls]]
 chain_id = 31337
-host = "127.0.0.1"
-port = 8545
+url = "http://127.0.0.1:8545"
 
 [chain_client]
 url = "https://test-chainservice.com"
@@ -21,3 +20,4 @@ algorithm = "rs256"
 
 [gas_meter]
 url = "https://dashboard.vlayer.xyz/api/webhooks/prover"
+api_key = "deadbeef"
