@@ -4,8 +4,6 @@ use derive_new::new;
 
 include!("src/build_utils.rs");
 
-include!("src/build_utils.rs");
-
 #[derive(new)]
 struct JsonConfig {
     filename: &'static str,
