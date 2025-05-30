@@ -16,7 +16,7 @@ use serde_json::Value;
 use tlsn_core::transcript::Transcript;
 pub use verify::verify_presentation;
 
-pub const TLSN_VERSION: &str = "0.1.0-alpha.9";
+pub const TLSN_VERSION: &str = "0.1.0-alpha.10";
 pub const TLSN_VERSION_WITH_V_PREFIX: &str = concat!("v", TLSN_VERSION);
 
 pub struct RedactionConfig {
