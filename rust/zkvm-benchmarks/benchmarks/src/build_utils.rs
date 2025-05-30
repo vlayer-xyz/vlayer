@@ -118,6 +118,9 @@ mod tests {
         mod size {
             use super::*;
 
+            #[allow(clippy::cast_possible_truncation)]
+            #[allow(clippy::cast_precision_loss)]
+            #[allow(clippy::cast_sign_loss)]
             fn assert_size_within_allowed_range(actual_size: usize, target_size: usize) {
                 let max_allowed_size =
                     (target_size as f32 * (1.0 + ALLOWED_SIZE_DIFF_PERCENT / 100.0)) as usize;

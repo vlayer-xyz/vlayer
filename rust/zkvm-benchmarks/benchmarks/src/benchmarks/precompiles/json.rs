@@ -1,7 +1,3 @@
-#![allow(clippy::all)]
-
-// src/lib.rs or src/main.rs
-
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
 use call_precompiles::json::{get_int, get_string};
@@ -21,9 +17,9 @@ include_generated!(JSON_100B, "100b.json");
 include_generated!(JSON_1KB, "1kb.json");
 include_generated!(JSON_10KB, "10kb.json");
 include_generated!(JSON_100KB, "100kb.json");
-include_generated!(JSON_10K_LVL_1, "10k_1_level.json");
-include_generated!(JSON_10K_LVL_10, "10k_10_level.json");
-include_generated!(JSON_10K_LVL_100, "10k_100_level.json");
+include_generated!(JSON_10K_LVL_1, "10kb_1_level.json");
+include_generated!(JSON_10K_LVL_10, "10kb_10_level.json");
+include_generated!(JSON_10K_LVL_100, "10kb_100_level.json");
 include_generated!(JSON_10K_INT_VALUES, "10kb_with_numbers.json");
 
 lazy_static::lazy_static! {
