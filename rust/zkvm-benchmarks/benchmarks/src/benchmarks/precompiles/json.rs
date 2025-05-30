@@ -86,10 +86,10 @@ pub fn benchmarks() -> Vec<Benchmark> {
             || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
             3_896_399,
         ),
-        // Benchmark::new(
-        //     "json_get_int_10kb",
-        //     || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
-        //     2_632_000,
-        // ),
+        Benchmark::new(
+            "json_get_int_10kb",
+            || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
+            3_896_399,
+        ),
     ]
 }
