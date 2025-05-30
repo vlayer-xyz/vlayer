@@ -34,7 +34,7 @@ lazy_static::lazy_static! {
 
 fn create_nested_key_path(depth: usize, key_name: &str) -> String {
     let mut path = String::new();
-    for i in 0..=depth {
+    for i in 1..=depth {
         path.push_str(&format!("level{i}"));
         path.push('.');
     }

@@ -13,6 +13,7 @@ use risc0_zkvm::guest::env::cycle_count;
 use serde::{Deserialize, Serialize};
 
 mod benchmarks;
+#[allow(dead_code)] // used in `build.rs`
 pub mod build_utils;
 
 pub struct Runner(Vec<Benchmark>);

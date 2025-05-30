@@ -5,16 +5,6 @@ use lazy_static::lazy_static;
 
 include!("src/build_utils.rs");
 
-const B_100: usize = 100;
-const KB: usize = 1024;
-const TEN_KB: usize = 10 * KB;
-const HUNDRED_KB: usize = 100 * KB;
-
-const DEPTH_0: usize = 0;
-const DEPTH_1: usize = 1;
-const DEPTH_10: usize = 10;
-const DEPTH_100: usize = 100;
-
 #[derive(new)]
 struct JsonConfig {
     filename: &'static str,
