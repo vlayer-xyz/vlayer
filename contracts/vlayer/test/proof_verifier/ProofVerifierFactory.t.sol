@@ -54,24 +54,6 @@ contract VerifierFactory_Tests is Test {
         assertEq(address(verifier), address(router));
     }
 
-    function test_stableDeploymentForTestnetsEqualsToTheExpectedOne() public view {
-        string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/deployed_contracts.json");
-        string memory json = vm.readFile(path);
-        bytes memory data = vm.parseJson(json);
-
-        Deployment memory deployment = abi.decode(data, (Deployment));
-
-        Repository repository = TestnetStableDeployment.repository();
-        (FakeProofVerifier fakeProofVerifier, Groth16ProofVerifier groth16ProofVerifier, ProofVerifierRouter router) =
-            TestnetStableDeployment.verifiers();
-
-        assertEq(address(repository), findAddress(deployment, "Repository"));
-        assertEq(address(fakeProofVerifier), findAddress(deployment, "FakeProofVerifier"));
-        assertEq(address(groth16ProofVerifier), findAddress(deployment, "Groth16ProofVerifier"));
-        assertEq(address(router), findAddress(deployment, "ProofVerifierRouter"));
-    }
-
     function test_failsForOtherNetworks() public {
         vm.chainId(11155111 + 1);
 

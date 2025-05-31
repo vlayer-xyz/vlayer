@@ -3,12 +3,18 @@
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 NETWORKS=( "sepolia" "base-sepolia" "optimism-sepolia" "arbitrum-sepolia" "worldchain-sepolia" "base" )
 
+# Simple function to get Repository address from .sol file
+repository_address() {
+    grep -o "Repository(address(0x[a-fA-F0-9]\{40\}))" "${CONTRACTS_DIR}/src/TestnetStableDeployment.sol" | \
+    grep -o "0x[a-fA-F0-9]\{40\}"
+}
+
 set -ueo pipefail
 
 SCRIPT="ImageIdAdministration.s.sol"
 CONTARCT="AddSupportForCurrentImageId"
 SCRIPT_INVOCATION="${CONTRACTS_DIR}/script/${SCRIPT}:${CONTARCT}"
-REPOSITORY_ADDRESS=$(jq -r <"${CONTRACTS_DIR}/deployed_contracts.json" '.contracts[] | select(.contractName == "Repository") | .contractAddress')
+REPOSITORY_ADDRESS=$(repository_address)
 
 cd "${CONTRACTS_DIR}"
 
