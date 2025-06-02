@@ -17,15 +17,15 @@ include_generated_json!(JSON_100B, "100b.json");
 include_generated_json!(JSON_1KB, "1kb.json");
 include_generated_json!(JSON_10KB, "10kb.json");
 include_generated_json!(JSON_100KB, "100kb.json");
-include_generated_json!(JSON_10K_LVL_1, "10kb_1_level.json");
-include_generated_json!(JSON_10K_LVL_10, "10kb_10_level.json");
-include_generated_json!(JSON_10K_LVL_100, "10kb_100_level.json");
+include_generated_json!(JSON_1_LVL_10K, "1_level_10kb.json");
+include_generated_json!(JSON_10_LVL_10K, "10_level_10kb.json");
+include_generated_json!(JSON_100_LVL_10K, "100_level_10kb.json");
 include_generated_json!(JSON_10K_INT_VALUES, "10kb_with_numbers.json");
 
 lazy_static::lazy_static! {
-    static ref LVL_1_KEY:  String = create_nested_key_path(1, KEY);
+    static ref LVL_1_KEY: String = create_nested_key_path(1, KEY);
     static ref LVL_10_KEY: String = create_nested_key_path(10, KEY);
-    static ref LVL_100_KEY:String = create_nested_key_path(100, KEY);
+    static ref LVL_100_KEY: String = create_nested_key_path(100, KEY);
 }
 
 fn create_nested_key_path(depth: usize, key_name: &str) -> String {
@@ -59,18 +59,18 @@ pub fn benchmarks() -> Vec<Benchmark> {
             31_434_000,
         ),
         Benchmark::new(
-            "json_get_string_10k_1_lvl",
-            || benchmark_get_string(JSON_10K_LVL_1, &LVL_1_KEY),
+            "json_get_string_1_lvl_10k",
+            || benchmark_get_string(JSON_1_LVL_10K, &LVL_1_KEY),
             2_614_000,
         ),
         Benchmark::new(
-            "json_get_string_10k_10_lvl",
-            || benchmark_get_string(JSON_10K_LVL_10, &LVL_10_KEY),
+            "json_get_string_10_lvl_10k",
+            || benchmark_get_string(JSON_10_LVL_10K, &LVL_10_KEY),
             2_633_000,
         ),
         Benchmark::new(
-            "json_get_string_10k_100_lvl",
-            || benchmark_get_string(JSON_10K_LVL_100, &LVL_100_KEY),
+            "json_get_string_100_lvl_10k",
+            || benchmark_get_string(JSON_100_LVL_10K, &LVL_100_KEY),
             2_659_000,
         ),
         Benchmark::new(

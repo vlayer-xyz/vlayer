@@ -24,9 +24,9 @@ lazy_static! {
         JsonConfig::new("1kb.json", KB, DEPTH_0, &STRING_VALUE),
         JsonConfig::new("10kb.json", TEN_KB, DEPTH_0, &STRING_VALUE),
         JsonConfig::new("100kb.json", HUNDRED_KB, DEPTH_0, &STRING_VALUE),
-        JsonConfig::new("10kb_1_level.json", TEN_KB, DEPTH_1, &STRING_VALUE),
-        JsonConfig::new("10kb_10_level.json", TEN_KB, DEPTH_10, &STRING_VALUE),
-        JsonConfig::new("10kb_100_level.json", TEN_KB, DEPTH_100, &STRING_VALUE),
+        JsonConfig::new("1_level_10kb.json", TEN_KB, DEPTH_1, &STRING_VALUE),
+        JsonConfig::new("10_level_10kb.json", TEN_KB, DEPTH_10, &STRING_VALUE),
+        JsonConfig::new("100_level_10kb.json", TEN_KB, DEPTH_100, &STRING_VALUE),
         JsonConfig::new("10kb_with_numbers.json", TEN_KB, DEPTH_0, &INTEGER_VALUE),
     ];
     static ref REGEX_CONFIGS: Vec<RegexConfig> = vec![
