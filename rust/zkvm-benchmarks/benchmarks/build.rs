@@ -27,10 +27,6 @@ lazy_static! {
         JsonConfig::new("1_level_10kb.json", KB_10, DEPTH_1),
         JsonConfig::new("10_level_10kb.json", KB_10, DEPTH_10),
         JsonConfig::new("100_level_10kb.json", KB_10, DEPTH_100),
-        JsonConfig::new("100b_with_numbers.json", B_100, DEPTH_0),
-        JsonConfig::new("1kb_with_numbers.json", KB, DEPTH_0),
-        JsonConfig::new("10kb_with_numbers.json", KB_10, DEPTH_0),
-        JsonConfig::new("100kb_with_numbers.json", KB_100, DEPTH_0),
     ];
     static ref REGEX_CONFIGS: Vec<RegexConfig> = vec![
         RegexConfig::new("1kb.txt", KB),
