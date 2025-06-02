@@ -20,7 +20,6 @@ await writeEnvVariables(".env", {
   VITE_PROVER_URL: config.proverUrl,
   VITE_JSON_RPC_URL: config.jsonRpcUrl,
   VITE_CLIENT_AUTH_MODE: config.clientAuthMode,
-  VITE_PRIVATE_KEY: config.privateKey,
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_NOTARY_URL: config.notaryUrl,
   VITE_WS_PROXY_URL: config.wsProxyUrl,

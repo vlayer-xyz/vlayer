@@ -22,7 +22,6 @@ await writeEnvVariables(".env", {
   VITE_CHAIN_NAME: config.chainName,
   VITE_PROVER_URL: config.proverUrl,
   VITE_JSON_RPC_URL: config.jsonRpcUrl,
-  VITE_PRIVATE_KEY: config.privateKey,
   VITE_DNS_SERVICE_URL: config.dnsServiceUrl,
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL || "",
