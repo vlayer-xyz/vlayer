@@ -19,10 +19,6 @@ include_generated_text!(TEXT_100KB, "100kb.txt");
 const SIMPLE_PATTERN: &str = "^.*needle.*$"; // Simple word matching
 const COMPLEX_PATTERN: &str = "^.*\\d{3}-\\d{2}-\\d{4}.*$"; // Complex number pattern with character classes
 
-// Patterns with capture groups for capture benchmarks
-const SIMPLE_CAPTURE_PATTERN: &str = "^.*(needle).*$"; // Simple word capture
-const COMPLEX_CAPTURE_PATTERN: &str = "^.*(\\d{3})-(\\d{2})-(\\d{4}).*$"; // Complex number capture with groups
-
 fn benchmark_is_match(text: &str, pattern: &str) {
     let calldata: Bytes = [text, pattern].abi_encode().into();
     is_match(&calldata).expect("is_match failed");
@@ -70,33 +66,33 @@ pub fn benchmarks() -> Vec<Benchmark> {
         // Simple capture pattern benchmarks
         Benchmark::new(
             "regex_capture_simple_1kb",
-            || benchmark_capture(TEXT_1KB, SIMPLE_CAPTURE_PATTERN),
+            || benchmark_capture(TEXT_1KB, SIMPLE_PATTERN),
             628_000,
         ),
         Benchmark::new(
             "regex_capture_simple_10kb",
-            || benchmark_capture(TEXT_10KB, SIMPLE_CAPTURE_PATTERN),
+            || benchmark_capture(TEXT_10KB, SIMPLE_PATTERN),
             1_913_000,
         ),
         Benchmark::new(
             "regex_capture_simple_100kb",
-            || benchmark_capture(TEXT_100KB, SIMPLE_CAPTURE_PATTERN),
+            || benchmark_capture(TEXT_100KB, SIMPLE_PATTERN),
             59_476_000,
         ),
         // Complex capture pattern benchmarks
         Benchmark::new(
             "regex_capture_complex_1kb",
-            || benchmark_capture(TEXT_1KB, COMPLEX_CAPTURE_PATTERN),
+            || benchmark_capture(TEXT_1KB, COMPLEX_PATTERN),
             8_900_000,
         ),
         Benchmark::new(
             "regex_capture_complex_10kb",
-            || benchmark_capture(TEXT_10KB, COMPLEX_CAPTURE_PATTERN),
+            || benchmark_capture(TEXT_10KB, COMPLEX_PATTERN),
             8_900_000,
         ),
         Benchmark::new(
             "regex_capture_complex_100kb",
-            || benchmark_capture(TEXT_100KB, COMPLEX_CAPTURE_PATTERN),
+            || benchmark_capture(TEXT_100KB, COMPLEX_PATTERN),
             65_129_000,
         ),
     ]
