@@ -30,7 +30,6 @@ lazy_static! {
         JsonConfig::new("10kb_with_numbers.json", TEN_KB, DEPTH_0, &INTEGER_VALUE),
     ];
     static ref REGEX_CONFIGS: Vec<RegexConfig> = vec![
-        RegexConfig::new("100b.txt", B_100),
         RegexConfig::new("1kb.txt", KB),
         RegexConfig::new("10kb.txt", TEN_KB),
         RegexConfig::new("100kb.txt", HUNDRED_KB),
