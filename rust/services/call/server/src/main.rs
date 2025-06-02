@@ -36,7 +36,8 @@ impl TryFrom<Cli> for ConfigOptionsWithVersion {
                     .prefix_separator("_")
                     .separator("__")
                     .list_separator(" ")
-                    .with_list_parse_key("rpc_urls");
+                    .with_list_parse_key("rpc_urls")
+                    .ignore_empty(true);
                 EnvConfig::builder()
                     .add_source(default_config)
                     .add_source(env_config)
@@ -66,7 +67,7 @@ async fn main() -> anyhow::Result<()> {
             res.and_then(|RpcUrl { url, .. }| extract_rpc_url_token(&url))
         })
         .collect();
-    init_tracing(opts.config.log_format, secrets);
+    init_tracing(opts.config.log_format.unwrap_or_default(), secrets);
 
     info!("Running vlayer serve...");
 

@@ -66,37 +66,50 @@ function startup_chain_services() {
     startup_chain_server ${db_path}
 }
 
+function concat() {
+    local IFS="$1"
+    shift
+    echo "$*"
+}
+
 function startup_vlayer() {
     local proof_arg=$1
     shift # shift input params, since the second (and last) arg is an array of external_urls 
-    local external_urls=("$@")
+    local rpc_urls=("$@")
+
+    local chain_client_url=
+    local jwt_pub_key=
+    local jwt_algorithm=
 
     echo "Starting vlayer REST server"
     pushd "${VLAYER_HOME}"
 
-    local args=(
-        "--proof" "${proof_arg}"
-        "--rpc-url" "31337:http://localhost:8545" # L1
-        "--rpc-url" "31338:http://localhost:8546" # L2 OP
+    rpc_urls+=(
+        "31337:http://localhost:8545" # L1
+        "31338:http://localhost:8546" # L2 OP
     )
+    rpc_urls=$(concat " " "${rpc_urls}")
 
     if [[ "${JWT_AUTH}" == "on" ]]; then
-        args+=("--jwt-public-key" "./docker/fixtures/jwt-authority.key.pub") # JWT public key
+        jwt_pub_key="./docker/fixtures/jwt-authority.key.pub" # JWT public key
+        jwt_algorithm="rs256" # JWT signing algorithm
     fi
 
     if [[ -n "${EXTERNAL_CHAIN_SERVICE_URL:-}" ]]; then
-        args+=("--chain-proof-url" "${EXTERNAL_CHAIN_SERVICE_URL}")
+        chain_client_url="${EXTERNAL_CHAIN_SERVICE_URL}"
     elif [[ ${#CHAIN_WORKER_ARGS[@]} -gt 0 ]]; then
-        args+=("--chain-proof-url" "http://localhost:3001")
+        chain_client_url="http://localhost:3001"
     fi
 
     RUST_LOG=info \
     BONSAI_API_URL="${BONSAI_API_URL}" \
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
-    ./target/debug/call_server \
-        ${args[@]} \
-        ${external_urls[@]+"${external_urls[@]}"} \
-        >>"${LOGS_DIR}/vlayer_serve.out" &
+    VLAYER_PROOF_MODE="${proof_arg}" \
+    VLAYER_RPC_URLS="${rpc_urls}" \
+    VLAYER_CHAIN_CLIENT__URL="${chain_client_url}" \
+    VLAYER_AUTH__JWT__PUBLIC_KEY="${jwt_pub_key}" \
+    VLAYER_AUTH__JWT__ALGORITHM="${jwt_algorithm}" \
+    ./target/debug/call_server >>"${LOGS_DIR}/vlayer_serve.out" &
 
     VLAYER_SERVER=$!
 

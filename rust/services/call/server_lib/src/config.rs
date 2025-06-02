@@ -22,9 +22,11 @@ use thiserror::Error;
 
 use crate::gas_meter::Config as GasMeterConfig;
 
-pub const CHAIN_CLIENT_POLL_INTERVAL: u64 = 5;
-pub const CHAIN_CLIENT_TIMEOUT: u64 = 240;
-pub const GAS_METER_TIME_TO_LIVE: u64 = 3600;
+pub const DEFAULT_HOST: &str = "127.0.0.1";
+pub const DEFAULT_PORT: u16 = 3000;
+pub const DEFAULT_CHAIN_CLIENT_POLL_INTERVAL: u64 = 5;
+pub const DEFAULT_CHAIN_CLIENT_TIMEOUT: u64 = 240;
+pub const DEFAULT_GAS_METER_TIME_TO_LIVE: u64 = 3600;
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -133,7 +135,7 @@ pub struct ConfigOptions {
     /// Gas meter config
     pub gas_meter: Option<GasMeterOptions>,
     /// Log format
-    pub log_format: LogFormat,
+    pub log_format: Option<LogFormat>,
 }
 
 pub fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions, Error> {
@@ -146,14 +148,14 @@ pub fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions, Error>
 impl Default for ConfigOptions {
     fn default() -> Self {
         Self {
-            host: "127.0.0.1".to_string(),
-            port: 3000,
+            host: DEFAULT_HOST.to_string(),
+            port: DEFAULT_PORT,
             chain_client: None,
             auth: None,
             gas_meter: None,
             proof_mode: ProofMode::default(),
             rpc_urls: Vec::default(),
-            log_format: LogFormat::default(),
+            log_format: None,
         }
     }
 }
@@ -172,7 +174,8 @@ impl From<GasMeterOptions> for GasMeterConfig {
             time_to_live,
         }: GasMeterOptions,
     ) -> Self {
-        let time_to_live = Duration::from_secs(time_to_live.unwrap_or(GAS_METER_TIME_TO_LIVE));
+        let time_to_live =
+            Duration::from_secs(time_to_live.unwrap_or(DEFAULT_GAS_METER_TIME_TO_LIVE));
         Self::new(url, time_to_live, Some(api_key))
     }
 }
@@ -205,8 +208,8 @@ impl From<ChainClientOptions> for ChainClientConfig {
         }: ChainClientOptions,
     ) -> Self {
         let poll_interval =
-            Duration::from_secs(poll_interval.unwrap_or(CHAIN_CLIENT_POLL_INTERVAL));
-        let timeout = Duration::from_secs(timeout.unwrap_or(CHAIN_CLIENT_TIMEOUT));
+            Duration::from_secs(poll_interval.unwrap_or(DEFAULT_CHAIN_CLIENT_POLL_INTERVAL));
+        let timeout = Duration::from_secs(timeout.unwrap_or(DEFAULT_CHAIN_CLIENT_TIMEOUT));
         Self::new(url, poll_interval, timeout)
     }
 }
