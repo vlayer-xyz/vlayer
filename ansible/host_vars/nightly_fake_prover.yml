@@ -19,14 +19,14 @@ vlayer_prover_rpc_urls:
  - "11155111:https://omniscient-flashy-frog.ethereum-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}"
  - "11155420:https://omniscient-flashy-frog.optimism-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}"
  - "1:https://eth-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
- - "8453:https://base-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
- - "10:https://opt-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ # Base mainnet remains in fake provers for the time being, supporting one use case.
+ - "8453:https://omniscient-flashy-frog.base-mainnet.quiknode.pro/{{ vlayer_quicknode_api_key }}"
+ - "10:https://omniscient-flashy-frog.optimism.quiknode.pro/{{ vlayer_quicknode_api_key }}"
  - "84532:https://omniscient-flashy-frog.base-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}"
  - "4801:https://omniscient-flashy-frog.worldchain-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}"
  - "80002:https://polygon-amoy.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "421614:https://arb-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "300:https://zksync-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
- - "8453:https://base-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "42161:https://arb-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "42170:https://arbnova-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "137:https://polygon-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
@@ -42,16 +42,12 @@ vlayer_prover_rpc_urls:
  - "10200:https://gnosis-chiado.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  # https://docs.bitkubchain.org/rpc-service/rpc
  # The rate limit of RPC endpoint on Mainnet and Testnet is 2K/1min.
- - "96:https://rpc.bitkubchain.io"
  - "25925:https://rpc-testnet.bitkubchain.io"
- # https://docs.kinto.xyz/kinto-the-safe-l2/building-on-kinto/tools/node-rpc
- - "7887:https://rpc.kinto-rpc.com"
  # https://docs.celo.org/network
- - "42220:https://forno.celo.org"
+ - "44787:https://alfajores-forno.celo-testnet.org/"
  # https://docs.zircuit.com/dev-tools/rpc-endpoints
- - "48900:https://zircuit1-mainnet.p2pify.com"
  - "48899:https://zircuit1-testnet.p2pify.com"
- # https://docs.fhenix.zone/getting-started
+ # https://docs.fhenix.zone/docs/devdocs/Fhenix%20Testnet/Connecting-To
  - "8008135:https://api.helium.fhenix.zone"
 vlayer_prover_gas_meter_url: "https://dashboard.vlayer.xyz/api/webhooks/prover"
 vlayer_prover_gas_meter_api_key: !vault |

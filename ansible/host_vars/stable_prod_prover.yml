@@ -49,8 +49,6 @@ vlayer_prover_rpc_urls:
  - "42220:https://forno.celo.org"
  # https://docs.zircuit.com/dev-tools/rpc-endpoints
  - "48900:https://zircuit1-mainnet.p2pify.com"
- # https://docs.fhenix.zone/getting-started
- - "8008135:https://api.helium.fhenix.zone"
 vlayer_prover_gas_meter_url: "https://dashboard.vlayer.xyz/api/webhooks/prover"
 vlayer_prover_gas_meter_api_key: !vault |
   $ANSIBLE_VAULT;1.1;AES256
