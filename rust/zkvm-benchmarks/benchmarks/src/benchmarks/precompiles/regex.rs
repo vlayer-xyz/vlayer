@@ -29,56 +29,67 @@ fn benchmark_capture(text: &str, pattern: &str) {
     capture(&calldata).expect("capture failed");
 }
 
-fn make_benchmarks(
-    name_prefix: &str,
-    pattern: &'static str,
-    bench_fn: fn(&str, &str),
-    cycles: [u64; 3],
-) -> Vec<Benchmark> {
+pub fn benchmarks() -> Vec<Benchmark> {
     vec![
         Benchmark::new(
-            format!("{name_prefix}_1kb"),
-            move || bench_fn(TEXT_1KB, pattern),
-            cycles[0],
+            "regex_is_match_simple_1kb",
+            || benchmark_is_match(TEXT_1KB, SIMPLE_PATTERN),
+            480_000,
         ),
         Benchmark::new(
-            format!("{name_prefix}_10kb"),
-            move || bench_fn(TEXT_10KB, pattern),
-            cycles[1],
+            "regex_is_match_simple_10kb",
+            || benchmark_is_match(TEXT_10KB, SIMPLE_PATTERN),
+            735_000,
         ),
         Benchmark::new(
-            format!("{name_prefix}_100kb"),
-            move || bench_fn(TEXT_100KB, pattern),
-            cycles[2],
+            "regex_is_match_simple_100kb",
+            || benchmark_is_match(TEXT_100KB, SIMPLE_PATTERN),
+            3_280_000,
+        ),
+        Benchmark::new(
+            "regex_is_match_complex_1kb",
+            || benchmark_is_match(TEXT_1KB, COMPLEX_PATTERN),
+            2_631_000,
+        ),
+        Benchmark::new(
+            "regex_is_match_complex_10kb",
+            || benchmark_is_match(TEXT_10KB, COMPLEX_PATTERN),
+            2_885_000,
+        ),
+        Benchmark::new(
+            "regex_is_match_complex_100kb",
+            || benchmark_is_match(TEXT_100KB, COMPLEX_PATTERN),
+            5_431_000,
+        ),
+        Benchmark::new(
+            "regex_capture_simple_1kb",
+            || benchmark_capture(TEXT_1KB, SIMPLE_PATTERN),
+            485_000,
+        ),
+        Benchmark::new(
+            "regex_capture_simple_10kb",
+            || benchmark_capture(TEXT_10KB, SIMPLE_PATTERN),
+            753_000,
+        ),
+        Benchmark::new(
+            "regex_capture_simple_100kb",
+            || benchmark_capture(TEXT_100KB, SIMPLE_PATTERN),
+            3_437_000,
+        ),
+        Benchmark::new(
+            "regex_capture_complex_1kb",
+            || benchmark_capture(TEXT_1KB, COMPLEX_PATTERN),
+            2_631_000,
+        ),
+        Benchmark::new(
+            "regex_capture_complex_10kb",
+            || benchmark_capture(TEXT_10KB, COMPLEX_PATTERN),
+            2_900_000,
+        ),
+        Benchmark::new(
+            "regex_capture_complex_100kb",
+            || benchmark_capture(TEXT_100KB, COMPLEX_PATTERN),
+            5_584_000,
         ),
     ]
-}
-
-pub fn benchmarks() -> Vec<Benchmark> {
-    let mut benches = Vec::new();
-    benches.extend(make_benchmarks(
-        "regex_is_match_simple",
-        SIMPLE_PATTERN,
-        benchmark_is_match,
-        [480_000, 735_000, 3_280_000],
-    ));
-    benches.extend(make_benchmarks(
-        "regex_is_match_complex",
-        COMPLEX_PATTERN,
-        benchmark_is_match,
-        [2_631_000, 2_885_000, 5_431_000],
-    ));
-    benches.extend(make_benchmarks(
-        "regex_capture_simple",
-        SIMPLE_PATTERN,
-        benchmark_capture,
-        [628_000, 1_913_000, 59_476_000],
-    ));
-    benches.extend(make_benchmarks(
-        "regex_capture_complex",
-        COMPLEX_PATTERN,
-        benchmark_capture,
-        [8_900_000, 8_900_000, 65_129_000],
-    ));
-    benches
 }
