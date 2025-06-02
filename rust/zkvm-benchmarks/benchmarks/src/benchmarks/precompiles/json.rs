@@ -76,7 +76,7 @@ pub fn benchmarks() -> Vec<Benchmark> {
         Benchmark::new(
             "json_get_int_10kb",
             || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
-            3_896_399,
+            3_896_000,
         ),
     ]
 }
