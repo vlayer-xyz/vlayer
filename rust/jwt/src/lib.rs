@@ -1,14 +1,25 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use derive_builder::Builder;
 pub use jsonwebtoken::{
     Algorithm as JwtAlgorithm, DecodingKey, EncodingKey, Header, TokenData, Validation, decode,
-    decode_header, encode, errors::Error, get_current_timestamp,
+    decode_header, encode, errors::Error as JwtError, get_current_timestamp,
 };
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString};
+use strum::{Display, EnumString, VariantNames};
+use thiserror::Error;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, Display, EnumString)]
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("JWT signing key not found: '{}'", .0.display())]
+    JwtSigningKeyNotFound(PathBuf),
+    #[error("JWT internal error: {0}")]
+    Jwt(#[from] JwtError),
+}
+
+#[derive(
+    Debug, Clone, Copy, Serialize, Deserialize, Default, Display, EnumString, VariantNames,
+)]
 #[serde(rename_all = "lowercase")]
 #[strum(ascii_case_insensitive)]
 pub enum Algorithm {
@@ -40,20 +51,23 @@ impl From<Algorithm> for JwtAlgorithm {
     }
 }
 
-pub fn load_jwt_key(
+pub fn load_jwt_signing_key(
     public_key_path: impl AsRef<Path>,
     algorithm: Algorithm,
-) -> anyhow::Result<DecodingKey> {
-    let bytes = std::fs::read(public_key_path.as_ref())?;
+) -> Result<DecodingKey, Error> {
+    let bytes = std::fs::read(public_key_path.as_ref())
+        .map_err(|_| Error::JwtSigningKeyNotFound(public_key_path.as_ref().to_path_buf()))?;
     let key = match algorithm {
         Algorithm::RS256
         | Algorithm::RS384
         | Algorithm::RS512
         | Algorithm::PS256
         | Algorithm::PS384
-        | Algorithm::PS512 => DecodingKey::from_rsa_pem(&bytes)?,
-        Algorithm::ES256 | Algorithm::ES384 => DecodingKey::from_ec_pem(&bytes)?,
-        Algorithm::EdDSA => DecodingKey::from_ed_pem(&bytes)?,
+        | Algorithm::PS512 => DecodingKey::from_rsa_pem(&bytes).map_err(Error::Jwt)?,
+        Algorithm::ES256 | Algorithm::ES384 => {
+            DecodingKey::from_ec_pem(&bytes).map_err(Error::Jwt)?
+        }
+        Algorithm::EdDSA => DecodingKey::from_ed_pem(&bytes).map_err(Error::Jwt)?,
     };
     Ok(key)
 }

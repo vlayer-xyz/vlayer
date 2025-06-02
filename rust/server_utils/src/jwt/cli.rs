@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::Parser;
 use derive_more::Debug;
 use derive_new::new;
-use jwt::{DecodingKey, Error as JwtError, JwtAlgorithm};
+use jwt::{DecodingKey, JwtAlgorithm, JwtError};
 use thiserror::Error;
 use tracing::{info, warn};
 
@@ -29,7 +29,7 @@ pub enum Error {
     InvalidPublicKey(PathBuf),
 
     #[error(transparent)]
-    Jwt(JwtError),
+    Jwt(#[from] JwtError),
 }
 
 impl TryFrom<Args> for Option<Config> {

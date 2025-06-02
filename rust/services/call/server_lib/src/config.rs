@@ -1,7 +1,7 @@
 use std::{
     collections::BTreeMap,
     net::{Ipv4Addr, SocketAddr as RawSocketAddr, SocketAddrV4},
-    path::Path,
+    path::{Path, PathBuf},
     str::FromStr,
     time::Duration,
 };
@@ -13,10 +13,11 @@ use chain_client::ChainClientConfig;
 use common::{GuestElf, LogFormat};
 use derive_more::{Debug, From, Into};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
-use jwt::{Algorithm, load_jwt_key};
+use jwt::{Algorithm, Error as JwtError, load_jwt_signing_key};
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
+use strum::VariantNames;
 use thiserror::Error;
 
 use crate::gas_meter::Config as GasMeterConfig;
@@ -24,6 +25,28 @@ use crate::gas_meter::Config as GasMeterConfig;
 pub const CHAIN_CLIENT_POLL_INTERVAL: u64 = 5;
 pub const CHAIN_CLIENT_TIMEOUT: u64 = 240;
 pub const GAS_METER_TIME_TO_LIVE: u64 = 3600;
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Config file not found: '{}'", .0.display())]
+    ConfigFile(PathBuf),
+    #[error("Missing required config field: {0}")]
+    ConfigField(String),
+    #[error("Parsing config from toml failed: {0}")]
+    ConfigToml(#[from] toml::de::Error),
+    #[error("Invalid rpc url format: expected <chain-id>:<url>, got {0}")]
+    RpcUrlFormat(String),
+    #[error("Invalid chain id: {0}")]
+    ChainId(String),
+    #[error(
+        "Unexpected JWT signing algorithm selected: '{}'. Possible values are {:?}",
+        .0,
+        Algorithm::VARIANTS
+    )]
+    JwtSigningAlgorithm(String),
+    #[error(transparent)]
+    Jwt(#[from] JwtError),
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GasMeterOptions {
@@ -66,23 +89,23 @@ pub struct RpcUrl {
 }
 
 impl FromStr for RpcUrl {
-    type Err = anyhow::Error;
+    type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<&str> = s.splitn(2, ':').collect();
         if parts.len() < 2 {
-            anyhow::bail!("expected <chain-id>:<url>");
+            return Err(Error::RpcUrlFormat(s.to_string()));
         }
         let chain_id: ChainId = parts[0]
             .parse()
-            .map_err(|_| anyhow::anyhow!("Invalid chain ID: {}", parts[0]))?;
+            .map_err(|_| Error::ChainId(parts[0].to_string()))?;
         let url = parts[1].to_string();
         Ok(Self { chain_id, url })
     }
 }
 
 impl TryFrom<RpcUrlOrString> for RpcUrl {
-    type Error = anyhow::Error;
+    type Error = Error;
 
     fn try_from(value: RpcUrlOrString) -> Result<Self, Self::Error> {
         match value {
@@ -113,9 +136,10 @@ pub struct ConfigOptions {
     pub log_format: LogFormat,
 }
 
-pub fn parse_config_file(path: impl AsRef<Path>) -> anyhow::Result<ConfigOptions> {
-    let contents = std::fs::read_to_string(path.as_ref())?;
-    let config_opts: ConfigOptions = toml::from_str(&contents)?;
+pub fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions, Error> {
+    let contents = std::fs::read_to_string(path.as_ref())
+        .map_err(|_| Error::ConfigFile(path.as_ref().to_path_buf()))?;
+    let config_opts: ConfigOptions = toml::from_str(&contents).map_err(Error::ConfigToml)?;
     Ok(config_opts)
 }
 
@@ -140,22 +164,31 @@ pub struct ConfigOptionsWithVersion {
     pub config: ConfigOptions,
 }
 
-impl TryFrom<GasMeterOptions> for GasMeterConfig {
-    type Error = anyhow::Error;
-
-    fn try_from(opts: GasMeterOptions) -> Result<Self, Self::Error> {
-        let api_key = opts.api_key;
-        let time_to_live = Duration::from_secs(opts.time_to_live.unwrap_or(GAS_METER_TIME_TO_LIVE));
-        Ok(Self::new(opts.url, time_to_live, Some(api_key)))
+impl From<GasMeterOptions> for GasMeterConfig {
+    fn from(
+        GasMeterOptions {
+            url,
+            api_key,
+            time_to_live,
+        }: GasMeterOptions,
+    ) -> Self {
+        let time_to_live = Duration::from_secs(time_to_live.unwrap_or(GAS_METER_TIME_TO_LIVE));
+        Self::new(url, time_to_live, Some(api_key))
     }
 }
 
 impl TryFrom<JwtOptions> for JwtConfig {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(opts: JwtOptions) -> Result<Self, Self::Error> {
-        let algorithm = Algorithm::from_str(&opts.algorithm)?;
-        let public_key = load_jwt_key(&opts.public_key, algorithm)?;
+    fn try_from(
+        JwtOptions {
+            public_key,
+            algorithm,
+        }: JwtOptions,
+    ) -> Result<Self, Self::Error> {
+        let algorithm = Algorithm::from_str(&algorithm)
+            .map_err(|_| Error::JwtSigningAlgorithm(algorithm.clone()))?;
+        let public_key = load_jwt_signing_key(&public_key, algorithm).map_err(Error::Jwt)?;
         Ok(Self {
             public_key,
             algorithm: algorithm.into(),
@@ -179,11 +212,10 @@ impl From<ChainClientOptions> for ChainClientConfig {
 }
 
 impl TryFrom<ConfigOptionsWithVersion> for Config {
-    type Error = anyhow::Error;
+    type Error = Error;
 
     fn try_from(opts: ConfigOptionsWithVersion) -> Result<Self, Self::Error> {
-        let gas_meter_config: Option<GasMeterConfig> =
-            opts.config.gas_meter.map(TryInto::try_into).transpose()?;
+        let gas_meter_config: Option<GasMeterConfig> = opts.config.gas_meter.map(Into::into);
         let jwt_config = opts
             .config
             .auth
@@ -213,10 +245,6 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             .build()?)
     }
 }
-
-#[derive(Debug, Error)]
-#[error("Missing required config field: {0}")]
-pub struct Error(String);
 
 #[derive(Clone, Debug)]
 pub struct Config {
@@ -385,9 +413,10 @@ impl ConfigBuilder {
             jwt_config,
         } = self;
 
-        let call_guest_elf = call_guest_elf.ok_or(Error("call_guest_elf".into()))?;
-        let chain_guest_ids = chain_guest_ids.ok_or(Error("chain_guest_ids".into()))?;
-        let semver = semver.ok_or(Error("semver".into()))?;
+        let call_guest_elf = call_guest_elf.ok_or(Error::ConfigField("call_guest_elf".into()))?;
+        let chain_guest_ids =
+            chain_guest_ids.ok_or(Error::ConfigField("chain_guest_ids".into()))?;
+        let semver = semver.ok_or(Error::ConfigField("semver".into()))?;
         let rpc_urls: BTreeMap<ChainId, String> = rpc_urls.0.into_iter().collect();
 
         Ok(Config {
