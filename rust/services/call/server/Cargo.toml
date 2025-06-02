@@ -4,16 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 call_server_lib = { workspace = true }
-chain_client = { workspace = true }
 clap = { workspace = true, features = ["derive", "env", "string"] }
 common = { workspace = true }
 config = { workspace = true }
 guest_wrapper = { workspace = true }
 hex = { workspace = true }
-humantime = { workspace = true }
 server_utils = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
