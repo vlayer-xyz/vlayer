@@ -231,7 +231,7 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             .map(TryInto::<RpcUrl>::try_into)
             .collect::<Result<_, _>>()?;
 
-        Ok(ConfigBuilder::default()
+        ConfigBuilder::default()
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
             .with_call_guest_elf(&CALL_GUEST_ELF)
             .with_host(opts.config.host)
@@ -242,7 +242,7 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             .with_gas_meter_config(gas_meter_config)
             .with_jwt_config(jwt_config)
             .with_chain_client_config(chain_client_config)
-            .build()?)
+            .build()
     }
 }
 
