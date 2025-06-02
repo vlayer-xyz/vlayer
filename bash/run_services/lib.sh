@@ -88,7 +88,7 @@ function startup_vlayer() {
         "31337:http://localhost:8545" # L1
         "31338:http://localhost:8546" # L2 OP
     )
-    rpc_urls=$(concat " " "${rpc_urls}")
+    rpc_urls_concat=$(concat " " ${rpc_urls[@]+"${rpc_urls[@]}"})
 
     if [[ "${JWT_AUTH}" == "on" ]]; then
         jwt_pub_key="./docker/fixtures/jwt-authority.key.pub" # JWT public key
@@ -105,7 +105,7 @@ function startup_vlayer() {
     BONSAI_API_URL="${BONSAI_API_URL}" \
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
     VLAYER_PROOF_MODE="${proof_arg}" \
-    VLAYER_RPC_URLS="${rpc_urls}" \
+    VLAYER_RPC_URLS="${rpc_urls_concat}" \
     VLAYER_CHAIN_CLIENT__URL="${chain_client_url}" \
     VLAYER_AUTH__JWT__PUBLIC_KEY="${jwt_pub_key}" \
     VLAYER_AUTH__JWT__ALGORITHM="${jwt_algorithm}" \
