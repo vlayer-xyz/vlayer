@@ -36,7 +36,7 @@ Their structure and responsibilities are as follows:
 - **Host** (in `services/call/host`): Runs a **_preflight_**, during which it collects all the data required by the guest. It retrieves data from online sources (RPC clients) and then triggers guest execution (which is done offline).
 - **Engine** (in `services/call/engine`): Sets up and executes the EVM, which executes `Prover` smart contract (including calling custom [Precompiles](#precompiles)). It executes exactly the same code in _preflight_ and Guest execution.
 
-Our architecture is heavily inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel).
+Our architecture is heavily inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/crates/steel).
 
 Currently, the Guest is compiled with Risc0, but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt).
 
