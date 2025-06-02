@@ -1,6 +1,6 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
-use call_precompiles::regex::is_match;
+use call_precompiles::regex::{capture, is_match};
 
 use crate::Benchmark;
 
@@ -11,7 +11,6 @@ macro_rules! include_generated_text {
     };
 }
 
-include_generated_text!(TEXT_100B, "100b.txt");
 include_generated_text!(TEXT_1KB, "1kb.txt");
 include_generated_text!(TEXT_10KB, "10kb.txt");
 include_generated_text!(TEXT_100KB, "100kb.txt");
@@ -20,19 +19,23 @@ include_generated_text!(TEXT_100KB, "100kb.txt");
 const SIMPLE_PATTERN: &str = "^.*needle.*$"; // Simple word matching
 const COMPLEX_PATTERN: &str = "^.*\\d{3}-\\d{2}-\\d{4}.*$"; // Complex number pattern with character classes
 
+// Patterns with capture groups for capture benchmarks
+const SIMPLE_CAPTURE_PATTERN: &str = "^.*(needle).*$"; // Simple word capture
+const COMPLEX_CAPTURE_PATTERN: &str = "^.*(\\d{3})-(\\d{2})-(\\d{4}).*$"; // Complex number capture with groups
+
 fn benchmark_is_match(text: &str, pattern: &str) {
     let calldata: Bytes = [text, pattern].abi_encode().into();
     is_match(&calldata).expect("is_match failed");
 }
 
+fn benchmark_capture(text: &str, pattern: &str) {
+    let calldata: Bytes = [text, pattern].abi_encode().into();
+    capture(&calldata).expect("capture failed");
+}
+
 pub fn benchmarks() -> Vec<Benchmark> {
     vec![
         // Simple pattern benchmarks (word matching)
-        Benchmark::new(
-            "regex_is_match_simple_100b",
-            || benchmark_is_match(TEXT_100B, SIMPLE_PATTERN),
-            453_000,
-        ),
         Benchmark::new(
             "regex_is_match_simple_1kb",
             || benchmark_is_match(TEXT_1KB, SIMPLE_PATTERN),
@@ -50,11 +53,6 @@ pub fn benchmarks() -> Vec<Benchmark> {
         ),
         // Complex pattern benchmarks (number pattern with character classes)
         Benchmark::new(
-            "regex_is_match_complex_100b",
-            || benchmark_is_match(TEXT_100B, COMPLEX_PATTERN),
-            2_606_000,
-        ),
-        Benchmark::new(
             "regex_is_match_complex_1kb",
             || benchmark_is_match(TEXT_1KB, COMPLEX_PATTERN),
             2_631_000,
@@ -68,6 +66,38 @@ pub fn benchmarks() -> Vec<Benchmark> {
             "regex_is_match_complex_100kb",
             || benchmark_is_match(TEXT_100KB, COMPLEX_PATTERN),
             5_431_000,
+        ),
+        // Simple capture pattern benchmarks
+        Benchmark::new(
+            "regex_capture_simple_1kb",
+            || benchmark_capture(TEXT_1KB, SIMPLE_CAPTURE_PATTERN),
+            628_000,
+        ),
+        Benchmark::new(
+            "regex_capture_simple_10kb",
+            || benchmark_capture(TEXT_10KB, SIMPLE_CAPTURE_PATTERN),
+            1_913_000,
+        ),
+        Benchmark::new(
+            "regex_capture_simple_100kb",
+            || benchmark_capture(TEXT_100KB, SIMPLE_CAPTURE_PATTERN),
+            59_476_000,
+        ),
+        // Complex capture pattern benchmarks
+        Benchmark::new(
+            "regex_capture_complex_1kb",
+            || benchmark_capture(TEXT_1KB, COMPLEX_CAPTURE_PATTERN),
+            8_900_000,
+        ),
+        Benchmark::new(
+            "regex_capture_complex_10kb",
+            || benchmark_capture(TEXT_10KB, COMPLEX_CAPTURE_PATTERN),
+            8_900_000,
+        ),
+        Benchmark::new(
+            "regex_capture_complex_100kb",
+            || benchmark_capture(TEXT_100KB, COMPLEX_CAPTURE_PATTERN),
+            65_129_000,
         ),
     ]
 }
