@@ -1,6 +1,7 @@
 use std::{env, fs, path::Path};
 
 use derive_new::new;
+use lazy_static::lazy_static;
 
 include!("src/build_utils.rs");
 
@@ -9,7 +10,6 @@ struct JsonConfig {
     filename: &'static str,
     size_bytes: usize,
     nesting_depth: usize,
-    value: &'static JsonValue,
 }
 
 #[derive(new)]
@@ -20,22 +20,22 @@ struct RegexConfig {
 
 lazy_static! {
     static ref JSON_CONFIGS: Vec<JsonConfig> = vec![
-        JsonConfig::new("100b.json", B_100, DEPTH_0, &STRING_VALUE),
-        JsonConfig::new("1kb.json", KB, DEPTH_0, &STRING_VALUE),
-        JsonConfig::new("10kb.json", TEN_KB, DEPTH_0, &STRING_VALUE),
-        JsonConfig::new("100kb.json", HUNDRED_KB, DEPTH_0, &STRING_VALUE),
-        JsonConfig::new("1_level_10kb.json", TEN_KB, DEPTH_1, &STRING_VALUE),
-        JsonConfig::new("10_level_10kb.json", TEN_KB, DEPTH_10, &STRING_VALUE),
-        JsonConfig::new("100_level_10kb.json", TEN_KB, DEPTH_100, &STRING_VALUE),
-        JsonConfig::new("100b_with_numbers.json", B_100, DEPTH_0, &INTEGER_VALUE),
-        JsonConfig::new("1kb_with_numbers.json", KB, DEPTH_0, &INTEGER_VALUE),
-        JsonConfig::new("10kb_with_numbers.json", TEN_KB, DEPTH_0, &INTEGER_VALUE),
-        JsonConfig::new("100kb_with_numbers.json", HUNDRED_KB, DEPTH_0, &INTEGER_VALUE),
+        JsonConfig::new("100b.json", B_100, DEPTH_0),
+        JsonConfig::new("1kb.json", KB, DEPTH_0),
+        JsonConfig::new("10kb.json", KB_10, DEPTH_0),
+        JsonConfig::new("100kb.json", KB_100, DEPTH_0),
+        JsonConfig::new("1_level_10kb.json", KB_10, DEPTH_1),
+        JsonConfig::new("10_level_10kb.json", KB_10, DEPTH_10),
+        JsonConfig::new("100_level_10kb.json", KB_10, DEPTH_100),
+        JsonConfig::new("100b_with_numbers.json", B_100, DEPTH_0),
+        JsonConfig::new("1kb_with_numbers.json", KB, DEPTH_0),
+        JsonConfig::new("10kb_with_numbers.json", KB_10, DEPTH_0),
+        JsonConfig::new("100kb_with_numbers.json", KB_100, DEPTH_0),
     ];
     static ref REGEX_CONFIGS: Vec<RegexConfig> = vec![
         RegexConfig::new("1kb.txt", KB),
-        RegexConfig::new("10kb.txt", TEN_KB),
-        RegexConfig::new("100kb.txt", HUNDRED_KB),
+        RegexConfig::new("10kb.txt", KB_10),
+        RegexConfig::new("100kb.txt", KB_100),
     ];
 }
 
@@ -59,7 +59,7 @@ fn write_file(out_dir: &Path, filename: &str, content: &str) {
 
 fn generate_json_files(out_dir: &Path) {
     for config in JSON_CONFIGS.iter() {
-        let json = generate_json(config.size_bytes, config.nesting_depth, config.value);
+        let json = generate_json(config.size_bytes, config.nesting_depth);
         write_file(out_dir, config.filename, &json);
     }
 }

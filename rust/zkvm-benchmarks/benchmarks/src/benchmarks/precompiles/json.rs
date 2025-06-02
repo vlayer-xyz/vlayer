@@ -1,8 +1,10 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
-use call_precompiles::json::{get_int, get_string};
+use call_precompiles::json::{get_bool, get_int, get_string};
 
-const KEY: &str = "key1";
+const STRING_KEY: &str = "key1";
+const INT_KEY: &str = "key2";
+const BOOL_KEY: &str = "key3";
 
 use crate::Benchmark;
 
@@ -20,15 +22,12 @@ include_generated_json!(JSON_100KB, "100kb.json");
 include_generated_json!(JSON_1_LVL_10K, "1_level_10kb.json");
 include_generated_json!(JSON_10_LVL_10K, "10_level_10kb.json");
 include_generated_json!(JSON_100_LVL_10K, "100_level_10kb.json");
-include_generated_json!(JSON_100B_INT_VALUES, "100b_with_numbers.json");
-include_generated_json!(JSON_1KB_INT_VALUES, "1kb_with_numbers.json");
 include_generated_json!(JSON_10K_INT_VALUES, "10kb_with_numbers.json");
-include_generated_json!(JSON_100KB_INT_VALUES, "100kb_with_numbers.json");
 
 lazy_static::lazy_static! {
-    static ref LVL_1_KEY: String = create_nested_key_path(1, KEY);
-    static ref LVL_10_KEY: String = create_nested_key_path(10, KEY);
-    static ref LVL_100_KEY: String = create_nested_key_path(100, KEY);
+    static ref LVL_1_KEY: String = create_nested_key_path(1, STRING_KEY);
+    static ref LVL_10_KEY: String = create_nested_key_path(10, STRING_KEY);
+    static ref LVL_100_KEY: String = create_nested_key_path(100, STRING_KEY);
 }
 
 fn create_nested_key_path(depth: usize, key_name: &str) -> String {
@@ -51,46 +50,57 @@ fn benchmark_get_int(json_body: &str, path: &str) {
     get_int(&calldata).expect("get_int failed");
 }
 
+fn benchmark_get_bool(json_body: &str, path: &str) {
+    let calldata: Bytes = [json_body, path].abi_encode().into();
+    get_bool(&calldata).expect("get_bool failed");
+}
+
 pub fn benchmarks() -> Vec<Benchmark> {
     vec![
-        Benchmark::new("json_get_string_100b", || benchmark_get_string(JSON_100B, KEY), 38_000),
-        Benchmark::new("json_get_string_1kb", || benchmark_get_string(JSON_1KB, KEY), 210_000),
-        Benchmark::new("json_get_string_10kb", || benchmark_get_string(JSON_10KB, KEY), 2_620_000),
+        Benchmark::new(
+            "json_get_string_100b",
+            || benchmark_get_string(JSON_100B, STRING_KEY),
+            42_000,
+        ),
+        Benchmark::new(
+            "json_get_string_1kb",
+            || benchmark_get_string(JSON_1KB, STRING_KEY),
+            256_000,
+        ),
+        Benchmark::new(
+            "json_get_string_10kb",
+            || benchmark_get_string(JSON_10KB, STRING_KEY),
+            3_151_000,
+        ),
         Benchmark::new(
             "json_get_string_100kb",
-            || benchmark_get_string(JSON_100KB, KEY),
-            31_434_000,
+            || benchmark_get_string(JSON_100KB, STRING_KEY),
+            37_502_000,
         ),
         Benchmark::new(
             "json_get_string_1_lvl_10k",
             || benchmark_get_string(JSON_1_LVL_10K, &LVL_1_KEY),
-            2_614_000,
+            3_153_000,
         ),
         Benchmark::new(
             "json_get_string_10_lvl_10k",
             || benchmark_get_string(JSON_10_LVL_10K, &LVL_10_KEY),
-            2_633_000,
+            3_150_000,
         ),
         Benchmark::new(
             "json_get_string_100_lvl_10k",
             || benchmark_get_string(JSON_100_LVL_10K, &LVL_100_KEY),
-            2_659_000,
+            3_134_000,
         ),
-        Benchmark::new(
-            "json_get_int_100b",
-            || benchmark_get_int(JSON_100B_INT_VALUES, KEY),
-            26_000,
-        ),
-        Benchmark::new("json_get_int_1kb", || benchmark_get_int(JSON_1KB_INT_VALUES, KEY), 316_000),
         Benchmark::new(
             "json_get_int_10kb",
-            || benchmark_get_int(JSON_10K_INT_VALUES, KEY),
-            3_896_000,
+            || benchmark_get_int(JSON_10K_INT_VALUES, INT_KEY),
+            3_151_000,
         ),
         Benchmark::new(
-            "json_get_int_100kb",
-            || benchmark_get_int(JSON_100KB_INT_VALUES, KEY),
-            45_383_000,
+            "json_get_bool_10kb",
+            || benchmark_get_bool(JSON_10K_INT_VALUES, BOOL_KEY),
+            3_151_000,
         ),
     ]
 }
