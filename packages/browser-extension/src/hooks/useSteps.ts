@@ -1,33 +1,29 @@
 import { BrowsingHistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
 import {
-  ExtensionStep,
+  EXTENSION_STEP,
   UrlPattern,
   WebProofStep,
   WebProofStepUserAction,
 } from "../web-proof-commons";
-import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
-import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
+import { useProvingSessionConfig } from "hooks/useProvingSessionConfig";
+import { useBrowsingHistory } from "hooks/useBrowsingHistory";
+import { useStoredUserActionAssertions } from "hooks/useStoredUserActionAssertions";
 import { useZkProvingState } from "./useZkProvingState";
 import { URLPattern } from "urlpattern-polyfill";
 import { match, P } from "ts-pattern";
-import { LOADING } from "@vlayer/extension-hooks";
-import { useNotifyOnStepCompleted } from "hooks/useNotifyOnStepCompleted.ts";
-import { useCallback, useEffect, useState } from "react";
-import { getActiveTabUrl, getElementOnPage } from "lib/activeTabContext.ts";
-import { useIntervalCalls } from "@vlayer/extension-hooks";
+import { LOADING, useIntervalCalls } from "@vlayer/extension-hooks";
+import { useNotifyOnStepCompleted } from "hooks/useNotifyOnStepCompleted";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getActiveTabUrl, getElementOnPage } from "lib/activeTabContext";
 
-type StepCompletionCheck<T extends WebProofStep> = (
-  browsingHistory: BrowsingHistoryItem[],
-  step: T,
-  isZkProvingDone: boolean,
-) => Promise<boolean> | boolean;
+interface ActionableStep<T extends WebProofStep = WebProofStep> {
+  step: T;
 
-type StepByType<U extends ExtensionStep> = Extract<WebProofStep, { step: U }>;
+  isReady?(): boolean;
 
-type StepCompletions = {
-  [K in ExtensionStep]: StepCompletionCheck<StepByType<K>>;
-};
+  isCompleted?(): boolean | Promise<boolean>;
+}
 
 const isUrlRequestCompleted = (
   browsingHistory: BrowsingHistoryItem[],
@@ -47,11 +43,7 @@ const wasUrlVisited = (
   });
 };
 
-const hasProof = (
-  _browsingHistory: BrowsingHistoryItem[],
-  _step: { url: UrlPattern },
-  isZkProvingDone: boolean,
-) => {
+const hasProof = (isZkProvingDone: boolean) => {
   return isZkProvingDone;
 };
 
@@ -63,12 +55,23 @@ const isActiveTabUrlMatching = async (expectedUrl: string) => {
   return new URLPattern(expectedUrl).test(currentUrl);
 };
 
+const domStateAssertion = (
+  element: Element | null,
+  assertion: WebProofStepUserAction["assertion"],
+) => {
+  if (element === null) {
+    return assertion.require.notExist;
+  }
+  return assertion.require.exist;
+};
+
 const isExpectedDomElementState = async (
-  _browsingHistory: BrowsingHistoryItem[],
   step: WebProofStepUserAction,
+  storedAssertion: boolean | undefined,
+  storeAssertion: (value: boolean) => void,
 ) => {
   if (!(await isActiveTabUrlMatching(step.url))) {
-    return false;
+    return Boolean(storedAssertion);
   }
 
   let element: Element | null;
@@ -82,97 +85,103 @@ const isExpectedDomElementState = async (
     return false;
   }
 
-  if (element === null) {
-    return step.assertion.require.notExist;
-  }
-  return step.assertion.require.exist;
+  const result = domStateAssertion(element, step.assertion);
+  storeAssertion(result);
+
+  return result;
 };
 
-const isStartPageStepReady = () => true;
-const isStartPageStepCompleted = wasUrlVisited;
-
-const isRedirectStepReady = () => true;
-const isRedirectStepCompleted = wasUrlVisited;
-
-const isUserActionStepReady = () => true;
-
-const isUserActionStepCompleted = isExpectedDomElementState;
-
-const isExpectUrlStepReady = () => true;
-const isExpectUrlStepCompleted = wasUrlVisited;
-
-const isNotarizeStepReady = isUrlRequestCompleted;
-const isNotarizeStepCompleted = hasProof;
-
-const isExtractVariablesStepReady = () => true;
-const isExtractVariablesStepCompleted = () => true;
-
-const isClickButtonStepReady = () => true;
-const isClickButtonStepCompleted = () => true;
-
-const checkStepCompletion: StepCompletions = {
-  startPage: isStartPageStepCompleted,
-  redirect: isRedirectStepCompleted,
-  userAction: isUserActionStepCompleted,
-  expectUrl: isExpectUrlStepCompleted,
-  notarize: isNotarizeStepCompleted,
-  extractVariables: isExtractVariablesStepCompleted,
-  clickButton: isClickButtonStepCompleted,
-};
-
-function checkCompletion<T extends ExtensionStep>(
-  step: T,
-): StepCompletionCheck<StepByType<T>> {
-  return checkStepCompletion[step];
-}
-
-const checkStepReadiness = {
-  startPage: isStartPageStepReady,
-  redirect: isRedirectStepReady,
-  userAction: isUserActionStepReady,
-  expectUrl: isExpectUrlStepReady,
-  notarize: isNotarizeStepReady,
-  extractVariables: isExtractVariablesStepReady,
-  clickButton: isClickButtonStepReady,
-};
-
-const calculateStepStatus = async ({
-  hasUncompletedStep,
-  step,
-  history,
-  isZkProvingDone,
-}: {
-  hasUncompletedStep: boolean;
-  step: WebProofStep;
-  history: BrowsingHistoryItem[];
-  isZkProvingDone: boolean;
-}): Promise<StepStatus> => {
+const calculateStepStatus = async (
+  step: ActionableStep<WebProofStep>,
+  hasUncompletedStep: boolean,
+): Promise<StepStatus> => {
   //after uncompleted step all steps can only by further no need to calculate anything
   if (hasUncompletedStep) {
     return StepStatus.Further;
   }
 
   // check if step is completed
-  if (await checkCompletion(step.step)(history, step, isZkProvingDone)) {
+  if (step.isCompleted === undefined || (await step.isCompleted())) {
     return StepStatus.Completed;
   }
   // check if step is ready
-  if (checkStepReadiness[step.step](history, step)) {
+  if (step.isReady === undefined || step.isReady()) {
     return StepStatus.Current;
   }
 
   return StepStatus.Further;
 };
 
-export const calculateSteps = async ({
-  stepsSetup = [],
+function intoActionableStep(
+  step: WebProofStep,
+  history: BrowsingHistoryItem[],
+  isZkProvingDone: boolean,
+  assertions: Record<string, boolean>,
+  storeAssertion: (key: string, value: boolean) => void,
+): ActionableStep<WebProofStep> {
+  return match(step)
+    .with(
+      { step: P.union(EXTENSION_STEP.startPage, EXTENSION_STEP.redirect) },
+      (step) => ({
+        step,
+        isCompleted: () => wasUrlVisited(history, step),
+      }),
+    )
+    .with({ step: EXTENSION_STEP.userAction }, (step) => ({
+      step,
+      isCompleted: () =>
+        isExpectedDomElementState(step, assertions[step.label], (value) =>
+          storeAssertion(step.label, value),
+        ),
+    }))
+    .with({ step: EXTENSION_STEP.expectUrl }, (step) => ({
+      step,
+      isReady: () => wasUrlVisited(history, step),
+    }))
+    .with({ step: EXTENSION_STEP.notarize }, (step) => ({
+      step,
+      isReady: () => isUrlRequestCompleted(history, step),
+      isCompleted: () => hasProof(isZkProvingDone),
+    }))
+    .with(
+      {
+        step: P.union(
+          EXTENSION_STEP.extractVariables,
+          EXTENSION_STEP.clickButton,
+        ),
+      },
+      (step) => ({
+        step,
+      }),
+    )
+    .exhaustive();
+}
+
+function getActionableSteps({
+  stepsSetup,
   history,
   isZkProvingDone,
+  assertions,
+  storeAssertion,
 }: {
   stepsSetup: WebProofStep[];
   history: BrowsingHistoryItem[];
   isZkProvingDone: boolean;
-}) => {
+  assertions: Record<string, boolean>;
+  storeAssertion: (key: string, value: boolean) => void;
+}) {
+  return stepsSetup.map((step) =>
+    intoActionableStep(
+      step,
+      history,
+      isZkProvingDone,
+      assertions,
+      storeAssertion,
+    ),
+  );
+}
+
+export const calculateSteps = async (stepsSetup: ActionableStep[]) => {
   const steps: Step[] = [];
 
   for (const currentStep of stepsSetup) {
@@ -180,16 +189,11 @@ export const calculateSteps = async ({
       steps.length > 0 && steps.at(-1)?.status !== StepStatus.Completed;
 
     steps.push({
-      step: currentStep,
-      label: currentStep.label,
-      link: currentStep.url,
-      kind: currentStep.step,
-      status: await calculateStepStatus({
-        hasUncompletedStep,
-        step: currentStep,
-        history,
-        isZkProvingDone,
-      }),
+      step: currentStep.step,
+      label: currentStep.step.label,
+      link: currentStep.step.url,
+      kind: currentStep.step.step,
+      status: await calculateStepStatus(currentStep, hasUncompletedStep),
     });
   }
 
@@ -199,6 +203,7 @@ export const calculateSteps = async ({
 export const useSteps = (): Step[] => {
   const [config] = useProvingSessionConfig();
   const [history] = useBrowsingHistory();
+  const [assertions, storeAssertion] = useStoredUserActionAssertions();
   const { isDone: isZkProvingDone } = useZkProvingState();
   const [steps, setSteps] = useState<Step[]>([]);
 
@@ -208,14 +213,21 @@ export const useSteps = (): Step[] => {
     .with({ steps: P.array(P.any) }, ({ steps }) => steps)
     .exhaustive();
 
+  const actionableSteps = useMemo(
+    () =>
+      getActionableSteps({
+        stepsSetup,
+        history,
+        isZkProvingDone,
+        assertions,
+        storeAssertion,
+      }),
+    [history, isZkProvingDone, stepsSetup, assertions, storeAssertion],
+  );
+
   const recalculateSteps = useCallback(async () => {
-    const steps = await calculateSteps({
-      stepsSetup,
-      history,
-      isZkProvingDone,
-    });
-    setSteps(steps);
-  }, [history, isZkProvingDone, stepsSetup]);
+    setSteps(await calculateSteps(actionableSteps));
+  }, [actionableSteps]);
 
   const RECALCULATE_STEPS_TIMEOUT = 100;
   useIntervalCalls(recalculateSteps, RECALCULATE_STEPS_TIMEOUT);
