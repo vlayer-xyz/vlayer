@@ -126,9 +126,7 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
         );
     }
 
-    let prover = prover_task.await??;
-
-    let mut prover = prover.start_notarize();
+    let mut prover = prover_task.await??;
 
     let transcript = prover.transcript();
 
@@ -142,11 +140,16 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
     builder.commit_sent(&redaction_config.sent)?;
     builder.commit_recv(&redaction_config.recv)?;
 
-    prover.transcript_commit(builder.build()?);
+    let transcript_commit = builder.build()?;
 
-    let request_config = RequestConfig::default();
+    let mut builder = RequestConfig::builder();
 
-    let (attestation, secrets) = Box::pin(prover.finalize(&request_config)).await?;
+    builder.transcript_commit(transcript_commit);
+
+    let request_config = builder.build()?;
+
+    #[allow(deprecated)]
+    let (attestation, secrets) = prover.notarize(&request_config).await?;
 
     debug!("finished notarizing");
 
