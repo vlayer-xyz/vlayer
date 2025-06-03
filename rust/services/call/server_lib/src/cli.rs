@@ -20,25 +20,28 @@ impl TryFrom<Cli> for ConfigOptionsWithVersion {
     fn try_from(value: Cli) -> Result<Self, Self::Error> {
         let config = match value.config_file {
             Some(path) => parse_config_file(path)?,
-            None => {
-                let default_config = EnvConfig::try_from(&ConfigOptions::default())?;
-                let env_config = Environment::with_prefix("VLAYER")
-                    .try_parsing(true)
-                    .prefix_separator("_")
-                    .separator("__")
-                    .list_separator(" ")
-                    .with_list_parse_key("rpc_urls")
-                    .ignore_empty(true);
-                EnvConfig::builder()
-                    .add_source(default_config)
-                    .add_source(env_config)
-                    .build()?
-                    .try_deserialize()?
-            }
+            None => config_from_env()?,
         };
         let semver = version::version();
         Ok(ConfigOptionsWithVersion { semver, config })
     }
+}
+
+fn config_from_env() -> anyhow::Result<ConfigOptions> {
+    let default_config = EnvConfig::try_from(&ConfigOptions::default())?;
+    let env_config = Environment::with_prefix("VLAYER")
+        .try_parsing(true)
+        .prefix_separator("_")
+        .separator("__")
+        .list_separator(" ")
+        .with_list_parse_key("rpc_urls")
+        .ignore_empty(true);
+    let config = EnvConfig::builder()
+        .add_source(default_config)
+        .add_source(env_config)
+        .build()?
+        .try_deserialize()?;
+    Ok(config)
 }
 
 struct Version;

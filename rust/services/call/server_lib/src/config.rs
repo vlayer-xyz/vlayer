@@ -84,7 +84,7 @@ pub struct ChainClientOptions {
     pub timeout: Option<u64>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum RpcUrlOrString {
     RpcUrl(RpcUrl),
