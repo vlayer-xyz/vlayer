@@ -20,3 +20,4 @@
   * `304957ee9fdecb19ec65f8633d40a926aacd142b81c4cfd43d42ca6742f67130` – Update `chain_specs.toml` [#2218](https://github.com/vlayer-xyz/vlayer/pull/2218)
   * `d47c721762613c905c892b615c3496fc172ea7d5f7fc29ae9900a4f0b5478dd3` – Risc0 2.0.2 - [#2279](https://github.com/vlayer-xyz/vlayer/pull/2279)
   * `202097073e66ede38bf441f210b93e7983bd2473b1680f945ebacf41bf1d5ed8` – Update `AnchorStateRegistry` addresses for unichain and base chains
+  * `81fe3f1b7ffd8ce8ac1e108a2dde6666b667990a7abc158e000ac31c589b60a1` – Make `NotAnOptimism` error message human readable 
