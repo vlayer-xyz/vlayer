@@ -19,6 +19,8 @@ use tracing::{debug, info, warn};
 #[derive(Parser)]
 #[command(version = version::Version)]
 struct Cli {
+    /// Path to TOML config file such as config.toml.
+    /// See https://book.vlayer.xyz/appendix/architecture/prover.html#toml for options.
     #[arg(long)]
     config_file: Option<String>,
 }

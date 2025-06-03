@@ -52,8 +52,11 @@ pub enum Error {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GasMeterOptions {
+    /// Url to the gas meter
     pub url: String,
+    /// API key
     pub api_key: String,
+    /// Time-to-live for gas meter requests in seconds
     pub time_to_live: Option<u64>,
 }
 
@@ -65,14 +68,19 @@ pub enum AuthOptions {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JwtOptions {
+    /// Path to the public key in PEM format
     pub public_key: String,
+    /// Signing algorithm to use
     pub algorithm: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ChainClientOptions {
+    /// Url to the chain client
     pub url: String,
+    /// Poll interval in seconds
     pub poll_interval: Option<u64>,
+    /// Timeout in seconds
     pub timeout: Option<u64>,
 }
 
@@ -86,7 +94,9 @@ pub enum RpcUrlOrString {
 #[derive(Debug, Clone, Serialize, Deserialize, Into)]
 #[into((ChainId, String))]
 pub struct RpcUrl {
+    /// Chain ID
     pub chain_id: ChainId,
+    /// RPC url
     pub url: String,
 }
 
