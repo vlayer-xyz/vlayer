@@ -51,6 +51,7 @@ lazy_static = { workspace = true }
 provider = { workspace = true }
 reqwest = { workspace = true }
 serde_json = { workspace = true, features = ["preserve_order"] }
+tempfile = { workspace = true }
 tower = { workspace = true, features = ["retry", "timeout", "util"] }
 web_proof = { workspace = true, features = ["fixtures"] }
 

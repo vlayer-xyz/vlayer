@@ -2794,6 +2794,7 @@ dependencies = [
  "serde_with",
  "server_utils",
  "strum 0.26.3",
+ "tempfile",
  "thiserror 2.0.11",
  "tokio",
  "toml 0.8.19",
