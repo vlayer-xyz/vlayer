@@ -4,5 +4,4 @@ verifiable_dns_rust_log:
   - info
   - dns_server=debug
 vlayer_jwt_public_key_location: /home/{{ ansible_user }}/.vlayer/jwt.key.pub
-vlayer_jwt_algorithm: rs256
 vlayer_release_channel: stable
