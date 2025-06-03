@@ -12,7 +12,7 @@ export const useStoredUserActionAssertions = () => {
   const storeAssertion = useCallback(
     (key: string, value: boolean) =>
       _storeAssertion((prev) => ({
-        ...prev,
+        ...(prev === LOADING ? {} : prev),
         [key]: value,
       })),
     [_storeAssertion],
