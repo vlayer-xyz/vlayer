@@ -6,18 +6,11 @@ edition = "2024"
 [dependencies]
 anyhow = { workspace = true }
 call_server_lib = { workspace = true }
-clap = { workspace = true, features = ["derive", "env", "string"] }
 common = { workspace = true }
 config = { workspace = true }
-guest_wrapper = { workspace = true }
-hex = { workspace = true }
 server_utils = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
-version = { workspace = true }
-
-[dev-dependencies]
-regex = { workspace = true }
 
 [lints]
 workspace = true

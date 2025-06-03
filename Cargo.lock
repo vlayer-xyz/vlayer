@@ -2741,16 +2741,11 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "call_server_lib",
- "clap 4.5.26",
  "common",
  "config 0.15.11",
- "guest_wrapper",
- "hex",
- "regex",
  "server_utils",
  "tokio",
  "tracing",
- "version",
 ]
 
 [[package]]
@@ -2772,7 +2767,9 @@ dependencies = [
  "call_host",
  "chain",
  "chain_client",
+ "clap 4.5.26",
  "common",
+ "config 0.15.11",
  "ctor",
  "dashmap",
  "derive-new",
@@ -2785,6 +2782,7 @@ dependencies = [
  "lazy_static",
  "mime",
  "provider",
+ "regex",
  "reqwest 0.12.12",
  "risc0-zkp",
  "risc0-zkvm",
@@ -2801,6 +2799,7 @@ dependencies = [
  "tower 0.5.2",
  "tower-http 0.6.2",
  "tracing",
+ "version",
  "web_proof",
 ]
 

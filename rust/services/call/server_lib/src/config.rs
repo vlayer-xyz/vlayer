@@ -148,7 +148,7 @@ pub struct ConfigOptions {
     pub log_format: Option<LogFormat>,
 }
 
-pub fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions, Error> {
+pub(crate) fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions, Error> {
     let contents = std::fs::read_to_string(path.as_ref())
         .map_err(|_| Error::ConfigFile(path.as_ref().to_path_buf()))?;
     let config_opts: ConfigOptions = toml::from_str(&contents).map_err(Error::ConfigToml)?;

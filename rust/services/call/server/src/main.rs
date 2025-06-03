@@ -1,56 +1,14 @@
-mod version;
-
 use std::str::FromStr;
 
 use call_server_lib::{
-    Config, ProofMode,
-    config::{
-        AuthOptions, ConfigOptions, ConfigOptionsWithVersion, JwtOptions, RpcUrl, RpcUrlOrString,
-        parse_config_file,
-    },
+    Cli, Config, ProofMode,
+    cli::Parser,
+    config::{AuthOptions, ConfigOptionsWithVersion, JwtOptions, RpcUrl, RpcUrlOrString},
     serve,
 };
-use clap::Parser;
 use common::{extract_rpc_url_token, init_tracing};
-use config::{Config as EnvConfig, Environment};
 use server_utils::set_risc0_dev_mode;
 use tracing::{debug, info, warn};
-
-#[derive(Parser)]
-#[command(version = version::Version)]
-struct Cli {
-    /// Path to TOML config file such as config.toml.
-    /// See https://book.vlayer.xyz/appendix/architecture/prover.html#toml for options.
-    #[arg(long)]
-    config_file: Option<String>,
-}
-
-impl TryFrom<Cli> for ConfigOptionsWithVersion {
-    type Error = anyhow::Error;
-
-    fn try_from(value: Cli) -> Result<Self, Self::Error> {
-        let config = match value.config_file {
-            Some(path) => parse_config_file(path)?,
-            None => {
-                let default_config = EnvConfig::try_from(&ConfigOptions::default())?;
-                let env_config = Environment::with_prefix("VLAYER")
-                    .try_parsing(true)
-                    .prefix_separator("_")
-                    .separator("__")
-                    .list_separator(" ")
-                    .with_list_parse_key("rpc_urls")
-                    .ignore_empty(true);
-                EnvConfig::builder()
-                    .add_source(default_config)
-                    .add_source(env_config)
-                    .build()?
-                    .try_deserialize()?
-            }
-        };
-        let semver = version::version();
-        Ok(ConfigOptionsWithVersion { semver, config })
-    }
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
