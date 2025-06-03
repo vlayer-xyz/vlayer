@@ -1,7 +1,7 @@
 import { BrowsingHistoryItem } from "../state/history.ts";
 import { StepStatus } from "constants/step.ts";
 import { expect, vi } from "vitest";
-import { calculateSteps } from "./useSteps";
+import { calculateSteps, getActionableSteps } from "./useSteps";
 import chalk from "chalk";
 import { steps } from "./useSteps.test.data.ts";
 import browser, { type Tabs } from "webextension-polyfill";
@@ -16,6 +16,7 @@ export type StepTestCase = {
     isZkProvingDone: boolean;
     history: BrowsingHistoryItem[];
     activeTabContext?: TestActiveTab;
+    assertions?: Record<string, boolean>;
   };
   output: StepStatus[];
 };
@@ -37,10 +38,14 @@ export const expectedStatuses = async ({ input, output }: StepTestCase) => {
     mockActiveTab(input.activeTabContext);
   }
   (
-    await calculateSteps({
-      stepsSetup: steps,
-      ...input,
-    })
+    await calculateSteps(
+      getActionableSteps({
+        stepsSetup: steps,
+        assertions: {},
+        storeAssertion: () => {},
+        ...input,
+      }),
+    )
   ).forEach((step, index) => {
     expect(step.status).toEqual(output[index]);
   });

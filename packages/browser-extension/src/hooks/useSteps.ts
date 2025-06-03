@@ -91,37 +91,22 @@ const isExpectedDomElementState = async (
   return result;
 };
 
-const calculateStepStatus = async (
-  step: ActionableStep<WebProofStep>,
-  hasUncompletedStep: boolean,
-): Promise<StepStatus> => {
-  //after uncompleted step all steps can only by further no need to calculate anything
-  if (hasUncompletedStep) {
-    return StepStatus.Further;
-  }
-
-  // check if step is completed
-  if (step.isCompleted === undefined || (await step.isCompleted())) {
-    return StepStatus.Completed;
-  }
-  // check if step is ready
-  if (step.isReady === undefined || step.isReady()) {
-    return StepStatus.Current;
-  }
-
-  return StepStatus.Further;
-};
-
 function intoActionableStep(
   step: WebProofStep,
   history: BrowsingHistoryItem[],
   isZkProvingDone: boolean,
   assertions: Record<string, boolean>,
   storeAssertion: (key: string, value: boolean) => void,
-): ActionableStep<WebProofStep> {
+): ActionableStep {
   return match(step)
     .with(
-      { step: P.union(EXTENSION_STEP.startPage, EXTENSION_STEP.redirect) },
+      {
+        step: P.union(
+          EXTENSION_STEP.startPage,
+          EXTENSION_STEP.redirect,
+          EXTENSION_STEP.expectUrl,
+        ),
+      },
       (step) => ({
         step,
         isCompleted: () => wasUrlVisited(history, step),
@@ -133,10 +118,6 @@ function intoActionableStep(
         isExpectedDomElementState(step, assertions[step.label], (value) =>
           storeAssertion(step.label, value),
         ),
-    }))
-    .with({ step: EXTENSION_STEP.expectUrl }, (step) => ({
-      step,
-      isReady: () => wasUrlVisited(history, step),
     }))
     .with({ step: EXTENSION_STEP.notarize }, (step) => ({
       step,
@@ -157,7 +138,7 @@ function intoActionableStep(
     .exhaustive();
 }
 
-function getActionableSteps({
+export function getActionableSteps({
   stepsSetup,
   history,
   isZkProvingDone,
@@ -180,6 +161,27 @@ function getActionableSteps({
     ),
   );
 }
+
+const calculateStepStatus = async (
+  step: ActionableStep<WebProofStep>,
+  hasUncompletedStep: boolean,
+): Promise<StepStatus> => {
+  //after uncompleted step all steps can only by further no need to calculate anything
+  if (hasUncompletedStep) {
+    return StepStatus.Further;
+  }
+
+  // check if step is completed
+  if (step.isCompleted === undefined || (await step.isCompleted())) {
+    return StepStatus.Completed;
+  }
+  // check if step is ready
+  if (step.isReady === undefined || step.isReady()) {
+    return StepStatus.Current;
+  }
+
+  return StepStatus.Further;
+};
 
 export const calculateSteps = async (stepsSetup: ActionableStep[]) => {
   const steps: Step[] = [];
