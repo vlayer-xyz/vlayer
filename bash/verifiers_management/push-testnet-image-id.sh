@@ -12,8 +12,8 @@ repository_address() {
 set -ueo pipefail
 
 SCRIPT="ImageIdAdministration.s.sol"
-CONTARCT="AddSupportForCurrentImageId"
-SCRIPT_INVOCATION="${CONTRACTS_DIR}/script/${SCRIPT}:${CONTARCT}"
+CONTRACT="AddSupportForCurrentImageId"
+SCRIPT_INVOCATION="${CONTRACTS_DIR}/script/${SCRIPT}:${CONTRACT}"
 REPOSITORY_ADDRESS=$(repository_address)
 
 cd "${CONTRACTS_DIR}"
