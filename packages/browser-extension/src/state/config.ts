@@ -8,6 +8,7 @@ export enum StorageKeys {
   tlsnProof = "tlsn.proof",
   // browsing history, should survive extension close/reopen
   browsingHistory = "browsingHistory",
+  userActionAssertions = "userActionAssertions",
   // zk proving status, it will be cleared just after its added
   zkProvingStatus = "zkProvingStatus",
 }
