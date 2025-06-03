@@ -8,7 +8,7 @@ The Ethereum ecosystem is fragmented, consisting of various EVM chains such as B
 * `chainId`, which specifies the chain in the context of which the next function call will be executed
 * `blockNo`, which is the block number of the given chain
 
-> **Note:** At the moment, teleportation is only supported from L1 ethereum chains to optimistic L2 chains.
+> **Note:** At the moment, teleportation is only supported from L1 Ethereum chains (Ethereum mainnet and Ethereum sepolia) to optimistic L2 chains. When we teleport from mainnet, we can only teleport to optimistic L2 mainnet chains, and from sepolia we can only teleport to optimistic L2 sepolia.
 
 ## Example 
 ### Prover
