@@ -92,7 +92,7 @@ anvil
 Open a new terminal, navigate to `rust` directory and run:
 
 ```sh
-RUST_LOG=info cargo run --bin call_server -- --rpc-url '31337:http://localhost:8545' --proof fake
+VLAYER_RPC_URLS="31337:http://localhost:8545" RUST_LOG=info cargo run --bin call_server
 ```
 
 ### Build example contracts
