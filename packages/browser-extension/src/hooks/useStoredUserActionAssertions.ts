@@ -17,7 +17,6 @@ export const useStoredUserActionAssertions = () => {
       })),
     [_storeAssertion],
   );
-  );
 
   return [assertion, storeAssertion] as const;
 };
