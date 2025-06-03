@@ -11,11 +11,12 @@ export const useStoredUserActionAssertions = () => {
 
   const storeAssertion = useCallback(
     (key: string, value: boolean) =>
-      _storeAssertion({
-        ...assertion,
+      _storeAssertion((prev) => ({
+        ...prev,
         [key]: value,
-      }),
-    [assertion],
+      })),
+    [_storeAssertion],
+  );
   );
 
   return [assertion, storeAssertion] as const;
