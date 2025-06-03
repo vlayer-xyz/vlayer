@@ -6,8 +6,8 @@ use std::{
 use anyhow::Context;
 use clap::{Args as ClapArgs, Parser, Subcommand};
 use jwt::{
-    Algorithm, Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey, Environment,
-    Error as JwtError, Header, TokenData, Validation, decode, decode_header, encode,
+    Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey, Environment, Header,
+    JwtAlgorithm, JwtError, TokenData, Validation, decode, decode_header, encode,
     get_current_timestamp,
 };
 use thiserror::Error;
@@ -114,7 +114,7 @@ fn encode_jwt(args: Encode) -> Result<()> {
     info!("{claims:#?}");
 
     let header = Header {
-        alg: Algorithm::RS256,
+        alg: JwtAlgorithm::RS256,
         ..Default::default()
     };
 
@@ -137,7 +137,7 @@ fn decode_jwt(args: Decode) -> Result<()> {
 
     info!("{header:#?}");
 
-    let mut validation = Validation::new(Algorithm::RS256);
+    let mut validation = Validation::new(JwtAlgorithm::RS256);
     let pub_key = pub_key.unwrap_or_else(|| {
         validation.insecure_disable_signature_validation();
         DecodingKey::from_secret(b"")

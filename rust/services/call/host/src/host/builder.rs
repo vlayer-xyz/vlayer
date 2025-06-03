@@ -70,7 +70,14 @@ pub struct WithStartExecLocation {
 impl New {
     #[allow(clippy::unused_self)]
     #[must_use]
-    pub fn with_rpc_urls(self, rpc_urls: HashMap<ChainId, String>) -> WithProviders {
+    pub fn with_rpc_urls<'a>(
+        self,
+        rpc_urls: impl IntoIterator<Item = (&'a ChainId, &'a String)>,
+    ) -> WithProviders {
+        let rpc_urls: HashMap<ChainId, String> = rpc_urls
+            .into_iter()
+            .map(|(&id, host)| (id, host.to_string()))
+            .collect();
         let provider_factory = EthersProviderFactory::new(rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
         let op_client_factory = Box::new(optimism::client::factory::http::Factory::new(rpc_urls));

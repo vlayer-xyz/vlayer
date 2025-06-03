@@ -129,7 +129,7 @@ mod test {
     const MAX_CALLDATA_SIZE: usize = 2;
 
     #[tokio::test]
-    async fn invalid_to_address() -> anyhow::Result<()> {
+    async fn invalid_to_address() {
         let call = Call::new(INVALID_ADDRESS, DATA, 0);
         let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE);
 
@@ -137,12 +137,10 @@ mod test {
             actual_result,
             Err(Error::FieldValidation(err)) if err.to_string() == "`to` Invalid string length `0x`"
         ));
-
-        Ok(())
     }
 
     #[tokio::test]
-    async fn invalid_data() -> anyhow::Result<()> {
+    async fn invalid_data() {
         const INVALID_DATA: &str = "xx";
         let call = Call::new(TO, INVALID_DATA, 0);
         let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE);
@@ -151,12 +149,10 @@ mod test {
             actual_result,
             Err(Error::FieldValidation(err)) if err.to_string() == "`data` Invalid hex prefix `xx`"
         ));
-
-        Ok(())
     }
 
     #[tokio::test]
-    async fn calldata_length_limit() -> anyhow::Result<()> {
+    async fn calldata_length_limit() {
         const LONG_DATA: &str = "0x00";
         let call = Call::new(TO, LONG_DATA, 0);
         let actual_result = call.parse_and_validate(0);
@@ -165,7 +161,5 @@ mod test {
             actual_result,
             Err(Error::FieldValidation(err)) if err.to_string() == "`data` is too long `1` > `0`"
         ));
-
-        Ok(())
     }
 }

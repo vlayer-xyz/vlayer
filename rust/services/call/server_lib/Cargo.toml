@@ -17,12 +17,16 @@ call_engine = { workspace = true }
 call_host = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
+clap = { workspace = true, features = ["derive", "string"] }
 common = { workspace = true }
+config = { workspace = true }
 dashmap = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
+guest_wrapper = { workspace = true }
 hex = { workspace = true }
 jsonrpsee = { workspace = true }
+jwt = { workspace = true }
 mime = { workspace = true }
 provider = { workspace = true }
 risc0-zkp = { workspace = true }
@@ -32,10 +36,13 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 serde_with = { workspace = true, features = ["macros"] }
 server_utils = { workspace = true }
+strum = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+toml = { workspace = true }
 tower-http = { workspace = true, features = ["cors", "sensitive-headers", "validate-request"] }
 tracing = { workspace = true }
+version = { workspace = true }
 
 [dev-dependencies]
 assert-json-diff = { workspace = true }
@@ -45,8 +52,10 @@ ethers = { workspace = true }
 guest_wrapper = { workspace = true }
 lazy_static = { workspace = true }
 provider = { workspace = true }
+regex = { workspace = true }
 reqwest = { workspace = true }
 serde_json = { workspace = true, features = ["preserve_order"] }
+tempfile = { workspace = true }
 tower = { workspace = true, features = ["retry", "timeout", "util"] }
 web_proof = { workspace = true, features = ["fixtures"] }
 

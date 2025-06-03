@@ -40,6 +40,88 @@ Our architecture is heavily inspired by RISC Zero [steel](https://github.com/ris
 
 Currently, the Guest is compiled with Risc0, but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt).
 
+### Runtime configuration
+
+**Call Prover** can be configured either from a `config.toml` file, or via environment variables.
+
+#### TOML
+
+When configuring the prover from the config file, you can pass it via `--config-file` flag:
+
+```
+$ call_server --config-file config.toml
+```
+
+Valid keys for different configuration options are shown in an example TOML file below:
+
+```toml
+host = "127.0.0.1"
+port = 3000
+proof_mode = "fake"
+log_format = "plain" # Optional log format to use: [plain, json], defaults to plain
+
+# Optional list of RPC urls for different chains.
+# If empty, defaults to Anvil: 31337:http://localhost:8545
+[[rpc_urls]]
+chain_id = 31337
+url = "http://localhost:8545"
+
+[[rpc_urls]]
+chain_id = 31338
+url = "http://localhost:8546"
+
+# Optional chain client config
+[chain_client]
+url = "http://localhost:3001"
+poll_interval = 5 # Optional polling interval in seconds
+timeout = 240 # Optional timeout in seconds
+
+# Optional JWT-based authentication config.
+[auth.jwt]
+public_key = "/path/to/signing/key.pem"
+algorithm = "rs256" # Signing algorithm to use, defaults to rs256
+
+# Optional gas-meter integration for billing and usage tracking
+[gas_meter]
+url = "http://localhost:3002"
+api_key = "deadbeef"
+time_to_live = 3600 # Optional time-to-live for gas meter requests in seconds
+```
+
+A few comments about different configuration options:
+* `host` - address to use
+* `port` - port to bind to
+* `proof_mode` - possible values are either `fake` (default) for fake proofs, or `groth16` for production proofs on Risc0 Bonsai
+* `log_format` - optional log format to use either `plain` (default) or `json`
+* `rpc_urls` - optional list of chain RPC urls for the prover to use, defaults to Anvil if not set (`31337:http://localhost:8545`)
+* `chain_client` - optional chain client config (usually used with time-travel and teleport)
+* `auth` - optional auth module which currently supports only JWT mode
+* `auth.jwt` - optional JWT auth config
+* `gas_meter` - optional gas meter config (usually used internally for billing and usage tracking)
+
+#### Environment variables
+
+If using a `config.toml` is undesirable, the prover can also be configured using defaults with environment variables overrides. Every config option can be overriden.
+We use `VLAYER_` prefix, and nesting of config options is represented using `__`. Current up-to-date table of environment variables overrides is as follows:
+
+|Environment variable                 |Config option                |Default                       |Type   |Values                  |
+|-------------------------------------|-----------------------------|------------------------------|-------|------------------------|
+|`VLAYER_HOST`                        |`host`                       |"127.0.0.1"                   |string |                        |
+|`VLAYER_PORT`                        |`port`                       |3000                          |u16    |0-65535                 |
+|`VLAYER_PROOF_MODE`                  |`proof_mode`                 |"fake"                        |enum   |"fake","groth16"        |
+|`VLAYER_LOG_FORMAT`                  |`log_format`                 |"plain"                       |enum   |"plain","json"          |
+|`VLAYER_RPC_URLS`                    |`rpc_urls`                   |"31337:http://localhost:8545" |list   |                        |
+|`VLAYER_CHAIN_CLIENT__URL`           |`chain_client.url`           |"http://localhost:3001"       |string |                        |
+|`VLAYER_CHAIN_CLIENT__POLL_INTERVAL` |`chain_client.poll_interval` |5                             |usize  |                        |
+|`VLAYER_CHAIN_CLIENT__TIMEOUT`       |`chain_client.timeout`       |240                           |usize  |                        |
+|`VLAYER_AUTH__JWT__PUBLIC_KEY`       |`auth.jwt.public_key`        |"/path/to/signing/key.pem"    |string |                        |
+|`VLAYER_AUTH__JWT__ALGORITHM`        |`auth.jwt.algorithm`         |"rs256"                       |enum   |"rs256","rs384","rs512" |
+|                                     |                             |                              |       |"es256","es384","ps256" |
+|                                     |                             |                              |       |"ps384","ps512","eddsa" |
+|`VLAYER_GAS_METER__URL`              |`gas_meter.url`              |"http://localhost:3002"       |string |                        |
+|`VLAYER_GAS_METER__API_KEY`          |`gas_meter.api_key`          |"deadbeef"                    |string |                        |
+|`VLAYER_GAS_METER__TIME_TO_LIVE`     |`gas_meter.time_to_live`     |3600                          |usize  |                        |
+
 ### Execution and proving
 
 The Host passes arguments to the Guest via standard input (stdin), and similarly, the Guest returns values via standard output (stdout). zkVM works in isolation, without access to a disk or network.

@@ -10,7 +10,7 @@ use axum_extra::{
 };
 use derive_more::Deref;
 use derive_new::new;
-use jwt::{Algorithm, DecodingKey, Error as JwtError, Validation, decode, decode_header};
+use jwt::{DecodingKey, JwtAlgorithm, JwtError, Validation, decode, decode_header};
 use serde::Deserialize;
 use serde_json::json;
 use thiserror::Error;
@@ -26,13 +26,13 @@ pub enum Error {
     #[error("Missing JWT token")]
     MissingToken,
     #[error(transparent)]
-    Jwt(JwtError),
+    Jwt(#[from] JwtError),
 }
 
 #[derive(new, Clone)]
 pub struct State {
     pub_key: DecodingKey,
-    algorithm: Algorithm,
+    algorithm: JwtAlgorithm,
 }
 
 const HEADER_TYP: &str = "JWT";

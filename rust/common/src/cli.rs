@@ -1,6 +1,8 @@
 use clap::{Parser, ValueEnum};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq, Copy)]
+#[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq, Copy, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum LogFormat {
     #[default]
     Plain,

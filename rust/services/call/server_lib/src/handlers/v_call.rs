@@ -57,7 +57,7 @@ async fn build_host(
     prover_contract_addr: Address,
 ) -> std::result::Result<Host, BuilderError> {
     let host = Host::builder()
-        .with_rpc_urls(config.rpc_urls.clone())
+        .with_rpc_urls(&config.rpc_urls)
         .with_chain_guest_id(config.chain_guest_id())
         .with_chain_client_config(config.chain_client_config.clone())?
         .with_start_chain_id(chain_id)?

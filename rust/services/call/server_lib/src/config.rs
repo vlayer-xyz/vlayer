@@ -1,28 +1,273 @@
-use std::{collections::HashMap, net::SocketAddr as RawSocketAddr};
+use std::{
+    collections::BTreeMap,
+    net::{Ipv4Addr, SocketAddr as RawSocketAddr, SocketAddrV4},
+    path::{Path, PathBuf},
+    str::FromStr,
+    time::Duration,
+};
 
 use alloy_primitives::{ChainId, hex::ToHexExt};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use chain_client::ChainClientConfig;
-use common::GuestElf;
-use derive_more::From;
+use common::{GuestElf, LogFormat};
+use derive_more::{Debug, From, Into};
+use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
+use jwt::{Algorithm, Error as JwtError, load_jwt_signing_key};
 use risc0_zkp::core::digest::Digest;
+use serde::{Deserialize, Serialize};
 use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
+use strum::VariantNames;
 use thiserror::Error;
 
 use crate::gas_meter::Config as GasMeterConfig;
 
-#[derive(Debug, Error)]
-#[error("Missing required config field: {0}")]
-pub struct Error(String);
+pub const DEFAULT_HOST: &str = "127.0.0.1";
+pub const DEFAULT_PORT: u16 = 3000;
+pub const DEFAULT_CHAIN_CLIENT_POLL_INTERVAL: u64 = 5;
+pub const DEFAULT_CHAIN_CLIENT_TIMEOUT: u64 = 240;
+pub const DEFAULT_GAS_METER_TIME_TO_LIVE: u64 = 3600;
 
-#[derive(Clone)]
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Config file not found: '{}'", .0.display())]
+    ConfigFile(PathBuf),
+    #[error("Missing required config field: {0}")]
+    ConfigField(String),
+    #[error("Parsing config from toml failed: {0}")]
+    ConfigToml(#[from] toml::de::Error),
+    #[error("Invalid rpc url format: expected <chain-id>:<url>, got {0}")]
+    RpcUrlFormat(String),
+    #[error("Invalid chain id: {0}")]
+    ChainId(String),
+    #[error(
+        "Unexpected JWT signing algorithm selected: '{}'. Possible values are {:?}",
+        .0,
+        Algorithm::VARIANTS
+    )]
+    JwtSigningAlgorithm(String),
+    #[error(transparent)]
+    Jwt(#[from] JwtError),
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GasMeterOptions {
+    /// Url to the gas meter
+    pub url: String,
+    /// API key
+    pub api_key: String,
+    /// Time-to-live for gas meter requests in seconds
+    pub time_to_live: Option<u64>,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AuthOptions {
+    Jwt(JwtOptions),
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct JwtOptions {
+    /// Path to the public key in PEM format
+    pub public_key: String,
+    /// Signing algorithm to use
+    pub algorithm: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ChainClientOptions {
+    /// Url to the chain client
+    pub url: String,
+    /// Poll interval in seconds
+    pub poll_interval: Option<u64>,
+    /// Timeout in seconds
+    pub timeout: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum RpcUrlOrString {
+    RpcUrl(RpcUrl),
+    String(String),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Into, PartialEq, Eq)]
+#[into((ChainId, String))]
+pub struct RpcUrl {
+    /// Chain ID
+    pub chain_id: ChainId,
+    /// RPC url
+    pub url: String,
+}
+
+impl FromStr for RpcUrl {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        if parts.len() < 2 {
+            return Err(Error::RpcUrlFormat(s.to_string()));
+        }
+        let chain_id: ChainId = parts[0]
+            .parse()
+            .map_err(|_| Error::ChainId(parts[0].to_string()))?;
+        let url = parts[1].to_string();
+        Ok(Self { chain_id, url })
+    }
+}
+
+impl TryFrom<RpcUrlOrString> for RpcUrl {
+    type Error = Error;
+
+    fn try_from(value: RpcUrlOrString) -> Result<Self, Self::Error> {
+        match value {
+            RpcUrlOrString::RpcUrl(rpc) => Ok(rpc),
+            RpcUrlOrString::String(s) => Self::from_str(&s),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ConfigOptions {
+    /// Host
+    pub host: String,
+    /// Port
+    pub port: u16,
+    /// Proof mode to use. Possible values are ["fake", "groth16"]
+    pub proof_mode: ProofMode,
+    /// RPC mappings
+    #[serde(default)]
+    pub rpc_urls: Vec<RpcUrlOrString>,
+    /// Chain client config
+    pub chain_client: Option<ChainClientOptions>,
+    /// Authentication
+    pub auth: Option<AuthOptions>,
+    /// Gas meter config
+    pub gas_meter: Option<GasMeterOptions>,
+    /// Log format
+    pub log_format: Option<LogFormat>,
+}
+
+pub(crate) fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions, Error> {
+    let contents = std::fs::read_to_string(path.as_ref())
+        .map_err(|_| Error::ConfigFile(path.as_ref().to_path_buf()))?;
+    let config_opts: ConfigOptions = toml::from_str(&contents).map_err(Error::ConfigToml)?;
+    Ok(config_opts)
+}
+
+impl Default for ConfigOptions {
+    fn default() -> Self {
+        Self {
+            host: DEFAULT_HOST.to_string(),
+            port: DEFAULT_PORT,
+            chain_client: None,
+            auth: None,
+            gas_meter: None,
+            proof_mode: ProofMode::default(),
+            rpc_urls: Vec::default(),
+            log_format: None,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ConfigOptionsWithVersion {
+    pub semver: String,
+    pub config: ConfigOptions,
+}
+
+impl From<GasMeterOptions> for GasMeterConfig {
+    fn from(
+        GasMeterOptions {
+            url,
+            api_key,
+            time_to_live,
+        }: GasMeterOptions,
+    ) -> Self {
+        let time_to_live =
+            Duration::from_secs(time_to_live.unwrap_or(DEFAULT_GAS_METER_TIME_TO_LIVE));
+        Self::new(url, time_to_live, Some(api_key))
+    }
+}
+
+impl TryFrom<JwtOptions> for JwtConfig {
+    type Error = Error;
+
+    fn try_from(
+        JwtOptions {
+            public_key,
+            algorithm,
+        }: JwtOptions,
+    ) -> Result<Self, Self::Error> {
+        let algorithm = Algorithm::from_str(&algorithm)
+            .map_err(|_| Error::JwtSigningAlgorithm(algorithm.clone()))?;
+        let public_key = load_jwt_signing_key(&public_key, algorithm).map_err(Error::Jwt)?;
+        Ok(Self {
+            public_key,
+            algorithm: algorithm.into(),
+        })
+    }
+}
+
+impl From<ChainClientOptions> for ChainClientConfig {
+    fn from(
+        ChainClientOptions {
+            url,
+            poll_interval,
+            timeout,
+        }: ChainClientOptions,
+    ) -> Self {
+        let poll_interval =
+            Duration::from_secs(poll_interval.unwrap_or(DEFAULT_CHAIN_CLIENT_POLL_INTERVAL));
+        let timeout = Duration::from_secs(timeout.unwrap_or(DEFAULT_CHAIN_CLIENT_TIMEOUT));
+        Self::new(url, poll_interval, timeout)
+    }
+}
+
+impl TryFrom<ConfigOptionsWithVersion> for Config {
+    type Error = Error;
+
+    fn try_from(opts: ConfigOptionsWithVersion) -> Result<Self, Self::Error> {
+        let gas_meter_config: Option<GasMeterConfig> = opts.config.gas_meter.map(Into::into);
+        let jwt_config = opts
+            .config
+            .auth
+            .map(|auth| match auth {
+                AuthOptions::Jwt(jwt) => jwt.try_into(),
+            })
+            .transpose()?;
+        let chain_client_config = opts.config.chain_client.map(Into::into);
+        let rpc_urls: Vec<RpcUrl> = opts
+            .config
+            .rpc_urls
+            .into_iter()
+            .map(TryInto::<RpcUrl>::try_into)
+            .collect::<Result<_, _>>()?;
+
+        ConfigBuilder::default()
+            .with_chain_guest_ids(CHAIN_GUEST_IDS)
+            .with_call_guest_elf(&CALL_GUEST_ELF)
+            .with_host(opts.config.host)
+            .with_port(opts.config.port)
+            .with_proof_mode(opts.config.proof_mode)
+            .with_semver(opts.semver)
+            .with_rpc_mappings(rpc_urls)
+            .with_gas_meter_config(gas_meter_config)
+            .with_jwt_config(jwt_config)
+            .with_chain_client_config(chain_client_config)
+            .build()
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Config {
     pub socket_addr: RawSocketAddr,
-    pub rpc_urls: HashMap<ChainId, String>,
+    #[debug(skip)]
+    pub rpc_urls: BTreeMap<ChainId, String>,
     pub proof_mode: ProofMode,
     pub chain_client_config: Option<ChainClientConfig>,
     pub max_calldata_size: usize,
+    #[debug(skip)]
     pub call_guest_elf: GuestElf,
     pub chain_guest_ids: Box<[Digest]>,
     pub semver: String,
@@ -51,21 +296,16 @@ impl Config {
 pub struct SocketAddr(RawSocketAddr);
 
 impl Default for SocketAddr {
-    #[allow(clippy::expect_used)]
     fn default() -> Self {
-        Self(
-            "127.0.0.1:3000"
-                .parse()
-                .expect("parsing default value 127.0.0.1:3000 should not fail"),
-        )
+        Self(RawSocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 3000)))
     }
 }
 
-pub struct RpcUrls(HashMap<ChainId, String>);
+pub struct RpcUrls(Vec<(ChainId, String)>);
 
 impl Default for RpcUrls {
     fn default() -> Self {
-        Self(HashMap::from([(TEST_CHAIN_ID, "http://localhost:8545".to_string())]))
+        Self(vec![(TEST_CHAIN_ID, "http://localhost:8545".to_string())])
     }
 }
 
@@ -120,9 +360,9 @@ impl ConfigBuilder {
     #[must_use]
     pub fn with_rpc_mappings(
         mut self,
-        mappings: impl IntoIterator<Item = (ChainId, String)>,
+        mappings: impl IntoIterator<Item = impl Into<(ChainId, String)>>,
     ) -> Self {
-        self.rpc_urls.0.extend(mappings);
+        self.rpc_urls.0.extend(mappings.into_iter().map(Into::into));
         self
     }
 
@@ -134,18 +374,14 @@ impl ConfigBuilder {
 
     #[must_use]
     #[allow(clippy::unwrap_used)]
-    pub fn with_host(mut self, host: Option<String>) -> Self {
-        if let Some(host) = host {
-            self.socket_addr.0.set_ip(host.parse().unwrap());
-        }
+    pub fn with_host(mut self, host: impl Into<String>) -> Self {
+        self.socket_addr.0.set_ip(host.into().parse().unwrap());
         self
     }
 
     #[must_use]
-    pub fn with_port(mut self, port: Option<u16>) -> Self {
-        if let Some(port) = port {
-            self.socket_addr.0.set_port(port);
-        }
+    pub fn with_port(mut self, port: u16) -> Self {
+        self.socket_addr.0.set_port(port);
         self
     }
 
@@ -190,13 +426,15 @@ impl ConfigBuilder {
             jwt_config,
         } = self;
 
-        let call_guest_elf = call_guest_elf.ok_or(Error("call_guest_elf".into()))?;
-        let chain_guest_ids = chain_guest_ids.ok_or(Error("chain_guest_ids".into()))?;
-        let semver = semver.ok_or(Error("semver".into()))?;
+        let call_guest_elf = call_guest_elf.ok_or(Error::ConfigField("call_guest_elf".into()))?;
+        let chain_guest_ids =
+            chain_guest_ids.ok_or(Error::ConfigField("chain_guest_ids".into()))?;
+        let semver = semver.ok_or(Error::ConfigField("semver".into()))?;
+        let rpc_urls: BTreeMap<ChainId, String> = rpc_urls.0.into_iter().collect();
 
         Ok(Config {
             socket_addr: socket_addr.0,
-            rpc_urls: rpc_urls.0,
+            rpc_urls,
             proof_mode,
             chain_client_config,
             max_calldata_size: max_calldata_size.0,
@@ -222,6 +460,8 @@ impl From<&Config> for HostConfig {
 
 #[cfg(test)]
 pub(crate) mod tests {
+    use std::io::Write;
+
     use super::*;
 
     pub(crate) fn config_builder() -> ConfigBuilder {
@@ -235,19 +475,20 @@ pub(crate) mod tests {
 
     #[test]
     fn local_testnet_rpc_url_always_there() {
-        let config = config_builder().with_rpc_mappings(vec![]).build().unwrap();
+        let config = config_builder().build().unwrap();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://localhost:8545");
     }
 
     #[test]
     fn local_testnet_rpc_url_can_be_overwritten() {
-        let config = config_builder()
-            .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
-            .build()
-            .unwrap();
+        let rpc = RpcUrl {
+            chain_id: TEST_CHAIN_ID,
+            url: "http://127.0.0.1:8666".to_string(),
+        };
+        let config = config_builder().with_rpc_mappings([rpc]).build().unwrap();
 
-        assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "NEW");
+        assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://127.0.0.1:8666");
     }
 
     #[test]
@@ -263,5 +504,140 @@ pub(crate) mod tests {
             "0x0100000001000000010000000100000001000000010000000100000001000000"
         );
         assert_eq!(config.semver, "1.2.3".to_string());
+    }
+
+    fn save_config_file(contents: impl AsRef<str>) -> tempfile::NamedTempFile {
+        let mut config_file = tempfile::NamedTempFile::new().unwrap();
+        config_file
+            .as_file_mut()
+            .write_all(contents.as_ref().as_bytes())
+            .unwrap();
+        config_file
+    }
+
+    #[test]
+    fn correctly_parse_config_file() {
+        let config_file = save_config_file(
+            r#"
+        host = "127.0.0.1" 
+        port = 3000
+        proof_mode = "groth16"
+
+        [[rpc_urls]]
+        chain_id = 31337
+        url = "http://localhost:8545"
+
+        [auth.jwt]
+        public_key = "/path/to/key"
+        algorithm = "rs256"
+
+        [gas_meter]
+        url = "http://localhost:3001"
+        api_key = "deadbeef"
+        "#,
+        );
+
+        let opts = parse_config_file(config_file.path()).unwrap();
+        assert_eq!(
+            opts,
+            ConfigOptions {
+                host: "127.0.0.1".to_string(),
+                port: 3000,
+                proof_mode: ProofMode::Groth16,
+                rpc_urls: vec![RpcUrlOrString::RpcUrl(RpcUrl {
+                    chain_id: 31337,
+                    url: "http://localhost:8545".to_string()
+                })],
+                chain_client: None,
+                auth: Some(AuthOptions::Jwt(JwtOptions {
+                    public_key: "/path/to/key".to_string(),
+                    algorithm: "rs256".to_string(),
+                })),
+                gas_meter: Some(GasMeterOptions {
+                    url: "http://localhost:3001".to_string(),
+                    api_key: "deadbeef".to_string(),
+                    time_to_live: None
+                }),
+                log_format: None,
+            }
+        );
+    }
+
+    #[test]
+    fn correctly_parse_config_file_with_alternative_rpc_urls_syntax() {
+        let config_file = save_config_file(
+            r#"
+        host = "127.0.0.1" 
+        port = 3000
+        proof_mode = "groth16"
+        rpc_urls = ["31337:http://localhost:8545", "31338:http://localhost:8546"]
+        "#,
+        );
+
+        let opts = parse_config_file(config_file.path()).unwrap();
+        assert_eq!(
+            opts,
+            ConfigOptions {
+                host: "127.0.0.1".to_string(),
+                port: 3000,
+                proof_mode: ProofMode::Groth16,
+                rpc_urls: vec![
+                    RpcUrlOrString::String("31337:http://localhost:8545".to_string()),
+                    RpcUrlOrString::String("31338:http://localhost:8546".to_string())
+                ],
+                chain_client: None,
+                auth: None,
+                gas_meter: None,
+                log_format: None,
+            }
+        );
+    }
+
+    #[test]
+    fn reports_invalid_path_to_jwt_signing_key() {
+        let config_file = save_config_file(
+            r#"
+                host = "0.0.0.0"
+                port = 3000
+                proof_mode = "fake"
+
+                [auth.jwt]
+                public_key = "/gibberish"
+                algorithm = "rs256"
+            "#,
+        );
+
+        let opts = parse_config_file(config_file.path()).unwrap();
+        let res: Result<Config, Error> = ConfigOptionsWithVersion {
+            semver: "0".to_string(),
+            config: opts,
+        }
+        .try_into();
+
+        assert!(matches!(res.unwrap_err(), Error::Jwt(JwtError::JwtSigningKeyNotFound(..))));
+    }
+
+    #[test]
+    fn reports_invalid_jwt_signing_algorithm() {
+        let config_file = save_config_file(
+            r#"
+                host = "0.0.0.0"
+                port = 3000
+                proof_mode = "fake"
+
+                [auth.jwt]
+                public_key = "docker/fixtures/jwt-authority.key.pub"
+                algorithm = "ts256"
+            "#,
+        );
+
+        let opts = parse_config_file(config_file.path()).unwrap();
+        let res: Result<Config, Error> = ConfigOptionsWithVersion {
+            semver: "0".to_string(),
+            config: opts,
+        }
+        .try_into();
+
+        assert!(matches!(res.unwrap_err(), Error::JwtSigningAlgorithm(..)));
     }
 }

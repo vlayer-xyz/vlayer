@@ -18,26 +18,31 @@ Environment=RUST_LOG={{ vlayer_rust_log | join(',') }}
 Environment=VLAYER_LOG_FORMAT=json
 Environment=PATH=/home/ubuntu/.cargo/bin/:$PATH
 {% if vlayer_bonsai_api_url is defined %}
-Environment='BONSAI_API_URL={{ vlayer_bonsai_api_url }}'
+Environment=BONSAI_API_URL={{ vlayer_bonsai_api_url }}
 {% endif %}
 {% if vlayer_bonsai_api_key is defined %}
-Environment='BONSAI_API_KEY={{ vlayer_bonsai_api_key }}'
+Environment=BONSAI_API_KEY={{ vlayer_bonsai_api_key }}
 {% endif %}
-ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
-{{- ' --host ' ~ vlayer_prover_host if vlayer_prover_host is defined else '' }}
-{{- ' --port ' ~ vlayer_prover_port if vlayer_prover_port is defined else '' }}
-{{- ' --proof ' ~ vlayer_proof_type if vlayer_proof_type is defined else '' }}
-{%- for url in vlayer_prover_rpc_urls|default([]) %}
-{{-  ' --rpc-url ' ~ url | trim -}}
-{% endfor %}
 {% if vlayer_prover_gas_meter_url is defined %}
-{{- ' --gas-meter-url ' ~ vlayer_prover_gas_meter_url }}
-{{- ' --gas-meter-api-key ' ~ vlayer_prover_gas_meter_api_key -}}
+Environment=VLAYER_GAS_METER__URL={{ vlayer_prover_gas_meter_url }}
+Environment=VLAYER_GAS_METER__API_KEY={{ vlayer_prover_gas_meter_api_key }}
+{% endif %}
+{% if vlayer_prover_host is defined %}
+Environment=VLAYER_HOST={{ vlayer_prover_host }}
+{% endif %}
+{% if vlayer_prover_port is defined %}
+Environment=VLAYER_PORT={{ vlayer_prover_port }}
+{% endif %}
+{% if vlayer_proof_type is defined %}
+Environment=VLAYER_PROOF_MODE={{ vlayer_proof_type }}
 {% endif %}
 {% if vlayer_prover_chain_proof_url is defined %}
-{{- ' --chain-proof-url ' ~ vlayer_prover_chain_proof_url -}}
+Environment=VLAYER_CHAIN_CLIENT__URL={{ vlayer_prover_chain_proof_url }}
 {% endif %}
-{{- ' --jwt-public-key ' ~ vlayer_jwt_public_key_location }}
+Environment=VLAYER_AUTH__JWT__URL={{ vlayer_jwt_public_key_location }}
+Environment=VLAYER_AUTH__JWT__ALGORITHM={{ vlayer_jwt_algorithm }}
+Environment='VLAYER_RPC_URLS={{ vlayer_prover_rpc_urls | join(' ') }}'
+ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
 
 [Install]
 WantedBy=multi-user.target

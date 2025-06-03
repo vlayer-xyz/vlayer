@@ -1,8 +1,9 @@
 use std::path::PathBuf;
 
 use clap::Parser;
+use derive_more::Debug;
 use derive_new::new;
-use jwt::{Algorithm, DecodingKey, Error as JwtError};
+use jwt::{DecodingKey, JwtAlgorithm, JwtError};
 use thiserror::Error;
 use tracing::{info, warn};
 
@@ -12,13 +13,14 @@ pub struct Args {
     pub jwt_public_key: Option<PathBuf>,
 
     #[arg(long, requires = "auth", default_value = "RS256")]
-    pub jwt_algorithm: Option<Algorithm>,
+    pub jwt_algorithm: Option<JwtAlgorithm>,
 }
 
-#[derive(new, Clone)]
+#[derive(new, Clone, Debug)]
 pub struct Config {
+    #[debug(skip)]
     pub public_key: DecodingKey,
-    pub algorithm: Algorithm,
+    pub algorithm: JwtAlgorithm,
 }
 
 #[derive(Debug, Error)]
@@ -27,7 +29,7 @@ pub enum Error {
     InvalidPublicKey(PathBuf),
 
     #[error(transparent)]
-    Jwt(JwtError),
+    Jwt(#[from] JwtError),
 }
 
 impl TryFrom<Args> for Option<Config> {
