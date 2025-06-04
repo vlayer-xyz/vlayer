@@ -1,7 +1,7 @@
 import { BrowsingHistoryItem } from "src/state";
 import { StepStatus } from "constants/step.ts";
-import { WebProofStep } from "../web-proof-commons";
-import { StepTestCase } from "hooks/useSteps.test.helpers.ts";
+import { WebProofStep } from "../../web-proof-commons";
+import { StepTestCase } from "hooks/useSteps/useSteps.test.helpers.ts";
 
 export const steps = [
   {

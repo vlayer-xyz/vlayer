@@ -1,6 +1,7 @@
 import { useSteps } from "hooks/useSteps";
 import { Step } from "components/molecules/Step";
 import React from "react";
+
 export const Steps = () => {
   const steps = useSteps();
   return (

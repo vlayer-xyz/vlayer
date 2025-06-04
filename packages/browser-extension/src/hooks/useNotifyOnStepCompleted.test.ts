@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import browser from "webextension-polyfill";
 import { renderHook } from "@testing-library/react";
 import { ExtensionInternalMessageType } from "../web-proof-commons";
-import { steps, testData } from "./useSteps.test.data.ts";
+import { steps, testData } from "./useSteps/useSteps.test.data.ts";
 import { useNotifyOnStepCompleted } from "./useNotifyOnStepCompleted.ts";
 import { Step, StepStatus } from "src/constants";
 

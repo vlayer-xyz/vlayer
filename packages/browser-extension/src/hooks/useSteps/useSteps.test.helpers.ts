@@ -1,10 +1,10 @@
-import { BrowsingHistoryItem } from "../state/history.ts";
-import { StepStatus } from "constants/step.ts";
+import { BrowsingHistoryItem } from "../../state/history";
+import { StepStatus } from "constants/step";
 import { expect, vi } from "vitest";
-import { calculateSteps, getActionableSteps } from "./useSteps";
-import chalk from "chalk";
-import { steps } from "./useSteps.test.data.ts";
+import { calculateSteps } from "./useSteps";
+import { steps } from "./useSteps.test.data";
 import browser, { type Tabs } from "webextension-polyfill";
+import { getInteractiveSteps } from "./interactiveSteps";
 
 type TestActiveTab = Partial<Tabs.Tab> & {
   innerHTML?: string;
@@ -39,8 +39,7 @@ export const expectedStatuses = async ({ input, output }: StepTestCase) => {
   }
   (
     await calculateSteps(
-      getActionableSteps({
-        stepsSetup: steps,
+      getInteractiveSteps(steps, {
         assertions: {},
         storeAssertion: () => {},
         ...input,
@@ -51,14 +50,4 @@ export const expectedStatuses = async ({ input, output }: StepTestCase) => {
   });
 
   vi.clearAllMocks();
-};
-
-export const testTitle = ({
-  input,
-  output,
-}: {
-  output: StepStatus[];
-  input: { id: string };
-}) => {
-  return `should return ${chalk.blue(`[${output.map((e) => e.toString()).join(", ")}]`)} for input ${chalk.blue(input.id)}`;
 };
