@@ -57,4 +57,13 @@ contract JsonParsingTest is VTest {
 
         assertEq(keccak256(bytes(assetName)), keccak256(bytes("FDUSD")));
     }
+
+    function test_parsingFloatFromSimpleJson() public {
+        Web memory web = Web("{\"asset\":\"FDUSD\",\"test\":5.123}", "", "");
+
+        callProver();
+        int256 value = web.jsonGetFloatAsInt("test", 2);
+
+        assertEq(value, 512);
+    }
 }
