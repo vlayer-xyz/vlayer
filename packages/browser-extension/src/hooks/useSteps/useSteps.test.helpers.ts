@@ -1,10 +1,10 @@
-import { BrowsingHistoryItem } from "../state/history.ts";
-import { StepStatus } from "constants/step.ts";
 import { expect, vi } from "vitest";
-import { calculateSteps } from "./useSteps";
-import chalk from "chalk";
-import { steps } from "./useSteps.test.data.ts";
 import browser, { type Tabs } from "webextension-polyfill";
+import type { BrowsingHistoryItem } from "src/state";
+import { StepStatus } from "constants/step";
+import { getInteractiveSteps } from "./interactiveSteps";
+import { calculateSteps } from "./useSteps";
+import { steps } from "./useSteps.test.data";
 
 type TestActiveTab = Partial<Tabs.Tab> & {
   innerHTML?: string;
@@ -16,6 +16,7 @@ export type StepTestCase = {
     isZkProvingDone: boolean;
     history: BrowsingHistoryItem[];
     activeTabContext?: TestActiveTab;
+    assertions?: Record<string, boolean>;
   };
   output: StepStatus[];
 };
@@ -37,23 +38,16 @@ export const expectedStatuses = async ({ input, output }: StepTestCase) => {
     mockActiveTab(input.activeTabContext);
   }
   (
-    await calculateSteps({
-      stepsSetup: steps,
-      ...input,
-    })
+    await calculateSteps(
+      getInteractiveSteps(steps, {
+        assertions: {},
+        storeAssertion: () => {},
+        ...input,
+      }),
+    )
   ).forEach((step, index) => {
     expect(step.status).toEqual(output[index]);
   });
 
   vi.clearAllMocks();
-};
-
-export const testTitle = ({
-  input,
-  output,
-}: {
-  output: StepStatus[];
-  input: { id: string };
-}) => {
-  return `should return ${chalk.blue(`[${output.map((e) => e.toString()).join(", ")}]`)} for input ${chalk.blue(input.id)}`;
 };
