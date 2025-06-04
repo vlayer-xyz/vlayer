@@ -74,7 +74,7 @@ mod assert_commits_into {
 pub enum ConversionError {
     #[error("Conversion: {0}")]
     ConversionError(#[from] BaseConversionError),
-    #[error("NotAnoptimism: {0}")]
+    #[error("Chain with id {0} is not an optimistic chain")]
     NotAnOptimism(ChainId),
 }
 
