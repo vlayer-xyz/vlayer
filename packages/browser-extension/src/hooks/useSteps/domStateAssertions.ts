@@ -15,9 +15,9 @@ export const domStateAssertion = (
   assertion: WebProofStepUserAction["assertion"],
 ) => {
   if (element === null) {
-    return assertion.require.notExist;
+    return Boolean(assertion.require.notExist);
   }
-  return assertion.require.exist;
+  return Boolean(assertion.require.exist);
 };
 
 export const isExpectedDomElementState = async (
