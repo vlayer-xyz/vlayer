@@ -1,0 +1,31 @@
+name: Release notify failure
+on:
+  workflow_run:
+    workflows:
+      - "Release nightly"
+    types: [completed]
+
+jobs:
+  release-notify-failure:
+    name: Release notify failure
+    environment: Production
+    if: ${{ github.event.workflow_run.conclusion != 'success' && github.event.workflow_run.conclusion != 'skipped' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger PagerDuty
+        run: |
+          curl -X POST https://events.pagerduty.com/v2/enqueue \
+            -H "Content-Type: application/json" \
+            -d '{
+              "routing_key": "'"${{ secrets.PAGERDUTY_CD_INTEGRATION_KEY }}"'",
+              "event_action": "trigger",
+              "payload": {
+                "summary": "GitHub Actions workflow failed in ${{ github.repository }}",
+                "source": "${{ github.repository }}",
+                "severity": "error",
+                "custom_details": {
+                  "workflow": "Main CI workflow",
+                  "url": "https://github.com/${{ github.repository }}/actions"
+                }
+              }
+            }'

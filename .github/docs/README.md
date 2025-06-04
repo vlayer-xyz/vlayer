@@ -54,6 +54,7 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [PR team labeler](/.github/workflows/pr_team_labeler.yaml) | Adds team labels to PRs. |
 | [Release](/.github/workflows/release.yaml) | Reusable workflow to publish artifacts to npm, GitHub Releases, S3. |
 | [Release nightly](/.github/workflows/release_nightly.yaml) | Uses the reusable release workflow to publish a nightly release. |
+| [Release notify failure](/.github/workflows/release_notify_failure.yaml) | Sends notifications on failed releases. |
 | [Release browser extension](/.github/workflows/release_browser_extension.yaml) | Uploads the extension to Chrome Web Store. |
 | [Test contracts](/.github/workflows/test_contracts.yaml) | Test and lint contracts. |
 | [Test chain worker migration](./github/workflows/test_chain_worker_migration.yaml) | Verifies that a new version of chain worker can generate new ZK proofs based on existing proofs. |
