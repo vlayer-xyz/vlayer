@@ -1,10 +1,10 @@
-import { BrowsingHistoryItem } from "../../state/history";
-import { StepStatus } from "constants/step";
 import { expect, vi } from "vitest";
+import browser, { type Tabs } from "webextension-polyfill";
+import type { BrowsingHistoryItem } from "src/state";
+import { StepStatus } from "constants/step";
+import { getInteractiveSteps } from "./interactiveSteps";
 import { calculateSteps } from "./useSteps";
 import { steps } from "./useSteps.test.data";
-import browser, { type Tabs } from "webextension-polyfill";
-import { getInteractiveSteps } from "./interactiveSteps";
 
 type TestActiveTab = Partial<Tabs.Tab> & {
   innerHTML?: string;

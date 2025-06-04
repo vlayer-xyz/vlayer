@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import browser, { type Tabs } from "webextension-polyfill";
+import { WebProofStep } from "../../web-proof-commons";
 import {
   type InteractiveStepsConfig,
   intoInteractiveStep,
 } from "./interactiveSteps";
-import browser, { type Tabs } from "webextension-polyfill";
-import { WebProofStep } from "../../web-proof-commons";
-import { BrowsingHistoryItem } from "src/state";
 import { HTTPMethod } from "lib/HttpMethods.ts";
+import type { BrowsingHistoryItem } from "src/state";
 
 const stepSetup = ({
   history = [],

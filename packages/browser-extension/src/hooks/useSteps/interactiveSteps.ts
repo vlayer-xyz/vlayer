@@ -1,11 +1,11 @@
+import { URLPattern } from "urlpattern-polyfill";
+import { match, P } from "ts-pattern";
 import {
   EXTENSION_STEP,
   type UrlPattern,
   type WebProofStep,
 } from "../../web-proof-commons";
 import type { BrowsingHistoryItem } from "src/state";
-import { URLPattern } from "urlpattern-polyfill";
-import { match, P } from "ts-pattern";
 import { isExpectedDomElementState } from "./domStateAssertions";
 
 export interface InteractiveStep<T extends WebProofStep = WebProofStep> {

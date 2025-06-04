@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { domStateAssertion } from "./domStateAssertions";
 import type { WebProofStepUserAction } from "../../web-proof-commons";
+import { domStateAssertion } from "./domStateAssertions";
 
 describe("domStateAssertion", () => {
   it("returns true if element is present and we expect it", () => {

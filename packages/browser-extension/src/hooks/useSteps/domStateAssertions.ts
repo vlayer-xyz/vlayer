@@ -1,6 +1,6 @@
+import { URLPattern } from "urlpattern-polyfill";
 import type { WebProofStepUserAction } from "../../web-proof-commons";
 import { getActiveTabUrl, getElementOnPage } from "lib/activeTabContext.ts";
-import { URLPattern } from "urlpattern-polyfill";
 
 const isActiveTabUrlMatching = async (expectedUrl: string) => {
   const currentUrl = await getActiveTabUrl();
