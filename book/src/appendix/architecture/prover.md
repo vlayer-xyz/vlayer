@@ -81,6 +81,14 @@ timeout = 240 # Optional timeout in seconds
 public_key = "/path/to/signing/key.pem"
 algorithm = "rs256" # Signing algorithm to use, defaults to rs256
 
+# Optional list of user-defined JWT claims that the server will validate
+[[auth.jwt.claims]]
+name = "sub" # Specifying just the name of the claim will assert the claims existence with any value
+
+[[auth.jwt.claims]]
+name = "environment"
+values = ["test"] # Here, `environment` can only accept a single value of `test` which the server will assert
+
 # Optional gas-meter integration for billing and usage tracking
 [gas_meter]
 url = "http://localhost:3002"
@@ -118,6 +126,7 @@ We use `VLAYER_` prefix, and nesting of config options is represented using `__`
 |`VLAYER_AUTH__JWT__ALGORITHM`        |`auth.jwt.algorithm`         |"rs256"                       |enum   |"rs256","rs384","rs512" |
 |                                     |                             |                              |       |"es256","es384","ps256" |
 |                                     |                             |                              |       |"ps384","ps512","eddsa" |
+|`VLAYER_AUTH__JWT__CLAIMS`           |`auth.jwt.claims`            |[]                            |list   |                        |
 |`VLAYER_GAS_METER__URL`              |`gas_meter.url`              |"http://localhost:3002"       |string |                        |
 |`VLAYER_GAS_METER__API_KEY`          |`gas_meter.api_key`          |"deadbeef"                    |string |                        |
 |`VLAYER_GAS_METER__TIME_TO_LIVE`     |`gas_meter.time_to_live`     |3600                          |usize  |                        |

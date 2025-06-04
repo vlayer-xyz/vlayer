@@ -119,7 +119,7 @@ For guides about the project structure, check out [architecture appendix](/appen
 To profile execution of Guest code in zkVM, we leverage the profiling functionality [provided by RISC Zero](https://dev.risczero.com/api/zkvm/profiling). In order to run profiling, follow the steps in the [Usage](https://dev.risczero.com/api/zkvm/profiling#usage) section of the RISC Zero documentation, but in [Step 2](https://dev.risczero.com/api/zkvm/profiling#step-2-running) replace the command you run with:
 
 ```sh
-RISC0_PPROF_OUT=./profile.pb cargo run --bin call_server --proof fake
+RISC0_PPROF_OUT=./profile.pb cargo run --bin call_server
 ```
 
 which will start the vlayer server. Then just call the JSON RPC API and the server will write the profiling output to `profile.pb`, which can be later [visualised as explained in the RISC Zero Profiling Guide](https://dev.risczero.com/api/zkvm/profiling#step-3-visualization). Please note that the profile only contains data about the Guest execution, i.e. the execution inside the zkVM.
