@@ -142,23 +142,23 @@ mod tests {
     }
 
     mod jwt {
-        use server_utils::jwt::{
-            Environment,
-            test_helpers::{JWT_SECRET, TokenArgs, token as test_token},
-        };
+        use serde_json::json;
+        use server_utils::jwt::{EncodingKey, Header, encode, get_current_timestamp};
 
         use super::*;
-        use crate::server::test_helpers::app_with_jwt_auth;
+        use crate::server::test_helpers::{JWT_SECRET, app_with_jwt_auth};
 
-        fn token(invalid_after: i64, subject: &str) -> String {
-            test_token(&TokenArgs {
-                secret: JWT_SECRET,
-                host: None,
-                port: None,
-                invalid_after,
-                subject,
-                environment: Some(Environment::Test),
-            })
+        fn token(invalid_after: i64) -> String {
+            let exp = get_current_timestamp() as i64 + invalid_after;
+            let key = EncodingKey::from_secret(JWT_SECRET);
+            encode(
+                &Header::default(),
+                &json!({
+                    "exp": exp,
+                }),
+                &key,
+            )
+            .unwrap()
         }
 
         async fn run_dns_query_with_token(token: String) -> Response<Body> {
@@ -169,7 +169,7 @@ mod tests {
 
         #[tokio::test]
         async fn accepts_requests_with_valid_token() {
-            assert_eq!(run_dns_query_with_token(token(60, "1234")).await.status(), StatusCode::OK)
+            assert_eq!(run_dns_query_with_token(token(60)).await.status(), StatusCode::OK)
         }
 
         #[tokio::test]
@@ -185,26 +185,24 @@ mod tests {
         #[tokio::test]
         async fn rejects_requests_with_expired_token() {
             assert_eq!(
-                run_dns_query_with_token(token(-120, "1234")).await.status(),
+                run_dns_query_with_token(token(-120)).await.status(),
                 StatusCode::UNAUTHORIZED
             )
         }
 
         #[tokio::test]
         async fn rejects_requests_with_tampered_with_token() {
-            assert_eq!(
-                run_dns_query_with_token(test_token(&TokenArgs {
-                    secret: "beefdead",
-                    host: None,
-                    port: None,
-                    invalid_after: 60,
-                    subject: "1234",
-                    environment: None,
-                }))
-                .await
-                .status(),
-                StatusCode::UNAUTHORIZED
+            let key = EncodingKey::from_secret(b"beefdead");
+            let ts = get_current_timestamp() + 1000;
+            let token = encode(
+                &Header::default(),
+                &json!({
+                    "exp": ts,
+                }),
+                &key,
             )
+            .unwrap();
+            assert_eq!(run_dns_query_with_token(token).await.status(), StatusCode::UNAUTHORIZED)
         }
     }
 }

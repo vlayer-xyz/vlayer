@@ -56,10 +56,12 @@ fn server(config: Config, state: AppState) -> Router {
 
 #[cfg(test)]
 mod test_helpers {
-    use server_utils::jwt::test_helpers::default_config as default_jwt_config;
+    use server_utils::jwt::{DecodingKey, config::Config as JwtConfig};
 
     use super::*;
     use crate::config::ConfigBuilder;
+
+    pub const JWT_SECRET: &[u8] = b"deadbeef";
 
     pub fn app() -> Router {
         let config = ConfigBuilder::default().build();
@@ -68,9 +70,9 @@ mod test_helpers {
     }
 
     pub fn app_with_jwt_auth() -> Router {
-        let config = ConfigBuilder::default()
-            .with_jwt_config(default_jwt_config())
-            .build();
+        let public_key = DecodingKey::from_secret(JWT_SECRET);
+        let jwt_config = JwtConfig::new(public_key, Default::default(), vec![]);
+        let config = ConfigBuilder::default().with_jwt_config(jwt_config).build();
         let state = AppState::new(config.clone());
         server(config, state)
     }
