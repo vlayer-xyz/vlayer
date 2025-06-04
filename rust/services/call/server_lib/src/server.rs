@@ -11,7 +11,7 @@ use axum::{
 use derive_new::new;
 use server_utils::{
     RequestId, RequestIdLayer, Router as JrpcRouter, cors, init_trace_layer,
-    jwt::{Claims, axum::ClaimsExtractor},
+    jwt::axum::TokenExtractor,
 };
 use tokio::net::TcpListener;
 use tower_http::{
@@ -23,8 +23,6 @@ use tracing::info;
 use crate::{
     config::Config,
     handlers::{Params, RpcServer, State as AppState},
-    jwt::validate_environment,
-    token::Token,
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -46,21 +44,13 @@ async fn handle(
 }
 
 async fn handle_with_auth(
-    ClaimsExtractor(Claims {
-        sub, environment, ..
-    }): ClaimsExtractor<Claims>,
+    TokenExtractor(token): TokenExtractor,
     AxumState(State { router, config }): AxumState<State>,
     Extension(req_id): Extension<RequestId>,
     body: Bytes,
 ) -> impl IntoResponse {
-    if let Err(e) = validate_environment(&config, environment) {
-        return e.into_response();
-    }
-    let params = Params::new(config, Some(Token::new(sub)), req_id);
-    router
-        .handle_request_with_params(body, params)
-        .await
-        .into_response()
+    let params = Params::new(config, Some(token), req_id);
+    router.handle_request_with_params(body, params).await
 }
 
 #[derive(new, Clone)]

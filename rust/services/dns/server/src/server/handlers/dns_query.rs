@@ -8,7 +8,7 @@ use axum::{
     response::IntoResponse,
     routing::{MethodRouter, get},
 };
-use server_utils::jwt::{Claims, axum::ClaimsExtractor};
+use server_utils::jwt::axum::TokenExtractor;
 use tower_http::{
     sensitive_headers::SetSensitiveRequestHeadersLayer,
     validate_request::ValidateRequestHeaderLayer,
@@ -32,7 +32,7 @@ pub fn handler(config: Config) -> MethodRouter<AppState> {
 }
 
 async fn dns_query_handler_with_auth(
-    _claims: ClaimsExtractor<Claims>,
+    _: TokenExtractor,
     state: State<AppState>,
     params: Query<Params>,
 ) -> impl IntoResponse {

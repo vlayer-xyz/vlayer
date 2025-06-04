@@ -3,7 +3,6 @@ pub mod config;
 pub mod gas_meter;
 pub mod jwt;
 pub mod server;
-pub mod token;
 
 mod handlers;
 mod metrics;
