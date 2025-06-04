@@ -74,7 +74,25 @@ pub struct JwtOptions {
     pub algorithm: String,
     /// User-defined claims
     #[serde(default)]
-    pub claims: Vec<JwtClaim>,
+    pub claims: Vec<JwtClaimOrString>,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum JwtClaimOrString {
+    JwtClaim(JwtClaim),
+    String(String),
+}
+
+impl TryFrom<JwtClaimOrString> for JwtClaim {
+    type Error = Error;
+
+    fn try_from(value: JwtClaimOrString) -> Result<Self, Self::Error> {
+        match value {
+            JwtClaimOrString::JwtClaim(claim) => Ok(claim),
+            JwtClaimOrString::String(s) => Ok(JwtClaim::from_str(&s)?),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -206,6 +224,10 @@ impl TryFrom<JwtOptions> for JwtConfig {
         let algorithm = Algorithm::from_str(&algorithm)
             .map_err(|_| Error::JwtSigningAlgorithm(algorithm.clone()))?;
         let public_key = load_jwt_signing_key(&public_key, algorithm).map_err(Error::Jwt)?;
+        let claims: Vec<JwtClaim> = claims
+            .into_iter()
+            .map(TryInto::<JwtClaim>::try_into)
+            .collect::<Result<_, _>>()?;
         Ok(Self::new(public_key, algorithm.into(), claims))
     }
 }
@@ -677,14 +699,14 @@ pub(crate) mod tests {
                     public_key: "docker/fixtures/jwt-authority.key.pub".to_string(),
                     algorithm: "rs256".to_string(),
                     claims: vec![
-                        JwtClaim {
+                        JwtClaimOrString::JwtClaim(JwtClaim {
                             name: "sub".to_string(),
                             values: vec![]
-                        },
-                        JwtClaim {
+                        }),
+                        JwtClaimOrString::JwtClaim(JwtClaim {
                             name: "environment".to_string(),
                             values: vec!["Test".to_string(), "Production".to_string()]
-                        }
+                        })
                     ]
                 })),
                 gas_meter: None,

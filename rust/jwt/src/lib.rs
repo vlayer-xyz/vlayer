@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
 pub use jsonwebtoken::{
     Algorithm as JwtAlgorithm, DecodingKey, EncodingKey, Header, TokenData, Validation, decode,
@@ -10,6 +13,8 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error("empty string when parsing JWT claim")]
+    EmptyString,
     #[error("JWT signing key not found: '{}'", .0.display())]
     JwtSigningKeyNotFound(PathBuf),
     #[error("JWT internal error: {0}")]
@@ -76,4 +81,18 @@ pub struct Claim {
     pub name: String,
     #[serde(default)]
     pub values: Vec<String>,
+}
+
+impl FromStr for Claim {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            return Err(Error::EmptyString);
+        }
+        let parts: Vec<&str> = s.split(':').collect();
+        let name = parts[0].to_string();
+        let values = parts[1..].iter().map(ToString::to_string).collect();
+        Ok(Self { name, values })
+    }
 }

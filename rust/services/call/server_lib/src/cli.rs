@@ -35,6 +35,7 @@ fn config_from_env() -> anyhow::Result<ConfigOptions> {
         .separator("__")
         .list_separator(" ")
         .with_list_parse_key("rpc_urls")
+        .with_list_parse_key("auth.jwt.claims")
         .ignore_empty(true);
     let config = EnvConfig::builder()
         .add_source(default_config)
