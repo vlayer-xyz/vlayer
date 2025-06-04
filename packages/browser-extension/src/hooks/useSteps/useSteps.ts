@@ -77,7 +77,7 @@ export const useSteps = (): Step[] => {
     setSteps(await calculateSteps(interactiveSteps));
   }, [interactiveSteps]);
 
-  const RECALCULATE_STEPS_TIMEOUT = 100;
+  const RECALCULATE_STEPS_TIMEOUT = 500;
   useIntervalCalls(recalculateSteps, RECALCULATE_STEPS_TIMEOUT);
 
   useEffect(() => void recalculateSteps(), [recalculateSteps]);
