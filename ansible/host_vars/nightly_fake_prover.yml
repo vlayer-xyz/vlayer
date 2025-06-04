@@ -5,6 +5,9 @@ ansible_user: ubuntu
 vlayer_release_channel: nightly
 vlayer_prover_host: 127.0.0.1
 vlayer_prover_port: 3000
+vlayer_jwt_claims: |
+  "sub"
+  "environment:test"
 prover_nginx_ip_rate_limit_burst: 20
 prover_nginx_ip_rate_limit_per_minute: 60
 vlayer_alchemy_api_key: !vault |
