@@ -6,9 +6,9 @@ vlayer_release_channel: stable
 vlayer_prover_host: 127.0.0.1
 vlayer_prover_port: 3000
 vlayer_proof_type: groth16
-vlayer_jwt_claims: |
-  "sub"
-  "environment:production"
+vlayer_jwt_claims:
+ - "sub"
+ - "environment:production"
 vlayer_bonsai_api_url: "https://api.bonsai.xyz/"
 vlayer_bonsai_api_key: !vault |
   $ANSIBLE_VAULT;1.1;AES256
