@@ -54,9 +54,9 @@ impl Config {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
     use serde_json::json;
+
+    use super::*;
 
     #[test]
     fn validates_presence() {

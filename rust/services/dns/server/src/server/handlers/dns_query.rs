@@ -148,6 +148,7 @@ mod tests {
         use super::*;
         use crate::server::test_helpers::{JWT_SECRET, app_with_jwt_auth};
 
+        #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
         fn token(invalid_after: i64) -> String {
             let exp = get_current_timestamp() as i64 + invalid_after;
             let key = EncodingKey::from_secret(JWT_SECRET);
