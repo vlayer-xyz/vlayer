@@ -1,39 +1,19 @@
-use lazy_static::lazy_static;
-
 const B_100: usize = 100;
 const KB: usize = 1024;
-const TEN_KB: usize = 10 * KB;
-const HUNDRED_KB: usize = 100 * KB;
+const KB_10: usize = 10 * KB;
+const KB_100: usize = 100 * KB;
 
 const DEPTH_0: usize = 0;
 const DEPTH_1: usize = 1;
 const DEPTH_10: usize = 10;
 const DEPTH_100: usize = 100;
 
-enum Value {
-    String(String),
-    Integer(i64),
-}
-
-lazy_static! {
-    static ref STRING_VALUE: Value = string_value("value");
-    static ref INTEGER_VALUE: Value = int_value(1);
-}
-
-fn string_value(s: &str) -> Value {
-    Value::String(s.to_string())
-}
-
-const fn int_value(n: i64) -> Value {
-    Value::Integer(n)
-}
-
-fn generate_json(target_size: usize, depth: usize, value: &Value) -> String {
+fn generate_json(target_size: usize, depth: usize) -> String {
     let overhead = estimate_nesting_overhead(depth);
 
     // build flat body under (target_size - overhead)
     let body_size_limit = target_size.saturating_sub(overhead);
-    let body = build_flat_body(body_size_limit, value);
+    let body = build_flat_body(body_size_limit);
 
     build_nested_body(body, depth)
 }
@@ -47,20 +27,25 @@ fn estimate_nesting_overhead(depth: usize) -> usize {
     overhead
 }
 
-fn build_flat_body(body_size: usize, value: &Value) -> String {
+fn build_flat_body(body_size: usize) -> String {
     let mut body = String::with_capacity(body_size);
     body.push('{');
     let mut i = 1;
+    let mut value_type = 0;
     while body.len() < body_size {
-        let entry = match value {
-            Value::String(s) => format!("\"key{i}\":\"{s}\","),
-            Value::Integer(n) => format!("\"key{i}\":{n},"),
+        let entry = match value_type % 4 {
+            0 => format!("\"key{i}\":\"value\","),
+            1 => format!("\"key{i}\":1,"),
+            2 => format!("\"key{i}\":true,"),
+            3 => format!("\"key{i}\":1.23,"),
+            _ => unreachable!(),
         };
         if body.len() + entry.len() + 1 > body_size {
             break;
         }
         body.push_str(&entry);
         i += 1;
+        value_type += 1;
     }
     if body.ends_with(',') {
         body.pop();
@@ -80,6 +65,38 @@ fn build_nested_body(body: String, depth: usize) -> String {
     result
 }
 
+/// Generate text for benchmarking regex performance containing two distinct patterns:
+///
+/// 1. **Simple pattern**: The literal string `"needle"` - simple word matching
+/// 2. **Complex pattern**: SSN-style format `"123-45-6789"` - complex number pattern with character classes
+///
+/// The function places each pattern once at the beginning of the text, then pads the remainder
+/// with 'x' characters to reach the target size. This approach ensures consistent benchmark
+/// conditions while testing different regex complexity levels.
+///
+/// # Arguments
+/// * `size` - Target size of the generated text in bytes
+///
+/// # Returns
+/// A string containing both patterns followed by padding to reach the specified size
+pub fn generate_text_for_benchmarking_regex(size: usize) -> String {
+    let mut out = String::with_capacity(size);
+
+    // Calculate pattern size
+    let patterns = "needle 123-45-6789 ";
+    let pattern_size = patterns.len();
+
+    // Pad with 'x' characters first
+    let padding_size = size.saturating_sub(pattern_size);
+    out.push_str(&"x".repeat(padding_size));
+
+    // Add patterns at the end
+    out.push_str("needle "); // Simple pattern
+    out.push_str("123-45-6789 "); // Complex pattern
+
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -89,7 +106,7 @@ mod tests {
 
         #[test]
         fn generates() {
-            let json = generate_json(B_100, DEPTH_1, &STRING_VALUE);
+            let json = generate_json(B_100, DEPTH_1);
             assert!(json.contains("level1"));
             assert!(json.contains("key1"));
         }
@@ -135,7 +152,7 @@ mod tests {
             #[test]
             fn size_within_six_percent() {
                 let target_size = 50;
-                let result = build_flat_body(target_size, &STRING_VALUE);
+                let result = build_flat_body(target_size);
                 let actual_size = result.len();
                 assert_size_within_allowed_range(actual_size, target_size);
             }
@@ -146,13 +163,13 @@ mod tests {
 
             #[test]
             fn string_value() {
-                let result = build_flat_body(50, &STRING_VALUE);
+                let result = build_flat_body(50);
                 assert!(result.contains("\"value\""));
             }
 
             #[test]
             fn integer_value() {
-                let result = build_flat_body(50, &INTEGER_VALUE);
+                let result = build_flat_body(50);
                 assert!(result.contains("1"));
             }
         }

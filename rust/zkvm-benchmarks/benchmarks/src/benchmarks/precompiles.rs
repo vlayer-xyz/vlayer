@@ -2,6 +2,7 @@ use crate::{Benchmark, benchmarks::merge};
 #[allow(dead_code)]
 mod email;
 mod json;
+mod regex;
 mod url_pattern;
 
 pub fn benchmarks() -> Vec<Benchmark> {
@@ -9,5 +10,6 @@ pub fn benchmarks() -> Vec<Benchmark> {
         // ("email", email::benchmarks()),
         ("url_pattern", url_pattern::benchmarks()),
         ("json", json::benchmarks()),
+        ("regex", regex::benchmarks()),
     ])
 }
