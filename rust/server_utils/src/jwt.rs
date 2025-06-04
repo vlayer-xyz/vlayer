@@ -3,8 +3,8 @@ pub mod cli;
 pub mod config;
 
 pub use jwt::{
-    Algorithm, Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey, Environment,
-    Header, encode, get_current_timestamp,
+    Algorithm, Claim, Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey,
+    Environment, Header, encode, get_current_timestamp,
 };
 
 pub mod test_helpers {
@@ -14,6 +14,19 @@ pub mod test_helpers {
     use super::*;
 
     pub fn default_config() -> Config {
-        Config::new(DecodingKey::from_secret(JWT_SECRET.as_bytes()), Default::default(), Vec::new())
+        Config::new(
+            DecodingKey::from_secret(JWT_SECRET.as_bytes()),
+            Default::default(),
+            vec![
+                Claim {
+                    name: "sub".to_string(),
+                    values: vec![],
+                },
+                Claim {
+                    name: "environment".to_string(),
+                    values: vec!["test".to_string()],
+                },
+            ],
+        )
     }
 }

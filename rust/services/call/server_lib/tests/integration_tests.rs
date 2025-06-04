@@ -512,7 +512,7 @@ mod server_tests {
                 port: None,
                 invalid_after,
                 subject,
-                environment: None,
+                environment: Some(Environment::Test),
             })
         }
 
@@ -615,10 +615,10 @@ mod server_tests {
             let req = rpc_body("dummy", &json!([]));
             let resp = app.post_with_bearer_auth("/", &req, &token).await;
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
-                json!({ "error": "Invalid environment in JWT: production, prover server proof mode: fake" }),
+                json!({ "error": "JWT validation error: unexpected value for claim 'environment': expected one of [ 'test' ], received 'production'" }),
             );
         }
 
@@ -628,14 +628,15 @@ mod server_tests {
             const API_KEY: &str = "secret-deadbeef";
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
-            const SUBJECT: &str = "1234";
             const SLEEP_DURATION: tokio::time::Duration = tokio::time::Duration::from_millis(100);
+
+            let token = token(60, "1234");
 
             let mut gas_meter_server =
                 GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
-                .with_bearer_auth(SUBJECT)
+                .with_bearer_auth(&token)
                 .with_params(allocate_gas_body(EXPECTED_HASH), false)
                 .with_result(json!({}))
                 .with_expected_header(API_KEY_HEADER_NAME, API_KEY)
@@ -654,9 +655,7 @@ mod server_tests {
                 .unwrap();
 
             let req = v_call_body(contract.address(), &call_data);
-            let response = app
-                .post_with_bearer_auth("/", &req, &token(60, SUBJECT))
-                .await;
+            let response = app.post_with_bearer_auth("/", &req, &token).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_jrpc_ok(response, EXPECTED_HASH).await;

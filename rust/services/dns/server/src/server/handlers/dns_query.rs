@@ -142,7 +142,10 @@ mod tests {
     }
 
     mod jwt {
-        use server_utils::jwt::test_helpers::{JWT_SECRET, TokenArgs, token as test_token};
+        use server_utils::jwt::{
+            Environment,
+            test_helpers::{JWT_SECRET, TokenArgs, token as test_token},
+        };
 
         use super::*;
         use crate::server::test_helpers::app_with_jwt_auth;
@@ -154,7 +157,7 @@ mod tests {
                 port: None,
                 invalid_after,
                 subject,
-                environment: None,
+                environment: Some(Environment::Test),
             })
         }
 
