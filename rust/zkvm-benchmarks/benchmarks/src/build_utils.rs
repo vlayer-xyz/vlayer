@@ -1,39 +1,19 @@
-use lazy_static::lazy_static;
-
 const B_100: usize = 100;
 const KB: usize = 1024;
-const TEN_KB: usize = 10 * KB;
-const HUNDRED_KB: usize = 100 * KB;
+const KB_10: usize = 10 * KB;
+const KB_100: usize = 100 * KB;
 
 const DEPTH_0: usize = 0;
 const DEPTH_1: usize = 1;
 const DEPTH_10: usize = 10;
 const DEPTH_100: usize = 100;
 
-enum JsonValue {
-    String(String),
-    Integer(i64),
-}
-
-lazy_static! {
-    static ref STRING_VALUE: JsonValue = string_value("value");
-    static ref INTEGER_VALUE: JsonValue = int_value(1);
-}
-
-fn string_value(s: &str) -> JsonValue {
-    JsonValue::String(s.to_string())
-}
-
-const fn int_value(n: i64) -> JsonValue {
-    JsonValue::Integer(n)
-}
-
-fn generate_json(target_size: usize, depth: usize, value: &JsonValue) -> String {
+fn generate_json(target_size: usize, depth: usize) -> String {
     let overhead = estimate_nesting_overhead(depth);
 
     // build flat body under (target_size - overhead)
     let body_size_limit = target_size.saturating_sub(overhead);
-    let body = build_flat_body(body_size_limit, value);
+    let body = build_flat_body(body_size_limit);
 
     build_nested_body(body, depth)
 }
@@ -47,20 +27,25 @@ fn estimate_nesting_overhead(depth: usize) -> usize {
     overhead
 }
 
-fn build_flat_body(body_size: usize, value: &JsonValue) -> String {
+fn build_flat_body(body_size: usize) -> String {
     let mut body = String::with_capacity(body_size);
     body.push('{');
     let mut i = 1;
+    let mut value_type = 0;
     while body.len() < body_size {
-        let entry = match value {
-            JsonValue::String(s) => format!("\"key{i}\":\"{s}\","),
-            JsonValue::Integer(n) => format!("\"key{i}\":{n},"),
+        let entry = match value_type % 4 {
+            0 => format!("\"key{i}\":\"value\","),
+            1 => format!("\"key{i}\":1,"),
+            2 => format!("\"key{i}\":true,"),
+            3 => format!("\"key{i}\":1.23,"),
+            _ => unreachable!(),
         };
         if body.len() + entry.len() + 1 > body_size {
             break;
         }
         body.push_str(&entry);
         i += 1;
+        value_type += 1;
     }
     if body.ends_with(',') {
         body.pop();
@@ -121,7 +106,7 @@ mod tests {
 
         #[test]
         fn generates() {
-            let json = generate_json(B_100, DEPTH_1, &STRING_VALUE);
+            let json = generate_json(B_100, DEPTH_1);
             assert!(json.contains("level1"));
             assert!(json.contains("key1"));
         }
@@ -167,7 +152,7 @@ mod tests {
             #[test]
             fn size_within_six_percent() {
                 let target_size = 50;
-                let result = build_flat_body(target_size, &STRING_VALUE);
+                let result = build_flat_body(target_size);
                 let actual_size = result.len();
                 assert_size_within_allowed_range(actual_size, target_size);
             }
@@ -178,13 +163,13 @@ mod tests {
 
             #[test]
             fn string_value() {
-                let result = build_flat_body(50, &STRING_VALUE);
+                let result = build_flat_body(50);
                 assert!(result.contains("\"value\""));
             }
 
             #[test]
             fn integer_value() {
-                let result = build_flat_body(50, &INTEGER_VALUE);
+                let result = build_flat_body(50);
                 assert!(result.contains("1"));
             }
         }
