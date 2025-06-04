@@ -1,6 +1,6 @@
 use std::net::{IpAddr, Ipv4Addr, SocketAddr as RawSocketAddr};
 
-use server_utils::jwt::cli::Config as JwtConfig;
+use server_utils::jwt::config::Config as JwtConfig;
 
 #[derive(Clone)]
 #[allow(clippy::struct_field_names)]

@@ -13,10 +13,10 @@ use chain_client::ChainClientConfig;
 use common::{GuestElf, LogFormat};
 use derive_more::{Debug, From, Into};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
-use jwt::{Algorithm, Error as JwtError, load_jwt_signing_key};
+use jwt::{Algorithm, Claim as JwtClaim, Error as JwtError, load_jwt_signing_key};
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
-use server_utils::{ProofMode, jwt::cli::Config as JwtConfig};
+use server_utils::{ProofMode, jwt::config::Config as JwtConfig};
 use strum::VariantNames;
 use thiserror::Error;
 
@@ -72,6 +72,9 @@ pub struct JwtOptions {
     pub public_key: String,
     /// Signing algorithm to use
     pub algorithm: String,
+    /// User-defined claims
+    #[serde(default)]
+    pub claims: Vec<JwtClaim>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -197,15 +200,13 @@ impl TryFrom<JwtOptions> for JwtConfig {
         JwtOptions {
             public_key,
             algorithm,
+            claims,
         }: JwtOptions,
     ) -> Result<Self, Self::Error> {
         let algorithm = Algorithm::from_str(&algorithm)
             .map_err(|_| Error::JwtSigningAlgorithm(algorithm.clone()))?;
         let public_key = load_jwt_signing_key(&public_key, algorithm).map_err(Error::Jwt)?;
-        Ok(Self {
-            public_key,
-            algorithm: algorithm.into(),
-        })
+        Ok(Self::new(public_key, algorithm.into(), claims))
     }
 }
 
@@ -552,6 +553,7 @@ pub(crate) mod tests {
                 auth: Some(AuthOptions::Jwt(JwtOptions {
                     public_key: "/path/to/key".to_string(),
                     algorithm: "rs256".to_string(),
+                    claims: Vec::new(),
                 })),
                 gas_meter: Some(GasMeterOptions {
                     url: "http://localhost:3001".to_string(),
@@ -639,5 +641,55 @@ pub(crate) mod tests {
         .try_into();
 
         assert!(matches!(res.unwrap_err(), Error::JwtSigningAlgorithm(..)));
+    }
+
+    #[test]
+    fn correctly_parses_custom_user_jwt_claims() {
+        let config_file = save_config_file(
+            r#"
+                host = "0.0.0.0"
+                port = 3000
+                proof_mode = "fake"
+
+                [auth.jwt]
+                public_key = "docker/fixtures/jwt-authority.key.pub"
+                algorithm = "rs256"
+
+                [[auth.jwt.claims]]
+                name = "sub"
+
+                [[auth.jwt.claims]]
+                name = "environment"
+                values = ["Test", "Production"]
+            "#,
+        );
+
+        let opts = parse_config_file(config_file.path()).unwrap();
+        assert_eq!(
+            opts,
+            ConfigOptions {
+                host: "0.0.0.0".to_string(),
+                port: 3000,
+                proof_mode: ProofMode::Fake,
+                rpc_urls: vec![],
+                chain_client: None,
+                auth: Some(AuthOptions::Jwt(JwtOptions {
+                    public_key: "docker/fixtures/jwt-authority.key.pub".to_string(),
+                    algorithm: "rs256".to_string(),
+                    claims: vec![
+                        JwtClaim {
+                            name: "sub".to_string(),
+                            values: vec![]
+                        },
+                        JwtClaim {
+                            name: "environment".to_string(),
+                            values: vec!["Test".to_string(), "Production".to_string()]
+                        }
+                    ]
+                })),
+                gas_meter: None,
+                log_format: None,
+            }
+        );
     }
 }

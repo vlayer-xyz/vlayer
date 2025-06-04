@@ -72,6 +72,13 @@ pub fn load_jwt_signing_key(
     Ok(key)
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct Claim {
+    pub name: String,
+    #[serde(default)]
+    pub values: Vec<String>,
+}
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, EnumString, Display)]
 #[serde(rename_all = "lowercase")]
 #[strum(ascii_case_insensitive)]

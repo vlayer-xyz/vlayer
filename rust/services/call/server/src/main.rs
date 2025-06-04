@@ -57,6 +57,7 @@ fn log_auth_mode(auth: Option<&AuthOptions>) {
             AuthOptions::Jwt(JwtOptions {
                 public_key,
                 algorithm,
+                ..
             }) => info!(
                 "Using JWT-based authorization with public key '{}' and algorithm '{}'.",
                 public_key, algorithm
