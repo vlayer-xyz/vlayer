@@ -1,5 +1,4 @@
-# Updates the chain services with a latest stable vlayer release,
-# after a successful release.
+# Updates the chain services with a latest stable vlayer release.
 name: Deploy Chain Services
 on:
   workflow_dispatch:

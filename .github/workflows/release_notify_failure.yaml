@@ -3,6 +3,11 @@ on:
   workflow_run:
     workflows:
       - "Release nightly"
+      - "Release stable"
+      - "Deploy Nightly Provers"
+      - "Deploy Stable Provers"
+      - "Deploy VDNS"
+      - "Deploy Chain Services"
     types: [completed]
 
 jobs:
@@ -20,12 +25,12 @@ jobs:
               "routing_key": "'"${{ secrets.PAGERDUTY_CD_INTEGRATION_KEY }}"'",
               "event_action": "trigger",
               "payload": {
-                "summary": "GitHub Actions workflow failed in ${{ github.repository }}",
-                "source": "${{ github.repository }}",
+                "summary": "Release failed",
+                "source": "GitHub Actions in ${{github.repository}}",
                 "severity": "error",
                 "custom_details": {
-                  "workflow": "Main CI workflow",
-                  "url": "https://github.com/${{ github.repository }}/actions"
+                  "workflow": "${{ github.event.workflow_run.name }}",
+                  "url": "${{ github.event.workflow_run.html_url }}"
                 }
               }
             }'
