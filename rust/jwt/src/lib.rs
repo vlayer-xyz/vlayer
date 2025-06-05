@@ -13,10 +13,10 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("empty string when parsing JWT claim")]
+    #[error("Empty string when parsing JWT claim")]
     EmptyString,
-    #[error("empty name for JWT claim")]
-    EmptyName,
+    #[error("Empty name for JWT claim: '{0}'")]
+    EmptyName(String),
     #[error("JWT signing key not found: '{}'", .0.display())]
     JwtSigningKeyNotFound(PathBuf),
     #[error("JWT internal error: {0}")]
@@ -95,9 +95,46 @@ impl FromStr for Claim {
         let parts: Vec<&str> = s.split(':').collect();
         let name = parts[0].to_string();
         if name.is_empty() {
-            return Err(Error::EmptyName);
+            return Err(Error::EmptyName(s.to_string()));
         }
         let values = parts[1..].iter().map(ToString::to_string).collect();
         Ok(Self { name, values })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn correctly_parses_jwt_claim_with_no_values() {
+        assert_eq!(
+            Claim {
+                name: "sub".to_string(),
+                values: vec![]
+            },
+            Claim::from_str("sub").unwrap()
+        );
+    }
+
+    #[test]
+    fn correctly_parses_jwt_claim_with_values() {
+        assert_eq!(
+            Claim {
+                name: "environment".to_string(),
+                values: vec!["test".to_string(), "production".to_string()]
+            },
+            Claim::from_str("environment:test:production").unwrap()
+        );
+    }
+
+    #[test]
+    fn reports_error_on_empty_string() {
+        assert!(matches!(Claim::from_str("").unwrap_err(), Error::EmptyString));
+    }
+
+    #[test]
+    fn reports_error_on_missing_claim_name() {
+        assert!(matches!(Claim::from_str(":test:production").unwrap_err(), Error::EmptyName(..)));
     }
 }
