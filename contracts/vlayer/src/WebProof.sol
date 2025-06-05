@@ -19,6 +19,12 @@ struct Web {
     string url;
 }
 
+struct FloatInput {
+    string json;
+    string path;
+    uint8 precision;
+}
+
 library WebProofLib {
     using Strings for string;
     using UrlLib for string;
@@ -125,5 +131,20 @@ library WebLib {
         Address.verifyCallResult(success, returnData);
 
         return abi.decode(returnData, (bool));
+    }
+
+    function jsonGetFloatAsInt(Web memory web, string memory jsonPath, uint8 precision)
+        internal
+        view
+        returns (int256)
+    {
+        require(bytes(web.body).length > 0, "Body is empty");
+
+        FloatInput memory input = FloatInput({json: web.body, path: jsonPath, precision: precision});
+        bytes memory encodedParams = abi.encode(input);
+        (bool success, bytes memory returnData) = Precompiles.JSON_GET_FLOAT_AS_INT.staticcall(encodedParams);
+        Address.verifyCallResult(success, returnData);
+
+        return abi.decode(returnData, (int256));
     }
 }
