@@ -90,3 +90,27 @@ jobs:
             vlayer-call-server
       - name: Test js sdk release
         run: bash/test-js-sdk-release.sh
+
+  notify-failure:
+    name: Notify failure
+    needs: [test-release-anvil, test-release-sepolia, test-release-js-sdk]
+    if: failure() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger PagerDuty
+        run: |
+          curl -X POST https://events.pagerduty.com/v2/enqueue \
+            -H "Content-Type: application/json" \
+            -d '{
+              "routing_key": "'"${{ secrets.PAGERDUTY_CD_INTEGRATION_KEY }}"'",
+              "event_action": "trigger",
+              "payload": {
+                "summary": "Post-release tests failed",
+                "source": "GitHub Actions in ${{github.repository}}",
+                "severity": "error",
+                "custom_details": {
+                  "workflow": "${{ github.workflow }}",
+                  "url": "https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+                }
+              }
+            }'
