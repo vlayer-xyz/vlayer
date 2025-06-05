@@ -45,7 +45,7 @@ async function run(bench: Benchmark): Promise<Metrics> {
     bench.functionName,
     bench.args,
     chain.id,
-    proverUrl
+    proverUrl,
   );
   const { metrics } = await waitForProof(hash, proverUrl);
 
@@ -62,9 +62,9 @@ function prettyPrint(results: Results) {
         acc,
         name.length,
         `${stats.gas}`.length,
-        `${stats.cycles}`.length
+        `${stats.cycles}`.length,
       ),
-    MIN_CELL_WIDTH
+    MIN_CELL_WIDTH,
   );
   const rowWidth = (cellWidth + 2) * NUM_COLS + NUM_COLS + 1;
 
