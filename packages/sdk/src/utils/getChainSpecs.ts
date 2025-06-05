@@ -14,11 +14,8 @@ const isChain = (chain: unknown): chain is Chain => {
 
 export const getChainSpecs = (chainName: string): Chain => {
   let chain = undefined;
-  try {
-    chain = chains[chainName as keyof typeof chains];
-  } catch {
-    throw new Error(`Cannot import ${chainName} from viem/chains`);
-  }
+
+  chain = chains[chainName as keyof typeof chains];
 
   if (!chain || !isChain(chain)) {
     throw new Error(`Chain ${chainName} is not supported by viem`);
