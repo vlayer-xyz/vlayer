@@ -59,7 +59,7 @@ Run the vlayer server:
 
 ```sh
 cd rust
-cargo run --bin call_server --proof fake
+cargo run --bin call_server
 ```
 
 Deploy `WebProofProver` and `WebProofVerifier` contracts on anvil:

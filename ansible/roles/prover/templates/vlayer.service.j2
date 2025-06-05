@@ -41,6 +41,7 @@ Environment=VLAYER_CHAIN_CLIENT__URL={{ vlayer_prover_chain_proof_url }}
 {% endif %}
 Environment=VLAYER_AUTH__JWT__PUBLIC_KEY={{ vlayer_jwt_public_key_location }}
 Environment=VLAYER_AUTH__JWT__ALGORITHM={{ vlayer_jwt_algorithm }}
+Environment='VLAYER_AUTH__JWT__CLAIMS={{ vlayer_jwt_claims | join(' ') }}'
 Environment='VLAYER_RPC_URLS={{ vlayer_prover_rpc_urls | join(' ') }}'
 ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
 

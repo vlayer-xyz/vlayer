@@ -3182,6 +3182,7 @@ dependencies = [
  "clap 4.5.26",
  "colored 3.0.0",
  "derive-new",
+ "derive_builder 0.12.0",
  "derive_more 1.0.0",
  "flate2",
  "jwt",
@@ -7868,7 +7869,6 @@ dependencies = [
 name = "jwt"
 version = "0.1.0"
 dependencies = [
- "derive_builder 0.12.0",
  "jsonwebtoken 9.3.1",
  "serde",
  "strum 0.26.3",

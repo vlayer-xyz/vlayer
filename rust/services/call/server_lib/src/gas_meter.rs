@@ -6,10 +6,13 @@ use call_common::Metadata;
 use derive_more::Debug;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::rpc::{Client as RawRpcClient, Error as RpcError, Method};
+use server_utils::{
+    jwt::axum::Token,
+    rpc::{Client as RawRpcClient, Error as RpcError, Method},
+};
 use tracing::{error, info};
 
-use crate::{handlers::v_call::types::CallHash, token::Token};
+use crate::handlers::v_call::types::CallHash;
 
 type Result<T> = std::result::Result<T, Error>;
 

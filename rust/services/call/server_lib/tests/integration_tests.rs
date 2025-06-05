@@ -496,29 +496,46 @@ mod server_tests {
     mod jwt {
         use assert_json_diff::assert_json_eq;
         use server_utils::jwt::{
-            ClaimsBuilder, EncodingKey, Environment, Header, encode, get_current_timestamp,
-            test_helpers::{
-                JWT_SECRET, TokenArgs, default_config as default_jwt_config, token as test_token,
-            },
+            Claim, DecodingKey, EncodingKey, Header, config::Config as JwtConfig, encode,
+            get_current_timestamp,
         };
         use test_helpers::mock::Server;
 
         use super::*;
 
+        const JWT_SECRET: &[u8] = b"deadbeef";
+
+        #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
         fn token(invalid_after: i64, subject: &str) -> String {
-            test_token(&TokenArgs {
-                secret: JWT_SECRET,
-                host: Some("api.vlayer.xyz"),
-                port: None,
-                invalid_after,
-                subject,
-                environment: None,
-            })
+            let exp = get_current_timestamp() as i64 + invalid_after;
+            let key = EncodingKey::from_secret(JWT_SECRET);
+            encode(
+                &Header::default(),
+                &json!({
+                    "exp": exp,
+                    "sub": subject,
+                    "environment": "test",
+                }),
+                &key,
+            )
+            .unwrap()
         }
 
         fn default_app() -> Server {
+            let public_key = DecodingKey::from_secret(JWT_SECRET);
+            let claims = vec![
+                Claim {
+                    name: "sub".to_string(),
+                    values: vec![],
+                },
+                Claim {
+                    name: "environment".to_string(),
+                    values: vec!["test".to_string()],
+                },
+            ];
+            let jwt_config = JwtConfig::new(public_key, Default::default(), claims);
             Context::default()
-                .with_jwt_auth(default_jwt_config())
+                .with_jwt_auth(jwt_config)
                 .server(call_guest_elf(), chain_guest_elf())
         }
 
@@ -566,12 +583,16 @@ mod server_tests {
         async fn rejects_requests_with_tampered_with_token() {
             let key = EncodingKey::from_secret(b"beefdead");
             let ts = get_current_timestamp() + 1000;
-            let claims = ClaimsBuilder::default()
-                .exp(ts)
-                .sub("1234".to_string())
-                .build()
-                .unwrap();
-            let token = encode(&Header::default(), &claims, &key).unwrap();
+            let token = encode(
+                &Header::default(),
+                &json!({
+                    "exp": ts,
+                    "sub": "1234",
+                    "environment": "test",
+                }),
+                &key,
+            )
+            .unwrap();
 
             let app = default_app();
             let req = rpc_body("dummy", &json!([]));
@@ -601,24 +622,27 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn reject_requests_with_mismatched_environment() {
-            let key = EncodingKey::from_secret(JWT_SECRET.as_bytes());
+            let key = EncodingKey::from_secret(JWT_SECRET);
             let ts = get_current_timestamp() + 1000;
-            let claims = ClaimsBuilder::default()
-                .exp(ts)
-                .sub("1234".to_string())
-                .environment(Environment::Production)
-                .build()
-                .unwrap();
-            let token = encode(&Header::default(), &claims, &key).unwrap();
+            let token = encode(
+                &Header::default(),
+                &json!({
+                    "exp": ts,
+                    "sub": "1234",
+                    "environment": "production",
+                }),
+                &key,
+            )
+            .unwrap();
 
             let app = default_app();
             let req = rpc_body("dummy", &json!([]));
             let resp = app.post_with_bearer_auth("/", &req, &token).await;
 
-            assert_eq!(StatusCode::BAD_REQUEST, resp.status());
+            assert_eq!(StatusCode::UNAUTHORIZED, resp.status());
             assert_json_eq!(
                 body_to_json(resp.into_body()).await,
-                json!({ "error": "Invalid environment in JWT: production, prover server proof mode: fake" }),
+                json!({ "error": "JWT validation error: unexpected value for claim 'environment': expected one of [ 'test' ], received 'production'" }),
             );
         }
 
@@ -628,21 +652,33 @@ mod server_tests {
             const API_KEY: &str = "secret-deadbeef";
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
-            const SUBJECT: &str = "1234";
             const SLEEP_DURATION: tokio::time::Duration = tokio::time::Duration::from_millis(100);
+
+            let token = token(60, "1234");
 
             let mut gas_meter_server =
                 GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
-                .with_bearer_auth(SUBJECT)
+                .with_bearer_auth(&token)
                 .with_params(allocate_gas_body(EXPECTED_HASH), false)
                 .with_result(json!({}))
                 .with_expected_header(API_KEY_HEADER_NAME, API_KEY)
                 .add()
                 .await;
 
-            let jwt_config = default_jwt_config();
+            let public_key = DecodingKey::from_secret(JWT_SECRET);
+            let claims = vec![
+                Claim {
+                    name: "sub".to_string(),
+                    values: vec![],
+                },
+                Claim {
+                    name: "environment".to_string(),
+                    values: vec!["test".to_string()],
+                },
+            ];
+            let jwt_config = JwtConfig::new(public_key, Default::default(), claims);
             let ctx = Context::default()
                 .with_jwt_auth(jwt_config)
                 .with_gas_meter_server(gas_meter_server);
@@ -654,9 +690,7 @@ mod server_tests {
                 .unwrap();
 
             let req = v_call_body(contract.address(), &call_data);
-            let response = app
-                .post_with_bearer_auth("/", &req, &token(60, SUBJECT))
-                .await;
+            let response = app.post_with_bearer_auth("/", &req, &token).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_jrpc_ok(response, EXPECTED_HASH).await;

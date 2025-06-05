@@ -5,11 +5,13 @@ use std::{
 
 use anyhow::Context;
 use clap::{Args as ClapArgs, Parser, Subcommand};
+use derive_builder::Builder;
 use jwt::{
-    Claims, ClaimsBuilder, ClaimsBuilderError, DecodingKey, EncodingKey, Environment, Header,
-    JwtAlgorithm, JwtError, TokenData, Validation, decode, decode_header, encode,
-    get_current_timestamp,
+    DecodingKey, EncodingKey, Header, JwtAlgorithm, JwtError, TokenData, Validation, decode,
+    decode_header, encode, get_current_timestamp,
 };
+use serde::{Deserialize, Serialize};
+use strum::{Display, EnumString};
 use thiserror::Error;
 use tracing::info;
 
@@ -80,6 +82,30 @@ struct Decode {
 
     /// JWT to decode
     jwt: String,
+}
+
+#[derive(Debug, Clone, Copy, Default, EnumString, Display, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+#[strum(ascii_case_insensitive)]
+#[strum(serialize_all = "lowercase")]
+pub enum Environment {
+    #[default]
+    Test,
+    Production,
+}
+
+#[derive(Builder, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[builder(pattern = "owned")]
+pub struct Claims {
+    #[builder(setter(into, strip_option), default)]
+    pub host: Option<String>,
+    #[builder(setter(into, strip_option), default)]
+    pub port: Option<u16>,
+    pub exp: u64,
+    pub sub: String,
+    #[builder(setter(into), default)]
+    pub environment: Option<Environment>,
 }
 
 pub fn run(args: Args) -> Result<()> {

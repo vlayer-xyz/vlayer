@@ -8,7 +8,7 @@ use derive_new::new;
 use ethers::types::{Bytes, H160};
 use mock::{Anvil, Client, Contract, GasMeterServer, Server};
 use serde_json::{Value, json};
-use server_utils::jwt::cli::Config as JwtConfig;
+use server_utils::jwt::config::Config as JwtConfig;
 
 pub const GAS_LIMIT: u64 = 1_000_000;
 pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;

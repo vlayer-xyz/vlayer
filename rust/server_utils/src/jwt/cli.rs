@@ -2,10 +2,11 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use derive_more::Debug;
-use derive_new::new;
 use jwt::{DecodingKey, JwtAlgorithm, JwtError};
 use thiserror::Error;
 use tracing::{info, warn};
+
+use super::config::Config;
 
 #[derive(Debug, Parser)]
 pub struct Args {
@@ -14,13 +15,6 @@ pub struct Args {
 
     #[arg(long, requires = "auth", default_value = "RS256")]
     pub jwt_algorithm: Option<JwtAlgorithm>,
-}
-
-#[derive(new, Clone, Debug)]
-pub struct Config {
-    #[debug(skip)]
-    pub public_key: DecodingKey,
-    pub algorithm: JwtAlgorithm,
 }
 
 #[derive(Debug, Error)]
@@ -52,6 +46,6 @@ impl TryFrom<Args> for Option<Config> {
             "Using JWT-based authorization with public key '{}' and algorithm '{algorithm:#?}'.",
             jwt_public_key.display()
         );
-        Ok(Some(Config::new(public_key, algorithm)))
+        Ok(Some(Config::new(public_key, algorithm, Vec::new())))
     }
 }

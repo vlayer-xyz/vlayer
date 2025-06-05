@@ -1,6 +1,8 @@
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
-use derive_builder::Builder;
 pub use jsonwebtoken::{
     Algorithm as JwtAlgorithm, DecodingKey, EncodingKey, Header, TokenData, Validation, decode,
     decode_header, encode, errors::Error as JwtError, get_current_timestamp,
@@ -11,6 +13,10 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error("Empty string when parsing JWT claim")]
+    EmptyString,
+    #[error("Empty name for JWT claim: '{0}'")]
+    EmptyName(String),
     #[error("JWT signing key not found: '{}'", .0.display())]
     JwtSigningKeyNotFound(PathBuf),
     #[error("JWT internal error: {0}")]
@@ -72,135 +78,63 @@ pub fn load_jwt_signing_key(
     Ok(key)
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, EnumString, Display)]
-#[serde(rename_all = "lowercase")]
-#[strum(ascii_case_insensitive)]
-#[strum(serialize_all = "lowercase")]
-pub enum Environment {
-    #[default]
-    Test,
-    Production,
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct Claim {
+    pub name: String,
+    #[serde(default)]
+    pub values: Vec<String>,
 }
 
-#[derive(Builder, Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[builder(pattern = "owned")]
-pub struct Claims {
-    #[builder(setter(into, strip_option), default)]
-    pub host: Option<String>,
-    #[builder(setter(into, strip_option), default)]
-    pub port: Option<u16>,
-    pub exp: u64,
-    pub sub: String,
-    #[builder(setter(into), default)]
-    pub environment: Option<Environment>,
-}
+impl FromStr for Claim {
+    type Err = Error;
 
-#[allow(clippy::unwrap_used)]
-pub mod test_helpers {
-    use super::*;
-
-    pub struct TokenArgs<'a> {
-        pub secret: &'a str,
-        pub invalid_after: i64,
-        pub subject: &'a str,
-        pub host: Option<&'a str>,
-        pub port: Option<u16>,
-        pub environment: Option<Environment>,
-    }
-
-    #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
-    pub fn token(args: &TokenArgs) -> String {
-        let key = EncodingKey::from_secret(args.secret.as_bytes());
-        let ts = get_current_timestamp() as i64 + args.invalid_after;
-        let mut claims_builder = ClaimsBuilder::default()
-            .exp(ts as u64)
-            .sub(args.subject.to_string())
-            .environment(args.environment);
-        if let Some(host) = args.host {
-            claims_builder = claims_builder
-                .host(host.to_string())
-                .port(args.port.unwrap_or(DEFAULT_WEB_PROOF_PORT))
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.is_empty() {
+            return Err(Error::EmptyString);
         }
-
-        let claims = claims_builder.build().unwrap();
-
-        encode(&Header::default(), &claims, &key).unwrap()
+        let parts: Vec<&str> = s.split(':').collect();
+        let name = parts[0].to_string();
+        if name.is_empty() {
+            return Err(Error::EmptyName(s.to_string()));
+        }
+        let values = parts[1..].iter().map(ToString::to_string).collect();
+        Ok(Self { name, values })
     }
-
-    pub const JWT_SECRET: &str = "deadbeef";
-    pub const DEFAULT_WEB_PROOF_PORT: u16 = 443;
 }
 
 #[cfg(test)]
 mod tests {
-    use test_helpers::{JWT_SECRET, TokenArgs, token};
-
     use super::*;
 
-    fn decoding_key() -> DecodingKey {
-        DecodingKey::from_secret(JWT_SECRET.as_bytes())
+    #[test]
+    fn correctly_parses_jwt_claim_with_no_values() {
+        assert_eq!(
+            Claim {
+                name: "sub".to_string(),
+                values: vec![]
+            },
+            Claim::from_str("sub").unwrap()
+        );
     }
 
     #[test]
-    fn decodes_without_web_proof_claims() {
-        let jwt = token(&TokenArgs {
-            secret: JWT_SECRET,
-            host: None,
-            port: None,
-            invalid_after: 0,
-            subject: "1234",
-            environment: None,
-        });
-        let claims: TokenData<Claims> =
-            decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
-        assert!(claims.claims.host.is_none());
-        assert!(claims.claims.port.is_none());
+    fn correctly_parses_jwt_claim_with_values() {
+        assert_eq!(
+            Claim {
+                name: "environment".to_string(),
+                values: vec!["test".to_string(), "production".to_string()]
+            },
+            Claim::from_str("environment:test:production").unwrap()
+        );
     }
 
     #[test]
-    fn decodes_with_web_proof_claims() {
-        let jwt = token(&TokenArgs {
-            secret: JWT_SECRET,
-            host: Some("xyz.xyz"),
-            port: None,
-            invalid_after: 0,
-            subject: "1234",
-            environment: None,
-        });
-        let claims: TokenData<Claims> =
-            decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
-        assert_eq!(claims.claims.host, Some("xyz.xyz".to_string()));
-        assert_eq!(claims.claims.port, Some(443));
+    fn reports_error_on_empty_string() {
+        assert!(matches!(Claim::from_str("").unwrap_err(), Error::EmptyString));
     }
 
     #[test]
-    fn decodes_as_test() {
-        let jwt = token(&TokenArgs {
-            secret: JWT_SECRET,
-            host: None,
-            port: None,
-            invalid_after: 0,
-            subject: "1234",
-            environment: Some(Environment::Test),
-        });
-        let token_data: TokenData<Claims> =
-            decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
-        assert_eq!(token_data.claims.environment, Some(Environment::Test));
-    }
-
-    #[test]
-    fn decodes_as_production() {
-        let jwt = token(&TokenArgs {
-            secret: JWT_SECRET,
-            host: None,
-            port: None,
-            invalid_after: 0,
-            subject: "1234",
-            environment: Some(Environment::Production),
-        });
-        let token_data: TokenData<Claims> =
-            decode(&jwt, &decoding_key(), &Validation::default()).unwrap();
-        assert_eq!(token_data.claims.environment, Some(Environment::Production));
+    fn reports_error_on_missing_claim_name() {
+        assert!(matches!(Claim::from_str(":test:production").unwrap_err(), Error::EmptyName(..)));
     }
 }

@@ -5,12 +5,12 @@ use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
 use derive_new::new;
 use jsonrpsee::{Extensions, proc_macros::rpc};
-use server_utils::RequestId;
+use server_utils::{RequestId, jwt::axum::Token};
 use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
 use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};
 use v_versions::Versions;
 
-use crate::{config::Config, proof::Status as ProofStatus, token::Token};
+use crate::{config::Config, proof::Status as ProofStatus};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;

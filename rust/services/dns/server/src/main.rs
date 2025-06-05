@@ -7,7 +7,7 @@ use common::init_tracing;
 use config::ConfigBuilder;
 use dotenvy::dotenv;
 use server::serve;
-use server_utils::jwt::cli::Config as JwtConfig;
+use server_utils::jwt::config::Config as JwtConfig;
 
 use crate::cli::Cli;
 
