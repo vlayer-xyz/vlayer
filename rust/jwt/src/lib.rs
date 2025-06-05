@@ -15,6 +15,8 @@ use thiserror::Error;
 pub enum Error {
     #[error("empty string when parsing JWT claim")]
     EmptyString,
+    #[error("empty name for JWT claim")]
+    EmptyName,
     #[error("JWT signing key not found: '{}'", .0.display())]
     JwtSigningKeyNotFound(PathBuf),
     #[error("JWT internal error: {0}")]
@@ -92,6 +94,9 @@ impl FromStr for Claim {
         }
         let parts: Vec<&str> = s.split(':').collect();
         let name = parts[0].to_string();
+        if name.is_empty() {
+            return Err(Error::EmptyName);
+        }
         let values = parts[1..].iter().map(ToString::to_string).collect();
         Ok(Self { name, values })
     }
