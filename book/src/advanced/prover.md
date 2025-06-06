@@ -4,17 +4,22 @@ vlayer `Prover` contracts are almost the same as regular Solidity smart contract
 
 - **Access to Off-Chain Data:** `Prover` contracts accept data from multiple sources through features such as [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email proofs](/features/email.html), and [web proofs](/features/web.html). This allows claims to be verified on-chain without exposing all input the data.
 
-- **Execution Environment:** The `Prover` code executes on the vlayer zkEVM, where the proofs of computation are subsequently verified by the on-chain `Verifier` contract. Unlike the on-chain contract, the `Prover` does not have access to the current block. It can only access previously mined blocks. Under the hood, vlayer generates zero-knowledge proofs of the `Prover`'s execution.
+- **Execution Environment:** The `Prover` code executes on the vlayer zkEVM, but the proofs of that computation are subsequently verified by the on-chain `Verifier` contract. Unlike the on-chain contract, the `Prover` does not have access to the current block. It can only access previously mined blocks. Under the hood, vlayer generates zero-knowledge proofs of the `Prover`'s execution.
 
 ## Prover in-depth
 
 ### Prover parent contract
-Any contract function can be run in the vlayer prover, but to access the additional features listed above, the contract should inherit from the `Prover` contract and any function can be used as a proving function.
+Any contract function can be run in the vlayer prover, but to access the additional features listed above, the contract should inherit from the `Prover` contract. Once inherited, any function can act as a proving function. These features are enabled by precompiles available only on the vlayer zkEVM.
+
+### Single source of truth
+Although the `Prover` contract runs only on the zkEVM, its code must also be deployed to the same public chain as the `Verifier`. This is because the vlayer zkEVM operates in stateless mode and fetches the prover contract code directly from the public blockchain.
 
 ### Arguments and returned value
-Arbitrary arguments can be passed to Prover functions. All arguments are private, meaning they are not visible on-chain; however, they are visible to the prover server.
+Arbitrary arguments can be passed to `Prover` functions. All input arguments are private, meaning they are not visible on-chain; however, they are visible to the prover server.
 
-All data returned by functions is public. To make an argument public on-chain, return it from the function.
+Returned values are bound to the proof, so the `Verifier` must always receive both the proof and the returned values from the `Prover` function in order to validate them correctly.
+
+Proofs are not stored or persisted by vlayer. It is the developer's responsibility to track and manage used proofs within their `Verifier` contract.
 
 ### Limits
 
