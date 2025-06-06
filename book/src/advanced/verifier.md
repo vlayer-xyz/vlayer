@@ -23,6 +23,8 @@ contract Example is Verifier {
 }
 ```
 
+<!-- FEEDBACK: how onlyVerified modifier works under the hood? It could be explained here in more details + how we defend against malicious prover?-->
+
 ### onlyVerified modifier
 The `onlyVerified` modifier takes two arguments:
 1. `Prover` contract address 
