@@ -10,11 +10,16 @@ type RedirectStepActionProps = {
 };
 
 const redirect = async (link: string): Promise<void> => {
-  const tabs = await browser.tabs.query({
+  const [activeTab] = await browser.tabs.query({
     active: true,
     currentWindow: true,
   });
-  await browser.tabs.update(tabs[0].id, { url: link });
+
+  if (!activeTab || !activeTab.id) {
+    throw new Error("No active tab found");
+  }
+
+  await browser.tabs.update(activeTab.id, { url: link });
 };
 
 export const RedirectStepActions: FC<RedirectStepActionProps> = ({
