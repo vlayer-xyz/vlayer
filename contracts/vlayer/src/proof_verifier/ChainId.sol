@@ -28,6 +28,7 @@ library ChainIdLibrary {
     function isTestnet() internal view returns (bool) {
         return block.chainid == 11155111 // Ethereum Sepolia
             || block.chainid == 300 // zkSync Sepolia
+            || block.chainid == 545 // Flow EVM Testnet
             || block.chainid == 4801 // Worldchain Sepolia
             || block.chainid == 59141 // Linea Sepolia
             || block.chainid == 80002 // Polygon Amoy
@@ -42,6 +43,7 @@ library ChainIdLibrary {
             || block.chainid == 137 // Polygon
             || block.chainid == 324 // zkSync
             || block.chainid == 480 // Worldchain
+            || block.chainid == 747 // Flow EVM Mainnet
             || block.chainid == 8453 // Base
             || block.chainid == 42161 // Arbitrum One
             || block.chainid == 42170 // Arbitrum Nova

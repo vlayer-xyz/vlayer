@@ -27,12 +27,14 @@ risc0-ethereum = { version = "2.0.0", url = "https://github.com/vlayer-xyz/risc0
 ethereum = "https://eth.drpc.org"
 optimism = "https://mainnet.optimism.io"
 base = "https://mainnet.base.org"
+flow-evm-mainnet = "https://mainnet.evm.nodes.onflow.org"
 
 arbitrum-sepolia = "https://sepolia-rollup.arbitrum.io/rpc"
 base-sepolia = "https://sepolia.base.org"
 optimism-sepolia = "https://sepolia.optimism.io"
 sepolia = "https://eth-sepolia.public.blastapi.io"
 worldchain-sepolia = "https://worldchain-sepolia.gateway.tenderly.co"
+flow-evm-testnet = "https://testnet.evm.nodes.onflow.org"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
