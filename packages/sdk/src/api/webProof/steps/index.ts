@@ -12,4 +12,4 @@ const steps = {
   userAction,
 };
 
-export { expectUrl, startPage, notarize, userAction, steps };
+export { expectUrl, startPage, notarize, userAction, redirect, steps };
