@@ -1,5 +1,6 @@
 use std::{
     collections::BTreeMap,
+    marker::PhantomData,
     net::{Ipv4Addr, SocketAddr as RawSocketAddr, SocketAddrV4},
     path::{Path, PathBuf},
     str::FromStr,
@@ -15,7 +16,10 @@ use derive_more::{Debug, From, Into};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_IDS};
 use jwt::{Algorithm, Claim as JwtClaim, Error as JwtError, load_jwt_signing_key};
 use risc0_zkp::core::digest::Digest;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize, Serialize,
+    de::{self, DeserializeSeed, Deserializer},
+};
 use server_utils::{ProofMode, jwt::config::Config as JwtConfig};
 use strum::VariantNames;
 use thiserror::Error;
@@ -73,26 +77,8 @@ pub struct JwtOptions {
     /// Signing algorithm to use
     pub algorithm: String,
     /// User-defined claims
-    #[serde(default)]
-    pub claims: Vec<JwtClaimOrString>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(untagged)]
-pub enum JwtClaimOrString {
-    JwtClaim(JwtClaim),
-    String(String),
-}
-
-impl TryFrom<JwtClaimOrString> for JwtClaim {
-    type Error = Error;
-
-    fn try_from(value: JwtClaimOrString) -> Result<Self, Self::Error> {
-        match value {
-            JwtClaimOrString::JwtClaim(claim) => Ok(claim),
-            JwtClaimOrString::String(s) => Ok(JwtClaim::from_str(&s)?),
-        }
-    }
+    #[serde(default, deserialize_with = "seq_string_or_struct")]
+    pub claims: Vec<JwtClaim>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -103,13 +89,6 @@ pub struct ChainClientOptions {
     pub poll_interval: Option<u64>,
     /// Timeout in seconds
     pub timeout: Option<u64>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(untagged)]
-pub enum RpcUrlOrString {
-    RpcUrl(RpcUrl),
-    String(String),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Into, PartialEq, Eq)]
@@ -137,17 +116,6 @@ impl FromStr for RpcUrl {
     }
 }
 
-impl TryFrom<RpcUrlOrString> for RpcUrl {
-    type Error = Error;
-
-    fn try_from(value: RpcUrlOrString) -> Result<Self, Self::Error> {
-        match value {
-            RpcUrlOrString::RpcUrl(rpc) => Ok(rpc),
-            RpcUrlOrString::String(s) => Self::from_str(&s),
-        }
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ConfigOptions {
     /// Host
@@ -157,8 +125,8 @@ pub struct ConfigOptions {
     /// Proof mode to use. Possible values are ["fake", "groth16"]
     pub proof_mode: ProofMode,
     /// RPC mappings
-    #[serde(default)]
-    pub rpc_urls: Vec<RpcUrlOrString>,
+    #[serde(default, deserialize_with = "seq_string_or_struct")]
+    pub rpc_urls: Vec<RpcUrl>,
     /// Chain client config
     pub chain_client: Option<ChainClientOptions>,
     /// Authentication
@@ -174,6 +142,85 @@ pub(crate) fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions,
         .map_err(|_| Error::ConfigFile(path.as_ref().to_path_buf()))?;
     let config_opts: ConfigOptions = toml::from_str(&contents).map_err(Error::ConfigToml)?;
     Ok(config_opts)
+}
+
+fn seq_string_or_struct<'de, T, D, Err>(deserializer: D) -> Result<Vec<T>, D::Error>
+where
+    Err: Into<Error>,
+    T: Deserialize<'de> + FromStr<Err = Err>,
+    D: Deserializer<'de>,
+{
+    struct StringOrStruct<T, Err>(PhantomData<(T, Err)>);
+
+    impl<'de, T, Err> de::Visitor<'de> for StringOrStruct<T, Err>
+    where
+        Err: Into<Error>,
+        T: Deserialize<'de> + FromStr<Err = Err>,
+    {
+        type Value = T;
+
+        fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            formatter.write_str("string or map")
+        }
+
+        fn visit_str<E>(self, value: &str) -> Result<T, E>
+        where
+            E: de::Error,
+        {
+            FromStr::from_str(value)
+                .map_err(Into::into)
+                .map_err(de::Error::custom)
+        }
+
+        fn visit_map<M>(self, map: M) -> Result<T, M::Error>
+        where
+            M: de::MapAccess<'de>,
+        {
+            Deserialize::deserialize(de::value::MapAccessDeserializer::new(map))
+        }
+    }
+
+    impl<'de, T, Err> DeserializeSeed<'de> for StringOrStruct<T, Err>
+    where
+        T: Deserialize<'de> + FromStr<Err = Err>,
+        Err: Into<Error>,
+    {
+        type Value = T;
+
+        fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_any(self)
+        }
+    }
+
+    struct SeqStringOrStruct<T, Err>(PhantomData<(T, Err)>);
+
+    impl<'de, T, Err> de::Visitor<'de> for SeqStringOrStruct<T, Err>
+    where
+        Err: Into<Error>,
+        T: Deserialize<'de> + FromStr<Err = Err>,
+    {
+        type Value = Vec<T>;
+
+        fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            formatter.write_str("sequence of strings or maps")
+        }
+
+        fn visit_seq<S>(self, mut seq: S) -> Result<Self::Value, S::Error>
+        where
+            S: de::SeqAccess<'de>,
+        {
+            let mut vec = Vec::new();
+            while let Some(element) = seq.next_element_seed(StringOrStruct(PhantomData))? {
+                vec.push(element);
+            }
+            Ok(vec)
+        }
+    }
+
+    deserializer.deserialize_seq(SeqStringOrStruct(PhantomData))
 }
 
 impl Default for ConfigOptions {
@@ -224,10 +271,6 @@ impl TryFrom<JwtOptions> for JwtConfig {
         let algorithm = Algorithm::from_str(&algorithm)
             .map_err(|_| Error::JwtSigningAlgorithm(algorithm.clone()))?;
         let public_key = load_jwt_signing_key(&public_key, algorithm).map_err(Error::Jwt)?;
-        let claims: Vec<JwtClaim> = claims
-            .into_iter()
-            .map(TryInto::<JwtClaim>::try_into)
-            .collect::<Result<_, _>>()?;
         Ok(Self::new(public_key, algorithm.into(), claims))
     }
 }
@@ -260,12 +303,6 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             })
             .transpose()?;
         let chain_client_config = opts.config.chain_client.map(Into::into);
-        let rpc_urls: Vec<RpcUrl> = opts
-            .config
-            .rpc_urls
-            .into_iter()
-            .map(TryInto::<RpcUrl>::try_into)
-            .collect::<Result<_, _>>()?;
 
         ConfigBuilder::default()
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
@@ -274,7 +311,7 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             .with_port(opts.config.port)
             .with_proof_mode(opts.config.proof_mode)
             .with_semver(opts.semver)
-            .with_rpc_mappings(rpc_urls)
+            .with_rpc_mappings(opts.config.rpc_urls)
             .with_gas_meter_config(gas_meter_config)
             .with_jwt_config(jwt_config)
             .with_chain_client_config(chain_client_config)
@@ -596,10 +633,10 @@ pub(crate) mod tests {
                     host: "127.0.0.1".to_string(),
                     port: 3000,
                     proof_mode: ProofMode::Groth16,
-                    rpc_urls: vec![RpcUrlOrString::RpcUrl(RpcUrl {
+                    rpc_urls: vec![RpcUrl {
                         chain_id: 31337,
                         url: "http://localhost:8545".to_string()
-                    })],
+                    }],
                     chain_client: None,
                     auth: Some(AuthOptions::Jwt(JwtOptions {
                         public_key: "/path/to/key".to_string(),
@@ -635,8 +672,14 @@ pub(crate) mod tests {
                     port: 3000,
                     proof_mode: ProofMode::Groth16,
                     rpc_urls: vec![
-                        RpcUrlOrString::String("31337:http://localhost:8545".to_string()),
-                        RpcUrlOrString::String("31338:http://localhost:8546".to_string())
+                        RpcUrl {
+                            chain_id: 31337,
+                            url: "http://localhost:8545".to_string(),
+                        },
+                        RpcUrl {
+                            chain_id: 31338,
+                            url: "http://localhost:8546".to_string(),
+                        }
                     ],
                     chain_client: None,
                     auth: None,
@@ -722,20 +765,20 @@ pub(crate) mod tests {
                     host: "0.0.0.0".to_string(),
                     port: 3000,
                     proof_mode: ProofMode::Fake,
-                    rpc_urls: vec![],
+                    rpc_urls: Vec::default(),
                     chain_client: None,
                     auth: Some(AuthOptions::Jwt(JwtOptions {
                         public_key: "docker/fixtures/jwt-authority.key.pub".to_string(),
                         algorithm: "rs256".to_string(),
                         claims: vec![
-                            JwtClaimOrString::JwtClaim(JwtClaim {
+                            JwtClaim {
                                 name: "sub".to_string(),
                                 values: vec![]
-                            }),
-                            JwtClaimOrString::JwtClaim(JwtClaim {
+                            },
+                            JwtClaim {
                                 name: "environment".to_string(),
                                 values: vec!["Test".to_string(), "Production".to_string()]
-                            })
+                            }
                         ]
                     })),
                     gas_meter: None,
