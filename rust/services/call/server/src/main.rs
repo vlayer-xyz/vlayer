@@ -1,7 +1,7 @@
 use call_server_lib::{
     Cli, Config, ProofMode,
     cli::Parser,
-    config::{AuthOptions, ConfigOptionsWithVersion, JwtOptions, RpcUrl, RpcUrlOrString},
+    config::{AuthOptions, ConfigOptionsWithVersion, JwtOptions, RpcUrl},
     serve,
 };
 use common::{LogFormat, extract_rpc_url_token, init_tracing};
@@ -37,16 +37,12 @@ async fn main() -> anyhow::Result<()> {
 
 fn init_tracing_with_secrets<'a>(
     log_format: LogFormat,
-    rpc_urls: impl IntoIterator<Item = &'a RpcUrlOrString>,
+    rpc_urls: impl IntoIterator<Item = &'a RpcUrl>,
 ) {
     let secrets: Vec<String> = rpc_urls
         .into_iter()
         .cloned()
-        .filter_map(|rpc_url_or_string| {
-            RpcUrl::try_from(rpc_url_or_string)
-                .ok()
-                .and_then(|RpcUrl { url, .. }| extract_rpc_url_token(&url))
-        })
+        .filter_map(|RpcUrl { url, .. }| extract_rpc_url_token(&url))
         .collect();
     init_tracing(log_format, secrets);
 }
