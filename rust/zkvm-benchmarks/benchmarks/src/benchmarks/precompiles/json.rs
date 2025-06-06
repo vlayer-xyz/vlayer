@@ -22,7 +22,6 @@ include_generated_json!(JSON_100KB, "100kb.json");
 include_generated_json!(JSON_1_LVL_10K, "1_level_10kb.json");
 include_generated_json!(JSON_10_LVL_10K, "10_level_10kb.json");
 include_generated_json!(JSON_100_LVL_10K, "100_level_10kb.json");
-include_generated_json!(JSON_10K_INT_VALUES, "10kb_with_numbers.json");
 
 lazy_static::lazy_static! {
     static ref LVL_1_KEY: String = create_nested_key_path(1, STRING_KEY);
@@ -92,15 +91,7 @@ pub fn benchmarks() -> Vec<Benchmark> {
             || benchmark_get_string(JSON_100_LVL_10K, &LVL_100_KEY),
             3_134_000,
         ),
-        Benchmark::new(
-            "json_get_int_10kb",
-            || benchmark_get_int(JSON_10K_INT_VALUES, INT_KEY),
-            3_151_000,
-        ),
-        Benchmark::new(
-            "json_get_bool_10kb",
-            || benchmark_get_bool(JSON_10K_INT_VALUES, BOOL_KEY),
-            3_151_000,
-        ),
+        Benchmark::new("json_get_int_10kb", || benchmark_get_int(JSON_10KB, INT_KEY), 3_151_000),
+        Benchmark::new("json_get_bool_10kb", || benchmark_get_bool(JSON_10KB, BOOL_KEY), 3_151_000),
     ]
 }
