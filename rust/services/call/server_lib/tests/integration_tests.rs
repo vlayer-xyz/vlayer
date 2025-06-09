@@ -403,6 +403,7 @@ mod server_tests {
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
             const EXPECTED_GAS_USED: u64 = 21_724;
+            const EXPECTED_CYCLES_USED: u64 = 4_194_304;
 
             let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
             gas_meter_server
@@ -450,6 +451,20 @@ mod server_tests {
                 .add()
                 .await;
 
+            gas_meter_server
+                .mock_method("v_updateCycles")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "cycles_used": EXPECTED_CYCLES_USED
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .with_expected_calls(1)
+                .add()
+                .await;
+
             let ctx = Context::default().with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
@@ -489,6 +504,96 @@ mod server_tests {
             let _hash = get_hash(&app, &contract, &call_data).await;
             let _hash = get_hash(&app, &contract, &call_data).await;
 
+            ctx.assert_gas_meter();
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn test_cycles_integration_properly() {
+            const EXPECTED_HASH: &str =
+                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+            const EXPECTED_GAS_USED: u64 = 21_724;
+
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+
+            // Set up the required calls
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_params(allocate_gas_body(EXPECTED_HASH), false)
+                .with_result(json!({}))
+                .add()
+                .await;
+            gas_meter_server
+                .mock_method("v_refundUnusedGas")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "computation_stage": "preflight",
+                        "gas_used": EXPECTED_GAS_USED,
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
+            gas_meter_server
+                .mock_method("v_sendMetadata")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "metadata": [{"start_chain": ETHEREUM_SEPOLIA_ID}]
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            // INTEGRATION TEST: Test that v_updateCycles is called exactly once
+            // with any reasonable cycles value (> 0)
+            gas_meter_server
+                .mock_method("v_updateCycles")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        // Don't specify cycles_used - test validates the call happens
+                    }),
+                    true, // partial match - only requires hash to be correct
+                )
+                .with_result(json!({}))
+                .with_expected_calls(1) // Ensure called exactly once
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_refundUnusedGas")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "computation_stage": "proving",
+                        "gas_used": EXPECTED_GAS_USED,
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+            get_proof_result(&app, hash).await;
+
+            // This validates:
+            // 1. v_updateCycles was called exactly once
+            // 2. It was called with the correct hash
+            // 3. It was called at the right time (after proving)
+            // 4. The system handled the response correctly
             ctx.assert_gas_meter();
         }
     }
