@@ -66,12 +66,12 @@ impl Method for SendMetadata {
 
 #[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
-pub struct SendCyclesUsed {
+pub struct UpdateCycles {
     hash: CallHash,
     cycles_used: u64,
 }
 
-impl Method for SendCyclesUsed {
+impl Method for UpdateCycles {
     const METHOD_NAME: &str = "v_updateCycles";
 }
 
@@ -168,7 +168,7 @@ impl Client for RpcClient {
     }
 
     async fn update_cycles(&self, cycles_used: u64) -> Result<()> {
-        let req = SendCyclesUsed::new(self.hash, cycles_used);
+        let req = UpdateCycles::new(self.hash, cycles_used);
         info!("v_updateCycles => {req:#?}");
         if let Err(err) = self.call(req).await {
             error!("v_updateCycles failed with error: {err}");
