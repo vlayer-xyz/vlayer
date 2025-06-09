@@ -36,12 +36,12 @@ async function run(bench: Benchmark): Promise<Metrics> {
   const { chain, proverUrl } = createContext(config);
 
   const prover = await deployProver({
-    proverSpec: bench.proverSpec,
+    proverSpec: bench.proverContractSpec,
   });
 
   const hash = await prove(
     prover,
-    bench.proverSpec.abi,
+    bench.proverContractSpec.abi,
     bench.functionName,
     bench.args,
     chain.id,

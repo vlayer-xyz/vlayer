@@ -1,19 +1,34 @@
 import { Benchmark } from "../types";
-import proverSpec from "../../../../contracts/fixtures/out/ArithOpProver.sol/ArithOpProver";
+import proverContractSpec from "../../../../contracts/fixtures/out/ArithOpProver.sol/ArithOpProver";
 
 export const benchmarks: Benchmark[] = [
-  { name: "Addition", proverSpec, args: [1, 2], functionName: "add" },
+  {
+    name: "Addition",
+    proverContractSpec,
+    args: [1, 2],
+    functionName: "add",
+  },
   {
     name: "Multiplication",
-    proverSpec,
+    proverContractSpec,
     args: [1, 2],
     functionName: "mul",
   },
-  { name: "Subtraction", proverSpec, args: [1, 2], functionName: "sub" },
-  { name: "Division", proverSpec, args: [4, 2], functionName: "div" },
+  {
+    name: "Subtraction",
+    proverContractSpec,
+    args: [1, 2],
+    functionName: "sub",
+  },
+  {
+    name: "Division",
+    proverContractSpec,
+    args: [4, 2],
+    functionName: "div",
+  },
   {
     name: "Signed-division",
-    proverSpec,
+    proverContractSpec,
     args: [-4, 2],
     functionName: "sdiv",
   },
