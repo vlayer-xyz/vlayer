@@ -64,6 +64,17 @@ impl Method for SendMetadata {
     const METHOD_NAME: &str = "v_sendMetadata";
 }
 
+#[derive(new, Serialize, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct UpdateCycles {
+    hash: CallHash,
+    cycles_used: u64,
+}
+
+impl Method for UpdateCycles {
+    const METHOD_NAME: &str = "v_updateCycles";
+}
+
 #[derive(new, Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub url: String,
@@ -78,6 +89,7 @@ pub trait Client: Send + Sync {
     async fn allocate(&self, gas_limit: u64) -> Result<()>;
     async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()>;
     async fn send_metadata(&self, metadata: Box<[Metadata]>) -> Result<()>;
+    async fn update_cycles(&self, cycles_used: u64) -> Result<()>;
 }
 
 pub struct RpcClient {
@@ -154,6 +166,16 @@ impl Client for RpcClient {
         }
         Ok(())
     }
+
+    async fn update_cycles(&self, cycles_used: u64) -> Result<()> {
+        let req = UpdateCycles::new(self.hash, cycles_used);
+        info!("v_updateCycles => {req:#?}");
+        if let Err(err) = self.call(req).await {
+            error!("v_updateCycles failed with error: {err}");
+            return Err(err);
+        }
+        Ok(())
+    }
 }
 
 pub struct NoOpClient;
@@ -169,6 +191,10 @@ impl Client for NoOpClient {
     }
 
     async fn send_metadata(&self, _metadata: Box<[Metadata]>) -> Result<()> {
+        Ok(())
+    }
+
+    async fn update_cycles(&self, _cycles_used: u64) -> Result<()> {
         Ok(())
     }
 }

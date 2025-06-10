@@ -403,6 +403,7 @@ mod server_tests {
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
             const EXPECTED_GAS_USED: u64 = 21_724;
+            const EXPECTED_CYCLES_USED: u64 = 4_194_304;
 
             let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
             gas_meter_server
@@ -447,6 +448,20 @@ mod server_tests {
                     false,
                 )
                 .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_updateCycles")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "cycles_used": EXPECTED_CYCLES_USED
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .with_expected_calls(1)
                 .add()
                 .await;
 

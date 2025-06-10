@@ -42,6 +42,12 @@ pub async fn await_proving(
         "Finished stage"
     );
 
+    if let Err(err) = gas_meter_client.update_cycles(cycles_used).await {
+        tracing::warn!("Failed to send cycles used to gas meter: {}", err);
+    } else {
+        tracing::info!("Successfully updated cycles used ({}) to gas meter", cycles_used);
+    }
+
     let raw_data: RawData = host_output.try_into()?;
     metrics.cycles = cycles_used;
     metrics.times.proving = metrics::elapsed_time_as_millis_u64(elapsed_time)?;
