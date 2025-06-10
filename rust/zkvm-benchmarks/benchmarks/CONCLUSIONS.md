@@ -22,7 +22,6 @@ General conclusions:
 - Standard deviation is about 16% of the mean, indicating a moderate spread in performance between different url_pattern operations.
 - The average cycle count for url_pattern precompiles is about 3 million.
 - The spread is significant, with the cheapest (exact match: `2,424,905`) and most expensive (wildcard_path_and_query_regex: `3,771,545`) operations differing by over 1.3 million cycles.
-- Regex-based patterns are consistently more expensive than exact matches.
 
 ## `json`
 
@@ -82,7 +81,6 @@ General conclusions:
 
 - For the same input size and pattern complexity, `capture` operations are consistently slightly more expensive than `is_match` (e.g., for 100kb simple pattern: is_match = 3,283,176 cycles, capture = 3,437,784 cycles; ~5% overhead).
 - Complex patterns are significantly more expensive than simple ones. For 100kb input, complex is_match takes 5,429,474 cycles vs. 3,283,176 for simple (~65% more), and complex capture takes 5,584,547 vs. 3,437,784 (~62% more).
-- For all input sizes, the difference between is_match and capture is smaller than the difference between simple and complex patterns.
 - Overall, regex precompiles are much more sensitive to pattern complexity than to the choice between is_match and capture.
 
 #### Formulas
