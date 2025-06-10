@@ -2,7 +2,7 @@ import { ContractArg, ContractSpec } from "@vlayer/sdk";
 
 export type Benchmark = {
   name: string;
-  spec: ContractSpec;
+  proverContractSpec: ContractSpec;
   args: ContractArg[];
   functionName: string;
 };

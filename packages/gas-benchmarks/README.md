@@ -83,11 +83,11 @@ the prover spec and encode it as `Benchmark` type
 
 ```ts
 import { Benchmark } from "../types";
-import proverSpec from "../../../../contracts/fixtures/out/NewProver.sol/NewProver";
+import proverContractSpec from "../../../../contracts/fixtures/out/NewProver.sol/NewProver";
 
 export const benchmark: Benchmark = {
   name: "NewProver",
-  spec: proverSpec,
+  spec: proverContractSpec,
   args: [someArgs],
   functionName: "proveMe",
 };
