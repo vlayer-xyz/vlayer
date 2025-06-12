@@ -13,7 +13,6 @@ notarization:
   max_sent_data: 14096
   max_recv_data: 16384
   timeout: 1800
-  private_key_path: "/root/.notary/notary.key"
   signature_algorithm: secp256k1
   allow_extensions: false
 

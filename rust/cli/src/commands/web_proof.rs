@@ -18,7 +18,7 @@ enum Scheme {
     Https,
 }
 
-const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/v0.1.0-alpha.10";
+const DEFAULT_NOTARY_URL: &str = "https://test-notary.vlayer.xyz/v0.1.0-alpha.11";
 const DEFAULT_MAX_SENT_DATA: usize = 1 << 12;
 const DEFAULT_MAX_RECV_DATA: usize = 1 << 14;
 
@@ -288,7 +288,7 @@ mod tests {
 
         assert_eq!(converted.notary_config.host, "test-notary.vlayer.xyz");
         assert_eq!(converted.notary_config.port, 443);
-        assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.10");
+        assert_eq!(converted.notary_config.path_prefix, "v0.1.0-alpha.11");
         assert_eq!(converted.max_sent_data, DEFAULT_MAX_SENT_DATA);
         assert_eq!(converted.max_recv_data, DEFAULT_MAX_RECV_DATA);
         assert!(converted.notary_config.enable_tls);

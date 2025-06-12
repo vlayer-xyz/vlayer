@@ -117,8 +117,8 @@ export async function tlsnProve(
 
     const decodedTranscript = new DecodedTranscript(
       new Transcript({
-        sent: decodedProof?.transcript.sent,
-        recv: decodedProof?.transcript.recv,
+        sent: decodedProof?.transcript?.sent || [],
+        recv: decodedProof?.transcript?.recv || [],
       }),
     );
 

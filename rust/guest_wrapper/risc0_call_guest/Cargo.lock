@@ -4613,8 +4613,8 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tlsn-core"
-version = "0.1.0-alpha.10"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
+version = "0.1.0-alpha.11"
+source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
 dependencies = [
  "bcs",
  "bimap",
@@ -4640,8 +4640,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-core"
-version = "0.1.0-alpha.10"
-source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.10#de7a47de5b4f6e4de0ec2ff3d1c42a0d2bf7a6a6"
+version = "0.1.0-alpha.11"
+source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
 dependencies = [
  "futures",
  "hmac",
