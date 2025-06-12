@@ -17,6 +17,7 @@ import {
   calculateRequestSize,
   DEFAULT_MAX_RECV_DATA,
 } from "./requestSizeCalculator";
+import { DecodedTranscript } from "./redaction/utils/decodedTranscript/DecodedTranscript";
 
 type ProverConfig = {
   serverDns: string;
@@ -54,10 +55,7 @@ export async function tlsnProve(
   requestBody?: string,
 ): Promise<{
   presentationJson: PresentationJSON;
-  decodedTranscript: {
-    sent: string;
-    recv: string;
-  };
+  decodedTranscript: DecodedTranscript;
 }> {
   try {
     // tlsn-wasm needs to run in a worker
@@ -117,18 +115,18 @@ export async function tlsnProve(
     const decodedProof = await presentation.verify();
     log("Decoded proof", decodedProof);
 
-    const decodedTranscript = new Transcript({
-      sent: decodedProof?.transcript.sent,
-      recv: decodedProof?.transcript.recv,
-    });
+    const decodedTranscript = new DecodedTranscript(
+      new Transcript({
+        sent: decodedProof?.transcript.sent,
+        recv: decodedProof?.transcript.recv,
+      }),
+    );
+
     log("Decoded transcript", decodedTranscript);
 
     return {
       presentationJson,
-      decodedTranscript: {
-        sent: decodedTranscript.sent(),
-        recv: decodedTranscript.recv(),
-      },
+      decodedTranscript,
     };
   } catch (e) {
     log("Error while proving TLSN", e);
