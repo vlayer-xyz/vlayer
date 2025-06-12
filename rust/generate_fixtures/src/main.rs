@@ -111,7 +111,7 @@ async fn generate_valid_web_proof_with_custom_notary_key() -> Result<(), Box<dyn
                 NotaryConfigBuilder::default()
                     .host(NOTARY_HOST)
                     .port(NOTARY_PORT_CUSTOM_KEY)
-                    .enable_tls(true)
+                    .enable_tls(false)
                     .build()?,
             )
             .server_domain(SERVER_DOMAIN)
@@ -146,7 +146,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
 
     generate_web_proofs_with_redaction_config(
         |transcript| RedactionConfig {
-            sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
+            sent: RangeSet::from([0..55, 61..190, 195..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
         },
         "../web_proof/testdata/web_proof_all_redaction_types.json",
@@ -155,7 +155,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
 
     generate_web_proofs_with_redaction_config(
         |transcript| RedactionConfig {
-            sent: RangeSet::from([0..56, 61..161, 166..transcript.sent().len()]),
+            sent: RangeSet::from([0..56, 61..190, 195..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
         },
         "../web_proof/testdata/web_proof_request_url_partial_redaction.json",
@@ -164,7 +164,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
 
     generate_web_proofs_with_redaction_config(
         |transcript| RedactionConfig {
-            sent: RangeSet::from([0..55, 61..162, 166..transcript.sent().len()]),
+            sent: RangeSet::from([0..55, 61..191, 195..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 415..463, 475..transcript.received().len()]),
         },
         "../web_proof/testdata/web_proof_request_header_partial_redaction.json",
@@ -173,7 +173,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
 
     generate_web_proofs_with_redaction_config(
         |transcript| RedactionConfig {
-            sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
+            sent: RangeSet::from([0..55, 61..190, 195..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 414..463, 475..transcript.received().len()]),
         },
         "../web_proof/testdata/web_proof_response_header_partial_redaction.json",
@@ -182,7 +182,7 @@ async fn generate_web_proofs_with_redaction() -> Result<(), Box<dyn std::error::
 
     generate_web_proofs_with_redaction_config(
         |transcript| RedactionConfig {
-            sent: RangeSet::from([0..55, 61..161, 166..transcript.sent().len()]),
+            sent: RangeSet::from([0..55, 61..190, 195..transcript.sent().len()]),
             recv: RangeSet::from([0..386, 415..464, 475..transcript.received().len()]),
         },
         "../web_proof/testdata/web_proof_response_json_partial_redaction.json",

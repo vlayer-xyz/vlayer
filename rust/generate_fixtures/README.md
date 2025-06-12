@@ -5,7 +5,6 @@ This Rust crate is designed to regenerate web proof fixtures for testing and dev
 Ensure the required Docker services are up and running before executing the fixture generator.
 
 ```
-./bash/generate-notary-keys.sh
 docker compose -f ./docker/web-proof/docker-compose-notary-custom-key.yaml -f ./docker/web-proof/docker-compose-release.yaml up
 ```
 

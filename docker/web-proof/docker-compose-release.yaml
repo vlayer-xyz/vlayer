@@ -6,11 +6,13 @@ services:
       - "3003:80"
     command: "80 lotr-api.online:3011"
   notary-server:
-    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.10
+    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.11
     ports:
       - "7047:7047"
     volumes:
-      - ../notary-config:/root/.notary-server/config
+      - ../notary-config:/root/.notary
+    command: ["--config", "/root/.notary/config.yaml"]
+
   json-server:
     build:
       context: ../../
