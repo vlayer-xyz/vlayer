@@ -1,11 +1,11 @@
 name: Test JS
 
 on:
-  pull_request:
+  # pull_request:
   merge_group:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
