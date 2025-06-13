@@ -54,21 +54,18 @@ jobs:
         working-directory: ./packages/test-web-app
         run: bun install --frozen-lockfile
 
-      - name: Download latest extension artifact from release
+      - name: Download browser-extension-latest artifact from vouch
         uses: actions/download-artifact@v4
         with:
+          name: browser-extension-latest
           repository: vlayer-xyz/vouch
-          name: browser-extension  # artifact name set during release
-          path: ./packages/browser-extension
+          path: ./packages/browser-extension/dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Extract extension into dist folder
-        working-directory: ./packages/browser-extension
-        run: |
-          mkdir -p dist
-          tar -xzf browser-extension.tar.gz -C dist --strip-components=1
-          ls -la dist
-        
+
+      - name: Ls dist 
+        working-directory: ./packages/browser-extension/dist
+        run: ls -la
+  
       - name: Clean up tarball
         working-directory: ./packages/browser-extension
         run: rm browser-extension.tar.gz
