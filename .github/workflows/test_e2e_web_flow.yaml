@@ -55,13 +55,12 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Download latest extension artifact from release
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          repo: vlayer-xyz/vouch
-          workflow: release_github_extension_artifact.yml  # or name of your release workflow
+          repository: vlayer-xyz/vouch
           name: browser-extension  # artifact name set during release
           path: ./packages/browser-extension
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Extract extension into dist folder
         working-directory: ./packages/browser-extension
@@ -73,8 +72,6 @@ jobs:
       - name: Clean up tarball
         working-directory: ./packages/browser-extension
         run: rm browser-extension.tar.gz
-
-
 
       - name: Install Playwright Browsers
         working-directory: ./packages
