@@ -57,7 +57,7 @@ jobs:
       - name: Download browser-extension-latest artifact from vouch
         uses: actions/download-artifact@v4
         with:
-          name: browser-extension-latest
+          artifact-ids: 3322180520
           repository: vlayer-xyz/vouch
           path: ./packages/browser-extension/dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
