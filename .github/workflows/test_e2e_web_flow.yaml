@@ -55,24 +55,14 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Download latest extension artifact from release
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: vlayer-xyz/vouch
-          tag: browser-extension-latest  # or any specific tag you want to use
-          extract: true
-          out-file-path: ./packages/browser-extension/dist
-          token: ${{ secrets.GITHUB_VOUCH_PAT }}
-      
-      - name: Extract extension into dist folder
-        working-directory: ./packages/browser-extension
         run: |
-          mkdir -p dist
-          tar -xzf browser-extension.tar.gz -C dist --strip-components=1
+         curl -L https://github.com/vlayer-xyz/vouch/releases/download/browser-extension-latest/browser-extension.tar.gz --output browser-extension.tar.gz
+         mkdir -p dist 
+         tar -xzf browser-extension.tar.gz -C dist --strip-components=1
         
       - name: Clean up tarball
         working-directory: ./packages/browser-extension
         run: rm browser-extension.tar.gz
-      
 
       - name: Install Playwright Browsers
         working-directory: ./packages
