@@ -580,13 +580,13 @@ pub(crate) mod tests {
 
         #[test]
         fn correctly_parses_rpc_url() {
-            let as_string = "31337:http://127.0.0.1:8545";
+            let rpc_url_as_string = "31337:http://127.0.0.1:8545";
             assert_eq!(
                 RpcUrl {
                     chain_id: 31337,
                     url: "http://127.0.0.1:8545".to_string()
                 },
-                RpcUrl::from_str(as_string).unwrap()
+                RpcUrl::from_str(rpc_url_as_string).unwrap()
             );
         }
 
