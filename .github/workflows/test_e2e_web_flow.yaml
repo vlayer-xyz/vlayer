@@ -31,7 +31,7 @@ jobs:
     needs: changes
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
+    # if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
@@ -54,9 +54,15 @@ jobs:
         working-directory: ./packages/test-web-app
         run: bun install --frozen-lockfile
 
-      - name: Build extension
+      - name: Download latest extension artifact from release
+        run: |
+         curl -L https://github.com/vlayer-xyz/vouch/releases/download/browser-extension-latest/browser-extension.tar.gz --output browser-extension.tar.gz
+         mkdir -p dist 
+         tar -xzf browser-extension.tar.gz -C dist --strip-components=1
+        
+      - name: Clean up tarball
         working-directory: ./packages/browser-extension
-        run: bun run build
+        run: rm browser-extension.tar.gz
 
       - name: Install Playwright Browsers
         working-directory: ./packages
