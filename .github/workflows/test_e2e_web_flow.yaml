@@ -61,7 +61,7 @@ jobs:
           tag: browser-extension-latest  # or any specific tag you want to use
           extract: true
           out-file-path: ./packages/browser-extension/dist
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_VOUCH_PAT }}
       
       - name: Extract extension into dist folder
         working-directory: ./packages/browser-extension
