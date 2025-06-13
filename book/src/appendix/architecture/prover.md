@@ -81,13 +81,13 @@ timeout = 240 # Optional timeout in seconds
 public_key = "/path/to/signing/key.pem"
 algorithm = "rs256" # Signing algorithm to use, defaults to rs256
 
-# Optional list of user-defined JWT claims that the server will validate
+# Optional list of user-defined JWT claims
 [[auth.jwt.claims]]
 name = "sub" # Specifying just the name of the claim will assert the claims existence with any value
 
 [[auth.jwt.claims]]
 name = "environment"
-values = ["test"] # Here, `environment` can only accept a single value of `test` which the server will assert
+values = ["test"] # `environment` can only accept a single value: `test`
 
 # Optional gas-meter integration for billing and usage tracking
 [gas_meter]
