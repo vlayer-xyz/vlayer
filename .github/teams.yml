@@ -1,22 +1,18 @@
-Web:
-  - '@aajj999'
+Protocol:
   - '@akonior'
   - '@wgromniak2'
   - '@pociej'
-  - '@krzysztof-jelski'
-
-Email:
-  - '@pik694'
-  - '@vanruch'
-
-Ops:
   - '@rzadp'
   - '@kubkon'
-
-Ethereum:
   - '@AdamDawidKrol'
-  - '@LogvinovLeon'
-  - '@Wiezzel'
+
+Vouch:
+  - '@krzysztof-jelski'
+  - '@aajj999'
+  - '@pik694'
+  - '@vanruch'
+  - '@akoszowski'
 
 DevEx:
   - '@Chmarusso'
+  - '@writersblockchain'
