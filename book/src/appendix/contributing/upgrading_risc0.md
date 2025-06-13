@@ -476,6 +476,41 @@ library TestnetStableDeployment {
 }
 ```
 
+When updating `MainnetStableDeployment.sol` addresses, you also have to update the address tested in `test_returnsAConstantForMainnets()` test in `contracts/vlayer/test/proof_verifier/ProofVerifierFactory.t.sol`:
+
+```sol
+// contracts/vlayer/test/proof_verifier/ProofVerifierFactory.t.sol
+// ...
+function test_returnsAConstantForMainnets() public {
+    vm.chainId(1);
+
+    IProofVerifier verifier = ProofVerifierFactory.produce();
+    assert(verifier == IProofVerifier(address(GROTH16_ADDRESS)));
+}
+```
+
+```sol
+// contracts/vlayer/src/MainnetStableDeployment.sol
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.21;
+
+import {Repository} from "./Repository.sol";
+import {Groth16ProofVerifier} from "./proof_verifier/Groth16ProofVerifier.sol";
+
+library MainnetStableDeployment {
+    function repository() internal pure returns (Repository) {
+        return Repository(address(0x42fc5CdBfA5E4699C0e1e0adD0c4BC421d80482F));
+    }
+
+    function verifiers() internal pure returns (Groth16ProofVerifier) {
+        Groth16ProofVerifier groth16ProofVerifier =
+            Groth16ProofVerifier(address(GROTH16_ADDRESS));
+
+        return (groth16ProofVerifier);
+    }
+}
+```
+
 ## Generate new Guest ID using Docker
 
 Make sure all previous steps have been performed successfully.
