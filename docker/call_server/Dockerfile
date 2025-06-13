@@ -2,7 +2,7 @@ FROM --platform=linux/amd64 ubuntu:24.04 AS build
 ARG VLAYER_RELEASE=nightly
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
-RUN curl -L https://github.com/risc0/risc0/releases/download/v2.0.1/cargo-risczero-x86_64-unknown-linux-gnu.tgz -o cargo-risczero-x86_64-unknown-linux-gnu.tgz
+RUN curl -L https://github.com/risc0/risc0/releases/download/v2.1.0/cargo-risczero-x86_64-unknown-linux-gnu.tgz -o cargo-risczero-x86_64-unknown-linux-gnu.tgz
 RUN mkdir -p cargo-risczero
 RUN tar -xzf cargo-risczero-x86_64-unknown-linux-gnu.tgz -C cargo-risczero
 

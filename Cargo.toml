@@ -150,10 +150,10 @@ rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
 revm = { version = "=19.4.0", default-features = false, features = ["optimism"] }
-risc0-build = "=2.1.1"
-risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "cf3d1381f076f1094455a0fc6ebd5bd172424d09" }
+risc0-build = "=2.1.2"
+risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "3d9f71ee4f8f1329b11f76424d6ecb5e854e77c5" }
 risc0-zkp = { version = "=2.0.1", default-features = false }
-risc0-zkvm = "=2.0.2"
+risc0-zkvm = "=2.1.0"
 risc0-zkvm-platform = "=2.0.2"
 bonsai-sdk = "=1.4.0"
 rlp = "0.6.1"
