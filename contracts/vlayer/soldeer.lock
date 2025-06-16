@@ -14,7 +14,7 @@ integrity = "3874463846ab995a6a9a88412913cacec6144f7605daa1af57c2d8bf3f210b13"
 
 [[dependencies]]
 name = "risc0-ethereum"
-version = "2.0.0"
-url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v2.0.0-soldeer/contracts.zip"
-checksum = "e0185c9324d619546bf7d190b472d19c67e2bf1ac1c69743cddc00035fb4cf3e"
-integrity = "b2294ca16e2f350887245f299620f9a9741f774d63c1167180fe1e1a3e5e2d73"
+version = "2.1.1"
+url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v2.1.1-soldeer/contracts.zip"
+checksum = "aa3294018761aba8c78dc4c5408f6e17397e6becfcf2059dd0530981ef05e95d"
+integrity = "ee6c1f9f7afe24f64913c2c1d33ac65806299e4792fbfb4fdbff74db255b9bee"

@@ -417,6 +417,100 @@ Proof result: [
 ]
 ```
 
+1.8.8. Fix Solidity stable deployment tests - `contracts/vlayer/src/TestnetStableDeployment.sol` and `contracts/vlayer/src/MainnetStableDeployment.sol`
+
+If any of the stable deployment tests failed, e.g., `contracts/vlayer/test/integration/TestnetStableDeployment.t.sol` or `contracts/vlayer/test/integration/MainnetStableDeployment.t.sol`,
+you will need to update contracts addresses with the correct value. While doing this, it is best to update one address at a time, and re-run the tests.
+
+In order to repro the failures locally, run from the project root:
+
+```
+cd contracts/vlayer
+rm -rf cache dependencies out
+forge soldeer install
+FOUNDRY_PROFILE=no-vlayer ../../target/debug/vlayer test --match-path test/integration/MainnetStableDeployment.t.sol
+```
+
+(For testnet it goes analogically but we match path `test/integration/TestnetStableDeployment.t.sol` instead.)
+
+
+A typical failing run may look as follows:
+
+```
+Ran 4 tests for test/integration/TestnetStableDeployment.t.sol:StableTestDeployment_Tests
+[FAIL: assertion failed: 0x2ECf3470326735703bb6a36f1e33A2999216C5B7 != 0x0aa99BBDB44591B4D17a45F7050349A7C768d116] test_FakeProofVerifierAddressIsStable() (gas: 7045)
+[FAIL: assertion failed: 0xCD6C658fD7cD35daC0e9c2Ec6E11fd051f766568 != 0x7E231CfC3e3B549633D5AD61C30f07Dd4d408ad3] test_groth16ProofVerifierAddressIsStable() (gas: 11960)
+[FAIL: assertion failed: 0xb820A089b4c5bC8BBf4021FB9637Ff598DaB2E69 != 0xE574dd2E0048A9e44d3EC946B78d4dFcfF52600e] test_proofVerifierRouterIsStable() (gas: 5088)
+[FAIL: assertion failed: NEW_ADDRESS != 0xc4E4dC291A5C4dEbe9Ff5a3372F3FdD2e42Bac86] test_repositoryAddressIsStable() (gas: 6547)
+Suite result: FAILED. 0 passed; 4 failed; 0 skipped; finished in 15.39ms (28.10ms CPU time)
+
+Ran 1 test suite in 139.41ms (15.39ms CPU time): 0 tests passed, 4 failed, 0 skipped (4 total tests)  
+```
+
+In this case, we substitute the addresses one-by-one, re-running the test after each swap-out, with the correct values:
+
+```sol
+// contracts/vlayer/src/TesnetStableDeployment.sol
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.21;
+
+import {Repository} from "./Repository.sol";
+import {FakeProofVerifier} from "./proof_verifier/FakeProofVerifier.sol";
+import {Groth16ProofVerifier} from "./proof_verifier/Groth16ProofVerifier.sol";
+import {ProofVerifierRouter} from "./proof_verifier/ProofVerifierRouter.sol";
+
+library TestnetStableDeployment {
+    function repository() internal pure returns (Repository) {
+        return Repository(address(NEW_ADDRESS));
+    }
+
+    function verifiers() internal pure returns (FakeProofVerifier, Groth16ProofVerifier, ProofVerifierRouter) {
+        FakeProofVerifier fakeProofVerifier = FakeProofVerifier(address(0xeF2f0Cbb90821E1C5C46CE5283c82F802F65a3f3));
+        Groth16ProofVerifier groth16ProofVerifier =
+            Groth16ProofVerifier(address(0x074Fc67dA733FFA5B288a9d5755552e61a1A0a06));
+        ProofVerifierRouter proofVerifierRouter =
+            ProofVerifierRouter(address(0x7d441696a6F095B3Cd5e144ccBCDB507e0ce124e));
+
+        return (fakeProofVerifier, groth16ProofVerifier, proofVerifierRouter);
+    }
+}
+```
+
+When updating `MainnetStableDeployment.sol` addresses, you also have to update the address tested in `test_returnsAConstantForMainnets()` test in `contracts/vlayer/test/proof_verifier/ProofVerifierFactory.t.sol`:
+
+```sol
+// contracts/vlayer/test/proof_verifier/ProofVerifierFactory.t.sol
+// ...
+function test_returnsAConstantForMainnets() public {
+    vm.chainId(1);
+
+    IProofVerifier verifier = ProofVerifierFactory.produce();
+    assert(verifier == IProofVerifier(address(GROTH16_ADDRESS)));
+}
+```
+
+```sol
+// contracts/vlayer/src/MainnetStableDeployment.sol
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.21;
+
+import {Repository} from "./Repository.sol";
+import {Groth16ProofVerifier} from "./proof_verifier/Groth16ProofVerifier.sol";
+
+library MainnetStableDeployment {
+    function repository() internal pure returns (Repository) {
+        return Repository(address(0x42fc5CdBfA5E4699C0e1e0adD0c4BC421d80482F));
+    }
+
+    function verifiers() internal pure returns (Groth16ProofVerifier) {
+        Groth16ProofVerifier groth16ProofVerifier =
+            Groth16ProofVerifier(address(GROTH16_ADDRESS));
+
+        return (groth16ProofVerifier);
+    }
+}
+```
+
 ## Generate new Guest ID using Docker
 
 Make sure all previous steps have been performed successfully.
