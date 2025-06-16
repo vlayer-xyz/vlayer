@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-NETWORKS=( "sepolia" "base-sepolia" "optimism-sepolia" "arbitrum-sepolia" "worldchain-sepolia" "base" "flow-evm-testnet" )
+NETWORKS=( "sepolia" "base-sepolia" "optimism-sepolia" "arbitrum-sepolia" "worldchain-sepolia" "flow-evm-testnet" )
 
 # Simple function to get Repository address from .sol file
 repository_address() {
