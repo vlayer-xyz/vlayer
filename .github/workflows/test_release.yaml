@@ -48,6 +48,10 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           submodules: recursive
+      - name: Download Vouch Browser Extension latest release
+        uses: ./.github/actions/download-vouch-extension-release
+        with:
+          VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}
       - name: Test remote prover
         env:
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets[matrix.vlayer_release.private_key_index] }}

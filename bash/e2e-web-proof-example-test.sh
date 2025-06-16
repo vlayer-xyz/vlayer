@@ -14,6 +14,4 @@ generate_ts_bindings
 
 ./bash/mock-imageid.sh
 
-build_extension
-
 run_web_tests simple-web-proof

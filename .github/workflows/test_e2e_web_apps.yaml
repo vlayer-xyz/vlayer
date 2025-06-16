@@ -1,11 +1,11 @@
 name: E2E web apps
 
 on:
-  # pull_request:
+  pull_request:
   merge_group:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
@@ -145,6 +145,7 @@ jobs:
           vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
           vercel_token: ${{ secrets.VERCEL_TOKEN }}
           playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
+          VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}
 
   test-e2e-web-apps-simple-time-travel:
     name: E2E web apps (simple-time-travel)
@@ -246,6 +247,7 @@ jobs:
           playwright_test_x_com_auth_token: ${{ secrets.PLAYWRIGHT_TEST_X_COM_AUTH_TOKEN }}
           jwt_auth: "on"
           vlayer_api_token: ${{ vars.VLAYER_API_TOKEN }}
+          VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}
 
   test-e2e-web-apps-jwt-simple-time-travel:
     name: E2E web apps with JWT (simple-time-travel)

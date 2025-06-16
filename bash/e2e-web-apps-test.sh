@@ -13,7 +13,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/utils.sh"
 
 set_proving_mode
 generate_ts_bindings
-build_extension
 build_sdk
 build_sdk_hooks
 

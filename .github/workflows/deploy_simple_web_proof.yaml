@@ -68,6 +68,11 @@ jobs:
         working-directory: ./packages/sdk-hooks
         run: bun run build
 
+      - name: Download Vouch Browser Extension latest release
+        uses: ./.github/actions/download-vouch-extension-release
+        with:
+          VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}
+
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
 
