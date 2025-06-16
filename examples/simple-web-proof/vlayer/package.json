@@ -45,7 +45,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
-    "vitest": "^3.1.1", 
+    "vitest": "^3.1.1",
     "typescript": "^5.5.4",
     "@types/node": "^22.5.4",
     "vite-tsconfig-paths": "^5.0.1",
@@ -68,4 +68,3 @@
     "wagmi": "2.14.16"
   }
 }
-

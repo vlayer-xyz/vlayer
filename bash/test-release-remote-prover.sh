@@ -45,8 +45,6 @@ VLAYER_ENV="testnet"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-build_extension
-
 echo "Starting VDNS server"
 docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d vdns_server
 
@@ -96,8 +94,13 @@ done
 
 # Copy the TEMP_DIR to the final destination after the loop
 echo "Copying from ${TEMP_DIR} to ${VLAYER_HOME}/vlayer-test-release"
+ls "${TEMP_DIR}"
+ls "${VLAYER_HOME}"
 mkdir -p "${VLAYER_HOME}/vlayer-test-release"
+echo "Created directory: ${VLAYER_HOME}/vlayer-test-release"
+ls "${VLAYER_HOME}"
 cp -a "${TEMP_DIR}"/* "${VLAYER_HOME}/vlayer-test-release"
+echo "Playwright test results copied to ${VLAYER_HOME}/vlayer-test-release"
 
 # Exit with 1 if any Playwright test failed
 if [ "$PLAYWRIGHT_FAILED" = true ]; then

@@ -1,18 +1,18 @@
 name: E2E example web apps test with OP Sepolia
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  #   # If any path names do not match patterns in paths-ignore,
-  #   # even if some path names match the patterns,
-  #   # the workflow will run.
-  #   paths-ignore:
-  #     - "README.md"
-  #     - "LICENSE"
-  #     - "book/**"
-  # pull_request:
-  # merge_group:
+  push:
+    branches:
+      - main
+    # If any path names do not match patterns in paths-ignore,
+    # even if some path names match the patterns,
+    # the workflow will run.
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
+  pull_request:
+  merge_group:
   workflow_dispatch:
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.

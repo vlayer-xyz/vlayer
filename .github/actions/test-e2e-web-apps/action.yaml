@@ -30,6 +30,9 @@ inputs:
     description: "Vlayer API token (required if jwt_auth is set)"
     required: false
     default: ""
+  VOUCH_EXTENSION_DOWNLOAD_PAT:
+    required: false
+    description: 'Token to download the Browser Extension release from Vouch.'
 
 runs:
   using: composite
@@ -79,6 +82,12 @@ runs:
       shell: bash
       working-directory: ./packages/sdk-hooks
       run: bun run build
+
+    - name: Download Vouch Browser Extension latest release
+      if: inputs.VOUCH_EXTENSION_DOWNLOAD_PAT != ''
+      uses: ./.github/actions/download-vouch-extension-release
+      with:
+        VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ inputs.VOUCH_EXTENSION_DOWNLOAD_PAT }}
 
     - name: Install Playwright browsers
       shell: bash
