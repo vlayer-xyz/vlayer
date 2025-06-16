@@ -50,15 +50,28 @@ jobs:
         working-directory: ./packages/sdk-hooks
         run: bun run build
 
-      - name: Install dependencies of test-web-app
-        working-directory: ./packages/test-web-app
-        run: bun install --frozen-lockfile
-
-      - name: Download latest extension artifact from release
+      - name: Download release asset via GitHub API
+        working-directory: ./packages/browser-extension
+        env:
+          GITHUB_VOUCH_PAT: ${{ secrets.GITHUB_VOUCH_PAT }}
         run: |
-         curl -L https://github.com/vlayer-xyz/vouch/releases/download/browser-extension-latest/browser-extension.tar.gz --output browser-extension.tar.gz
-         mkdir -p dist 
-         tar -xzf browser-extension.tar.gz -C dist --strip-components=1
+          REPO=vlayer-xyz/vouch
+          TAG=browser-extension-latest
+      
+          RELEASE_JSON=$(curl -s -H "Authorization: token $GITHUB_VOUCH_PAT" \
+            "https://api.github.com/repos/$REPO/releases/tags/$TAG")
+      
+          ASSET_API_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name == "browser-extension.tar.gz") | .url')
+      
+          echo "Downloading asset from: $ASSET_API_URL"
+      
+          curl -L -H "Authorization: token $GITHUB_VOUCH_PAT" \
+               -H "Accept: application/octet-stream" \
+               "$ASSET_API_URL" -o browser-extension.tar.gz
+      
+          mkdir -p dist
+          tar -xzf browser-extension.tar.gz -C dist --strip-components=3
+          ls dist
         
       - name: Clean up tarball
         working-directory: ./packages/browser-extension
