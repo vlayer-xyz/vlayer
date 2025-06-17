@@ -542,7 +542,7 @@ perform the following:
 2. Run the GuestID generation method:
 
 ```sh
-SKIP_CURRENT_GUEST_ELF_ID_FROM_HISTORY=1 RISC0_USE_DOCKER=1 cargo build
+UPDATE_GUEST_ELF_ID=1 SKIP_CURRENT_GUEST_ELF_ID_FROM_HISTORY=1 RISC0_USE_DOCKER=1 cargo build
 ```
 
 3. Clear and update the changelog with only the newly generated GuestId - `rust/guest_wrapper/artifacts/chain_guest/CHANGELOG.md`
