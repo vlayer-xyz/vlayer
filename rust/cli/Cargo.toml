@@ -33,6 +33,7 @@ toml = { workspace = true, features = ["parse"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 version = { workspace = true }
+web_proof = { workspace = true }
 web_prover = { workspace = true }
 
 [dev-dependencies]

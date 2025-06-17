@@ -3,7 +3,7 @@ use commands::{
     init::{InitArgs, run_init},
     jwt::{Args as JwtArgs, run as run_jwt},
     update::UpdateArgs,
-    web_proof::{WebProofArgs, webproof_fetch},
+    web_proof::{WebProofDebugArgs, WebProofFetchArgs, webproof_debug, webproof_fetch},
 };
 use test_runner::{cli::TestArgs, set_risc0_dev_mode};
 use tracing::{debug, error, info, level_filters::LevelFilter, trace, warn};
@@ -38,7 +38,9 @@ enum Commands {
     Init(InitArgs),
     Test(Box<TestArgs>),
     Update(UpdateArgs),
-    WebProofFetch(WebProofArgs),
+    WebProofFetch(WebProofFetchArgs),
+    #[command(hide = true)]
+    WebProofDebug(WebProofDebugArgs),
     #[command(hide = true)]
     TestLoggingConfiguration,
     Jwt(JwtArgs),
@@ -62,18 +64,18 @@ async fn main() {
 
 async fn run() -> Result<()> {
     match Cli::parse().command {
-        Commands::Init(args) => run_init(args).await,
+        Commands::Init(args) => run_init(args).await?,
         Commands::Test(args) => {
             set_risc0_dev_mode();
-            Box::pin(run_test(args)).await
+            Box::pin(run_test(args)).await?
         }
-        Commands::Update(args) => run_update(args).await,
-        Commands::WebProofFetch(args) => {
-            webproof_fetch(args).await.map_err(derive_more::Into::into)
-        }
-        Commands::TestLoggingConfiguration => run_logging_test(),
-        Commands::Jwt(args) => run_jwt(args).map_err(crate::errors::Error::Jwt),
-    }
+        Commands::Update(args) => run_update(args).await?,
+        Commands::WebProofFetch(args) => webproof_fetch(args).await?,
+        Commands::WebProofDebug(args) => webproof_debug(args)?,
+        Commands::TestLoggingConfiguration => run_logging_test()?,
+        Commands::Jwt(args) => run_jwt(args).map_err(crate::errors::Error::Jwt)?,
+    };
+    Ok(())
 }
 
 fn run_logging_test() -> Result<()> {
