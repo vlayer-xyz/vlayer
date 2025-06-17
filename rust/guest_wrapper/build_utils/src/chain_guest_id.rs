@@ -74,8 +74,8 @@ pub fn add_current_to_history() -> anyhow::Result<()> {
 
 /// Update the chain guest ID stored in repo to `new_id`.
 /// Generate a "TODO" changelog entry.
-/// `add_current_to_history` should be called before.
-pub fn update(new_id: Digest) -> anyhow::Result<()> {
+/// `add_current_to_history` should be called before when ensuring previous id is in history.
+pub fn update(new_id: Digest, ensure_previous_in_history: bool) -> anyhow::Result<()> {
     let old_hex_id = current_id_hex()?;
     let new_hex_id = hex::encode(new_id.as_bytes());
 
@@ -84,10 +84,12 @@ pub fn update(new_id: Digest) -> anyhow::Result<()> {
     if old_hex_id == new_hex_id {
         return Ok(());
     }
-    anyhow::ensure!(
-        id_history_hex()?.iter().any(|id| id == &old_hex_id),
-        "Previous chain guest ID ({old_hex_id}) not in history"
-    );
+    if (ensure_previous_in_history) {
+        anyhow::ensure!(
+            id_history_hex()?.iter().any(|id| id == &old_hex_id),
+            "Previous chain guest ID ({old_hex_id}) not in history"
+        );
+    }
 
     fs::write(LAYOUT.chain_guest_id(), &new_hex_id)?;
 
