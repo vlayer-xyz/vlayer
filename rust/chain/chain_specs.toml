@@ -84,6 +84,12 @@ name = "unichain-sepolia"
 id = 1301
 op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0xf971F1b0D80eb769577135b490b913825BfcF00B", structure = { type = "v1", value = { game_type = "Cannon" } } } }
 forks = [{ spec = "GRANITE", activation = { Block = 0 } }]
+
+[[chains]]
+name = "flow-testnet"
+id = 545
+forks = [{ spec = "CANCUN", activation = { Block = 0 } }]
+
 # endregion testnets
 
 # region mainnets
