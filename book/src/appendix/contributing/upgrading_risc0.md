@@ -531,3 +531,18 @@ Go and get yourself a cup of coffee or something - this *will* take a while.
 ```
 
 replace `TODO` with an actual reason for an upgrade.
+
+## Clearing the history of chain GuestIDs
+
+If the history of supported chain GuestIDs needs to be cleared (e.g. because of a vulnerability),
+perform the following:
+
+1. Clear the `rust/guest_wrapper/artifacts/chain_guest/elf_id_history` file.
+
+2. Run the GuestID generation method:
+
+```sh
+UPDATE_GUEST_ELF_ID=1 SKIP_CURRENT_GUEST_ELF_ID_FROM_HISTORY=1 RISC0_USE_DOCKER=1 cargo build
+```
+
+3. Clear and update the changelog with only the newly generated GuestId - `rust/guest_wrapper/artifacts/chain_guest/CHANGELOG.md`

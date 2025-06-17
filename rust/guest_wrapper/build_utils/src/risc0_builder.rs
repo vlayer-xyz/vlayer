@@ -32,15 +32,22 @@ pub struct Builder {
     skip_build: bool,
     use_docker: bool,
     update_guest_elf: bool,
+    skip_current_guest_elf_id_from_history: bool,
 }
 
 impl Builder {
     pub fn from_env() -> Self {
         let use_docker = use_bool_var("RISC0_USE_DOCKER");
         let update_guest_elf = use_bool_var("UPDATE_GUEST_ELF_ID");
+        let skip_current_guest_elf_id_from_history =
+            use_bool_var("SKIP_CURRENT_GUEST_ELF_ID_FROM_HISTORY");
         assert!(
             !update_guest_elf || use_docker,
             "`UPDATE_GUEST_ELF_ID` requires `RISC0_USE_DOCKER`"
+        );
+        assert!(
+            !skip_current_guest_elf_id_from_history || update_guest_elf,
+            "`SKIP_CURRENT_GUEST_ELF_ID_FROM_HISTORY` requires `UPDATE_GUEST_ELF_ID`"
         );
         Self {
             data_layout: DataLayout::new().unwrap(),
@@ -48,6 +55,7 @@ impl Builder {
             skip_build: use_bool_var("RISC0_SKIP_BUILD"),
             use_docker,
             update_guest_elf,
+            skip_current_guest_elf_id_from_history,
         }
     }
 
@@ -134,9 +142,11 @@ impl Builder {
 
     /// Add current chain guest ID to history and generate a new one
     fn update_chain_guest(&self) -> anyhow::Result<()> {
-        chain_guest_id::add_current_to_history()?;
+        if !self.skip_current_guest_elf_id_from_history {
+            chain_guest_id::add_current_to_history()?;
+        }
         let (_, chain_guest) = self.build_guests()?;
-        chain_guest_id::update(chain_guest.image_id)?;
+        chain_guest_id::update(chain_guest.image_id, !self.skip_current_guest_elf_id_from_history)?;
 
         Ok(())
     }
