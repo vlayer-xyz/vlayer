@@ -20,7 +20,6 @@ const webProofConfig: WebProofConfig<Abi, string> = {
     commitmentArgs: [],
     chainId: 1,
   },
-  logoUrl: "http://twitterswap.com/logo.png",
   steps: [
     startPage("https://x.com/", "Go to x.com login page"),
     expectUrl("https://x.com/home", "Log in"),

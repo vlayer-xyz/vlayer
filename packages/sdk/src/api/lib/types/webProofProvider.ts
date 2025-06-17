@@ -9,7 +9,7 @@ import {
 } from "../../../web-proof-commons";
 
 export type WebProofRequestInput = {
-  logoUrl: string;
+  logoUrl?: string;
   steps: WebProofStep[];
 };
 

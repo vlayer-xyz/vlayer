@@ -154,7 +154,7 @@ export type MessageFromExtension =
 export type WebProverSessionConfig = {
   notaryUrl: string;
   wsProxyUrl: string;
-  logoUrl: string;
+  logoUrl?: string;
   token?: string;
   steps: WebProofStep[];
 };

@@ -30,7 +30,6 @@ import {
 } from '@vlayer/sdk/web_proof'
 
 const webProofRequest = createWebProofRequest({
-  logoUrl: 'http://twitterswap.com/logo.png',
   steps: [
     startPage('https://x.com/i/flow/login', 'Go to x.com login page'),
     expectUrl('https://x.com/home', 'Log in'),
@@ -123,7 +122,6 @@ const proverCallCommitment = {
 
 webProofProvider.requestWebProof({
   proverCallCommitment,
-  logoUrl: 'http://twitterswap.com/logo.png',
   steps: [
     startPage('https://x.com/i/flow/login', 'Go to x.com login page'),
     expectUrl('https://x.com/home', 'Log in'),
