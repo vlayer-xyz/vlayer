@@ -3167,6 +3167,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber 0.3.19",
  "version",
+ "web_proof",
  "web_prover",
 ]
 

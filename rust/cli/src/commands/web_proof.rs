@@ -1,10 +1,15 @@
-use std::str::FromStr;
+use std::{fs, path::PathBuf, str::FromStr};
 
-use clap::Parser;
+use clap::{ArgGroup, Parser};
 use reqwest::Url;
 use strum::EnumString;
 use thiserror::Error;
 use tracing::debug;
+use web_proof::{
+    verifier::verify_and_parse,
+    web::Web,
+    web_proof::{BodyRedactionMode, Config, UrlTestMode},
+};
 use web_prover::{
     Method, NotarizeParams, NotarizeParamsBuilder, NotarizeParamsBuilderError, NotaryConfig,
     NotaryConfigBuilder, NotaryConfigBuilderError, generate_web_proof,
@@ -42,7 +47,7 @@ pub(crate) enum InputError {
 
 /// Generates a web-based proof for the specified request
 #[derive(Clone, Parser, Debug)]
-pub(crate) struct WebProofArgs {
+pub(crate) struct WebProofFetchArgs {
     /// Full URL of the request to notarize
     #[arg(long)]
     url: String,
@@ -78,7 +83,17 @@ pub(crate) struct WebProofArgs {
     max_recv_data: Option<usize>,
 }
 
-pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
+#[derive(Clone, Parser, Debug)]
+#[command(group(ArgGroup::new("input").required(true).args(&["json", "file"])))]
+pub(crate) struct WebProofDebugArgs {
+    /// Web-proof encoded as JSON
+    json: Option<String>,
+    /// Path to web-proof encoded as JSON
+    #[clap(short)]
+    file: Option<PathBuf>,
+}
+
+pub(crate) async fn webproof_fetch(args: WebProofFetchArgs) -> anyhow::Result<()> {
     let server_args: NotarizeParams = args.try_into()?;
 
     debug!("notarizing...");
@@ -87,6 +102,24 @@ pub(crate) async fn webproof_fetch(args: WebProofArgs) -> anyhow::Result<()> {
 
     println!("{presentation}");
 
+    Ok(())
+}
+
+pub(crate) fn webproof_debug(args: WebProofDebugArgs) -> anyhow::Result<()> {
+    let web_proof_json = match args.json {
+        Some(web_proof_json) => web_proof_json,
+        None => {
+            #[allow(clippy::expect_used)]
+            let path = args
+                .file
+                .expect("clap guarantees this is defined if args.json is None");
+            fs::read_to_string(path)?
+        }
+    };
+    let web_proof = serde_json::from_str(&web_proof_json)?;
+    let config = Config::new(BodyRedactionMode::Disabled, UrlTestMode::Full);
+    let web: Web = verify_and_parse(web_proof, config)?;
+    println!("{web:#?}");
     Ok(())
 }
 
@@ -182,10 +215,10 @@ fn parse_header(header_str: impl AsRef<str>) -> Result<(String, String)> {
         })
 }
 
-impl TryFrom<WebProofArgs> for NotarizeParams {
+impl TryFrom<WebProofFetchArgs> for NotarizeParams {
     type Error = InputError;
 
-    fn try_from(value: WebProofArgs) -> Result<Self> {
+    fn try_from(value: WebProofFetchArgs) -> Result<Self> {
         let ProvenUrl { host, port } = parse_proven_url(&value.url)?;
 
         // If host is not provided fallback to host extracted from url
@@ -242,7 +275,7 @@ mod tests {
     use super::*;
     #[test]
     fn test_convert_args() {
-        let input_args = WebProofArgs {
+        let input_args = WebProofFetchArgs {
             headers: vec!["Authorization: Basic 1234".into(), "X-Api-Key: 5678".into()],
             data: Some("example body data".into()),
             max_sent_data: Some(100),
@@ -268,7 +301,7 @@ mod tests {
 
     #[test]
     fn test_parse_headers() {
-        let input_args: WebProofArgs = WebProofArgs {
+        let input_args: WebProofFetchArgs = WebProofFetchArgs {
             headers: vec!["Auth:oriza:tion: Basic 1234".into(), "X-Api-Key: 5678".into()],
             ..Default::default()
         };
@@ -279,7 +312,7 @@ mod tests {
 
     #[test]
     fn test_default_notary_args() {
-        let input_args = WebProofArgs {
+        let input_args = WebProofFetchArgs {
             notary: None,
             ..Default::default()
         };
@@ -296,7 +329,7 @@ mod tests {
 
     #[test]
     fn test_default_method_no_data() {
-        let input_args = WebProofArgs {
+        let input_args = WebProofFetchArgs {
             data: None,
             ..Default::default()
         };
@@ -306,7 +339,7 @@ mod tests {
 
     #[test]
     fn test_default_method_with_data() {
-        let input_args = WebProofArgs {
+        let input_args = WebProofFetchArgs {
             data: Some("something".to_string()),
             ..Default::default()
         };
@@ -316,7 +349,7 @@ mod tests {
 
     #[test]
     fn test_trim_slashes_in_notary_path() {
-        let input_args = WebProofArgs {
+        let input_args = WebProofFetchArgs {
             notary: Some("https://notary.vlayer.xyz/path/to/api/".into()),
             ..Default::default()
         };
@@ -329,7 +362,7 @@ mod tests {
 
     #[test]
     fn test_set_notary_tls_https() {
-        let input_args = WebProofArgs {
+        let input_args = WebProofFetchArgs {
             notary: Some("https://notary.vlayer.xyz/path/to/api/".into()),
             ..Default::default()
         };
@@ -341,7 +374,7 @@ mod tests {
 
     #[test]
     fn test_set_notary_tls_http() {
-        let input_args = WebProofArgs {
+        let input_args = WebProofFetchArgs {
             notary: Some("http://notary.vlayer.xyz/path/to/api/".into()),
             ..Default::default()
         };
@@ -353,7 +386,7 @@ mod tests {
 
     #[test]
     fn test_convert_args_no_uri_params() {
-        let input_args: WebProofArgs = WebProofArgs {
+        let input_args: WebProofFetchArgs = WebProofFetchArgs {
             url: "https://api.x.com:8080/v1/followers".to_string(),
             ..Default::default()
         };
@@ -364,7 +397,7 @@ mod tests {
     }
     #[test]
     fn test_convert_args_no_host_provided() {
-        let input_args: WebProofArgs = WebProofArgs {
+        let input_args: WebProofFetchArgs = WebProofFetchArgs {
             url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".to_string(),
             host: None,
             ..Default::default()
@@ -377,7 +410,7 @@ mod tests {
 
     #[test]
     fn test_invalid_proven_url_error() {
-        let input_args: WebProofArgs = WebProofArgs {
+        let input_args: WebProofFetchArgs = WebProofFetchArgs {
             url: "invalid-url".to_string(),
             ..Default::default()
         };
@@ -391,7 +424,7 @@ mod tests {
 
     #[test]
     fn test_invalid_notary_url_error() {
-        let input_args: WebProofArgs = WebProofArgs {
+        let input_args: WebProofFetchArgs = WebProofFetchArgs {
             notary: Some("invalid-url".to_string()),
             ..Default::default()
         };
@@ -405,7 +438,7 @@ mod tests {
 
     #[test]
     fn test_invalid_proven_url_protocol_error() {
-        let input_args: WebProofArgs = WebProofArgs {
+        let input_args: WebProofFetchArgs = WebProofFetchArgs {
             url: "xyz:///path/to/resource".to_string(),
             ..Default::default()
         };
@@ -419,7 +452,7 @@ mod tests {
 
     #[test]
     fn test_invalid_notary_url_protocol_error() {
-        let input_args: WebProofArgs = WebProofArgs {
+        let input_args: WebProofFetchArgs = WebProofFetchArgs {
             notary: Some("htp://notary.vlayer.xyz/path/to/api/".into()),
             ..Default::default()
         };
@@ -433,7 +466,7 @@ mod tests {
 
     #[test]
     fn test_invalid_header_format_error() {
-        let input_args: WebProofArgs = WebProofArgs {
+        let input_args: WebProofFetchArgs = WebProofFetchArgs {
             headers: vec!["Authorization".into()],
             ..Default::default()
         };
@@ -470,7 +503,7 @@ mod tests {
         fail(" Authorization  Bearer  ");
     }
 
-    impl Default for WebProofArgs {
+    impl Default for WebProofFetchArgs {
         fn default() -> Self {
             Self {
                 url: "https://api.x.com:8080/v1/followers?token=5daa4f53&uid=245".into(),

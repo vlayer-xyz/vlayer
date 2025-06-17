@@ -10,4 +10,4 @@ mod request_transcript;
 mod response_transcript;
 mod transcript_parser;
 mod utils;
-mod web;
+pub mod web;
