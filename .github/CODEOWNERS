@@ -188,3 +188,11 @@
 /rust/web_proof/src/verifier.rs @marekkirejczyk
 /rust/web_proof/src/web.rs @marekkirejczyk
 /rust/web_proof/src/web_proof.rs @marekkirejczyk
+
+# Directories marked to be moved to the vouch repository.
+/packages/browser-extension/* @marekkirejczyk @wgromniak2 @akoszowski
+/packages/extension-hooks/* @marekkirejczyk @wgromniak2 @akoszowski
+
+# Soon to be marked as deprecated. If updates needed, shall be reflected in the vouch repository.
+/packages/sdk/api/web_proof/* @marekkirejczyk @wgromniak2 @akoszowski
+/packages/web-proof-commons/* @marekkirejczyk @wgromniak2 @akoszowski
