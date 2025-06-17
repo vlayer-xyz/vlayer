@@ -145,8 +145,13 @@ export const useEmailProofVerification = () => {
     if (verificationError) {
       if (verificationError.message.includes("already been minted")) {
         throw new AlreadyMintedError();
+      } else if (
+        verificationError.message.includes("User rejected the request")
+      ) {
+        setCurrentStep(ProofVerificationStep.MINT);
+      } else {
+        throw new Error(verificationError.message);
       }
-      throw new Error(verificationError.message);
     }
   }, [verificationError]);
 
