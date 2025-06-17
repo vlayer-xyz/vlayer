@@ -142,7 +142,7 @@ impl Builder {
 
     /// Add current chain guest ID to history and generate a new one
     fn update_chain_guest(&self) -> anyhow::Result<()> {
-        if (!self.skip_current_guest_elf_id_from_history) {
+        if !self.skip_current_guest_elf_id_from_history {
             chain_guest_id::add_current_to_history()?;
         }
         let (_, chain_guest) = self.build_guests()?;

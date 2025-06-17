@@ -84,7 +84,7 @@ pub fn update(new_id: Digest, ensure_previous_in_history: bool) -> anyhow::Resul
     if old_hex_id == new_hex_id {
         return Ok(());
     }
-    if (ensure_previous_in_history) {
+    if ensure_previous_in_history {
         anyhow::ensure!(
             id_history_hex()?.iter().any(|id| id == &old_hex_id),
             "Previous chain guest ID ({old_hex_id}) not in history"
