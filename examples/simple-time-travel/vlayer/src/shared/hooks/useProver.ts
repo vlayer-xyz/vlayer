@@ -1,23 +1,25 @@
 import {
-  useChain,
+  useSyncChain,
   useCallProver,
   useWaitForProvingResult,
 } from "@vlayer/react";
 import proverSpec from "../../../../out/AverageBalance.sol/AverageBalance";
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
-import { UseChainError, CallProverError } from "../errors/appErrors";
+import { CallProverError, ChainSyncError } from "../errors/appErrors";
 
 export const useProver = () => {
   const [, setProverResult] = useLocalStorage("proverResult", "");
 
-  const { chain, error: chainError } = useChain(
+  const { chain, error: chainError } = useSyncChain(
     import.meta.env.VITE_CHAIN_NAME,
   );
 
-  if (chainError) {
-    throw new UseChainError(chainError);
-  }
+  useEffect(() => {
+    if (chainError) {
+      throw new ChainSyncError(chainError.message);
+    }
+  }, [chainError?.message]);
 
   const {
     callProver,
