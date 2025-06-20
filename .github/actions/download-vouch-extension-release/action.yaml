@@ -7,6 +7,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Create browser-extension directory
+      working-directory: ./packages
+      shell: bash
+      run: mkdir -p browser-extension
     - name: Download Vouch Browser Extension latest release
       working-directory: ./packages/browser-extension
       shell: bash
@@ -31,11 +35,6 @@ runs:
 
         mkdir -p dist
         tar -xzf browser-extension.tar.gz -C dist --strip-components=4
-
-    - name: Diaplay dist working-directory
-      working-directory: ./packages/browser-extension/dist
-      shell: bash
-      run: ls
         
     - name: Clean up tarball
       working-directory: ./packages/browser-extension
