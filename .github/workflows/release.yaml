@@ -32,21 +32,6 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  build-extension:
-    if: github.repository == 'vlayer-xyz/vlayer'
-    name: Build browser extension
-    needs: [build-release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Build extension
-        uses: ./.github/actions/build-extension
-        with:
-          version_name: ${{ needs.build-release.outputs.vlayer_build }}
-        env:
-          VITE_SENTRY_DSN: "https://24fb8a36179103a1aafd60401c006505@o4508754893012992.ingest.de.sentry.io/4509004636422224"
-
   push-contracts:
     if: github.repository == 'vlayer-xyz/vlayer'
     name: Push vlayer contracts
@@ -118,7 +103,7 @@ jobs:
     if: github.repository == 'vlayer-xyz/vlayer'
     name: Push artifacts to AWS S3
     runs-on: ubuntu-latest
-    needs: [build-release, build-examples, build-extension, push-contracts]
+    needs: [build-release, build-examples, push-contracts]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -177,7 +162,7 @@ jobs:
   publish-sdk-to-npm:
     if: github.repository == 'vlayer-xyz/vlayer'
     name: Publish SDK to NPM
-    needs: [build-release, build-examples, build-extension, push-contracts]
+    needs: [build-release, build-examples, push-contracts]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -315,7 +300,6 @@ jobs:
       [
         build-release,
         build-examples,
-        build-extension,
         push-contracts,
         publish-react-hooks-to-npm,
         push-docker-image,
@@ -384,7 +368,6 @@ jobs:
       [
         build-release,
         build-examples,
-        build-extension,
         push-contracts,
         publish-react-hooks-to-npm,
         push-docker-image,
