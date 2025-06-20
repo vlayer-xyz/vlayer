@@ -94,13 +94,8 @@ done
 
 # Copy the TEMP_DIR to the final destination after the loop
 echo "Copying from ${TEMP_DIR} to ${VLAYER_HOME}/vlayer-test-release"
-ls "${TEMP_DIR}"
-ls "${VLAYER_HOME}"
 mkdir -p "${VLAYER_HOME}/vlayer-test-release"
-echo "Created directory: ${VLAYER_HOME}/vlayer-test-release"
-ls "${VLAYER_HOME}"
 cp -a "${TEMP_DIR}"/* "${VLAYER_HOME}/vlayer-test-release"
-echo "Playwright test results copied to ${VLAYER_HOME}/vlayer-test-release"
 
 # Exit with 1 if any Playwright test failed
 if [ "$PLAYWRIGHT_FAILED" = true ]; then
