@@ -1,15 +1,15 @@
 name: Rust incremental compilation performance
 
 on:
-  pull_request:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - ".github/workflows/performance_rust_compilation.yaml"
-  merge_group:
+  # pull_request:
+  #   paths:
+  #     - "rust-toolchain.toml"
+  #     - "rust/**"
+  #     - ".github/workflows/performance_rust_compilation.yaml"
+  # merge_group:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
@@ -21,7 +21,7 @@ permissions:
 jobs:
   performance-rust-compilation:
     name: Rust incremental compilation performance
-    runs-on: aws-linux-medium
+    runs-on: przemek-testing-org-runner
 
     steps:
       - name: Checkout repository
