@@ -31,7 +31,7 @@ jobs:
     needs: changes
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
-    if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
+    # if: github.event_name == 'push' || needs.changes.outputs.relevant-changes == 'true'
     steps:
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
@@ -50,13 +50,10 @@ jobs:
         working-directory: ./packages/sdk-hooks
         run: bun run build
 
-      - name: Install dependencies of test-web-app
-        working-directory: ./packages/test-web-app
-        run: bun install --frozen-lockfile
-
-      - name: Build extension
-        working-directory: ./packages/browser-extension
-        run: bun run build
+      - name: Download Vouch Browser Extension latest release
+        uses: ./.github/actions/download-vouch-extension-release
+        with:
+          VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}
 
       - name: Install Playwright Browsers
         working-directory: ./packages
