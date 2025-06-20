@@ -21,7 +21,7 @@ permissions:
 jobs:
   performance-rust-compilation:
     name: Rust incremental compilation performance
-    runs-on: przemek-testing-org-runner
+    runs-on: org-runner
 
     steps:
       - name: Checkout repository
