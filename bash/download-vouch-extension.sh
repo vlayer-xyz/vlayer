@@ -19,7 +19,7 @@ RELEASE_JSON=$(curl -s -L \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer ${VOUCH_EXTENSION_DOWNLOAD_PAT}" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "https://api.github.com/repos/vlayer-xyz/vouch/releases/tags/browser-extension-latest")
+    "https://api.github.com/repos/vlayer-xyz/vouch/releases/tags/browser-extension-nightly")
 
 ASSET_URL=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name == "browser-extension.tar.gz") | .url')
 echo_color YELLOW "Asset URL: $ASSET_URL"
