@@ -163,7 +163,7 @@ By default, the transcript is not redacted at all and redaction of each HTTP req
 
 You can redact specific headers from both the request and the response. To do so, use `request.headers`, `request.headers_except`, `response.headers`, or `response.headers_except` with a header name (e.g. `Authorization`, `Cookie`). Using `headers` or `headers_except` allows you to control which HTTP headers are redacted: either by explicitly specifying the headers to remove, or by redacting all except a given subset.
 
-#### Redact specifc headers
+#### Redact specific headers
 
 ```ts
 notarize("https://api.example.com/profile", "GET", "Proof", [
@@ -202,7 +202,7 @@ notarize("https://api.example.com/profile", "GET", "Proof", [
 
 You can redact specific query parameters from a URL. Use `url_query` to redact only selected parameters, or `url_query_except` to redact all parameters except those you specify.
 
-#### Redact specifc queries
+#### Redact specific queries
 
 ```ts
 notarize("https://api.example.com/profile", "GET", "Proof", [
