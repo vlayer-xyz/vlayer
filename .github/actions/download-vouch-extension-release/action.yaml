@@ -1,5 +1,5 @@
-name: Download Vouch Browser Extension latest release
-description: Download the latest release of the Vouch Browser Extension.
+name: Download Vouch Browser Extension nightly release
+description: Download the nightly release of the Vouch Browser Extension.
 inputs:
   VOUCH_EXTENSION_DOWNLOAD_PAT:
     required: true
@@ -11,7 +11,7 @@ runs:
       working-directory: ./packages
       shell: bash
       run: mkdir -p browser-extension
-    - name: Download Vouch Browser Extension latest release
+    - name: Download Vouch Browser Extension nightly release
       working-directory: ./packages/browser-extension
       shell: bash
       env:
@@ -34,7 +34,7 @@ runs:
           --output browser-extension.tar.gz
 
         mkdir -p dist
-        tar -xzf browser-extension.tar.gz -C dist --strip-components=4
+        tar -xzf browser-extension.tar.gz -C dist
         
     - name: Clean up tarball
       working-directory: ./packages/browser-extension

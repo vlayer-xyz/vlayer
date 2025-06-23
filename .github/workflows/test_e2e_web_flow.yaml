@@ -50,7 +50,11 @@ jobs:
         working-directory: ./packages/sdk-hooks
         run: bun run build
 
-      - name: Download Vouch Browser Extension latest release
+      - name: Install dependencies of test-web-app
+        working-directory: ./packages/test-web-app
+        run: bun install --frozen-lockfile
+
+      - name: Download Vouch Browser Extension nightly release
         uses: ./.github/actions/download-vouch-extension-release
         with:
           VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}

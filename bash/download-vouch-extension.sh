@@ -69,7 +69,7 @@ curl -L \
 
 echo_color BLUE "Extracting browser extension files to dist directory"
 mkdir -p dist
-tar -xzf browser-extension.tar.gz -C dist --strip-components=4
+tar -xzf browser-extension.tar.gz -C dist
 rm browser-extension.tar.gz
 
 echo_color GREEN "Browser extension downloaded successfully to ${VLAYER_HOME}/packages/browser-extension/dist"

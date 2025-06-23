@@ -48,7 +48,7 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           submodules: recursive
-      - name: Download Vouch Browser Extension latest release
+      - name: Download Vouch Browser Extension nightly release
         uses: ./.github/actions/download-vouch-extension-release
         with:
           VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}

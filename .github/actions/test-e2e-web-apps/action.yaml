@@ -83,7 +83,7 @@ runs:
       working-directory: ./packages/sdk-hooks
       run: bun run build
 
-    - name: Download Vouch Browser Extension latest release
+    - name: Download Vouch Browser Extension nightly release
       if: inputs.VOUCH_EXTENSION_DOWNLOAD_PAT != ''
       uses: ./.github/actions/download-vouch-extension-release
       with:
