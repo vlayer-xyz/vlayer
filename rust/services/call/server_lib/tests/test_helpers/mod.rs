@@ -116,7 +116,11 @@ pub(crate) mod mock {
     use std::{sync::Arc, time::Duration};
 
     use axum::{Router, body::Body, http::Response};
-    use call_server_lib::{Config, gas_meter::Config as GasMeterConfig, server};
+    use call_server_lib::{
+        Config,
+        gas_meter::{Config as GasMeterConfig, Mode as GasMeterMode},
+        server,
+    };
     use derive_more::{Deref, DerefMut};
     use ethers::{
         contract::abigen,
@@ -197,11 +201,11 @@ pub(crate) mod mock {
         #[deref_mut]
         mock: RpcServerMock,
         time_to_live: Duration,
-        api_key: Option<String>,
+        api_key: String,
     }
 
     impl GasMeterServer {
-        pub(crate) async fn start(time_to_live: Duration, api_key: Option<String>) -> Self {
+        pub(crate) async fn start(time_to_live: Duration, api_key: String) -> Self {
             let mock = RpcServerMock::start().await;
             Self {
                 mock,
@@ -211,7 +215,12 @@ pub(crate) mod mock {
         }
 
         pub(crate) fn as_gas_meter_config(&self) -> GasMeterConfig {
-            GasMeterConfig::new(self.url(), self.time_to_live, self.api_key.clone())
+            GasMeterConfig::new(
+                self.url(),
+                self.time_to_live,
+                self.api_key.clone(),
+                GasMeterMode::default(),
+            )
         }
     }
 }

@@ -405,7 +405,7 @@ mod server_tests {
             const EXPECTED_GAS_USED: u64 = 21_724;
             const EXPECTED_CYCLES_USED: u64 = 4_194_304;
 
-            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, "".to_string()).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_params(allocate_gas_body(EXPECTED_HASH), false)
@@ -484,7 +484,7 @@ mod server_tests {
             const EXPECTED_HASH: &str =
                 "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
 
-            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, "".to_string()).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_params(allocate_gas_body(EXPECTED_HASH), false)
@@ -671,8 +671,7 @@ mod server_tests {
 
             let token = token(60, "1234");
 
-            let mut gas_meter_server =
-                GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, API_KEY.into()).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_bearer_auth(&token)

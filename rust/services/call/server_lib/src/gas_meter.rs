@@ -10,16 +10,21 @@ use server_utils::{
     jwt::axum::Token,
     rpc::{Client as RawRpcClient, Error as RpcError, Method},
 };
+use strum::{Display, EnumString, VariantNames};
 use tracing::{error, info};
 
 use crate::handlers::v_call::types::CallHash;
 
 type Result<T> = std::result::Result<T, Error>;
 
+pub const PROVER_API_KEY_HEADER_NAME: &str = "x-prover-api-key";
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
     Rpc(#[from] RpcError),
+    #[error("Token is required for billing mode")]
+    TokenRequired,
 }
 
 #[derive(new, Serialize, Debug)]
@@ -80,7 +85,17 @@ pub struct Config {
     pub url: String,
     pub time_to_live: Duration,
     #[debug(skip)]
-    pub api_key: Option<String>,
+    pub api_key: String,
+    pub mode: Mode,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default, Display, EnumString, VariantNames)]
+#[serde(rename_all = "lowercase")]
+#[strum(ascii_case_insensitive)]
+pub enum Mode {
+    #[default]
+    Bill,
+    Track,
 }
 
 #[async_trait]
@@ -92,25 +107,32 @@ pub trait Client: Send + Sync {
     async fn update_cycles(&self, cycles_used: u64) -> Result<()>;
 }
 
-pub struct RpcClient {
+pub struct BillingClient {
     client: RawRpcClient,
     hash: CallHash,
     time_to_live: Duration,
-    api_key: Option<String>,
-    token: Option<Token>,
+    api_key: String,
+    token: Token,
 }
 
-impl RpcClient {
-    const PROVER_API_KEY_HEADER_NAME: &str = "x-prover-api-key";
+pub struct TrackingClient {
+    client: RawRpcClient,
+    hash: CallHash,
+    api_key: String,
+}
 
+pub struct NoOpClient;
+
+impl BillingClient {
     pub fn new(
         Config {
             url,
             time_to_live,
             api_key,
+            ..
         }: Config,
         hash: CallHash,
-        token: Option<Token>,
+        token: Token,
     ) -> Self {
         let client = RawRpcClient::new(&url);
         Self {
@@ -123,20 +145,18 @@ impl RpcClient {
     }
 
     async fn call(&self, method: impl Method) -> Result<()> {
-        let mut req = self.client.request(method);
-        if let Some(api_key) = &self.api_key {
-            req = req.with_header(Self::PROVER_API_KEY_HEADER_NAME, api_key);
-        }
-        if let Some(token) = &self.token {
-            req = req.with_bearer_auth(token);
-        }
-        let _resp = req.send().await?;
+        self.client
+            .request(method)
+            .with_header(PROVER_API_KEY_HEADER_NAME, &self.api_key)
+            .with_bearer_auth(&self.token)
+            .send()
+            .await?;
         Ok(())
     }
 }
 
 #[async_trait]
-impl Client for RpcClient {
+impl Client for BillingClient {
     async fn allocate(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live.as_secs());
         info!("v_allocateGas => {req:#?}");
@@ -178,7 +198,56 @@ impl Client for RpcClient {
     }
 }
 
-pub struct NoOpClient;
+impl TrackingClient {
+    pub fn new(Config { url, api_key, .. }: Config, hash: CallHash) -> Self {
+        let client = RawRpcClient::new(&url);
+        Self {
+            client,
+            hash,
+            api_key,
+        }
+    }
+
+    async fn call(&self, method: impl Method) -> Result<()> {
+        self.client
+            .request(method)
+            .with_header(PROVER_API_KEY_HEADER_NAME, &self.api_key)
+            .send()
+            .await?;
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl Client for TrackingClient {
+    async fn allocate(&self, _gas_limit: u64) -> Result<()> {
+        Ok(())
+    }
+
+    async fn refund(&self, _stage: ComputationStage, _gas_used: u64) -> Result<()> {
+        Ok(())
+    }
+
+    async fn send_metadata(&self, metadata: Box<[Metadata]>) -> Result<()> {
+        let req = SendMetadata::new(self.hash, metadata);
+        info!("v_sendMetadata => {req:#?}");
+        if let Err(err) = self.call(req).await {
+            error!("v_sendMetadata failed with error: {err}");
+            return Err(err);
+        }
+        Ok(())
+    }
+
+    async fn update_cycles(&self, cycles_used: u64) -> Result<()> {
+        let req = UpdateCycles::new(self.hash, cycles_used);
+        info!("v_updateCycles => {req:#?}");
+        if let Err(err) = self.call(req).await {
+            error!("v_updateCycles failed with error: {err}");
+            return Err(err);
+        }
+        Ok(())
+    }
+}
 
 #[async_trait]
 impl Client for NoOpClient {
@@ -199,8 +268,19 @@ impl Client for NoOpClient {
     }
 }
 
-pub fn init(config: Option<Config>, call_hash: CallHash, token: Option<Token>) -> Box<dyn Client> {
-    config.map_or(Box::new(NoOpClient), |config| {
-        Box::new(RpcClient::new(config, call_hash, token))
+pub fn try_init(
+    config: Option<Config>,
+    call_hash: CallHash,
+    token: Option<Token>,
+) -> Result<Box<dyn Client>> {
+    let Some(config) = config else {
+        return Ok(Box::new(NoOpClient));
+    };
+    Ok(match config.mode {
+        Mode::Bill => {
+            let token = token.ok_or(Error::TokenRequired)?;
+            Box::new(BillingClient::new(config, call_hash, token))
+        }
+        Mode::Track => Box::new(TrackingClient::new(config, call_hash)),
     })
 }

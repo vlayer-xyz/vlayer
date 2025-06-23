@@ -24,7 +24,7 @@ use server_utils::{ProofMode, jwt::config::Config as JwtConfig};
 use strum::VariantNames;
 use thiserror::Error;
 
-use crate::gas_meter::Config as GasMeterConfig;
+use crate::gas_meter::{Config as GasMeterConfig, Mode as GasMeterMode};
 
 pub const DEFAULT_HOST: &str = "127.0.0.1";
 pub const DEFAULT_PORT: u16 = 3000;
@@ -45,6 +45,12 @@ pub enum Error {
     #[error("Invalid chain id: {0}")]
     ChainId(String),
     #[error(
+        "Unexpected gas-meter mode selected: '{}'. Possible values are {:?}",
+        .0,
+        GasMeterMode::VARIANTS
+    )]
+    GasMeterMode(String),
+    #[error(
         "Unexpected JWT signing algorithm selected: '{}'. Possible values are {:?}",
         .0,
         Algorithm::VARIANTS
@@ -62,6 +68,8 @@ pub struct GasMeterOptions {
     pub api_key: String,
     /// Time-to-live for gas meter requests in seconds
     pub time_to_live: Option<u64>,
+    /// Mode of operation for gas meter: [bill, track]
+    pub mode: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -244,17 +252,21 @@ pub struct ConfigOptionsWithVersion {
     pub config: ConfigOptions,
 }
 
-impl From<GasMeterOptions> for GasMeterConfig {
-    fn from(
+impl TryFrom<GasMeterOptions> for GasMeterConfig {
+    type Error = Error;
+
+    fn try_from(
         GasMeterOptions {
             url,
             api_key,
             time_to_live,
+            mode,
         }: GasMeterOptions,
-    ) -> Self {
+    ) -> Result<Self, Self::Error> {
         let time_to_live =
             Duration::from_secs(time_to_live.unwrap_or(DEFAULT_GAS_METER_TIME_TO_LIVE));
-        Self::new(url, time_to_live, Some(api_key))
+        let mode = GasMeterMode::from_str(&mode).map_err(|_| Error::GasMeterMode(mode.clone()))?;
+        Ok(Self::new(url, time_to_live, api_key, mode))
     }
 }
 
@@ -294,7 +306,8 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
     type Error = Error;
 
     fn try_from(opts: ConfigOptionsWithVersion) -> Result<Self, Self::Error> {
-        let gas_meter_config: Option<GasMeterConfig> = opts.config.gas_meter.map(Into::into);
+        let gas_meter_config: Option<GasMeterConfig> =
+            opts.config.gas_meter.map(TryInto::try_into).transpose()?;
         let jwt_config = opts
             .config
             .auth
@@ -608,7 +621,7 @@ pub(crate) mod tests {
         fn correctly_parse_config_file() {
             let config_file = save_config_file(
                 r#"
-        host = "127.0.0.1" 
+        host = "127.0.0.1"
         port = 3000
         proof_mode = "groth16"
 
@@ -621,6 +634,7 @@ pub(crate) mod tests {
         algorithm = "rs256"
 
         [gas_meter]
+        mode = "bill"
         url = "http://localhost:3001"
         api_key = "deadbeef"
         "#,
@@ -646,7 +660,8 @@ pub(crate) mod tests {
                     gas_meter: Some(GasMeterOptions {
                         url: "http://localhost:3001".to_string(),
                         api_key: "deadbeef".to_string(),
-                        time_to_live: None
+                        time_to_live: None,
+                        mode: "bill".to_string(),
                     }),
                     log_format: None,
                 }
@@ -657,7 +672,7 @@ pub(crate) mod tests {
         fn correctly_parse_config_file_with_alternative_rpc_urls_syntax() {
             let config_file = save_config_file(
                 r#"
-        host = "127.0.0.1" 
+        host = "127.0.0.1"
         port = 3000
         proof_mode = "groth16"
         rpc_urls = ["31337:http://localhost:8545", "31338:http://localhost:8546"]
