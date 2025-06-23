@@ -32,7 +32,7 @@ inputs:
     default: ""
   VOUCH_EXTENSION_DOWNLOAD_PAT:
     required: false
-    description: 'Token to download the Browser Extension release from Vouch.'
+    description: 'Token to download the Browser Extension release from Vouch (needed only for simple-web-proof example).'
 
 runs:
   using: composite
