@@ -52,11 +52,6 @@ Each environment includes multiple artifacts, each with distinct deployment cycl
 
 ### User Environment (Web Browser)
 
-- **Extension**
-    - **Release**: vlayer manually releases updates to the Chrome Web Store and other extension platforms. Although automated releases are technically feasible, the store acceptance process introduces some unpredictability.
-    - **Installation**: Users install extensions manually from the store.
-    - **Updates**: Browsers typically handle automatic updates, additionally users can be encouraged or enforced to update manually if needed.
-
 - **SDK**
     - **Release**: vlayer releases new SDK versions daily.
     - **Installation**: Developers add the SDK to their project dependencies.
@@ -94,7 +89,6 @@ All server infrastructure may undergo daily deployments to accommodate updates.
 |Artefact          |Destination|Release|Installation|Update|
 |------------------|-----------|-------|------------|------|
 |**User**|         |           |       |            |      |
-|Extension	       |Chrome Web Store|periodic|store|auto + enforce|
 |SDK| 	Developers' app	| uncontrollable	|  |	uncontrollable |
 |**Developer**|
 |Smart Contracts package | Soldeer | daily| `soldeer` | `vlayer update` |
