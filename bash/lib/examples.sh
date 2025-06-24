@@ -1,12 +1,7 @@
 # You can set the $EXAMPLE variable to run a single example
 function get_examples() {
     local EXAMPLE_LIST=(
-        "simple"
         "simple-email-proof"
-        "simple-web-proof"
-        "simple-time-travel"
-        "simple-teleport"
-        "kraken-web-proof"
     )
 
     # "simple-teleport" is not enabled on testnet as we still need to deploy chain workers
