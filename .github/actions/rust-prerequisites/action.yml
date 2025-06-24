@@ -2,11 +2,11 @@ name: Rust prerequisites
 description: Installs Rust compilation prerequisites.
 inputs:
   target:
-    description: 'Additional target support to install.'
+    description: "Additional target support to install."
     required: false
   include_risc0:
     description: Whether to include risc0 installation
-    default: 'true'
+    default: "true"
 outputs:
   RUSTC_WRAPPER:
     description: "A rustc wrapper using sccache for optimalization"
@@ -15,11 +15,8 @@ runs:
   using: "composite"
   steps:
     - name: Set up Rust
-      uses: actions-rust-lang/setup-rust-toolchain@11df97af8e8102fd60b60a77dfbf58d40cd843b8 # v1.10.1
+      uses: ./.github/actions/setup-rust
       with:
-        toolchain: nightly,1.85
-        components: clippy,rustfmt
-        cache: false
         target: ${{ inputs.target }}
 
     - name: Install sccache
@@ -40,7 +37,7 @@ runs:
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
         tool: cargo-binstall@1.10.8
-          
+
     - name: Install cargo sort
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
