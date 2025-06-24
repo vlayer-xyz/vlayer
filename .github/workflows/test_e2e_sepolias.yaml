@@ -71,29 +71,24 @@ jobs:
     outputs:
       gas-ok: ${{ steps.set-result.outputs.gas-ok }}
     steps:
-      - name: Configure AWS creds
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1
+          submodules: recursive
 
-      - name: Download gas_price_checker from S3
-        run: |
-          aws s3 cp \
-            s3://${{ vars.AWS_BUCKET }}/gas_price_checker \
-            "$RUNNER_TEMP/gas_price_checker"
-      - name: Make gas_price_checker executable
-        run: sudo chmod +x "$RUNNER_TEMP/gas_price_checker"
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@11df97af8e8102fd60b60a77dfbf58d40cd843b8 # v1.10.1
+        with:
+          toolchain: nightly,1.85
+          components: clippy,rustfmt
+          cache: false
 
       - name: Run gas_price_checker
         id: run-check
         run: |
           # allow failure so we can capture it
           set +e
-          "$RUNNER_TEMP/gas_price_checker" \
-            "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}" \
-            $GAS_PRICE_THRESHOLD
+          cargo run -p gas_price_checker -- https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }} $GAS_PRICE_THRESHOLD
           EXIT_CODE=$?
           echo "exit_code=$EXIT_CODE" >>"$GITHUB_OUTPUT"
         env:
