@@ -73,7 +73,7 @@ jobs:
               - 'ansible/**'
               - 'bun.lock'
             workflow-changes:
-              - '.github/workflows/test_e2e_bonsai_opsepolia.yaml'
+              - '.github/workflows/test_e2e_sepolias.yaml'
               - '.github/actions/test-e2e/**'
 
   # The gas price on the Ethereum Sepolia network can vary significantly.
