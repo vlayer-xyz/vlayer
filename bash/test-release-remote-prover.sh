@@ -76,16 +76,16 @@ for example in $(get_examples); do
     VLAYER_TEMP_DIR="examples/${example}"
     cd "${VLAYER_TEMP_DIR}"
 
-    if [ "${example}" = "simple-web-proof" ]; then
-        mkdir -p "./vlayer/tests/browser-extension"
-        cp -a "${VLAYER_HOME}/browser-extension" "./vlayer/tests/browser-extension"
-    fi
- 
     vlayer init --template "${example}"
     echo "Current directory: $(pwd)"
     forge build
     vlayer test
     echo "::endgroup::"
+
+    if [ "${example}" = "simple-web-proof" ]; then
+        mkdir -p "./vlayer/tests/browser-extension"
+        cp -a "${VLAYER_HOME}/browser-extension" "./vlayer/tests/browser-extension"
+    fi
 
     echo "::group::vlayer run prove.ts: ${example}"
     run_prover_script

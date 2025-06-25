@@ -16,7 +16,10 @@ export const test = base.extend<{
 }>({
   // eslint-disable-next-line
   context: async ({}, load) => {
-    const pathToExtension = path.join(__dirname, "playwright-tests/browser-extension");
+    const pathToExtension = path.join(
+      __dirname,
+      "playwright-tests/browser-extension",
+    );
 
     const context = await chromium.launchPersistentContext(
       "",
