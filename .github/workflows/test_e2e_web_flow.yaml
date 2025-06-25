@@ -74,7 +74,7 @@ jobs:
         uses: ./.github/actions/download-vouch-extension-release
         with:
           VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}
-          EXTENSION_PATH: ./examples/simple-web-proof/vlayer/tests
+          EXTENSION_PATH: ./packages/playwright-tests
 
       - name: Install Playwright Browsers
         working-directory: ./packages

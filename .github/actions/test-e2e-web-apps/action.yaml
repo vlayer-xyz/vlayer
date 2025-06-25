@@ -88,7 +88,7 @@ runs:
       uses: ./.github/actions/download-vouch-extension-release
       with:
         VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ inputs.VOUCH_EXTENSION_DOWNLOAD_PAT }}
-        EXTENSION_PATH: ./packages/playwright-tests
+        EXTENSION_PATH: ./examples/simple-web-proof/vlayer/tests
 
     - name: Install Playwright browsers
       shell: bash
