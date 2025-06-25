@@ -32,7 +32,7 @@ chain_workers:
     chain_worker_chain_id: 8453
     chain_worker_proof_mode: succinct
     chain_worker_max_back_propagation_blocks: 10
-    chain_worker_max_head_blocks: 10
+    chain_worker_max_head_blocks: 100
     chain_worker_confirmations: 8
     chain_worker_bonsai_api_url: "https://api.bonsai.xyz/"
     chain_worker_bonsai_api_key: !vault |
@@ -48,7 +48,7 @@ chain_workers:
     chain_worker_chain_id: 10
     chain_worker_proof_mode: succinct
     chain_worker_max_back_propagation_blocks: 10
-    chain_worker_max_head_blocks: 10
+    chain_worker_max_head_blocks: 100
     chain_worker_confirmations: 8
     chain_worker_bonsai_api_url: "https://api.bonsai.xyz/"
     chain_worker_bonsai_api_key: !vault |
