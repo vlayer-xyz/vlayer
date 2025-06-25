@@ -11,11 +11,11 @@ runs:
   using: "composite"
   steps:
     - name: Create browser-extension directory
-      working-directory: ./${ inputs.EXTENSION_PATH }
+      working-directory: ./${{ inputs.EXTENSION_PATH }}
       shell: bash
       run: mkdir -p browser-extension
     - name: Download Vouch Browser Extension nightly release
-      working-directory: ./${ inputs.EXTENSION_PATH }/browser-extension
+      working-directory: ./${{ inputs.EXTENSION_PATH }}/browser-extension
       shell: bash
       env:
         VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ inputs.VOUCH_EXTENSION_DOWNLOAD_PAT }}
@@ -39,6 +39,6 @@ runs:
         tar -xzf browser-extension.tar.gz -C ./
         
     - name: Clean up tarball
-      working-directory: ./${ inputs.EXTENSION_PATH }/browser-extension
+      working-directory: ./${{ inputs.EXTENSION_PATH }}/browser-extension
       shell: bash
       run: rm browser-extension.tar.gz
