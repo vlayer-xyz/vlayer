@@ -13,7 +13,7 @@ Read the 📖 [vlayer book](https://book.vlayer.xyz/introduction.html) to get st
 
 ## Contributing
 
-We're excited you're interested in contributing to vlayer. This [contributing](https://book.vlayer.xyz/appendix/contributing/overview.html) section in vlayer book outline the process to get involved.
+We're excited you're interested in contributing to vlayer. This [contributing](https://book.vlayer.xyz/appendix/contributing/overview.html) section in vlayer book outlines the process to get involved.
 
 ## License
 vlayer v1.0 uses a dual licensing model, in which vlayer Labs Ltd. (core contributor of vlayer) is designated for commercialization, while the code is licensed to the general public under Business Source License (BSL) 1.1, which shall convert to the permissive MIT license after three years. 
