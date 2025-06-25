@@ -1,11 +1,12 @@
 # First steps with vlayer
 <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; height: auto;">
-  <iframe src="https://player.vimeo.com/video/1083856896?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" 
-          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-          frameborder="0" 
-          allow="autoplay; fullscreen; picture-in-picture" 
-          title="Get started with vlayer"
-          allowfullscreen>
+  <iframe 
+    src="https://www.youtube.com/embed/dDqGM3q8aTk?si=neRW6mAmqxTOSGjv" 
+    title="YouTube video player" 
+    frameborder="0" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+    allowfullscreen 
+    style="position: absolute; top:0; left: 0; width: 100%; height: 100%;">
   </iframe>
 </div>
 
