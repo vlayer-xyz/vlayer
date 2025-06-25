@@ -54,9 +54,10 @@ jobs:
         working-directory: ./packages/test-web-app
         run: bun install --frozen-lockfile
 
-      - name: Build extension
-        working-directory: ./packages/browser-extension
-        run: bun run build
+      - name: Download Vouch Browser Extension nightly release
+        uses: ./.github/actions/download-vouch-extension-release
+        with:
+          VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ secrets.VOUCH_EXTENSION_DOWNLOAD_PAT }}
 
       - name: Install Playwright Browsers
         working-directory: ./packages

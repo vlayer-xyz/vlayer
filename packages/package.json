@@ -7,7 +7,7 @@
     "test-web:headless": "bun run deploy_test_contracts && TEST_MODE=headless bunx playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "1.48.0",
+    "@playwright/test": "1.52.0",
     "@testing-library/react": "^16.1.0",
     "@types/bun": "latest",
     "@types/eslint__js": "^8.42.3",

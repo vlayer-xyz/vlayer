@@ -26,14 +26,6 @@ function run_web_app {
     echo "::endgroup::Running web app"
 }
 
-function run_browser_extension {
-    echo "::group::Running browser extension"
-    pushd ${VLAYER_HOME}/packages/browser-extension
-    bun run dev
-    popd
-    echo "::endgroup::Running browser extension"
-}
-
 DOCKER_COMPOSE_SERVICES="anvil-l1 anvil-l2-op wsproxy wsproxy-test-client notary-server"
 source ${VLAYER_HOME}/bash/run-services.sh
 
@@ -41,4 +33,3 @@ install_deps
 build_core_contracts
 build_example_contracts simple-web-proof
 run_web_app
-run_browser_extension

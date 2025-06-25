@@ -45,7 +45,9 @@ VLAYER_ENV="testnet"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/lib/examples.sh"
 
-build_extension
+pushd "${VLAYER_HOME}"
+silent_unless_fails bun install --frozen-lockfile
+popd
 
 echo "Starting VDNS server"
 docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d vdns_server
