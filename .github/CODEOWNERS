@@ -186,4 +186,6 @@
 
 # Soon to be marked as deprecated. If updates needed, shall be reflected in the vouch repository.
 /packages/sdk/api/web_proof/* @marekkirejczyk @wgromniak2 @akoszowski
+/packages/sdk/src/api/lib/types/webProofProvider.ts @marekkirejczyk @wgromniak2 @akoszowski
+/packages/sdk/src/api/lib/types/viem.ts @marekkirejczyk @wgromniak2 @akoszowski
 /packages/web-proof-commons/* @marekkirejczyk @wgromniak2 @akoszowski
