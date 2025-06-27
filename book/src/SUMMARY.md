@@ -35,7 +35,7 @@
 ---
 
 - [Appendix]()
-  - [Audits](./appendix/security-audits.md)
+  - [Security](./appendix/security.md)
   - [Contributing](./appendix/contributing/overview.md)
     - [Rust](./appendix/contributing/rust.md)
     - [JavaScript](./appendix/contributing/javascript.md)
