@@ -20,7 +20,7 @@ import { v_getProofReceipt } from "./v_getProofReceipt";
 import { foundry } from "viem/chains";
 import { v_versions } from "./v_versions";
 import { checkVersionCompatibility } from "../utils/versions";
-import meta from "../../../package.json" with { type: "json" };
+import meta from "../../../package.json";
 const sdkVersion = meta.version;
 
 export interface ProveOptions {

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "exclude": [
+    "./src/**/*.test.ts"
+  ],
+  "compilerOptions": {
+    "outDir": "./dist/esm",
+    "module": "ESNext",
+    "noEmit": false,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  }
+}

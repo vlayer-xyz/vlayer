@@ -3,25 +3,29 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/esm/index.d.ts"
     },
     "./web_proof": {
-      "import": "./dist/api/webProof/index.js",
-      "types": "./dist/api/webProof/index.d.ts"
+      "import": "./dist/esm/api/webProof/index.js",
+      "require": "./dist/cjs/api/webProof/index.js",
+      "types": "./dist/esm/api/webProof/index.d.ts"
     },
     "./config": {
-      "import": "./dist/config/index.js",
-      "types": "./dist/config/index.d.ts"
+      "import": "./dist/esm/config/index.js",
+      "require": "./dist/cjs/config/index.js",
+      "types": "./dist/esm/config/index.d.ts"
     },
     "./prover": {
-      "import": "./dist/api/prover/index.js",
-      "types": "./dist/api/prover/index.d.ts"
+      "import": "./dist/esm/api/prover/index.js",
+      "require": "./dist/cjs/api/prover/index.js",
+      "types": "./dist/esm/api/prover/index.d.ts"
     }
   },
   "version": "0.1.0",
   "scripts": {
-    "build": "bun tsc --project tsconfig.build.json && bun tsc-alias",
+    "build": "rm -rf dist && bun tsc --project tsconfig.esm.json && bun tsc --project tsconfig.cjs.json && bun tsc-alias -p tsconfig.esm.json && bun tsc-alias -p tsconfig.cjs.json && cp package.json dist/",
     "test:unit": "vitest --run",
     "gen:types": "sh ../../bash/build-ts-types.sh",
     "replaceCommonsSymlink": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak"
