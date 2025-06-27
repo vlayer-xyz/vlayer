@@ -82,6 +82,13 @@ runs:
       working-directory: ./packages/sdk-hooks
       run: bun run build
 
+    - name: Download Vouch Browser Extension nightly release
+      if: inputs.VOUCH_EXTENSION_DOWNLOAD_PAT != ''
+      uses: ./.github/actions/download-vouch-extension-release
+      with:
+        VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ inputs.VOUCH_EXTENSION_DOWNLOAD_PAT }}
+        EXTENSION_PATH: ./examples/simple-web-proof/vlayer/tests
+
     - name: Install Playwright browsers
       shell: bash
       run: bunx playwright install --with-deps chromium

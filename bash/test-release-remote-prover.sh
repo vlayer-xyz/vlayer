@@ -53,8 +53,6 @@ echo "Starting VDNS server"
 docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml up -d vdns_server
 
 TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX)
-mkdir -p "${TEMP_DIR}/packages/browser-extension"
-cp -a "${VLAYER_HOME}/packages/browser-extension/dist" "${TEMP_DIR}/packages/browser-extension"
 
 echo "::group::Installing playwright chromium"
 install_chromium
@@ -77,12 +75,17 @@ for example in $(get_examples); do
 
     VLAYER_TEMP_DIR="examples/${example}"
     cd "${VLAYER_TEMP_DIR}"
- 
+
     vlayer init --template "${example}"
     echo "Current directory: $(pwd)"
     forge build
     vlayer test
     echo "::endgroup::"
+
+    if [ "${example}" = "simple-web-proof" ]; then
+        mkdir -p "./vlayer/tests/browser-extension"
+        cp -a "${VLAYER_HOME}/browser-extension" "./vlayer/tests/browser-extension"
+    fi
 
     echo "::group::vlayer run prove.ts: ${example}"
     run_prover_script

@@ -4,15 +4,18 @@ inputs:
   VOUCH_EXTENSION_DOWNLOAD_PAT:
     required: true
     description: 'Token to download the Browser Extension release from Vouch.'
+  EXTENSION_PATH:
+    required: true
+    description: 'Path where the browser-extension directory will be created.'
 runs:
   using: "composite"
   steps:
     - name: Create browser-extension directory
-      working-directory: ./packages
+      working-directory: ./${{ inputs.EXTENSION_PATH }}
       shell: bash
       run: mkdir -p browser-extension
     - name: Download Vouch Browser Extension nightly release
-      working-directory: ./packages/browser-extension
+      working-directory: ./${{ inputs.EXTENSION_PATH }}/browser-extension
       shell: bash
       env:
         VOUCH_EXTENSION_DOWNLOAD_PAT: ${{ inputs.VOUCH_EXTENSION_DOWNLOAD_PAT }}
@@ -33,10 +36,9 @@ runs:
           "$ASSET_URL" \
           --output browser-extension.tar.gz
 
-        mkdir -p dist
-        tar -xzf browser-extension.tar.gz -C dist
+        tar -xzf browser-extension.tar.gz -C ./
         
     - name: Clean up tarball
-      working-directory: ./packages/browser-extension
+      working-directory: ./${{ inputs.EXTENSION_PATH }}/browser-extension
       shell: bash
       run: rm browser-extension.tar.gz
