@@ -2,7 +2,7 @@ use alloy_primitives::{Address, ChainId};
 use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
 use call_rpc::{rpc_cache_paths, rpc_urls};
-use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
+use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF_WITH_CANONICAL_ID};
 use optimism::client::factory::cached::{self, Factory};
 use provider::{BlockNumber, BlockTag, CachedMultiProvider, CachedProviderFactory};
 // pub use rpc::{rpc_cache_path, rpc_cache_paths};
@@ -93,13 +93,15 @@ fn create_host(
 ) -> Result<Host, BuilderError> {
     let config = Config {
         call_guest_elf: CALL_GUEST_ELF.clone(),
-        chain_guest_ids: vec![CHAIN_GUEST_ELF.id].into_boxed_slice(),
+        chain_guest_ids: vec![CHAIN_GUEST_ELF_WITH_CANONICAL_ID.id].into_boxed_slice(),
         ..Default::default()
     };
     let block_number =
         block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
-    let chain_proof_client =
-        Box::new(chain_client::FakeClient::new(multi_provider.clone(), CHAIN_GUEST_ELF.id));
+    let chain_proof_client = Box::new(chain_client::FakeClient::new(
+        multi_provider.clone(),
+        CHAIN_GUEST_ELF_WITH_CANONICAL_ID.id,
+    ));
     let start_exec_location = (location.chain_id, block_number).into();
     Host::try_new(
         multi_provider,
