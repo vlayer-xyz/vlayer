@@ -3,7 +3,7 @@ use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
 use call_rpc::{rpc_cache_paths, rpc_urls};
 use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
-use optimism::client::factory::cached;
+use optimism::client::factory::cached::{self, Factory};
 use provider::{BlockNumber, BlockTag, CachedMultiProvider, CachedProviderFactory};
 // pub use rpc::{rpc_cache_path, rpc_cache_paths};
 pub use types::ExecutionLocation;
@@ -25,8 +25,15 @@ pub async fn preflight<C>(
 where
     C: SolCall,
 {
-    let op_client_factory = cached::Factory::default();
-    preflight_with_factory::<C>(test_name, call, location, op_client_factory).await
+    preflight_with_factory::<C>(test_name, call, location, Factory::default()).await
+}
+
+pub async fn preflight_raw(
+    test_name: &str,
+    call: Call,
+    location: &ExecutionLocation,
+) -> anyhow::Result<PreflightResult, Error> {
+    preflight_inner(test_name, call, location, Factory::default()).await
 }
 
 pub async fn preflight_with_factory<C>(
@@ -38,12 +45,21 @@ pub async fn preflight_with_factory<C>(
 where
     C: SolCall,
 {
+    let preflight_result = preflight_inner(test_name, call, location, op_client_factory).await?;
+    let decoded_host_output = C::abi_decode_returns(&preflight_result.host_output, true)?;
+
+    Ok(decoded_host_output)
+}
+
+async fn preflight_inner(
+    test_name: &str,
+    call: Call,
+    location: &ExecutionLocation,
+    op_client_factory: impl optimism::client::IFactory + 'static,
+) -> Result<PreflightResult, Error> {
     let multi_provider = create_multi_provider(test_name);
     let host = create_host(multi_provider, location, op_client_factory)?;
-    let PreflightResult { host_output, .. } = host.preflight(call).await?;
-    let return_value = C::abi_decode_returns(&host_output, true)?;
-
-    Ok(return_value)
+    Ok(host.preflight(call).await?)
 }
 
 pub async fn run(
