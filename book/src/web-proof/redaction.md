@@ -6,7 +6,7 @@ Redaction feature lets you **hide sensitive portions** of an HTTPS transcript fr
 
 > ⚠️ **Warning!** Unsafe byte-range redaction can introduce ambiguities and vulnerabilities. This guide explains how to use redaction safely.
 
-To learn how to enable and configure redaction using the vlayer SDK, see the [Redaction](../../javascript/web-proofs.md#redaction) section in our JavaScript documentation.
+To learn how to enable and configure redaction using the vlayer SDK, see the [Redaction](../javascript/web-proofs.md#redaction) section in our JavaScript documentation.
 
 ### Currently supported redaction targets:
 * URL path
