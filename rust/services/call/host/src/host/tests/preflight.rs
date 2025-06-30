@@ -329,10 +329,10 @@ mod gas_estimation {
         let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
         let call = call(USDT, &balanceOfCall { account: binance_8 });
-        let _result = preflight_raw("usdt_erc20_balance_of", call, &location).await?;
+        let result = preflight_raw("usdt_erc20_balance_of", call, &location).await?;
 
-        // add gas_estimate field
-        // dbg!(result.gas_estimate);
+        // gas_estimate is not deterministic, so we just check that it's greater than 0
+        assert!(result.gas_estimate > 0);
 
         Ok(())
     }

@@ -23,7 +23,7 @@ pub use error::{BuilderError, Error, ProvingError};
 use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;
-use risc0_zkvm::{ProveInfo, SessionStats, sha::Digest};
+use risc0_zkvm::{ExecutorEnv, ProveInfo, SessionStats, sha::Digest};
 use seal::EncodableReceipt;
 use tracing::instrument;
 
@@ -82,6 +82,7 @@ pub struct PreflightResult {
     pub input: Input,
     pub gas_used: u64,
     pub elapsed_time: Duration,
+    pub gas_estimate: u64,
     pub metadata: Box<[Metadata]>,
 }
 
@@ -149,7 +150,11 @@ impl Host {
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
             .await?;
+        let guest_elf = self.guest_elf.clone();
         let input = self.prepare_input_data(call)?;
+
+        #[allow(clippy::unwrap_used)]
+        let gas_estimate = estimate_gas(&input, &guest_elf).unwrap();
 
         let elapsed_time = now.elapsed();
         Ok(PreflightResult::new(
@@ -157,6 +162,7 @@ impl Host {
             input,
             gas_used,
             elapsed_time,
+            gas_estimate,
             metadata,
         ))
     }
@@ -242,4 +248,23 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
     let raw_guest_output: Bytes = receipt.journal.bytes.into();
 
     Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats, elapsed_time))
+}
+
+fn estimate_gas(input: &Input, elf: &GuestElf) -> anyhow::Result<u64> {
+    let elf = &elf.elf;
+    let env = input
+        .chain_proofs
+        .values()
+        .try_fold(ExecutorEnv::builder(), |mut builder, (_, proof)| {
+            builder.add_assumption(proof.receipt.clone());
+            Ok::<_, anyhow::Error>(builder)
+        })?
+        .write(input)?
+        .segment_limit_po2(22)
+        .build()?;
+
+    let prover = risc0_zkvm::default_executor();
+
+    let res = prover.execute(env, elf)?;
+    Ok(res.cycles())
 }
