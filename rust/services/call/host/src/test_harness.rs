@@ -26,10 +26,10 @@ where
     C: SolCall,
 {
     let op_client_factory = cached::Factory::default();
-    preflight_with_teleport::<C>(test_name, call, location, op_client_factory).await
+    preflight_with_factory::<C>(test_name, call, location, op_client_factory).await
 }
 
-pub async fn preflight_with_teleport<C>(
+pub async fn preflight_with_factory<C>(
     test_name: &str,
     call: Call,
     location: &ExecutionLocation,

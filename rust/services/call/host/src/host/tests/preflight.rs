@@ -182,7 +182,7 @@ mod teleport {
             SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
             TOKEN,
         },
-        preflight_with_teleport,
+        preflight_with_factory,
     };
 
     #[tokio::test(flavor = "multi_thread")]
@@ -200,7 +200,7 @@ mod teleport {
         let crossChainBalanceOfReturn {
             _2: cross_chain_balance,
             ..
-        } = preflight_with_teleport::<crossChainBalanceOfCall>(
+        } = preflight_with_factory::<crossChainBalanceOfCall>(
             "teleport",
             call,
             &location,
