@@ -316,3 +316,24 @@ mod travel_call_with_time_dependent_precompile {
             .unwrap();
     }
 }
+
+mod gas_estimation {
+    use super::*;
+    use crate::test_harness::{
+        contracts::usdt::{BLOCK_NO, IERC20::balanceOfCall, USDT},
+        preflight_raw,
+    };
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn gas_estimation() -> anyhow::Result<()> {
+        let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
+        let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
+        let call = call(USDT, &balanceOfCall { account: binance_8 });
+        let _result = preflight_raw("usdt_erc20_balance_of", call, &location).await?;
+
+        // add gas_estimate field
+        // dbg!(result.gas_estimate);
+
+        Ok(())
+    }
+}
