@@ -31,6 +31,7 @@ pub async fn await_preflight(
         gas_used,
         elapsed_time,
         metadata,
+        ..
     } = host.preflight(call).await?;
 
     info!(
