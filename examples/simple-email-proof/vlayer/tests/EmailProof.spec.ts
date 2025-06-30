@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 import { stepsMeta, StepKind } from "../src/app/router/types";
 import { useMockWallet } from "./mockWallet";
 
-const testEmlFile = readFileSync("../testdata/valid_vlayer.eml");
+const testEmlFile = readFileSync("../testdata/verify_vlayer.eml");
 
 test.beforeEach(async ({ page }) => {
   await useMockWallet(page);
