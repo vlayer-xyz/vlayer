@@ -8,7 +8,6 @@
     "lint-fix:solidity": "solhint '../src/**/*.sol' --fix --noPrompt && forge fmt ../src",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "prove:mainnet": "VLAYER_ENV=mainnet bun run prove.ts",
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "deploy:mainnet": "VLAYER_ENV=mainnet bun run deploy.ts",
