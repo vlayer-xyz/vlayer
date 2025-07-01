@@ -50,7 +50,7 @@ mod tests {
     use crate::test_harness::{
         ExecutionLocation, call,
         contracts::usdt::{BLOCK_NO, IERC20::balanceOfCall, USDT},
-        preflight_raw,
+        preflight_raw_result,
     };
 
     mod estimate {
@@ -62,7 +62,7 @@ mod tests {
             let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
             let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
             let call = call(USDT, &balanceOfCall { account: binance_8 });
-            let result = preflight_raw("usdt_erc20_balance_of", call, &location).await?;
+            let result = preflight_raw_result("usdt_erc20_balance_of", call, &location).await?;
 
             let gas_estimate =
                 Risc0CycleEstimator::new().estimate(&result.input, result.guest_elf)?;

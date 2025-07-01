@@ -30,7 +30,7 @@ where
     preflight_with_factory::<C>(test_name, call, location, Factory::default()).await
 }
 
-pub async fn preflight_raw(
+pub async fn preflight_raw_result(
     test_name: &str,
     call: Call,
     location: &ExecutionLocation,
