@@ -71,5 +71,11 @@ mod tests {
 
             Ok(())
         }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn works_with_composed_proofs() -> anyhow::Result<()> {
+            // todo
+            Ok(())
+        }
     }
 }
