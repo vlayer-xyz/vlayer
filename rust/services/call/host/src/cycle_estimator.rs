@@ -8,7 +8,7 @@ pub trait CycleEstimator {
 }
 
 #[derive(Debug, Error)]
-#[error("Gas estimation failed: {0}")]
+#[error("Cycle estimation failed: {0}")]
 pub struct CycleEstimatorError(#[from] anyhow::Error);
 
 #[derive(Debug, Default, Clone)]
