@@ -1,7 +1,7 @@
 use anyhow::Context;
 use bytes::Bytes;
 use call_engine::Input;
-use risc0_zkvm::{default_executor, ExecutorEnv};
+use risc0_zkvm::{ExecutorEnv, default_executor};
 use thiserror::Error;
 
 pub trait CycleEstimator {
