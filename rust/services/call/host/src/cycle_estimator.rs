@@ -1,14 +1,11 @@
 use bytes::Bytes;
 use call_engine::Input;
-use dyn_clone::{DynClone, clone_trait_object};
 use risc0_zkvm::ExecutorEnv;
 use thiserror::Error;
 
-pub trait CycleEstimator: DynClone + Send + Sync {
+pub trait CycleEstimator {
     fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, GasEstimatorError>;
 }
-
-clone_trait_object!(CycleEstimator);
 
 #[derive(Debug, Error)]
 pub enum GasEstimatorError {

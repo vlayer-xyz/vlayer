@@ -19,7 +19,6 @@ chain_client = { workspace = true, features = ["fake", "rpc"] }
 chain_common = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
-dyn-clone = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }
 lazy_static = { workspace = true }
