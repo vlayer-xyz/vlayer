@@ -63,6 +63,7 @@ mod tests {
         use super::*;
 
         // `estimate` function is not deterministic, so we just check that result is greater than 0
+        // Below test is based on `erc20_balance_of` test from `preflight` module
         #[tokio::test(flavor = "multi_thread")]
         async fn result_greater_than_zero() -> anyhow::Result<()> {
             let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
