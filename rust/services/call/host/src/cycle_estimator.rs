@@ -4,12 +4,12 @@ use risc0_zkvm::ExecutorEnv;
 use thiserror::Error;
 
 pub trait CycleEstimator {
-    fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, CycleEstimatorError>;
+    fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, Error>;
 }
 
 #[derive(Debug, Error)]
 #[error("Cycle estimation failed: {0}")]
-pub struct CycleEstimatorError(#[from] anyhow::Error);
+pub struct Error(#[from] anyhow::Error);
 
 #[derive(Debug, Default, Clone)]
 pub struct Risc0CycleEstimator {}
@@ -21,7 +21,7 @@ impl Risc0CycleEstimator {
 }
 
 impl CycleEstimator for Risc0CycleEstimator {
-    fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, CycleEstimatorError> {
+    fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, Error> {
         let env = input
             .chain_proofs
             .values()
