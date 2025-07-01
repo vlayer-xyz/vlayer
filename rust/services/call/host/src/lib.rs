@@ -1,3 +1,4 @@
+mod cycle_estimator;
 mod evm_env;
 mod host;
 mod into_input;
@@ -5,9 +6,10 @@ mod into_input;
 use call_common::RevmDB;
 use call_db::ProofDb;
 pub use call_engine::Call;
+pub use cycle_estimator::{CycleEstimator, Risc0CycleEstimator};
 pub use host::{
     BuilderError, Config, Error, Host, PreflightResult, Prover, ProvingError, ProvingInput,
-    error::preflight::Error as PreflightError, gas_estimator::Risc0GasEstimator,
+    error::preflight::Error as PreflightError,
 };
 use revm::db::CacheDB;
 

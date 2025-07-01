@@ -4,10 +4,7 @@ use alloy_chains::{Chain, NamedChain::AnvilHardhat};
 use alloy_primitives::{address, uint};
 use alloy_sol_types::SolCall;
 
-use crate::{
-    host::tests::call,
-    test_harness::{ExecutionLocation, run, run_with_teleport},
-};
+use crate::test_harness::{ExecutionLocation, call, run, run_with_teleport};
 
 #[cfg(test)]
 #[ctor::ctor]

@@ -2,10 +2,7 @@ use alloy_chains::{Chain, NamedChain::AnvilHardhat};
 use alloy_primitives::{address, b256, uint};
 use ethers_core::types::BlockNumber as BlockTag;
 
-use crate::{
-    host::tests::call,
-    test_harness::{ExecutionLocation, preflight},
-};
+use crate::test_harness::{ExecutionLocation, call, preflight};
 
 mod usdt {
     use call_engine::Call;
@@ -176,16 +173,13 @@ mod teleport {
     use optimism::client::factory::cached;
 
     use super::*;
-    use crate::{
-        host::gas_estimator::Risc0GasEstimator,
-        test_harness::{
-            contracts::teleport::{
-                BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT,
-                SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
-                TOKEN,
-            },
-            preflight_with_factory,
+    use crate::test_harness::{
+        contracts::teleport::{
+            BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT,
+            SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
+            TOKEN,
         },
+        preflight_with_factory,
     };
 
     #[tokio::test(flavor = "multi_thread")]
@@ -200,7 +194,6 @@ mod teleport {
         );
         let op_client_factory =
             cached::Factory::from_single_sequencer_output(OP_ANVIL, OUTPUT.clone());
-        let gas_estimator = Box::new(Risc0GasEstimator::new());
         let crossChainBalanceOfReturn {
             _2: cross_chain_balance,
             ..
@@ -209,7 +202,6 @@ mod teleport {
             call,
             &location,
             op_client_factory,
-            gas_estimator,
         )
         .await
         .unwrap();
@@ -254,34 +246,21 @@ mod teleport {
 // Accesses 9 blocks in total
 mod time_travel {
     use super::*;
-    use crate::{
-        host::gas_estimator::FakeGasEstimator,
-        test_harness::{
-            contracts::time_travel::{
-                AVERAGE_BALANCE_OF_CALL,
-                AverageBalance::{averageBalanceOfCall, averageBalanceOfReturn},
-                BLOCK_NO, SIMPLE_TIME_TRAVEL,
-            },
-            preflight_with_gas_estimator,
-        },
+    use crate::test_harness::contracts::time_travel::{
+        AVERAGE_BALANCE_OF_CALL,
+        AverageBalance::{averageBalanceOfCall, averageBalanceOfReturn},
+        BLOCK_NO, SIMPLE_TIME_TRAVEL,
     };
 
     #[tokio::test(flavor = "multi_thread")]
     async fn time_travel() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BLOCK_NO).into();
         let call = call(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
-        let gas_estimator = Box::new(FakeGasEstimator::new());
 
         let averageBalanceOfReturn {
             _2: average_balance,
             ..
-        } = preflight_with_gas_estimator::<averageBalanceOfCall>(
-            "time_travel",
-            call,
-            &location,
-            gas_estimator,
-        )
-        .await?;
+        } = preflight::<averageBalanceOfCall>("time_travel", call, &location).await?;
 
         assert_eq!(average_balance, uint!(1_874_845_031_590_000_U256));
 
@@ -332,26 +311,5 @@ mod travel_call_with_time_dependent_precompile {
         let _ = preflight::<mainCall>("travel_call_with_time_dep_precompile", call, &location)
             .await
             .unwrap();
-    }
-}
-
-mod gas_estimation {
-    use super::*;
-    use crate::test_harness::{
-        contracts::usdt::{BLOCK_NO, IERC20::balanceOfCall, USDT},
-        preflight_raw,
-    };
-
-    #[tokio::test(flavor = "multi_thread")]
-    async fn gas_estimation() -> anyhow::Result<()> {
-        let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
-        let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
-        let call = call(USDT, &balanceOfCall { account: binance_8 });
-        let result = preflight_raw("usdt_erc20_balance_of", call, &location).await?;
-
-        // gas_estimate is not deterministic, so we just check that it's greater than 0
-        assert!(result.gas_estimate > 0);
-
-        Ok(())
     }
 }

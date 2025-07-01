@@ -27,15 +27,11 @@ use risc0_zkvm::{ProveInfo, SessionStats, sha::Digest};
 use seal::EncodableReceipt;
 use tracing::instrument;
 
-use crate::{
-    HostDb, evm_env::factory::HostEvmEnvFactory, host::gas_estimator::GasEstimator,
-    into_input::into_multi_input,
-};
+use crate::{HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
 
 mod builder;
 mod config;
 pub(crate) mod error;
-pub mod gas_estimator;
 mod prover;
 #[cfg(test)]
 mod tests;
@@ -59,7 +55,6 @@ pub struct Host {
     travel_call_verifier: HostTravelCallVerifier,
     guest_elf: GuestElf,
     is_vlayer_test: bool,
-    gas_estimator: Box<dyn GasEstimator>,
 }
 
 impl Host {
@@ -87,8 +82,8 @@ pub struct PreflightResult {
     pub input: Input,
     pub gas_used: u64,
     pub elapsed_time: Duration,
-    pub gas_estimate: u64,
     pub metadata: Box<[Metadata]>,
+    pub guest_elf: Bytes,
 }
 
 #[derive(new, Debug, Clone)]
@@ -104,7 +99,6 @@ impl Host {
         chain_client: Option<Box<dyn chain_client::Client>>,
         op_client_factory: impl optimism::client::IFactory + 'static,
         config: Config,
-        gas_estimator: Box<dyn GasEstimator>,
     ) -> Result<Self, crate::BuilderError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::try_new(config.proof_mode, &config.call_guest_elf)?;
@@ -126,7 +120,6 @@ impl Host {
             travel_call_verifier,
             guest_elf: config.call_guest_elf,
             is_vlayer_test: config.is_vlayer_test,
-            gas_estimator,
         })
     }
 
@@ -157,12 +150,8 @@ impl Host {
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
             .await?;
-        let gas_estimator = self.gas_estimator.clone();
-        let guest_elf = self.guest_elf.clone();
+        let guest_elf = self.guest_elf.elf.clone();
         let input = self.prepare_input_data(call)?;
-
-        #[allow(clippy::unwrap_used)]
-        let gas_estimate = gas_estimator.estimate(&input, &guest_elf).unwrap();
 
         let elapsed_time = now.elapsed();
         Ok(PreflightResult::new(
@@ -170,8 +159,8 @@ impl Host {
             input,
             gas_used,
             elapsed_time,
-            gas_estimate,
             metadata,
+            guest_elf,
         ))
     }
 

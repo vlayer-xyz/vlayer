@@ -33,7 +33,6 @@ use risc0_zkvm::sha::Digest;
 use tracing::warn;
 
 use super::{BuilderError as Error, Config, Host};
-use crate::host::gas_estimator::Risc0GasEstimator;
 
 pub struct New;
 
@@ -219,15 +218,7 @@ impl WithStartExecLocation {
             providers,
             op_client_factory,
         } = self;
-        let gas_estimator = Box::new(Risc0GasEstimator::new());
-        Host::try_new(
-            providers,
-            start_exec_location,
-            chain_client,
-            op_client_factory,
-            config,
-            gas_estimator,
-        )
+        Host::try_new(providers, start_exec_location, chain_client, op_client_factory, config)
     }
 }
 

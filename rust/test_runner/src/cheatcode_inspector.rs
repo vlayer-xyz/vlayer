@@ -6,7 +6,7 @@ use call_engine::{
         create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
     },
 };
-use call_host::{Config as HostConfig, Host, Risc0GasEstimator};
+use call_host::{Config as HostConfig, Host};
 use chain::TEST_CHAIN_ID;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
@@ -153,7 +153,6 @@ fn create_host<DB: Database>(ctx: &EvmContext<DB>, rpc_endpoints: &RpcEndpoints)
         Some(chain_proof_client),
         op_client_factory,
         config,
-        Box::new(Risc0GasEstimator::new()),
     )
     .unwrap()
 }
