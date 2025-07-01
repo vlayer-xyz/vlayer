@@ -1,7 +1,7 @@
 use anyhow::Context;
 use bytes::Bytes;
 use call_engine::Input;
-use risc0_zkvm::ExecutorEnv;
+use risc0_zkvm::{default_executor, ExecutorEnv};
 use thiserror::Error;
 
 pub trait CycleEstimator {
@@ -24,9 +24,9 @@ impl Risc0CycleEstimator {
 impl CycleEstimator for Risc0CycleEstimator {
     fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, Error> {
         let env = build_executor_env(input)?;
-        let prover = risc0_zkvm::default_executor();
+        let executor = default_executor();
 
-        let res = prover.execute(env, &elf).context("failed to execute")?;
+        let res = executor.execute(env, &elf).context("failed to execute")?;
         Ok(res.cycles())
     }
 }
