@@ -15,20 +15,20 @@ chain_workers:
     chain_worker_rpc_url: https://fragrant-small-sheet.ethereum-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
     chain_worker_chain_id: 11155111
     chain_worker_proof_mode: fake
-    chain_worker_max_back_propagation_blocks: 10
+    chain_worker_max_back_propagation_blocks: 0
     chain_worker_max_head_blocks: 10
     chain_worker_confirmations: 8
   - chain_worker_identifier: base-sepolia
     chain_worker_rpc_url: https://fragrant-small-sheet.base-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
     chain_worker_chain_id: 84532
     chain_worker_proof_mode: fake
-    chain_worker_max_back_propagation_blocks: 10
+    chain_worker_max_back_propagation_blocks: 0
     chain_worker_max_head_blocks: 10
     chain_worker_confirmations: 8
   - chain_worker_identifier: optimism-sepolia
     chain_worker_rpc_url: https://fragrant-small-sheet.optimism-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
     chain_worker_chain_id: 11155420
     chain_worker_proof_mode: fake
-    chain_worker_max_back_propagation_blocks: 10
+    chain_worker_max_back_propagation_blocks: 0
     chain_worker_max_head_blocks: 10
     chain_worker_confirmations: 8
