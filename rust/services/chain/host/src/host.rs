@@ -158,12 +158,17 @@ where
             .compute_append_range(new_range, latest_block_number);
 
         if new_range == old_range {
-            info!("No new blocks to append or prepend");
+            info!(latest_block_number, "No new blocks to append or prepend");
             return Ok(None);
         }
         info!(start = prepend.start(), end = prepend.end(), "Prepend");
         info!(start = append.start(), end = append.end(), "Append");
-        info!(start = new_range.start(), end = new_range.end(), "New range");
+        info!(
+            start = new_range.start(),
+            end = new_range.end(),
+            latest_block_number,
+            "New range"
+        );
 
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
         let append_blocks = self.fetcher.get_blocks_range(append).await?;
