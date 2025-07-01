@@ -1,3 +1,4 @@
+use anyhow::Context;
 use bytes::Bytes;
 use call_engine::Input;
 use risc0_zkvm::ExecutorEnv;
@@ -32,11 +33,12 @@ impl CycleEstimator for Risc0CycleEstimator {
             .write(input)?
             // Workaround for r0vm bug reproed in: https://github.com/vlayer-xyz/risc0-r0vm-fake-repro
             .segment_limit_po2(22)
-            .build()?;
+            .build()
+            .context("failed to build executor env")?;
 
         let prover = risc0_zkvm::default_executor();
 
-        let res = prover.execute(env, &elf)?;
+        let res = prover.execute(env, &elf).context("failed to execute")?;
         Ok(res.cycles())
     }
 }
