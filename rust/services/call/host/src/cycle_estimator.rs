@@ -4,14 +4,12 @@ use risc0_zkvm::ExecutorEnv;
 use thiserror::Error;
 
 pub trait CycleEstimator {
-    fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, GasEstimatorError>;
+    fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, CycleEstimatorError>;
 }
 
 #[derive(Debug, Error)]
-pub enum GasEstimatorError {
-    #[error("Gas estimation failed: {0}")]
-    EstimateGas(#[from] anyhow::Error),
-}
+#[error("Gas estimation failed: {0}")]
+pub struct CycleEstimatorError(#[from] anyhow::Error);
 
 #[derive(Debug, Default, Clone)]
 pub struct Risc0CycleEstimator {}
@@ -23,7 +21,7 @@ impl Risc0CycleEstimator {
 }
 
 impl CycleEstimator for Risc0CycleEstimator {
-    fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, GasEstimatorError> {
+    fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, CycleEstimatorError> {
         let env = input
             .chain_proofs
             .values()
@@ -32,6 +30,7 @@ impl CycleEstimator for Risc0CycleEstimator {
                 Ok::<_, anyhow::Error>(builder)
             })?
             .write(input)?
+            // Workaround for r0vm bug reproed in: https://github.com/vlayer-xyz/risc0-r0vm-fake-repro
             .segment_limit_po2(22)
             .build()?;
 
@@ -54,19 +53,23 @@ mod tests {
         preflight_raw,
     };
 
-    #[tokio::test(flavor = "multi_thread")]
-    // gas_estimate is not deterministic, so we just check that it's greater than 0
-    async fn cycle_estimation_is_greater_thant_zero() -> anyhow::Result<()> {
-        let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
-        let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
-        let call = call(USDT, &balanceOfCall { account: binance_8 });
-        let result = preflight_raw("usdt_erc20_balance_of", call, &location).await?;
+    mod estimate {
+        use super::*;
 
-        let gas_estimate = Risc0CycleEstimator::new().estimate(&result.input, result.guest_elf)?;
-        dbg!(&gas_estimate);
+        // `estimate` function is not deterministic, so we just check that result is greater than 0
+        #[tokio::test(flavor = "multi_thread")]
+        async fn result_greater_than_zero() -> anyhow::Result<()> {
+            let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
+            let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
+            let call = call(USDT, &balanceOfCall { account: binance_8 });
+            let result = preflight_raw("usdt_erc20_balance_of", call, &location).await?;
 
-        assert!(gas_estimate > 0);
+            let gas_estimate =
+                Risc0CycleEstimator::new().estimate(&result.input, result.guest_elf)?;
 
-        Ok(())
+            assert!(gas_estimate > 0);
+
+            Ok(())
+        }
     }
 }
