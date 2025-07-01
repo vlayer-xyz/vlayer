@@ -8,7 +8,10 @@ use provider::{BlockNumber, BlockTag, CachedMultiProvider, CachedProviderFactory
 // pub use rpc::{rpc_cache_path, rpc_cache_paths};
 pub use types::ExecutionLocation;
 
-use crate::{BuilderError, Call, Config, Error, Host, PreflightResult};
+use crate::{
+    BuilderError, Call, Config, Error, Host, PreflightResult,
+    host::gas_estimator::{GasEstimator, Risc0GasEstimator},
+};
 
 pub mod contracts;
 mod types;
@@ -16,6 +19,18 @@ mod types;
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new test data directory and writes return data from Alchemy into files in that directory.
 const UPDATE_SNAPSHOTS: bool = false;
+
+pub async fn preflight_with_gas_estimator<C>(
+    test_name: &str,
+    call: Call,
+    location: &ExecutionLocation,
+    gas_estimator: Box<dyn GasEstimator>,
+) -> anyhow::Result<C::Return>
+where
+    C: SolCall,
+{
+    preflight_with_factory::<C>(test_name, call, location, Factory::default(), gas_estimator).await
+}
 
 pub async fn preflight<C>(
     test_name: &str,
@@ -25,7 +40,14 @@ pub async fn preflight<C>(
 where
     C: SolCall,
 {
-    preflight_with_factory::<C>(test_name, call, location, Factory::default()).await
+    preflight_with_factory::<C>(
+        test_name,
+        call,
+        location,
+        Factory::default(),
+        Box::new(Risc0GasEstimator::new()),
+    )
+    .await
 }
 
 pub async fn preflight_raw(
@@ -33,7 +55,14 @@ pub async fn preflight_raw(
     call: Call,
     location: &ExecutionLocation,
 ) -> anyhow::Result<PreflightResult, Error> {
-    preflight_inner(test_name, call, location, Factory::default()).await
+    preflight_inner(
+        test_name,
+        call,
+        location,
+        Factory::default(),
+        Box::new(Risc0GasEstimator::new()),
+    )
+    .await
 }
 
 pub async fn preflight_with_factory<C>(
@@ -41,11 +70,13 @@ pub async fn preflight_with_factory<C>(
     call: Call,
     location: &ExecutionLocation,
     op_client_factory: impl optimism::client::IFactory + 'static,
+    gas_estimator: Box<dyn GasEstimator>,
 ) -> anyhow::Result<C::Return>
 where
     C: SolCall,
 {
-    let preflight_result = preflight_inner(test_name, call, location, op_client_factory).await?;
+    let preflight_result =
+        preflight_inner(test_name, call, location, op_client_factory, gas_estimator).await?;
     let decoded_host_output = C::abi_decode_returns(&preflight_result.host_output, true)?;
 
     Ok(decoded_host_output)
@@ -56,9 +87,10 @@ async fn preflight_inner(
     call: Call,
     location: &ExecutionLocation,
     op_client_factory: impl optimism::client::IFactory + 'static,
+    gas_estimator: Box<dyn GasEstimator>,
 ) -> Result<PreflightResult, Error> {
     let multi_provider = create_multi_provider(test_name);
-    let host = create_host(multi_provider, location, op_client_factory)?;
+    let host = create_host(multi_provider, location, op_client_factory, gas_estimator)?;
     Ok(host.preflight(call).await?)
 }
 
@@ -78,7 +110,8 @@ pub async fn run_with_teleport(
     op_client_factory: impl optimism::client::IFactory + 'static,
 ) -> Result<HostOutput, Error> {
     let multi_provider = create_multi_provider(test_name);
-    let host = create_host(multi_provider, location, op_client_factory)?;
+    let gas_estimator = Box::new(Risc0GasEstimator::new());
+    let host = create_host(multi_provider, location, op_client_factory, gas_estimator)?;
     let result = host.main(call).await?;
 
     Ok(result)
@@ -88,6 +121,7 @@ fn create_host(
     multi_provider: CachedMultiProvider,
     location: &ExecutionLocation,
     op_client_factory: impl optimism::client::IFactory + 'static,
+    gas_estimator: Box<dyn GasEstimator>,
 ) -> Result<Host, BuilderError> {
     let config = Config {
         call_guest_elf: CALL_GUEST_ELF.clone(),
@@ -105,6 +139,7 @@ fn create_host(
         Some(chain_proof_client),
         op_client_factory,
         config,
+        gas_estimator,
     )
 }
 

@@ -2506,6 +2506,7 @@ dependencies = [
  "ctor",
  "derive-new",
  "dotenvy",
+ "dyn-clone",
  "ethers-core",
  "ethers-providers",
  "guest_wrapper",

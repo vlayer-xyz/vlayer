@@ -7,7 +7,7 @@ use call_db::ProofDb;
 pub use call_engine::Call;
 pub use host::{
     BuilderError, Config, Error, Host, PreflightResult, Prover, ProvingError, ProvingInput,
-    error::preflight::Error as PreflightError,
+    error::preflight::Error as PreflightError, gas_estimator::Risc0GasEstimator,
 };
 use revm::db::CacheDB;
 

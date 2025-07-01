@@ -23,15 +23,19 @@ pub use error::{BuilderError, Error, ProvingError};
 use optimism::client::factory::recording;
 pub use prover::Prover;
 use provider::CachedMultiProvider;
-use risc0_zkvm::{ExecutorEnv, ProveInfo, SessionStats, sha::Digest};
+use risc0_zkvm::{ProveInfo, SessionStats, sha::Digest};
 use seal::EncodableReceipt;
 use tracing::instrument;
 
-use crate::{HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
+use crate::{
+    HostDb, evm_env::factory::HostEvmEnvFactory, host::gas_estimator::GasEstimator,
+    into_input::into_multi_input,
+};
 
 mod builder;
 mod config;
 pub(crate) mod error;
+pub mod gas_estimator;
 mod prover;
 #[cfg(test)]
 mod tests;
@@ -55,6 +59,7 @@ pub struct Host {
     travel_call_verifier: HostTravelCallVerifier,
     guest_elf: GuestElf,
     is_vlayer_test: bool,
+    gas_estimator: Box<dyn GasEstimator>,
 }
 
 impl Host {
@@ -99,6 +104,7 @@ impl Host {
         chain_client: Option<Box<dyn chain_client::Client>>,
         op_client_factory: impl optimism::client::IFactory + 'static,
         config: Config,
+        gas_estimator: Box<dyn GasEstimator>,
     ) -> Result<Self, crate::BuilderError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::try_new(config.proof_mode, &config.call_guest_elf)?;
@@ -120,6 +126,7 @@ impl Host {
             travel_call_verifier,
             guest_elf: config.call_guest_elf,
             is_vlayer_test: config.is_vlayer_test,
+            gas_estimator,
         })
     }
 
@@ -150,11 +157,12 @@ impl Host {
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
             .await?;
+        let gas_estimator = self.gas_estimator.clone();
         let guest_elf = self.guest_elf.clone();
         let input = self.prepare_input_data(call)?;
 
         #[allow(clippy::unwrap_used)]
-        let gas_estimate = estimate_gas(&input, &guest_elf).unwrap();
+        let gas_estimate = gas_estimator.estimate(&input, &guest_elf).unwrap();
 
         let elapsed_time = now.elapsed();
         Ok(PreflightResult::new(
@@ -248,23 +256,4 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
     let raw_guest_output: Bytes = receipt.journal.bytes.into();
 
     Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats, elapsed_time))
-}
-
-fn estimate_gas(input: &Input, elf: &GuestElf) -> anyhow::Result<u64> {
-    let elf = &elf.elf;
-    let env = input
-        .chain_proofs
-        .values()
-        .try_fold(ExecutorEnv::builder(), |mut builder, (_, proof)| {
-            builder.add_assumption(proof.receipt.clone());
-            Ok::<_, anyhow::Error>(builder)
-        })?
-        .write(input)?
-        .segment_limit_po2(22)
-        .build()?;
-
-    let prover = risc0_zkvm::default_executor();
-
-    let res = prover.execute(env, elf)?;
-    Ok(res.cycles())
 }

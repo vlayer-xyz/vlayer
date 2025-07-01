@@ -176,13 +176,16 @@ mod teleport {
     use optimism::client::factory::cached;
 
     use super::*;
-    use crate::test_harness::{
-        contracts::teleport::{
-            BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT,
-            SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
-            TOKEN,
+    use crate::{
+        host::gas_estimator::Risc0GasEstimator,
+        test_harness::{
+            contracts::teleport::{
+                BLOCK_NO, JOHN, OUTPUT, SIMPLE_TELEPORT,
+                SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
+                TOKEN,
+            },
+            preflight_with_factory,
         },
-        preflight_with_factory,
     };
 
     #[tokio::test(flavor = "multi_thread")]
@@ -197,6 +200,7 @@ mod teleport {
         );
         let op_client_factory =
             cached::Factory::from_single_sequencer_output(OP_ANVIL, OUTPUT.clone());
+        let gas_estimator = Box::new(Risc0GasEstimator::new());
         let crossChainBalanceOfReturn {
             _2: cross_chain_balance,
             ..
@@ -205,6 +209,7 @@ mod teleport {
             call,
             &location,
             op_client_factory,
+            gas_estimator,
         )
         .await
         .unwrap();
@@ -244,26 +249,39 @@ mod teleport {
     }
 }
 
-// Generated using `simple_time_travel` example
+// Generated using `simple_ vel` example
 // Computes average balance of OP Sepolia USDC for TOKEN_OWNER on blocks from 17915294 to 17985294 with a step of 9000
 // Accesses 9 blocks in total
 mod time_travel {
     use super::*;
-    use crate::test_harness::contracts::time_travel::{
-        AVERAGE_BALANCE_OF_CALL,
-        AverageBalance::{averageBalanceOfCall, averageBalanceOfReturn},
-        BLOCK_NO, SIMPLE_TIME_TRAVEL,
+    use crate::{
+        host::gas_estimator::FakeGasEstimator,
+        test_harness::{
+            contracts::time_travel::{
+                AVERAGE_BALANCE_OF_CALL,
+                AverageBalance::{averageBalanceOfCall, averageBalanceOfReturn},
+                BLOCK_NO, SIMPLE_TIME_TRAVEL,
+            },
+            preflight_with_gas_estimator,
+        },
     };
 
     #[tokio::test(flavor = "multi_thread")]
     async fn time_travel() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BLOCK_NO).into();
         let call = call(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
+        let gas_estimator = Box::new(FakeGasEstimator::new());
 
         let averageBalanceOfReturn {
             _2: average_balance,
             ..
-        } = preflight::<averageBalanceOfCall>("time_travel", call, &location).await?;
+        } = preflight_with_gas_estimator::<averageBalanceOfCall>(
+            "time_travel",
+            call,
+            &location,
+            gas_estimator,
+        )
+        .await?;
 
         assert_eq!(average_balance, uint!(1_874_845_031_590_000_U256));
 
