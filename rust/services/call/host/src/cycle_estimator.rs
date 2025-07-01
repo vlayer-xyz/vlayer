@@ -23,24 +23,28 @@ impl Risc0CycleEstimator {
 
 impl CycleEstimator for Risc0CycleEstimator {
     fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, Error> {
-        let env = input
-            .chain_proofs
-            .values()
-            .try_fold(ExecutorEnv::builder(), |mut builder, (_, proof)| {
-                builder.add_assumption(proof.receipt.clone());
-                Ok::<_, anyhow::Error>(builder)
-            })?
-            .write(input)?
-            // Workaround for r0vm bug reproed in: https://github.com/vlayer-xyz/risc0-r0vm-fake-repro
-            .segment_limit_po2(22)
-            .build()
-            .context("failed to build executor env")?;
-
+        let env = build_executor_env(input)?;
         let prover = risc0_zkvm::default_executor();
 
         let res = prover.execute(env, &elf).context("failed to execute")?;
         Ok(res.cycles())
     }
+}
+
+fn build_executor_env(input: &Input) -> Result<ExecutorEnv, anyhow::Error> {
+    input
+        .chain_proofs
+        .values()
+        .try_fold(ExecutorEnv::builder(), |mut builder, (_, proof)| {
+            builder.add_assumption(proof.receipt.clone());
+            Ok::<_, anyhow::Error>(builder)
+        })
+        .context("failed to add assumptions")?
+        .write(input)?
+        // Workaround for r0vm bug reproed in: https://github.com/vlayer-xyz/risc0-r0vm-fake-repro
+        .segment_limit_po2(22)
+        .build()
+        .context("failed to build executor env")
 }
 
 #[cfg(test)]
@@ -78,6 +82,17 @@ mod tests {
         async fn works_with_composed_proofs() -> anyhow::Result<()> {
             // todo
             Ok(())
+        }
+    }
+
+    mod create_executor_env {
+        use super::*;
+
+        #[test]
+        fn success() {
+            let input = Input::default();
+            let env = build_executor_env(&input);
+            assert!(env.is_ok());
         }
     }
 }
