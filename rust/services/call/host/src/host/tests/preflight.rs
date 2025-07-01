@@ -241,7 +241,7 @@ mod teleport {
     }
 }
 
-// Generated using `simple_time-travel` example
+// Generated using `simple_time_travel` example
 // Computes average balance of OP Sepolia USDC for TOKEN_OWNER on blocks from 17915294 to 17985294 with a step of 9000
 // Accesses 9 blocks in total
 mod time_travel {
