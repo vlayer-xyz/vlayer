@@ -150,7 +150,7 @@ impl Host {
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
             .await?;
-        dbg!("log 0,1", self.guest_elf.id);
+        // dbg!("log 0,1", self.guest_elf.id);
         let guest_elf = self.guest_elf.elf.clone();
         let input = self.prepare_input_data(call)?;
 

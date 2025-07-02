@@ -91,7 +91,7 @@ fn create_host(
     location: &ExecutionLocation,
     op_client_factory: impl optimism::client::IFactory + 'static,
 ) -> Result<Host, BuilderError> {
-    dbg!("log 0", CHAIN_GUEST_ELF.id);
+    // dbg!("log 0", CHAIN_GUEST_ELF.id);
     let config = Config {
         call_guest_elf: CALL_GUEST_ELF.clone(),
         chain_guest_ids: vec![CHAIN_GUEST_ELF.id].into_boxed_slice(),

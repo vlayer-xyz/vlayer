@@ -58,11 +58,8 @@ mod tests {
     use crate::test_harness::{
         ExecutionLocation, call,
         contracts::{
-            time_travel::{
-                AVERAGE_BALANCE_OF_CALL,
-                SIMPLE_TIME_TRAVEL, *,
-            },
-            usdt::{IERC20::balanceOfCall, USDT, *},
+            time_travel::{AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
+            usdt::{IERC20::balanceOfCall, USDT},
         },
         preflight_raw_result,
     };
