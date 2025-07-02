@@ -40,3 +40,8 @@ declare module "@playwright/test";
 declare module "fs";
 
 /// <reference types="react" />
+
+// Alias legacy "react-router" package to typed react-router-dom re-export
+declare module "react-router" {
+  export * from "react-router-dom";
+}

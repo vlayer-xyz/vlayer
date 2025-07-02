@@ -40,3 +40,7 @@ declare global {
     interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
   }
 }
+
+declare module "react-router" {
+  export * from "react-router-dom";
+}

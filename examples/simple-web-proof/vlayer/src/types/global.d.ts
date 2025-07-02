@@ -13,7 +13,10 @@ declare module "*.png" {
   export default src;
 }
 
-declare module "react-router";
+declare module "react-router" {
+  export * from "react-router-dom";
+}
+
 declare module "react-error-boundary";
 declare module "motion/react";
 declare module "@heroicons/react/24/outline";
