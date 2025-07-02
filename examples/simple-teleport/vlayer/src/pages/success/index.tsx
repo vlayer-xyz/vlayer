@@ -1,6 +1,7 @@
 import { useSearchParams } from "react-router";
 import { shortenAndFormatHash } from "../../shared/lib/utils";
 import { useAccount } from "wagmi";
+
 export const SuccessPage = () => {
   const account = useAccount();
   const [searchParams] = useSearchParams();
@@ -15,7 +16,7 @@ export const SuccessPage = () => {
           <a
             href={`${
               account.chain?.blockExplorers?.default?.url ??
-              account.chain?.blockExplorers?.etherscan?.url ?? ""
+              (account.chain?.blockExplorers as any)?.etherscan?.url ?? ""
             }/tx/${txHash}`}
             className="text-blue-700 text-center text-block font-bold"
           >

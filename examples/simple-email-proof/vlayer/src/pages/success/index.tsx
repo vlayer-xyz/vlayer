@@ -16,7 +16,7 @@ export const SuccessContainer = () => {
         <a
           href={`${
             account.chain?.blockExplorers?.default?.url ??
-            account.chain?.blockExplorers?.etherscan?.url ?? ""
+            (account.chain?.blockExplorers as any)?.etherscan?.url ?? ""
           }/tx/${txHash}`}
           target="_blank"
           rel="noreferrer"
@@ -32,4 +32,4 @@ export const SuccessContainer = () => {
       </div>
     </>
   );
-};
+}

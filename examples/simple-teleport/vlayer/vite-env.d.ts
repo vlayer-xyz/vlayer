@@ -4,6 +4,8 @@ interface ImportMetaEnv {
   readonly PROVER_STEP_BACK: bigint;
   readonly PROVER_ERC20_CONTRACT_ADDR: string;
   readonly PROVER_ERC20_HOLDER_ADDR: string;
+  readonly VITE_GAS_LIMIT: string;
+  readonly VITE_FAUCET_URL: string;
 }
 
 interface ImportMeta {

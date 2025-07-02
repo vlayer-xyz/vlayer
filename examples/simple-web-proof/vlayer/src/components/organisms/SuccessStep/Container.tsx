@@ -14,7 +14,7 @@ export const SuccessStep = () => {
       handle={handle}
       blockExplorer={
         chain?.blockExplorers?.default?.url ??
-        chain?.blockExplorers?.etherscan?.url
+        (chain?.blockExplorers as any)?.etherscan?.url
       }
     />
   );
