@@ -24,6 +24,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
       "types/*": ["../../../packages/sdk/src/api/lib/types/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   }
 }

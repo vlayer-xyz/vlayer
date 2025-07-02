@@ -1,3 +1,4 @@
+import React from "react";
 import { Link, useSearchParams } from "react-router";
 import { truncateHashOrAddr } from "../../shared/lib/utils";
 import { useAccount } from "wagmi";
