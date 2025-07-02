@@ -26,7 +26,9 @@ impl CycleEstimator for Risc0CycleEstimator {
         let env = build_executor_env(input)?;
         let executor = default_executor();
 
-        let res = executor.execute(env, &elf).context("failed to execute executor env")?;
+        let res = executor
+            .execute(env, &elf)
+            .context("failed to execute executor env")?;
         Ok(res.cycles())
     }
 }
