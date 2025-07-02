@@ -30,7 +30,12 @@ declare global {
     interface ElementClass extends React.JSX.ElementClass {}
     interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
     interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
-    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+    interface IntrinsicElements {
+      div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+      a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+      b: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      br: React.DetailedHTMLProps<React.HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
+    }
     interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
   }
 }
