@@ -59,7 +59,7 @@ mod tests {
         ExecutionLocation, call,
         contracts::{
             time_travel::{
-                AVERAGE_BALANCE_OF_CALL, AverageBalance::averageBalanceOfReturn,
+                AVERAGE_BALANCE_OF_CALL,
                 SIMPLE_TIME_TRAVEL, *,
             },
             usdt::{IERC20::balanceOfCall, USDT, *},
