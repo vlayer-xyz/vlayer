@@ -15,7 +15,7 @@ mod types;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new test data directory and writes return data from Alchemy into files in that directory.
-const UPDATE_SNAPSHOTS: bool = false;
+const UPDATE_SNAPSHOTS: bool = true;
 
 const GAS_LIMIT: u64 = 1_000_000;
 
@@ -91,6 +91,7 @@ fn create_host(
     location: &ExecutionLocation,
     op_client_factory: impl optimism::client::IFactory + 'static,
 ) -> Result<Host, BuilderError> {
+    dbg!("log 0", CHAIN_GUEST_ELF.id);
     let config = Config {
         call_guest_elf: CALL_GUEST_ELF.clone(),
         chain_guest_ids: vec![CHAIN_GUEST_ELF.id].into_boxed_slice(),
