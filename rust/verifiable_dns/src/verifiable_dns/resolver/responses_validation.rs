@@ -5,9 +5,11 @@ use crate::{
     verifiable_dns::resolver::ResolverError,
 };
 
-pub(super) fn validate_response<PError>(response: &Response) -> Result<(), ResolverError<PError>> {
+pub(super) fn validate_response<PError>(
+    response: &Response,
+) -> Result<(), Box<ResolverError<PError>>> {
     let error_message =
-        |msg: &str| Err(ResolverError::InvalidResponse(response.clone(), msg.into()));
+        |msg: &str| Err(Box::new(ResolverError::InvalidResponse(response.clone(), msg.into())));
 
     if response.status != 0 {
         return error_message("Non-zero status");

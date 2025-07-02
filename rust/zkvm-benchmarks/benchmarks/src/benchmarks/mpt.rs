@@ -30,7 +30,7 @@ mod height_20 {
     const HEIGHT: usize = 20;
 
     fn zeros(size: usize) -> Vec<u8> {
-        iter::repeat(0).take(size).collect()
+        iter::repeat_n(0, size).collect()
     }
 
     fn fixture() -> MerkleTrie {

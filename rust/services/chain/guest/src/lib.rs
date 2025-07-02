@@ -11,18 +11,24 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Input {
-    Initialize {
-        elf_id: Digest,
-        block: Box<dyn EvmBlockHeader>,
-    },
-    AppendPrepend {
-        elf_id: Digest,
-        prepend_blocks: Vec<Box<dyn EvmBlockHeader>>,
-        append_blocks: Vec<Box<dyn EvmBlockHeader>>,
-        old_leftmost_block: Box<dyn EvmBlockHeader>,
-        prev_zk_proof: Box<Receipt>,
-        block_trie: BlockTrie,
-    },
+    Initialize(Box<Initialize>),
+    AppendPrepend(Box<AppendPrepend>),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Initialize {
+    pub elf_id: Digest,
+    pub block: Box<dyn EvmBlockHeader>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AppendPrepend {
+    pub elf_id: Digest,
+    pub prepend_blocks: Vec<Box<dyn EvmBlockHeader>>,
+    pub append_blocks: Vec<Box<dyn EvmBlockHeader>>,
+    pub old_leftmost_block: Box<dyn EvmBlockHeader>,
+    pub prev_zk_proof: Box<Receipt>,
+    pub block_trie: BlockTrie,
 }
 
 #[allow(clippy::expect_used)]
@@ -70,22 +76,26 @@ fn append_prepend(
 #[allow(clippy::unused_async)]
 pub async fn main(input: Input, old_elf_ids: impl IntoIterator<Item = Digest>) -> (B256, Digest) {
     match input {
-        Input::Initialize { elf_id, block } => initialize(elf_id, block),
-        Input::AppendPrepend {
-            elf_id,
-            prepend_blocks,
-            append_blocks,
-            old_leftmost_block,
-            block_trie,
-            prev_zk_proof,
-        } => append_prepend(
-            elf_id,
-            prepend_blocks.into_iter(),
-            append_blocks.into_iter(),
-            old_leftmost_block,
-            &prev_zk_proof,
-            old_elf_ids,
-            block_trie,
-        ),
+        Input::Initialize(init_params) => initialize(init_params.elf_id, init_params.block),
+        Input::AppendPrepend(append_prepend_params) => {
+            let AppendPrepend {
+                elf_id,
+                prepend_blocks,
+                append_blocks,
+                old_leftmost_block,
+                block_trie,
+                prev_zk_proof,
+            } = *append_prepend_params;
+
+            append_prepend(
+                elf_id,
+                prepend_blocks.into_iter(),
+                append_blocks.into_iter(),
+                old_leftmost_block,
+                &prev_zk_proof,
+                old_elf_ids,
+                block_trie,
+            )
+        }
     }
 }

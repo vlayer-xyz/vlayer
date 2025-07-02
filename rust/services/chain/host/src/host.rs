@@ -10,7 +10,7 @@ use alloy_primitives::ChainId;
 use block_fetcher::BlockFetcher;
 use block_trie::BlockTrie;
 use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
-use chain_guest::Input;
+use chain_guest::{AppendPrepend, Initialize, Input};
 use common::GuestElf;
 pub use config::HostConfig;
 use error::HostError;
@@ -128,10 +128,10 @@ where
         let start_block_number = start_block.number();
         let trie = BlockTrie::init(&start_block)?;
 
-        let input = Input::Initialize {
+        let input = Input::Initialize(Box::new(Initialize {
             elf_id: self.elf.id,
             block: start_block,
-        };
+        }));
         let receipt = self.prover.prove(&input, None)?;
 
         let range = NonEmptyRange::from_single_value(start_block_number);
@@ -177,14 +177,14 @@ where
         trie.prepend(prepend_blocks.iter(), &old_leftmost_block)?;
         trie.append(append_blocks.iter())?;
 
-        let input = Input::AppendPrepend {
+        let input = Input::AppendPrepend(Box::new(AppendPrepend {
             elf_id: self.elf.id,
             prepend_blocks,
             append_blocks,
             old_leftmost_block,
             prev_zk_proof: Box::new((*old_zk_proof).clone()),
             block_trie: old_trie.clone(),
-        };
+        }));
         let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
         let chain_update = ChainUpdate::from_two_tries(new_range, &old_trie, &trie, &receipt)?;
 

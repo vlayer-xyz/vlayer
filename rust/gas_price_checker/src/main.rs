@@ -22,7 +22,7 @@ fn main() -> anyhow::Result<()> {
 
     let gas_price_gwei = fetch_gas_price(rpc_url)?;
 
-    println!("Gas price: {:.4} gwei", gas_price_gwei);
+    println!("Gas price: {gas_price_gwei:.4} gwei");
 
     if gas_price_gwei <= threshold_gwei {
         println!("✅ Gas price is low enough → OK");
@@ -51,7 +51,7 @@ fn fetch_gas_price(rpc_url: &str) -> anyhow::Result<f64> {
         .context("Failed to make RPC request")?;
 
     let response_text = response.text()?;
-    println!("Raw response: {}", response_text);
+    println!("Raw response: {response_text}");
 
     let response_json: Value = from_str(&response_text).context("Failed to parse JSON response")?;
 
@@ -67,7 +67,7 @@ fn fetch_gas_price(rpc_url: &str) -> anyhow::Result<f64> {
     // NOTE: casting u64 to f64 will round values >2^53. Gas prices in wei are typically < 1e11
     // and should stay far below 2^53, so converting to f64 is safe for this use case.
     let gas_price_wei = u64::from_str_radix(gas_price_hex.trim_start_matches("0x"), 16)
-        .context(format!("Failed to parse gas price hex: {}", gas_price_hex))?
+        .context(format!("Failed to parse gas price hex: {gas_price_hex}"))?
         as f64;
     let gas_price_gwei = gas_price_wei / 1e9;
 

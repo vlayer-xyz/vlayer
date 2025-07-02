@@ -440,7 +440,7 @@ impl ConfigBuilder {
     }
 
     #[must_use]
-    pub fn with_port(mut self, port: u16) -> Self {
+    pub const fn with_port(mut self, port: u16) -> Self {
         self.socket_addr.0.set_port(port);
         self
     }
@@ -608,7 +608,7 @@ pub(crate) mod tests {
         fn correctly_parse_config_file() {
             let config_file = save_config_file(
                 r#"
-        host = "127.0.0.1" 
+        host = "127.0.0.1"
         port = 3000
         proof_mode = "groth16"
 
@@ -657,7 +657,7 @@ pub(crate) mod tests {
         fn correctly_parse_config_file_with_alternative_rpc_urls_syntax() {
             let config_file = save_config_file(
                 r#"
-        host = "127.0.0.1" 
+        host = "127.0.0.1"
         port = 3000
         proof_mode = "groth16"
         rpc_urls = ["31337:http://localhost:8545", "31338:http://localhost:8546"]
