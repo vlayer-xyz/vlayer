@@ -46,3 +46,8 @@ declare module "debug";
 declare module "@johanneskares/wallet-mock";
 declare module "@playwright/test";
 declare module "fs";
+
+// Provide type alias: treat legacy "react-router" imports as react-router-dom
+declare module "react-router" {
+  export * from "react-router-dom";
+}
