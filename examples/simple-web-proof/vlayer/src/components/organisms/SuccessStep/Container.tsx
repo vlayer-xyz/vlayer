@@ -12,7 +12,10 @@ export const SuccessStep = () => {
     <SuccessStepPresentational
       tx={tx}
       handle={handle}
-      blockExplorer={chain?.blockExplorers?.default?.url}
+      blockExplorer={
+        chain?.blockExplorers?.default?.url ??
+        chain?.blockExplorers?.etherscan?.url
+      }
     />
   );
 };
