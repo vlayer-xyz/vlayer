@@ -26,6 +26,8 @@
       "types/*": ["../../../packages/sdk/src/api/lib/types/*"]
     },
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "esModuleInterop": true,
+    "types": ["react", "react-dom", "react-router-dom"]
   }
 }

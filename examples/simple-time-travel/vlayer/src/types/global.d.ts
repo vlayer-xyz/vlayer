@@ -38,3 +38,5 @@ declare module "debug";
 declare module "@johanneskares/wallet-mock";
 declare module "@playwright/test";
 declare module "fs";
+
+/// <reference types="react" />
