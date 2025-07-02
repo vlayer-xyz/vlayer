@@ -1,5 +1,5 @@
 import React from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { SuccessStepPresentational } from "./Presentational";
 

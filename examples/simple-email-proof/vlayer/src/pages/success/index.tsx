@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router-dom";
 import { truncateHashOrAddr } from "../../shared/lib/utils";
 import { useAccount } from "wagmi";
 export const SuccessContainer = () => {

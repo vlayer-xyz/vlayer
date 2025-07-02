@@ -18,7 +18,7 @@ declare module "react-error-boundary";
 declare module "motion/react";
 declare module "@heroicons/react/24/outline";
 
-import "react";
+import type * as React from "react";
 
 declare module "wagmi";
 declare module "viem";
@@ -34,8 +34,7 @@ declare module "fs";
 
 declare global {
   namespace JSX {
-    interface IntrinsicElements {
-      [elemName: string]: any;
-    }
+    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+    interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
   }
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 import { shortenAndFormatHash } from "../../shared/lib/utils";
 import { useAccount } from "wagmi";
 
