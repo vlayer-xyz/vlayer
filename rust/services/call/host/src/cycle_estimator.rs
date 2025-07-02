@@ -13,13 +13,7 @@ pub trait CycleEstimator {
 pub struct Error(#[from] anyhow::Error);
 
 #[derive(Debug, Default, Clone)]
-pub struct Risc0CycleEstimator {}
-
-impl Risc0CycleEstimator {
-    pub const fn new() -> Self {
-        Self {}
-    }
-}
+pub struct Risc0CycleEstimator;
 
 impl CycleEstimator for Risc0CycleEstimator {
     fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, Error> {
@@ -71,8 +65,7 @@ mod tests {
             let call = call(USDT, &balanceOfCall { account: binance_8 });
             let result = preflight_raw_result("usdt_erc20_balance_of", call, &location).await?;
 
-            let gas_estimate =
-                Risc0CycleEstimator::new().estimate(&result.input, result.guest_elf)?;
+            let gas_estimate = Risc0CycleEstimator.estimate(&result.input, result.guest_elf)?;
 
             assert!(gas_estimate > 0);
 
