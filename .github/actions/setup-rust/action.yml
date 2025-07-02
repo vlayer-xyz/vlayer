@@ -7,7 +7,7 @@ inputs:
   version:
     description: "Rust version to install."
     required: false
-    default: "1.85"
+    default: "1.88"
 runs:
   using: "composite"
   steps:
