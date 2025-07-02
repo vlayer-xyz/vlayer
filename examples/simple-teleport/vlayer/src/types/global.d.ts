@@ -1,4 +1,8 @@
+/// <reference types="react/jsx-runtime" />
 /// <reference types="react" />
+/// <reference types="react-dom" />
+/// <reference types="react-router-dom" />
+/// <reference types="wagmi" />
 
 declare module "*.module.css" {
   const classes: { [key: string]: string };
@@ -22,7 +26,6 @@ declare module "@heroicons/react/24/outline";
 
 import type * as React from "react";
 
-declare module "wagmi";
 declare module "viem";
 declare module "viem/*";
 declare module "@vlayer/react";
@@ -36,7 +39,16 @@ declare module "fs";
 
 declare global {
   namespace JSX {
-    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    interface IntrinsicElements {
+      div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+      a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+      b: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      br: React.DetailedHTMLProps<React.HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
+    }
     interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
   }
 }
@@ -44,3 +56,9 @@ declare global {
 declare module "react-router" {
   export * from "react-router-dom";
 }
+
+// Empty module declarations for explicit mapping
+declare module "react" {}
+declare module "react-dom" {}
+declare module "react-router-dom" {}
+declare module "wagmi" {}

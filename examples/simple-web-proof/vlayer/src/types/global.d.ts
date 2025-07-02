@@ -25,7 +25,16 @@ import type * as React from "react";
 
 declare global {
   namespace JSX {
-    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+    interface Element extends React.JSX.Element {}
+    interface ElementClass extends React.JSX.ElementClass {}
+    interface ElementAttributesProperty extends React.JSX.ElementAttributesProperty {}
+    interface ElementChildrenAttribute extends React.JSX.ElementChildrenAttribute {}
+    interface IntrinsicElements {
+      div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+      a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+      b: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      br: React.DetailedHTMLProps<React.HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
+    }
     interface IntrinsicAttributes extends React.JSX.IntrinsicAttributes {}
   }
 }
@@ -42,4 +51,14 @@ declare module "@johanneskares/wallet-mock";
 declare module "@playwright/test";
 declare module "fs";
 
+/// <reference types="react/jsx-runtime" />
 /// <reference types="react" />
+/// <reference types="react-dom" />
+/// <reference types="react-router-dom" />
+/// <reference types="wagmi" />
+
+// Empty module declarations per requirement
+declare module "react" {}
+declare module "react-dom" {}
+declare module "react-router-dom" {}
+declare module "wagmi" {}

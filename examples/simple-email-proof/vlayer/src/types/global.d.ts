@@ -1,6 +1,8 @@
+/// <reference types="react/jsx-runtime" />
 /// <reference types="react" />
 /// <reference types="react-dom" />
 /// <reference types="react-router-dom" />
+/// <reference types="wagmi" />
 
 declare module "*.module.css" {
   const classes: { [key: string]: string };
@@ -40,7 +42,6 @@ declare global {
   }
 }
 
-declare module "wagmi";
 declare module "viem";
 declare module "viem/*";
 declare module "@vlayer/react";
@@ -56,3 +57,9 @@ declare module "fs";
 declare module "react-router" {
   export * from "react-router-dom";
 }
+
+// Empty module stubs for explicit path mapping
+declare module "react" {}
+declare module "react-dom" {}
+declare module "react-router-dom" {}
+declare module "wagmi" {}
