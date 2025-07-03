@@ -45,7 +45,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId: number = foundry.id,
   url: string = "http://127.0.0.1:3000",
-  gasLimit: number = 10_000_000,
+  gasLimit: number = 400_000_000,
   token?: string,
   options: ProveOptions = { preverifyVersions: false },
 ): Promise<BrandedHash<T, F>> {
@@ -55,11 +55,11 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     functionName: functionName as string,
     args: args as readonly unknown[],
   });
-  const call: CallParams = { to: prover, data: calldata, gas_limit: gasLimit };
+  const call: CallParams = { to: prover, data: calldata };
   const context: CallContext = {
     chain_id: chainId,
   };
-  const hash = await v_call(call, context, url, token);
+  const hash = await v_call(call, gasLimit, context, url, token);
   return { hash } as BrandedHash<T, F>;
 }
 

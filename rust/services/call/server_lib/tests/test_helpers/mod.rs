@@ -10,24 +10,25 @@ use mock::{Anvil, Client, Contract, GasMeterServer, Server};
 use serde_json::{Value, json};
 use server_utils::jwt::config::Config as JwtConfig;
 
-pub const GAS_LIMIT: u64 = 1_000_000;
+pub const VGAS_LIMIT: u64 = 100_000_000;
+pub const INSUFFICIENT_VGAS_LIMIT: u64 = 0;
 pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;
 pub const GAS_METER_TTL: Duration = Duration::from_secs(3600);
 
 pub fn allocate_gas_body(expected_hash: &str) -> Value {
     json!({
-        "gas_limit": GAS_LIMIT,
+        "gas_limit": VGAS_LIMIT,
         "hash": expected_hash,
         "time_to_live": GAS_METER_TTL.as_secs(),
     })
 }
 
-pub fn v_call_body(contract_address: H160, call_data: &Bytes) -> Value {
+pub fn v_call_body(contract_address: H160, call_data: &Bytes, vgas_limit: u64) -> Value {
     let params = json!([
         {
             "to": contract_address,
             "data": call_data,
-            "gas_limit": GAS_LIMIT,
+            "vgas_limit": vgas_limit,
         },
         {
             "chain_id": ETHEREUM_SEPOLIA_ID,

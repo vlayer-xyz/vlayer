@@ -14,12 +14,12 @@ import debug from "debug";
 
 const log = debug("vlayer:v_call");
 
-function v_callBody(call: CallParams, context: CallContext) {
+function v_callBody(call: CallParams, gasLimit: number, context: CallContext) {
   log("call", call);
   log("context", context);
   return {
     method: "v_call",
-    params: [call, context],
+    params: [call, gasLimit, context],
     id: 1,
     jsonrpc: "2.0",
   };
@@ -27,6 +27,7 @@ function v_callBody(call: CallParams, context: CallContext) {
 
 export async function v_call(
   call: CallParams,
+  gasLimit: number,
   context: CallContext,
   url: string = "http://127.0.0.1:3000",
   token?: string,
@@ -40,7 +41,7 @@ export async function v_call(
 
   const rawResponse = await fetch(url, {
     method: "POST",
-    body: JSON.stringify(v_callBody(call, context)),
+    body: JSON.stringify(v_callBody(call, gasLimit, context)),
     headers,
   });
   log("raw response: ", rawResponse);
