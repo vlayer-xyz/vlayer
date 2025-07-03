@@ -55,21 +55,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_to_u32_array() {
+    fn success() {
         let input = [1, 0, 0, 0, 2, 0, 0, 0];
         assert_eq!(to_u32_array(input), [1, 2]);
     }
 
     #[test]
     #[should_panic(expected = "INPUT_SIZE has to be a multiple of 4 (u32::BITS/8)")]
-    const fn test_to_u32_array_invalid_length() {
+    fn non_multiple_of_4() {
         let input = [0];
         to_u32_array::<1, 1>(input);
     }
 
     #[test]
     #[should_panic(expected = "INPUT_SIZE / 4 must equal OUTPUT_SIZE")]
-    const fn test_to_u32_array_invalid_length_2() {
+    fn not_matching_output_size() {
         let input = [0, 0, 0, 0];
         to_u32_array::<4, 2>(input);
     }
