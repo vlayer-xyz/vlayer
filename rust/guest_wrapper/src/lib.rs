@@ -20,9 +20,9 @@ pub static CHAIN_GUEST_ELF: GuestElf =
 pub static CHAIN_GUEST_ELF_WITH_CANONICAL_ID: GuestElf =
     GuestElf::new(to_u32_array(CHAIN_GUEST_IDS[0]), private::RISC0_CHAIN_GUEST_ELF);
 
-#[cfg(not(clippy))]
+#[allow(unused)]
 const fn to_u32_array(bytes: [u8; 32]) -> [u32; 8] {
-    let mut arr = [0u32; 8];
+    let mut arr = [0_u32; 8];
     let mut i = 0;
     while i < 8 {
         arr[i] = u32::from_le_bytes([
