@@ -2,10 +2,7 @@ use alloy_chains::{Chain, NamedChain::AnvilHardhat};
 use alloy_primitives::{address, b256, uint};
 use ethers_core::types::BlockNumber as BlockTag;
 
-use crate::{
-    host::tests::call,
-    test_harness::{ExecutionLocation, preflight},
-};
+use crate::test_harness::{ExecutionLocation, call, preflight};
 
 mod usdt {
     use call_engine::Call;
@@ -41,7 +38,7 @@ mod usdt {
 
     #[tokio::test(flavor = "multi_thread")]
     #[should_panic(
-        expected = "called `Result::unwrap()` on an `Err` value: EVM error: transaction validation error: call gas cost exceeds the gas limit"
+        expected = "called `Result::unwrap()` on an `Err` value: Preflight: EVM error: transaction validation error: call gas cost exceeds the gas limit"
     )]
     async fn fails_when_no_gas() {
         let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
@@ -182,7 +179,7 @@ mod teleport {
             SimpleTeleportProver::{crossChainBalanceOfCall, crossChainBalanceOfReturn},
             TOKEN,
         },
-        preflight_with_teleport,
+        preflight_with_factory,
     };
 
     #[tokio::test(flavor = "multi_thread")]
@@ -200,7 +197,7 @@ mod teleport {
         let crossChainBalanceOfReturn {
             _2: cross_chain_balance,
             ..
-        } = preflight_with_teleport::<crossChainBalanceOfCall>(
+        } = preflight_with_factory::<crossChainBalanceOfCall>(
             "teleport",
             call,
             &location,

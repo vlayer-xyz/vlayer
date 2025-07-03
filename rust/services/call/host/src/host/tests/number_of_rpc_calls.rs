@@ -10,10 +10,12 @@ use provider::{CachedMultiProvider, CachedProvider, profiling};
 use crate::{
     Call,
     evm_env::factory::HostEvmEnvFactory,
-    host::tests::call,
-    test_harness::contracts::{
-        time_travel::{self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
-        usdt::{self, IERC20::balanceOfCall, USDT},
+    test_harness::{
+        call,
+        contracts::{
+            time_travel::{self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
+            usdt::{self, IERC20::balanceOfCall, USDT},
+        },
     },
 };
 

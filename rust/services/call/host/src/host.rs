@@ -83,6 +83,7 @@ pub struct PreflightResult {
     pub gas_used: u64,
     pub elapsed_time: Duration,
     pub metadata: Box<[Metadata]>,
+    pub guest_elf: Bytes,
 }
 
 #[derive(new, Debug, Clone)]
@@ -149,6 +150,7 @@ impl Host {
         self.travel_call_verifier
             .verify(&self.envs, self.start_execution_location)
             .await?;
+        let guest_elf = self.guest_elf.elf.clone();
         let input = self.prepare_input_data(call)?;
 
         let elapsed_time = now.elapsed();
@@ -158,6 +160,7 @@ impl Host {
             gas_used,
             elapsed_time,
             metadata,
+            guest_elf,
         ))
     }
 
