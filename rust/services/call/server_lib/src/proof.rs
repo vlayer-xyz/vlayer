@@ -1,5 +1,6 @@
-use call_engine::Call as EngineCall;
-use call_host::Host;
+use bytes::Bytes;
+use call_engine::{Call as EngineCall, Input};
+use call_host::{CycleEstimator, CycleEstimatorError, Host, ProvingInput, Risc0CycleEstimator};
 use dashmap::Entry;
 use tracing::{error, info, instrument};
 
@@ -84,6 +85,11 @@ fn set_metrics(
     entry.and_modify(|res| res.metrics = metrics)
 }
 
+fn estimate_cycles(input: &Input, elf: Bytes) -> Result<u64, CycleEstimatorError> {
+    let cycle_estimation = Risc0CycleEstimator.estimate(input, elf)?;
+    Ok(cycle_estimation)
+}
+
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
@@ -133,10 +139,22 @@ pub async fn generate(
             }
         };
 
+    let estimation_start = std::time::Instant::now();
+    match estimate_cycles(&preflight_result.input, preflight_result.guest_elf) {
+        Ok(result) => {
+            info!("Cycle estimation: {result}");
+        }
+        Err(err) => {
+            error!("Cycle estimation failed with error: {err}");
+        }
+    };
+    let elapsed = estimation_start.elapsed();
+    info!("Cycle estimation lasted: {elapsed:?}");
+
     match proving::await_proving(
         &prover,
         call_guest_id,
-        preflight_result,
+        ProvingInput::new(preflight_result.host_output, preflight_result.input),
         &gas_meter_client,
         &mut metrics,
     )

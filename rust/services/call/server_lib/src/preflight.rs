@@ -1,6 +1,6 @@
 use call_common::Metadata;
 use call_engine::Call as EngineCall;
-use call_host::{Host, PreflightError, PreflightResult, ProvingInput};
+use call_host::{Host, PreflightError, PreflightResult};
 use tracing::info;
 
 use crate::{
@@ -24,24 +24,17 @@ pub async fn await_preflight(
     call: EngineCall,
     gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
-) -> Result<ProvingInput, Error> {
-    let PreflightResult {
-        host_output,
-        input,
-        gas_used,
-        elapsed_time,
-        metadata,
-        ..
-    } = host.preflight(call).await?;
+) -> Result<PreflightResult, Error> {
+    let result = host.preflight(call).await?;
 
     info!(
         state = tracing::field::debug(State::Preflight),
-        gas_used = gas_used,
-        elapsed_time = elapsed_time.as_millis(),
+        gas_used = result.gas_used,
+        elapsed_time = result.elapsed_time.as_millis(),
         "Finished stage",
     );
 
-    for meta in &metadata {
+    for meta in &result.metadata.clone() {
         match meta {
             Metadata::Precompile(x) => {
                 info!(
@@ -69,12 +62,14 @@ pub async fn await_preflight(
     }
 
     gas_meter_client
-        .refund(ComputationStage::Preflight, gas_used)
+        .refund(ComputationStage::Preflight, result.gas_used)
         .await?;
-    gas_meter_client.send_metadata(metadata).await?;
+    gas_meter_client
+        .send_metadata(result.metadata.clone())
+        .await?;
 
-    metrics.gas = gas_used;
-    metrics.times.preflight = metrics::elapsed_time_as_millis_u64(elapsed_time)?;
+    metrics.gas = result.gas_used;
+    metrics.times.preflight = metrics::elapsed_time_as_millis_u64(result.elapsed_time)?;
 
-    Ok(ProvingInput::new(host_output, input))
+    Ok(result)
 }
