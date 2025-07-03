@@ -26,15 +26,21 @@ pub async fn await_preflight(
     metrics: &mut Metrics,
 ) -> Result<PreflightResult, Error> {
     let result = host.preflight(call).await?;
+    let PreflightResult {
+        gas_used,
+        elapsed_time,
+        metadata,
+        ..
+    } = &result;
 
     info!(
         state = tracing::field::debug(State::Preflight),
-        gas_used = result.gas_used,
-        elapsed_time = result.elapsed_time.as_millis(),
+        gas_used = gas_used,
+        elapsed_time = elapsed_time.as_millis(),
         "Finished stage",
     );
 
-    for meta in &result.metadata.clone() {
+    for meta in metadata.clone() {
         match meta {
             Metadata::Precompile(x) => {
                 info!(
@@ -62,14 +68,14 @@ pub async fn await_preflight(
     }
 
     gas_meter_client
-        .refund(ComputationStage::Preflight, result.gas_used)
+        .refund(ComputationStage::Preflight, *gas_used)
         .await?;
     gas_meter_client
-        .send_metadata(result.metadata.clone())
+        .send_metadata(metadata.clone())
         .await?;
 
-    metrics.gas = result.gas_used;
-    metrics.times.preflight = metrics::elapsed_time_as_millis_u64(result.elapsed_time)?;
+    metrics.gas = *gas_used;
+    metrics.times.preflight = metrics::elapsed_time_as_millis_u64(*elapsed_time)?;
 
     Ok(result)
 }
