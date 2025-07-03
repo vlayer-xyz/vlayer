@@ -112,7 +112,7 @@ impl From<impl AsRef<[u8]>> for Path
 
 Unit tests exist for functions of the specific structs.
 
-There are also four [e2e tests](../tests/):
+There are also four [e2e tests](./tests/):
 * Testing that our implementation produces the same roots as `alloy_trie`
 * Verifying that we can parse the results of `eth_getProof`
 * Ensuring that after inserting a large number of elements into the MPT, we can later retrieve them using the get method, even when the structure becomes complex
