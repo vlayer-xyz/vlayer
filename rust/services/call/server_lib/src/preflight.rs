@@ -70,9 +70,7 @@ pub async fn await_preflight(
     gas_meter_client
         .refund(ComputationStage::Preflight, *gas_used)
         .await?;
-    gas_meter_client
-        .send_metadata(metadata.clone())
-        .await?;
+    gas_meter_client.send_metadata(metadata.clone()).await?;
 
     metrics.gas = *gas_used;
     metrics.times.preflight = metrics::elapsed_time_as_millis_u64(*elapsed_time)?;
