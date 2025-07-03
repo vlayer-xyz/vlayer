@@ -151,10 +151,11 @@ pub async fn generate(
     let elapsed = estimation_start.elapsed();
     info!("Cycle estimation lasted: {elapsed:?}");
 
+    let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
     match proving::await_proving(
         &prover,
         call_guest_id,
-        ProvingInput::new(preflight_result.host_output, preflight_result.input),
+        proving_input,
         &gas_meter_client,
         &mut metrics,
     )
