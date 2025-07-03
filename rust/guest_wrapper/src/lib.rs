@@ -24,9 +24,16 @@ pub static CHAIN_GUEST_ELF_WITH_CANONICAL_ID: GuestElf =
 const fn to_u32_array<const INPUT_SIZE: usize, const OUTPUT_SIZE: usize>(
     bytes: [u8; INPUT_SIZE],
 ) -> [u32; OUTPUT_SIZE] {
-    const BYTES_PER_U32: usize = 4; // u32::BITS as usize / 8
-    assert!(INPUT_SIZE % BYTES_PER_U32 == 0, "INPUT_SIZE has to be a multiple of 4 (u32::BITS/8)");
-    assert!(INPUT_SIZE / BYTES_PER_U32 == OUTPUT_SIZE, "INPUT_SIZE / 4 must equal OUTPUT_SIZE");
+    const BYTES_PER_U32: usize = 4; // (u32::BITS as usize / 8)
+    assert!(
+        INPUT_SIZE % BYTES_PER_U32 == 0,
+        "INPUT_SIZE has to be a multiple of 4 (u32::BITS/8)"
+    );
+    assert!(
+        INPUT_SIZE / BYTES_PER_U32 == OUTPUT_SIZE,
+        "INPUT_SIZE / 4 must equal OUTPUT_SIZE"
+    );
+
     let mut arr = [0_u32; OUTPUT_SIZE];
     let mut i = 0;
     while i < OUTPUT_SIZE {
