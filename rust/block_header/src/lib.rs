@@ -37,15 +37,15 @@ clone_trait_object!(EvmBlockHeader);
 // We are not using #[serde(tag = "type", content = "data")] here because zkvm returns
 // NotSupported error for it in deserialize_identifier function in deserializer.rs file
 pub enum BlockHeader {
-    Eth(EthBlockHeader),
-    Forge(ForgeBlockHeader),
+    Eth(Box<EthBlockHeader>),
+    Forge(Box<ForgeBlockHeader>),
 }
 
 impl From<BlockHeader> for Box<dyn EvmBlockHeader> {
     fn from(block_header: BlockHeader) -> Self {
         match block_header {
-            BlockHeader::Eth(header) => Box::new(header),
-            BlockHeader::Forge(header) => Box::new(header),
+            BlockHeader::Eth(header) => header,
+            BlockHeader::Forge(header) => header,
         }
     }
 }
@@ -55,9 +55,9 @@ impl TryFrom<&dyn EvmBlockHeader> for BlockHeader {
 
     fn try_from(header: &dyn EvmBlockHeader) -> Result<Self, Self::Error> {
         if is::<EthBlockHeader>(header) {
-            Ok(BlockHeader::Eth(header.try_into()?))
+            Ok(BlockHeader::Eth(Box::new(header.try_into()?)))
         } else if is::<ForgeBlockHeader>(header) {
-            Ok(BlockHeader::Forge(header.try_into()?))
+            Ok(BlockHeader::Forge(Box::new(header.try_into()?)))
         } else {
             Err("Failed converting BlockHeader")
         }
@@ -128,7 +128,7 @@ mod header_to_dyn_header {
     #[test]
     fn eth() {
         let eth_block_header = EthBlockHeader::default();
-        let header_type = BlockHeader::Eth(eth_block_header);
+        let header_type = BlockHeader::Eth(Box::new(eth_block_header));
         let boxed_header: Box<dyn EvmBlockHeader> = header_type.into();
 
         assert!(boxed_header.as_ref().is::<EthBlockHeader>());

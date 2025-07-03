@@ -19,16 +19,16 @@ pub struct Config {
 
 /// `Client` implementation which fetches proofs from server via JSON RPC.
 pub struct RpcClient {
-    rpc_client: RawRpcClient,
+    client: RawRpcClient,
     poll_interval: Duration,
     timeout: Duration,
 }
 
 impl RpcClient {
     pub fn new(config: &Config) -> Self {
-        let rpc_client = RawRpcClient::new(&config.url);
+        let client = RawRpcClient::new(&config.url);
         Self {
-            rpc_client,
+            client,
             poll_interval: config.poll_interval,
             timeout: config.timeout,
         }
@@ -87,7 +87,7 @@ impl Client for RpcClient {
         info!(chain_id, block_numbers = ?block_numbers, "fetching chain proof");
 
         let params = GetChainProof::new(chain_id, block_numbers.clone());
-        let result_value = self.rpc_client.call(params).await.map_err(Error::from)?;
+        let result_value = self.client.call(params).await.map_err(Error::from)?;
 
         let rpc_chain_proof: RpcChainProof = serde_json::from_value(result_value)?;
         let chain_proof = rpc_chain_proof.try_into()?;
@@ -99,7 +99,7 @@ impl Client for RpcClient {
         info!("Getting sync status for chain_id: {chain_id}");
 
         let params = GetSyncStatus::new(chain_id);
-        let result_value = self.rpc_client.call(params).await.map_err(Error::from)?;
+        let result_value = self.client.call(params).await.map_err(Error::from)?;
         let sync_status: SyncStatus = serde_json::from_value(result_value)?;
 
         info!("Sync status for chain {chain_id}: {sync_status:?}");

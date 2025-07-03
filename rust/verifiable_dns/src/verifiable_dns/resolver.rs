@@ -55,7 +55,7 @@ impl<C: Now, P: DoHProvider, const Q: usize> Resolver<C, P, Q> {
     }
 }
 
-fn validate_responses<PError>(responses: &[Response]) -> Result<(), ResolverError<PError>> {
+fn validate_responses<PError>(responses: &[Response]) -> Result<(), Box<ResolverError<PError>>> {
     responses
         .iter()
         .map(validate_response::<PError>)
@@ -68,14 +68,17 @@ fn validate_responses<PError>(responses: &[Response]) -> Result<(), ResolverErro
         .skip(1)
         .find(|r| !responses_match(first_response, r))
     {
-        return Err(ResolverError::ResponsesMismatch(first_response.clone(), mismatched.clone()));
+        return Err(Box::new(ResolverError::ResponsesMismatch(
+            first_response.clone(),
+            mismatched.clone(),
+        )));
     }
 
     Ok(())
 }
 
 impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resolver<C, P, Q> {
-    type Error = ResolverError<P::Error>;
+    type Error = Box<ResolverError<P::Error>>;
 
     async fn resolve(&self, query: &Query) -> Result<Response, Self::Error> {
         let jobs: Vec<_> = self.providers.iter().map(|p| p.resolve(query)).collect();

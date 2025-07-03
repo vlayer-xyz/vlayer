@@ -2,15 +2,15 @@ name: Risc0 tools
 description: Installs risc0 tools
 inputs:
   r0vm_version:
-    description: 'Version of r0vm to install'
+    description: "Version of r0vm to install"
     default: 2.1.0
     required: false
   cargo_risczero_version:
-    description: 'Version of cargo risczero to install'
+    description: "Version of cargo risczero to install"
     default: 2.1.0
     required: false
   rust_version:
-    description: 'Version of Rust toolchain for building guest images'
+    description: "Version of Rust toolchain for building guest images"
     default: 1.85.0
     required: false
 runs:

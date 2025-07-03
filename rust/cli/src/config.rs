@@ -114,7 +114,7 @@ impl<P: Clone> Dependency<P> {
         }
     }
 
-    pub fn as_detailed_mut(&mut self) -> Option<&mut DetailedDependency<P>> {
+    pub const fn as_detailed_mut(&mut self) -> Option<&mut DetailedDependency<P>> {
         match self {
             Self::Simple(..) => None,
             Self::Detailed(x) => Some(x),
