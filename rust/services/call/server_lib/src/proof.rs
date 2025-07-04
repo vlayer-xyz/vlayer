@@ -85,11 +85,6 @@ fn set_metrics(
     entry.and_modify(|res| res.metrics = metrics)
 }
 
-fn estimate_cycles(input: &Input, elf: Bytes) -> Result<u64, CycleEstimatorError> {
-    let cycle_estimation = Risc0CycleEstimator.estimate(input, elf)?;
-    Ok(cycle_estimation)
-}
-
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
@@ -140,16 +135,16 @@ pub async fn generate(
         };
 
     let estimation_start = std::time::Instant::now();
-    match estimate_cycles(&preflight_result.input, preflight_result.guest_elf) {
+    match Risc0CycleEstimator.estimate(&preflight_result.input, preflight_result.guest_elf) {
         Ok(result) => {
-            info!("Cycle estimation: {result}");
+            info!(estimated_cycles = result, "Cycle estimation");
         }
         Err(err) => {
             error!("Cycle estimation failed with error: {err}");
         }
     };
     let elapsed = estimation_start.elapsed();
-    info!("Cycle estimation lasted: {elapsed:?}");
+    info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
 
     let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
     match proving::await_proving(
