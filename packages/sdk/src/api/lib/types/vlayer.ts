@@ -85,7 +85,7 @@ export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
 
 export type VlayerClient = {
   prove: <T extends Abi, F extends ContractFunctionName<T>>(
-    args: ProveArgs<T, F>
+    args: ProveArgs<T, F>,
   ) => Promise<BrandedHash<T, F>>;
 
   waitForProvingResult: <
