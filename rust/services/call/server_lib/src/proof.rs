@@ -1,5 +1,5 @@
 use call_engine::Call as EngineCall;
-use call_host::Host;
+use call_host::{CycleEstimator, Host, ProvingInput, Risc0CycleEstimator};
 use dashmap::Entry;
 use tracing::{error, info, instrument};
 
@@ -133,10 +133,23 @@ pub async fn generate(
             }
         };
 
+    let estimation_start = std::time::Instant::now();
+    match Risc0CycleEstimator.estimate(&preflight_result.input, preflight_result.guest_elf) {
+        Ok(result) => {
+            info!(estimated_cycles = result, "Cycle estimation");
+        }
+        Err(err) => {
+            error!("Cycle estimation failed with error: {err}");
+        }
+    };
+    let elapsed = estimation_start.elapsed();
+    info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
+
+    let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
     match proving::await_proving(
         &prover,
         call_guest_id,
-        preflight_result,
+        proving_input,
         &gas_meter_client,
         &mut metrics,
     )
