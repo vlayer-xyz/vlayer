@@ -16,6 +16,7 @@ pub enum State {
     Preflight,
     Proving,
     Done,
+    EstimatingCycles,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -49,6 +50,7 @@ impl From<&ProofState> for State {
         match value {
             ProofState::Queued => Self::Queued,
             ProofState::AllocateGasPending | ProofState::AllocateGasError(..) => Self::AllocateGas,
+            ProofState::EstimatingCycles => Self::EstimatingCycles,
             ProofState::PreflightPending | ProofState::PreflightError(..) => Self::Preflight,
             ProofState::ProvingPending | ProofState::ProvingError(..) => Self::Proving,
             ProofState::Done(..) => Self::Done,
