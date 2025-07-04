@@ -6,7 +6,10 @@ mod into_input;
 use call_common::RevmDB;
 use call_db::ProofDb;
 pub use call_engine::Call;
-pub use cycle_estimator::{CycleEstimator, Error as CycleEstimatorError, Risc0CycleEstimator};
+pub use cycle_estimator::{
+    Error as CycleEstimatorError, Estimator as CycleEstimator,
+    Risc0Estimator as Risc0CycleEstimator,
+};
 pub use host::{
     BuilderError, Config, Error, Host, PreflightResult, Prover, ProvingError, ProvingInput,
     error::preflight::Error as PreflightError,

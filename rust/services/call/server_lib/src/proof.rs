@@ -1,6 +1,5 @@
-use bytes::Bytes;
-use call_engine::{Call as EngineCall, Input};
-use call_host::{CycleEstimator, CycleEstimatorError, Host, ProvingInput, Risc0CycleEstimator};
+use call_engine::Call as EngineCall;
+use call_host::{CycleEstimator, Host, ProvingInput, Risc0CycleEstimator};
 use dashmap::Entry;
 use tracing::{error, info, instrument};
 

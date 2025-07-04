@@ -4,7 +4,7 @@ use call_engine::Input;
 use risc0_zkvm::{ExecutorEnv, default_executor};
 use thiserror::Error;
 
-pub trait CycleEstimator {
+pub trait Estimator {
     fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, Error>;
 }
 
@@ -13,9 +13,9 @@ pub trait CycleEstimator {
 pub struct Error(#[from] anyhow::Error);
 
 #[derive(Debug, Default, Clone)]
-pub struct Risc0CycleEstimator;
+pub struct Risc0Estimator;
 
-impl CycleEstimator for Risc0CycleEstimator {
+impl Estimator for Risc0Estimator {
     fn estimate(&self, input: &Input, elf: Bytes) -> Result<u64, Error> {
         let env = build_executor_env(input)?;
         let executor = default_executor();
@@ -71,7 +71,7 @@ mod tests {
             let call = call(USDT, &balanceOfCall { account: binance_8 });
             let result = preflight_raw_result("usdt_erc20_balance_of", call, &location).await?;
 
-            let cycle_estimate = Risc0CycleEstimator.estimate(&result.input, result.guest_elf)?;
+            let cycle_estimate = Risc0Estimator.estimate(&result.input, result.guest_elf)?;
 
             assert!(cycle_estimate > 0);
 
@@ -88,7 +88,7 @@ mod tests {
 
             let result = preflight_raw_result("time_travel", call, &location).await?;
 
-            let cycle_estimate = Risc0CycleEstimator.estimate(&result.input, result.guest_elf)?;
+            let cycle_estimate = Risc0Estimator.estimate(&result.input, result.guest_elf)?;
 
             assert!(cycle_estimate > 0);
 
