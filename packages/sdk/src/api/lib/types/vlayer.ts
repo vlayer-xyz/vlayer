@@ -50,6 +50,7 @@ export enum ProofState {
   Queued = "queued",
   AllocateGas = "allocate_gas",
   Preflight = "preflight",
+  EstimatingCycles = "estimating_cycles",
   Proving = "proving",
   Done = "done",
 }
@@ -84,7 +85,7 @@ export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
 
 export type VlayerClient = {
   prove: <T extends Abi, F extends ContractFunctionName<T>>(
-    args: ProveArgs<T, F>,
+    args: ProveArgs<T, F>
   ) => Promise<BrandedHash<T, F>>;
 
   waitForProvingResult: <
@@ -118,6 +119,7 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
     state: z.enum([
       ProofState.AllocateGas,
       ProofState.Preflight,
+      ProofState.EstimatingCycles,
       ProofState.Proving,
     ]),
   }),
@@ -128,6 +130,7 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
       ProofState.Done,
       ProofState.AllocateGas,
       ProofState.Preflight,
+      ProofState.EstimatingCycles,
       ProofState.Proving,
       ProofState.Queued,
     ]),

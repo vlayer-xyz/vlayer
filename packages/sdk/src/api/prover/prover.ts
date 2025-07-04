@@ -30,7 +30,7 @@ export interface ProveOptions {
 async function preverifyVersions(
   url: string,
   shouldPreverify: boolean,
-  token?: string,
+  token?: string
 ) {
   if (shouldPreverify) {
     const proverVersions = await v_versions(url, token);
@@ -47,7 +47,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   url: string = "http://127.0.0.1:3000",
   gasLimit: number = 10_000_000,
   token?: string,
-  options: ProveOptions = { preverifyVersions: false },
+  options: ProveOptions = { preverifyVersions: false }
 ): Promise<BrandedHash<T, F>> {
   await preverifyVersions(url, !!options.preverifyVersions);
   const calldata = encodeFunctionData({
@@ -85,6 +85,9 @@ const handleErrors = ({ status, state, error }: ProofReceipt) => {
       .with(ProofState.Preflight, () => {
         throw new Error(`Preflight failed with error: ${error}`);
       })
+      .with(ProofState.EstimatingCycles, () => {
+        throw new Error(`Cycle estimation failed with error: ${error}`);
+      })
       .with(ProofState.Proving, () => {
         throw new Error(`Proving failed with error: ${error}`);
       })
@@ -110,7 +113,7 @@ export async function waitForProof<
     await sleep(sleepDuration);
   }
   throw new Error(
-    `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries.`,
+    `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries.`
   );
 }
 
