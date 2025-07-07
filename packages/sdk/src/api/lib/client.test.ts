@@ -181,22 +181,6 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
-  it("should notify that zk-proving failed", async () => {
-    fetchMocker.mockResponseOnce(() => {
-      throw new Error("test");
-    });
-
-    const hash = { hash: hashStr } as BrandedHash<[], string>;
-    try {
-      await vlayer.waitForProvingResult({ hash });
-    } catch (e) {
-      //eslint-disable-next-line no-console
-      console.log("Error waiting for proving result", e);
-    }
-
-    expect(zkProvingSpy).toBeCalledTimes(1);
-    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
-  });
 });
 
 describe("Failed zk-proving", () => {
@@ -329,6 +313,22 @@ describe("Failed zk-proving", () => {
     expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
+  });
+  it("should notify that zk-proving failed", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      throw new Error("test");
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      //eslint-disable-next-line no-console
+      console.log("Error waiting for proving result", e);
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(1);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
   });
 });
 
