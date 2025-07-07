@@ -219,7 +219,7 @@ describe("Success zk-proving", () => {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       expect((e as Error).message).toMatch(
-        "Cycle estimation failed with error: Cycle estimation failed"
+        "Cycle estimation failed with error: Cycle estimation failed",
       );
     }
 
@@ -322,7 +322,7 @@ describe("Failed zk-proving", () => {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       expect((e as Error).message).toMatch(
-        "Preflight failed with error: Preflight error: ..."
+        "Preflight failed with error: Preflight error: ...",
       );
     }
 
@@ -442,9 +442,9 @@ describe("Authentication", () => {
           proverAbi: [],
           args: [],
           chainId: 42,
-        })
+        }),
       ).rejects.toThrowError(
-        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`
+        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
       );
     });
 
@@ -456,9 +456,9 @@ describe("Authentication", () => {
           proverAbi: [],
           args: [],
           chainId: 42,
-        })
+        }),
       ).rejects.toThrowError(
-        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`
+        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
       );
     });
   });
