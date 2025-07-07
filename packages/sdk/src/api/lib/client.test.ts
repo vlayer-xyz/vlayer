@@ -60,8 +60,7 @@ describe("Success zk-proving", () => {
     const webProofProvider = createExtensionWebProofProvider();
     zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
     vlayer = createVlayerClient({ webProofProvider });
-  });
-  it("should send message to extension that zkproving started", async () => {
+
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
@@ -71,7 +70,8 @@ describe("Success zk-proving", () => {
         }),
       };
     });
-
+  });
+  it("should send message to extension that zkproving started", async () => {
     const result = await vlayer.prove({
       address: `0x${"a".repeat(40)}`,
       functionName: "main",
@@ -85,16 +85,6 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
   });
   it("should send message to extension that zkproving is done", async () => {
-    fetchMocker.mockResponseOnce(() => {
-      return {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: "2.0",
-          result: hashStr,
-        }),
-      };
-    });
-
     await vlayer.prove({
       address: `0x${"a".repeat(40)}`,
       functionName: "main",
@@ -126,16 +116,6 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
   it("should handle successful cycle estimation flow", async () => {
-    fetchMocker.mockResponseOnce(() => {
-      return {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: "2.0",
-          result: hashStr,
-        }),
-      };
-    });
-
     await vlayer.prove({
       address: `0x${"a".repeat(40)}`,
       functionName: "main",
