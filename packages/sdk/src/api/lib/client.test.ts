@@ -219,7 +219,7 @@ describe("Success zk-proving", () => {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       expect((e as Error).message).toMatch(
-        "Cycle estimation failed with error: Cycle estimation failed",
+        "Cycle estimation failed with error: Cycle estimation failed"
       );
     }
 
