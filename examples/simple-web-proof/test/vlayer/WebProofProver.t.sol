@@ -13,7 +13,7 @@ contract WebProverTest is VTest {
 
     function test_verifiesWebProofAndRetrievesScreenName() public {
         WebProof memory webProof = WebProof(
-            vm.readFile("testdata/web_proof.json")
+            vm.readFile("testdata/web_proof_development_notary_pub_key.json")
         );
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
