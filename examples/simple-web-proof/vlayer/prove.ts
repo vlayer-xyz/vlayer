@@ -15,7 +15,10 @@ import {
 } from "@vlayer/sdk/config";
 
 let config = getConfig();
-const web_proof = config.vlayerEnv === "mainnet" ? web_proof_vlayer_signature : web_proof_development_signature;
+const web_proof =
+  config.vlayerEnv === "mainnet"
+    ? web_proof_vlayer_signature
+    : web_proof_development_signature;
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
