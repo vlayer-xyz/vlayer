@@ -122,7 +122,7 @@ pub async fn generate(
             .map_err(Error::Preflight)
         {
             Ok(res) => {
-                let entry = set_state(&state, call_hash, State::ProvingPending);
+                let entry = set_state(&state, call_hash, State::EstimatingCycles);
                 set_metrics(entry, metrics);
                 res
             }
@@ -135,8 +135,6 @@ pub async fn generate(
         };
 
     let estimation_start = std::time::Instant::now();
-
-    set_state(&state, call_hash, State::EstimatingCycles);
 
     match Risc0CycleEstimator.estimate(&preflight_result.input, preflight_result.guest_elf) {
         Ok(result) => {
