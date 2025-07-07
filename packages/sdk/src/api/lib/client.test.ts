@@ -125,6 +125,108 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
+  it("should handle successful cycle estimation flow", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          result: hashStr,
+        }),
+      };
+    });
+
+    await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "estimating_cycles",
+            status: 1,
+            metrics: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "done",
+            status: 1,
+            metrics: {},
+            data: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+
+    await vlayer.waitForProvingResult({ hash });
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
+  });
+  it("should handle failed cycle estimation", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          result: hashStr,
+        }),
+      };
+    });
+
+    const hash = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "estimating_cycles",
+            status: 0,
+            metrics: {},
+            error: "Cycle estimation failed",
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      expect((e as Error).message).toMatch(
+        "Cycle estimation failed with error: Cycle estimation failed",
+      );
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
+  });
   it("should notify that zk-proving failed", async () => {
     fetchMocker.mockResponseOnce(() => {
       throw new Error("test");
@@ -220,7 +322,7 @@ describe("Failed zk-proving", () => {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       expect((e as Error).message).toMatch(
-        "Preflight failed with error: Preflight error: ...",
+        "Preflight failed with error: Preflight error: ..."
       );
     }
 
@@ -340,9 +442,9 @@ describe("Authentication", () => {
           proverAbi: [],
           args: [],
           chainId: 42,
-        }),
+        })
       ).rejects.toThrowError(
-        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
+        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`
       );
     });
 
@@ -354,9 +456,9 @@ describe("Authentication", () => {
           proverAbi: [],
           args: [],
           chainId: 42,
-        }),
+        })
       ).rejects.toThrowError(
-        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
+        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`
       );
     });
   });
