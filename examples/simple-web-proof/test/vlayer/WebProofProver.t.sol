@@ -11,9 +11,9 @@ import {WebProofProver} from "../../src/vlayer/WebProofProver.sol";
 contract WebProverTest is VTest {
     using Strings for string;
 
-    function test_verifiesWebProofAndRetrievesScreenName() public {
+    function test_verifiesDevelopmentWebProofAndRetrievesScreenName() public {
         WebProof memory webProof = WebProof(
-            vm.readFile("testdata/web_proof.json")
+            vm.readFile("testdata/web_proof_development_signature.json")
         );
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
@@ -28,9 +28,9 @@ contract WebProverTest is VTest {
         assertEq(addr, account);
     }
 
-    function test_failedVerificationBecauseOfInvlidNotaryPublicKey() public {
+    function test_failedVerificationBecauseOfInvalidNotaryPublicKey() public {
         WebProof memory webProof = WebProof(
-            vm.readFile("testdata/web_proof_invalid_notary_pub_key.json")
+            vm.readFile("testdata/web_proof_invalid_signature.json")
         );
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
