@@ -41,6 +41,7 @@ A nightly version is published daily and stable version is released regularly an
 - We can guarantee compatibility among various artifacts.
 
 A potential downside of this approach is that it may require developers to address bugs in their code caused by breaking changes in vlayer.
+
 We recommend using stable version for production.
 Use nightly versions if you're developing integrations or need early access to new features.
 
