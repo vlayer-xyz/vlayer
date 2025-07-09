@@ -150,9 +150,7 @@ pub async fn generate(
                     }
                     other_err => {
                         error!("Preflight failed with error: {other_err}");
-                        State::PreflightError(
-                            Error::Preflight(PreflightError::from(other_err)).into(),
-                        )
+                        State::PreflightError(Error::Preflight(other_err).into())
                     }
                 };
                 let entry = set_state(&state, call_hash, state_value);

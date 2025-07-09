@@ -51,14 +51,13 @@ pub enum ExecutionError {
 }
 
 impl ExecutionError {
-    pub fn is_gas_limit_exceeded(&self) -> bool {
-        match self {
-            ExecutionError::EvmError(evm_error) => match evm_error {
-                EVMError::Transaction(InvalidTransaction::CallGasCostMoreThanGasLimit) => true,
-                _ => false,
-            },
-            _ => false,
-        }
+    pub const fn is_gas_limit_exceeded(&self) -> bool {
+        matches!(
+            self,
+            ExecutionError::EvmError(EVMError::Transaction(
+                InvalidTransaction::CallGasCostMoreThanGasLimit
+            ))
+        )
     }
 }
 
