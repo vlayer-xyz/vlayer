@@ -22,7 +22,7 @@ pub enum Error {
 }
 
 impl Error {
-    pub fn is_gas_limit_exceeded(&self) -> bool {
+    pub const fn is_gas_limit_exceeded(&self) -> bool {
         match self {
             Error::Execution(execution_error) => execution_error.is_gas_limit_exceeded(),
             _ => false,
