@@ -32,6 +32,8 @@
   - [Global variables](./advanced/prover-global-variables.md)
   - [Tests](./advanced/tests.md)
 
+- [FAQ & Troubleshooting](./faq-troubleshooting.md)
+
 ---
 
 - [Appendix]()
