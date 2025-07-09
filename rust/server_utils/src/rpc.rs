@@ -28,7 +28,7 @@ impl Error {
             Error::JsonRpc(value) => value
                 .as_object()
                 .and_then(|obj| obj.get("code"))
-                .and_then(|code| code.as_u64()),
+                .and_then(serde_json::Value::as_u64),
             _ => None,
         }
     }
