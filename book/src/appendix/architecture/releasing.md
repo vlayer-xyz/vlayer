@@ -33,9 +33,9 @@ Unfortunately, both the user and vlayer have limited control over the SDK versio
 
 ### Nightly and Stable Versions
 
-To ensure developers have the best possible experience, we will encourage and/or require them to always update to the most recent version of vlayer.
+To ensure developers have the best possible experience, we recommend always using the most recent version of vlayer.
 
-A new nightly version is released each day, and a new stable version is released weekly. This approach ensures that:
+A nightly version is published daily and stable version is released regularly and includes tested features and fixes.
 
 - Developers have access to the latest features and bug fixes.
 - We can guarantee compatibility among various artifacts.
