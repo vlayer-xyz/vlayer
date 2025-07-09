@@ -78,7 +78,7 @@ Updating these artifacts is encouraged and is executable via `vlayer update`.
 
 - **User Dashboard** - A user interface for managing proof history and purchasing
 - **vlayer Prover** - A server for executing `Prover` operations
-- **Chain Indexers** - A server for pre-proving on-chain data, including a JSON RPC server and worker components
+- **Chain Indexers** - A server for maintaining a [Chain Proof Cache](../architecture/chain_proof/coherence.md#chain-proof-cache), including a JSON RPC server and worker components
 - **TLS Notary Server** - Manages notarization in the Web Proofs context, deployed as needed
 - **DNS Notary Server** - Manages notarization in the Email Proofs context, deployed as needed
 - **WebSocket Proxy** - Handles TCP/IP connection proxying for Web Proofs, deployed as required
