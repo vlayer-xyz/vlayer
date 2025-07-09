@@ -28,7 +28,6 @@ impl Error {
     pub fn is_insufficient_gas_balance(&self) -> bool {
         match self {
             Error::Rpc(rpc_err) => rpc_err.has_error_code(INSUFFICIENT_GAS_BALANCE_ERROR_CODE),
-            _ => false,
         }
     }
 }
