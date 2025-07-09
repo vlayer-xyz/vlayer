@@ -22,8 +22,6 @@ type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     #[error(transparent)]
     Rpc(#[from] RpcError),
-    #[error("{0}")]
-    UserFriendly(String),
 }
 
 impl Error {
