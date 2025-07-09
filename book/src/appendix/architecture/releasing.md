@@ -78,8 +78,8 @@ Updating these artifacts is encouraged and is executable via `vlayer update`.
 - **User Dashboard** - A user interface for managing proof history and purchasing
 - **vlayer Prover** - A server for executing `Prover` operations
 - **Chain Indexers** - A server for pre-proving on-chain data, including a JSON RPC server and worker components
-- **TLS Notary** - Manages notarization in the Web Proofs context, deployed as needed
-- **DNS Notary** - Manages notarization in the Email Proofs context, deployed as needed
+- **TLS Notary Server** - Manages notarization in the Web Proofs context, deployed as needed
+- **DNS Notary Server** - Manages notarization in the Email Proofs context, deployed as needed
 - **WebSocket Proxy** - Handles TCP/IP connection proxying for Web Proofs, deployed as required
 - **Additional Components** - Includes monitoring infrastructure and networked proving systems
 
@@ -101,6 +101,6 @@ All server infrastructure may undergo daily deployments to accommodate updates.
 | User dashboard                   | Server                 | Daily             | -                               | vlayer                |
 | vlayer prover                    | Server                 | Nightly/Stable    | -                               | vlayer                |
 | Chain Indexers                   | Server                 | Stable            | -                               | vlayer                |
-| Notary (TLS/DNS)                 | Server                 | As needed         | -                               | vlayer                |
+| Notary Servers (TLS/DNS)         | Server                 | As needed         | -                               | vlayer                |
 | WebSocket proxy                  | Server                 | As needed         | -                               | vlayer                |
 | Proving network (Bonsai)         | Server                 | Uncontrollable    | -                               | Uncontrollable        |
