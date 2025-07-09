@@ -22,7 +22,7 @@ Addresses:
 
 The Smart Contracts provided by vlayer provide base classes from which the Developer derives their own Smart Contracts.
 
-Only testnet contracts allow fake proofs - on mainnet, only real Groth16 proofs are valid.
+Only testnet contracts allow [fake proofs](../getting-started/dev-and-production.md#fake-mode) - on mainnet, only [real Groth16 proofs](../getting-started/dev-and-production.md#groth16-mode) are valid.
 
 ### Mainnet Addresses
 
