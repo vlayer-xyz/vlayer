@@ -108,20 +108,13 @@ pub async fn generate(
             set_state(&state, call_hash, State::PreflightPending);
         }
         Err(err) => {
-            if err.is_insufficient_gas_balance() {
-                set_state(
-                    &state,
-                    call_hash,
-                    State::AllocateGasError(Error::AllocateGasInsufficientBalance.into()),
-                );
+            let state_value = if err.is_insufficient_gas_balance() {
+                State::AllocateGasError(Error::AllocateGasInsufficientBalance.into())
             } else {
                 error!("Gas meter failed with error: {err}");
-                set_state(
-                    &state,
-                    call_hash,
-                    State::AllocateGasError(Error::AllocateGasRpc(err).into()),
-                );
-            }
+                State::AllocateGasError(Error::AllocateGasRpc(err).into())
+            };
+            set_state(&state, call_hash, state_value);
             return;
         }
     };
