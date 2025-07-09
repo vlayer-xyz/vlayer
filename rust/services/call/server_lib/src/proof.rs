@@ -18,7 +18,7 @@ use crate::{
 pub enum Error {
     #[error("Allocating gas: {0}")]
     AllocateGasRpc(#[from] GasMeterError),
-    #[error("Your gas balance is insufficient to allocate given gas_limit")]
+    #[error("Your gas balance is insufficient to allocate given gas_limit.")]
     AllocateGasInsufficientBalance,
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
@@ -109,28 +109,33 @@ pub async fn generate(
             set_state(&state, call_hash, State::PreflightPending);
         }
         Err(err) => {
-            error!("Gas meter failed with error: {err}");
-            let allocate_gas_error = match &err {
-                GasMeterError::Rpc(rpc_error) => match rpc_error {
-                    server_utils::rpc::Error::JsonRpc(error_value) => {
-                        if error_value
-                            .as_object()
-                            .and_then(|obj| obj.get("code"))
-                            .and_then(|code| code.as_u64())
-                            .filter(|&code| code == 1003)
-                            .is_some()
-                        {
-                            Error::AllocateGasInsufficientBalance
-                        } else {
-                            Error::AllocateGasRpc(err)
-                        }
-                    }
-                    _ => Error::AllocateGasRpc(err),
-                },
-            };
+            let is_insufficient_balance = matches!(
+                &err,
+                GasMeterError::Rpc(server_utils::rpc::Error::JsonRpc(error_value))
+                    if error_value
+                        .as_object()
+                        .and_then(|obj| obj.get("code"))
+                        .and_then(|code| code.as_u64())
+                        .filter(|&code| code == 1003)
+                        .is_some()
+            );
 
-            set_state(&state, call_hash, State::AllocateGasError(allocate_gas_error.into()));
-            return;
+            if is_insufficient_balance {
+                set_state(
+                    &state,
+                    call_hash,
+                    State::AllocateGasError(Error::AllocateGasInsufficientBalance.into()),
+                );
+                return;
+            } else {
+                error!("Gas meter failed with error: {err}");
+                set_state(
+                    &state,
+                    call_hash,
+                    State::AllocateGasError(Error::AllocateGasRpc(err).into()),
+                );
+                return;
+            }
         }
     };
 

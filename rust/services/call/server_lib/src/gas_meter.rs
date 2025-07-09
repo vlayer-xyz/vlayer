@@ -140,10 +140,7 @@ impl Client for RpcClient {
     async fn allocate(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live.as_secs());
         info!("v_allocateGas => {req:#?}");
-        if let Err(err) = self.call(req).await {
-            error!("v_allocateGas failed with error: {err}");
-            return Err(err);
-        }
+        self.call(req).await?;
         Ok(())
     }
 
