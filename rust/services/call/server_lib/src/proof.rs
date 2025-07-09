@@ -17,8 +17,8 @@ use crate::{
 pub enum Error {
     #[error("Allocating gas: {0}")]
     AllocateGasRpc(#[from] GasMeterError),
-    #[error("Your gas balance is insufficient to allocate given gas_limit.")]
-    AllocateGasInsufficientBalance,
+    #[error("Your gas balance is insufficient to allocate given gas_limit of {gas_limit}.")]
+    AllocateGasInsufficientBalance { gas_limit: u64 },
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
     #[error("Proving: {0}")]
@@ -109,7 +109,12 @@ pub async fn generate(
         }
         Err(err) => {
             let state_value = if err.is_insufficient_gas_balance() {
-                State::AllocateGasError(Error::AllocateGasInsufficientBalance.into())
+                State::AllocateGasError(
+                    Error::AllocateGasInsufficientBalance {
+                        gas_limit: call.gas_limit,
+                    }
+                    .into(),
+                )
             } else {
                 error!("Gas meter failed with error: {err}");
                 State::AllocateGasError(Error::AllocateGasRpc(err).into())
