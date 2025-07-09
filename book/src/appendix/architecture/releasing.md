@@ -41,15 +41,8 @@ A nightly version is published daily and stable version is released regularly an
 - We can guarantee compatibility among various artifacts.
 
 A potential downside of this approach is that it may require developers to address bugs in their code caused by breaking changes in vlayer.
-
-### Production
-
-In the production environment, we still want to encourage developers to update to the latest version; however:
-
-- Stable versions are released less frequently than nightly, and this process is initiated manually.
-  - We avoid unannounced breaking changes in the stable versions.
-  - We pay additional considerations to changes in audited code.
-- Developers may be required to update their versions in order to maintain compatibility with vlayer's node infrastructure. For greater control, developers might want to enter into a self-hosted arrangement with vlayer.
+We recommend using stable version for production.
+Use nightly versions if you're developing integrations or need early access to new features.
 
 ## Artifacts and Deployment Cycles
 
