@@ -1,6 +1,7 @@
 use call_engine::Call as EngineCall;
 use call_host::{CycleEstimator, Host, ProvingInput, Risc0CycleEstimator};
 use dashmap::Entry;
+use server_utils;
 use tracing::{error, info, instrument};
 
 pub use crate::proving::RawData;
@@ -16,7 +17,9 @@ use crate::{
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Allocating gas: {0}")]
-    AllocateGas(#[from] GasMeterError),
+    AllocateGasRpc(#[from] GasMeterError),
+    #[error("Your gas balance is insufficient to allocate given gas_limit")]
+    AllocateGasInsufficientBalance,
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
     #[error("Proving: {0}")]
@@ -101,17 +104,32 @@ pub async fn generate(
 
     set_state(&state, call_hash, State::AllocateGasPending);
 
-    match gas_meter_client
-        .allocate(call.gas_limit)
-        .await
-        .map_err(Error::AllocateGas)
-    {
+    match gas_meter_client.allocate(call.gas_limit).await {
         Ok(()) => {
             set_state(&state, call_hash, State::PreflightPending);
         }
         Err(err) => {
             error!("Gas meter failed with error: {err}");
-            set_state(&state, call_hash, State::AllocateGasError(err.into()));
+            let allocate_gas_error = match &err {
+                GasMeterError::Rpc(rpc_error) => match rpc_error {
+                    server_utils::rpc::Error::JsonRpc(error_value) => {
+                        if error_value
+                            .as_object()
+                            .and_then(|obj| obj.get("code"))
+                            .and_then(|code| code.as_u64())
+                            .filter(|&code| code == 1003)
+                            .is_some()
+                        {
+                            Error::AllocateGasInsufficientBalance
+                        } else {
+                            Error::AllocateGasRpc(err)
+                        }
+                    }
+                    _ => Error::AllocateGasRpc(err),
+                },
+            };
+
+            set_state(&state, call_hash, State::AllocateGasError(allocate_gas_error.into()));
             return;
         }
     };
