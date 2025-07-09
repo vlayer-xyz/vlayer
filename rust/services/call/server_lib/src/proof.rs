@@ -1,7 +1,6 @@
 use call_engine::Call as EngineCall;
 use call_host::{CycleEstimator, Host, ProvingInput, Risc0CycleEstimator};
 use dashmap::Entry;
-use server_utils;
 use tracing::{error, info, instrument};
 
 pub use crate::proving::RawData;
@@ -109,24 +108,12 @@ pub async fn generate(
             set_state(&state, call_hash, State::PreflightPending);
         }
         Err(err) => {
-            let is_insufficient_balance = matches!(
-                &err,
-                GasMeterError::Rpc(server_utils::rpc::Error::JsonRpc(error_value))
-                    if error_value
-                        .as_object()
-                        .and_then(|obj| obj.get("code"))
-                        .and_then(|code| code.as_u64())
-                        .filter(|&code| code == 1003)
-                        .is_some()
-            );
-
-            if is_insufficient_balance {
+            if err.is_insufficient_gas_balance() {
                 set_state(
                     &state,
                     call_hash,
                     State::AllocateGasError(Error::AllocateGasInsufficientBalance.into()),
                 );
-                return;
             } else {
                 error!("Gas meter failed with error: {err}");
                 set_state(
@@ -134,8 +121,8 @@ pub async fn generate(
                     call_hash,
                     State::AllocateGasError(Error::AllocateGasRpc(err).into()),
                 );
-                return;
             }
+            return;
         }
     };
 

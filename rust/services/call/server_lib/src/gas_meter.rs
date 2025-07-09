@@ -14,12 +14,25 @@ use tracing::{error, info};
 
 use crate::handlers::v_call::types::CallHash;
 
+pub const INSUFFICIENT_GAS_BALANCE_ERROR_CODE: u64 = 1003;
+
 type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
     Rpc(#[from] RpcError),
+    #[error("{0}")]
+    UserFriendly(String),
+}
+
+impl Error {
+    pub fn is_insufficient_gas_balance(&self) -> bool {
+        match self {
+            Error::Rpc(rpc_err) => rpc_err.has_error_code(INSUFFICIENT_GAS_BALANCE_ERROR_CODE),
+            _ => false,
+        }
+    }
 }
 
 #[derive(new, Serialize, Debug)]
