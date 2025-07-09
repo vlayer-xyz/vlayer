@@ -4,7 +4,7 @@ use call_engine::{
     evm::{self},
     verifier,
 };
-use revm::primitives::{EVMError, HaltReason, SuccessReason};
+use revm::primitives::{EVMError, HaltReason, InvalidTransaction, SuccessReason};
 use thiserror::Error;
 
 use crate::{HostDbError, into_input};
@@ -19,6 +19,15 @@ pub enum Error {
 
     #[error("Travel Call verifier error: {0}")]
     Verifier(#[from] verifier::travel_call::Error),
+}
+
+impl Error {
+    pub fn is_gas_limit_exceeded(&self) -> bool {
+        match self {
+            Error::Execution(execution_error) => execution_error.is_gas_limit_exceeded(),
+            _ => false,
+        }
+    }
 }
 
 #[derive(Error, Debug)]
@@ -39,6 +48,18 @@ pub enum ExecutionError {
 
     #[error("Panic: {0}")]
     Panic(String),
+}
+
+impl ExecutionError {
+    pub fn is_gas_limit_exceeded(&self) -> bool {
+        match self {
+            ExecutionError::EvmError(evm_error) => match evm_error {
+                EVMError::Transaction(InvalidTransaction::CallGasCostMoreThanGasLimit) => true,
+                _ => false,
+            },
+            _ => false,
+        }
+    }
 }
 
 pub type GuestExecutionError = call_engine::travel_call::Error<HostDbError>;
