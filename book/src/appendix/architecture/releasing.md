@@ -60,7 +60,7 @@ Each environment includes multiple artifacts, each with distinct deployment cycl
 
 - **vlayer Command Line Tools** - Used in different contexts:
   - `vlayer` with `init` and `test` flags, tightly integrated with Foundry
-  - `call_server` (a.k.a prover), an optional dependency for local development
+  - `call_server`, an optional dependency for local development without relying on the vlayer node infrastructure for proving
 - **Local Development SDK**
 - **vlayer Smart Contracts** - Managed via Soldeer
 - **Foundry** - An external dependency requiring updates synchronized with vlayer to:
