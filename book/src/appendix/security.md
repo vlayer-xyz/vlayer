@@ -22,9 +22,9 @@ Addresses:
 
 vlayer provides base classes from which the developer derives their own smart contracts.
 
-On testnet, contracts support [fake proofs](../getting-started/dev-and-production.md#fake-mode) for faster development and testing.
-
-On mainnet, only [real Groth16 proofs](../getting-started/dev-and-production.md#groth16-mode) are valid.
+> Note: On testnet, contracts support [fake proofs](../getting-started/dev-and-production.md#fake-mode) for faster development and testing.
+>
+> On mainnet, only [real Groth16 proofs](../getting-started/dev-and-production.md#groth16-mode) are valid.
 
 ### Mainnet Addresses
 
