@@ -141,6 +141,60 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toBeCalledTimes(1);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
   });
+  it("should handle successful cycle estimation flow", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          result: hashStr,
+        }),
+      };
+    });
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "estimating_cycles",
+            status: 1,
+            metrics: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "done",
+            status: 1,
+            metrics: {},
+            data: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+
+    await vlayer.waitForProvingResult({ hash });
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
+  });
 });
 
 describe("Failed zk-proving", () => {
@@ -221,6 +275,53 @@ describe("Failed zk-proving", () => {
     } catch (e) {
       expect((e as Error).message).toMatch(
         "Preflight failed with error: Preflight error: ...",
+      );
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
+  });
+  it("should handle failed cycle estimation", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          result: hashStr,
+        }),
+      };
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "estimating_cycles",
+            status: 0,
+            metrics: {},
+            error: "Cycle estimation failed",
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    const hash = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      // The SDK cannot understand the new `estimating_cycles` state, but is able to handle the error and read the error message.
+      expect((e as Error).message).toMatch(
+        "Failed with error: Cycle estimation failed",
       );
     }
 

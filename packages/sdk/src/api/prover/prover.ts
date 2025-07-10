@@ -88,6 +88,9 @@ const handleErrors = ({ status, state, error }: ProofReceipt) => {
       .with(ProofState.Proving, () => {
         throw new Error(`Proving failed with error: ${error}`);
       })
+      .with(ProofState.Unknown, () => {
+        throw new Error(`Failed with error: ${error}`);
+      })
       .exhaustive();
   }
 };
