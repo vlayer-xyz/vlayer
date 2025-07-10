@@ -116,40 +116,28 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
     error: z.string(),
     data: z.undefined(),
     metrics: z.custom<Metrics>(),
-    state: z.string().transform((val) => {
-      if (val === (ProofState.AllocateGas as string)) {
-        return ProofState.AllocateGas;
-      }
-      if (val === (ProofState.Preflight as string)) {
-        return ProofState.Preflight;
-      }
-      if (val === (ProofState.Proving as string)) {
-        return ProofState.Proving;
-      }
-      return ProofState.Unknown;
-    }),
+    state: z
+      .enum([
+        ProofState.AllocateGas,
+        ProofState.Preflight,
+        ProofState.Proving,
+        ProofState.Unknown,
+      ])
+      .catch(ProofState.Unknown),
   }),
   z.object({
     status: z.literal(1),
     error: z.undefined(),
-    state: z.string().transform((val) => {
-      if (val === (ProofState.Done as string)) {
-        return ProofState.Done;
-      }
-      if (val === (ProofState.AllocateGas as string)) {
-        return ProofState.AllocateGas;
-      }
-      if (val === (ProofState.Preflight as string)) {
-        return ProofState.Preflight;
-      }
-      if (val === (ProofState.Proving as string)) {
-        return ProofState.Proving;
-      }
-      if (val === (ProofState.Queued as string)) {
-        return ProofState.Queued;
-      }
-      return ProofState.Unknown;
-    }),
+    state: z
+      .enum([
+        ProofState.Done,
+        ProofState.AllocateGas,
+        ProofState.Preflight,
+        ProofState.Proving,
+        ProofState.Queued,
+        ProofState.Unknown,
+      ])
+      .catch(ProofState.Unknown),
     data: z.custom<ProofData>(),
     metrics: z.custom<Metrics>(),
   }),
