@@ -50,7 +50,7 @@ rzup show
 echo "::endgroup::"
 ```
 
-4. Nightly Dockerfiles - `docker/call_server/Dockerfile.nightly` and `docker/chain_worker/Dockerfile.nightly`
+4. Dockerfiles - `docker/call_server/Dockerfile` and `docker/chain_worker/Dockerfile`
 
 ```docker
 RUN curl -L https://github.com/risc0/risc0/releases/download/v2.0.0/cargo-risczero-x86_64-unknown-linux-gnu.tgz -o cargo-risczero-x86_64-unknown-linux-gnu.tgz
