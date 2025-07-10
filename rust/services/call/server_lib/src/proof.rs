@@ -136,17 +136,16 @@ pub async fn generate(
             }
             Err(err) => {
                 let state_value = match err {
+                    preflight::Error::Preflight(preflight_err)
+                        if preflight_err.is_gas_limit_exceeded() =>
+                    {
+                        State::PreflightError(Error::PreflightGasLimitExceeded { gas_limit }.into())
+                    }
                     preflight::Error::Preflight(preflight_err) => {
-                        if preflight_err.is_gas_limit_exceeded() {
-                            State::PreflightError(
-                                Error::PreflightGasLimitExceeded { gas_limit }.into(),
-                            )
-                        } else {
-                            error!("Preflight failed with error: {preflight_err}");
-                            State::PreflightError(
-                                Error::Preflight(preflight::Error::Preflight(preflight_err)).into(),
-                            )
-                        }
+                        error!("Preflight failed with error: {preflight_err}");
+                        State::PreflightError(
+                            Error::Preflight(preflight::Error::Preflight(preflight_err)).into(),
+                        )
                     }
                     other_err => {
                         error!("Preflight failed with error: {other_err}");
