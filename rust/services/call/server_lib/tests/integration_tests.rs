@@ -157,6 +157,41 @@ mod server_tests {
             assert_eq!(StatusCode::OK, response.status());
             assert_jrpc_ok(response, EXPECTED_HASH).await;
         }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn accepts_vgas_limit() {
+            const EXPECTED_HASH: &str =
+                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+
+            let ctx = Context::default();
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                        "vgas_limit": GAS_LIMIT,
+                    },
+                    {
+                        "chain_id": ETHEREUM_SEPOLIA_ID,
+                    }
+                ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            let response = app.post("/", &req).await;
+            assert_eq!(StatusCode::OK, response.status());
+
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
+        }
     }
 
     #[allow(non_snake_case)]
