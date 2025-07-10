@@ -21,6 +21,8 @@ pub enum Error {
     AllocateGasInsufficientBalance { gas_limit: u64 },
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
+    #[error("Proving exceeds given gas_limit of {gas_limit}.")]
+    PreflightGasLimitExceeded { gas_limit: u64 },
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
 }
@@ -123,19 +125,33 @@ pub async fn generate(
         }
     };
 
+    let gas_limit = call.gas_limit;
     let preflight_result =
-        match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics)
-            .await
-            .map_err(Error::Preflight)
-        {
+        match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics).await {
             Ok(res) => {
                 let entry = set_state(&state, call_hash, State::ProvingPending);
                 set_metrics(entry, metrics);
                 res
             }
             Err(err) => {
-                error!("Preflight failed with error: {err}");
-                let entry = set_state(&state, call_hash, State::PreflightError(err.into()));
+                let state_value = match err {
+                    preflight::Error::Preflight(preflight_err)
+                        if preflight_err.is_gas_limit_exceeded() =>
+                    {
+                        State::PreflightError(Error::PreflightGasLimitExceeded { gas_limit }.into())
+                    }
+                    preflight::Error::Preflight(preflight_err) => {
+                        error!("Preflight failed with error: {preflight_err}");
+                        State::PreflightError(
+                            Error::Preflight(preflight::Error::Preflight(preflight_err)).into(),
+                        )
+                    }
+                    other_err => {
+                        error!("Preflight failed with error: {other_err}");
+                        State::PreflightError(Error::Preflight(other_err).into())
+                    }
+                };
+                let entry = set_state(&state, call_hash, state_value);
                 set_metrics(entry, metrics);
                 return;
             }
