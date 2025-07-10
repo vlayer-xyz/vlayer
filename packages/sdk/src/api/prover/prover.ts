@@ -89,11 +89,7 @@ const handleErrors = ({ status, state, error }: ProofReceipt) => {
         throw new Error(`Proving failed with error: ${error}`);
       })
       .with(ProofState.Unknown, () => {
-        // For unknown states, we can try to infer from the error message
-        if (error?.includes("Cycle estimation")) {
-          throw new Error(`Cycle estimation failed with error: ${error}`);
-        }
-        throw new Error(`Operation failed with error: ${error}`);
+        throw new Error(`Failed with error: ${error}`);
       })
       .exhaustive();
   }

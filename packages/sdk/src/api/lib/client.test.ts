@@ -319,8 +319,9 @@ describe("Failed zk-proving", () => {
     try {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
+      // The SDK cannot understand the new `estimating_cycles` state, but is able to handle the error and read the error message.
       expect((e as Error).message).toMatch(
-        "Cycle estimation failed with error: Cycle estimation failed",
+        "Failed with error: Cycle estimation failed",
       );
     }
 
