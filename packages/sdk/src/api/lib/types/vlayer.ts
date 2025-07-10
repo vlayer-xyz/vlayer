@@ -52,6 +52,7 @@ export enum ProofState {
   Preflight = "preflight",
   Proving = "proving",
   Done = "done",
+  Unknown = "unknown",
 }
 
 export type ProofData = {
@@ -115,22 +116,28 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
     error: z.string(),
     data: z.undefined(),
     metrics: z.custom<Metrics>(),
-    state: z.enum([
-      ProofState.AllocateGas,
-      ProofState.Preflight,
-      ProofState.Proving,
-    ]),
+    state: z.string().transform((val): ProofState => {
+      const knownStates = [
+        ProofState.AllocateGas,
+        ProofState.Preflight,
+        ProofState.Proving,
+      ];
+      return knownStates.find((state) => state === val) || ProofState.Unknown;
+    }),
   }),
   z.object({
     status: z.literal(1),
     error: z.undefined(),
-    state: z.enum([
-      ProofState.Done,
-      ProofState.AllocateGas,
-      ProofState.Preflight,
-      ProofState.Proving,
-      ProofState.Queued,
-    ]),
+    state: z.string().transform((val): ProofState => {
+      const knownStates = [
+        ProofState.Done,
+        ProofState.AllocateGas,
+        ProofState.Preflight,
+        ProofState.Proving,
+        ProofState.Queued,
+      ];
+      return knownStates.find((state) => state === val) || ProofState.Unknown;
+    }),
     data: z.custom<ProofData>(),
     metrics: z.custom<Metrics>(),
   }),
