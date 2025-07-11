@@ -31,13 +31,13 @@
     ~/.vlayer/bin/vlayerup --channel {{ vlayer_release_channel }}
   args:
     executable: /bin/bash
-  async: 600  # 10 minutes to complete
-  poll: 10  # check every 10 seconds
+  async: 600 # 10 minutes to complete
+  poll: 10 # check every 10 seconds
   retries: 2
-  when: not vlayerup_executed | default(false)
+  when: not chain_server_vlayerup_executed | default(false)
 - name: Mark vlayerup as executed
   ansible.builtin.set_fact:
-    vlayerup_executed: true
+    chain_server_vlayerup_executed: true
 
 - name: Install service file
   become: true
@@ -45,7 +45,7 @@
   ansible.builtin.template:
     src: vlayer-chain-server.service.j2
     dest: /etc/systemd/system/vlayer-chain-server.service
-    mode: '644'
+    mode: "644"
 
 - name: Enable and start the vlayer service
   become: true
