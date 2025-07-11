@@ -12,6 +12,9 @@ use crate::{
 
 pub mod types;
 
+// Limit for the gas used during the preflight. It's not used for limiting cycles.
+const EVM_GAS_LIMIT: u64 = 100_000_000;
+
 pub async fn v_call(
     state: State,
     call: Call,
@@ -24,7 +27,8 @@ pub async fn v_call(
         req_id,
     } = params;
 
-    let call = call.parse_and_validate(config.max_calldata_size)?;
+    let vgas_limit = call.gas_limit;
+    let call = call.parse_and_validate(config.max_calldata_size, EVM_GAS_LIMIT)?;
 
     let host = build_host(&config, context.chain_id, call.to).await?;
     let call_hash = (&host.start_execution_location(), &call).into();
@@ -42,7 +46,7 @@ pub async fn v_call(
     if !found_existing {
         tokio::spawn(async move {
             let span = info_span!("http", id = req_id.to_string());
-            proof::generate(call, host, gas_meter_client, state.clone(), call_hash)
+            proof::generate(call, host, gas_meter_client, vgas_limit, state.clone(), call_hash)
                 .instrument(span)
                 .await
         });

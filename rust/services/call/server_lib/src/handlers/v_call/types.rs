@@ -60,11 +60,11 @@ impl Call {
         }
     }
 
-    pub fn parse_and_validate(self, max_calldata_size: usize) -> Result<HostCall> {
+    pub fn parse_and_validate(self, max_calldata_size: usize, gas_limit: u64) -> Result<HostCall> {
         let call = HostCall {
             to: parse_address_field("to", self.to)?,
             data: parse_hex_field("data", self.data)?,
-            gas_limit: self.gas_limit,
+            gas_limit,
         };
 
         if call.data.len() > max_calldata_size {
@@ -132,7 +132,7 @@ mod test {
     #[tokio::test]
     async fn invalid_to_address() {
         let call = Call::new(INVALID_ADDRESS, DATA, 0);
-        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE);
+        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE, 0);
 
         assert!(matches!(
             actual_result,
@@ -144,7 +144,7 @@ mod test {
     async fn invalid_data() {
         const INVALID_DATA: &str = "xx";
         let call = Call::new(TO, INVALID_DATA, 0);
-        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE);
+        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE, 0);
 
         assert!(matches!(
             actual_result,
@@ -156,7 +156,7 @@ mod test {
     async fn calldata_length_limit() {
         const LONG_DATA: &str = "0x00";
         let call = Call::new(TO, LONG_DATA, 0);
-        let actual_result = call.parse_and_validate(0);
+        let actual_result = call.parse_and_validate(0, 0);
 
         assert!(matches!(
             actual_result,

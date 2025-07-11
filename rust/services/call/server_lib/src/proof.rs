@@ -1,5 +1,5 @@
 use call_engine::Call as EngineCall;
-use call_host::{CycleEstimator, Host, ProvingInput, Risc0CycleEstimator};
+use call_host::{CycleEstimator, CycleEstimatorError, Host, ProvingInput, Risc0CycleEstimator};
 use dashmap::Entry;
 use tracing::{error, info, instrument};
 
@@ -13,6 +13,8 @@ use crate::{
     v_call::CallHash,
 };
 
+const CYCLES_PER_VGAS: u64 = 1_000_000;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Allocating gas: {0}")]
@@ -21,8 +23,12 @@ pub enum Error {
     AllocateGasInsufficientBalance { gas_limit: u64 },
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
-    #[error("Proving exceeds given gas_limit of {gas_limit}.")]
+    #[error("Can can consume at most {gas_limit} EVM gas.")]
     PreflightGasLimitExceeded { gas_limit: u64 },
+    #[error("Estimating cycles: {0}")]
+    EstimatingCycles(#[from] CycleEstimatorError),
+    #[error("Insufficient gas: provided {provided}, estimated cycles: {estimated}")]
+    InsufficientGas { provided: u64, estimated: u64 },
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
 }
@@ -36,6 +42,7 @@ pub enum State {
     PreflightPending,
     PreflightError(Box<Error>),
     EstimatingCyclesPending,
+    EstimatingCyclesError(Box<Error>),
     ProvingPending,
     ProvingError(Box<Error>),
     Done(Box<RawData>),
@@ -45,7 +52,10 @@ impl State {
     pub const fn is_err(&self) -> bool {
         matches!(
             self,
-            State::AllocateGasError(..) | State::PreflightError(..) | State::ProvingError(..)
+            State::AllocateGasError(..)
+                | State::PreflightError(..)
+                | State::ProvingError(..)
+                | State::EstimatingCyclesError(..)
         )
     }
 
@@ -94,18 +104,20 @@ pub async fn generate(
     call: EngineCall,
     host: Host,
     gas_meter_client: impl GasMeterClient,
+    vgas_limit: u64,
     state: AppState,
     call_hash: CallHash,
 ) {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let mut metrics = Metrics::default();
+    let cycles_limit = vgas_limit * CYCLES_PER_VGAS;
 
     info!("Generating proof");
 
     set_state(&state, call_hash, State::AllocateGasPending);
 
-    match gas_meter_client.allocate(call.gas_limit).await {
+    match gas_meter_client.allocate(vgas_limit).await {
         Ok(()) => {
             set_state(&state, call_hash, State::PreflightPending);
         }
@@ -113,7 +125,7 @@ pub async fn generate(
             let state_value = if err.is_insufficient_gas_balance() {
                 State::AllocateGasError(
                     Error::AllocateGasInsufficientBalance {
-                        gas_limit: call.gas_limit,
+                        gas_limit: vgas_limit,
                     }
                     .into(),
                 )
@@ -139,6 +151,7 @@ pub async fn generate(
                     preflight::Error::Preflight(preflight_err)
                         if preflight_err.is_gas_limit_exceeded() =>
                     {
+                        error!("Preflight gas limit exceeded!");
                         State::PreflightError(Error::PreflightGasLimitExceeded { gas_limit }.into())
                     }
                     preflight::Error::Preflight(preflight_err) => {
@@ -159,16 +172,44 @@ pub async fn generate(
         };
 
     let estimation_start = std::time::Instant::now();
-    match Risc0CycleEstimator.estimate(&preflight_result.input, preflight_result.guest_elf) {
-        Ok(result) => {
-            info!(estimated_cycles = result, "Cycle estimation");
-        }
-        Err(err) => {
-            error!("Cycle estimation failed with error: {err}");
-        }
-    };
+
+    let estimated_cycles =
+        match Risc0CycleEstimator.estimate(&preflight_result.input, preflight_result.guest_elf) {
+            Ok(result) => {
+                info!(estimated_cycles = result, "Cycle estimation");
+                result
+            }
+            Err(err) => {
+                error!("Cycle estimation failed with error: {err}");
+                let entry = set_state(
+                    &state,
+                    call_hash,
+                    State::EstimatingCyclesError(Box::new(Error::EstimatingCycles(err))),
+                );
+                set_metrics(entry, metrics);
+                return;
+            }
+        };
+
     let elapsed = estimation_start.elapsed();
     info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
+
+    if cycles_limit < estimated_cycles {
+        error!(
+            "Insufficient gas: provided {}, estimated cycles: {}",
+            cycles_limit, estimated_cycles
+        );
+        let entry = set_state(
+            &state,
+            call_hash,
+            State::EstimatingCyclesError(Box::new(Error::InsufficientGas {
+                provided: cycles_limit,
+                estimated: estimated_cycles,
+            })),
+        );
+        set_metrics(entry, metrics);
+        return;
+    }
 
     set_state(&state, call_hash, State::ProvingPending);
 
