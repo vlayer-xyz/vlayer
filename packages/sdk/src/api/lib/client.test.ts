@@ -211,7 +211,7 @@ describe("Failed zk-proving", () => {
         }),
       };
     });
-    
+
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
@@ -239,7 +239,7 @@ describe("Failed zk-proving", () => {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       expect((e as Error).message).toMatch(
-        "Preflight failed with error: Preflight error: ..."
+        "Preflight failed with error: Preflight error: ...",
       );
     }
 
@@ -286,7 +286,7 @@ describe("Failed zk-proving", () => {
     } catch (e) {
       // The SDK cannot understand the new `estimating_cycles` state, but is able to handle the error and read the error message.
       expect((e as Error).message).toMatch(
-        "Failed with error: Cycle estimation failed"
+        "Failed with error: Cycle estimation failed",
       );
     }
 
@@ -422,9 +422,9 @@ describe("Authentication", () => {
           proverAbi: [],
           args: [],
           chainId: 42,
-        })
+        }),
       ).rejects.toThrowError(
-        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`
+        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
       );
     });
 
@@ -436,9 +436,9 @@ describe("Authentication", () => {
           proverAbi: [],
           args: [],
           chainId: 42,
-        })
+        }),
       ).rejects.toThrowError(
-        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`
+        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
       );
     });
   });
