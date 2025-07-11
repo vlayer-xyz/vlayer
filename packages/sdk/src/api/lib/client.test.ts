@@ -115,12 +115,12 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
-  it("should handle successful cycle estimation flow", async () => {
+  it("should handle successful `new_state` state value", async () => {
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
           result: {
-            state: "estimating_cycles",
+            state: "new_state",
             status: 1,
             metrics: {},
           },
@@ -247,7 +247,7 @@ describe("Failed zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
   });
-  it("should handle failed cycle estimation", async () => {
+  it("should handle failure with `new_state` state value", async () => {
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
@@ -262,10 +262,10 @@ describe("Failed zk-proving", () => {
       return {
         body: JSON.stringify({
           result: {
-            state: "estimating_cycles",
+            state: "new_state",
             status: 0,
             metrics: {},
-            error: "Cycle estimation failed",
+            error: "some reason",
           },
           jsonrpc: "2.0",
           id: 1,
@@ -284,9 +284,9 @@ describe("Failed zk-proving", () => {
     try {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
-      // The SDK cannot understand the new `estimating_cycles` state, but is able to handle the error and read the error message.
+      // The SDK cannot understand the `new_state`, but is able to handle the error and read the error message.
       expect((e as Error).message).toMatch(
-        "Failed with error: Cycle estimation failed",
+        "Failed with error: some reason",
       );
     }
 
