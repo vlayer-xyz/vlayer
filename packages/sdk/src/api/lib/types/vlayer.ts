@@ -51,6 +51,7 @@ export enum ProofState {
   AllocateGas = "allocate_gas",
   Preflight = "preflight",
   Proving = "proving",
+  EstimatingVgas = "estimating_vgas",
   Done = "done",
   Unknown = "unknown",
 }
@@ -120,6 +121,7 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
       .enum([
         ProofState.AllocateGas,
         ProofState.Preflight,
+        ProofState.EstimatingVgas,
         ProofState.Proving,
         ProofState.Unknown,
       ])
