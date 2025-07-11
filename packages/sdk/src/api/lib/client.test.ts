@@ -160,6 +160,52 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
+  it("should handle successful vgas estimation flow", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "estimating_vgas",
+            status: 1,
+            metrics: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "done",
+            status: 1,
+            metrics: {},
+            data: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+
+    await vlayer.waitForProvingResult({ hash });
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
+  });
 });
 
 describe("Failed zk-proving", () => {
@@ -307,6 +353,52 @@ describe("Failed zk-proving", () => {
 
     expect(zkProvingSpy).toBeCalledTimes(1);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
+  });
+  it("should handle failed vgas estimation", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          result: hashStr,
+        }),
+      };
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "estimating_vgas",
+            status: 0,
+            metrics: {},
+            error: "Vgas estimation failed",
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    const hash = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      expect((e as Error).message).toMatch(
+        "Vgas estimation failed with error: Vgas estimation failed",
+      );
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
   });
 });
 

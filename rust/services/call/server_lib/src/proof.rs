@@ -35,6 +35,7 @@ pub enum State {
     AllocateGasError(Box<Error>),
     PreflightPending,
     PreflightError(Box<Error>),
+    EstimatingVgasPending,
     ProvingPending,
     ProvingError(Box<Error>),
     Done(Box<RawData>),
