@@ -17,7 +17,6 @@ type Calldata = string;
 export type CallParams = {
   to: Address;
   data: Calldata;
-  gas_limit: number;
 };
 
 export type CallContext = {
@@ -51,6 +50,7 @@ export enum ProofState {
   AllocateGas = "allocate_gas",
   Preflight = "preflight",
   Proving = "proving",
+  EstimatingVgas = "estimating_vgas",
   Done = "done",
   Unknown = "unknown",
 }
@@ -120,6 +120,7 @@ export const proofReceiptSchema = z.discriminatedUnion("status", [
       .enum([
         ProofState.AllocateGas,
         ProofState.Preflight,
+        ProofState.EstimatingVgas,
         ProofState.Proving,
         ProofState.Unknown,
       ])

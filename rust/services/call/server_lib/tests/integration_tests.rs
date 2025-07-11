@@ -9,7 +9,7 @@ mod test_helpers;
 
 use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string};
 use test_helpers::{
-    ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL, allocate_gas_body, rpc_body, v_call_body,
+    ETHEREUM_SEPOLIA_ID, GAS_METER_TTL, VGAS_LIMIT, allocate_gas_body, rpc_body, v_call_body,
 };
 
 mod server_tests {
@@ -96,12 +96,12 @@ mod server_tests {
                     {
                         "to": "I am not a valid address!",
                         "data": call_data,
-                        "gas_limit": GAS_LIMIT,
+                        "vgas_limit": VGAS_LIMIT,
                     },
                     {
                         "chain_id": ETHEREUM_SEPOLIA_ID,
                     }
-                    ],
+                ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -119,7 +119,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
             const EXPECTED_HASH: &str =
-                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+                "0x25ef754684f015821227469c1630163a0e78d7ba5285d094e5c46f0896cd8722";
 
             let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
@@ -129,7 +129,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = v_call_body(contract.address(), &call_data);
+            let req = v_call_body(contract.address(), &call_data, VGAS_LIMIT);
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
@@ -139,7 +139,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn web_proof_success() {
             const EXPECTED_HASH: &str =
-                "0xbf60e293e76b61b0a2d87b77d696f21707e6f2b7b665858935233ab8c4dfb20b";
+                "0x7632152d5d8ae4e6ae2246271c84965570984625dd19689e42aa225617a81838";
 
             let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
@@ -150,7 +150,7 @@ mod server_tests {
             let web_proof = WebProof { web_proof_json };
             let call_data = contract.web_proof(web_proof).calldata().unwrap();
 
-            let req = v_call_body(contract.address(), &call_data);
+            let req = v_call_body(contract.address(), &call_data, VGAS_LIMIT);
 
             let response = app.post("/", &req).await;
 
@@ -161,7 +161,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn accepts_vgas_limit() {
             const EXPECTED_HASH: &str =
-                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+                "0x25ef754684f015821227469c1630163a0e78d7ba5285d094e5c46f0896cd8722";
 
             let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
@@ -177,7 +177,7 @@ mod server_tests {
                     {
                         "to": contract.address(),
                         "data": call_data,
-                        "vgas_limit": GAS_LIMIT,
+                        "vgas_limit": VGAS_LIMIT,
                     },
                     {
                         "chain_id": ETHEREUM_SEPOLIA_ID,
@@ -209,7 +209,10 @@ mod server_tests {
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
-        use crate::test_helpers::mock::{Contract, Server, WebProof};
+        use crate::test_helpers::{
+            INSUFFICIENT_VGAS_LIMIT,
+            mock::{Contract, Server, WebProof},
+        };
 
         const RETRY_SLEEP_DURATION: tokio::time::Duration = tokio::time::Duration::from_millis(100);
         const MAX_POLLING_TIME: std::time::Duration = std::time::Duration::from_secs(60);
@@ -218,9 +221,9 @@ mod server_tests {
         type Resp = (State, bool, Value);
 
         #[derive(Clone)]
-        struct RetryRequest;
+        struct RetryWhilePending;
 
-        impl tower::retry::Policy<Req, Resp, String> for RetryRequest {
+        impl tower::retry::Policy<Req, Resp, String> for RetryWhilePending {
             type Future = tokio::time::Sleep;
 
             fn retry(
@@ -232,7 +235,7 @@ mod server_tests {
                     .as_ref()
                     .ok()
                     .and_then(|(state, success, _)| match state {
-                        State::Preflight | State::Proving => {
+                        State::Preflight | State::Proving | State::EstimatingVgas => {
                             if !success {
                                 None
                             } else {
@@ -254,7 +257,7 @@ mod server_tests {
             contract: &Contract,
             call_data: &Bytes,
         ) -> call_server_lib::v_call::CallHash {
-            let request = v_call_body(contract.address(), call_data);
+            let request = v_call_body(contract.address(), call_data, VGAS_LIMIT);
             let response = app.post("/", &request).await;
             assert_eq!(StatusCode::OK, response.status());
             let as_json = body_to_json(response.into_body()).await;
@@ -285,7 +288,7 @@ mod server_tests {
         async fn get_proof_result(app: &Server, hash: CallHash) -> Value {
             let svc = ServiceBuilder::new()
                 .layer(tower::timeout::TimeoutLayer::new(MAX_POLLING_TIME))
-                .layer(tower::retry::RetryLayer::new(RetryRequest))
+                .layer(tower::retry::RetryLayer::new(RetryWhilePending))
                 .service_fn(|request| async move {
                     Ok(v_get_proof_receipt_result(app, request).await) as Result<(_, _, _), String>
                 });
@@ -434,9 +437,37 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
+        async fn insufficient_gas_limit() {
+            let ctx = Context::default();
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let request = v_call_body(contract.address(), &call_data, INSUFFICIENT_VGAS_LIMIT);
+            let response = app.post("/", &request).await;
+            assert_eq!(StatusCode::OK, response.status());
+            let as_json = body_to_json(response.into_body()).await;
+            let hash = serde_json::from_value(as_json["result"].clone())
+                .expect("valid returned hash value of the call params");
+
+            let result = get_proof_result(&app, hash).await;
+            assert_json_include!(
+                actual: result,
+                expected: json!({
+                    "state": "estimating_vgas",
+                    "status": 0
+                })
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gas_meter() {
             const EXPECTED_HASH: &str =
-                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+                "0x25ef754684f015821227469c1630163a0e78d7ba5285d094e5c46f0896cd8722";
             const EXPECTED_GAS_USED: u64 = 21_724;
             const EXPECTED_CYCLES_USED: u64 = 4_194_304;
 
@@ -517,7 +548,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn ensure_we_allocate_gas_only_once() {
             const EXPECTED_HASH: &str =
-                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+                "0x25ef754684f015821227469c1630163a0e78d7ba5285d094e5c46f0896cd8722";
 
             let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
             gas_meter_server
@@ -701,7 +732,7 @@ mod server_tests {
             const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
             const API_KEY: &str = "secret-deadbeef";
             const EXPECTED_HASH: &str =
-                "0x0172834e56827951e1772acaf191c488ba427cb3218d251987a05406ec93f2b2";
+                "0x25ef754684f015821227469c1630163a0e78d7ba5285d094e5c46f0896cd8722";
             const SLEEP_DURATION: tokio::time::Duration = tokio::time::Duration::from_millis(100);
 
             let token = token(60, "1234");
@@ -739,7 +770,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = v_call_body(contract.address(), &call_data);
+            let req = v_call_body(contract.address(), &call_data, VGAS_LIMIT);
             let response = app.post_with_bearer_auth("/", &req, &token).await;
 
             assert_eq!(StatusCode::OK, response.status());
