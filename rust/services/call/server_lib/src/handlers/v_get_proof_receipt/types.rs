@@ -51,7 +51,7 @@ impl From<&ProofState> for State {
             ProofState::Queued => Self::Queued,
             ProofState::AllocateGasPending | ProofState::AllocateGasError(..) => Self::AllocateGas,
             ProofState::PreflightPending | ProofState::PreflightError(..) => Self::Preflight,
-            ProofState::EstimatingVgasPending => Self::EstimatingVgas,
+            ProofState::EstimatingCyclesPending => Self::EstimatingVgas,
             ProofState::ProvingPending | ProofState::ProvingError(..) => Self::Proving,
             ProofState::Done(..) => Self::Done,
         }

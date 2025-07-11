@@ -35,7 +35,7 @@ pub enum State {
     AllocateGasError(Box<Error>),
     PreflightPending,
     PreflightError(Box<Error>),
-    EstimatingVgasPending,
+    EstimatingCyclesPending,
     ProvingPending,
     ProvingError(Box<Error>),
     Done(Box<RawData>),
@@ -130,7 +130,7 @@ pub async fn generate(
     let preflight_result =
         match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics).await {
             Ok(res) => {
-                let entry = set_state(&state, call_hash, State::EstimatingVgasPending);
+                let entry = set_state(&state, call_hash, State::EstimatingCyclesPending);
                 set_metrics(entry, metrics);
                 res
             }
