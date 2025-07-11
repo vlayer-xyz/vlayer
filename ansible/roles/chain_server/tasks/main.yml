@@ -35,7 +35,7 @@
   poll: 10  # check every 10 seconds
   retries: 2
   when: not vlayerup_executed | default(false)
-- name: Mark vlayerup as executed
+- name: Mark vlayerup as executed  # noqa: var-naming[no-role-prefix]
   ansible.builtin.set_fact:
     vlayerup_executed: true
 
