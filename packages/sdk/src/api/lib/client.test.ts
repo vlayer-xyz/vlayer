@@ -125,22 +125,6 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
-  it("should notify that zk-proving failed", async () => {
-    fetchMocker.mockResponseOnce(() => {
-      throw new Error("test");
-    });
-
-    const hash = { hash: hashStr } as BrandedHash<[], string>;
-    try {
-      await vlayer.waitForProvingResult({ hash });
-    } catch (e) {
-      //eslint-disable-next-line no-console
-      console.log("Error waiting for proving result", e);
-    }
-
-    expect(zkProvingSpy).toBeCalledTimes(1);
-    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
-  });
   it("should handle successful cycle estimation flow", async () => {
     fetchMocker.mockResponseOnce(() => {
       return {
@@ -274,7 +258,7 @@ describe("Failed zk-proving", () => {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       expect((e as Error).message).toMatch(
-        "Preflight failed with error: Preflight error: ...",
+        "Preflight failed with error: Preflight error: ..."
       );
     }
 
@@ -321,13 +305,29 @@ describe("Failed zk-proving", () => {
     } catch (e) {
       // The SDK cannot understand the new `estimating_cycles` state, but is able to handle the error and read the error message.
       expect((e as Error).message).toMatch(
-        "Failed with error: Cycle estimation failed",
+        "Failed with error: Cycle estimation failed"
       );
     }
 
     expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
+  });
+  it("should notify that zk-proving failed", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      throw new Error("test");
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      //eslint-disable-next-line no-console
+      console.log("Error waiting for proving result", e);
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(1);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
   });
 });
 
@@ -441,9 +441,9 @@ describe("Authentication", () => {
           proverAbi: [],
           args: [],
           chainId: 42,
-        }),
+        })
       ).rejects.toThrowError(
-        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
+        `Missing JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`
       );
     });
 
@@ -455,9 +455,9 @@ describe("Authentication", () => {
           proverAbi: [],
           args: [],
           chainId: 42,
-        }),
+        })
       ).rejects.toThrowError(
-        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`,
+        `Invalid JWT token${VLAYER_ERROR_NOTES[HttpAuthorizationError.name]}`
       );
     });
   });
