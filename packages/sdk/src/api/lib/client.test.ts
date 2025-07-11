@@ -116,14 +116,6 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
   it("should handle successful cycle estimation flow", async () => {
-    await vlayer.prove({
-      address: `0x${"a".repeat(40)}`,
-      functionName: "main",
-      proverAbi: [],
-      args: [],
-      chainId: 42,
-    });
-
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
@@ -150,6 +142,14 @@ describe("Success zk-proving", () => {
           id: 1,
         }),
       };
+    });
+
+    await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
     });
 
     const hash = { hash: hashStr } as BrandedHash<[], string>;
