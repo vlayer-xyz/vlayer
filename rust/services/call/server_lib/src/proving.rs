@@ -30,6 +30,7 @@ pub async fn await_proving(
     prover_input: ProvingInput,
     gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
+    estimated_vgas: u64,
 ) -> Result<RawData, Error> {
     let host_output = Host::prove(prover, call_guest_id, prover_input)?;
     let cycles_used = host_output.cycles_used;
@@ -53,7 +54,7 @@ pub async fn await_proving(
     metrics.times.proving = metrics::elapsed_time_as_millis_u64(elapsed_time)?;
 
     gas_meter_client
-        .refund(ComputationStage::Proving, metrics.gas)
+        .refund(ComputationStage::Proving, estimated_vgas)
         .await?;
 
     Ok(raw_data)

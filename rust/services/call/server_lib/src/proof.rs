@@ -243,6 +243,7 @@ pub async fn generate(
         proving_input,
         &gas_meter_client,
         &mut metrics,
+        estimated_vgas,
     )
     .await
     .map_err(Error::Proving)
