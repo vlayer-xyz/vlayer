@@ -27,7 +27,7 @@ pub enum Error {
     PreflightEvmGasLimitExceeded { evm_gas_limit: u64 },
     #[error("Estimating cycles: {0}")]
     EstimatingCycles(#[from] CycleEstimatorError),
-    #[error("Insufficient vgas: provided {provided}, estimated vgas: {estimated}")]
+    #[error("Insufficient vgas_limit: provided {provided}, estimated vgas: {estimated}")]
     InsufficientVgas { provided: u64, estimated: u64 },
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
@@ -219,7 +219,7 @@ pub async fn generate(
 
     if cycles_limit < estimated_cycles {
         warn!(
-            "Insufficient gas: provided {} vgas ({} cycles), estimated cycles: {}",
+            "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated cycles: {}",
             vgas_limit, cycles_limit, estimated_cycles
         );
         let entry = set_state(
