@@ -1,7 +1,7 @@
 use call_engine::Call as EngineCall;
 use call_host::{CycleEstimator, CycleEstimatorError, Host, ProvingInput, Risc0CycleEstimator};
 use dashmap::Entry;
-use tracing::{error, info, instrument};
+use tracing::{error, info, instrument, warn};
 
 pub use crate::proving::RawData;
 use crate::{
@@ -195,9 +195,9 @@ pub async fn generate(
     info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
 
     if cycles_limit < estimated_cycles {
-        error!(
-            "Insufficient gas: provided {}, estimated cycles: {}",
-            cycles_limit, estimated_cycles
+        warn!(
+            "Insufficient gas: provided {} vgas ({} cycles), estimated cycles: {}",
+            vgas_limit, cycles_limit, estimated_cycles
         );
         let entry = set_state(
             &state,
