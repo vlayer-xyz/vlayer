@@ -35,6 +35,7 @@ pub enum State {
     AllocateGasError(Box<Error>),
     PreflightPending,
     PreflightError(Box<Error>),
+    EstimatingCyclesPending,
     ProvingPending,
     ProvingError(Box<Error>),
     Done(Box<RawData>),
@@ -129,7 +130,7 @@ pub async fn generate(
     let preflight_result =
         match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics).await {
             Ok(res) => {
-                let entry = set_state(&state, call_hash, State::ProvingPending);
+                let entry = set_state(&state, call_hash, State::EstimatingCyclesPending);
                 set_metrics(entry, metrics);
                 res
             }
@@ -168,6 +169,8 @@ pub async fn generate(
     };
     let elapsed = estimation_start.elapsed();
     info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
+
+    set_state(&state, call_hash, State::ProvingPending);
 
     let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
     match proving::await_proving(
