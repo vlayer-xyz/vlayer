@@ -97,7 +97,7 @@ pub struct Config {
 #[auto_impl(Box)]
 pub trait Client: Send + Sync {
     async fn allocate(&self, vgas_limit: u64) -> Result<()>;
-    async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()>;
+    async fn refund(&self, stage: ComputationStage, vgas_used: u64) -> Result<()>;
     async fn send_metadata(&self, metadata: Box<[Metadata]>) -> Result<()>;
     async fn update_cycles(&self, cycles_used: u64) -> Result<()>;
 }
