@@ -90,7 +90,7 @@ function DappWithProfile(profile: string) {
           [
             {
               response: {
-                json_body_except: ["name"],
+                json_body_except: ["name", "success"],
               },
             },
             {
