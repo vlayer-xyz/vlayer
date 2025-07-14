@@ -23,8 +23,8 @@ impl Estimator for Risc0Estimator {
         let res = executor
             .execute(env, &elf)
             .context("failed to execute executor env")?;
-        let proving_cycles: u64 = res.segments.iter().map(|s| 1u64 << s.po2).sum();
-        Ok(proving_cycles)
+        let total_cycles: u64 = res.segments.iter().map(|s| 1u64 << s.po2).sum();
+        Ok(total_cycles)
     }
 }
 
