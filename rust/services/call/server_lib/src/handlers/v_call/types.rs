@@ -60,7 +60,11 @@ impl Call {
         }
     }
 
-    pub fn parse_and_validate(self, max_calldata_size: usize, evm_gas_limit: u64) -> Result<HostCall> {
+    pub fn parse_and_validate(
+        self,
+        max_calldata_size: usize,
+        evm_gas_limit: u64,
+    ) -> Result<HostCall> {
         let call = HostCall {
             to: parse_address_field("to", self.to)?,
             data: parse_hex_field("data", self.data)?,
@@ -122,9 +126,8 @@ impl Hashable for CallHashData<'_> {
 
 #[cfg(test)]
 mod test {
-    use crate::handlers::v_call::EVM_GAS_LIMIT;
-
     use super::*;
+    use crate::handlers::v_call::EVM_GAS_LIMIT;
 
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
     const DATA: &str = "0x0000";
