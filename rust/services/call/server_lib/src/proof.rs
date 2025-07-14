@@ -19,16 +19,16 @@ const CYCLES_PER_VGAS: u64 = 1_000_000;
 pub enum Error {
     #[error("Allocating gas: {0}")]
     AllocateGasRpc(#[from] GasMeterError),
-    #[error("Your gas balance is insufficient to allocate given gas_limit of {gas_limit}.")]
-    AllocateGasInsufficientBalance { gas_limit: u64 },
+    #[error("Your vgas balance is insufficient to allocate given vgas_limit of {vgas_limit}.")]
+    AllocateGasInsufficientBalance { vgas_limit: u64 },
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
-    #[error("Can can consume at most {gas_limit} EVM gas.")]
-    PreflightGasLimitExceeded { gas_limit: u64 },
+    #[error("EVM gas limit {evm_gas_limit} exceeded.")]
+    PreflightEvmGasLimitExceeded { evm_gas_limit: u64 },
     #[error("Estimating cycles: {0}")]
     EstimatingCycles(#[from] CycleEstimatorError),
-    #[error("Insufficient gas: provided {provided}, estimated cycles: {estimated}")]
-    InsufficientGas { provided: u64, estimated: u64 },
+    #[error("Insufficient vgas: provided {provided}, estimated vgas: {estimated}")]
+    InsufficientVgas { provided: u64, estimated: u64 },
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
 }
@@ -70,6 +70,7 @@ impl State {
         match self {
             State::AllocateGasError(err)
             | State::PreflightError(err)
+            | State::EstimatingCyclesError(err)
             | State::ProvingError(err) => Some(err),
             _ => None,
         }
@@ -123,12 +124,7 @@ pub async fn generate(
         }
         Err(err) => {
             let state_value = if err.is_insufficient_gas_balance() {
-                State::AllocateGasError(
-                    Error::AllocateGasInsufficientBalance {
-                        gas_limit: vgas_limit,
-                    }
-                    .into(),
-                )
+                State::AllocateGasError(Error::AllocateGasInsufficientBalance { vgas_limit }.into())
             } else {
                 error!("Gas meter failed with error: {err}");
                 State::AllocateGasError(Error::AllocateGasRpc(err).into())
@@ -138,7 +134,7 @@ pub async fn generate(
         }
     };
 
-    let gas_limit = call.gas_limit;
+    let evm_gas_limit = call.gas_limit;
     let preflight_result =
         match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics).await {
             Ok(res) => {
@@ -152,7 +148,9 @@ pub async fn generate(
                         if preflight_err.is_gas_limit_exceeded() =>
                     {
                         error!("Preflight gas limit exceeded!");
-                        State::PreflightError(Error::PreflightGasLimitExceeded { gas_limit }.into())
+                        State::PreflightError(
+                            Error::PreflightEvmGasLimitExceeded { evm_gas_limit }.into(),
+                        )
                     }
                     preflight::Error::Preflight(preflight_err) => {
                         error!("Preflight failed with error: {preflight_err}");
@@ -199,12 +197,13 @@ pub async fn generate(
             "Insufficient gas: provided {} vgas ({} cycles), estimated cycles: {}",
             vgas_limit, cycles_limit, estimated_cycles
         );
+        let estimated_vgas = estimated_cycles.div_ceil(CYCLES_PER_VGAS);
         let entry = set_state(
             &state,
             call_hash,
-            State::EstimatingCyclesError(Box::new(Error::InsufficientGas {
-                provided: cycles_limit,
-                estimated: estimated_cycles,
+            State::EstimatingCyclesError(Box::new(Error::InsufficientVgas {
+                provided: vgas_limit,
+                estimated: estimated_vgas,
             })),
         );
         set_metrics(entry, metrics);
