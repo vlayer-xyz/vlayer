@@ -4,7 +4,7 @@ use call_host::{Host, PreflightError, PreflightResult};
 use tracing::info;
 
 use crate::{
-    gas_meter::{Client as GasMeterClient, ComputationStage, Error as GasMeterError},
+    gas_meter::Error as GasMeterError,
     metrics::{self, Error as MetricsError, Metrics},
     v_get_proof_receipt::State,
 };
@@ -22,7 +22,6 @@ pub enum Error {
 pub async fn await_preflight(
     host: Host,
     call: EngineCall,
-    gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
 ) -> Result<PreflightResult, Error> {
     let result @ PreflightResult {
@@ -64,13 +63,6 @@ pub async fn await_preflight(
             }
         }
     }
-
-    gas_meter_client
-        .refund(ComputationStage::Preflight, gas_used)
-        .await?;
-    gas_meter_client
-        .send_metadata(result.metadata.clone())
-        .await?;
 
     metrics.gas = gas_used;
     metrics.times.preflight = metrics::elapsed_time_as_millis_u64(elapsed_time)?;

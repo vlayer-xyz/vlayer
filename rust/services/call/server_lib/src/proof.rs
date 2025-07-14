@@ -5,7 +5,7 @@ use tracing::{error, info, instrument, warn};
 
 pub use crate::proving::RawData;
 use crate::{
-    gas_meter::{Client as GasMeterClient, Error as GasMeterError},
+    gas_meter::{Client as GasMeterClient, ComputationStage, Error as GasMeterError},
     handlers::State as AppState,
     metrics::Metrics,
     preflight::{self, Error as PreflightError},
@@ -135,39 +135,38 @@ pub async fn generate(
     };
 
     let evm_gas_limit = call.gas_limit;
-    let preflight_result =
-        match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics).await {
-            Ok(res) => {
-                let entry = set_state(&state, call_hash, State::EstimatingCyclesPending);
-                set_metrics(entry, metrics);
-                res
-            }
-            Err(err) => {
-                let state_value = match err {
-                    preflight::Error::Preflight(preflight_err)
-                        if preflight_err.is_gas_limit_exceeded() =>
-                    {
-                        error!("Preflight gas limit exceeded!");
-                        State::PreflightError(
-                            Error::PreflightEvmGasLimitExceeded { evm_gas_limit }.into(),
-                        )
-                    }
-                    preflight::Error::Preflight(preflight_err) => {
-                        error!("Preflight failed with error: {preflight_err}");
-                        State::PreflightError(
-                            Error::Preflight(preflight::Error::Preflight(preflight_err)).into(),
-                        )
-                    }
-                    other_err => {
-                        error!("Preflight failed with error: {other_err}");
-                        State::PreflightError(Error::Preflight(other_err).into())
-                    }
-                };
-                let entry = set_state(&state, call_hash, state_value);
-                set_metrics(entry, metrics);
-                return;
-            }
-        };
+    let preflight_result = match preflight::await_preflight(host, call, &mut metrics).await {
+        Ok(res) => {
+            let entry = set_state(&state, call_hash, State::EstimatingCyclesPending);
+            set_metrics(entry, metrics);
+            res
+        }
+        Err(err) => {
+            let state_value = match err {
+                preflight::Error::Preflight(preflight_err)
+                    if preflight_err.is_gas_limit_exceeded() =>
+                {
+                    error!("Preflight gas limit exceeded!");
+                    State::PreflightError(
+                        Error::PreflightEvmGasLimitExceeded { evm_gas_limit }.into(),
+                    )
+                }
+                preflight::Error::Preflight(preflight_err) => {
+                    error!("Preflight failed with error: {preflight_err}");
+                    State::PreflightError(
+                        Error::Preflight(preflight::Error::Preflight(preflight_err)).into(),
+                    )
+                }
+                other_err => {
+                    error!("Preflight failed with error: {other_err}");
+                    State::PreflightError(Error::Preflight(other_err).into())
+                }
+            };
+            let entry = set_state(&state, call_hash, state_value);
+            set_metrics(entry, metrics);
+            return;
+        }
+    };
 
     let estimation_start = std::time::Instant::now();
 
@@ -189,6 +188,32 @@ pub async fn generate(
             }
         };
 
+    let estimated_vgas = estimated_cycles.div_ceil(CYCLES_PER_VGAS);
+
+    metrics.gas = estimated_vgas;
+
+    if let Err(err) = gas_meter_client
+        .refund(ComputationStage::Preflight, estimated_vgas)
+        .await
+    {
+        error!("Preflight refund failed with error: {err}");
+        let entry =
+            set_state(&state, call_hash, State::PreflightError(Error::AllocateGasRpc(err).into()));
+        set_metrics(entry, metrics);
+        return;
+    }
+
+    if let Err(err) = gas_meter_client
+        .send_metadata(preflight_result.metadata.clone())
+        .await
+    {
+        error!("Send metadata failed with error: {err}");
+        let entry =
+            set_state(&state, call_hash, State::PreflightError(Error::AllocateGasRpc(err).into()));
+        set_metrics(entry, metrics);
+        return;
+    }
+
     let elapsed = estimation_start.elapsed();
     info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
 
@@ -197,7 +222,6 @@ pub async fn generate(
             "Insufficient gas: provided {} vgas ({} cycles), estimated cycles: {}",
             vgas_limit, cycles_limit, estimated_cycles
         );
-        let estimated_vgas = estimated_cycles.div_ceil(CYCLES_PER_VGAS);
         let entry = set_state(
             &state,
             call_hash,

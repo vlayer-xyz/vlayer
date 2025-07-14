@@ -468,7 +468,7 @@ mod server_tests {
         async fn simple_with_gas_meter() {
             const EXPECTED_HASH: &str =
                 "0x25ef754684f015821227469c1630163a0e78d7ba5285d094e5c46f0896cd8722";
-            const EXPECTED_GAS_USED: u64 = 21_724;
+            const EXPECTED_VGAS_USED: u64 = 5;
             const EXPECTED_CYCLES_USED: u64 = 4_194_304;
 
             let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
@@ -484,7 +484,7 @@ mod server_tests {
                     json!({
                         "hash": EXPECTED_HASH,
                         "computation_stage": "preflight",
-                        "gas_used": EXPECTED_GAS_USED,
+                        "gas_used": EXPECTED_VGAS_USED,
                     }),
                     false,
                 )
@@ -497,7 +497,7 @@ mod server_tests {
                     json!({
                         "hash": EXPECTED_HASH,
                         "computation_stage": "proving",
-                        "gas_used": EXPECTED_GAS_USED,
+                        "gas_used": EXPECTED_VGAS_USED,
                     }),
                     false,
                 )
