@@ -96,7 +96,7 @@ pub struct Config {
 #[async_trait]
 #[auto_impl(Box)]
 pub trait Client: Send + Sync {
-    async fn allocate(&self, gas_limit: u64) -> Result<()>;
+    async fn allocate(&self, vgas_limit: u64) -> Result<()>;
     async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()>;
     async fn send_metadata(&self, metadata: Box<[Metadata]>) -> Result<()>;
     async fn update_cycles(&self, cycles_used: u64) -> Result<()>;
@@ -147,15 +147,15 @@ impl RpcClient {
 
 #[async_trait]
 impl Client for RpcClient {
-    async fn allocate(&self, gas_limit: u64) -> Result<()> {
-        let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live.as_secs());
+    async fn allocate(&self, vgas_limit: u64) -> Result<()> {
+        let req = AllocateGas::new(self.hash, vgas_limit, self.time_to_live.as_secs());
         info!("v_allocateGas => {req:#?}");
         self.call(req).await?;
         Ok(())
     }
 
-    async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
-        let req = RefundUnusedGas::new(self.hash, stage, gas_used);
+    async fn refund(&self, stage: ComputationStage, vgas_used: u64) -> Result<()> {
+        let req = RefundUnusedGas::new(self.hash, stage, vgas_used);
         info!("v_refundUnusedGas => {req:#?}");
         if let Err(err) = self.call(req).await {
             error!("v_refundGas failed with error: {err}");
