@@ -2582,6 +2582,7 @@ dependencies = [
  "auto_impl",
  "axum 0.8.1",
  "block_header",
+ "bytes",
  "call_common",
  "call_engine",
  "call_host",
@@ -13946,7 +13947,7 @@ dependencies = [
 
 [[package]]
 name = "version"
-version = "1.2.3"
+version = "1.2.4"
 dependencies = [
  "anyhow",
  "regex",

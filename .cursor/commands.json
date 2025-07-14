@@ -1,0 +1,9 @@
+{
+  "commands": {
+    "summarize": {
+      "description": "Create a comprehensive conversation summary in conclusion.md",
+      "prompt": "Please analyze our entire conversation and create a comprehensive summary in a file called 'conclusion.md' at the workspace root. The summary should include:\n\n1. Main topics discussed\n2. Key decisions made with rationale\n3. Code changes implemented (files created/modified)\n4. Problems solved and how\n5. Outstanding questions or tasks\n6. Next steps and recommendations\n7. References to relevant files or documentation\n\nFormat it as a well-structured markdown document with clear sections and actionable items.",
+      "output_file": "conclusion.md"
+    }
+  }
+}

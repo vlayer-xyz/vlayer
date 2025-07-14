@@ -40,7 +40,7 @@
     rzup install r0vm {{ vlayer_risc0_version }}
   args:
     executable: /bin/bash
-  register: r0vm_install_result
-  changed_when: "'is already installed' not in r0vm_install_result.stdout"
+  register: risc0_r0vm_install_result
+  changed_when: "'is already installed' not in risc0_r0vm_install_result.stdout"
   async: 600  # 10 minutes to complete
   poll: 10  # check every 10 seconds

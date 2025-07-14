@@ -47,6 +47,7 @@ impl From<Error> for ErrorObjectOwned {
 pub struct Call {
     pub to: String,
     pub data: String,
+    #[serde(alias = "vgas_limit")]
     pub gas_limit: u64,
 }
 

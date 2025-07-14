@@ -1,6 +1,6 @@
 use call_common::Metadata;
 use call_engine::Call as EngineCall;
-use call_host::{Host, PreflightError, PreflightResult, ProvingInput};
+use call_host::{Host, PreflightError, PreflightResult};
 use tracing::info;
 
 use crate::{
@@ -24,13 +24,10 @@ pub async fn await_preflight(
     call: EngineCall,
     gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
-) -> Result<ProvingInput, Error> {
-    let PreflightResult {
-        host_output,
-        input,
+) -> Result<PreflightResult, Error> {
+    let result @ PreflightResult {
         gas_used,
         elapsed_time,
-        metadata,
         ..
     } = host.preflight(call).await?;
 
@@ -41,7 +38,7 @@ pub async fn await_preflight(
         "Finished stage",
     );
 
-    for meta in &metadata {
+    for meta in result.metadata.clone() {
         match meta {
             Metadata::Precompile(x) => {
                 info!(
@@ -71,10 +68,12 @@ pub async fn await_preflight(
     gas_meter_client
         .refund(ComputationStage::Preflight, gas_used)
         .await?;
-    gas_meter_client.send_metadata(metadata).await?;
+    gas_meter_client
+        .send_metadata(result.metadata.clone())
+        .await?;
 
     metrics.gas = gas_used;
     metrics.times.preflight = metrics::elapsed_time_as_millis_u64(elapsed_time)?;
 
-    Ok(ProvingInput::new(host_output, input))
+    Ok(result)
 }

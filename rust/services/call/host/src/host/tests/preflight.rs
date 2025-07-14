@@ -2,7 +2,7 @@ use alloy_chains::{Chain, NamedChain::AnvilHardhat};
 use alloy_primitives::{address, b256, uint};
 use ethers_core::types::BlockNumber as BlockTag;
 
-use crate::test_harness::{ExecutionLocation, call, preflight};
+use crate::test_harness::{ExecutionLocation, call, preflight, preflight_raw_result};
 
 mod usdt {
     use call_engine::Call;
@@ -37,17 +37,23 @@ mod usdt {
     }
 
     #[tokio::test(flavor = "multi_thread")]
-    #[should_panic(
-        expected = "called `Result::unwrap()` on an `Err` value: Preflight: EVM error: transaction validation error: call gas cost exceeds the gas limit"
-    )]
     async fn fails_when_no_gas() {
         let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
         let call = Call::new(USDT, &balanceOfCall { account: binance_8 }, 0);
 
-        preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location)
-            .await
-            .unwrap();
+        let result = preflight_raw_result("usdt_erc20_balance_of", call, &location).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        match err {
+            crate::host::error::Error::Preflight(ref preflight_err) => {
+                assert!(
+                    preflight_err.is_gas_limit_exceeded(),
+                    "Expected gas limit exceeded error, got: {preflight_err}"
+                );
+            }
+            _ => panic!("Expected Preflight error, got: {err}"),
+        }
     }
 }
 

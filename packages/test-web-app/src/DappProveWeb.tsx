@@ -51,7 +51,7 @@ function DappProveWeb() {
           [
             {
               response: {
-                json_body_except: ["name"],
+                json_body_except: ["name", "success"],
               },
             },
             {

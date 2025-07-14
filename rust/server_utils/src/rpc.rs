@@ -22,6 +22,22 @@ pub enum Error {
     InvalidResponse(Value),
 }
 
+impl Error {
+    pub fn jsonrpc_code(&self) -> Option<u64> {
+        match self {
+            Error::JsonRpc(value) => value
+                .as_object()
+                .and_then(|obj| obj.get("code"))
+                .and_then(serde_json::Value::as_u64),
+            _ => None,
+        }
+    }
+
+    pub fn has_error_code(&self, expected_code: u64) -> bool {
+        self.jsonrpc_code() == Some(expected_code)
+    }
+}
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 pub struct RequestBuilder(reqwest::RequestBuilder);

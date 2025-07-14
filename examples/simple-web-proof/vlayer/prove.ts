@@ -1,8 +1,9 @@
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
-import web_proof from "../testdata/web_proof.json";
-import web_proof_invalid_signature from "../testdata/web_proof_invalid_notary_pub_key.json";
+import web_proof_development_signature from "../testdata/web_proof_development_signature.json";
+import web_proof_vlayer_signature from "../testdata/web_proof_vlayer_signature.json";
+import web_proof_invalid_signature from "../testdata/web_proof_invalid_signature.json";
 import * as assert from "assert";
 import { encodePacked, keccak256 } from "viem";
 
@@ -14,6 +15,10 @@ import {
 } from "@vlayer/sdk/config";
 
 let config = getConfig();
+const web_proof =
+  config.vlayerEnv === "mainnet"
+    ? web_proof_vlayer_signature
+    : web_proof_development_signature;
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,

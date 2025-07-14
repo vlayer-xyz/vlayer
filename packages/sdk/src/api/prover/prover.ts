@@ -85,8 +85,14 @@ const handleErrors = ({ status, state, error }: ProofReceipt) => {
       .with(ProofState.Preflight, () => {
         throw new Error(`Preflight failed with error: ${error}`);
       })
+      .with(ProofState.EstimatingVgas, () => {
+        throw new Error(`Vgas estimation failed with error: ${error}`);
+      })
       .with(ProofState.Proving, () => {
         throw new Error(`Proving failed with error: ${error}`);
+      })
+      .with(ProofState.Unknown, () => {
+        throw new Error(`Failed with error: ${error}`);
       })
       .exhaustive();
   }

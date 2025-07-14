@@ -60,8 +60,7 @@ describe("Success zk-proving", () => {
     const webProofProvider = createExtensionWebProofProvider();
     zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
     vlayer = createVlayerClient({ webProofProvider });
-  });
-  it("should send message to extension that zkproving started", async () => {
+
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
@@ -71,7 +70,8 @@ describe("Success zk-proving", () => {
         }),
       };
     });
-
+  });
+  it("should send message to extension that zkproving started", async () => {
     const result = await vlayer.prove({
       address: `0x${"a".repeat(40)}`,
       functionName: "main",
@@ -88,9 +88,14 @@ describe("Success zk-proving", () => {
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
-          id: 1,
+          result: {
+            state: "done",
+            status: 1,
+            metrics: {},
+            data: {},
+          },
           jsonrpc: "2.0",
-          result: hashStr,
+          id: 1,
         }),
       };
     });
@@ -101,6 +106,73 @@ describe("Success zk-proving", () => {
       proverAbi: [],
       args: [],
       chainId: 42,
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+    await vlayer.waitForProvingResult({ hash });
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
+  });
+  it("should handle successful `new_state` state value", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "new_state",
+            status: 1,
+            metrics: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "done",
+            status: 1,
+            metrics: {},
+            data: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+
+    await vlayer.waitForProvingResult({ hash });
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
+  });
+  it("should handle successful vgas estimation flow", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "estimating_vgas",
+            status: 1,
+            metrics: {},
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
     });
 
     fetchMocker.mockResponseOnce(() => {
@@ -118,28 +190,21 @@ describe("Success zk-proving", () => {
       };
     });
 
+    await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
     const hash = { hash: hashStr } as BrandedHash<[], string>;
+
     await vlayer.waitForProvingResult({ hash });
 
     expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
-  });
-  it("should notify that zk-proving failed", async () => {
-    fetchMocker.mockResponseOnce(() => {
-      throw new Error("test");
-    });
-
-    const hash = { hash: hashStr } as BrandedHash<[], string>;
-    try {
-      await vlayer.waitForProvingResult({ hash });
-    } catch (e) {
-      //eslint-disable-next-line no-console
-      console.log("Error waiting for proving result", e);
-    }
-
-    expect(zkProvingSpy).toBeCalledTimes(1);
-    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
   });
 });
 
@@ -193,14 +258,6 @@ describe("Failed zk-proving", () => {
       };
     });
 
-    const hash = await vlayer.prove({
-      address: `0x${"a".repeat(40)}`,
-      functionName: "main",
-      proverAbi: [],
-      args: [],
-      chainId: 42,
-    });
-
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
@@ -216,11 +273,126 @@ describe("Failed zk-proving", () => {
       };
     });
 
+    const hash = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
     try {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       expect((e as Error).message).toMatch(
         "Preflight failed with error: Preflight error: ...",
+      );
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
+  });
+  it("should handle failure with `new_state` state value", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          result: hashStr,
+        }),
+      };
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "new_state",
+            status: 0,
+            metrics: {},
+            error: "some reason",
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    const hash = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      // The SDK cannot understand the `new_state`, but is able to handle the error and read the error message.
+      expect((e as Error).message).toMatch("Failed with error: some reason");
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
+  });
+  it("should notify that zk-proving failed", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      throw new Error("test");
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      //eslint-disable-next-line no-console
+      console.log("Error waiting for proving result", e);
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(1);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
+  });
+  it("should handle failed vgas estimation", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: "2.0",
+          result: hashStr,
+        }),
+      };
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "estimating_vgas",
+            status: 0,
+            metrics: {},
+            error: "Vgas estimation failed",
+          },
+          jsonrpc: "2.0",
+          id: 1,
+        }),
+      };
+    });
+
+    const hash = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      expect((e as Error).message).toMatch(
+        "Vgas estimation failed with error: Vgas estimation failed",
       );
     }
 

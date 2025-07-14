@@ -14,12 +14,22 @@ use tracing::{error, info};
 
 use crate::handlers::v_call::types::CallHash;
 
+pub const INSUFFICIENT_GAS_BALANCE_ERROR_CODE: u64 = 1003;
+
 type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
     Rpc(#[from] RpcError),
+}
+
+impl Error {
+    pub fn is_insufficient_gas_balance(&self) -> bool {
+        match self {
+            Error::Rpc(rpc_err) => rpc_err.has_error_code(INSUFFICIENT_GAS_BALANCE_ERROR_CODE),
+        }
+    }
 }
 
 #[derive(new, Serialize, Debug)]
@@ -140,10 +150,7 @@ impl Client for RpcClient {
     async fn allocate(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live.as_secs());
         info!("v_allocateGas => {req:#?}");
-        if let Err(err) = self.call(req).await {
-            error!("v_allocateGas failed with error: {err}");
-            return Err(err);
-        }
+        self.call(req).await?;
         Ok(())
     }
 
