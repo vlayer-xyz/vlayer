@@ -1,0 +1,42 @@
+---
+alwaysApply: true
+---
+
+# Simple Web Proof Project Structure
+
+This is a example project of using vlayer web proofs technology with the following main components:
+
+## Core Architecture
+- **Foundry Project**: For Solidity smart contracts building, deploying, testing
+- **vlayer Integration**: Web proof generation, zk proving and on-chain verification
+- **React Frontend**: User interface for the example proof generation workflow
+- **Docker Services**: Development infrastructure for proof generation
+
+## Key Directories
+
+### Smart Contracts (`src/`)
+- [src/vlayer/WebProofProver.sol](mdc:src/vlayer/WebProofProver.sol) - Main prover contract
+- [src/vlayer/WebProofVerifier.sol](mdc:src/vlayer/WebProofVerifier.sol) - Verification contract
+
+### Frontend Application (`vlayer/`)
+- [vlayer/src/App.tsx](mdc:vlayer/src/App.tsx) - Main React application
+- [vlayer/src/components/](mdc:vlayer/src/components/) - React components organized by atomic design
+- [vlayer/prove.ts](mdc:vlayer/prove.ts) - Command line example of end-to-end proof generation logic (no UI)
+  - run with `bun run prove:dev` to deploy contracts and proving
+- [vlayer/deploy.ts](mdc:vlayer/deploy.ts) - Deployment scripts for prover and verifier contracts
+  - run with `bun run deploy:dev` to deploy contracts to local devnet 
+
+### Test Data (`testdata/`)
+- [testdata/web_proof_development_signature.json](mdc:testdata/web_proof_development_signature.json) - Development test data
+- [testdata/web_proof_vlayer_signature.json](mdc:testdata/web_proof_vlayer_signature.json) - vlayer test signatures
+
+### Configuration
+- [foundry.toml](mdc:foundry.toml) - Foundry configuration
+- [vlayer/package.json](mdc:vlayer/package.json) - Frontend dependencies
+- [vlayer/docker-compose.devnet.yaml](mdc:vlayer/docker-compose.devnet.yaml) - Development environment
+
+## Development Workflow
+1. Smart contract development in `src/vlayer/`
+2. Frontend development in `vlayer/src/`
+3. Testing with both Foundry tests and Playwright e2e tests
+4. Proof generation using vlayer infrastructure

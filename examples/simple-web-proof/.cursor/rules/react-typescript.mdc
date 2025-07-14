@@ -1,0 +1,48 @@
+---
+globs: *.ts,*.tsx
+---
+
+# React & TypeScript Development Guidelines
+
+## Component Architecture
+
+### Atomic Design Structure
+- Follow the atomic design pattern as shown in [vlayer/src/components/](mdc:vlayer/src/components/)
+- **Organisms**: Complex components like ConnectWalletStep, ProveStep, MintStep
+- **Molecules**: Reusable components like ProgressBar
+- **Layout**: Structural components like Navigation, Modal, ErrorBoundary
+
+### Component Patterns
+- Use Container/Presentational pattern for complex components
+- Each component should export through its `index.ts` file
+- Reference [vlayer/src/components/organisms/ProveStep/](mdc:vlayer/src/components/organisms/ProveStep/) for structure
+
+## State Management
+- Use custom hooks for complex state logic
+- Reference [vlayer/src/hooks/](mdc:vlayer/src/hooks/) for patterns:
+  - [useCurrentStep.ts](mdc:vlayer/src/hooks/useCurentStep.ts) - Step management
+  - [useTwitterAccountProof.ts](mdc:vlayer/src/hooks/useTwitterAccountProof.ts) - Proof generation
+  - [useExtension.ts](mdc:vlayer/src/hooks/useExtension.ts) - Extension integration
+
+## vlayer Integration
+- Handle async operations with proper error boundaries
+
+## Styling
+- Use Tailwind CSS for styling (configured in [vlayer/tailwind.config.js](mdc:vlayer/tailwind.config.js))
+- Use CSS modules for component-specific styles
+- Follow the main styling patterns in [vlayer/src/main.css](mdc:vlayer/src/main.css)
+
+## Testing
+- Use Vitest for unit testing (configured in [vlayer/tests/vitest.setup.ts](mdc:vlayer/tests/vitest.setup.ts))
+- Use Playwright for e2e testing ([vlayer/tests/web-proof.spec.ts](mdc:vlayer/tests/web-proof.spec.ts))
+- Include boundary testing as shown in [vlayer/tests/boundary.unit.tsx](mdc:vlayer/tests/boundary.unit.tsx)
+
+## Type Safety
+- Use strict TypeScript configuration ([vlayer/tsconfig.json](mdc:vlayer/tsconfig.json))
+- Define proper interfaces for vlayer integration
+- Use type guards for runtime validation
+
+## Error Handling
+- Implement proper error boundaries using [vlayer/src/components/layout/ErrorBoundary.tsx](mdc:vlayer/src/components/layout/ErrorBoundary.tsx)
+- Handle async errors gracefully in hooks
+- Use proper error states in components
