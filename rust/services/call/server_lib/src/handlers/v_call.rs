@@ -13,7 +13,7 @@ use crate::{
 pub mod types;
 
 // Limit for the gas used during the preflight. It's not used for limiting cycles.
-const EVM_GAS_LIMIT: u64 = 100_000_000;
+pub const EVM_GAS_LIMIT: u64 = 100_000_000;
 
 pub async fn v_call(
     state: State,
@@ -27,7 +27,7 @@ pub async fn v_call(
         req_id,
     } = params;
 
-    let vgas_limit = call.gas_limit;
+    let vgas_limit = call.vgas_limit;
     let call = call.parse_and_validate(config.max_calldata_size, EVM_GAS_LIMIT)?;
 
     let host = build_host(&config, context.chain_id, call.to).await?;

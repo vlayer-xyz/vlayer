@@ -47,24 +47,24 @@ impl From<Error> for ErrorObjectOwned {
 pub struct Call {
     pub to: String,
     pub data: String,
-    #[serde(alias = "vgas_limit")]
-    pub gas_limit: u64,
+    #[serde(alias = "gas_limit")]
+    pub vgas_limit: u64,
 }
 
 impl Call {
-    pub fn new(to: impl Into<String>, data: impl Into<String>, gas_limit: u64) -> Self {
+    pub fn new(to: impl Into<String>, data: impl Into<String>, vgas_limit: u64) -> Self {
         Self {
             to: to.into(),
             data: data.into(),
-            gas_limit,
+            vgas_limit,
         }
     }
 
-    pub fn parse_and_validate(self, max_calldata_size: usize, gas_limit: u64) -> Result<HostCall> {
+    pub fn parse_and_validate(self, max_calldata_size: usize, evm_gas_limit: u64) -> Result<HostCall> {
         let call = HostCall {
             to: parse_address_field("to", self.to)?,
             data: parse_hex_field("data", self.data)?,
-            gas_limit,
+            gas_limit: evm_gas_limit,
         };
 
         if call.data.len() > max_calldata_size {
@@ -122,6 +122,8 @@ impl Hashable for CallHashData<'_> {
 
 #[cfg(test)]
 mod test {
+    use crate::handlers::v_call::EVM_GAS_LIMIT;
+
     use super::*;
 
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
@@ -132,7 +134,7 @@ mod test {
     #[tokio::test]
     async fn invalid_to_address() {
         let call = Call::new(INVALID_ADDRESS, DATA, 0);
-        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE, 0);
+        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE, EVM_GAS_LIMIT);
 
         assert!(matches!(
             actual_result,
@@ -144,7 +146,7 @@ mod test {
     async fn invalid_data() {
         const INVALID_DATA: &str = "xx";
         let call = Call::new(TO, INVALID_DATA, 0);
-        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE, 0);
+        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE, EVM_GAS_LIMIT);
 
         assert!(matches!(
             actual_result,
@@ -156,7 +158,7 @@ mod test {
     async fn calldata_length_limit() {
         const LONG_DATA: &str = "0x00";
         let call = Call::new(TO, LONG_DATA, 0);
-        let actual_result = call.parse_and_validate(0, 0);
+        let actual_result = call.parse_and_validate(0, EVM_GAS_LIMIT);
 
         assert!(matches!(
             actual_result,
