@@ -153,14 +153,14 @@ library ProofFixtures {
     bytes32 public constant FIXED_GROTH16_SETTLE_BLOCK_HASH =
         bytes32(0xf0ac2a4ad2735a2d24a34c10bf493fcf98b58a6fbfc2d79639e25652e34cf89f);
     bytes32 public constant FIXED_FAKE_SETTLE_BLOCK_HASH =
-        bytes32(0x68c9d7e5f84b4ec324a15c46330a5994530df55e7f437bfdcc2e48d572dc93bb);
+        bytes32(0x60b4606c6d21d31bf382363d05aa5aecfd9a729782080bd58d5db24f16a3bdd6);
 
     address public constant FIXED_OWNER = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
     uint256 public constant FIXED_BALANCE = 10000000;
 
     function fakeProofFixture() public pure returns (Proof memory, bytes32) {
         bytes32[8] memory sealBytes = [
-            bytes32(0xc63b5190f650e4579feedd76edd57342f1de95291f9172f4964e74b9cedbf99c),
+            bytes32(0x71c344b512f2adc731cc604d8ca9d0c754532998b34bdf3fb1497e058f5e8d67),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
