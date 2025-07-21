@@ -2,6 +2,6 @@ vlayer/=../vlayer/src/
 openzeppelin/=../contracts/lib/risc0-ethereum/lib/openzeppelin-contracts/
 @openzeppelin-contracts-5.0.1/=dependencies/@openzeppelin-contracts-5.0.1/
 openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/
-risc0-ethereum-2.1.1/=../vlayer/dependencies/risc0-ethereum-2.1.1/
+risc0-ethereum-2.2.2/=../vlayer/dependencies/risc0-ethereum-2.2.2/
 
 
