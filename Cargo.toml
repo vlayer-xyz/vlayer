@@ -151,7 +151,7 @@ regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
 revm = { version = "=19.4.0", default-features = false, features = ["optimism"] }
 risc0-build = "=2.3.1"
-risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "3d9f71ee4f8f1329b11f76424d6ecb5e854e77c5" }
+risc0-build-ethereum = { git = "https://github.com/vlayer-xyz/risc0-ethereum.git", rev = "5cfea08da813b52d967da4593d4f6424cf6f7e41" }
 risc0-zkp = { version = "=2.0.2", default-features = false }
 risc0-zkvm = "=2.3.1"
 risc0-zkvm-platform = "=2.0.3"

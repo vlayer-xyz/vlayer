@@ -309,7 +309,7 @@ vlayer = '0.0.1'
             assert_eq!(dep.version().unwrap(), "2.1.1");
             assert_eq!(
                 dep.remappings().unwrap(),
-                &[("risc0-ethereum-2.1.1/".into(), "dependencies/risc0-ethereum-2.1.1/".into())]
+                &[("risc0-ethereum-2.2.2/".into(), "dependencies/risc0-ethereum-2.1.1/".into())]
             );
         }
 
