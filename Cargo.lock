@@ -10783,8 +10783,8 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-ethereum"
-version = "2.1.1"
-source = "git+https://github.com/vlayer-xyz/risc0-ethereum.git?rev=3d9f71ee4f8f1329b11f76424d6ecb5e854e77c5#3d9f71ee4f8f1329b11f76424d6ecb5e854e77c5"
+version = "2.2.2"
+source = "git+https://github.com/vlayer-xyz/risc0-ethereum.git?rev=5cfea08da813b52d967da4593d4f6424cf6f7e41#5cfea08da813b52d967da4593d4f6424cf6f7e41"
 dependencies = [
  "anyhow",
  "bytemuck",

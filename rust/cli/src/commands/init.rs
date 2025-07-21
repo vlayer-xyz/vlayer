@@ -556,7 +556,7 @@ mod tests {
             "forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             forge-std/=dependencies/forge-std-1.9.4/src/\n\
             openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
-            risc0-ethereum-2.1.1/=dependencies/risc0-ethereum-2.1.1/\n\
+            risc0-ethereum-2.2.2/=dependencies/risc0-ethereum-2.2.2/\n\
             some initial remappings\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
@@ -582,7 +582,7 @@ mod tests {
             "forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
             forge-std/=dependencies/forge-std-1.9.4/src/\n\
             openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
-            risc0-ethereum-2.1.1/=dependencies/risc0-ethereum-2.1.1/\n\
+            risc0-ethereum-2.2.2/=dependencies/risc0-ethereum-2.2.2/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
         );
