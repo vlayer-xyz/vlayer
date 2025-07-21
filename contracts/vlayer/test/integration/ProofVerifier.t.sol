@@ -145,7 +145,7 @@ contract PinnedProofVerifer_Tests is Test {
 
 library ProofFixtures {
     bytes32 public constant FIXED_CALL_GUEST_ID =
-        bytes32(0x2c142a3531ffb7cc3913541cac2a5735496a0f642b35d6c23a0881c1ff4a4d72);
+        bytes32(0xe4fa67ba8e47afa449599dc8e5664934caab39d82b28db49d6618120f13cd617);
     address public constant FIXED_PROVER_ADDRESS = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
     bytes4 public constant FIXED_SELECTOR = PinnedSimpleProver.balance.selector;
     uint256 public constant FIXED_SETTLE_CHAIN_ID = 31_337;
