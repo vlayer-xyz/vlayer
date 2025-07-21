@@ -151,7 +151,7 @@ library ProofFixtures {
     uint256 public constant FIXED_SETTLE_CHAIN_ID = 31_337;
     uint256 public constant FIXED_SETTLE_BLOCK_NUMBER = 6;
     bytes32 public constant FIXED_GROTH16_SETTLE_BLOCK_HASH =
-        bytes32(0xf0ac2a4ad2735a2d24a34c10bf493fcf98b58a6fbfc2d79639e25652e34cf89f);
+        bytes32(0xc097ebaa8c376eef219eba639b8106445245184e6340589aade6be8f952b8213);
     bytes32 public constant FIXED_FAKE_SETTLE_BLOCK_HASH =
         bytes32(0x60b4606c6d21d31bf382363d05aa5aecfd9a729782080bd58d5db24f16a3bdd6);
 
@@ -177,14 +177,14 @@ library ProofFixtures {
 
     function groth16ProofFixture() public pure returns (Proof memory, bytes32) {
         bytes32[8] memory sealBytes = [
-            bytes32(0x2cce35b1cd14b67a009a78d1868d0a25def9102601c896217b2b61ce5152fbb3),
-            bytes32(0x1df9360af6ed2897c5d75818ba39cde5aa84c67f99ea12758c1061aba98f01e3),
-            bytes32(0x004c5eb2882f9940f45acf8d1041b34fff99a127dac18255002aa10f29a30e91),
-            bytes32(0x2815565e95bc35311e5ad0dfe9594692529dd0c35011e46f1ac4536b3d083afd),
-            bytes32(0x02216c3605e64b7ee21911bd9e3a512d50c9034a9e4147dd25c9c9d446eaccd7),
-            bytes32(0x16c4ab934e53a6b30af1c19d08de11a7ee99e36646387ceda5dcf6121521b175),
-            bytes32(0x0bf04d292bb5b64cfb15d4d592528c160684f580125f32f13720298c080572a1),
-            bytes32(0x0753237c2346db7efe693c999d97981c8349b332f4d86bc71290fc7d45e41b26)
+            bytes32(0x271c6738507468f4a9fd292475876d4e989af05f16131422f9048669b64e616e),
+            bytes32(0x2b416f89ba8d5547f92ec149770adcff6376198d9631c24272e2580f419e4fee),
+            bytes32(0x1301810121e28114301d0b222b1dcc01ade6e463c70e2212d08805e847bf3451),
+            bytes32(0x2d52bd27b4d9255c4c6e2578cd8f3a36a1943d6ac2174e7bb1abfc41990eb7ec),
+            bytes32(0x131eb1197b012e93ae5d7bc39043d7ffc7678b453bbababc9f9c3362f6829eb3),
+            bytes32(0x22ea0234222c68f189b99b48913767e39e6dc300c802beb4b1599c5edef8e696),
+            bytes32(0x0e9c4a5a9b33a7269851b424e1765cb6968bae628884e4de097fad916d3b70fd),
+            bytes32(0x2bbf47e7e96436cc2f08ecfeef50b13bbc263474754cc95974dc3966b5e3525a)
         ];
 
         Seal memory seal = Seal(Groth16VerifierSelector.STABLE_VERIFIER_SELECTOR, sealBytes, ProofMode.GROTH16);
