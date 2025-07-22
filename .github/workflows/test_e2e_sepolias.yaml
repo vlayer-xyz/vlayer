@@ -41,6 +41,41 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.github_token }}
 
+  changes:
+    runs-on: ubuntu-latest
+    needs: permissions
+    outputs:
+      code-changes: ${{ steps.filter.outputs.code-changes }}
+      workflow-changes: ${{ steps.filter.outputs.workflow-changes }}
+    if: needs.permissions.outputs.has-permissions == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # We detect code changes, and run the workflow only if relevant code or workflow changes are detected.
+      # Because the workflow is resource heavy (in time/compilation, in testnet ETH usage, and in Bonsai API usage),
+      # we also skip running the workflow on every commit of PRs (unless the workflow configuration is changed)
+      # Red PR cannot be merged because even though PR commits are skipped, the workflow will still run in the merge queue.
+      - name: Filter changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code-changes:
+              - 'rust/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'bash/**'
+              - 'contracts/**'
+              - 'examples/**'
+              - 'packages/**'
+              - 'docker/**'
+              - 'ansible/**'
+              - 'bun.lock'
+            workflow-changes:
+              - '.github/workflows/test_e2e_sepolias.yaml'
+              - '.github/actions/test-e2e/**'
+
   # The gas price on the Ethereum Sepolia network can vary significantly.
   # To prevent running tests when gas prices are prohibitively high, this job checks the current gas price.
   # If the gas price exceeds a predefined threshold, the test is skipped to avoid running out of test eth.
@@ -87,7 +122,7 @@ jobs:
     name: Build binaries
     needs: changes
     runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    if: github.event_name == 'push' || (github.event_name != 'pull_request')
 
     steps:
       - name: Checkout repository
