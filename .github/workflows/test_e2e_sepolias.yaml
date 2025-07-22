@@ -86,7 +86,7 @@ jobs:
   build-binaries:
     name: Build binaries
     runs-on: aws-linux-medium
-    if: github.event_name == 'push' || (github.event_name == 'pull_request')
+    if: github.event_name == 'push' || (github.event_name != 'pull_request')
 
     steps:
       - name: Checkout repository
