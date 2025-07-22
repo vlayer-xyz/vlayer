@@ -1,4 +1,4 @@
-import { createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient, type ProveArgs } from "@vlayer/sdk";
 import proverSpec from "../out/AverageBalance.sol/AverageBalance";
 import verifierSpec from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
 import {
@@ -48,20 +48,25 @@ const vlayer = createVlayerClient({
   token: config.token,
 });
 
-const provingHash = await vlayer.prove({
+const proveArgs = {
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
   args: [timeTravelConfig.tokenOwner],
   chainId: ethClient.chain.id,
   gasLimit: config.gasLimit,
-});
+} as ProveArgs<typeof proverSpec.abi, "averageBalanceOf">;
+const { proverAbi, ...argsToLog } = proveArgs;
+console.log("Proving args:", argsToLog);
+
+const provingHash = await vlayer.prove(proveArgs);
+console.log("Proving hash:", provingHash);
 
 console.log("Waiting for proving result: ");
 
 const result = await vlayer.waitForProvingResult({ hash: provingHash });
+console.log("Proving result:", result);
 
-console.log("Proof:", result[0]);
 console.log("Verifying...");
 
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia

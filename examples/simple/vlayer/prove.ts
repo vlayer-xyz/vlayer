@@ -1,4 +1,4 @@
-import { createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient, type ProveArgs } from "@vlayer/sdk";
 import nftSpec from "../out/ExampleNFT.sol/ExampleNFT";
 import tokenSpec from "../out/ExampleToken.sol/ExampleToken";
 import {
@@ -65,14 +65,21 @@ const vlayer = createVlayerClient({
   token: config.token,
 });
 
-const hash = await vlayer.prove({
+const proveArgs = {
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "balance",
   args: [john.address],
   chainId: chain.id,
   gasLimit: config.gasLimit,
-});
+} as ProveArgs<typeof proverSpec.abi, "balance">;
+
+const { proverAbi, ...argsToLog } = proveArgs;
+console.log("Proving args:", argsToLog);
+
+const hash = await vlayer.prove(proveArgs);
+console.log("Proving hash:", hash);
+
 const result = await vlayer.waitForProvingResult({ hash });
 const [proof, owner, balance] = result;
 

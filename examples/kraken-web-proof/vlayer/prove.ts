@@ -1,6 +1,6 @@
 /// <reference types="bun" />
 
-import { createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient, type ProveArgs } from "@vlayer/sdk";
 import proverSpec from "../out/KrakenProver.sol/KrakenProver";
 import verifierSpec from "../out/KrakenVerifier.sol/KrakenVerifier";
 import {
@@ -59,7 +59,7 @@ console.log("✅ Contracts deployed", { prover, verifier });
 const webProof = await generateWebProof();
 
 console.log("⏳ Proving...");
-const hash = await vlayer.prove({
+const proveArgs = {
   address: prover,
   functionName: "main",
   proverAbi: proverSpec.abi,
@@ -70,8 +70,16 @@ const hash = await vlayer.prove({
   ],
   chainId: chain.id,
   gasLimit: config.gasLimit,
-});
+} as ProveArgs<typeof proverSpec.abi, "main">;
+const { proverAbi, ...argsToLog } = proveArgs;
+console.log("Proving args:", argsToLog);
+
+const hash = await vlayer.prove(proveArgs);
+console.log("Proving hash:", hash);
+
 const result = await vlayer.waitForProvingResult({ hash });
+console.log("Proving result:", result);
+
 const [proof, avgPrice] = result;
 console.log("✅ Proof generated");
 

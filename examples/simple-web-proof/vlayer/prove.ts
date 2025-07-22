@@ -1,4 +1,4 @@
-import { createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient, type ProveArgs } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
 import web_proof_development_signature from "../testdata/web_proof_development_signature.json";
@@ -68,7 +68,7 @@ async function testSuccessProvingAndVerification({
 >) {
   console.log("Proving...");
 
-  const hash = await vlayer.prove({
+  const proveArgs = {
     address: prover,
     functionName: "main",
     proverAbi: proverSpec.abi,
@@ -80,9 +80,17 @@ async function testSuccessProvingAndVerification({
     ],
     chainId: chain.id,
     gasLimit: config.gasLimit,
-  });
+  };
+  const { proverAbi, ...argsToLog } = proveArgs as any;
+  console.log("Proving args:", argsToLog);
+
+  const hash = await vlayer.prove(proveArgs);
+  console.log("Proving hash:", hash);
+
   const result = await vlayer.waitForProvingResult({ hash });
-  const [proof, twitterHandle, address] = result;
+  console.log("Proving result:", result);
+
+  const [proof, twitterHandle, address] = result as any;
 
   console.log("Verifying...");
 
@@ -150,7 +158,7 @@ async function testFailedProving({
   chain,
 }: Pick<ReturnType<typeof createContext>, "chain">) {
   try {
-    const hash = await vlayer.prove({
+    const proveArgs = {
       address: prover,
       functionName: "main",
       proverAbi: proverSpec.abi,
@@ -162,7 +170,13 @@ async function testFailedProving({
       ],
       chainId: chain.id,
       gasLimit: config.gasLimit,
-    });
+    } as ProveArgs<any, any>;
+    const { proverAbi, ...argsToLog } = proveArgs;
+    console.log("Proving args:", argsToLog);
+
+    const hash = await vlayer.prove(proveArgs);
+    console.log("Proving hash:", hash);
+
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
   } catch (error) {

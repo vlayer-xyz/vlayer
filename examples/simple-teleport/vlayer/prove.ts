@@ -1,4 +1,4 @@
-import { createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient, type ProveArgs } from "@vlayer/sdk";
 import proverSpec from "../out/SimpleTeleportProver.sol/SimpleTeleportProver";
 import verifierSpec from "../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
 import whaleBadgeNFTSpec from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
@@ -64,16 +64,23 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
-const proofHash = await vlayer.prove({
+const proveArgs = {
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "crossChainBalanceOf",
   args: [teleportConfig.tokenHolder, tokensToCheck],
   chainId: chain.id,
   gasLimit: config.gasLimit,
-});
+} as ProveArgs<typeof proverSpec.abi, "crossChainBalanceOf">;
+const { proverAbi, ...argsToLog } = proveArgs;
+console.log("Proving args:", argsToLog);
+
+const proofHash = await vlayer.prove(proveArgs);
+console.log("Proving hash:", proofHash);
+
 const result = await vlayer.waitForProvingResult({ hash: proofHash });
-console.log("Proof:", result[0]);
+console.log("Proving result:", result);
+
 console.log("⏳ Verifying...");
 
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia

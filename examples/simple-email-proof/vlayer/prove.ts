@@ -1,5 +1,5 @@
 import fs from "fs";
-import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
+import { createVlayerClient, preverifyEmail, type ProveArgs } from "@vlayer/sdk";
 import proverSpec from "../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import {
@@ -43,21 +43,28 @@ const vlayer = createVlayerClient({
   url: proverUrl,
   token: config.token,
 });
-const hash = await vlayer.prove({
+const emailArgs = await preverifyEmail({
+  mimeEmail,
+  dnsResolverUrl: dnsServiceUrl,
+  token: config.token,
+});
+
+const proveArgs = {
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "main",
   chainId: chain.id,
   gasLimit: config.gasLimit,
-  args: [
-    await preverifyEmail({
-      mimeEmail,
-      dnsResolverUrl: dnsServiceUrl,
-      token: config.token,
-    }),
-  ],
-});
+  args: [emailArgs],
+} as ProveArgs<typeof proverSpec.abi, "main">;
+const { proverAbi, ...argsToLog } = proveArgs;
+console.log("Proving args:", argsToLog);
+
+const hash = await vlayer.prove(proveArgs);
+console.log("Proving hash:", hash);
+
 const result = await vlayer.waitForProvingResult({ hash });
+console.log("Proving result:", result);
 
 console.log("Verifying...");
 
