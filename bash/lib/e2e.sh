@@ -65,9 +65,9 @@ remappings = [
   ["forge-std-1.9.4/src/", "dependencies/forge-std-1.9.4/src/"]
 ]
 [sol-dependencies.risc0-ethereum]
-version = '2.1.1'
-url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v2.1.1-soldeer/contracts.zip"
-remappings = [["risc0-ethereum-2.1.1/", "dependencies/risc0-ethereum-2.1.1/"]]
+version = '2.2.2'
+url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v2.2.2-soldeer/contracts.zip"
+remappings = [["risc0-ethereum-2.2.2/", "dependencies/risc0-ethereum-2.2.2/"]]
 [js-dependencies]
 "@vlayer/sdk" = { path = "$VLAYER_HOME/packages/sdk" }
 "@vlayer/react" = { path = "$VLAYER_HOME/packages/sdk-hooks" }

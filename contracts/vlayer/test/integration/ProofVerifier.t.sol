@@ -145,22 +145,22 @@ contract PinnedProofVerifer_Tests is Test {
 
 library ProofFixtures {
     bytes32 public constant FIXED_CALL_GUEST_ID =
-        bytes32(0x2c142a3531ffb7cc3913541cac2a5735496a0f642b35d6c23a0881c1ff4a4d72);
+        bytes32(0x966a1250a0b661e418faff4e65c0a2408deb190ed7df88238fc9d9a86e0542c1);
     address public constant FIXED_PROVER_ADDRESS = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
     bytes4 public constant FIXED_SELECTOR = PinnedSimpleProver.balance.selector;
     uint256 public constant FIXED_SETTLE_CHAIN_ID = 31_337;
     uint256 public constant FIXED_SETTLE_BLOCK_NUMBER = 6;
     bytes32 public constant FIXED_GROTH16_SETTLE_BLOCK_HASH =
-        bytes32(0xf0ac2a4ad2735a2d24a34c10bf493fcf98b58a6fbfc2d79639e25652e34cf89f);
+        bytes32(0x66818135d98a7797c1b72523962d12bba0d3da6b27c3a366e1b505574783adb8);
     bytes32 public constant FIXED_FAKE_SETTLE_BLOCK_HASH =
-        bytes32(0x68c9d7e5f84b4ec324a15c46330a5994530df55e7f437bfdcc2e48d572dc93bb);
+        bytes32(0xa869a2aae2ef9053e9db49a0866751de61e136ed56fd7bf99e56bbfe28f994e8);
 
     address public constant FIXED_OWNER = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
     uint256 public constant FIXED_BALANCE = 10000000;
 
     function fakeProofFixture() public pure returns (Proof memory, bytes32) {
         bytes32[8] memory sealBytes = [
-            bytes32(0xc63b5190f650e4579feedd76edd57342f1de95291f9172f4964e74b9cedbf99c),
+            bytes32(0x250618b5aaa645faa819d4a693235b407cd9de902797fad7d0c76a335dcca212),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
             bytes32(0x0000000000000000000000000000000000000000000000000000000000000000),
@@ -177,14 +177,14 @@ library ProofFixtures {
 
     function groth16ProofFixture() public pure returns (Proof memory, bytes32) {
         bytes32[8] memory sealBytes = [
-            bytes32(0x2cce35b1cd14b67a009a78d1868d0a25def9102601c896217b2b61ce5152fbb3),
-            bytes32(0x1df9360af6ed2897c5d75818ba39cde5aa84c67f99ea12758c1061aba98f01e3),
-            bytes32(0x004c5eb2882f9940f45acf8d1041b34fff99a127dac18255002aa10f29a30e91),
-            bytes32(0x2815565e95bc35311e5ad0dfe9594692529dd0c35011e46f1ac4536b3d083afd),
-            bytes32(0x02216c3605e64b7ee21911bd9e3a512d50c9034a9e4147dd25c9c9d446eaccd7),
-            bytes32(0x16c4ab934e53a6b30af1c19d08de11a7ee99e36646387ceda5dcf6121521b175),
-            bytes32(0x0bf04d292bb5b64cfb15d4d592528c160684f580125f32f13720298c080572a1),
-            bytes32(0x0753237c2346db7efe693c999d97981c8349b332f4d86bc71290fc7d45e41b26)
+            bytes32(0x2cb4dc6794a1c3f9a72cec7e53538cde77845d2e48e0c4514ded0e1115174e6a),
+            bytes32(0x2572f745fe9801ecacdc66c74943060d5dfff70ca5f42138e542e8d8dfa39950),
+            bytes32(0x2122e21ca20064a35508fc669d3062792a11f20de49d70bfbfe087edddcf6347),
+            bytes32(0x0b7a5d33c2ddd2bbe023a9b651da47e47a7a8624023573b1e1e4c56362a7900e),
+            bytes32(0x1201264c2caf3c86e8ae92a15aa85a03c5674ae54b8eac1ca65e25f3860ac847),
+            bytes32(0x2d703b6eca2ba3a1fefdde3830646f84ed55c92b5d8d5dbb2cd0e003457cffb7),
+            bytes32(0x2f75accf6e2b503bf6fe6fff2451afa3295c1fa4446d3f9c8e0ddfce1688eae9),
+            bytes32(0x0d557eb01708158207bb36a08c1f94133b0028414b2aa0a3ef657a7bd07f215b)
         ];
 
         Seal memory seal = Seal(Groth16VerifierSelector.STABLE_VERIFIER_SELECTOR, sealBytes, ProofMode.GROTH16);

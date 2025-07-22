@@ -29,7 +29,7 @@
           inherit system overlays;
         };
 
-        risc0-version = "2.1.0";
+        risc0-version = "2.3.1";
         risc0 = (import ./nix/risc0.nix { inherit system pkgs; }).risc0.${risc0-version};
 
         darwinInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin [

@@ -7,8 +7,8 @@ edition = "2024"
 
 [dependencies]
 call_guest = { path = "../../../services/call/guest" }
-risc0-zkvm = { version = "=2.1.0", default-features = false, features = ["std", "unstable"] }
-risc0-zkvm-platform = { version = "=2.0.2", features = [ "rust-runtime", "export-getrandom", "sys-getenv" ] }
+risc0-zkvm = { version = "=2.3.1", default-features = false, features = ["std", "unstable"] }
+risc0-zkvm-platform = { version = "=2.0.3", features = [ "rust-runtime", "export-getrandom", "sys-getenv" ] }
 zkvm-benchmarks = { path = "../../benchmarks" }
 
 [patch.crates-io]
