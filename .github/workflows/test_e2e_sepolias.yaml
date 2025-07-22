@@ -85,8 +85,9 @@ jobs:
 
   build-binaries:
     name: Build binaries
+    needs: changes
     runs-on: aws-linux-medium
-    if: github.event_name == 'push' || (github.event_name != 'pull_request')
+    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
 
     steps:
       - name: Checkout repository
@@ -164,7 +165,7 @@ jobs:
 
   test-e2e-bonsai-opsepolia-simple-web-proof:
     name: E2E test (simple-web-proof) with Bonsai and OP Sepolia
-    needs: [build-binaries]
+    needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
@@ -190,7 +191,7 @@ jobs:
 
   test-e2e-bonsai-opsepolia-simple-email-proof:
     name: E2E test (simple-email-proof) with Bonsai and OP Sepolia
-    needs: [build-binaries]
+    needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
@@ -216,7 +217,7 @@ jobs:
 
   test-e2e-bonsai-opsepolia-simple-time-travel:
     name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
-    needs: [build-binaries]
+    needs: [changes, build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
@@ -244,7 +245,7 @@ jobs:
   # It is not compatible with Bonsai, which expects "prod" proofs, so we don't test teleport on Bonsai.
   test-e2e-ethsepolia-simple-teleport:
     name: E2E test (simple-teleport) with Sepolia
-    needs: [check-gas, build-binaries]
+    needs: [changes, check-gas, build-binaries]
     if: needs.check-gas.outputs.gas-ok == 'true'
     runs-on: aws-linux-medium
     steps:
