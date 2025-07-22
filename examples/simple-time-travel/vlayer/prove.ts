@@ -10,6 +10,25 @@ import {
 import { getStartEndBlock } from "./helpers";
 import { loadFixtures } from "./loadFixtures";
 import { getTimeTravelConfig } from "./constants";
+import debug from "debug";
+
+const createLogger = (namespace: string) => {
+  const debugLogger = debug(namespace + ":debug");
+  const infoLogger = debug(namespace + ":info");
+
+  // Enable info logs by default
+  if (!debug.enabled(namespace + ":info")) {
+    debug.enable(namespace + ":info");
+  }
+
+  return {
+    info: (message: string, ...args: unknown[]) => infoLogger(message, ...args),
+    debug: (message: string, ...args: unknown[]) =>
+      debugLogger(message, ...args),
+  };
+};
+
+const log = createLogger("examples:simple-time-travel");
 
 const config = getConfig();
 const timeTravelConfig = getTimeTravelConfig(config.chainName);
@@ -56,18 +75,18 @@ const proveArgs = {
   chainId: ethClient.chain.id,
   gasLimit: config.gasLimit,
 } as ProveArgs<typeof proverSpec.abi, "averageBalanceOf">;
-const { proverAbi, ...argsToLog } = proveArgs;
-console.log("Proving args:", argsToLog);
+const { ...argsToLog } = proveArgs;
+log.debug("Proving args:", argsToLog);
 
 const provingHash = await vlayer.prove(proveArgs);
-console.log("Proving hash:", provingHash);
+log.debug("Proving hash:", provingHash);
 
-console.log("Waiting for proving result: ");
+log.info("Waiting for proving result...");
 
 const result = await vlayer.waitForProvingResult({ hash: provingHash });
-console.log("Proving result:", result);
+log.debug("Proving result:", result);
 
-console.log("Verifying...");
+log.info("Verifying...");
 
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia
 const gas = await ethClient.estimateContractGas({
@@ -93,4 +112,4 @@ const receipt = await waitForTransactionReceipt({
   hash: verificationHash,
 });
 
-console.log(`Verification result: ${receipt.status}`);
+log.info(`Verification result: ${receipt.status}`);

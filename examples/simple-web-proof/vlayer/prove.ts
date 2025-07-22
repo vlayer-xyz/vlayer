@@ -6,6 +6,7 @@ import web_proof_vlayer_signature from "../testdata/web_proof_vlayer_signature.j
 import web_proof_invalid_signature from "../testdata/web_proof_invalid_signature.json";
 import * as assert from "assert";
 import { encodePacked, keccak256 } from "viem";
+import debug from "debug";
 
 import {
   getConfig,
@@ -13,6 +14,24 @@ import {
   deployVlayerContracts,
   writeEnvVariables,
 } from "@vlayer/sdk/config";
+
+const createLogger = (namespace: string) => {
+  const debugLogger = debug(namespace + ":debug");
+  const infoLogger = debug(namespace + ":info");
+
+  // Enable info logs by default
+  if (!debug.enabled(namespace + ":info")) {
+    debug.enable(namespace + ":info");
+  }
+
+  return {
+    info: (message: string, ...args: unknown[]) => infoLogger(message, ...args),
+    debug: (message: string, ...args: unknown[]) =>
+      debugLogger(message, ...args),
+  };
+};
+
+const log = createLogger("examples:simple-web-proof");
 
 let config = getConfig();
 const web_proof =
@@ -66,7 +85,7 @@ async function testSuccessProvingAndVerification({
     "chain" | "ethClient" | "account" | "confirmations"
   >
 >) {
-  console.log("Proving...");
+  log.info("Proving...");
 
   const proveArgs = {
     address: prover,
@@ -80,19 +99,19 @@ async function testSuccessProvingAndVerification({
     ],
     chainId: chain.id,
     gasLimit: config.gasLimit,
-  };
-  const { proverAbi, ...argsToLog } = proveArgs as any;
-  console.log("Proving args:", argsToLog);
+  } as ProveArgs<typeof proverSpec.abi, "main">;
+  const { ...argsToLog } = proveArgs;
+  log.debug("Proving args:", argsToLog);
 
   const hash = await vlayer.prove(proveArgs);
-  console.log("Proving hash:", hash);
+  log.debug("Proving hash:", hash);
 
   const result = await vlayer.waitForProvingResult({ hash });
-  console.log("Proving result:", result);
+  log.debug("Proving result:", result);
 
-  const [proof, twitterHandle, address] = result as any;
+  const [proof, twitterHandle, address] = result;
 
-  console.log("Verifying...");
+  log.info("Verifying...");
 
   // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia
   const gas = await ethClient.estimateContractGas({
@@ -121,7 +140,7 @@ async function testSuccessProvingAndVerification({
     retryDelay: 1000,
   });
 
-  console.log("Verified!");
+  log.info("Verified!");
 
   const balance = await ethClient.readContract({
     address: verifier,
@@ -170,12 +189,12 @@ async function testFailedProving({
       ],
       chainId: chain.id,
       gasLimit: config.gasLimit,
-    } as ProveArgs<any, any>;
-    const { proverAbi, ...argsToLog } = proveArgs;
-    console.log("Proving args:", argsToLog);
+    } as ProveArgs<typeof proverSpec.abi, "main">;
+    const { ...argsToLog } = proveArgs;
+    log.debug("Proving args:", argsToLog);
 
     const hash = await vlayer.prove(proveArgs);
-    console.log("Proving hash:", hash);
+    log.debug("Proving hash:", hash);
 
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
@@ -189,7 +208,7 @@ async function testFailedProving({
       'Preflight failed with error: Preflight: Transaction reverted: ContractError(Revert(Revert("Invalid notary public key")))',
       `Error with wrong message returned: ${error.message}`,
     );
-    console.log("✅ Done");
+    log.info("✅ Done");
   }
 }
 

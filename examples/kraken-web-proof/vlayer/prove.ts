@@ -10,6 +10,25 @@ import {
   writeEnvVariables,
 } from "@vlayer/sdk/config";
 import { spawn } from "child_process";
+import debug from "debug";
+
+const createLogger = (namespace: string) => {
+  const debugLogger = debug(namespace + ":debug");
+  const infoLogger = debug(namespace + ":info");
+
+  // Enable info logs by default
+  if (!debug.enabled(namespace + ":info")) {
+    debug.enable(namespace + ":info");
+  }
+
+  return {
+    info: (message: string, ...args: unknown[]) => infoLogger(message, ...args),
+    debug: (message: string, ...args: unknown[]) =>
+      debugLogger(message, ...args),
+  };
+};
+
+const log = createLogger("examples:kraken-web-proof");
 
 const URL_TO_PROVE = "https://api.kraken.com/0/public/Ticker?pair=ETHUSD";
 
@@ -29,7 +48,7 @@ const vlayer = createVlayerClient({
 });
 
 async function generateWebProof() {
-  console.log("⏳ Generating web proof...");
+  log.info("⏳ Generating web proof...");
   const { stdout } = await runProcess("vlayer", [
     "web-proof-fetch",
     "--notary",
@@ -40,7 +59,7 @@ async function generateWebProof() {
   return stdout;
 }
 
-console.log("⏳ Deploying contracts...");
+log.info("⏳ Deploying contracts...");
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
@@ -54,11 +73,11 @@ await writeEnvVariables(".env", {
   VITE_VERIFIER_ADDRESS: verifier,
 });
 
-console.log("✅ Contracts deployed", { prover, verifier });
+log.info("✅ Contracts deployed", { prover, verifier });
 
 const webProof = await generateWebProof();
 
-console.log("⏳ Proving...");
+log.info("⏳ Proving...");
 const proveArgs = {
   address: prover,
   functionName: "main",
@@ -71,19 +90,19 @@ const proveArgs = {
   chainId: chain.id,
   gasLimit: config.gasLimit,
 } as ProveArgs<typeof proverSpec.abi, "main">;
-const { proverAbi, ...argsToLog } = proveArgs;
-console.log("Proving args:", argsToLog);
+const { ...argsToLog } = proveArgs;
+log.debug("Proving args:", argsToLog);
 
 const hash = await vlayer.prove(proveArgs);
-console.log("Proving hash:", hash);
+log.debug("Proving hash:", hash);
 
 const result = await vlayer.waitForProvingResult({ hash });
-console.log("Proving result:", result);
+log.debug("Proving result:", result);
 
 const [proof, avgPrice] = result;
-console.log("✅ Proof generated");
+log.info("✅ Proof generated");
 
-console.log("⏳ Verifying...");
+log.info("⏳ Verifying...");
 
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia
 const gas = await ethClient.estimateContractGas({
@@ -112,7 +131,7 @@ await ethClient.waitForTransactionReceipt({
   retryDelay: 1000,
 });
 
-console.log("✅ Verified!");
+log.info("✅ Verified!");
 
 function runProcess(
   cmd: string,

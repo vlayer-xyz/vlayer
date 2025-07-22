@@ -11,6 +11,25 @@ import {
 import { type Address } from "viem";
 import { loadFixtures } from "./loadFixtures";
 import { getTeleportConfig } from "./constants";
+import debug from "debug";
+
+const createLogger = (namespace: string) => {
+  const debugLogger = debug(namespace + ":debug");
+  const infoLogger = debug(namespace + ":info");
+
+  // Enable info logs by default
+  if (!debug.enabled(namespace + ":info")) {
+    debug.enable(namespace + ":info");
+  }
+
+  return {
+    info: (message: string, ...args: unknown[]) => infoLogger(message, ...args),
+    debug: (message: string, ...args: unknown[]) =>
+      debugLogger(message, ...args),
+  };
+};
+
+const log = createLogger("examples:simple-teleport");
 
 const config = getConfig();
 const teleportConfig = getTeleportConfig(config.chainName);
@@ -31,7 +50,7 @@ const vlayer = createVlayerClient({
   url: proverUrl,
   token: config.token,
 });
-console.log("⏳ Deploying helper contracts...");
+log.info("⏳ Deploying helper contracts...");
 const deployWhaleBadgeHash = await ethClient.deployContract({
   abi: whaleBadgeNFTSpec.abi,
   bytecode: whaleBadgeNFTSpec.bytecode.object,
@@ -72,16 +91,16 @@ const proveArgs = {
   chainId: chain.id,
   gasLimit: config.gasLimit,
 } as ProveArgs<typeof proverSpec.abi, "crossChainBalanceOf">;
-const { proverAbi, ...argsToLog } = proveArgs;
-console.log("Proving args:", argsToLog);
+const { ...argsToLog } = proveArgs;
+log.debug("Proving args:", argsToLog);
 
 const proofHash = await vlayer.prove(proveArgs);
-console.log("Proving hash:", proofHash);
+log.debug("Proving hash:", proofHash);
 
 const result = await vlayer.waitForProvingResult({ hash: proofHash });
-console.log("Proving result:", result);
+log.debug("Proving result:", result);
 
-console.log("⏳ Verifying...");
+log.info("⏳ Verifying...");
 
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia
 const gas = await ethClient.estimateContractGas({
@@ -109,4 +128,4 @@ const receipt = await ethClient.waitForTransactionReceipt({
   retryDelay: 1000,
 });
 
-console.log(`✅ Verification result: ${receipt.status}`);
+log.info(`✅ Verification result: ${receipt.status}`);

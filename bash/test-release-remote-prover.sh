@@ -88,6 +88,7 @@ for example in $(get_examples); do
     fi
 
     echo "::group::vlayer run prove.ts: ${example}"
+    export DEBUG=examples:*
     run_prover_script
     echo "::endgroup::"
 
