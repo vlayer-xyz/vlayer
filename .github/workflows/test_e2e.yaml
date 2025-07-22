@@ -106,15 +106,6 @@ jobs:
         with:
           example: "simple"
 
-          # JWT auth related
-          jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
-
-          # Proving related
-          proving_mode: "prod"
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
-
   test-e2e-simple-web-proof:
     name: E2E test (simple-web-proof)
     needs: [changes, build-binaries]
