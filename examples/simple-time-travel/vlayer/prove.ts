@@ -1,4 +1,4 @@
-import { createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient, type ProveArgs } from "@vlayer/sdk";
 import proverSpec from "../out/AverageBalance.sol/AverageBalance";
 import verifierSpec from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
 import {
@@ -10,6 +10,25 @@ import {
 import { getStartEndBlock } from "./helpers";
 import { loadFixtures } from "./loadFixtures";
 import { getTimeTravelConfig } from "./constants";
+import debug from "debug";
+
+const createLogger = (namespace: string) => {
+  const debugLogger = debug(namespace + ":debug");
+  const infoLogger = debug(namespace + ":info");
+
+  // Enable info logs by default
+  if (!debug.enabled(namespace + ":info")) {
+    debug.enable(namespace + ":info");
+  }
+
+  return {
+    info: (message: string, ...args: unknown[]) => infoLogger(message, ...args),
+    debug: (message: string, ...args: unknown[]) =>
+      debugLogger(message, ...args),
+  };
+};
+
+const log = createLogger("examples:simple-time-travel");
 
 const config = getConfig();
 const timeTravelConfig = getTimeTravelConfig(config.chainName);
@@ -48,21 +67,26 @@ const vlayer = createVlayerClient({
   token: config.token,
 });
 
-const provingHash = await vlayer.prove({
+const proveArgs = {
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
   args: [timeTravelConfig.tokenOwner],
   chainId: ethClient.chain.id,
   gasLimit: config.gasLimit,
-});
+} as ProveArgs<typeof proverSpec.abi, "averageBalanceOf">;
+const { ...argsToLog } = proveArgs;
+log.debug("Proving args:", argsToLog);
 
-console.log("Waiting for proving result: ");
+const provingHash = await vlayer.prove(proveArgs);
+log.debug("Proving hash:", provingHash);
+
+log.info("Waiting for proving result...");
 
 const result = await vlayer.waitForProvingResult({ hash: provingHash });
+log.debug("Proving result:", result);
 
-console.log("Proof:", result[0]);
-console.log("Verifying...");
+log.info("Verifying...");
 
 // Workaround for viem estimating gas with `latest` block causing future block assumptions to fail on slower chains like mainnet/sepolia
 const gas = await ethClient.estimateContractGas({
@@ -88,4 +112,4 @@ const receipt = await waitForTransactionReceipt({
   hash: verificationHash,
 });
 
-console.log(`Verification result: ${receipt.status}`);
+log.info(`Verification result: ${receipt.status}`);

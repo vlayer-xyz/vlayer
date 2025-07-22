@@ -29,7 +29,7 @@
     "@vercel/analytics": "^1.4.1",
     "@vlayer/react": "workspace:*",
     "@vlayer/sdk": "workspace:*",
-    "debug": "^4.4.0",
+    "debug": "^4.4.1",
     "motion": "^12.4.2",
     "react": "^18.3.1",
     "react-daisyui": "^5.0.5",
