@@ -133,6 +133,68 @@ const fn to_cycles(vgas: u64) -> u64 {
     vgas * CYCLES_PER_VGAS
 }
 
+/// Attempts to allocate vgas from the gas meter client.
+///
+/// On success, updates the application state to PreflightPending and returns `true`.
+/// On failure, logs the error, updates the application state with the allocation error,
+/// and returns `false` to signal that the caller should abort execution.
+///
+/// # Returns
+/// - `true` if vgas allocation succeeded
+/// - `false` if vgas allocation failed (caller should return immediately)
+async fn allocate_vgas(
+    gas_meter_client: &impl GasMeterClient,
+    vgas_limit: u64,
+    app_state: &AppState,
+    call_hash: CallHash,
+) -> bool {
+    set_state(app_state, call_hash, State::AllocateGasPending);
+
+    match gas_meter_client.allocate(vgas_limit).await {
+        Ok(()) => {
+            set_state(app_state, call_hash, State::PreflightPending);
+            true
+        }
+        Err(err) => {
+            let state = allocate_error_to_state(err, vgas_limit);
+            set_state(app_state, call_hash, state);
+            false
+        }
+    }
+}
+
+/// Executes the preflight phase and updates application state.
+///
+/// On success, updates the application state to EstimatingCyclesPending and returns the preflight result.
+/// On failure, logs the error, updates the application state with the preflight error,
+/// and returns `None` to signal that the caller should abort execution.
+///
+/// # Returns
+/// - `Some(preflight_result)` if preflight succeeded
+/// - `None` if preflight failed (caller should return immediately)
+async fn preflight(
+    host: Host,
+    call: EngineCall,
+    evm_gas_limit: u64,
+    app_state: &AppState,
+    call_hash: CallHash,
+    metrics: &mut Metrics,
+) -> Option<call_host::PreflightResult> {
+    match preflight::await_preflight(host, call, metrics).await {
+        Ok(res) => {
+            let entry = set_state(app_state, call_hash, State::EstimatingCyclesPending);
+            set_metrics(entry, *metrics);
+            Some(res)
+        }
+        Err(err) => {
+            let state = preflight_error_to_state(err, evm_gas_limit);
+            let entry = set_state(app_state, call_hash, state);
+            set_metrics(entry, *metrics);
+            None
+        }
+    }
+}
+
 /// Attempts to refund gas to the gas meter client after preflight computation.
 ///
 /// On success, logs the refund and returns `true`.
@@ -258,32 +320,16 @@ pub async fn generate(
 
     info!("Generating proof");
 
-    set_state(&app_state, call_hash, State::AllocateGasPending);
-
-    match gas_meter_client.allocate(vgas_limit).await {
-        Ok(()) => {
-            set_state(&app_state, call_hash, State::PreflightPending);
-        }
-        Err(err) => {
-            let state = allocate_error_to_state(err, vgas_limit);
-            set_state(&app_state, call_hash, state);
-            return;
-        }
-    };
+    if !allocate_vgas(&gas_meter_client, vgas_limit, &app_state, call_hash).await {
+        return;
+    }
 
     let evm_gas_limit = call.gas_limit;
-    let preflight_result = match preflight::await_preflight(host, call, &mut metrics).await {
-        Ok(res) => {
-            let entry = set_state(&app_state, call_hash, State::EstimatingCyclesPending);
-            set_metrics(entry, metrics);
-            res
-        }
-        Err(err) => {
-            let state = preflight_error_to_state(err, evm_gas_limit);
-            let entry = set_state(&app_state, call_hash, state);
-            set_metrics(entry, metrics);
-            return;
-        }
+    let Some(preflight_result) =
+        preflight(host, call, evm_gas_limit, &app_state, call_hash, &mut metrics)
+            .await
+    else {
+        return;
     };
 
     let estimation_start = std::time::Instant::now();
@@ -306,11 +352,11 @@ pub async fn generate(
             }
         };
 
-    let estimated_vgas = to_vgas(estimated_cycles);
-    metrics.gas = estimated_vgas;
-
     let elapsed = estimation_start.elapsed();
     info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
+
+    let estimated_vgas = to_vgas(estimated_cycles);
+    metrics.gas = estimated_vgas;
 
     if !refund(&gas_meter_client, estimated_vgas, app_state.clone(), call_hash, metrics).await {
         return;
