@@ -165,6 +165,40 @@ async fn refund(
     }
 }
 
+/// Attempts to send metadata to the gas meter client.
+///
+/// On success, logs the operation and returns `true`.
+/// On failure, logs the error, updates the application state with the error,
+/// and returns `false` to signal that the caller should abort execution.
+///
+/// # Returns
+/// - `true` if sending metadata succeeded
+/// - `false` if sending metadata failed (caller should return immediately)
+async fn send_metadata(
+    gas_meter_client: &impl GasMeterClient,
+    metadata: Box<[call_common::Metadata]>,
+    app_state: AppState,
+    call_hash: CallHash,
+    metrics: Metrics,
+) -> bool {
+    match gas_meter_client.send_metadata(metadata).await {
+        Ok(()) => {
+            info!("Send metadata succeeded");
+            true
+        }
+        Err(err) => {
+            error!("Send metadata failed with error: {err}");
+            let entry = set_state(
+                &app_state,
+                call_hash,
+                State::PreflightError(Error::AllocateGasRpc(err).into()),
+            );
+            set_metrics(entry, metrics);
+            false
+        }
+    }
+}
+
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
@@ -236,17 +270,15 @@ pub async fn generate(
         return;
     }
 
-    if let Err(err) = gas_meter_client
-        .send_metadata(preflight_result.metadata.clone())
-        .await
+    if !send_metadata(
+        &gas_meter_client,
+        preflight_result.metadata,
+        app_state.clone(),
+        call_hash,
+        metrics,
+    )
+    .await
     {
-        error!("Send metadata failed with error: {err}");
-        let entry = set_state(
-            &app_state,
-            call_hash,
-            State::PreflightError(Error::AllocateGasRpc(err).into()),
-        );
-        set_metrics(entry, metrics);
         return;
     }
 
