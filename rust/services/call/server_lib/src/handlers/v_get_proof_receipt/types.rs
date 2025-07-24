@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     metrics::Metrics,
     proof::{Error as ProofError, Status as ProofStatus},
-    state::State as ProofState,
     proving::RawData,
+    state::State as ProofState,
     v_call::CallHash,
 };
 
