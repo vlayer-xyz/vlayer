@@ -46,10 +46,15 @@ pub async fn v_call(
     if !found_existing {
         tokio::spawn(async move {
             let span = info_span!("http", id = req_id.to_string());
-            proof::Generator::new(gas_meter_client, vgas_limit, state.clone(), call_hash)
-                .run(host, call)
-                .instrument(span)
-                .await;
+            proof::generator::Generator::new(
+                gas_meter_client,
+                vgas_limit,
+                state.clone(),
+                call_hash,
+            )
+            .run(host, call)
+            .instrument(span)
+            .await;
         });
     }
 

@@ -1,48 +1,21 @@
 use call_common::Metadata;
 use call_engine::{Call as EngineCall, CallGuestId};
-use call_host::{
-    CycleEstimator, CycleEstimatorError, Host, PreflightResult, Prover, ProvingInput,
-    Risc0CycleEstimator,
-};
-use dashmap::Entry;
+use call_host::{CycleEstimator, Host, PreflightResult, Prover, ProvingInput, Risc0CycleEstimator};
 use tracing::{error, info, instrument, warn};
 
-pub use crate::proving::RawData;
 use crate::{
-    gas_meter::{Client as GasMeterClient, ComputationStage, Error as GasMeterError},
+    gas_meter::{Client as GasMeterClient, ComputationStage},
     handlers::State as AppState,
     metrics::Metrics,
-    preflight::{self, Error as PreflightError},
-    proving::{self, Error as ProvingError},
-    state::{State, set_state},
+    preflight::{self},
+    proof::{
+        Error, allocate_error_to_state, preflight_error_to_state, set_metrics,
+        state::{State, set_state},
+        to_cycles, to_vgas,
+    },
+    proving::{self},
     v_call::CallHash,
 };
-
-const CYCLES_PER_VGAS: u64 = 1_000_000;
-
-#[derive(Default)]
-pub struct Status {
-    pub state: State,
-    pub metrics: Metrics,
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("Allocating gas: {0}")]
-    AllocateGasRpc(#[from] GasMeterError),
-    #[error("Your vgas balance is insufficient to allocate given vgas_limit of {vgas_limit}.")]
-    AllocateGasInsufficientBalance { vgas_limit: u64 },
-    #[error("Preflight: {0}")]
-    Preflight(#[from] PreflightError),
-    #[error("EVM gas limit {evm_gas_limit} exceeded.")]
-    PreflightEvmGasLimitExceeded { evm_gas_limit: u64 },
-    #[error("Estimating cycles: {0}")]
-    EstimatingCycles(#[from] CycleEstimatorError),
-    #[error("Insufficient vgas_limit: provided {provided}, estimated vgas: {estimated}")]
-    InsufficientVgas { provided: u64, estimated: u64 },
-    #[error("Proving: {0}")]
-    Proving(#[from] ProvingError),
-}
 
 pub struct Generator {
     gas_meter_client: Box<dyn GasMeterClient>,
@@ -258,43 +231,4 @@ impl Generator {
             }
         };
     }
-}
-
-fn set_metrics(
-    entry: Entry<'_, CallHash, Status>,
-    metrics: Metrics,
-) -> Entry<'_, CallHash, Status> {
-    entry.and_modify(|res| res.metrics = metrics)
-}
-
-fn allocate_error_to_state(err: GasMeterError, vgas_limit: u64) -> State {
-    if err.is_insufficient_gas_balance() {
-        return State::AllocateGasError(
-            Error::AllocateGasInsufficientBalance { vgas_limit }.into(),
-        );
-    }
-    error!("Gas meter failed with error: {err}");
-    State::AllocateGasError(Error::AllocateGasRpc(err).into())
-}
-
-fn preflight_error_to_state(err: PreflightError, evm_gas_limit: u64) -> State {
-    if let preflight::Error::Preflight(ref preflight_err) = err {
-        if preflight_err.is_gas_limit_exceeded() {
-            error!("Preflight gas limit exceeded!");
-            return State::PreflightError(
-                Error::PreflightEvmGasLimitExceeded { evm_gas_limit }.into(),
-            );
-        }
-    }
-
-    error!("Preflight failed with error: {err}");
-    State::PreflightError(Error::Preflight(err).into())
-}
-
-const fn to_vgas(cycles: u64) -> u64 {
-    cycles.div_ceil(CYCLES_PER_VGAS)
-}
-
-const fn to_cycles(vgas: u64) -> u64 {
-    vgas * CYCLES_PER_VGAS
 }
