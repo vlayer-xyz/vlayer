@@ -100,6 +100,15 @@ fn set_metrics(
     entry.and_modify(|res| res.metrics = metrics)
 }
 
+fn allocate_error_to_state(err: GasMeterError, vgas_limit: u64) -> State {
+    if err.is_insufficient_gas_balance() {
+        State::AllocateGasError(Error::AllocateGasInsufficientBalance { vgas_limit }.into())
+    } else {
+        error!("Gas meter failed with error: {err}");
+        State::AllocateGasError(Error::AllocateGasRpc(err).into())
+    }
+}
+
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
@@ -123,12 +132,7 @@ pub async fn generate(
             set_state(&state, call_hash, State::PreflightPending);
         }
         Err(err) => {
-            let state_value = if err.is_insufficient_gas_balance() {
-                State::AllocateGasError(Error::AllocateGasInsufficientBalance { vgas_limit }.into())
-            } else {
-                error!("Gas meter failed with error: {err}");
-                State::AllocateGasError(Error::AllocateGasRpc(err).into())
-            };
+            let state_value = allocate_error_to_state(err, vgas_limit);
             set_state(&state, call_hash, state_value);
             return;
         }
