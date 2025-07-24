@@ -110,26 +110,17 @@ fn allocate_error_to_state(err: GasMeterError, vgas_limit: u64) -> State {
 }
 
 fn preflight_error_to_state(err: PreflightError, evm_gas_limit: u64) -> State {
-    match err {
-        preflight::Error::Preflight(preflight_err)
-            if preflight_err.is_gas_limit_exceeded() =>
-        {
+    if let preflight::Error::Preflight(ref preflight_err) = err {
+        if preflight_err.is_gas_limit_exceeded() {
             error!("Preflight gas limit exceeded!");
-            State::PreflightError(
+            return State::PreflightError(
                 Error::PreflightEvmGasLimitExceeded { evm_gas_limit }.into(),
-            )
-        }
-        preflight::Error::Preflight(preflight_err) => {
-            error!("Preflight failed with error: {preflight_err}");
-            State::PreflightError(
-                Error::Preflight(preflight::Error::Preflight(preflight_err)).into(),
-            )
-        }
-        other_err => {
-            error!("Preflight failed with error: {other_err}");
-            State::PreflightError(Error::Preflight(other_err).into())
+            );
         }
     }
+
+    error!("Preflight failed with error: {err}");
+    State::PreflightError(Error::Preflight(err).into())
 }
 
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
@@ -205,8 +196,11 @@ pub async fn generate(
         .await
     {
         error!("Preflight refund failed with error: {err}");
-        let entry =
-            set_state(&app_state, call_hash, State::PreflightError(Error::AllocateGasRpc(err).into()));
+        let entry = set_state(
+            &app_state,
+            call_hash,
+            State::PreflightError(Error::AllocateGasRpc(err).into()),
+        );
         set_metrics(entry, metrics);
         return;
     }
@@ -216,8 +210,11 @@ pub async fn generate(
         .await
     {
         error!("Send metadata failed with error: {err}");
-        let entry =
-            set_state(&app_state, call_hash, State::PreflightError(Error::AllocateGasRpc(err).into()));
+        let entry = set_state(
+            &app_state,
+            call_hash,
+            State::PreflightError(Error::AllocateGasRpc(err).into()),
+        );
         set_metrics(entry, metrics);
         return;
     }
