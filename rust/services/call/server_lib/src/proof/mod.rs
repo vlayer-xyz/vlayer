@@ -12,6 +12,9 @@ use crate::{
     v_call::CallHash,
 };
 
+pub mod generator;
+pub mod state;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Allocating gas: {0}")]
@@ -29,9 +32,6 @@ pub enum Error {
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
 }
-
-pub mod generator;
-pub mod state;
 
 const CYCLES_PER_VGAS: u64 = 1_000_000;
 
