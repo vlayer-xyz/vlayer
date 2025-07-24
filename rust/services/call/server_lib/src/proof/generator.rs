@@ -105,7 +105,7 @@ impl Generator {
         }
     }
 
-    fn estimate_cycles(&mut self, preflight_result: &PreflightResult) -> Option<u64> {
+    fn estimate_cycles(&self, preflight_result: &PreflightResult) -> Option<u64> {
         let estimation_start = std::time::Instant::now();
 
         let estimated_cycles = match Risc0CycleEstimator
@@ -198,7 +198,7 @@ impl Generator {
     }
 
     async fn proving(
-        &mut self,
+        mut self,
         preflight_result: PreflightResult,
         prover: &Prover,
         call_guest_id: CallGuestId,
