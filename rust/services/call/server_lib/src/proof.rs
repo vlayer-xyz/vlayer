@@ -102,11 +102,12 @@ fn set_metrics(
 
 fn allocate_error_to_state(err: GasMeterError, vgas_limit: u64) -> State {
     if err.is_insufficient_gas_balance() {
-        State::AllocateGasError(Error::AllocateGasInsufficientBalance { vgas_limit }.into())
-    } else {
-        error!("Gas meter failed with error: {err}");
-        State::AllocateGasError(Error::AllocateGasRpc(err).into())
+        return State::AllocateGasError(
+            Error::AllocateGasInsufficientBalance { vgas_limit }.into(),
+        );
     }
+    error!("Gas meter failed with error: {err}");
+    State::AllocateGasError(Error::AllocateGasRpc(err).into())
 }
 
 fn preflight_error_to_state(err: PreflightError, evm_gas_limit: u64) -> State {
