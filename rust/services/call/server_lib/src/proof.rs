@@ -1,3 +1,4 @@
+use call_common::Metadata;
 use call_engine::Call as EngineCall;
 use call_host::{CycleEstimator, CycleEstimatorError, Host, ProvingInput, Risc0CycleEstimator};
 use dashmap::Entry;
@@ -176,7 +177,7 @@ async fn refund(
 /// - `false` if sending metadata failed (caller should return immediately)
 async fn send_metadata(
     gas_meter_client: &impl GasMeterClient,
-    metadata: Box<[call_common::Metadata]>,
+    metadata: Box<[Metadata]>,
     app_state: AppState,
     call_hash: CallHash,
     metrics: Metrics,
