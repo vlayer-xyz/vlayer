@@ -124,6 +124,10 @@ fn preflight_error_to_state(err: PreflightError, evm_gas_limit: u64) -> State {
     State::PreflightError(Error::Preflight(err).into())
 }
 
+const fn to_vgas(cycles: u64) -> u64 {
+    cycles.div_ceil(CYCLES_PER_VGAS)
+}
+
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
@@ -188,7 +192,7 @@ pub async fn generate(
             }
         };
 
-    let estimated_vgas = estimated_cycles.div_ceil(CYCLES_PER_VGAS);
+    let estimated_vgas = to_vgas(estimated_cycles);
 
     metrics.gas = estimated_vgas;
 
