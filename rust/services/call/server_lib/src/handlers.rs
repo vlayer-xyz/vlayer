@@ -53,7 +53,7 @@ impl RpcServer for State {
         let params = extensions
             .get::<Params>()
             .expect("params should be extracted in the handler");
-        v_call::v_call(self.clone(), call, ctx, params.clone()).await
+        v_call::v_call(Arc::clone(self), call, ctx, params.clone()).await
     }
 
     async fn v_get_proof_receipt(&self, hash: CallHash) -> VGetProofReceiptResult<CallResult> {

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use alloy_primitives::ChainId;
 use call_host::{BuilderError, Host};
 use provider::Address;
@@ -49,7 +51,7 @@ pub async fn v_call(
             proof::generator::Generator::new(
                 gas_meter_client,
                 vgas_limit,
-                state.clone(),
+                Arc::clone(&state),
                 call_hash,
             )
             .run(host, call)
