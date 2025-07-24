@@ -155,8 +155,8 @@ pub async fn generate(
             set_state(&app_state, call_hash, State::PreflightPending);
         }
         Err(err) => {
-            let state_value = allocate_error_to_state(err, vgas_limit);
-            set_state(&app_state, call_hash, state_value);
+            let state = allocate_error_to_state(err, vgas_limit);
+            set_state(&app_state, call_hash, state);
             return;
         }
     };
@@ -169,8 +169,8 @@ pub async fn generate(
             res
         }
         Err(err) => {
-            let state_value = preflight_error_to_state(err, evm_gas_limit);
-            let entry = set_state(&app_state, call_hash, state_value);
+            let state = preflight_error_to_state(err, evm_gas_limit);
+            let entry = set_state(&app_state, call_hash, state);
             set_metrics(entry, metrics);
             return;
         }
