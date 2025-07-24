@@ -13,6 +13,7 @@ echo "::group::vlayer installation"
 curl -SL https://install.vlayer.xyz | bash
 export PATH="$PATH:$HOME/.config/.vlayer/bin"
 vlayerup
+vlayer --version
 echo "::endgroup::"
 
 echo "::group::bun installation"
@@ -45,9 +46,11 @@ for example in $(get_examples); do
     vlayer test
     echo "::endgroup::"
 
-    echo "Starting docker-compose"
     pushd vlayer
+        echo "::group::Starting docker-compose"
         bun run devnet:up
+        docker compose -f docker-compose.devnet.yaml images
+        echo "::endgroup::"
     popd
 
     echo "::group::vlayer run prove.ts: ${example}"
