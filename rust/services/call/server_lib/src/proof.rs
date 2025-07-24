@@ -129,6 +129,10 @@ const fn to_vgas(cycles: u64) -> u64 {
     cycles.div_ceil(CYCLES_PER_VGAS)
 }
 
+const fn to_cycles(vgas: u64) -> u64 {
+    vgas * CYCLES_PER_VGAS
+}
+
 /// Attempts to refund gas to the gas meter client after preflight computation.
 ///
 /// On success, logs the refund and returns `true`.
@@ -200,6 +204,45 @@ async fn send_metadata(
     }
 }
 
+/// Validates that the provided vgas limit is sufficient for the estimated vgas requirement.
+///
+/// On success, returns `true` and continues execution.
+/// On failure, logs a warning, updates the application state with an insufficient vgas error,
+/// and returns `false` to signal that the caller should abort execution.
+///
+/// # Returns
+/// - `true` if vgas limit is sufficient
+/// - `false` if vgas limit is insufficient (caller should return immediately)
+fn validate_vgas_limit(
+    vgas_limit: u64,
+    estimated_vgas: u64,
+    estimated_cycles: u64,
+    app_state: &AppState,
+    call_hash: CallHash,
+    metrics: Metrics,
+) -> bool {
+    let cycles_limit = to_cycles(vgas_limit);
+
+    if vgas_limit <= estimated_vgas {
+        warn!(
+            "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated vgas: {} ({} cycles)",
+            vgas_limit, cycles_limit, estimated_vgas, estimated_cycles
+        );
+        let entry = set_state(
+            app_state,
+            call_hash,
+            State::EstimatingCyclesError(Box::new(Error::InsufficientVgas {
+                provided: vgas_limit,
+                estimated: estimated_vgas,
+            })),
+        );
+        set_metrics(entry, metrics);
+        false
+    } else {
+        true
+    }
+}
+
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
@@ -212,7 +255,6 @@ pub async fn generate(
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let mut metrics = Metrics::default();
-    let cycles_limit = vgas_limit * CYCLES_PER_VGAS;
 
     info!("Generating proof");
 
@@ -286,20 +328,14 @@ pub async fn generate(
         return;
     }
 
-    if vgas_limit <= estimated_vgas {
-        warn!(
-            "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated vgas: {} ({} cycles)",
-            vgas_limit, cycles_limit, estimated_vgas, estimated_cycles
-        );
-        let entry = set_state(
-            &app_state,
-            call_hash,
-            State::EstimatingCyclesError(Box::new(Error::InsufficientVgas {
-                provided: vgas_limit,
-                estimated: estimated_vgas,
-            })),
-        );
-        set_metrics(entry, metrics);
+    if !validate_vgas_limit(
+        vgas_limit,
+        estimated_vgas,
+        estimated_cycles,
+        &app_state,
+        call_hash,
+        metrics,
+    ) {
         return;
     }
 
