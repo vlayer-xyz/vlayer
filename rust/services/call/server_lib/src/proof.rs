@@ -286,7 +286,7 @@ pub async fn generate(
         return;
     }
 
-    if cycles_limit < estimated_cycles {
+    if vgas_limit <= estimated_vgas {
         warn!(
             "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated cycles: {}",
             vgas_limit, cycles_limit, estimated_cycles
