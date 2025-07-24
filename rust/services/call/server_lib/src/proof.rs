@@ -128,6 +128,43 @@ const fn to_vgas(cycles: u64) -> u64 {
     cycles.div_ceil(CYCLES_PER_VGAS)
 }
 
+/// Attempts to refund gas to the gas meter client after preflight computation.
+///
+/// On success, logs the refund and returns `true`.
+/// On failure, logs the error, updates the application state with the error,
+/// and returns `false` to signal that the caller should abort execution.
+///
+/// # Returns
+/// - `true` if the refund succeeded
+/// - `false` if the refund failed (caller should return immediately)
+async fn refund(
+    gas_meter_client: &impl GasMeterClient,
+    estimated_vgas: u64,
+    app_state: AppState,
+    call_hash: CallHash,
+    metrics: Metrics,
+) -> bool {
+    match gas_meter_client
+        .refund(ComputationStage::Preflight, estimated_vgas)
+        .await
+    {
+        Ok(()) => {
+            info!("Preflight refund succeeded for {estimated_vgas} vgas");
+            true
+        }
+        Err(err) => {
+            error!("Preflight refund failed with error: {err}");
+            let entry = set_state(
+                &app_state,
+                call_hash,
+                State::PreflightError(Error::AllocateGasRpc(err).into()),
+            );
+            set_metrics(entry, metrics);
+            false
+        }
+    }
+}
+
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
@@ -193,20 +230,9 @@ pub async fn generate(
         };
 
     let estimated_vgas = to_vgas(estimated_cycles);
-
     metrics.gas = estimated_vgas;
 
-    if let Err(err) = gas_meter_client
-        .refund(ComputationStage::Preflight, estimated_vgas)
-        .await
-    {
-        error!("Preflight refund failed with error: {err}");
-        let entry = set_state(
-            &app_state,
-            call_hash,
-            State::PreflightError(Error::AllocateGasRpc(err).into()),
-        );
-        set_metrics(entry, metrics);
+    if !refund(&gas_meter_client, estimated_vgas, app_state.clone(), call_hash, metrics).await {
         return;
     }
 
