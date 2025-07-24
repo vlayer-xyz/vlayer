@@ -267,6 +267,9 @@ pub async fn generate(
     let estimated_vgas = to_vgas(estimated_cycles);
     metrics.gas = estimated_vgas;
 
+    let elapsed = estimation_start.elapsed();
+    info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
+
     if !refund(&gas_meter_client, estimated_vgas, app_state.clone(), call_hash, metrics).await {
         return;
     }
@@ -282,9 +285,6 @@ pub async fn generate(
     {
         return;
     }
-
-    let elapsed = estimation_start.elapsed();
-    info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
 
     if cycles_limit < estimated_cycles {
         warn!(
