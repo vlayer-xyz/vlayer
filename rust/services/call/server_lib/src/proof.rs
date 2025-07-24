@@ -288,8 +288,8 @@ pub async fn generate(
 
     if vgas_limit <= estimated_vgas {
         warn!(
-            "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated cycles: {}",
-            vgas_limit, cycles_limit, estimated_cycles
+            "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated vgas: {} ({} cycles)",
+            vgas_limit, cycles_limit, estimated_vgas, estimated_cycles
         );
         let entry = set_state(
             &app_state,
