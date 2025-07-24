@@ -100,7 +100,7 @@ async function testSuccessProvingAndVerification({
     chainId: chain.id,
     gasLimit: config.gasLimit,
   } as ProveArgs<typeof proverSpec.abi, "main">;
-  const { ...argsToLog } = proveArgs;
+  const { proverAbi: _, ...argsToLog } = proveArgs;
   log.debug("Proving args:", argsToLog);
 
   const hash = await vlayer.prove(proveArgs);
@@ -190,7 +190,7 @@ async function testFailedProving({
       chainId: chain.id,
       gasLimit: config.gasLimit,
     } as ProveArgs<typeof proverSpec.abi, "main">;
-    const { ...argsToLog } = proveArgs;
+    const { proverAbi: _, ...argsToLog } = proveArgs;
     log.debug("Proving args:", argsToLog);
 
     const hash = await vlayer.prove(proveArgs);

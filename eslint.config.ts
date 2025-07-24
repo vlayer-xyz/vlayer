@@ -76,6 +76,23 @@ export default tseslint.config(
       "no-console": "off",
     },
   },
+  // Allow underscore variables to be unused (common convention)
+  {
+    files: [
+      "packages/**/*.{ts,tsx,js,jsx}",
+      "examples/**/*.{ts,tsx,js,jsx}",
+    ],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_"
+        }
+      ],
+    },
+  },
   // Disable type-checking rules for specific files to avoid forcing their inclusion in tsconfig.json
   {
     files: [
