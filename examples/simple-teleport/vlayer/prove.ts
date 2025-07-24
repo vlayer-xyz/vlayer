@@ -91,7 +91,7 @@ const proveArgs = {
   chainId: chain.id,
   gasLimit: config.gasLimit,
 } as ProveArgs<typeof proverSpec.abi, "crossChainBalanceOf">;
-const { ...argsToLog } = proveArgs;
+const { proverAbi: _, ...argsToLog } = proveArgs;
 log.debug("Proving args:", argsToLog);
 
 const proofHash = await vlayer.prove(proveArgs);

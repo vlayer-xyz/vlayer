@@ -80,7 +80,7 @@ const proveArgs = {
   gasLimit: config.gasLimit,
   args: [emailArgs],
 } as ProveArgs<typeof proverSpec.abi, "main">;
-const { ...argsToLog } = proveArgs;
+const { proverAbi: _, ...argsToLog } = proveArgs;
 log.debug("Proving args:", argsToLog);
 
 const hash = await vlayer.prove(proveArgs);

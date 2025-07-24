@@ -75,7 +75,7 @@ const proveArgs = {
   chainId: ethClient.chain.id,
   gasLimit: config.gasLimit,
 } as ProveArgs<typeof proverSpec.abi, "averageBalanceOf">;
-const { ...argsToLog } = proveArgs;
+const { proverAbi: _, ...argsToLog } = proveArgs;
 log.debug("Proving args:", argsToLog);
 
 const provingHash = await vlayer.prove(proveArgs);

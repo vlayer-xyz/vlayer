@@ -93,7 +93,7 @@ const proveArgs = {
   gasLimit: config.gasLimit,
 } as ProveArgs<typeof proverSpec.abi, "balance">;
 
-const { ...argsToLog } = proveArgs;
+const { proverAbi: _, ...argsToLog } = proveArgs;
 log.debug("Proving args:", argsToLog);
 
 const hash = await vlayer.prove(proveArgs);
