@@ -1,6 +1,8 @@
 use call_common::Metadata;
 use call_engine::Call as EngineCall;
-use call_host::{CycleEstimator, CycleEstimatorError, Host, ProvingInput, Risc0CycleEstimator};
+use call_host::{
+    CycleEstimator, CycleEstimatorError, Host, PreflightResult, ProvingInput, Risc0CycleEstimator,
+};
 use dashmap::Entry;
 use tracing::{error, info, instrument, warn};
 
@@ -195,6 +197,48 @@ async fn preflight(
     }
 }
 
+/// Estimates the number of cycles required for the computation.
+///
+/// On success, logs the estimation time and returns the estimated cycles.
+/// On failure, logs the error, updates the application state with the estimation error,
+/// and returns `None` to signal that the caller should abort execution.
+///
+/// # Returns
+/// - `Some(estimated_cycles)` if cycle estimation succeeded
+/// - `None` if cycle estimation failed (caller should return immediately)
+fn estimate_cycles(
+    preflight_result: &PreflightResult,
+    app_state: &AppState,
+    call_hash: CallHash,
+    metrics: Metrics,
+) -> Option<u64> {
+    let estimation_start = std::time::Instant::now();
+
+    let estimated_cycles = match Risc0CycleEstimator
+        .estimate(&preflight_result.input, preflight_result.guest_elf.clone())
+    {
+        Ok(result) => {
+            info!(estimated_cycles = result, "Cycle estimation");
+            result
+        }
+        Err(err) => {
+            error!("Cycle estimation failed with error: {err}");
+            let entry = set_state(
+                app_state,
+                call_hash,
+                State::EstimatingCyclesError(Box::new(Error::EstimatingCycles(err))),
+            );
+            set_metrics(entry, metrics);
+            return None;
+        }
+    };
+
+    let elapsed = estimation_start.elapsed();
+    info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
+
+    Some(estimated_cycles)
+}
+
 /// Attempts to refund gas to the gas meter client after preflight computation.
 ///
 /// On success, logs the refund and returns `true`.
@@ -326,34 +370,15 @@ pub async fn generate(
 
     let evm_gas_limit = call.gas_limit;
     let Some(preflight_result) =
-        preflight(host, call, evm_gas_limit, &app_state, call_hash, &mut metrics)
-            .await
+        preflight(host, call, evm_gas_limit, &app_state, call_hash, &mut metrics).await
     else {
         return;
     };
 
-    let estimation_start = std::time::Instant::now();
-
-    let estimated_cycles =
-        match Risc0CycleEstimator.estimate(&preflight_result.input, preflight_result.guest_elf) {
-            Ok(result) => {
-                info!(estimated_cycles = result, "Cycle estimation");
-                result
-            }
-            Err(err) => {
-                error!("Cycle estimation failed with error: {err}");
-                let entry = set_state(
-                    &app_state,
-                    call_hash,
-                    State::EstimatingCyclesError(Box::new(Error::EstimatingCycles(err))),
-                );
-                set_metrics(entry, metrics);
-                return;
-            }
-        };
-
-    let elapsed = estimation_start.elapsed();
-    info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
+    let Some(estimated_cycles) = estimate_cycles(&preflight_result, &app_state, call_hash, metrics)
+    else {
+        return;
+    };
 
     let estimated_vgas = to_vgas(estimated_cycles);
     metrics.gas = estimated_vgas;
