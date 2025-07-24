@@ -128,29 +128,6 @@ const fn to_vgas(cycles: u64) -> u64 {
     cycles.div_ceil(CYCLES_PER_VGAS)
 }
 
-fn preflight_error_to_state(err: PreflightError, evm_gas_limit: u64) -> State {
-    match err {
-        preflight::Error::Preflight(preflight_err)
-            if preflight_err.is_gas_limit_exceeded() =>
-        {
-            error!("Preflight gas limit exceeded!");
-            State::PreflightError(
-                Error::PreflightEvmGasLimitExceeded { evm_gas_limit }.into(),
-            )
-        }
-        preflight::Error::Preflight(preflight_err) => {
-            error!("Preflight failed with error: {preflight_err}");
-            State::PreflightError(
-                Error::Preflight(preflight::Error::Preflight(preflight_err)).into(),
-            )
-        }
-        other_err => {
-            error!("Preflight failed with error: {other_err}");
-            State::PreflightError(Error::Preflight(other_err).into())
-        }
-    }
-}
-
 #[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
 pub async fn generate(
     call: EngineCall,
