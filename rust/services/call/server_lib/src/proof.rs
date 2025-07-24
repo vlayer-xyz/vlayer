@@ -1,7 +1,8 @@
 use call_common::Metadata;
-use call_engine::Call as EngineCall;
+use call_engine::{Call as EngineCall, CallGuestId};
 use call_host::{
-    CycleEstimator, CycleEstimatorError, Host, PreflightResult, ProvingInput, Risc0CycleEstimator,
+    CycleEstimator, CycleEstimatorError, Host, PreflightResult, Prover, ProvingInput,
+    Risc0CycleEstimator,
 };
 use dashmap::Entry;
 use tracing::{error, info, instrument, warn};
@@ -13,10 +14,17 @@ use crate::{
     metrics::Metrics,
     preflight::{self, Error as PreflightError},
     proving::{self, Error as ProvingError},
+    state::{State, set_state},
     v_call::CallHash,
 };
 
 const CYCLES_PER_VGAS: u64 = 1_000_000;
+
+#[derive(Default)]
+pub struct Status {
+    pub state: State,
+    pub metrics: Metrics,
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -36,364 +44,219 @@ pub enum Error {
     Proving(#[from] ProvingError),
 }
 
-#[derive(Default)]
-pub enum State {
-    #[default]
-    Queued,
-    AllocateGasPending,
-    AllocateGasError(Box<Error>),
-    PreflightPending,
-    PreflightError(Box<Error>),
-    EstimatingCyclesPending,
-    EstimatingCyclesError(Box<Error>),
-    ProvingPending,
-    ProvingError(Box<Error>),
-    Done(Box<RawData>),
-}
-
-impl State {
-    pub const fn is_err(&self) -> bool {
-        matches!(
-            self,
-            State::AllocateGasError(..)
-                | State::PreflightError(..)
-                | State::ProvingError(..)
-                | State::EstimatingCyclesError(..)
-        )
-    }
-
-    pub const fn data(&self) -> Option<&RawData> {
-        match self {
-            State::Done(data) => Some(data),
-            _ => None,
-        }
-    }
-
-    pub const fn err(&self) -> Option<&Error> {
-        match self {
-            State::AllocateGasError(err)
-            | State::PreflightError(err)
-            | State::EstimatingCyclesError(err)
-            | State::ProvingError(err) => Some(err),
-            _ => None,
-        }
-    }
-}
-
-#[derive(Default)]
-pub struct Status {
-    pub state: State,
-    pub metrics: Metrics,
-}
-
-fn set_state(
-    app_state: &AppState,
-    call_hash: CallHash,
-    state: State,
-) -> Entry<'_, CallHash, Status> {
-    app_state
-        .entry(call_hash)
-        .and_modify(|res| res.state = state)
-}
-
-#[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
-pub async fn generate(
-    call: EngineCall,
-    host: Host,
-    gas_meter_client: impl GasMeterClient,
+pub struct Generator {
+    gas_meter_client: Box<dyn GasMeterClient>,
     vgas_limit: u64,
     app_state: AppState,
     call_hash: CallHash,
-) {
-    let prover = host.prover();
-    let call_guest_id = host.call_guest_id();
-    let mut metrics = Metrics::default();
-
-    info!("Generating proof");
-
-    if !allocate_vgas(&gas_meter_client, vgas_limit, &app_state, call_hash).await {
-        return;
-    }
-
-    let evm_gas_limit = call.gas_limit;
-    let Some(preflight_result) =
-        preflight(host, call, evm_gas_limit, &app_state, call_hash, &mut metrics).await
-    else {
-        return;
-    };
-
-    let Some(estimated_cycles) = estimate_cycles(&preflight_result, &app_state, call_hash, metrics)
-    else {
-        return;
-    };
-
-    let estimated_vgas = to_vgas(estimated_cycles);
-    metrics.gas = estimated_vgas;
-
-    if !refund(&gas_meter_client, estimated_vgas, app_state.clone(), call_hash, metrics).await {
-        return;
-    }
-
-    if !send_metadata(
-        &gas_meter_client,
-        preflight_result.metadata,
-        app_state.clone(),
-        call_hash,
-        metrics,
-    )
-    .await
-    {
-        return;
-    }
-
-    if !validate_vgas_limit(
-        vgas_limit,
-        estimated_vgas,
-        estimated_cycles,
-        &app_state,
-        call_hash,
-        metrics,
-    ) {
-        return;
-    }
-
-    set_state(&app_state, call_hash, State::ProvingPending);
-
-    let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
-    match proving::await_proving(
-        &prover,
-        call_guest_id,
-        proving_input,
-        &gas_meter_client,
-        &mut metrics,
-        estimated_vgas,
-    )
-    .await
-    .map_err(Error::Proving)
-    {
-        Ok(raw_data) => {
-            let entry = set_state(&app_state, call_hash, State::Done(raw_data.into()));
-            set_metrics(entry, metrics);
-        }
-        Err(err) => {
-            error!("Proving failed with error: {err}");
-            let entry = set_state(&app_state, call_hash, State::ProvingError(err.into()));
-            set_metrics(entry, metrics);
-        }
-    };
-}
-
-/// Attempts to allocate vgas from the gas meter client.
-///
-/// On success, updates the application state to PreflightPending and returns `true`.
-/// On failure, logs the error, updates the application state with the allocation error,
-/// and returns `false` to signal that the caller should abort execution.
-///
-/// # Returns
-/// - `true` if vgas allocation succeeded
-/// - `false` if vgas allocation failed (caller should return immediately)
-async fn allocate_vgas(
-    gas_meter_client: &impl GasMeterClient,
-    vgas_limit: u64,
-    app_state: &AppState,
-    call_hash: CallHash,
-) -> bool {
-    set_state(app_state, call_hash, State::AllocateGasPending);
-
-    match gas_meter_client.allocate(vgas_limit).await {
-        Ok(()) => {
-            set_state(app_state, call_hash, State::PreflightPending);
-            true
-        }
-        Err(err) => {
-            let state = allocate_error_to_state(err, vgas_limit);
-            set_state(app_state, call_hash, state);
-            false
-        }
-    }
-}
-
-/// Executes the preflight phase and updates application state.
-///
-/// On success, updates the application state to EstimatingCyclesPending and returns the preflight result.
-/// On failure, logs the error, updates the application state with the preflight error,
-/// and returns `None` to signal that the caller should abort execution.
-///
-/// # Returns
-/// - `Some(preflight_result)` if preflight succeeded
-/// - `None` if preflight failed (caller should return immediately)
-async fn preflight(
-    host: Host,
-    call: EngineCall,
-    evm_gas_limit: u64,
-    app_state: &AppState,
-    call_hash: CallHash,
-    metrics: &mut Metrics,
-) -> Option<call_host::PreflightResult> {
-    match preflight::await_preflight(host, call, metrics).await {
-        Ok(res) => {
-            let entry = set_state(app_state, call_hash, State::EstimatingCyclesPending);
-            set_metrics(entry, *metrics);
-            Some(res)
-        }
-        Err(err) => {
-            let state = preflight_error_to_state(err, evm_gas_limit);
-            let entry = set_state(app_state, call_hash, state);
-            set_metrics(entry, *metrics);
-            None
-        }
-    }
-}
-
-/// Estimates the number of cycles required for the computation.
-///
-/// On success, logs the estimation time and returns the estimated cycles.
-/// On failure, logs the error, updates the application state with the estimation error,
-/// and returns `None` to signal that the caller should abort execution.
-///
-/// # Returns
-/// - `Some(estimated_cycles)` if cycle estimation succeeded
-/// - `None` if cycle estimation failed (caller should return immediately)
-fn estimate_cycles(
-    preflight_result: &PreflightResult,
-    app_state: &AppState,
-    call_hash: CallHash,
     metrics: Metrics,
-) -> Option<u64> {
-    let estimation_start = std::time::Instant::now();
-
-    let estimated_cycles = match Risc0CycleEstimator
-        .estimate(&preflight_result.input, preflight_result.guest_elf.clone())
-    {
-        Ok(result) => {
-            info!(estimated_cycles = result, "Cycle estimation");
-            result
-        }
-        Err(err) => {
-            error!("Cycle estimation failed with error: {err}");
-            let entry = set_state(
-                app_state,
-                call_hash,
-                State::EstimatingCyclesError(Box::new(Error::EstimatingCycles(err))),
-            );
-            set_metrics(entry, metrics);
-            return None;
-        }
-    };
-
-    let elapsed = estimation_start.elapsed();
-    info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
-
-    Some(estimated_cycles)
 }
 
-/// Attempts to refund gas to the gas meter client after preflight computation.
-///
-/// On success, logs the refund and returns `true`.
-/// On failure, logs the error, updates the application state with the error,
-/// and returns `false` to signal that the caller should abort execution.
-///
-/// # Returns
-/// - `true` if the refund succeeded
-/// - `false` if the refund failed (caller should return immediately)
-async fn refund(
-    gas_meter_client: &impl GasMeterClient,
-    estimated_vgas: u64,
-    app_state: AppState,
-    call_hash: CallHash,
-    metrics: Metrics,
-) -> bool {
-    match gas_meter_client
-        .refund(ComputationStage::Preflight, estimated_vgas)
-        .await
-    {
-        Ok(()) => {
-            info!("Preflight refund succeeded for {estimated_vgas} vgas");
-            true
-        }
-        Err(err) => {
-            error!("Preflight refund failed with error: {err}");
-            let entry = set_state(
-                &app_state,
-                call_hash,
-                State::PreflightError(Error::AllocateGasRpc(err).into()),
-            );
-            set_metrics(entry, metrics);
-            false
-        }
-    }
-}
-
-/// Attempts to send metadata to the gas meter client.
-///
-/// On success, logs the operation and returns `true`.
-/// On failure, logs the error, updates the application state with the error,
-/// and returns `false` to signal that the caller should abort execution.
-///
-/// # Returns
-/// - `true` if sending metadata succeeded
-/// - `false` if sending metadata failed (caller should return immediately)
-async fn send_metadata(
-    gas_meter_client: &impl GasMeterClient,
-    metadata: Box<[Metadata]>,
-    app_state: AppState,
-    call_hash: CallHash,
-    metrics: Metrics,
-) -> bool {
-    match gas_meter_client.send_metadata(metadata).await {
-        Ok(()) => {
-            info!("Send metadata succeeded");
-            true
-        }
-        Err(err) => {
-            error!("Send metadata failed with error: {err}");
-            let entry = set_state(
-                &app_state,
-                call_hash,
-                State::PreflightError(Error::AllocateGasRpc(err).into()),
-            );
-            set_metrics(entry, metrics);
-            false
-        }
-    }
-}
-
-/// Validates that the provided vgas limit is sufficient for the estimated vgas requirement.
-///
-/// On success, returns `true` and continues execution.
-/// On failure, logs a warning, updates the application state with an insufficient vgas error,
-/// and returns `false` to signal that the caller should abort execution.
-///
-/// # Returns
-/// - `true` if vgas limit is sufficient
-/// - `false` if vgas limit is insufficient (caller should return immediately)
-fn validate_vgas_limit(
-    vgas_limit: u64,
-    estimated_vgas: u64,
-    estimated_cycles: u64,
-    app_state: &AppState,
-    call_hash: CallHash,
-    metrics: Metrics,
-) -> bool {
-    let cycles_limit = to_cycles(vgas_limit);
-
-    if vgas_limit <= estimated_vgas {
-        warn!(
-            "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated vgas: {} ({} cycles)",
-            vgas_limit, cycles_limit, estimated_vgas, estimated_cycles
-        );
-        let entry = set_state(
+impl Generator {
+    pub fn new(
+        gas_meter_client: Box<dyn GasMeterClient>,
+        vgas_limit: u64,
+        app_state: AppState,
+        call_hash: CallHash,
+    ) -> Self {
+        Self {
+            gas_meter_client,
+            vgas_limit,
             app_state,
             call_hash,
-            State::EstimatingCyclesError(Box::new(Error::InsufficientVgas {
-                provided: vgas_limit,
-                estimated: estimated_vgas,
-            })),
-        );
-        set_metrics(entry, metrics);
-        false
-    } else {
-        true
+            metrics: Metrics::default(),
+        }
+    }
+
+    #[instrument(name = "proof", skip_all, fields(hash = %self.call_hash))]
+    pub async fn run(mut self, host: Host, call: EngineCall) {
+        info!("Generating proof");
+        let prover = host.prover();
+        let call_guest_id = host.call_guest_id();
+
+        if !&self.allocate_vgas().await {
+            return;
+        }
+        let Some(preflight_result) = self.preflight(host, call).await else {
+            return;
+        };
+        let Some(estimated_cycles) = self.estimate_cycles(&preflight_result) else {
+            return;
+        };
+        let estimated_vgas = to_vgas(estimated_cycles);
+        self.metrics.gas = estimated_vgas;
+        if !self.refund(estimated_vgas).await {
+            return;
+        }
+        if !self.send_metadata(preflight_result.metadata.clone()).await {
+            return;
+        }
+        if !self.validate_vgas_limit(estimated_vgas, estimated_cycles) {
+            return;
+        }
+        self.proving(preflight_result, &prover, call_guest_id, estimated_vgas)
+            .await;
+    }
+
+    async fn allocate_vgas(&self) -> bool {
+        set_state(&self.app_state, self.call_hash, State::AllocateGasPending);
+
+        match self.gas_meter_client.allocate(self.vgas_limit).await {
+            Ok(()) => {
+                set_state(&self.app_state, self.call_hash, State::PreflightPending);
+                true
+            }
+            Err(err) => {
+                let state = allocate_error_to_state(err, self.vgas_limit);
+                set_state(&self.app_state, self.call_hash, state);
+                false
+            }
+        }
+    }
+
+    async fn preflight(&mut self, host: Host, call: EngineCall) -> Option<PreflightResult> {
+        let evm_gas_limit = call.gas_limit;
+        match preflight::await_preflight(host, call, &mut self.metrics).await {
+            Ok(res) => {
+                let entry =
+                    set_state(&self.app_state, self.call_hash, State::EstimatingCyclesPending);
+                set_metrics(entry, self.metrics);
+                Some(res)
+            }
+            Err(err) => {
+                let state = preflight_error_to_state(err, evm_gas_limit);
+                let entry = set_state(&self.app_state, self.call_hash, state);
+                set_metrics(entry, self.metrics);
+                None
+            }
+        }
+    }
+
+    fn estimate_cycles(&mut self, preflight_result: &PreflightResult) -> Option<u64> {
+        let estimation_start = std::time::Instant::now();
+
+        let estimated_cycles = match Risc0CycleEstimator
+            .estimate(&preflight_result.input, preflight_result.guest_elf.clone())
+        {
+            Ok(result) => {
+                info!(estimated_cycles = result, "Cycle estimation");
+                result
+            }
+            Err(err) => {
+                error!("Cycle estimation failed with error: {err}");
+                let entry = set_state(
+                    &self.app_state,
+                    self.call_hash,
+                    State::EstimatingCyclesError(Box::new(Error::EstimatingCycles(err))),
+                );
+                set_metrics(entry, self.metrics);
+                return None;
+            }
+        };
+
+        let elapsed = estimation_start.elapsed();
+        info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
+
+        Some(estimated_cycles)
+    }
+
+    async fn refund(&self, estimated_vgas: u64) -> bool {
+        match self
+            .gas_meter_client
+            .refund(ComputationStage::Preflight, estimated_vgas)
+            .await
+        {
+            Ok(()) => {
+                info!("Preflight refund succeeded for {estimated_vgas} vgas");
+                true
+            }
+            Err(err) => {
+                error!("Preflight refund failed with error: {err}");
+                let entry = set_state(
+                    &self.app_state,
+                    self.call_hash,
+                    State::PreflightError(Error::AllocateGasRpc(err).into()),
+                );
+                set_metrics(entry, self.metrics);
+                false
+            }
+        }
+    }
+
+    async fn send_metadata(&self, metadata: Box<[Metadata]>) -> bool {
+        match self.gas_meter_client.send_metadata(metadata).await {
+            Ok(()) => {
+                info!("Send metadata succeeded");
+                true
+            }
+            Err(err) => {
+                error!("Send metadata failed with error: {err}");
+                let entry = set_state(
+                    &self.app_state,
+                    self.call_hash,
+                    State::PreflightError(Error::AllocateGasRpc(err).into()),
+                );
+                set_metrics(entry, self.metrics);
+                false
+            }
+        }
+    }
+
+    fn validate_vgas_limit(&self, estimated_vgas: u64, estimated_cycles: u64) -> bool {
+        if self.vgas_limit <= estimated_vgas {
+            let cycles_limit = to_cycles(self.vgas_limit);
+            warn!(
+                "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated vgas: {} ({} cycles)",
+                self.vgas_limit, cycles_limit, estimated_vgas, estimated_cycles
+            );
+            let entry = set_state(
+                &self.app_state,
+                self.call_hash,
+                State::EstimatingCyclesError(Box::new(Error::InsufficientVgas {
+                    provided: self.vgas_limit,
+                    estimated: estimated_vgas,
+                })),
+            );
+            set_metrics(entry, self.metrics);
+            false
+        } else {
+            true
+        }
+    }
+
+    async fn proving(
+        &mut self,
+        preflight_result: PreflightResult,
+        prover: &Prover,
+        call_guest_id: CallGuestId,
+        estimated_vgas: u64,
+    ) {
+        set_state(&self.app_state, self.call_hash, State::ProvingPending);
+
+        let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
+        match proving::await_proving(
+            prover,
+            call_guest_id,
+            proving_input,
+            &self.gas_meter_client,
+            &mut self.metrics,
+            estimated_vgas,
+        )
+        .await
+        .map_err(Error::Proving)
+        {
+            Ok(raw_data) => {
+                let entry =
+                    set_state(&self.app_state, self.call_hash, State::Done(raw_data.into()));
+                set_metrics(entry, self.metrics);
+            }
+            Err(err) => {
+                error!("Proving failed with error: {err}");
+                let entry =
+                    set_state(&self.app_state, self.call_hash, State::ProvingError(err.into()));
+                set_metrics(entry, self.metrics);
+            }
+        };
     }
 }
 

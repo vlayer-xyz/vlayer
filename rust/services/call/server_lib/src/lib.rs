@@ -10,6 +10,7 @@ mod preflight;
 mod proof;
 mod proving;
 mod ser;
+mod state;
 
 pub const CYCLES_PER_VGAS: u64 = 1_000_000;
 
