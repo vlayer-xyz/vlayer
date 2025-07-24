@@ -138,7 +138,7 @@ pub async fn generate(
     host: Host,
     gas_meter_client: impl GasMeterClient,
     vgas_limit: u64,
-    state: AppState,
+    app_state: AppState,
     call_hash: CallHash,
 ) {
     let prover = host.prover();
@@ -148,15 +148,15 @@ pub async fn generate(
 
     info!("Generating proof");
 
-    set_state(&state, call_hash, State::AllocateGasPending);
+    set_state(&app_state, call_hash, State::AllocateGasPending);
 
     match gas_meter_client.allocate(vgas_limit).await {
         Ok(()) => {
-            set_state(&state, call_hash, State::PreflightPending);
+            set_state(&app_state, call_hash, State::PreflightPending);
         }
         Err(err) => {
             let state_value = allocate_error_to_state(err, vgas_limit);
-            set_state(&state, call_hash, state_value);
+            set_state(&app_state, call_hash, state_value);
             return;
         }
     };
@@ -164,13 +164,13 @@ pub async fn generate(
     let evm_gas_limit = call.gas_limit;
     let preflight_result = match preflight::await_preflight(host, call, &mut metrics).await {
         Ok(res) => {
-            let entry = set_state(&state, call_hash, State::EstimatingCyclesPending);
+            let entry = set_state(&app_state, call_hash, State::EstimatingCyclesPending);
             set_metrics(entry, metrics);
             res
         }
         Err(err) => {
             let state_value = preflight_error_to_state(err, evm_gas_limit);
-            let entry = set_state(&state, call_hash, state_value);
+            let entry = set_state(&app_state, call_hash, state_value);
             set_metrics(entry, metrics);
             return;
         }
@@ -187,7 +187,7 @@ pub async fn generate(
             Err(err) => {
                 error!("Cycle estimation failed with error: {err}");
                 let entry = set_state(
-                    &state,
+                    &app_state,
                     call_hash,
                     State::EstimatingCyclesError(Box::new(Error::EstimatingCycles(err))),
                 );
@@ -206,7 +206,7 @@ pub async fn generate(
     {
         error!("Preflight refund failed with error: {err}");
         let entry =
-            set_state(&state, call_hash, State::PreflightError(Error::AllocateGasRpc(err).into()));
+            set_state(&app_state, call_hash, State::PreflightError(Error::AllocateGasRpc(err).into()));
         set_metrics(entry, metrics);
         return;
     }
@@ -217,7 +217,7 @@ pub async fn generate(
     {
         error!("Send metadata failed with error: {err}");
         let entry =
-            set_state(&state, call_hash, State::PreflightError(Error::AllocateGasRpc(err).into()));
+            set_state(&app_state, call_hash, State::PreflightError(Error::AllocateGasRpc(err).into()));
         set_metrics(entry, metrics);
         return;
     }
@@ -231,7 +231,7 @@ pub async fn generate(
             vgas_limit, cycles_limit, estimated_cycles
         );
         let entry = set_state(
-            &state,
+            &app_state,
             call_hash,
             State::EstimatingCyclesError(Box::new(Error::InsufficientVgas {
                 provided: vgas_limit,
@@ -242,7 +242,7 @@ pub async fn generate(
         return;
     }
 
-    set_state(&state, call_hash, State::ProvingPending);
+    set_state(&app_state, call_hash, State::ProvingPending);
 
     let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
     match proving::await_proving(
@@ -257,12 +257,12 @@ pub async fn generate(
     .map_err(Error::Proving)
     {
         Ok(raw_data) => {
-            let entry = set_state(&state, call_hash, State::Done(raw_data.into()));
+            let entry = set_state(&app_state, call_hash, State::Done(raw_data.into()));
             set_metrics(entry, metrics);
         }
         Err(err) => {
             error!("Proving failed with error: {err}");
-            let entry = set_state(&state, call_hash, State::ProvingError(err.into()));
+            let entry = set_state(&app_state, call_hash, State::ProvingError(err.into()));
             set_metrics(entry, metrics);
         }
     };
