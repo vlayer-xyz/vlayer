@@ -96,43 +96,91 @@ fn set_state(
         .and_modify(|res| res.state = state)
 }
 
-fn set_metrics(
-    entry: Entry<'_, CallHash, Status>,
-    metrics: Metrics,
-) -> Entry<'_, CallHash, Status> {
-    entry.and_modify(|res| res.metrics = metrics)
-}
+#[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
+pub async fn generate(
+    call: EngineCall,
+    host: Host,
+    gas_meter_client: impl GasMeterClient,
+    vgas_limit: u64,
+    app_state: AppState,
+    call_hash: CallHash,
+) {
+    let prover = host.prover();
+    let call_guest_id = host.call_guest_id();
+    let mut metrics = Metrics::default();
 
-fn allocate_error_to_state(err: GasMeterError, vgas_limit: u64) -> State {
-    if err.is_insufficient_gas_balance() {
-        return State::AllocateGasError(
-            Error::AllocateGasInsufficientBalance { vgas_limit }.into(),
-        );
+    info!("Generating proof");
+
+    if !allocate_vgas(&gas_meter_client, vgas_limit, &app_state, call_hash).await {
+        return;
     }
-    error!("Gas meter failed with error: {err}");
-    State::AllocateGasError(Error::AllocateGasRpc(err).into())
-}
 
-fn preflight_error_to_state(err: PreflightError, evm_gas_limit: u64) -> State {
-    if let preflight::Error::Preflight(ref preflight_err) = err {
-        if preflight_err.is_gas_limit_exceeded() {
-            error!("Preflight gas limit exceeded!");
-            return State::PreflightError(
-                Error::PreflightEvmGasLimitExceeded { evm_gas_limit }.into(),
-            );
+    let evm_gas_limit = call.gas_limit;
+    let Some(preflight_result) =
+        preflight(host, call, evm_gas_limit, &app_state, call_hash, &mut metrics).await
+    else {
+        return;
+    };
+
+    let Some(estimated_cycles) = estimate_cycles(&preflight_result, &app_state, call_hash, metrics)
+    else {
+        return;
+    };
+
+    let estimated_vgas = to_vgas(estimated_cycles);
+    metrics.gas = estimated_vgas;
+
+    if !refund(&gas_meter_client, estimated_vgas, app_state.clone(), call_hash, metrics).await {
+        return;
+    }
+
+    if !send_metadata(
+        &gas_meter_client,
+        preflight_result.metadata,
+        app_state.clone(),
+        call_hash,
+        metrics,
+    )
+    .await
+    {
+        return;
+    }
+
+    if !validate_vgas_limit(
+        vgas_limit,
+        estimated_vgas,
+        estimated_cycles,
+        &app_state,
+        call_hash,
+        metrics,
+    ) {
+        return;
+    }
+
+    set_state(&app_state, call_hash, State::ProvingPending);
+
+    let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
+    match proving::await_proving(
+        &prover,
+        call_guest_id,
+        proving_input,
+        &gas_meter_client,
+        &mut metrics,
+        estimated_vgas,
+    )
+    .await
+    .map_err(Error::Proving)
+    {
+        Ok(raw_data) => {
+            let entry = set_state(&app_state, call_hash, State::Done(raw_data.into()));
+            set_metrics(entry, metrics);
         }
-    }
-
-    error!("Preflight failed with error: {err}");
-    State::PreflightError(Error::Preflight(err).into())
-}
-
-const fn to_vgas(cycles: u64) -> u64 {
-    cycles.div_ceil(CYCLES_PER_VGAS)
-}
-
-const fn to_cycles(vgas: u64) -> u64 {
-    vgas * CYCLES_PER_VGAS
+        Err(err) => {
+            error!("Proving failed with error: {err}");
+            let entry = set_state(&app_state, call_hash, State::ProvingError(err.into()));
+            set_metrics(entry, metrics);
+        }
+    };
 }
 
 /// Attempts to allocate vgas from the gas meter client.
@@ -349,89 +397,41 @@ fn validate_vgas_limit(
     }
 }
 
-#[instrument(name = "proof", skip_all, fields(hash = %call_hash))]
-pub async fn generate(
-    call: EngineCall,
-    host: Host,
-    gas_meter_client: impl GasMeterClient,
-    vgas_limit: u64,
-    app_state: AppState,
-    call_hash: CallHash,
-) {
-    let prover = host.prover();
-    let call_guest_id = host.call_guest_id();
-    let mut metrics = Metrics::default();
+fn set_metrics(
+    entry: Entry<'_, CallHash, Status>,
+    metrics: Metrics,
+) -> Entry<'_, CallHash, Status> {
+    entry.and_modify(|res| res.metrics = metrics)
+}
 
-    info!("Generating proof");
-
-    if !allocate_vgas(&gas_meter_client, vgas_limit, &app_state, call_hash).await {
-        return;
+fn allocate_error_to_state(err: GasMeterError, vgas_limit: u64) -> State {
+    if err.is_insufficient_gas_balance() {
+        return State::AllocateGasError(
+            Error::AllocateGasInsufficientBalance { vgas_limit }.into(),
+        );
     }
+    error!("Gas meter failed with error: {err}");
+    State::AllocateGasError(Error::AllocateGasRpc(err).into())
+}
 
-    let evm_gas_limit = call.gas_limit;
-    let Some(preflight_result) =
-        preflight(host, call, evm_gas_limit, &app_state, call_hash, &mut metrics).await
-    else {
-        return;
-    };
-
-    let Some(estimated_cycles) = estimate_cycles(&preflight_result, &app_state, call_hash, metrics)
-    else {
-        return;
-    };
-
-    let estimated_vgas = to_vgas(estimated_cycles);
-    metrics.gas = estimated_vgas;
-
-    if !refund(&gas_meter_client, estimated_vgas, app_state.clone(), call_hash, metrics).await {
-        return;
-    }
-
-    if !send_metadata(
-        &gas_meter_client,
-        preflight_result.metadata,
-        app_state.clone(),
-        call_hash,
-        metrics,
-    )
-    .await
-    {
-        return;
-    }
-
-    if !validate_vgas_limit(
-        vgas_limit,
-        estimated_vgas,
-        estimated_cycles,
-        &app_state,
-        call_hash,
-        metrics,
-    ) {
-        return;
-    }
-
-    set_state(&app_state, call_hash, State::ProvingPending);
-
-    let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
-    match proving::await_proving(
-        &prover,
-        call_guest_id,
-        proving_input,
-        &gas_meter_client,
-        &mut metrics,
-        estimated_vgas,
-    )
-    .await
-    .map_err(Error::Proving)
-    {
-        Ok(raw_data) => {
-            let entry = set_state(&app_state, call_hash, State::Done(raw_data.into()));
-            set_metrics(entry, metrics);
+fn preflight_error_to_state(err: PreflightError, evm_gas_limit: u64) -> State {
+    if let preflight::Error::Preflight(ref preflight_err) = err {
+        if preflight_err.is_gas_limit_exceeded() {
+            error!("Preflight gas limit exceeded!");
+            return State::PreflightError(
+                Error::PreflightEvmGasLimitExceeded { evm_gas_limit }.into(),
+            );
         }
-        Err(err) => {
-            error!("Proving failed with error: {err}");
-            let entry = set_state(&app_state, call_hash, State::ProvingError(err.into()));
-            set_metrics(entry, metrics);
-        }
-    };
+    }
+
+    error!("Preflight failed with error: {err}");
+    State::PreflightError(Error::Preflight(err).into())
+}
+
+const fn to_vgas(cycles: u64) -> u64 {
+    cycles.div_ceil(CYCLES_PER_VGAS)
+}
+
+const fn to_cycles(vgas: u64) -> u64 {
+    vgas * CYCLES_PER_VGAS
 }
