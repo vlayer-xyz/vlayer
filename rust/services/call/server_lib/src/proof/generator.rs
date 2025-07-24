@@ -44,68 +44,70 @@ impl Generator {
     #[instrument(name = "proof", skip_all, fields(hash = %self.call_hash))]
     pub async fn run(mut self, host: Host, call: EngineCall) {
         info!("Generating proof");
+
+        match self.run_pipeline(host, call).await {
+            Ok(()) => {
+                info!("Proof generation completed successfully");
+            }
+            Err(_) => {
+                warn!("Proof generation failed");
+            }
+        }
+    }
+
+    async fn run_pipeline(&mut self, host: Host, call: EngineCall) -> Result<(), ()> {
         let prover = host.prover();
         let call_guest_id = host.call_guest_id();
 
-        if !&self.allocate_vgas().await {
-            return;
-        }
-        let Some(preflight_result) = self.preflight(host, call).await else {
-            return;
-        };
-        let Some(estimated_cycles) = self.estimate_cycles(&preflight_result) else {
-            return;
-        };
+        self.allocate_vgas().await?;
+        let preflight_result = self.preflight(host, call).await?;
+        let estimated_cycles = self.estimate_cycles(&preflight_result)?;
         let estimated_vgas = to_vgas(estimated_cycles);
         self.metrics.gas = estimated_vgas;
-        if !self.refund(estimated_vgas).await {
-            return;
-        }
-        if !self.send_metadata(preflight_result.metadata.clone()).await {
-            return;
-        }
-        if !self.validate_vgas_limit(estimated_vgas, estimated_cycles) {
-            return;
-        }
+        self.refund(estimated_vgas).await?;
+        self.send_metadata(preflight_result.metadata.clone())
+            .await?;
+        self.validate_vgas_limit(estimated_vgas, estimated_cycles)?;
         self.proving(preflight_result, &prover, call_guest_id, estimated_vgas)
             .await;
+        Ok(())
     }
 
-    async fn allocate_vgas(&self) -> bool {
+    async fn allocate_vgas(&self) -> Result<(), ()> {
         set_state(&self.app_state, self.call_hash, State::AllocateGasPending);
 
         match self.gas_meter_client.allocate(self.vgas_limit).await {
             Ok(()) => {
                 set_state(&self.app_state, self.call_hash, State::PreflightPending);
-                true
+                Ok(())
             }
             Err(err) => {
                 let state = allocate_error_to_state(err, self.vgas_limit);
                 set_state(&self.app_state, self.call_hash, state);
-                false
+                Err(())
             }
         }
     }
 
-    async fn preflight(&mut self, host: Host, call: EngineCall) -> Option<PreflightResult> {
+    async fn preflight(&mut self, host: Host, call: EngineCall) -> Result<PreflightResult, ()> {
         let evm_gas_limit = call.gas_limit;
         match preflight::await_preflight(host, call, &mut self.metrics).await {
             Ok(res) => {
                 let entry =
                     set_state(&self.app_state, self.call_hash, State::EstimatingCyclesPending);
                 set_metrics(entry, self.metrics);
-                Some(res)
+                Ok(res)
             }
             Err(err) => {
                 let state = preflight_error_to_state(err, evm_gas_limit);
                 let entry = set_state(&self.app_state, self.call_hash, state);
                 set_metrics(entry, self.metrics);
-                None
+                Err(())
             }
         }
     }
 
-    fn estimate_cycles(&self, preflight_result: &PreflightResult) -> Option<u64> {
+    fn estimate_cycles(&self, preflight_result: &PreflightResult) -> Result<u64, ()> {
         let estimation_start = std::time::Instant::now();
 
         let estimated_cycles = match Risc0CycleEstimator
@@ -113,7 +115,7 @@ impl Generator {
         {
             Ok(result) => {
                 info!(estimated_cycles = result, "Cycle estimation");
-                result
+                Some(result)
             }
             Err(err) => {
                 error!("Cycle estimation failed with error: {err}");
@@ -123,17 +125,17 @@ impl Generator {
                     State::EstimatingCyclesError(Box::new(Error::EstimatingCycles(err))),
                 );
                 set_metrics(entry, self.metrics);
-                return None;
+                None
             }
         };
 
         let elapsed = estimation_start.elapsed();
         info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
 
-        Some(estimated_cycles)
+        estimated_cycles.ok_or(())
     }
 
-    async fn refund(&self, estimated_vgas: u64) -> bool {
+    async fn refund(&self, estimated_vgas: u64) -> Result<(), ()> {
         match self
             .gas_meter_client
             .refund(ComputationStage::Preflight, estimated_vgas)
@@ -141,7 +143,7 @@ impl Generator {
         {
             Ok(()) => {
                 info!("Preflight refund succeeded for {estimated_vgas} vgas");
-                true
+                Ok(())
             }
             Err(err) => {
                 error!("Preflight refund failed with error: {err}");
@@ -151,16 +153,16 @@ impl Generator {
                     State::PreflightError(Error::AllocateGasRpc(err).into()),
                 );
                 set_metrics(entry, self.metrics);
-                false
+                Err(())
             }
         }
     }
 
-    async fn send_metadata(&self, metadata: Box<[Metadata]>) -> bool {
+    async fn send_metadata(&self, metadata: Box<[Metadata]>) -> Result<(), ()> {
         match self.gas_meter_client.send_metadata(metadata).await {
             Ok(()) => {
                 info!("Send metadata succeeded");
-                true
+                Ok(())
             }
             Err(err) => {
                 error!("Send metadata failed with error: {err}");
@@ -170,12 +172,12 @@ impl Generator {
                     State::PreflightError(Error::AllocateGasRpc(err).into()),
                 );
                 set_metrics(entry, self.metrics);
-                false
+                Err(())
             }
         }
     }
 
-    fn validate_vgas_limit(&self, estimated_vgas: u64, estimated_cycles: u64) -> bool {
+    fn validate_vgas_limit(&self, estimated_vgas: u64, estimated_cycles: u64) -> Result<(), ()> {
         if self.vgas_limit <= estimated_vgas {
             let cycles_limit = to_cycles(self.vgas_limit);
             warn!(
@@ -191,14 +193,14 @@ impl Generator {
                 })),
             );
             set_metrics(entry, self.metrics);
-            false
+            Err(())
         } else {
-            true
+            Ok(())
         }
     }
 
     async fn proving(
-        mut self,
+        &mut self,
         preflight_result: PreflightResult,
         prover: &Prover,
         call_guest_id: CallGuestId,
