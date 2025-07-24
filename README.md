@@ -5,7 +5,7 @@ Our four core features include:
 - [Web Proofs](https://book.vlayer.xyz/features/web.html): Access verified web data, including APIs and websites, in your smart contracts 
 - [Email Proofs](https://book.vlayer.xyz/features/email.html): Tap into email content from your smart contracts and use it on-chain
 - [Time Travel](https://book.vlayer.xyz/features/time-travel.html): Leverage historical on-chain data in your smart contracts
-- [Teleport](https://book.vlayer.xyz/features/teleport.html): Execute a smart contract across different EVM-comptable blockchain networks
+- [Teleport](https://book.vlayer.xyz/features/teleport.html): Execute a smart contract across different EVM-compatible blockchain networks
 
 ## Getting started
 
