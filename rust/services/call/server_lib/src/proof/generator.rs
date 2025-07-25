@@ -67,7 +67,7 @@ impl Generator {
         self.refund(estimated_vgas).await?;
         self.send_metadata(preflight_result.metadata.clone())
             .await?;
-        self.validate_vgas_limit(estimated_vgas, estimated_cycles)?;
+        self.validate_vgas_limit(estimated_cycles)?;
         self.proving(preflight_result, &prover, call_guest_id, estimated_vgas)
             .await;
         Ok(())
@@ -177,7 +177,8 @@ impl Generator {
         }
     }
 
-    fn validate_vgas_limit(&self, estimated_vgas: u64, estimated_cycles: u64) -> Result<(), ()> {
+    fn validate_vgas_limit(&self, estimated_cycles: u64) -> Result<(), ()> {
+        let estimated_vgas = to_vgas(estimated_cycles);
         if self.vgas_limit <= estimated_vgas {
             let cycles_limit = to_cycles(self.vgas_limit);
             warn!(
