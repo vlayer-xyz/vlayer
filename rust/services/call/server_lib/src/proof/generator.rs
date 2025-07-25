@@ -179,7 +179,7 @@ impl Generator {
 
     fn validate_vgas_limit(&self, estimated_cycles: u64) -> Result<(), ()> {
         let estimated_vgas = to_vgas(estimated_cycles);
-        if self.vgas_limit <= estimated_vgas {
+        if self.vgas_limit < estimated_vgas {
             let cycles_limit = to_cycles(self.vgas_limit);
             warn!(
                 "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated vgas: {} ({} cycles)",
