@@ -10,6 +10,8 @@ BASE_DIR=${XDG_CONFIG_HOME:-$HOME}
 VLAYER_DIR=${VLAYER_DIR:-"$BASE_DIR/.vlayer"}
 VLAYER_BIN_DIR="$VLAYER_DIR/bin"
 CHANNEL="stable" # Default channel.
+VERSION="" # Specific version to install (takes precedence over channel).
+CHANNEL_SET="" # Flag to track if channel was explicitly set.
 
 main() {
   parse_args "$@"
@@ -49,7 +51,9 @@ main() {
       ARCHITECTURE="amd64" # Amd.
     fi
 
-  if [ "$CHANNEL" = "nightly" ]; then
+  if [ -n "$VERSION" ]; then
+    RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/${VERSION}/binaries-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+  elif [ "$CHANNEL" = "nightly" ]; then
     RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest-nightly/binaries-${PLATFORM}-${ARCHITECTURE}.${EXT}"
   elif [ "$CHANNEL" = "stable" ]; then
     RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest-stable/binaries-${PLATFORM}-${ARCHITECTURE}.${EXT}"
@@ -57,12 +61,17 @@ main() {
     err "unsupported channel: $CHANNEL. Supported channels are: nightly, stable"
   fi
 
-  say "Downloading vlayer..."
+  if [ -n "$VERSION" ]; then
+    say "Downloading vlayer version $VERSION..."
+  else
+    say "Downloading vlayer from $CHANNEL channel..."
+  fi
   ensure download "$RELEASE_URL" | ensure tar -xzC "$VLAYER_DIR"
   # TODO: replace with the right binary name
   BIN_PATH="$VLAYER_BIN_DIR/vlayer" 
   say "Unpacking"
   chmod +x "$BIN_PATH" 
+  show_version "$BIN_PATH"
   say "done!"
 }
 
@@ -70,15 +79,30 @@ parse_args() {
   while [ $# -gt 0 ]; do
     case "$1" in
       --channel)
+        if [ -n "$VERSION" ]; then
+          err "cannot use --channel when --version is specified"
+        fi
         if [ -n "${2:-}" ]; then
           CHANNEL="$2"
+          CHANNEL_SET="true"
           shift
         else
           err "missing argument for --channel"
         fi
         ;;
+      --version)
+        if [ -n "$CHANNEL_SET" ]; then
+          err "cannot use --version when --channel is specified"
+        fi
+        if [ -n "${2:-}" ]; then
+          VERSION="$2"
+          shift
+        else
+          err "missing argument for --version"
+        fi
+        ;;
       *)
-        err "unknown argument: $1"
+        err "unknown argument: $1. Usage: vlayerup [--channel stable|nightly] OR [--version X.Y.Z]"
         ;;
     esac
     shift
@@ -105,22 +129,37 @@ ensure() {
   if ! "$@"; then err "command failed: $*"; fi
 }
 
-# Downloads $1 into $2 or stdout
+show_version() {
+  local bin_path="$1"
+  local version_output
+  
+  if version_output=$("$bin_path" --version 2>/dev/null); then
+    say "Installed version: $version_output"
+  else
+    err "installation failed: vlayer binary version can't be determined"
+  fi
+}
+
 download() {
-  if [ -n "${2:-}" ]; then
-    # output into $2
-    if check_cmd curl; then
-      curl -#o "$2" -L "$1"
-    else
-      wget --show-progress -qO "$2" "$1"
+  local url="$1"
+  
+  if check_cmd curl; then
+    if ! curl -#fL "$url"; then
+      handle_download_error "$url"
     fi
   else
-    # output to stdout
-    if check_cmd curl; then
-      curl -#L "$1"
-    else
-      wget --show-progress -qO- "$1"
+    if ! wget --show-progress -qO- "$url"; then
+      handle_download_error "$url"
     fi
+  fi
+}
+
+handle_download_error() {
+  local url="$1"
+  if [ -n "$VERSION" ]; then
+    err "version $VERSION not found. Check available versions at: https://github.com/vlayer-xyz/vlayer/releases"
+  else
+    err "failed to download from $CHANNEL channel. URL: $url"
   fi
 }
 
