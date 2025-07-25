@@ -63,7 +63,6 @@ impl Generator {
         let preflight_result = self.preflight(host, evm_call).await?;
         let estimated_cycles = self.estimate_cycles(&preflight_result)?;
         let estimated_vgas = to_vgas(estimated_cycles);
-        self.metrics.gas = estimated_vgas;
         self.refund(estimated_vgas).await?;
         self.send_metadata(preflight_result.metadata.clone())
             .await?;
@@ -107,7 +106,7 @@ impl Generator {
         }
     }
 
-    fn estimate_cycles(&self, preflight_result: &PreflightResult) -> Result<u64, ()> {
+    fn estimate_cycles(&mut self, preflight_result: &PreflightResult) -> Result<u64, ()> {
         let estimation_start = std::time::Instant::now();
 
         let estimated_cycles = match Risc0CycleEstimator
@@ -132,7 +131,14 @@ impl Generator {
         let elapsed = estimation_start.elapsed();
         info!(estimating_cycles_elapsed_time = ?elapsed, "Cycle estimation lasted");
 
-        estimated_cycles.ok_or(())
+        let Some(estimated_cycles) = estimated_cycles else {
+            return Err(());
+        };
+
+        let estimated_vgas = to_vgas(estimated_cycles);
+        self.metrics.gas = estimated_vgas;
+
+        Ok(estimated_cycles)
     }
 
     async fn refund(&self, estimated_vgas: u64) -> Result<(), ()> {
