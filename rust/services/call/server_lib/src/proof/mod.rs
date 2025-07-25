@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 use call_host::CycleEstimatorError;
 use dashmap::Entry;
 use tracing::error;
@@ -39,6 +41,21 @@ const CYCLES_PER_VGAS: u64 = 1_000_000;
 pub struct Status {
     pub state: State,
     pub metrics: Metrics,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Vgas {
+    pub value: u64,
+    pub cycles: u64,
+}
+
+impl Vgas {
+    pub const fn from_cycles(cycles: u64) -> Self {
+        Self {
+            value: to_vgas(cycles),
+            cycles,
+        }
+    }
 }
 
 fn set_metrics(

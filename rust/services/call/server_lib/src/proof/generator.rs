@@ -9,9 +9,9 @@ use crate::{
     metrics::Metrics,
     preflight::{self},
     proof::{
-        Error, allocate_error_to_state, preflight_error_to_state, set_metrics,
+        Error, Vgas, allocate_error_to_state, preflight_error_to_state, set_metrics,
         state::{State, set_state},
-        to_cycles, to_vgas,
+        to_cycles,
     },
     proving::{self},
     v_call::CallHash,
@@ -61,13 +61,12 @@ impl Generator {
 
         self.allocate_vgas().await?;
         let preflight_result = self.preflight(host, evm_call).await?;
-        let estimated_cycles = self.estimate_cycles(&preflight_result)?;
-        let estimated_vgas = to_vgas(estimated_cycles);
-        self.refund(estimated_vgas).await?;
+        let estimated_vgas = self.estimate_cycles(&preflight_result)?;
+        self.refund(estimated_vgas.value).await?;
         self.send_metadata(preflight_result.metadata.clone())
             .await?;
-        self.validate_vgas_limit(estimated_cycles)?;
-        self.proving(preflight_result, &prover, call_guest_id, estimated_vgas)
+        self.validate_vgas_limit(estimated_vgas)?;
+        self.proving(preflight_result, &prover, call_guest_id, estimated_vgas.value)
             .await;
         Ok(())
     }
@@ -106,7 +105,7 @@ impl Generator {
         }
     }
 
-    fn estimate_cycles(&mut self, preflight_result: &PreflightResult) -> Result<u64, ()> {
+    fn estimate_cycles(&mut self, preflight_result: &PreflightResult) -> Result<Vgas, ()> {
         let estimation_start = std::time::Instant::now();
 
         let estimated_cycles = match Risc0CycleEstimator
@@ -135,10 +134,10 @@ impl Generator {
             return Err(());
         };
 
-        let estimated_vgas = to_vgas(estimated_cycles);
-        self.metrics.gas = estimated_vgas;
+        let estimated_vgas = Vgas::from_cycles(estimated_cycles);
+        self.metrics.gas = estimated_vgas.value;
 
-        Ok(estimated_cycles)
+        Ok(estimated_vgas)
     }
 
     async fn refund(&self, estimated_vgas: u64) -> Result<(), ()> {
@@ -183,20 +182,21 @@ impl Generator {
         }
     }
 
-    fn validate_vgas_limit(&self, estimated_cycles: u64) -> Result<(), ()> {
-        let estimated_vgas = to_vgas(estimated_cycles);
-        if self.vgas_limit < estimated_vgas {
-            let cycles_limit = to_cycles(self.vgas_limit);
+    fn validate_vgas_limit(&self, estimated_vgas: Vgas) -> Result<(), ()> {
+        if self.vgas_limit < estimated_vgas.value {
             warn!(
-                "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated vgas: {} ({} cycles)",
-                self.vgas_limit, cycles_limit, estimated_vgas, estimated_cycles
+                "Insufficient vgas_limit: provided {} vgas ({} cycles), estimated vgas: {} vgas ({} cycles)",
+                self.vgas_limit,
+                to_cycles(self.vgas_limit),
+                estimated_vgas.value,
+                estimated_vgas.cycles
             );
             let entry = set_state(
                 &self.app_state,
                 self.call_hash,
                 State::EstimatingCyclesError(Box::new(Error::InsufficientVgas {
                     provided: self.vgas_limit,
-                    estimated: estimated_vgas,
+                    estimated: estimated_vgas.value,
                 })),
             );
             set_metrics(entry, self.metrics);
