@@ -16,6 +16,12 @@ concurrency:
   cancel-in-progress: false
 jobs:
   test-release-anvil:
+    strategy:
+      fail-fast: false
+      matrix:
+        vlayer_release:
+          - channel: nightly
+          - channel: stable
     name: Test release on anvil and local prover
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
@@ -28,6 +34,9 @@ jobs:
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Test local prover
+        env:
+          VLAYER_RELEASE: ${{ matrix.vlayer_release.channel }}
+
         run: bash/test-release-local-prover.sh
 
   test-release-sepolia:

@@ -5,6 +5,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/e2e.sh"
 
 set -ueo pipefail
 
+VLAYER_RELEASE=${VLAYER_RELEASE:-nightly}
+
 echo "::group::setting git config"
 set_missing_git_config
 echo "::endgroup::"
@@ -12,7 +14,8 @@ echo "::endgroup::"
 echo "::group::vlayer installation"
 curl -SL https://install.vlayer.xyz | bash
 export PATH="$PATH:$HOME/.config/.vlayer/bin"
-vlayerup
+vlayerup --channel "${VLAYER_RELEASE}"
+vlayer --version
 echo "::endgroup::"
 
 echo "::group::bun installation"
@@ -45,9 +48,11 @@ for example in $(get_examples); do
     vlayer test
     echo "::endgroup::"
 
-    echo "Starting docker-compose"
     pushd vlayer
+        echo "::group::Starting docker-compose"
         bun run devnet:up
+        docker compose -f docker-compose.devnet.yaml images
+        echo "::endgroup::"
     popd
 
     echo "::group::vlayer run prove.ts: ${example}"
