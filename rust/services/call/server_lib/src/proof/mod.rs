@@ -45,7 +45,7 @@ fn set_metrics(
     entry: Entry<'_, CallHash, Status>,
     metrics: Metrics,
 ) -> Entry<'_, CallHash, Status> {
-    entry.and_modify(|res| res.metrics = metrics)
+    entry.and_modify(|status| status.metrics = metrics)
 }
 
 fn allocate_error_to_state(err: GasMeterError, vgas_limit: u64) -> State {
