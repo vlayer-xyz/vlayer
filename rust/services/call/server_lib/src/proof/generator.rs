@@ -1,5 +1,5 @@
 use call_common::Metadata;
-use call_engine::{Call as EngineCall, CallGuestId};
+use call_engine::{Call as EvmCall, CallGuestId};
 use call_host::{CycleEstimator, Host, PreflightResult, Prover, ProvingInput, Risc0CycleEstimator};
 use tracing::{error, info, instrument, warn};
 
@@ -42,10 +42,10 @@ impl Generator {
     }
 
     #[instrument(name = "proof", skip_all, fields(hash = %self.call_hash))]
-    pub async fn run(mut self, host: Host, call: EngineCall) {
+    pub async fn run(mut self, host: Host, emv_call: EvmCall) {
         info!("Generating proof");
 
-        match self.run_pipeline(host, call).await {
+        match self.run_pipeline(host, emv_call).await {
             Ok(()) => {
                 info!("Proof generation completed successfully");
             }
@@ -55,12 +55,12 @@ impl Generator {
         }
     }
 
-    async fn run_pipeline(&mut self, host: Host, call: EngineCall) -> Result<(), ()> {
+    async fn run_pipeline(&mut self, host: Host, evm_call: EvmCall) -> Result<(), ()> {
         let prover = host.prover();
         let call_guest_id = host.call_guest_id();
 
         self.allocate_vgas().await?;
-        let preflight_result = self.preflight(host, call).await?;
+        let preflight_result = self.preflight(host, evm_call).await?;
         let estimated_cycles = self.estimate_cycles(&preflight_result)?;
         let estimated_vgas = to_vgas(estimated_cycles);
         self.metrics.gas = estimated_vgas;
@@ -89,9 +89,9 @@ impl Generator {
         }
     }
 
-    async fn preflight(&mut self, host: Host, call: EngineCall) -> Result<PreflightResult, ()> {
-        let evm_gas_limit = call.gas_limit;
-        match preflight::await_preflight(host, call, &mut self.metrics).await {
+    async fn preflight(&mut self, host: Host, evm_call: EvmCall) -> Result<PreflightResult, ()> {
+        let evm_gas_limit = evm_call.gas_limit;
+        match preflight::await_preflight(host, evm_call, &mut self.metrics).await {
             Ok(res) => {
                 let entry =
                     set_state(&self.app_state, self.call_hash, State::EstimatingCyclesPending);

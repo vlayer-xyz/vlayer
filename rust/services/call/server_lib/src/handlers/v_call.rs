@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use alloy_primitives::ChainId;
-use call_host::{BuilderError, Host};
+use call_host::{BuilderError, Call as EvmCall, Host};
 use provider::Address;
 use tracing::{Instrument, info, info_span};
 use types::{Call, CallContext, CallHash, Result as VCallResult};
@@ -30,10 +30,10 @@ pub async fn v_call(
     } = params;
 
     let vgas_limit = call.vgas_limit;
-    let call = call.parse_and_validate(config.max_calldata_size, EVM_GAS_LIMIT)?;
+    let evm_call: EvmCall = call.parse_and_validate(config.max_calldata_size, EVM_GAS_LIMIT)?;
 
-    let host = build_host(&config, context.chain_id, call.to).await?;
-    let call_hash = (&host.start_execution_location(), &call).into();
+    let host = build_host(&config, context.chain_id, evm_call.to).await?;
+    let call_hash = (&host.start_execution_location(), &evm_call).into();
 
     info!(hash = tracing::field::display(call_hash), "Call");
 
@@ -54,7 +54,7 @@ pub async fn v_call(
                 Arc::clone(&state),
                 call_hash,
             )
-            .run(host, call)
+            .run(host, evm_call)
             .instrument(span)
             .await;
         });
