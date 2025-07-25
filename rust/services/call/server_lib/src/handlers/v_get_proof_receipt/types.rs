@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     metrics::Metrics,
-    proof::{Error as ProofError, State as ProofState, Status as ProofStatus},
+    proof::{Error as ProofError, Status as ProofStatus, state::State as ProofState},
     proving::RawData,
     v_call::CallHash,
 };

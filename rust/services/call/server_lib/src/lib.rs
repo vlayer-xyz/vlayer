@@ -11,8 +11,6 @@ mod proof;
 mod proving;
 mod ser;
 
-pub const CYCLES_PER_VGAS: u64 = 1_000_000;
-
 pub use cli::Cli;
 pub use config::{Config, ConfigBuilder};
 pub use handlers::{v_call::types as v_call, v_get_proof_receipt::types as v_get_proof_receipt};
