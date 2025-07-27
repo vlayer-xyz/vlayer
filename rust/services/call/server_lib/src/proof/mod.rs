@@ -1,5 +1,3 @@
-use std::fmt::{Display, Formatter};
-
 use call_host::CycleEstimatorError;
 use dashmap::Entry;
 use tracing::error;
