@@ -66,7 +66,9 @@ impl Generator {
         self.send_metadata(preflight_result.metadata.clone())
             .await?;
         self.validate_vgas_limit(estimated_vgas)?;
-        let raw_data = self.proving(preflight_result, &prover, call_guest_id).await?;
+        let raw_data = self
+            .proving(preflight_result, &prover, call_guest_id)
+            .await?;
         self.proving_refund(estimated_vgas.value).await?;
         self.set_done_state(raw_data);
 
