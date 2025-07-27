@@ -70,7 +70,7 @@ impl Generator {
             .proving(preflight_result, &prover, call_guest_id)
             .await?;
         self.proving_refund(estimated_vgas.value).await?;
-        self.set_done_state(raw_data);
+        self.mark_completed(raw_data);
 
         Ok(())
     }
@@ -266,7 +266,7 @@ impl Generator {
         }
     }
 
-    fn set_done_state(&self, raw_data: RawData) {
+    fn mark_completed(&self, raw_data: RawData) {
         let entry = set_state(&self.app_state, self.call_hash, State::Done(raw_data.into()));
         set_metrics(entry, self.metrics);
     }
