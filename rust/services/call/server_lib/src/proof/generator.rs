@@ -42,10 +42,10 @@ impl Generator {
     }
 
     #[instrument(name = "proof", skip_all, fields(hash = %self.call_hash))]
-    pub async fn run(mut self, host: Host, emv_call: EvmCall) {
+    pub async fn run(mut self, host: Host, evm_call: EvmCall) {
         info!("Generating proof");
 
-        match self.run_pipeline(host, emv_call).await {
+        match self.run_pipeline(host, evm_call).await {
             Ok(()) => {
                 info!("Proof generation completed successfully");
             }
