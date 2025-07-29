@@ -4,8 +4,6 @@ Installs the vlayer Prover docker container.
 
 ## Variables
 
-### todo update
-
 | Name | Purpose |
 | --- | --- |
 | `prover_docker_version` | A docker image tag to use. |
