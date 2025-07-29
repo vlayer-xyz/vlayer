@@ -58,5 +58,5 @@ vlayer_prover_gas_meter_api_key: !vault |
   333634303764653162643233336133656661
 vlayer_prover_chain_proof_url: "https://stable-fake-chainservice.vlayer.xyz"
 prover_docker_containers:
-  - version: "1.3.0"
-    port: 4001
+ - version: "1.3.0"
+   port: 4001
