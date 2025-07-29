@@ -10,7 +10,6 @@ vlayer_quicknode_api_key: !vault |
   3763383161376435350a383964363838636431633532376537346666343439666565336465393066
   39313234383930336434343664306161623866623261326463373635613665663633663630373836
   3036366431616532383235356339346538646431306133663465
-chain_server_nginx_ssl_certificate: "chainservice.vlayer.xyz"
 chain_workers:
   - chain_worker_identifier: ethereum
     chain_worker_rpc_url: https://clean-proud-spring.quiknode.pro/{{ vlayer_quicknode_api_key }}

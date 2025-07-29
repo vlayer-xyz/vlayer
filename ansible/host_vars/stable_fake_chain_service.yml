@@ -10,7 +10,6 @@ vlayer_quicknode_api_key: !vault |
   6435363531613734630a396133616131313962363663346231336134383065656165643638343739
   61323765346638303237613639373863643365373236323039336562346537336462316164646336
   6638303262643364353863656338393438613231353731666330
-chain_server_nginx_ssl_certificate: "testnet-chainservice.vlayer.xyz"
 chain_workers:
   - chain_worker_identifier: ethereum-sepolia
     chain_worker_rpc_url: https://fragrant-small-sheet.ethereum-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}

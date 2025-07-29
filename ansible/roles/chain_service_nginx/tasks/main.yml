@@ -12,7 +12,7 @@
 
 - name: Install vlayer certificate
   ansible.builtin.copy:
-    src: "{{ chain_server_nginx_ssl_certificate }}.pem"
+    src: chainservice.vlayer.xyz.pem
     dest: /etc/ssl/certs/chainservice.vlayer.xyz.pem
     mode: '644'
     owner: root
@@ -20,7 +20,7 @@
 
 - name: Install vlayer certificate key
   ansible.builtin.copy:
-    src: "{{ chain_server_nginx_ssl_certificate }}.key"
+    src: chainservice.vlayer.xyz.key
     dest: /etc/ssl/private/chainservice.vlayer.xyz.key
     mode: '600'
     owner: root
