@@ -6,4 +6,3 @@ chain_server_rust_log:
   - info
 chain_services_db_path: "/data/chain_db"
 vlayer_release_channel: stable
-chain_server_nginx_ssl_certificate: "testnet-chainservice.vlayer.xyz"
