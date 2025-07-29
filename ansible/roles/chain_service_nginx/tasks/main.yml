@@ -17,6 +17,7 @@
     mode: '644'
     owner: root
     group: root
+  notify: "Reload nginx"
 
 - name: Install vlayer certificate key
   ansible.builtin.copy:
@@ -25,6 +26,7 @@
     mode: '600'
     owner: root
     group: root
+  notify: "Reload nginx"
 
 - name: Install nginx configuration
   ansible.builtin.template:

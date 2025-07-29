@@ -6,7 +6,7 @@ use server_utils::rpc::Error as RpcError;
 use tokio::time::sleep;
 use u64_range::NonEmptyRange;
 
-const TEST_URL: &str = "https://test-chainservice.vlayer.xyz";
+const TEST_URL: &str = "https://nightly-fake-chainservice.vlayer.xyz";
 const PROD_URL: &str = "https://chainservice.vlayer.xyz";
 
 #[tokio::main]
