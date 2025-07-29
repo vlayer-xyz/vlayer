@@ -5,6 +5,7 @@ ansible_user: ubuntu
 vlayer_release_channel: nightly
 vlayer_prover_host: 127.0.0.1
 vlayer_prover_port: 3000
+vlayer_proof_type: fake
 vlayer_jwt_claims:
  - "sub"
  - "environment:test"

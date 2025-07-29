@@ -5,3 +5,4 @@ vlayer_rust_log:
 vlayer_jwt_public_key_location: /home/{{ ansible_user }}/.vlayer/jwt.key.pub
 vlayer_jwt_algorithm: rs256
 prover_nginx_ssl_certificate: "fake-prover.vlayer.xyz"
+prover_docker_containers: []

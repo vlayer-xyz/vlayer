@@ -2,6 +2,8 @@
 roles:
   - name: geerlingguy.swap
     version: 1.2.0
+  - name: geerlingguy.docker
+    version: 7.4.1
   - name: nginxinc.nginx
     version: 0.24.3
 
@@ -11,4 +13,7 @@ collections:
     source: https://galaxy.ansible.com
   - name: grafana.grafana
     version: 5.5.1
+    source: https://galaxy.ansible.com
+  - name: community.docker
+    version: 4.0.1
     source: https://galaxy.ansible.com

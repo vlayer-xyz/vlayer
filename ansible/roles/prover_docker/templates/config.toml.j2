@@ -1,0 +1,45 @@
+host = "0.0.0.0"
+port = 3000
+rust_log = "{{ prover_docker_rust_log | join(',') }}"
+log_format = "json"
+proof_mode = "{{ prover_docker_proof_type }}"
+
+{% if prover_docker_bonsai_api_url is defined %}
+bonsai_api_url = "{{ prover_docker_bonsai_api_url }}"
+{% endif %}
+{% if prover_docker_bonsai_api_key is defined %}
+bonsai_api_key = "{{ prover_docker_bonsai_api_key }}"
+{% endif %}
+
+{% if prover_docker_gas_meter_url is defined %}
+[gas_meter]
+url = "{{ prover_docker_gas_meter_url }}"
+api_key = "{{ prover_docker_gas_meter_api_key }}"
+{% endif %}
+
+{% if prover_docker_chain_proof_url is defined %}
+[chain_client]
+url = "{{ prover_docker_chain_proof_url }}"
+{% endif %}
+
+[auth.jwt]
+public_key = "/jwt.key.pub"
+algorithm = "{{ prover_docker_jwt_algorithm }}"
+
+{% for claim in prover_docker_jwt_claims %}
+{% if ':' in claim %}
+{% set claim_parts = claim.split(':', 1) %}
+[[auth.jwt.claims]]
+name = "{{ claim_parts[0] }}"
+values = ["{{ claim_parts[1] }}"]
+{% else %}
+[[auth.jwt.claims]]
+name = "{{ claim }}"
+{% endif %}
+{% endfor %}
+
+{% for rpc_url in prover_docker_rpc_urls %}
+[[rpc_urls]]
+chain_id = {{ rpc_url.split(':', 1)[0] }}
+url = "{{ rpc_url.split(':', 1)[1] }}"
+{% endfor %}

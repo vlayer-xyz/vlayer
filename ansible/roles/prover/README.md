@@ -11,9 +11,12 @@ Installs the vlayer Prover server.
 | `vlayer_release_channel` | Stable or nightly release channel. |
 | `vlayer_prover_rpc_urls` | A list of RPC urls for the Prover. |
 | `vlayer_prover_gas_meter_url` | Optional url to the gas meter endpoint. |
+| `vlayer_prover_gas_meter_api_key` | API key for the gas meter endpoint. |
 | `vlayer_prover_chain_proof_url` | Optional url to the chain proof server. |
 | `vlayer_proof_type` | Type of proof - `fake` or `groth16`. |
 | `vlayer_bonsai_api_url` | API url for Bonsai, required for real proofs. |
 | `vlayer_bonsai_api_key` | API key for Bonsai, required for real proofs. |
+| `vlayer_jwt_algorithm` | Algorithm type used in JWT. |
+| `vlayer_jwt_claims` | A list of JWT claims. |
 | `vlayer_jwt_public_key_location` | Where to install the JWT public key file. |
 | `vlayer_rust_log` | An array of log levels for constructing [`RUST_LOG`](https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html). |
