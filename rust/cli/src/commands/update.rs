@@ -118,8 +118,10 @@ fn update_sdk() -> Result<()> {
     let version = vlayer::Cli::version()?;
     let logger = UpdateLogger::new(format!("SDK to {version}"));
     let Some((path, package_json)) = find_package_json()? else {
-        logger.warn(format!("{} not found. Skipping SDK update.", "package.json".bold()));
-        return Ok(());
+        return Err(Error::Upgrade(format!(
+            "{} not found. Cannot update SDK.",
+            "package.json".bold()
+        )));
     };
 
     let Some(js_pm) = js::PackageManager::guess(&path) else {
