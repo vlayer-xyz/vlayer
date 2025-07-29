@@ -13,7 +13,7 @@ use crate::{
         state::{State, set_state},
         to_cycles,
     },
-    proving::{self},
+    proving::{self, RawData},
     v_call::CallHash,
 };
 
@@ -62,12 +62,16 @@ impl Generator {
         self.allocate_vgas().await?;
         let preflight_result = self.preflight(host, evm_call).await?;
         let estimated_vgas = self.estimate_cycles(&preflight_result)?;
-        self.refund(estimated_vgas.value).await?;
+        self.preflight_refund(estimated_vgas.value).await?;
         self.send_metadata(preflight_result.metadata.clone())
             .await?;
         self.validate_vgas_limit(estimated_vgas)?;
-        self.proving(preflight_result, &prover, call_guest_id, estimated_vgas.value)
-            .await;
+        let raw_data = self
+            .proving(preflight_result, &prover, call_guest_id)
+            .await?;
+        self.proving_refund(estimated_vgas.value).await?;
+        self.mark_completed(raw_data);
+
         Ok(())
     }
 
@@ -140,7 +144,7 @@ impl Generator {
         Ok(estimated_vgas)
     }
 
-    async fn refund(&self, estimated_vgas: u64) -> Result<(), ()> {
+    async fn preflight_refund(&self, estimated_vgas: u64) -> Result<(), ()> {
         match self
             .gas_meter_client
             .refund(ComputationStage::Preflight, estimated_vgas)
@@ -211,8 +215,7 @@ impl Generator {
         preflight_result: PreflightResult,
         prover: &Prover,
         call_guest_id: CallGuestId,
-        estimated_vgas: u64,
-    ) {
+    ) -> Result<RawData, ()> {
         set_state(&self.app_state, self.call_hash, State::ProvingPending);
 
         let proving_input = ProvingInput::new(preflight_result.host_output, preflight_result.input);
@@ -222,22 +225,49 @@ impl Generator {
             proving_input,
             &self.gas_meter_client,
             &mut self.metrics,
-            estimated_vgas,
         )
         .await
         .map_err(Error::Proving)
         {
             Ok(raw_data) => {
-                let entry =
-                    set_state(&self.app_state, self.call_hash, State::Done(raw_data.into()));
-                set_metrics(entry, self.metrics);
+                info!("Proving succeeded");
+                Ok(raw_data)
             }
             Err(err) => {
                 error!("Proving failed with error: {err}");
                 let entry =
                     set_state(&self.app_state, self.call_hash, State::ProvingError(err.into()));
                 set_metrics(entry, self.metrics);
+                Err(())
             }
-        };
+        }
+    }
+
+    async fn proving_refund(&self, estimated_vgas: u64) -> Result<(), ()> {
+        match self
+            .gas_meter_client
+            .refund(ComputationStage::Proving, estimated_vgas)
+            .await
+        {
+            Ok(()) => {
+                info!("Proving refund succeeded for {estimated_vgas} vgas");
+                Ok(())
+            }
+            Err(err) => {
+                error!("Proving refund failed with error: {err}");
+                let entry = set_state(
+                    &self.app_state,
+                    self.call_hash,
+                    State::ProvingError(Error::AllocateGasRpc(err).into()),
+                );
+                set_metrics(entry, self.metrics);
+                Err(())
+            }
+        }
+    }
+
+    fn mark_completed(&self, raw_data: RawData) {
+        let entry = set_state(&self.app_state, self.call_hash, State::Done(raw_data.into()));
+        set_metrics(entry, self.metrics);
     }
 }
