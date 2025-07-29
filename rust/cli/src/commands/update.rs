@@ -19,6 +19,8 @@ use crate::{
 pub mod docker;
 mod logger;
 
+const VLAYER_DIR_NAME: &str = "vlayer";
+
 #[derive(Clone, Copy, Debug, ValueEnum, Default, Display, Deserialize)]
 #[strum(serialize_all = "kebab-case")]
 pub enum ReleaseChannel {
@@ -40,6 +42,7 @@ pub(crate) struct UpdateArgs {
 }
 
 pub async fn run_update(args: UpdateArgs) -> Result<()> {
+    ensure_in_vlayer_directory()?;
     ensure_vlayerup_exists()?;
     update_cli(args.channel)?;
     update_sdk()?;
@@ -50,6 +53,45 @@ pub async fn run_update(args: UpdateArgs) -> Result<()> {
     println!("{}", "Build your contracts now and have fun!".bold());
 
     Ok(())
+}
+
+fn ensure_in_vlayer_directory() -> Result<()> {
+    // Can happen if current working directory doesn't exist
+    let current_dir = std::env::current_dir()
+        .map_err(|e| Error::Upgrade(format!("Failed to get current directory: {e}")))?;
+
+    if check_current_dir_is_vlayer(&current_dir)? {
+        return Ok(());
+    }
+
+    if change_to_vlayer_subdir(&current_dir)? {
+        return Ok(());
+    }
+
+    Err(Error::Upgrade(
+        "vlayer update must be run from within a 'vlayer' directory, or from a directory containing a 'vlayer' subdirectory".to_string()
+    ))
+}
+
+fn check_current_dir_is_vlayer(current_dir: &std::path::Path) -> Result<bool> {
+    if let Some(dir_name) = current_dir.file_name() {
+        if dir_name == VLAYER_DIR_NAME {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn change_to_vlayer_subdir(current_dir: &std::path::Path) -> Result<bool> {
+    let vlayer_subdir = current_dir.join(VLAYER_DIR_NAME);
+    if vlayer_subdir.is_dir() {
+        println!("📁 Found vlayer directory, changing into it...");
+        std::env::set_current_dir(&vlayer_subdir)
+            .map_err(|e| Error::Upgrade(format!("Failed to change to vlayer directory: {e}")))?;
+        println!("✓ Now in vlayer directory: {}", vlayer_subdir.display());
+        return Ok(true);
+    }
+    Ok(false)
 }
 
 fn ensure_vlayerup_exists() -> Result<()> {
