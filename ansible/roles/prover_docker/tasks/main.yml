@@ -9,6 +9,7 @@
 
 - name: Install config
   become: true
+  no_log: true
   ansible.builtin.template:
     src: "config.toml.j2"
     dest: /etc/vlayer-prover/{{ prover_docker_version }}/config/config.toml
@@ -25,6 +26,7 @@
 
 - name: Start prover container
   become: true
+  no_log: true
   community.docker.docker_compose_v2:
     project_src: /etc/vlayer-prover/{{ prover_docker_version }}
     state: present
