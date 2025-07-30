@@ -1,0 +1,54 @@
+---
+- name: Create versioned database directory
+  become: true
+  ansible.builtin.file:
+    path: /data/{{ chain_service_docker_version }}/chain_db
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '755'
+  notify: "Restart chain service docker {{ chain_service_docker_version }}"
+
+- name: Create configuration directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/vlayer-chain-service/{{ chain_service_docker_version }}
+    state: directory
+    mode: '755'
+  notify: "Restart chain service docker {{ chain_service_docker_version }}"
+
+- name: Install chain server environment file
+  become: true
+  no_log: true
+  ansible.builtin.template:
+    src: "chain-server.env.j2"
+    dest: /etc/vlayer-chain-service/{{ chain_service_docker_version }}/chain-server.env
+    mode: '600'
+  notify: "Restart chain service docker {{ chain_service_docker_version }}"
+
+- name: Install chain worker environment files
+  become: true
+  no_log: true
+  ansible.builtin.template:
+    src: "chain-worker.env.j2"
+    dest: /etc/vlayer-chain-service/{{ chain_service_docker_version }}/chain-worker-{{ worker.identifier }}.env
+    mode: '600'
+  loop: "{{ chain_service_docker_workers }}"
+  loop_control:
+    loop_var: worker
+  notify: "Restart chain service docker {{ chain_service_docker_version }}"
+
+- name: Install docker compose
+  become: true
+  ansible.builtin.template:
+    src: "docker-compose.yml.j2"
+    dest: /etc/vlayer-chain-service/{{ chain_service_docker_version }}/docker-compose.yml
+    mode: '755'
+  notify: "Restart chain service docker {{ chain_service_docker_version }}"
+
+- name: Start chain service containers
+  become: true
+  no_log: true
+  community.docker.docker_compose_v2:
+    project_src: /etc/vlayer-chain-service/{{ chain_service_docker_version }}
+    state: present
