@@ -34,6 +34,10 @@
         mode: '755'
 
   roles:
+    - role: geerlingguy.docker
+      vars:
+        docker_users: "{{ ansible_user }}"
+      become: true
     - role: geerlingguy.swap
       become: true
       vars:
@@ -60,4 +64,17 @@
         chain_worker_bonsai_api_url: "{{ item.chain_worker_bonsai_api_url | default('') }}"
         chain_worker_bonsai_api_key: "{{ item.chain_worker_bonsai_api_key | default('') }}"
       loop: "{{ chain_workers }}"
+      no_log: true
+
+    - name: Chain service docker containers
+      ansible.builtin.include_role:
+        name: chain_service_docker
+      vars:
+        chain_service_docker_version: "{{ item.version }}"
+        chain_service_docker_server_port: "{{ item.chain_server_port }}"
+        chain_service_docker_workers: "{{ item.chain_workers }}"
+        chain_service_docker_server_rust_log: "{{ chain_server_rust_log }}"
+        chain_service_docker_worker_rust_log: "{{ chain_worker_rust_log }}"
+      when: chain_service_docker_containers | length > 0
+      loop: "{{ chain_service_docker_containers }}"
       no_log: true

@@ -1,0 +1,28 @@
+services:
+  vlayer-chain-server:
+    image: ghcr.io/vlayer-xyz/chain_server:{{ chain_service_docker_version }}
+    container_name: vlayer-chain-server-{{ chain_service_docker_version }}
+    restart: always
+    # https://github.com/erthink/libmdbx?tab=readme-ov-file#containers
+    pid: host
+    ports:
+      - "{{ chain_service_docker_server_host }}:{{ chain_service_docker_server_port }}:3000"
+    volumes:
+      - /data/{{ chain_service_docker_version }}/chain_db:{{ chain_service_docker_db_path }}
+    env_file:
+      - chain-server.env
+    command: "--listen-addr 0.0.0.0:3000"
+
+{% for worker in chain_service_docker_workers %}
+  vlayer-chain-worker-{{ worker.identifier }}:
+    image: ghcr.io/vlayer-xyz/chain_worker:{{ chain_service_docker_version }}
+    container_name: vlayer-chain-worker-{{ chain_service_docker_version }}-{{ worker.identifier }}
+    restart: always
+    # https://github.com/erthink/libmdbx?tab=readme-ov-file#containers
+    pid: host
+    volumes:
+      - /data/{{ chain_service_docker_version }}/chain_db:{{ chain_service_docker_db_path }}
+    env_file:
+      - chain-worker-{{ worker.identifier }}.env
+
+{% endfor %}

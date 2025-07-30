@@ -1,0 +1,3 @@
+---
+chain_service_docker_server_host: 127.0.0.1
+chain_service_docker_db_path: /chain_db
