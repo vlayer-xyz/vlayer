@@ -60,3 +60,4 @@ vlayer_prover_chain_proof_url: "https://stable-fake-chainservice.vlayer.xyz"
 prover_docker_containers:
  - version: "1.3.0"
    port: 4001
+prover_nginx_default_prover_port: 4001
