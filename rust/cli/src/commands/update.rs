@@ -56,7 +56,6 @@ pub async fn run_update(args: UpdateArgs) -> Result<()> {
 }
 
 fn ensure_in_vlayer_directory() -> Result<()> {
-    // Can happen if current working directory doesn't exist
     let current_dir = std::env::current_dir()
         .map_err(|e| Error::Upgrade(format!("Failed to get current directory: {e}")))?;
 
