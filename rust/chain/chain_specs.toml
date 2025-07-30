@@ -27,7 +27,7 @@ forks = [
 [[chains]]
 name = "optimism-sepolia"
 id = 11155420
-op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0xDB2727Fc71176Bf8ED630F4142e0439733588e85" } }
+op_spec = { anchor_chain = 11155111, anchor_state_registry = { address = "0xa1Cec548926eb5d69aa3B7B57d371EdBdD03e64b" } }
 forks = [
     { spec = "BEDROCK", activation = { Block = 0 } },
     { spec = "CANYON", activation = { Timestamp = 1699981200 } },
