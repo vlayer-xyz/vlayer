@@ -1,0 +1,11 @@
+services:
+  vlayer-prover:
+    image: ghcr.io/vlayer-xyz/call_server:{{ prover_docker_version }}
+    container_name: vlayer-prover-{{ prover_docker_version }}
+    restart: always
+    command: "--config-file /config.toml"
+    ports:
+      - "{{ prover_docker_host }}:{{ prover_docker_port }}:3000"
+    volumes:
+      - /etc/vlayer-prover/{{ prover_docker_version }}/config/config.toml:/config.toml:ro
+      - {{ prover_docker_jwt_public_key_location }}:/jwt.key.pub:ro

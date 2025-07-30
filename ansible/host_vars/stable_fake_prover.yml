@@ -5,6 +5,7 @@ ansible_user: ubuntu
 vlayer_release_channel: stable
 vlayer_prover_host: 127.0.0.1
 vlayer_prover_port: 3000
+vlayer_proof_type: fake
 vlayer_jwt_claims:
  - "sub"
  - "environment:test"
@@ -56,3 +57,6 @@ vlayer_prover_gas_meter_api_key: !vault |
   35633263303637613536333463643966336565313263396131623132306632333631313165376534
   333634303764653162643233336133656661
 vlayer_prover_chain_proof_url: "https://stable-fake-chainservice.vlayer.xyz"
+prover_docker_containers:
+ - version: "1.3.0"
+   port: 4001

@@ -1,0 +1,8 @@
+---
+- name: Restart prover docker {{ prover_docker_version }}
+  become: true
+  no_log: true
+  community.docker.docker_compose_v2:
+    project_src: /etc/vlayer-prover/{{ prover_docker_version }}
+    state: restarted
+    recreate: always

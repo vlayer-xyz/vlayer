@@ -25,6 +25,10 @@
       ansible.builtin.gather_facts:
 
   roles:
+    - role: geerlingguy.docker
+      vars:
+        docker_users: "{{ ansible_user }}"
+      become: true
     - role: geerlingguy.swap
       become: true
       vars:
@@ -32,3 +36,25 @@
     - role: prover
     - role: prover_nginx
       become: true
+
+  tasks:
+    - name: Prover docker container
+      ansible.builtin.include_role:
+        name: prover_docker
+      vars:
+        prover_docker_version: "{{ item.version }}"
+        prover_docker_port: "{{ item.port }}"
+        prover_docker_proof_type: "{{ vlayer_proof_type }}"
+        prover_docker_rust_log: "{{ vlayer_rust_log }}"
+        prover_docker_bonsai_api_url: "{{ vlayer_bonsai_api_url }}"
+        prover_docker_bonsai_api_key: "{{ vlayer_bonsai_api_key }}"
+        prover_docker_gas_meter_url: "{{ vlayer_prover_gas_meter_url }}"
+        prover_docker_gas_meter_api_key: "{{ vlayer_prover_gas_meter_api_key }}"
+        prover_docker_chain_proof_url: "{{ vlayer_prover_chain_proof_url }}"
+        prover_docker_jwt_algorithm: "{{ vlayer_jwt_algorithm }}"
+        prover_docker_jwt_claims: "{{ vlayer_jwt_claims }}"
+        prover_docker_rpc_urls: "{{ vlayer_prover_rpc_urls }}"
+        prover_docker_jwt_public_key_location: "{{ vlayer_jwt_public_key_location }}"
+      when: prover_docker_containers | length > 0
+      loop: "{{ prover_docker_containers }}"
+      no_log: true

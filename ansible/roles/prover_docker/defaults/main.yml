@@ -1,0 +1,3 @@
+---
+prover_docker_host: 127.0.0.1
+prover_docker_port: 4000
