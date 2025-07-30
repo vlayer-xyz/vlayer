@@ -16,8 +16,13 @@ server {
   }
 {% endfor %}
 
+  location /latest/ {
+{{ common_location_settings | safe }}
+    proxy_pass http://127.0.0.1:{{- chain_server_port if chain_server_port is defined else '3001' }}/;
+  }
+
   location / {
 {{ common_location_settings | safe }}
-    proxy_pass http://127.0.0.1:{{- chain_server_port if chain_server_port is defined else '3001' }};
+    proxy_pass http://127.0.0.1:{{- chain_service_nginx_default_server_port if chain_service_nginx_default_server_port is defined else '3001' }};
   }
 }

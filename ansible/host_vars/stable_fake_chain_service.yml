@@ -57,3 +57,4 @@ chain_service_docker_containers:
         max_back_propagation_blocks: 0
         max_head_blocks: 10
         confirmations: 8
+chain_service_nginx_default_server_port: 4001

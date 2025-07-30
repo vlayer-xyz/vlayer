@@ -1,5 +1,6 @@
 ---
 chain_server_port: 3001
+chain_service_nginx_default_server_port: 3001
 chain_worker_rust_log:
   - info
 chain_server_rust_log:
