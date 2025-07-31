@@ -8,7 +8,6 @@ use std::{
 use anyhow::Context;
 use clap::Parser;
 use flate2::read::GzDecoder;
-
 use reqwest::get;
 use serde_json::{Map, Value};
 use tar::Archive;
