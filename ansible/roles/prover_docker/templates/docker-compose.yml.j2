@@ -9,3 +9,5 @@ services:
     volumes:
       - /etc/vlayer-prover/{{ prover_docker_version }}/config/config.toml:/config.toml:ro
       - {{ prover_docker_jwt_public_key_location }}:/jwt.key.pub:ro
+    env_file:
+      - prover.env

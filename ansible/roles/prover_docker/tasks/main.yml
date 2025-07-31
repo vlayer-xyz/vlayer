@@ -7,6 +7,15 @@
     mode: '755'
   notify: "Restart prover docker {{ prover_docker_version }}"
 
+- name: Install prover environment file
+  become: true
+  no_log: true
+  ansible.builtin.template:
+    src: "prover.env.j2"
+    dest: /etc/vlayer-prover/{{ prover_docker_version }}/prover.env
+    mode: '600'
+  notify: "Restart prover docker {{ prover_docker_version }}"
+
 - name: Install config
   become: true
   no_log: true
