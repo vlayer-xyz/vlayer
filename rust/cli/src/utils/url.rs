@@ -22,7 +22,10 @@ pub fn update_prover_url(root_path: &Path) -> Result<(), Error> {
                 modify_url_with_channel_and_version(&content, channel, version_str.as_deref())?;
             fs::write(env_path, output)?;
         } else {
-            info!("{} file not found in \"{}\". Skipping update.", env_file, root_path.display());
+            return Err(Error::CommandExecution(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("{} file not found in \"{}\"", env_file, root_path.display()),
+            )));
         }
     }
 
