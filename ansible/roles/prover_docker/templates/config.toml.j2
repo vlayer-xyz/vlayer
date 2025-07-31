@@ -1,15 +1,7 @@
 host = "0.0.0.0"
 port = 3000
-rust_log = "{{ prover_docker_rust_log | join(',') }}"
 log_format = "json"
 proof_mode = "{{ prover_docker_proof_type }}"
-
-{% if prover_docker_bonsai_api_url is defined %}
-bonsai_api_url = "{{ prover_docker_bonsai_api_url }}"
-{% endif %}
-{% if prover_docker_bonsai_api_key is defined %}
-bonsai_api_key = "{{ prover_docker_bonsai_api_key }}"
-{% endif %}
 
 {% if prover_docker_gas_meter_url is defined %}
 [gas_meter]
