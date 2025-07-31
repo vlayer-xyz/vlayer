@@ -107,8 +107,17 @@ async fn update_contracts() -> Result<()> {
     };
     let foundry_root = foundry_toml_path.parent().unwrap();
 
+    let original_cwd = std::env::current_dir()
+        .map_err(|e| Error::Upgrade(format!("Failed to get current directory: {e}")))?;
+
+    std::env::set_current_dir(foundry_root)
+        .map_err(|e| Error::Upgrade(format!("Failed to change to foundry root directory: {e}")))?;
     let config = Config::from_str(DEFAULT_CONFIG.replace("{{VERSION}}", version.as_str()))?;
-    install_solidity_dependencies(&config.sol_dependencies).await?;
+    let soldeer_result = install_solidity_dependencies(&config.sol_dependencies).await;
+    let restore_result = std::env::set_current_dir(&original_cwd)
+        .map_err(|e| Error::Upgrade(format!("Failed to restore original directory: {e}")));
+    soldeer_result?;
+    restore_result?;
     add_remappings(foundry_root, config.sol_dependencies.values())?;
     logger.success();
 
