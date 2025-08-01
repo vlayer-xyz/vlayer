@@ -7,6 +7,8 @@ on:
     paths:
       - examples/simple-teleport/**
       - .github/workflows/deploy_simple_teleport.yaml
+      - ./.github/actions/example-deploy
+      - bash/e2e-teleport-example-test.sh
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
