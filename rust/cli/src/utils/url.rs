@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::{fs, path::{Path, PathBuf}};
 
 use regex::Regex;
 use tracing::info;
@@ -7,26 +7,25 @@ use version::is_stable;
 use crate::{errors::Error, version};
 
 pub fn update_prover_url(root_path: &Path) -> Result<(), Error> {
-    let env_files = ["vlayer/.env.testnet", "vlayer/.env.mainnet"];
+    let channel = if is_stable() { "stable" } else { "nightly" };
+    let version = is_stable().then(version);
 
-    for env_file in env_files {
-        let env_path = root_path.join(env_file);
+    fn update_file(
+        path: PathBuf,
+        label: &str,
+        channel: &str,
+        version: Option<&str>,
+    ) -> Result<(), Error> {
+        let content = fs::read_to_string(&path)?;
+        info!("Updating prover URL in {}", label);
+        let output = modify_url_with_channel_and_version(&content, channel, version)?;
+        fs::write(path, output)?;
+        Ok(())
+    }
 
-        if env_path.exists() {
-            info!("Updating prover URL in {}", env_file);
-
-            let content = fs::read_to_string(&env_path)?;
-            let channel = if is_stable() { "stable" } else { "nightly" };
-            let version_str = is_stable().then(version);
-            let output =
-                modify_url_with_channel_and_version(&content, channel, version_str.as_deref())?;
-            fs::write(env_path, output)?;
-        } else {
-            return Err(Error::CommandExecution(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!("{} file not found in \"{}\"", env_file, root_path.display()),
-            )));
-        }
+    for rel in &["vlayer/.env.testnet", "vlayer/.env.mainnet"] {
+        let path = root_path.join(rel);
+        update_file(path, rel, channel, version.as_deref())?;
     }
 
     Ok(())
