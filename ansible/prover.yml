@@ -50,7 +50,7 @@
         prover_docker_bonsai_api_key: "{{ vlayer_bonsai_api_key }}"
         prover_docker_gas_meter_url: "{{ vlayer_prover_gas_meter_url }}"
         prover_docker_gas_meter_api_key: "{{ vlayer_prover_gas_meter_api_key }}"
-        prover_docker_chain_proof_url: "{{ vlayer_prover_chain_proof_url }}/{{ item.version }}/"
+        prover_docker_chain_proof_url: "{{ vlayer_prover_chain_proof_base_url }}/{{ item.version }}/"
         prover_docker_jwt_algorithm: "{{ vlayer_jwt_algorithm }}"
         prover_docker_jwt_claims: "{{ vlayer_jwt_claims }}"
         prover_docker_rpc_urls: "{{ vlayer_prover_rpc_urls }}"
