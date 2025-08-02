@@ -13,7 +13,7 @@ use crate::{
     config::{Config, DEFAULT_CONFIG},
     errors::{Error, Result},
     soldeer::{add_remappings, install_solidity_dependencies},
-    utils::path::find_file_up_tree,
+    utils::{path::find_file_up_tree, url::update_prover_url},
 };
 
 pub mod docker;
@@ -45,6 +45,7 @@ pub async fn run_update(args: UpdateArgs) -> Result<()> {
     ensure_in_vlayer_directory()?;
     ensure_vlayerup_exists()?;
     update_cli(args.channel)?;
+    update_prover_urls()?;
     update_sdk()?;
     update_contracts().await?;
     update_docker()?;
@@ -110,6 +111,23 @@ fn update_cli(channel: ReleaseChannel) -> Result<()> {
     base::Cli::run("vlayerup", &["--channel", channel.to_string().as_str()])?;
     let updated_version = vlayer::Cli::version()?;
     logger.success_with_version_info(&previous_version, &updated_version);
+    Ok(())
+}
+
+fn update_prover_urls() -> Result<()> {
+    let logger = UpdateLogger::new("Prover URLs");
+    let foundry_toml = find_file_up_tree("foundry.toml")?;
+    let Some(foundry_toml_path) = foundry_toml else {
+        logger.warn(format!("{} not found. Skipping prover URL update.", "foundry.toml".bold()));
+        return Ok(());
+    };
+    let foundry_root = foundry_toml_path
+        .parent()
+        .ok_or_else(|| Error::Upgrade("Failed to get foundry root directory".to_string()))?;
+
+    update_prover_url(foundry_root)
+        .map_err(|e| Error::Upgrade(format!("Failed to update prover URLs: {e}")))?;
+    logger.success();
     Ok(())
 }
 
