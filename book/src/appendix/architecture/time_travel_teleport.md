@@ -6,7 +6,7 @@ vlayer allows seamless aggregation of data from different blocks and chains. We 
 
 ## Verification
 
-At the [beggining of the `guest::main`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/guest.rs#L38) we verify whether the data for each execution location is coherent. However, we have not yet checked whether data from multiple execution locations align with each other. Specifically, we need to ensure that:
+At the [beginning of the `guest::main`](https://github.com/vlayer-xyz/vlayer/blob/main/rust/services/call/guest/src/guest.rs#L38) we verify whether the data for each execution location is coherent. However, we have not yet checked whether data from multiple execution locations align with each other. Specifically, we need to ensure that:
 
 - The blocks we claim to be on the same chain are actually there (allowing time travel between blocks on the same chain).
 - The blocks associated with a given chain truly belong to that chain (enabling teleportation to the specified chain).
