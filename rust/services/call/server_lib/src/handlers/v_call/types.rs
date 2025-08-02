@@ -2,8 +2,8 @@ use alloy_chains::Chain;
 use alloy_primitives::{B256, ChainId, hex::ToHexExt, keccak256};
 use alloy_rlp::RlpEncodable;
 use call_common::ExecutionLocation;
-use call_engine::Call as EngineCall;
-use call_host::{BuilderError, Call as HostCall};
+use call_engine::Call as EvmCall;
+use call_host::BuilderError;
 use common::Hashable;
 use derive_more::From;
 use derive_new::new;
@@ -64,23 +64,23 @@ impl Call {
         self,
         max_calldata_size: usize,
         evm_gas_limit: u64,
-    ) -> Result<HostCall> {
-        let call = HostCall {
+    ) -> Result<EvmCall> {
+        let evm_call = EvmCall {
             to: parse_address_field("to", self.to)?,
             data: parse_hex_field("data", self.data)?,
             gas_limit: evm_gas_limit,
         };
 
-        if call.data.len() > max_calldata_size {
+        if evm_call.data.len() > max_calldata_size {
             return Err(FieldValidationError::LengthLimit {
                 field: "data".to_string(),
-                length: call.data.len(),
+                length: evm_call.data.len(),
                 limit: max_calldata_size,
             }
             .into());
         }
 
-        Ok(call)
+        Ok(evm_call)
     }
 }
 
@@ -104,9 +104,9 @@ impl std::fmt::Display for CallHash {
     }
 }
 
-impl From<(&ExecutionLocation, &EngineCall)> for CallHash {
-    fn from((execution_location, call): (&ExecutionLocation, &EngineCall)) -> Self {
-        CallHashData::new(execution_location, call)
+impl From<(&ExecutionLocation, &EvmCall)> for CallHash {
+    fn from((execution_location, evm_call): (&ExecutionLocation, &EvmCall)) -> Self {
+        CallHashData::new(execution_location, evm_call)
             .hash_slow()
             .into()
     }
@@ -115,7 +115,7 @@ impl From<(&ExecutionLocation, &EngineCall)> for CallHash {
 #[derive(new, RlpEncodable, Debug)]
 pub struct CallHashData<'a> {
     execution_location: &'a ExecutionLocation,
-    call: &'a EngineCall,
+    evm_call: &'a EvmCall,
 }
 
 impl Hashable for CallHashData<'_> {

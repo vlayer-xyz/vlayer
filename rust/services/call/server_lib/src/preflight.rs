@@ -1,5 +1,5 @@
 use call_common::Metadata;
-use call_engine::Call as EngineCall;
+use call_engine::Call as EvmCall;
 use call_host::{Host, PreflightError, PreflightResult};
 use tracing::info;
 
@@ -21,14 +21,14 @@ pub enum Error {
 
 pub async fn await_preflight(
     host: Host,
-    call: EngineCall,
+    evm_call: EvmCall,
     metrics: &mut Metrics,
 ) -> Result<PreflightResult, Error> {
     let result @ PreflightResult {
         gas_used,
         elapsed_time,
         ..
-    } = host.preflight(call).await?;
+    } = host.preflight(evm_call).await?;
 
     info!(
         state = tracing::field::debug(State::Preflight),
