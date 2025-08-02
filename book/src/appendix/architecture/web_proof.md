@@ -6,7 +6,7 @@ The following diagram depicts the high-level architecture of how the [Web Proof]
 
 Arrows on the diagram depict data flow between the actors (rectangles).
 
-Generating and ZK-proving a Web Proof consits of the following steps:
+Generating and ZK-proving a Web Proof consists of the following steps:
 1. vlayer [SDK](../../javascript/javascript.md) (used in a webapp) requests a Web Proof from vlayer browser extension.
 2. The extension opens a TLS connection to a Server (2a) through a WebSocket proxy (2b), while conducting MPC-TLS session with the Notary (2c), generating a Web Proof of an HTTPS request to the Server. The WebSocket proxy is needed to provide the extension access to low-level details of the TLS handshake, which is normally not available within the browser, while the Notary acts as a trusted third party who certifies the transcript of the HTTPS request (without actually seeing it). For details of how the TLSN protocol works, please check [TLSN documentation](https://docs.tlsnotary.org/).
 3. The Web Proof is then sent back to vlayer SDK.
