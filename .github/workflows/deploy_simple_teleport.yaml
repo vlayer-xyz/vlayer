@@ -87,7 +87,7 @@ jobs:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "dev"
           VLAYER_ENV: dev
-          WEB_SERVER_URL: "https://teleport-demo.vlayer.xyz/"
+          WEB_SERVER_URL: "https://simple-teleport-28rby3a5f-vlayer.vercel.app"
           VLAYER_TMP_DIR: ./artifacts
         run: bash/e2e-teleport-example-test.sh
 

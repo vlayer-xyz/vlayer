@@ -12,7 +12,7 @@ import { AppErrorBoundaryComponent } from "./components/layout/ErrorBoundary";
 import { getChainSpecs } from "@vlayer/sdk";
 
 const queryClient = new QueryClient();
-const appKitProjectId = `88cd40e876a44270a55cd4e034d55478`;
+const appKitProjectId = `0716afdbbb2cc3df69721a879b92ad5b`;
 let chain = null;
 
 try {
