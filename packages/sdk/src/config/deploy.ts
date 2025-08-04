@@ -50,6 +50,7 @@ export const waitForTransactionReceipt = async ({
     confirmations: getChainConfirmations(client.chain?.name),
     retryCount: getChainRetries(client.chain?.name),
     retryDelay: 1000,
+    timeout: getChainRetries(client.chain?.name) * 1000,
   });
 };
 
