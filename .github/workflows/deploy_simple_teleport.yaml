@@ -9,38 +9,39 @@ on:
       - .github/workflows/deploy_simple_teleport.yaml
       - ./.github/actions/example-deploy
       - bash/e2e-teleport-example-test.sh
+  push:
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
   cancel-in-progress: true
 jobs:
-  deploy-simple-teleport:
-    name: Deploy simple-teleport example
-    runs-on: aws-linux-medium
-    outputs:
-      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - name: Install, build and deploy example
-        id: deploy
-        uses: ./.github/actions/example-deploy
-        with:
-          example_name: simple-teleport
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          vercel_token: ${{ secrets.VERCEL_TOKEN }}
-          vercel_project_id: ${{ secrets.VERCEL_SIMPLE_TELEPORT_PROJECT_ID }}
-          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          json_rpc_url: "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
-          vlayer_api_token: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN_TESTNET }}
-          vite_sentry_dsn: "https://fe1013ab0d2ae6227a1ed302b1c50383@o4508754893012992.ingest.de.sentry.io/4509196678922320"
+  # deploy-simple-teleport:
+  #   name: Deploy simple-teleport example
+  #   runs-on: aws-linux-medium
+  #   outputs:
+  #     deployment_url: ${{ steps.deploy.outputs.deployment_url }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+  #     - name: Install, build and deploy example
+  #       id: deploy
+  #       uses: ./.github/actions/example-deploy
+  #       with:
+  #         example_name: simple-teleport
+  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+  #         vercel_token: ${{ secrets.VERCEL_TOKEN }}
+  #         vercel_project_id: ${{ secrets.VERCEL_SIMPLE_TELEPORT_PROJECT_ID }}
+  #         vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+  #         json_rpc_url: "https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+  #         vlayer_api_token: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN_TESTNET }}
+  #         vite_sentry_dsn: "https://fe1013ab0d2ae6227a1ed302b1c50383@o4508754893012992.ingest.de.sentry.io/4509196678922320"
   e2e-test-web-apps-vercel:
     name: E2E web apps test against devnet and vercel deployment
     runs-on: aws-linux-medium
-    needs: [deploy-simple-teleport]
+    # needs: [deploy-simple-teleport]
 
     steps:
       - name: Checkout repository
@@ -86,24 +87,24 @@ jobs:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "dev"
           VLAYER_ENV: dev
-          WEB_SERVER_URL: ${{needs.deploy-simple-teleport.outputs.deployment_url}}
+          WEB_SERVER_URL: "https://teleport-demo.vlayer.xyz/"
           VLAYER_TMP_DIR: ./artifacts
         run: bash/e2e-teleport-example-test.sh
 
-      - name: Handle Playwright Reports
-        uses: ./.github/actions/handle-playwright-reports
-        if: ${{ !cancelled() }}
-        with:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          EXAMPLES_PATH: /examples/
-          GITHUB_TOKEN: ${{ github.token }}
-          ARTIFACT_RETENTION_DAYS: "30"
-          REPORT_PATH: "examples/**/vlayer/playwright-report/"
-          PR_NUMBER: ${{ github.event.number }}
-          DEPLOY_TYPE: "examples"
-          CONTEXT: "deploy-simple-teleport"
+      # - name: Handle Playwright Reports
+      #   uses: ./.github/actions/handle-playwright-reports
+      #   if: ${{ !cancelled() }}
+      #   with:
+      #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PLAYWRIGHT_REPORT_PROJECT_ID }}
+      #     VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      #     EXAMPLES_PATH: /examples/
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #     ARTIFACT_RETENTION_DAYS: "30"
+      #     REPORT_PATH: "examples/**/vlayer/playwright-report/"
+      #     PR_NUMBER: ${{ github.event.number }}
+      #     DEPLOY_TYPE: "examples"
+      #     CONTEXT: "deploy-simple-teleport"
 
       # Teardown
       - name: Display Logs
