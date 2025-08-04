@@ -82,6 +82,12 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/docker-compose.devnet.yaml
+          services: |
+            anvil-l1
+
       - name: Run e2e test
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
@@ -89,7 +95,7 @@ jobs:
           VLAYER_ENV: dev
           WEB_SERVER_URL: "https://simple-teleport-28rby3a5f-vlayer.vercel.app"
           VLAYER_TMP_DIR: ./artifacts
-          CHAIN_NAME: "optimismSepolia"
+          CHAIN_NAME: "anvil"
         run: bash/e2e-teleport-example-test.sh
 
       - name: Handle Playwright Reports

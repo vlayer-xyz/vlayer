@@ -22,7 +22,3 @@ else
 fi
 
 run_web_tests simple-teleport
-
-echo '::group::Cleanup'
-cleanup
-echo '::endgroup::'
