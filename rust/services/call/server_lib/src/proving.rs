@@ -6,7 +6,7 @@ use serde::{Serialize, Serializer};
 use tracing::info;
 
 use crate::{
-    gas_meter::{Client as GasMeterClient, ComputationStage, Error as GasMeterError},
+    gas_meter::{Client as GasMeterClient, Error as GasMeterError},
     metrics::{self, Error as MetricsError, Metrics},
     ser::ProofDTO,
     v_get_proof_receipt::State,
@@ -30,7 +30,6 @@ pub async fn await_proving(
     prover_input: ProvingInput,
     gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
-    estimated_vgas: u64,
 ) -> Result<RawData, Error> {
     let host_output = Host::prove(prover, call_guest_id, prover_input)?;
     let cycles_used = host_output.cycles_used;
@@ -52,10 +51,6 @@ pub async fn await_proving(
     let raw_data: RawData = host_output.try_into()?;
     metrics.cycles = cycles_used;
     metrics.times.proving = metrics::elapsed_time_as_millis_u64(elapsed_time)?;
-
-    gas_meter_client
-        .refund(ComputationStage::Proving, estimated_vgas)
-        .await?;
 
     Ok(raw_data)
 }
