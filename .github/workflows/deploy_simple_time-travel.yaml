@@ -89,6 +89,7 @@ jobs:
           VLAYER_ENV: dev
           WEB_SERVER_URL: "https://simple-time-travel-5oga2a500-vlayer.vercel.app"
           VLAYER_TMP_DIR: ./artifacts
+          CHAIN_NAME: "optimismSepolia"
         run: bash/e2e-time-travel-example-test.sh
 
       - name: Handle Playwright Reports

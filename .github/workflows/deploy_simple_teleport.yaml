@@ -89,6 +89,7 @@ jobs:
           VLAYER_ENV: dev
           WEB_SERVER_URL: "https://simple-teleport-28rby3a5f-vlayer.vercel.app"
           VLAYER_TMP_DIR: ./artifacts
+          CHAIN_NAME: "optimismSepolia"
         run: bash/e2e-teleport-example-test.sh
 
       - name: Handle Playwright Reports
