@@ -17,7 +17,8 @@ if [[ -z "${WEB_SERVER_URL:-}" ]]; then
   echo '::endgroup::'
 else
   echo "Using remote web server at: ${WEB_SERVER_URL}"
-  echo "Skipping local service startup"
+  echo "Skipping local service setup, mocking imageid"
+  ./bash/mock-imageid.sh
 fi
 
 run_web_tests simple-time-travel
