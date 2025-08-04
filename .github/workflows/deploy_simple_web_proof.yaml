@@ -9,32 +9,31 @@ on:
       - .github/workflows/deploy_simple_web_proof.yaml
       - ./.github/actions/example-deploy
       - bash/e2e-web-proof-example-test.sh
-  push:
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
   cancel-in-progress: true
 jobs:
-  # deploy-simple-web-proof:
-  #   name: Deploy simple-web-proof example
-  #   runs-on: aws-linux-medium
-  #   outputs:
-  #     deployment_url: ${{ steps.deploy.outputs.deployment_url }}
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-  #     - name: Install, build and deploy example
-  #       id: deploy
-  #       uses: ./.github/actions/example-deploy
-  #       with:
-  #         example_name: simple-web-proof
-  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-  #         vercel_token: ${{ secrets.VERCEL_TOKEN }}
-  #         vercel_project_id: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
-  #         vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         json_rpc_url: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
-  #         vlayer_api_token: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN_TESTNET }}
-  #         vite_sentry_dsn: "https://1afb2d9efb40a7ac94d0c8737ab8ffc4@o4508754893012992.ingest.de.sentry.io/4508760191795280"
+  deploy-simple-web-proof:
+    name: Deploy simple-web-proof example
+    runs-on: aws-linux-medium
+    outputs:
+      deployment_url: ${{ steps.deploy.outputs.deployment_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - name: Install, build and deploy example
+        id: deploy
+        uses: ./.github/actions/example-deploy
+        with:
+          example_name: simple-web-proof
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          vercel_token: ${{ secrets.VERCEL_TOKEN }}
+          vercel_project_id: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
+          vercel_org_id: ${{ secrets.VERCEL_ORG_ID }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          json_rpc_url: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+          vlayer_api_token: ${{ secrets.DEPLOYED_EXAMPLES_VLAYER_API_TOKEN_TESTNET }}
+          vite_sentry_dsn: "https://1afb2d9efb40a7ac94d0c8737ab8ffc4@o4508754893012992.ingest.de.sentry.io/4508760191795280"
