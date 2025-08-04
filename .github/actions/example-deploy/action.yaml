@@ -115,6 +115,7 @@ runs:
       env:
         VITE_FAUCET_URL: https://faucet.vlayer.xyz
         VITE_SENTRY_DSN: ${{ inputs.vite_sentry_dsn }}
+        VITE_PROVER_URL: "https://stable-fake-prover.vlayer.xyz/latest/"
       working-directory: ./examples/${{ inputs.example_name }}/vlayer
 
     - name: Copy vercel.json (if exists)
