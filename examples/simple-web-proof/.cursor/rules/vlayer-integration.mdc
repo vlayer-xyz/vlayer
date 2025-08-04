@@ -1,0 +1,69 @@
+---
+description: vlayer integration patterns and web proof development
+---
+
+# vlayer Integration Guidelines
+
+## Web Proofs 
+
+### [Installation and prerequisites](https://book.vlayer.xyz/getting-started/installation.html)
+### [First steps](https://book.vlayer.xyz/getting-started/first-steps.html)
+
+### Proof Generation
+- Use [vlayer/prove.ts](mdc:vlayer/prove.ts) as the main proof generation entry point
+- Follow the async patterns for proof generation workflows
+- Handle proof generation errors gracefully with proper user feedback
+
+### Contract Integration
+- Deploy contracts using [vlayer/deploy.ts](mdc:vlayer/deploy.ts) patterns
+- Ensure proper integration between [src/vlayer/WebProofProver.sol](mdc:src/vlayer/WebProofProver.sol) and [src/vlayer/WebProofVerifier.sol](mdc:src/vlayer/WebProofVerifier.sol)
+- Use test data from [testdata/](mdc:testdata/) directory for development and testing
+
+### Test Data Management
+- Use structured test data files:
+  - [testdata/web_proof_development_signature.json](mdc:testdata/web_proof_development_signature.json) - Development signatures
+  - [testdata/web_proof_vlayer_signature.json](mdc:testdata/web_proof_vlayer_signature.json) - vlayer signatures
+  - [testdata/web_proof_invalid_signature.json](mdc:testdata/web_proof_invalid_signature.json) - Invalid signature tests
+
+## Infrastructure Setup
+
+### Docker Services
+- Use `bun run devnet:up` to start [vlayer/docker-compose.devnet.yaml](mdc:vlayer/docker-compose.devnet.yaml) for development environment
+- Configure services through individual service.yaml files:
+  - [vlayer/anvil/service.yaml](mdc:vlayer/anvil/service.yaml) - Anvil blockchain
+  - [vlayer/notary-server/service.yaml](mdc:vlayer/notary-server/service.yaml) - Notary service
+  - [vlayer/call_server/service.yaml](mdc:vlayer/call_server/service.yaml) - Call server
+  - [vlayer/vdns_server/service.yaml](mdc:vlayer/vdns_server/service.yaml) - VDNS service
+
+### Configuration Management
+- Use [vlayer/notary-config/](mdc:vlayer/notary-config/) for notary configuration
+- Reference [vlayer/fixtures/jwt-authority.key.pub](mdc:vlayer/fixtures/jwt-authority.key.pub) for JWT authority setup
+- Configure call server through [vlayer/call_server/config.toml](mdc:vlayer/call_server/config.toml)
+
+## Frontend Integration
+
+### Extension Integration
+- Use [vlayer/src/hooks/useExtension.ts](mdc:vlayer/src/hooks/useExtension.ts) for browser extension integration
+- Handle extension installation flows through InstallExtensionStep component
+- Implement proper error handling for extension communication
+
+### Proof Workflow
+- Follow the step-by-step proof workflow:
+  1. **Welcome**: [vlayer/src/components/organisms/WelcomeStep/](mdc:vlayer/src/components/organisms/WelcomeStep/)
+  2. **Extension**: [vlayer/src/components/organisms/InstallExtensionStep/](mdc:vlayer/src/components/organisms/InstallExtensionStep/)
+  3. **Connect Wallet**: [vlayer/src/components/organisms/ConnectWalletStep/](mdc:vlayer/src/components/organisms/ConnectWalletStep/)
+  4. **Prove**: [vlayer/src/components/organisms/ProveStep/](mdc:vlayer/src/components/organisms/ProveStep/)
+  5. **Mint**: [vlayer/src/components/organisms/MintStep/](mdc:vlayer/src/components/organisms/MintStep/)
+  6. **Success**: [vlayer/src/components/organisms/SuccessStep/](mdc:vlayer/src/components/organisms/SuccessStep/)
+
+### Testing Integration
+- Use [vlayer/tests/web-proof.spec.ts](mdc:vlayer/tests/web-proof.spec.ts) as reference for e2e testing
+- Use `bun run test-web:dev` to run Playwright tests 
+- Configure Playwright through [vlayer/playwright.config.ts](mdc:vlayer/playwright.config.ts)
+- Include boundary testing for edge cases
+
+## Security Considerations
+- Always validate/assert in Prover before generating valid proof
+- Use proper error handling for network failures
+- Validate all inputs from external sources
+- Use `onlyVerified` modifier in your verifier contract code
