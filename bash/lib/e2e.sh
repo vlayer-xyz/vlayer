@@ -109,7 +109,12 @@ function run_web_tests() {
 
   pushd ${VLAYER_HOME}/examples/${1}
 
-  forge build
+  if [[ -z "${WEB_SERVER_URL:-}" ]]; then
+    forge build
+  else
+    echo "Using remote web server at: ${WEB_SERVER_URL}"
+    echo "Skipping forge build"
+  fi
 
   cd vlayer
 
