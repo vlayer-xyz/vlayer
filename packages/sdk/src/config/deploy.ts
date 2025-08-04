@@ -8,7 +8,7 @@ import {
   type Hex,
   parseAbi,
 } from "viem";
-import { getChainConfirmations } from "./utils/getChainConfirmations";
+import { getChainConfirmations, getChainRetries } from "./utils/getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
 import { v_versions } from "../api/prover";
@@ -45,7 +45,7 @@ export const waitForTransactionReceipt = async ({
   return client.waitForTransactionReceipt({
     hash,
     confirmations: getChainConfirmations(client.chain?.name),
-    retryCount: 120,
+    retryCount: getChainRetries(client.chain?.name),
     retryDelay: 1000,
   });
 };

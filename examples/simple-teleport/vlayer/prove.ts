@@ -124,7 +124,7 @@ const verificationHash = await ethClient.writeContract({
 const receipt = await ethClient.waitForTransactionReceipt({
   hash: verificationHash,
   confirmations,
-  retryCount: 60,
+  retryCount: 300,
   retryDelay: 1000,
 });
 

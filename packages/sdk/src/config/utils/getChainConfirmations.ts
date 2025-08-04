@@ -4,3 +4,10 @@ export const getChainConfirmations = (chainName?: string): number => {
   }
   return 6;
 };
+
+export const getChainRetries = (chainName?: string): number => {
+  if (!chainName || chainName.toLowerCase() === "anvil") {
+    return 60;
+  }
+  return 300;
+};
