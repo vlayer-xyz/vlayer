@@ -12,6 +12,12 @@ set_proving_mode
 
 generate_ts_bindings
 
-./bash/mock-imageid.sh
+if [[ -z "${WEB_SERVER_URL:-}" ]]; then
+  echo "Running with local services"
+  ./bash/mock-imageid.sh
+else
+  echo "Using remote web server at: ${WEB_SERVER_URL}"
+  echo "Skipping local service setup"
+fi
 
 run_web_tests simple-web-proof

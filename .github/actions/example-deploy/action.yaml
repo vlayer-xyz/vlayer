@@ -31,7 +31,7 @@ inputs:
 outputs:
   deployment_url:
     description: "Vercel deployment url"
-    value: ${{ steps.deploy-vercel-preview.outputs.deployment_url }}
+    value: ${{ steps.deploy-vercel-production.outputs.deployment_url || steps.deploy-vercel-preview.outputs.deployment_url }}
 runs:
   using: "composite"
   steps:
@@ -127,6 +127,7 @@ runs:
       working-directory: ./examples/${{ inputs.example_name }}/vlayer
 
     - name: Deploy to Vercel
+      id: deploy-vercel-production
       if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
       shell: bash
       env:
