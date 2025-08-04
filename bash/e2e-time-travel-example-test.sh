@@ -11,15 +11,9 @@ set_proving_mode
 
 generate_ts_bindings
 
-if [[ -z "${WEB_SERVER_URL:-}" ]]; then
-  echo '::group::Running services'
-  source ${VLAYER_HOME}/bash/run-services.sh
-  echo '::endgroup::'
-else
-  echo "Using remote web server at: ${WEB_SERVER_URL}"
-  echo "Skipping local service setup, mocking imageid"
-  ./bash/mock-imageid.sh
-fi
+echo '::group::Running services'
+source ${VLAYER_HOME}/bash/run-services.sh
+echo '::endgroup::'
 
 run_web_tests simple-time-travel
 
