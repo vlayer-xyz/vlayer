@@ -8,7 +8,10 @@ import {
   type Hex,
   parseAbi,
 } from "viem";
-import { getChainConfirmations, getChainRetries } from "./utils/getChainConfirmations";
+import {
+  getChainConfirmations,
+  getChainRetries,
+} from "./utils/getChainConfirmations";
 import debug from "debug";
 import TestVerifierRouterDeployer from "../abi/TestVerifierRouterDeployer";
 import { v_versions } from "../api/prover";
