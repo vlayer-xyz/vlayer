@@ -65,11 +65,15 @@ jobs:
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
 
-      - uses: hoverkraft-tech/compose-action@v2.0.2
-        with:
-          compose-file: docker/docker-compose.devnet.yaml
-          services: |
-            anvil-l1
+      # Stateful GH Runners have a separate testnet private key on disk,
+      # to allow concurrent runs of the workflow avoiding nonce issues.
+      # Here we load the key into a variable from a location on disk.
+      - name: Read testnet private key
+        shell: bash
+        run: |
+          EXAMPLES_TEST_PRIVATE_KEY=$(cat ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }})
+          echo "::add-mask::$EXAMPLES_TEST_PRIVATE_KEY"
+          echo "EXAMPLES_TEST_PRIVATE_KEY=${EXAMPLES_TEST_PRIVATE_KEY}" >> $GITHUB_ENV
 
       - name: Run e2e test
         env:
@@ -77,9 +81,13 @@ jobs:
           WEB_SERVER_URL: ${{needs.deploy-simple-time-travel.outputs.deployment_url}}
           VLAYER_TMP_DIR: ./artifacts
           BUILD_FORGE: 0 # The application and contracts are deployed at the previous job, no need to build the contracts in this step.
-          # The deployed app targets the testnet environment. However we use anvil locally to mint the NFT at the end of the flow.
-          CHAIN_NAME: "anvil"
+          CHAIN_NAME: "optimismSepolia" # Used to mint NFTs.
         run: bash/e2e-time-travel-example-test.sh
+
+      - name: Remove no longer needed private key from env
+        run: |
+          echo "EXAMPLES_TEST_PRIVATE_KEY=removed" >> $GITHUB_ENV
+        shell: bash
 
       - name: Handle Playwright Reports
         uses: ./.github/actions/handle-playwright-reports
