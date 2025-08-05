@@ -1,0 +1,47 @@
+name: Web Proof Vercel
+
+on:
+  push:
+    branches:
+      - main
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  web-proof-vercel:
+    name: Web Proof Vercel
+    runs-on: aws-linux-medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        id: rust_pre
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install Risc0 prerequisites
+        uses: ./.github/actions/risc0
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: bash/check-llvm-clang.sh
+
+      - name: Create reusable Cargo target dir
+        id: cargo_target
+        uses: ./.github/actions/reuse-cargo-target
+        with:
+          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
+          target_name: test-rust
+      - name: Run workspace rust tests
+        run: |
+          cargo build --release
+        env:
+          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
+          RUST_LOG: info
+        working-directory: rust/web_proof_vercel
