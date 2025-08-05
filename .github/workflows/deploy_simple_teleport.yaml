@@ -48,13 +48,6 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           submodules: recursive
-      - name: Install Rust prerequisites
-        id: rust_pre
-        uses: ./.github/actions/rust-prerequisites
-      - name: Install Risc0 prerequisites
-        uses: ./.github/actions/risc0
-      - name: Install contracts prerequisites
-        uses: ./.github/actions/contracts-prerequisites
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
 
@@ -72,22 +65,20 @@ jobs:
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
 
-      - name: Check clang and LLVM version
-        env:
-          EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check-llvm-clang.sh
-
-      - name: Install contracts' dependencies
-        working-directory: ./contracts/vlayer
-        run: forge soldeer install
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/docker-compose.devnet.yaml
+          services: |
+            anvil-l1
 
       - name: Run e2e test
         env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-          PROVING_MODE: "dev"
           VLAYER_ENV: dev
           WEB_SERVER_URL: ${{needs.deploy-simple-teleport.outputs.deployment_url}}
           VLAYER_TMP_DIR: ./artifacts
+          BUILD_FORGE: 0 # The application and contracts are deployed at the previous job, no need to build the contracts in this step.
+          # The deployed app targets the testnet environment. However we use anvil locally to mint the NFT at the end of the flow.
+          CHAIN_NAME: "anvil"
         run: bash/e2e-teleport-example-test.sh
 
       - name: Handle Playwright Reports
