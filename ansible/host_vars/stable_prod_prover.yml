@@ -69,8 +69,6 @@ vlayer_prover_gas_meter_api_key: !vault |
 vlayer_prover_chain_proof_base_url: "https://chainservice.vlayer.xyz"
 vlayer_prover_chain_proof_latest_url: "{{ vlayer_prover_chain_proof_base_url }}/latest/"
 prover_docker_containers:
- - version: "1.3.0"
-   port: 4001
  - version: "1.4.0"
    port: 4002
-prover_nginx_default_prover_port: 4001
+prover_nginx_default_prover_port: 4002
