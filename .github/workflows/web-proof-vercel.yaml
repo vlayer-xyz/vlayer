@@ -42,17 +42,10 @@ jobs:
       - name: Set up Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
 
-      - name: Create reusable Cargo target dir
-        id: cargo_target
-        uses: ./.github/actions/reuse-cargo-target
-        with:
-          targets_path: ${{ vars.VLAYER_CARGO_TARGET_DIRS }}
-          target_name: test-rust
       - name: Build binaries
         run: |
           nix develop .github/nix/. --command bash -c "cd rust/web_proof_vercel && cargo build --release"
         env:
-          CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
           RUST_LOG: info
 
       - name: Push artifact
