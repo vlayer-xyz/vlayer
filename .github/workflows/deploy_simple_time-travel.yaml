@@ -76,6 +76,7 @@ jobs:
           VLAYER_ENV: dev
           WEB_SERVER_URL: ${{needs.deploy-simple-time-travel.outputs.deployment_url}}
           VLAYER_TMP_DIR: ./artifacts
+          BUILD_FORGE: 0 # The application and contracts are deployed at the previous job, no need to build the contracts in this step.
           # The deployed app targets the testnet environment. However we use anvil locally to mint the NFT at the end of the flow.
           CHAIN_NAME: "anvil"
         run: bash/e2e-time-travel-example-test.sh

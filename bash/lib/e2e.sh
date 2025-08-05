@@ -1,5 +1,7 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
 
+BUILD_FORGE=${BUILD_FORGE:-1}
+
 function install_chromium() {    
   silent_unless_fails bunx playwright install --with-deps chromium
 }
@@ -109,11 +111,8 @@ function run_web_tests() {
 
   pushd ${VLAYER_HOME}/examples/${1}
 
-  if [[ -z "${WEB_SERVER_URL:-}" ]]; then
+  if [[ "${BUILD_FORGE}" == "1" ]] ; then
     forge build
-  else
-    echo "Using remote web server at: ${WEB_SERVER_URL}"
-    echo "Skipping forge build"
   fi
 
   cd vlayer
