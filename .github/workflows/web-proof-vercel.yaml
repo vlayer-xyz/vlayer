@@ -29,6 +29,19 @@ jobs:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check-llvm-clang.sh
 
+      - name: Check nixpkgs inputs
+        uses: DeterminateSystems/flake-checker-action@v9
+        with:
+          flake-lock-path: ./.github/nix/flake.lock
+          check-outdated: false
+          fail-mode: true
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v15
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
       - name: Create reusable Cargo target dir
         id: cargo_target
         uses: ./.github/actions/reuse-cargo-target
@@ -37,9 +50,7 @@ jobs:
           target_name: test-rust
       - name: Run workspace rust tests
         run: |
-          cargo build --release
+          nix develop .github/nix/. --command bash -c "cd rust/web_proof_vercel && cargo build --release"
         env:
           CARGO_TARGET_DIR: ${{ steps.cargo_target.outputs.CARGO_TARGET_DIR }}
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUST_LOG: info
-        working-directory: rust/web_proof_vercel
