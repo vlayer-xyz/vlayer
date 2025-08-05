@@ -16,7 +16,7 @@ export const chainToTeleportConfig: Record<string, TeleportConfig> = {
       erc20BlockNumbers: "3",
     },
   },
-  sepolia: {
+  optimismSepolia: {
     tokenHolder: "0x4631d3E5803332448e0D9cBb9bF501A4C50B95ed",
     prover: {
       erc20Addresses: "0xc6e1fb449b08b26b2063c289df9bbcb79b91c992",
