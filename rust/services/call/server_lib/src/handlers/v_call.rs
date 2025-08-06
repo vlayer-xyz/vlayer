@@ -46,6 +46,7 @@ pub async fn v_call(
     });
 
     if !found_existing {
+        let preflight_timeout = config.preflight_timeout;
         tokio::spawn(async move {
             let span = info_span!("http", id = req_id.to_string());
             proof::generator::Generator::new(
@@ -53,6 +54,7 @@ pub async fn v_call(
                 vgas_limit,
                 Arc::clone(&state),
                 call_hash,
+                preflight_timeout,
             )
             .run(host, evm_call)
             .instrument(span)

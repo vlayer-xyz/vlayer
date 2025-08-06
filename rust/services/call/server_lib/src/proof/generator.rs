@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use call_common::Metadata;
 use call_engine::{Call as EvmCall, CallGuestId};
 use call_host::{CycleEstimator, Host, PreflightResult, Prover, ProvingInput, Risc0CycleEstimator};
@@ -23,6 +25,7 @@ pub struct Generator {
     app_state: AppState,
     call_hash: CallHash,
     metrics: Metrics,
+    preflight_timeout: Duration,
 }
 
 impl Generator {
@@ -31,6 +34,7 @@ impl Generator {
         vgas_limit: u64,
         app_state: AppState,
         call_hash: CallHash,
+        preflight_timeout: Duration,
     ) -> Self {
         Self {
             gas_meter_client,
@@ -38,6 +42,7 @@ impl Generator {
             app_state,
             call_hash,
             metrics: Metrics::default(),
+            preflight_timeout,
         }
     }
 
@@ -93,7 +98,9 @@ impl Generator {
 
     async fn preflight(&mut self, host: Host, evm_call: EvmCall) -> Result<PreflightResult, ()> {
         let evm_gas_limit = evm_call.gas_limit;
-        match preflight::await_preflight(host, evm_call, &mut self.metrics).await {
+        match preflight::await_preflight(host, evm_call, &mut self.metrics, self.preflight_timeout)
+            .await
+        {
             Ok(res) => {
                 let entry =
                     set_state(&self.app_state, self.call_hash, State::EstimatingCyclesPending);

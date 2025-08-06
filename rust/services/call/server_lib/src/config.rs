@@ -31,6 +31,7 @@ pub const DEFAULT_PORT: u16 = 3000;
 pub const DEFAULT_CHAIN_CLIENT_POLL_INTERVAL: u64 = 5;
 pub const DEFAULT_CHAIN_CLIENT_TIMEOUT: u64 = 240;
 pub const DEFAULT_GAS_METER_TIME_TO_LIVE: u64 = 3600;
+pub const DEFAULT_PREFLIGHT_TIMEOUT: u64 = 1; // 1 second for testing
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -135,6 +136,8 @@ pub struct ConfigOptions {
     pub gas_meter: Option<GasMeterOptions>,
     /// Log format
     pub log_format: Option<LogFormat>,
+    /// Preflight timeout in seconds
+    pub preflight_timeout: Option<u64>,
 }
 
 pub(crate) fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions, Error> {
@@ -234,6 +237,7 @@ impl Default for ConfigOptions {
             proof_mode: ProofMode::default(),
             rpc_urls: Vec::default(),
             log_format: None,
+            preflight_timeout: None,
         }
     }
 }
@@ -303,6 +307,7 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             })
             .transpose()?;
         let chain_client_config = opts.config.chain_client.map(Into::into);
+        let preflight_timeout = opts.config.preflight_timeout.map(Duration::from_secs);
 
         ConfigBuilder::default()
             .with_chain_guest_ids(CHAIN_GUEST_IDS)
@@ -315,6 +320,7 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             .with_gas_meter_config(gas_meter_config)
             .with_jwt_config(jwt_config)
             .with_chain_client_config(chain_client_config)
+            .with_preflight_timeout(preflight_timeout)
             .build()
     }
 }
@@ -333,6 +339,7 @@ pub struct Config {
     pub semver: String,
     pub gas_meter_config: Option<GasMeterConfig>,
     pub jwt_config: Option<JwtConfig>,
+    pub preflight_timeout: Duration,
 }
 
 impl Config {
@@ -390,6 +397,7 @@ pub struct ConfigBuilder {
     semver: Option<String>,
     gas_meter_config: Option<GasMeterConfig>,
     jwt_config: Option<JwtConfig>,
+    preflight_timeout: Option<Duration>,
 }
 
 impl ConfigBuilder {
@@ -472,6 +480,12 @@ impl ConfigBuilder {
         self
     }
 
+    #[must_use]
+    pub fn with_preflight_timeout(mut self, timeout: impl Into<Option<Duration>>) -> Self {
+        self.preflight_timeout = timeout.into();
+        self
+    }
+
     pub fn build(self) -> Result<Config, Error> {
         let Self {
             socket_addr,
@@ -484,6 +498,7 @@ impl ConfigBuilder {
             semver,
             gas_meter_config,
             jwt_config,
+            preflight_timeout,
         } = self;
 
         let call_guest_elf = call_guest_elf.ok_or(Error::ConfigField("call_guest_elf".into()))?;
@@ -503,6 +518,8 @@ impl ConfigBuilder {
             semver,
             gas_meter_config,
             jwt_config,
+            preflight_timeout: preflight_timeout
+                .unwrap_or_else(|| Duration::from_secs(DEFAULT_PREFLIGHT_TIMEOUT)),
         })
     }
 }
@@ -649,6 +666,7 @@ pub(crate) mod tests {
                         time_to_live: None
                     }),
                     log_format: None,
+                    preflight_timeout: None,
                 }
             );
         }
@@ -685,6 +703,7 @@ pub(crate) mod tests {
                     auth: None,
                     gas_meter: None,
                     log_format: None,
+                    preflight_timeout: None,
                 }
             );
         }
@@ -783,6 +802,7 @@ pub(crate) mod tests {
                     })),
                     gas_meter: None,
                     log_format: None,
+                    preflight_timeout: None,
                 }
             );
         }

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use call_common::Metadata;
 use call_engine::Call as EvmCall;
 use call_host::{Host, PreflightError, PreflightResult};
@@ -17,18 +19,35 @@ pub enum Error {
     RefundingGas(#[from] GasMeterError),
     #[error("Metrics: {0}")]
     Metrics(#[from] MetricsError),
+    #[error("Preflight operation timed out after {timeout:?}")]
+    Timeout { timeout: std::time::Duration },
 }
 
 pub async fn await_preflight(
     host: Host,
     evm_call: EvmCall,
     metrics: &mut Metrics,
+    timeout: Duration,
 ) -> Result<PreflightResult, Error> {
+    dbg!("Starting preflight operation", timeout);
+
+    let preflight_future = host.preflight(evm_call);
+
     let result @ PreflightResult {
         gas_used,
         elapsed_time,
         ..
-    } = host.preflight(evm_call).await?;
+    } = match tokio::time::timeout(timeout, preflight_future).await {
+        Ok(result) => {
+            let result = result?;
+            dbg!("Preflight completed successfully");
+            result
+        }
+        Err(_) => {
+            dbg!("Preflight timed out", timeout);
+            return Err(Error::Timeout { timeout });
+        }
+    };
 
     info!(
         state = tracing::field::debug(State::Preflight),
