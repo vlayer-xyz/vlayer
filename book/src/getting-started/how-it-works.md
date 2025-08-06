@@ -73,7 +73,7 @@ contract Airdrop is Verifier {
   }
 }
 ```
-Note that the above contract inherits from the `Verfier` vlayer contract. 
+Note that the above contract inherits from the `Verifier` vlayer contract. 
 It is necessary for veryfing the computation done by the Prover contract from the previous step. 
 
 `claim()` function takes proof returned by the vlayer SDK as the first argument. Other arguments are public inputs returned from Prover `main()` function (in the same order). 
