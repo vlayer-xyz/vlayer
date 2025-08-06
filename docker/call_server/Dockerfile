@@ -11,7 +11,7 @@ RUN mkdir -p vlayer
 RUN tar -xzf binaries-linux-amd64.tar.gz -C vlayer
 
 FROM --platform=linux/amd64 ubuntu:24.04
-RUN apt-get update && apt-get install -y --no-install-recommends dumb-init curl
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init curl ca-certificates
 COPY --from=build /cargo-risczero/r0vm /bin/r0vm
 COPY --from=build /vlayer/bin/call_server /bin/call_server
 

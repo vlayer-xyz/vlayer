@@ -7,7 +7,7 @@ RUN mkdir -p vlayer
 RUN tar -xzf binaries-linux-amd64.tar.gz -C vlayer
 
 FROM --platform=linux/amd64 ubuntu:24.04
-RUN apt-get update && apt-get install -y --no-install-recommends dumb-init
+RUN apt-get update && apt-get install -y --no-install-recommends dumb-init ca-certificates
 
 COPY --from=build /vlayer/bin/chain_server /bin/chain_server
 
