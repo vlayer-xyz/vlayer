@@ -32,29 +32,3 @@ chain_workers:
     chain_worker_max_back_propagation_blocks: 0
     chain_worker_max_head_blocks: 10
     chain_worker_confirmations: 8
-chain_service_docker_containers:
-  - version: "1.4.0"
-    chain_server_port: 4002
-    chain_workers:
-      - identifier: ethereum-sepolia
-        rpc_url: https://fragrant-small-sheet.ethereum-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
-        chain_id: 11155111
-        proof_mode: fake
-        max_back_propagation_blocks: 0
-        max_head_blocks: 10
-        confirmations: 8
-      - identifier: base-sepolia
-        rpc_url: https://fragrant-small-sheet.base-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
-        chain_id: 84532
-        proof_mode: fake
-        max_back_propagation_blocks: 0
-        max_head_blocks: 10
-        confirmations: 8
-      - identifier: optimism-sepolia
-        rpc_url: https://fragrant-small-sheet.optimism-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key }}
-        chain_id: 11155420
-        proof_mode: fake
-        max_back_propagation_blocks: 0
-        max_head_blocks: 10
-        confirmations: 8
-chain_service_nginx_default_server_port: 4002
