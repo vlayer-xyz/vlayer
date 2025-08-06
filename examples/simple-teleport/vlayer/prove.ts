@@ -46,21 +46,51 @@ if (!account) {
     "No account found make sure EXAMPLES_TEST_PRIVATE_KEY is set in your environment variables",
   );
 }
+
 const vlayer = createVlayerClient({
   url: proverUrl,
   token: config.token,
 });
-log.info("⏳ Deploying helper contracts...");
-const deployWhaleBadgeHash = await ethClient.deployContract({
-  abi: whaleBadgeNFTSpec.abi,
-  bytecode: whaleBadgeNFTSpec.bytecode.object,
-  account,
-});
 
-const whaleBadgeNFTAddress = await waitForContractDeploy({
-  client: ethClient,
-  hash: deployWhaleBadgeHash,
-});
+// Check if contracts are already deployed via environment variables
+const existingProverAddress = process.env.VITE_PROVER_ADDRESS;
+const existingVerifierAddress = process.env.VITE_VERIFIER_ADDRESS;
+
+let prover: string;
+let verifier: string;
+
+if (existingProverAddress && existingVerifierAddress) {
+  log.info("📋 Using existing deployed contracts...");
+  prover = existingProverAddress;
+  verifier = existingVerifierAddress;
+  log.info(`   Prover: ${prover}`);
+  log.info(`   Verifier: ${verifier}`);
+} else {
+  log.info("⏳ Deploying helper contracts...");
+  const deployWhaleBadgeHash = await ethClient.deployContract({
+    abi: whaleBadgeNFTSpec.abi,
+    bytecode: whaleBadgeNFTSpec.bytecode.object,
+    account,
+  });
+
+  const whaleBadgeNFTAddress = await waitForContractDeploy({
+    client: ethClient,
+    hash: deployWhaleBadgeHash,
+  });
+
+  const { prover: newProver, verifier: newVerifier } = await deployVlayerContracts({
+    proverSpec,
+    verifierSpec,
+    proverArgs: [],
+    verifierArgs: [whaleBadgeNFTAddress],
+  });
+
+  prover = newProver;
+  verifier = newVerifier;
+  
+  log.info("⚠️  No existing contracts found. New contracts deployed.");
+  log.info("   Run deploy.ts first to avoid redeploying contracts.");
+}
 
 const tokensToCheck: {
   addr: Address;
@@ -75,13 +105,6 @@ const tokensToCheck: {
     balance: BigInt(0),
   }),
 );
-
-const { prover, verifier } = await deployVlayerContracts({
-  proverSpec,
-  verifierSpec,
-  proverArgs: [],
-  verifierArgs: [whaleBadgeNFTAddress],
-});
 
 const proveArgs = {
   address: prover,
@@ -124,9 +147,8 @@ const verificationHash = await ethClient.writeContract({
 const receipt = await ethClient.waitForTransactionReceipt({
   hash: verificationHash,
   confirmations,
-  retryCount: 600,
+  retryCount: 60,
   retryDelay: 1000,
-  timeout: 600 * 1000,
 });
 
 log.info(`✅ Verification result: ${receipt.status}`);
