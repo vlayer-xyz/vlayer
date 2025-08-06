@@ -47,7 +47,7 @@ chain_workers:
     chain_worker_rpc_url: https://clean-proud-spring.optimism.quiknode.pro/{{ vlayer_quicknode_api_key }}
     chain_worker_chain_id: 10
     chain_worker_proof_mode: succinct
-    chain_worker_max_back_propagation_blocks: 0
+    chain_worker_max_back_propagation_blocks: 10
     chain_worker_max_head_blocks: 100
     chain_worker_confirmations: 8
     chain_worker_bonsai_api_url: "https://api.bonsai.xyz/"
