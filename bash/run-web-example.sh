@@ -21,7 +21,7 @@ function install_deps {
 function run_web_app {
     echo "::group::Running web app"
     pushd ${VLAYER_HOME}/examples/simple-web-proof/vlayer
-    bun run web:dev &
+    bun run web:dev
     popd
     echo "::endgroup::Running web app"
 }
