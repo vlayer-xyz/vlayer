@@ -23,5 +23,5 @@ await writeEnvVariables(".env", {
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_NOTARY_URL: config.notaryUrl,
   VITE_WS_PROXY_URL: config.wsProxyUrl,
-  VITE_GAS_LIMIT: config.gasLimit,
+  VITE_GAS_LIMIT: config.vgasLimit,
 });

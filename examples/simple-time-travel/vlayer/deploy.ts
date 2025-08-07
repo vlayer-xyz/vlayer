@@ -41,5 +41,5 @@ await writeEnvVariables(".env", {
   VITE_PROVER_ERC20_HOLDER_ADDR: timeTravelConfig.tokenOwner,
   VITE_START_BLOCK: startBlock.toString(),
   VITE_END_BLOCK: endBlock.toString(),
-  VITE_GAS_LIMIT: config.gasLimit,
+  VITE_GAS_LIMIT: config.vgasLimit,
 });
