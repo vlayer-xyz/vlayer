@@ -9,6 +9,7 @@ use crate::Provider;
 
 const GOOGLE_BASE_URL: &str = "https://8.8.8.8/resolve";
 const DNS_SB_BASE_URL: &str = "https://185.222.222.222/dns-query";
+const REQUEST_TIMEOUT_SECS: u64 = 10;
 
 #[derive(Clone)]
 pub struct ExternalProvider {
@@ -56,7 +57,7 @@ impl ExternalProvider {
             .build()
             .get(self.base_url)
             .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
-            .timeout(Duration::from_secs(2))
+            .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS))
     }
 }
 
