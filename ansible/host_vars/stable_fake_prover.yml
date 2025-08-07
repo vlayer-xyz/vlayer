@@ -62,4 +62,7 @@ prover_docker_containers:
  - version: "1.4.0"
    port: 4002
    chain_proof_url: "{{ vlayer_prover_chain_proof_base_url }}"
-prover_nginx_default_prover_port: 4002
+ - version: "1.4.1"
+   port: 4003
+   chain_proof_url: "{{ vlayer_prover_chain_proof_base_url }}"
+prover_nginx_default_prover_port: 4003
