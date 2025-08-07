@@ -55,7 +55,7 @@ export const createVlayerClient = (
       proverAbi,
       functionName,
       chainId,
-      gasLimit,
+      vgasLimit,
       args,
     }: ProveArgs<T, F>) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
@@ -68,7 +68,7 @@ export const createVlayerClient = (
           args,
           chainId,
           url,
-          gasLimit,
+          vgasLimit,
           token,
         );
 
@@ -104,7 +104,7 @@ export const createVlayerClient = (
           url,
           token,
           numberOfRetries,
-          sleepDuration,
+          sleepDuration
         );
         const savedProvingData = resultHashMap.get(hash.hash);
         if (!savedProvingData) {
@@ -117,7 +117,7 @@ export const createVlayerClient = (
             abi: proverAbi,
             data: data.evm_call_result,
             functionName,
-          }),
+          })
         );
 
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
@@ -132,7 +132,7 @@ export const createVlayerClient = (
 
         const errorWithNote = match(error)
           .with(P.instanceOf(HttpAuthorizationError), (error) =>
-            httpAuthorizationErrorWithNote(error),
+            httpAuthorizationErrorWithNote(error)
           )
           .otherwise((error) => error);
         throw errorWithNote;
@@ -144,7 +144,7 @@ export const createVlayerClient = (
       proverAbi,
       functionName,
       chainId,
-      gasLimit,
+      vgasLimit,
       args,
     }) {
       const webProofPlaceholder = args[0];
@@ -194,7 +194,7 @@ export const createVlayerClient = (
         address,
         functionName,
         chainId,
-        gasLimit,
+        vgasLimit,
         proverAbi,
         args: [
           {

@@ -80,7 +80,7 @@ export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
   proverAbi: T;
   functionName: F;
   chainId?: number;
-  gasLimit?: number;
+  vgasLimit?: number;
   args: ContractFunctionArgs<T, AbiStateMutability, F>;
 };
 
@@ -103,7 +103,7 @@ export type VlayerClient = {
     proverAbi: T;
     functionName: F;
     chainId: number;
-    gasLimit?: number;
+    vgasLimit?: number;
     args: [
       WebProofRequest,
       ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
