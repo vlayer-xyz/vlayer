@@ -1,6 +1,6 @@
 services:
   notary-server-custom-key:
-    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.11
+    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.12
     ports:
       - "7048:7047"
     volumes:
