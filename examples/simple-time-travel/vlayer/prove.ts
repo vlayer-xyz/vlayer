@@ -73,7 +73,7 @@ const proveArgs = {
   functionName: "averageBalanceOf",
   args: [timeTravelConfig.tokenOwner],
   chainId: ethClient.chain.id,
-  gasLimit: config.gasLimit,
+  vgasLimit: config.vgasLimit,
 } as ProveArgs<typeof proverSpec.abi, "averageBalanceOf">;
 const { proverAbi: _, ...argsToLog } = proveArgs;
 log.debug("Proving args:", argsToLog);

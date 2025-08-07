@@ -17,7 +17,7 @@ type Calldata = string;
 export type CallParams = {
   to: Address;
   data: Calldata;
-  gas_limit: number;
+  vgas_limit: number;
 };
 
 export type CallContext = {
@@ -80,7 +80,7 @@ export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
   proverAbi: T;
   functionName: F;
   chainId?: number;
-  gasLimit?: number;
+  vgasLimit?: number;
   args: ContractFunctionArgs<T, AbiStateMutability, F>;
 };
 
@@ -103,7 +103,7 @@ export type VlayerClient = {
     proverAbi: T;
     functionName: F;
     chainId: number;
-    gasLimit?: number;
+    vgasLimit?: number;
     args: [
       WebProofRequest,
       ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,

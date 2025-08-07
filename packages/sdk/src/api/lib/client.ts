@@ -55,7 +55,7 @@ export const createVlayerClient = (
       proverAbi,
       functionName,
       chainId,
-      gasLimit,
+      vgasLimit,
       args,
     }: ProveArgs<T, F>) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
@@ -68,7 +68,7 @@ export const createVlayerClient = (
           args,
           chainId,
           url,
-          gasLimit,
+          vgasLimit,
           token,
         );
 
@@ -144,7 +144,7 @@ export const createVlayerClient = (
       proverAbi,
       functionName,
       chainId,
-      gasLimit,
+      vgasLimit,
       args,
     }) {
       const webProofPlaceholder = args[0];
@@ -194,7 +194,7 @@ export const createVlayerClient = (
         address,
         functionName,
         chainId,
-        gasLimit,
+        vgasLimit,
         proverAbi,
         args: [
           {

@@ -77,7 +77,7 @@ export const useTwitterAccountProof = () => {
     proverAbi: webProofProver.abi,
     chainId: chain?.id,
     functionName: "main",
-    gasLimit: Number(import.meta.env.VITE_GAS_LIMIT),
+    vgasLimit: Number(import.meta.env.VITE_GAS_LIMIT),
   };
 
   const {

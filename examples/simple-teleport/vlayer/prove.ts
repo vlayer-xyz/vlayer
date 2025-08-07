@@ -89,7 +89,7 @@ const proveArgs = {
   functionName: "crossChainBalanceOf",
   args: [teleportConfig.tokenHolder, tokensToCheck],
   chainId: chain.id,
-  gasLimit: config.gasLimit,
+  vgasLimit: config.vgasLimit,
 } as ProveArgs<typeof proverSpec.abi, "crossChainBalanceOf">;
 const { proverAbi: _, ...argsToLog } = proveArgs;
 log.debug("Proving args:", argsToLog);

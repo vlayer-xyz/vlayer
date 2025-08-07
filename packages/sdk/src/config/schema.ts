@@ -19,7 +19,7 @@ export const envSchema = z.object({
   SHOULD_DEPLOY_VERIFIER_ROUTER: stringBoolean.optional(),
   VLAYER_API_TOKEN: z.string().optional(),
   WS_PROXY_URL: z.string().url().optional(),
-  GAS_LIMIT: z.string().regex(/^\d+$/).transform(Number).optional(),
+  VGAS_LIMIT: z.string().regex(/^\d+$/).transform(Number).optional(),
 });
 
 export const configSchema = envSchema.transform(envToConfig);

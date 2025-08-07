@@ -67,5 +67,5 @@ await writeEnvVariables(".env", {
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_TOKENS_TO_CHECK: `"${JSON.stringify(tokensToCheck)}"`,
   VITE_DEFAULT_TOKEN_HOLDER: teleportConfig.tokenHolder,
-  VITE_GAS_LIMIT: config.gasLimit,
+  VITE_GAS_LIMIT: config.vgasLimit,
 });

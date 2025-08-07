@@ -4,8 +4,8 @@ import { keysToCamelCase } from "./camelCase";
 import type { z } from "zod";
 import { match } from "ts-pattern";
 import {
-  DEFAULT_TESTNET_GAS_LIMIT,
-  DEFAULT_MAINNET_GAS_LIMIT,
+  DEFAULT_TESTNET_VGAS_LIMIT,
+  DEFAULT_MAINNET_VGAS_LIMIT,
 } from "../../constants";
 
 export const envToConfig = (config: z.infer<typeof envSchema>) => {
@@ -13,7 +13,7 @@ export const envToConfig = (config: z.infer<typeof envSchema>) => {
     examplesTestPrivateKey,
     vlayerApiToken,
     shouldDeployVerifierRouter,
-    gasLimit,
+    vgasLimit,
     vlayerEnv,
     ...unchangedKeys
   } = keysToCamelCase(config);
@@ -26,11 +26,11 @@ export const envToConfig = (config: z.infer<typeof envSchema>) => {
     deployConfig: {
       shouldRedeployVerifierRouter: shouldDeployVerifierRouter ?? false,
     },
-    gasLimit:
-      gasLimit ??
+    vgasLimit:
+      vgasLimit ??
       match(vlayerEnv)
-        .with("testnet", "dev", () => DEFAULT_TESTNET_GAS_LIMIT)
-        .with("mainnet", () => DEFAULT_MAINNET_GAS_LIMIT)
+        .with("testnet", "dev", () => DEFAULT_TESTNET_VGAS_LIMIT)
+        .with("mainnet", () => DEFAULT_MAINNET_VGAS_LIMIT)
         .exhaustive(),
   };
 };

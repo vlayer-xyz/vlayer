@@ -69,7 +69,7 @@ export const useEmailProofVerification = () => {
     address: import.meta.env.VITE_PROVER_ADDRESS,
     proverAbi: proverSpec.abi,
     functionName: "main",
-    gasLimit: Number(import.meta.env.VITE_GAS_LIMIT),
+    vgasLimit: Number(import.meta.env.VITE_GAS_LIMIT),
     chainId: chain?.id,
   });
 

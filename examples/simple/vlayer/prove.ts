@@ -90,7 +90,7 @@ const proveArgs = {
   functionName: "balance",
   args: [john.address],
   chainId: chain.id,
-  gasLimit: config.gasLimit,
+  vgasLimit: config.vgasLimit,
 } as ProveArgs<typeof proverSpec.abi, "balance">;
 
 const { proverAbi: _, ...argsToLog } = proveArgs;

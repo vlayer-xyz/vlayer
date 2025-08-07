@@ -77,7 +77,7 @@ const proveArgs = {
   proverAbi: proverSpec.abi,
   functionName: "main",
   chainId: chain.id,
-  gasLimit: config.gasLimit,
+  vgasLimit: config.vgasLimit,
   args: [emailArgs],
 } as ProveArgs<typeof proverSpec.abi, "main">;
 const { proverAbi: _, ...argsToLog } = proveArgs;

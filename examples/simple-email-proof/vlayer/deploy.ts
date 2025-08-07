@@ -25,5 +25,5 @@ await writeEnvVariables(".env", {
   VITE_DNS_SERVICE_URL: config.dnsServiceUrl,
   VITE_VLAYER_API_TOKEN: config.token,
   VITE_EMAIL_SERVICE_URL: process.env.EMAIL_SERVICE_URL || "",
-  VITE_GAS_LIMIT: config.gasLimit,
+  VITE_GAS_LIMIT: config.vgasLimit,
 });
