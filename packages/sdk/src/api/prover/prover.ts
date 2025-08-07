@@ -55,7 +55,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     functionName: functionName as string,
     args: args as readonly unknown[],
   });
-  const call: CallParams = { to: prover, data: calldata, gas_limit: gasLimit };
+  const call: CallParams = { to: prover, data: calldata, vgas_limit: gasLimit };
   const context: CallContext = {
     chain_id: chainId,
   };

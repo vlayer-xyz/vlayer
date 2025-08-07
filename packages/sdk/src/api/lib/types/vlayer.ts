@@ -17,7 +17,7 @@ type Calldata = string;
 export type CallParams = {
   to: Address;
   data: Calldata;
-  gas_limit: number;
+  vgas_limit: number;
 };
 
 export type CallContext = {

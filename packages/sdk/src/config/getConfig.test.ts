@@ -20,7 +20,7 @@ describe("getConfig", () => {
         "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       VLAYER_API_TOKEN: "token",
       SHOULD_DEPLOY_VERIFIER_ROUTER: "true",
-      GAS_LIMIT: "1000",
+      VGAS_LIMIT: "1000",
     });
 
     const config = getConfig();
@@ -52,7 +52,7 @@ describe("getConfig", () => {
         "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       VLAYER_API_TOKEN: "token",
       SHOULD_DEPLOY_VERIFIER_ROUTER: "true",
-      GAS_LIMIT: "1000",
+      VGAS_LIMIT: "1000",
     });
 
     const config = getConfig({
