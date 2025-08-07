@@ -26,7 +26,7 @@ export const envToConfig = (config: z.infer<typeof envSchema>) => {
     deployConfig: {
       shouldRedeployVerifierRouter: shouldDeployVerifierRouter ?? false,
     },
-    gasLimit:
+    vgasLimit:
       vgasLimit ??
       match(vlayerEnv)
         .with("testnet", "dev", () => DEFAULT_TESTNET_VGAS_LIMIT)

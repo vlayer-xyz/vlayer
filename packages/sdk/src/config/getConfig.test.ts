@@ -36,7 +36,7 @@ describe("getConfig", () => {
       deployConfig: {
         shouldRedeployVerifierRouter: true,
       },
-      gasLimit: 1000,
+      vgasLimit: 1000,
     });
 
     cleanup();
@@ -60,7 +60,7 @@ describe("getConfig", () => {
       deployConfig: {
         shouldRedeployVerifierRouter: false,
       },
-      gasLimit: 1_000_000,
+      vgasLimit: 1_000_000,
     });
 
     expect(config).toEqual({
@@ -74,7 +74,7 @@ describe("getConfig", () => {
       deployConfig: {
         shouldRedeployVerifierRouter: false,
       },
-      gasLimit: 1_000_000,
+      vgasLimit: 1_000_000,
     });
 
     cleanup();
