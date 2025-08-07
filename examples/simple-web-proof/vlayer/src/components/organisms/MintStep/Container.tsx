@@ -24,10 +24,17 @@ export const MintStep = () => {
   const [proverResult] = useLocalStorage("proverResult", "");
   const { address } = useAccount();
   const { data: balance } = useBalance({ address });
-  const { writeContract, data: txHash, error } = useWriteContract();
-  const { status } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  const {
+    writeContract,
+    data: txHash,
+    error: writeContractError,
+  } = useWriteContract();
+  const { status, error: waitForTransactionReceiptError } =
+    useWaitForTransactionReceipt({
+      hash: txHash,
+    });
+
+  const error = writeContractError || waitForTransactionReceiptError;
 
   useEffect(() => {
     if (proverResult) {
