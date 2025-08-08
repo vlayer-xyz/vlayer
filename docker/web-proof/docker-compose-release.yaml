@@ -6,7 +6,7 @@ services:
       - "3003:80"
     command: "80 lotr-api.online:3011"
   notary-server:
-    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.11
+    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.12
     ports:
       - "7047:7047"
     volumes:

@@ -157,7 +157,7 @@ export const validateWebProofRequest = (
 };
 
 export const createExtensionWebProofProvider = ({
-  notaryUrl = "https://test-notary.vlayer.xyz/v0.1.0-alpha.11",
+  notaryUrl = "https://test-notary.vlayer.xyz/v0.1.0-alpha.12",
   wsProxyUrl = "wss://test-wsproxy.vlayer.xyz",
   token,
 }: WebProofProviderSetup = {}): WebProofProvider => {

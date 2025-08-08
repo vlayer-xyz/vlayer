@@ -3189,7 +3189,7 @@ dependencies = [
 [[package]]
 name = "clmul"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "bytemuck",
  "cfg-if",
@@ -8160,7 +8160,7 @@ checksum = "47e1ffaa40ddd1f3ed91f717a33c8c0ee23fff369e3aa8772b9605cc1d22f4c3"
 [[package]]
 name = "matrix-transpose"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "thiserror 1.0.69",
 ]
@@ -8426,7 +8426,7 @@ dependencies = [
 [[package]]
 name = "mpz-circuits"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "bincode",
  "itybity 0.3.1",
@@ -8442,7 +8442,7 @@ dependencies = [
 [[package]]
 name = "mpz-cointoss"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "futures",
  "mpz-cointoss-core",
@@ -8455,7 +8455,7 @@ dependencies = [
 [[package]]
 name = "mpz-cointoss-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "mpz-core",
  "opaque-debug",
@@ -8466,7 +8466,7 @@ dependencies = [
 [[package]]
 name = "mpz-common"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "async-trait",
  "bytes",
@@ -8488,7 +8488,7 @@ dependencies = [
 [[package]]
 name = "mpz-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "aes 0.9.0-rc.0",
  "bcs",
@@ -8514,7 +8514,7 @@ dependencies = [
 [[package]]
 name = "mpz-fields"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "ark-ff 0.4.2",
  "ark-secp256r1",
@@ -8534,7 +8534,7 @@ dependencies = [
 [[package]]
 name = "mpz-garble"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "async-trait",
  "derive_builder 0.11.2",
@@ -8561,7 +8561,7 @@ dependencies = [
 [[package]]
 name = "mpz-garble-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "aes 0.9.0-rc.0",
  "bitvec",
@@ -8592,7 +8592,7 @@ dependencies = [
 [[package]]
 name = "mpz-hash"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "itybity 0.3.1",
  "mpz-circuits",
@@ -8604,7 +8604,7 @@ dependencies = [
 [[package]]
 name = "mpz-memory-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "blake3",
  "futures",
@@ -8619,7 +8619,7 @@ dependencies = [
 [[package]]
 name = "mpz-ole"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "async-trait",
  "futures",
@@ -8637,7 +8637,7 @@ dependencies = [
 [[package]]
 name = "mpz-ole-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "hybrid-array",
  "itybity 0.3.1",
@@ -8653,7 +8653,7 @@ dependencies = [
 [[package]]
 name = "mpz-ot"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "async-trait",
  "cfg-if",
@@ -8677,7 +8677,7 @@ dependencies = [
 [[package]]
 name = "mpz-ot-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "aes 0.9.0-rc.0",
  "blake3",
@@ -8708,7 +8708,7 @@ dependencies = [
 [[package]]
 name = "mpz-share-conversion"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "async-trait",
  "mpz-common",
@@ -8724,7 +8724,7 @@ dependencies = [
 [[package]]
 name = "mpz-share-conversion-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "mpz-common",
  "mpz-core",
@@ -8738,7 +8738,7 @@ dependencies = [
 [[package]]
 name = "mpz-vm-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "async-trait",
  "futures",
@@ -8751,7 +8751,7 @@ dependencies = [
 [[package]]
 name = "mpz-zk"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "async-trait",
  "blake3",
@@ -8768,7 +8768,7 @@ dependencies = [
 [[package]]
 name = "mpz-zk-core"
 version = "0.1.0-alpha.3"
-source = "git+https://github.com/vlayer-xyz/mpz?rev=d6dd80e8d9357f548611bfb680b91c0d553a29f5#d6dd80e8d9357f548611bfb680b91c0d553a29f5"
+source = "git+https://github.com/privacy-scaling-explorations/mpz?rev=ccc0057#ccc00572f35c589706ca6be0e2e8749eb9b4414a"
 dependencies = [
  "blake3",
  "cfg-if",
@@ -8890,8 +8890,8 @@ dependencies = [
 
 [[package]]
 name = "notary-client"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -8909,8 +8909,8 @@ dependencies = [
 
 [[package]]
 name = "notary-common"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "serde",
 ]
@@ -11257,11 +11257,12 @@ dependencies = [
 
 [[package]]
 name = "rustls-pki-types"
-version = "1.10.1"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2bf47e6ff922db3825eb750c4e2ff784c6ff8fb9e13046ef6a1d1c5401b0b37"
+checksum = "229a4a4c221013e7e1f1a043678c5cc39fe5171437c88fb47151a21e6f5b5c79"
 dependencies = [
  "web-time 1.1.0",
+ "zeroize",
 ]
 
 [[package]]
@@ -12858,8 +12859,8 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tlsn-cipher"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "aes 0.8.4",
  "async-trait",
@@ -12871,12 +12872,13 @@ dependencies = [
 
 [[package]]
 name = "tlsn-common"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "async-trait",
  "derive_builder 0.12.0",
  "futures",
+ "ghash 0.5.1",
  "mpz-common",
  "mpz-core",
  "mpz-hash",
@@ -12902,8 +12904,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-core"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "bcs",
  "bimap",
@@ -12929,8 +12931,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-deap"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "async-trait",
  "futures",
@@ -12946,8 +12948,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-hmac-sha256"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "mpz-circuits",
  "mpz-core",
@@ -12960,8 +12962,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-key-exchange"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "async-trait",
  "derive_builder 0.12.0",
@@ -12983,13 +12985,12 @@ dependencies = [
 
 [[package]]
 name = "tlsn-mpc-tls"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "aes 0.8.4",
  "aes-gcm",
  "async-trait",
- "cipher 0.4.4",
  "ctr 0.9.2",
  "derive_builder 0.12.0",
  "enum-try-as-inner",
@@ -13024,8 +13025,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-prover"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "derive_builder 0.12.0",
  "futures",
@@ -13040,6 +13041,7 @@ dependencies = [
  "mpz-zk",
  "opaque-debug",
  "rand 0.9.0",
+ "rustls-pki-types",
  "serio",
  "thiserror 1.0.69",
  "tlsn-common",
@@ -13057,8 +13059,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-backend"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "async-trait",
  "futures",
@@ -13068,8 +13070,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-client"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "aes-gcm",
  "async-trait",
@@ -13091,8 +13093,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-client-async"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "bytes",
  "futures",
@@ -13104,8 +13106,8 @@ dependencies = [
 
 [[package]]
 name = "tlsn-tls-core"
-version = "0.1.0-alpha.11"
-source = "git+https://github.com/vlayer-xyz/tlsn.git?rev=6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c#6c7f2a917a21f9965f3afc464242dd3b8cdfcd3c"
+version = "0.1.0-alpha.12"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.12#f2ff4ba79245ea641c485ce11efb2cb574292abb"
 dependencies = [
  "futures",
  "hmac",
