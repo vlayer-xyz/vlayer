@@ -24,11 +24,11 @@ lazy_static::lazy_static! {
     static ref PROVIDER_FACTORY: EthersProviderFactory = EthersProviderFactory::new(rpc_urls());
     static ref CHAIN_TO_FINALISATION_TIME: HashMap<u64, u64> = HashMap::from([
         (Chain::optimism_sepolia().id(), SEVEN_DAYS),
-        (Chain::base_sepolia().id(), THREE_AND_A_HALF_DAYS),
+        (Chain::base_sepolia().id(), SEVEN_DAYS),
         (Chain::from_named(NamedChain::WorldSepolia).id(), THREE_AND_A_HALF_DAYS),
         (Chain::from_named(NamedChain::UnichainSepolia).id(), SEVEN_DAYS),
         (Chain::optimism_mainnet().id(), SEVEN_DAYS),
-        (Chain::base_mainnet().id(), THREE_AND_A_HALF_DAYS),
+        (Chain::base_mainnet().id(), SEVEN_DAYS),
         (Chain::from_named(NamedChain::World).id(), THREE_AND_A_HALF_DAYS),
         (Chain::from_named(NamedChain::Unichain).id(), SEVEN_DAYS),
     ]);
