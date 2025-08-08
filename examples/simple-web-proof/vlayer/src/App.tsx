@@ -75,7 +75,7 @@ const App = () => {
                       <Route
                         key={step.path}
                         path={step.path}
-                        element={<step.component />}
+                        element={React.createElement(step.component)}
                       />
                     ))}
                   </Route>
