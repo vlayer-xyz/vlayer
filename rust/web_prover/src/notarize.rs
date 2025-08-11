@@ -15,13 +15,17 @@ use tlsn_core::{
     CryptoProvider, Secrets, attestation::Attestation, request::RequestConfig,
     transcript::TranscriptCommitConfig,
 };
-use tlsn_prover::{Prover, ProverConfig};
+use tlsn_prover::{Prover, ProverConfig, TlsConfig};
 use tokio_util::compat::{FuturesAsyncReadCompatExt, TokioAsyncReadCompatExt};
 use tracing::debug;
 
 use crate::{Method, NotarizeParams, RedactionConfig};
 
 const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36";
+
+// Hardcoded paths for PoC - certificate and key files in repo root
+const CLIENT_CERT_PATH: &str = "certificate.pem";
+const CLIENT_KEY_PATH: &str = "private_key.pem";
 
 pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, RedactionConfig)> {
     debug!("notarizing...");
@@ -74,7 +78,15 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
 
     debug!("preparing notarization request done");
 
-    let prover_config = ProverConfig::builder()
+    // Load client certificate and private key for mTLS
+    debug!("loading client certificate and private key...");
+    let client_cert =
+        std::fs::read(CLIENT_CERT_PATH).context("Failed to read client certificate file")?;
+    let client_key =
+        std::fs::read(CLIENT_KEY_PATH).context("Failed to read client private key file")?;
+
+    let mut prover_config_builder = ProverConfig::builder();
+    prover_config_builder
         .server_name(server_domain.as_ref())
         .protocol_config(
             ProtocolConfig::builder()
@@ -82,8 +94,17 @@ pub async fn notarize(params: NotarizeParams) -> Result<(Attestation, Secrets, R
                 .max_recv_data(max_recv_data)
                 .build()?,
         )
-        .crypto_provider(CryptoProvider::default())
-        .build()?;
+        .crypto_provider(CryptoProvider::default());
+
+    // (Optional) Set up TLS client authentication if required by the server.
+    prover_config_builder.tls_config(
+        TlsConfig::builder()
+            .client_auth_pem((vec![client_cert], client_key))
+            .context("Failed to configure client authentication")?
+            .build()?,
+    );
+
+    let prover_config = prover_config_builder.build()?;
 
     debug!("initializing prover...");
 
