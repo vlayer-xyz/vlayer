@@ -1,10 +1,10 @@
-use alloy_primitives::{Address, ChainId, address};
+use alloy_primitives::{Address, ChainId, address, hex};
 use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
 use call_precompiles::{is_time_dependent, precompile_by_address};
 use revm::{
     EvmContext, Inspector as IInspector,
     db::WrapDatabaseRef,
-    interpreter::{CallInputs, CallOutcome, CallScheme},
+    interpreter::{CallInputs, CallOutcome, CallScheme, InstructionResult},
     primitives::ExecutionResult,
 };
 use tracing::{debug, info};
@@ -18,6 +18,29 @@ use crate::{
 /// This is calculated as:
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
+
+fn parse_web_proof_url(abi_data: &[u8]) -> Option<String> {
+    let http_bytes = b"http";
+    let pos = abi_data
+        .windows(4)
+        .position(|window| window == http_bytes)?;
+
+    let mut end_pos = pos;
+    for i in pos..abi_data.len() {
+        let byte = abi_data[i];
+        if byte == 0 || byte == b' ' || byte < 32 || byte > 126 {
+            break;
+        }
+        end_pos = i + 1;
+    }
+
+    let url = std::str::from_utf8(&abi_data[pos..end_pos]).ok()?;
+    if url.len() > 7 && url.starts_with("http") {
+        Some(url.to_string())
+    } else {
+        None
+    }
+}
 
 pub type TxResultWithMetadata = (ExecutionResult, Box<[Metadata]>);
 type TransactionCallback<'a, D> =
@@ -137,6 +160,7 @@ where
                 panic!("Precompile `{:?}` is not allowed for travel calls", precompile.tag());
             }
 
+            dbg!("🚀 CALLING PRECOMPILE:", precompile.tag());
             debug!("Calling PRECOMPILE {:?}", precompile.tag());
             self.metadata
                 .push(Metadata::precompile(precompile.tag(), inputs.input.len()));
@@ -146,6 +170,51 @@ where
             CONTRACT_ADDR => self.on_travel_call(inputs),
             _ => self.on_call(inputs),
         }
+    }
+
+    fn call_end(
+        &mut self,
+        _context: &mut EvmContext<WrapDatabaseRef<&D>>,
+        inputs: &CallInputs,
+        outcome: CallOutcome,
+    ) -> CallOutcome {
+        dbg!("call_end triggered for address:", &inputs.bytecode_address);
+
+        if let Some(precompile) =
+            precompile_by_address(&inputs.bytecode_address, self.is_vlayer_test)
+        {
+            debug!("Precompile {:?} finished execution", precompile.tag());
+
+            if matches!(precompile.tag(), call_precompiles::precompile::Tag::WebProof) {
+                dbg!("Web proof precompile finished");
+
+                match &outcome.result.result {
+                    InstructionResult::Return => {
+                        dbg!("Web proof returned successfully");
+                        let return_data = &outcome.result.output;
+
+                        dbg!("Return data length:", return_data.len());
+
+                        if !return_data.is_empty() {
+                            let preview = &return_data[..return_data.len().min(100)];
+                            dbg!("Return data preview (hex):", hex::encode(preview));
+
+                            if let Some(url) = parse_web_proof_url(return_data) {
+                                dbg!("Extracted web proof URL:", &url);
+                            }
+                        }
+                    }
+                    InstructionResult::Revert => {
+                        todo!()
+                    }
+                    _ => {
+                        todo!()
+                    }
+                }
+            }
+        }
+
+        outcome
     }
 }
 
