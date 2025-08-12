@@ -1,0 +1,33 @@
+---
+globs: *.sol
+---
+
+# Solidity Development Guidelines
+
+## vlayer Integration Patterns
+
+### WebProofProver Contract
+- Use [src/vlayer/WebProofProver.sol](mdc:src/vlayer/WebProofProver.sol) as the main prover implementation
+- Follow the pattern of importing vlayer libraries for proof generation
+- Implement proper error handling for proof validation failures
+
+### WebProofVerifier Contract
+- Use [src/vlayer/WebProofVerifier.sol](mdc:src/vlayer/WebProofVerifier.sol) for verification logic
+- Ensure proper integration with vlayer's verification system
+- Handle edge cases for invalid proofs gracefully
+
+## Testing Standards
+- All contracts should have corresponding test files in `test/vlayer/`
+- Use `vlayer test` for running contract tests (not official foundry command)
+- Reference [test/vlayer/WebProofProver.t.sol](mdc:test/vlayer/WebProofProver.t.sol) for testing patterns
+- Include tests for both success and failure scenarios
+
+## Code Structure
+- Use proper imports from vlayer libraries
+- Use consistent naming conventions across contracts
+
+## Security Considerations
+- Always validate proof public inputs before doing public onchain verification
+- Use proper access controls for sensitive functions
+- Follow the principle of least privilege
+- Include proper event emissions for important state changes
