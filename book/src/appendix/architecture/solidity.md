@@ -32,7 +32,7 @@ Proving data flow consists of three steps:
 
 It starts at `Guest`, which returns `GuestOutput` structure. 
 `GuestOutput` consists of just one field - `evm_call_result`. `evm_call_result` field is abi encoded `Prover` function output. 
-Since `Prover` returns `Proof` placeholder as its first returned value, `Guest` pre-fills `length` and `call_assumptions` fields of the `Proof` structuture. 
+Since `Prover` returns `Proof` placeholder as its first returned value, `Guest` pre-fills `length` and `call_assumptions` fields of the `Proof` structure. 
 
 `length` field of `Proof` structure is equal to the length of abi encoded _public outputs_, not including the size of the `Proof` placeholder.  
 
