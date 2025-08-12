@@ -415,7 +415,68 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn web_proof_success() {
-            let ctx = Context::default();
+            const EXPECTED_HASH: &str =
+                "0x7632152d5d8ae4e6ae2246271c84965570984625dd19689e42aa225617a81838";
+
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+
+            // Mock all methods without parameter matching - accept ANY parameters
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_params(json!({}), true) // true = ignore params completely
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_refundUnusedGas")
+                .with_params(json!({}), true) // Accept any refund call
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_refundUnusedGas")
+                .with_params(json!({}), true) // Second refund call
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_sendMetadata")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "metadata": [
+                            {"start_chain": ETHEREUM_SEPOLIA_ID},
+                            {
+                                "precompile": {
+                                    "tag": "web_proof",
+                                    "calldata_length": 15488
+                                }
+                            },
+                            {
+                                "precompile": {
+                                    "tag": "json_get_string",
+                                    "calldata_length": 256
+                                }
+                            }
+                        ]
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_updateCycles")
+                .with_params(json!({}), true) // Accept any cycles update
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
             let call_data = contract
@@ -434,6 +495,8 @@ mod server_tests {
                 &call_data,
                 contract.address(),
             );
+
+            ctx.assert_gas_meter();
         }
 
         #[tokio::test(flavor = "multi_thread")]
