@@ -201,9 +201,7 @@ impl<D: RevmDB> Inspector<'_, D> {
 
         match precompile.tag() {
             Tag::WebProof => self.handle_web_proof_result(precompile, outcome),
-            _ => {
-                // Other precompiles don't need post-execution processing
-            }
+            _ => {}
         }
     }
 
