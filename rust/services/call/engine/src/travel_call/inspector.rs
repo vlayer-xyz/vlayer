@@ -192,9 +192,8 @@ impl<D: RevmDB> Inspector<'_, D> {
     ) {
         use call_precompiles::precompile::Tag;
 
-        match precompile.tag() {
-            Tag::WebProof => self.handle_web_proof_result(precompile, outcome),
-            _ => {}
+        if precompile.tag() == Tag::WebProof {
+            self.handle_web_proof_result(precompile, outcome)
         }
     }
 
