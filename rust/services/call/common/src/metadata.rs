@@ -4,7 +4,7 @@ use serde::Serialize;
 
 use super::ExecutionLocation;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Metadata {
     Precompile(Precompile),
@@ -17,6 +17,11 @@ impl Metadata {
     #[must_use]
     pub const fn precompile(tag: Tag, calldata_length: usize) -> Self {
         Self::Precompile(Precompile::new(tag, calldata_length))
+    }
+
+    #[must_use]
+    pub fn precompile_with_result(tag: Tag, calldata_length: usize, result: PrecompileResult) -> Self {
+        Self::Precompile(Precompile::with_result(tag, calldata_length, result))
     }
 
     #[must_use]
@@ -35,10 +40,12 @@ impl Metadata {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Precompile {
     pub tag: Tag,
     pub calldata_length: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub precompile_result: Option<PrecompileResult>,
 }
 
 impl Precompile {
@@ -47,6 +54,22 @@ impl Precompile {
         Self {
             tag,
             calldata_length,
+            precompile_result: None,
         }
     }
+
+    #[must_use]
+    pub fn with_result(tag: Tag, calldata_length: usize, result: PrecompileResult) -> Self {
+        Self {
+            tag,
+            calldata_length,
+            precompile_result: Some(result),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PrecompileResult {
+    WebProofUrl(String),
 }

@@ -1,5 +1,8 @@
-use alloy_primitives::{Address, ChainId, address, hex};
-use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
+use alloy_primitives::{Address, ChainId, address};
+use call_common::{
+    ExecutionLocation, RevmDB, WrappedRevmDBError,
+    metadata::{Metadata, PrecompileResult},
+};
 use call_precompiles::{is_time_dependent, precompile_by_address};
 use revm::{
     EvmContext, Inspector as IInspector,
@@ -160,7 +163,6 @@ where
                 panic!("Precompile `{:?}` is not allowed for travel calls", precompile.tag());
             }
 
-            dbg!("🚀 CALLING PRECOMPILE:", precompile.tag());
             debug!("Calling PRECOMPILE {:?}", precompile.tag());
             self.metadata
                 .push(Metadata::precompile(precompile.tag(), inputs.input.len()));
@@ -178,29 +180,32 @@ where
         inputs: &CallInputs,
         outcome: CallOutcome,
     ) -> CallOutcome {
-        dbg!("call_end triggered for address:", &inputs.bytecode_address);
-
         if let Some(precompile) =
             precompile_by_address(&inputs.bytecode_address, self.is_vlayer_test)
         {
             debug!("Precompile {:?} finished execution", precompile.tag());
 
             if matches!(precompile.tag(), call_precompiles::precompile::Tag::WebProof) {
-                dbg!("Web proof precompile finished");
-
                 match &outcome.result.result {
                     InstructionResult::Return => {
-                        dbg!("Web proof returned successfully");
                         let return_data = &outcome.result.output;
 
-                        dbg!("Return data length:", return_data.len());
-
                         if !return_data.is_empty() {
-                            let preview = &return_data[..return_data.len().min(100)];
-                            dbg!("Return data preview (hex):", hex::encode(preview));
-
                             if let Some(url) = parse_web_proof_url(return_data) {
-                                dbg!("Extracted web proof URL:", &url);
+                                // Find and update the most recent precompile entry with this tag
+                                if let Some(entry) = self.metadata.iter_mut().rev().find(|entry| {
+                                    if let Metadata::Precompile(precompile_data) = entry {
+                                        precompile_data.tag == precompile.tag()
+                                            && precompile_data.precompile_result.is_none()
+                                    } else {
+                                        false
+                                    }
+                                }) {
+                                    if let Metadata::Precompile(precompile_data) = entry {
+                                        precompile_data.precompile_result =
+                                            Some(PrecompileResult::WebProofUrl(url));
+                                    }
+                                }
                             }
                         }
                     }

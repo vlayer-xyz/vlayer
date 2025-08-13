@@ -452,7 +452,10 @@ mod server_tests {
                             {
                                 "precompile": {
                                     "tag": "web_proof",
-                                    "calldata_length": 15488
+                                    "calldata_length": 15488,
+                                    "precompile_result": {
+                                        "web_proof_url": "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken"
+                                    }
                                 }
                             },
                             {
@@ -537,7 +540,10 @@ mod server_tests {
                             {
                                 "precompile": {
                                     "tag": "web_proof",
-                                    "calldata_length": 15488
+                                    "calldata_length": 15488,
+                                    "precompile_result": {
+                                        "web_proof_url": "https://lotr-api.online/regular_json?are_you_sure=yes&auth=s3cret_t0ken"
+                                    }
                                 }
                             },
                             {
