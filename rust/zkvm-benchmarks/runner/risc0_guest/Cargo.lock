@@ -1056,6 +1056,7 @@ dependencies = [
 name = "call_engine"
 version = "0.1.0"
 dependencies = [
+ "alloy-dyn-abi",
  "alloy-primitives",
  "alloy-rlp",
  "alloy-sol-types",
