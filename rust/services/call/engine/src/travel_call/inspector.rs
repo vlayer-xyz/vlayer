@@ -26,7 +26,7 @@ pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537
 fn parse_web_proof_url(abi_data: &[u8]) -> Option<String> {
     let array_type = DynSolType::FixedArray(Box::new(DynSolType::String), 4);
     let decoded = array_type.abi_decode(abi_data).ok()?;
-    
+
     if let DynSolValue::FixedArray(values) = decoded {
         if let Some(DynSolValue::String(url)) = values.first() {
             if url.starts_with("http") && !url.is_empty() {
