@@ -500,6 +500,91 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
+        async fn web_proof_with_gas_meter() {
+            const EXPECTED_HASH: &str =
+                "0x7632152d5d8ae4e6ae2246271c84965570984625dd19689e42aa225617a81838";
+
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_params(json!({}), true)
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_refundUnusedGas")
+                .with_params(json!({}), true)
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_refundUnusedGas")
+                .with_params(json!({}), true)
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_sendMetadata")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "metadata": [
+                            {"start_chain": ETHEREUM_SEPOLIA_ID},
+                            {
+                                "precompile": {
+                                    "tag": "web_proof",
+                                    "calldata_length": 15488
+                                }
+                            },
+                            {
+                                "precompile": {
+                                    "tag": "json_get_string",
+                                    "calldata_length": 256
+                                }
+                            }
+                        ]
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            gas_meter_server
+                .mock_method("v_updateCycles")
+                .with_params(json!({}), true)
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            let ctx = Context::default().with_gas_meter_server(gas_meter_server);
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .web_proof(WebProof {
+                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture()))
+                        .unwrap(),
+                })
+                .calldata()
+                .unwrap();
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+            let result = get_proof_result(&app, hash).await;
+            assert_proof_result(
+                &result,
+                Uint8::from(1).encode_hex(),
+                &call_data,
+                contract.address(),
+            );
+
+            ctx.assert_gas_meter();
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
         async fn insufficient_gas_limit() {
             let ctx = Context::default();
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
