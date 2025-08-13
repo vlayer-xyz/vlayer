@@ -1,3 +1,4 @@
+use alloy_dyn_abi::{DynSolType, DynSolValue};
 use alloy_primitives::{Address, ChainId, address};
 use call_common::{
     ExecutionLocation, RevmDB, WrappedRevmDBError,
@@ -23,26 +24,18 @@ use crate::{
 pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
 
 fn parse_web_proof_url(abi_data: &[u8]) -> Option<String> {
-    let http_bytes = b"http";
-    let pos = abi_data
-        .windows(4)
-        .position(|window| window == http_bytes)?;
-
-    let mut end_pos = pos;
-    for i in pos..abi_data.len() {
-        let byte = abi_data[i];
-        if byte == 0 || byte == b' ' || byte < 32 || byte > 126 {
-            break;
+    let array_type = DynSolType::FixedArray(Box::new(DynSolType::String), 4);
+    let decoded = array_type.abi_decode(abi_data).ok()?;
+    
+    if let DynSolValue::FixedArray(values) = decoded {
+        if let Some(DynSolValue::String(url)) = values.first() {
+            if url.starts_with("http") && !url.is_empty() {
+                return Some(url.clone());
+            }
         }
-        end_pos = i + 1;
     }
 
-    let url = std::str::from_utf8(&abi_data[pos..end_pos]).ok()?;
-    if url.len() > 7 && url.starts_with("http") {
-        Some(url.to_string())
-    } else {
-        None
-    }
+    None
 }
 
 pub type TxResultWithMetadata = (ExecutionResult, Box<[Metadata]>);

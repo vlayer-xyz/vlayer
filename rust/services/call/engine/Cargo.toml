@@ -9,6 +9,7 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
+alloy-dyn-abi = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true }
@@ -53,4 +54,3 @@ testing = ["common/testing"]
 
 [lints]
 workspace = true
-
