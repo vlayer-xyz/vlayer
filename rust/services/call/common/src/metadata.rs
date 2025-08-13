@@ -20,11 +20,6 @@ impl Metadata {
     }
 
     #[must_use]
-    pub fn precompile_with_result(tag: Tag, calldata_length: usize, result: PrecompileResult) -> Self {
-        Self::Precompile(Precompile::with_result(tag, calldata_length, result))
-    }
-
-    #[must_use]
     pub const fn start_chain(chain_id: ChainId) -> Self {
         Self::StartChain(chain_id)
     }
@@ -55,15 +50,6 @@ impl Precompile {
             tag,
             calldata_length,
             precompile_result: None,
-        }
-    }
-
-    #[must_use]
-    pub fn with_result(tag: Tag, calldata_length: usize, result: PrecompileResult) -> Self {
-        Self {
-            tag,
-            calldata_length,
-            precompile_result: Some(result),
         }
     }
 }
