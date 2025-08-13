@@ -10,7 +10,7 @@ use revm::{
     interpreter::{CallInputs, CallOutcome, CallScheme, InstructionResult},
     primitives::ExecutionResult,
 };
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 use crate::{
     io::Call,
@@ -184,42 +184,82 @@ where
             precompile_by_address(&inputs.bytecode_address, self.is_vlayer_test)
         {
             debug!("Precompile {:?} finished execution", precompile.tag());
-
-            if matches!(precompile.tag(), call_precompiles::precompile::Tag::WebProof) {
-                match &outcome.result.result {
-                    InstructionResult::Return => {
-                        let return_data = &outcome.result.output;
-
-                        if !return_data.is_empty() {
-                            if let Some(url) = parse_web_proof_url(return_data) {
-                                // Find and update the most recent precompile entry with this tag
-                                if let Some(entry) = self.metadata.iter_mut().rev().find(|entry| {
-                                    if let Metadata::Precompile(precompile_data) = entry {
-                                        precompile_data.tag == precompile.tag()
-                                            && precompile_data.precompile_result.is_none()
-                                    } else {
-                                        false
-                                    }
-                                }) {
-                                    if let Metadata::Precompile(precompile_data) = entry {
-                                        precompile_data.precompile_result =
-                                            Some(PrecompileResult::WebProofUrl(url));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    InstructionResult::Revert => {
-                        todo!()
-                    }
-                    _ => {
-                        todo!()
-                    }
-                }
-            }
+            self.handle_precompile_result(&precompile, &outcome);
         }
 
         outcome
+    }
+}
+
+impl<D: RevmDB> Inspector<'_, D> {
+    fn handle_precompile_result(
+        &mut self,
+        precompile: &call_precompiles::precompile::Precompile,
+        outcome: &CallOutcome,
+    ) {
+        use call_precompiles::precompile::Tag;
+
+        match precompile.tag() {
+            Tag::WebProof => self.handle_web_proof_result(precompile, outcome),
+            _ => {
+                // Other precompiles don't need post-execution processing
+            }
+        }
+    }
+
+    fn handle_web_proof_result(
+        &mut self,
+        precompile: &call_precompiles::precompile::Precompile,
+        outcome: &CallOutcome,
+    ) {
+        match &outcome.result.result {
+            InstructionResult::Return if !outcome.result.output.is_empty() => {
+                if let Some(url) = parse_web_proof_url(&outcome.result.output) {
+                    self.update_precompile_metadata(
+                        precompile.tag(),
+                        PrecompileResult::WebProofUrl(url),
+                    );
+                }
+            }
+            InstructionResult::Revert => {
+                warn!("Web proof precompile reverted");
+            }
+            _ => {
+                warn!(
+                    "Web proof precompile finished with unexpected result: {:?}",
+                    outcome.result.result
+                );
+            }
+        }
+    }
+
+    fn update_precompile_metadata(
+        &mut self,
+        tag: call_precompiles::precompile::Tag,
+        result: PrecompileResult,
+    ) {
+        // Find and update the most recent precompile entry with this tag that doesn't have a result yet
+        if let Some(metadata_entry) = self.find_precompile_metadata_mut(tag) {
+            metadata_entry.precompile_result = Some(result);
+        }
+    }
+
+    fn find_precompile_metadata_mut(
+        &mut self,
+        tag: call_precompiles::precompile::Tag,
+    ) -> Option<&mut call_common::metadata::Precompile> {
+        self.metadata
+            .iter_mut()
+            .rev()
+            .find_map(|entry| match entry {
+                Metadata::Precompile(precompile_data)
+                    if precompile_data.tag == tag
+                        && precompile_data.precompile_result.is_none() =>
+                {
+                    Some(precompile_data)
+                }
+                _ => None,
+            })
     }
 }
 
