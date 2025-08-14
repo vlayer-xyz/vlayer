@@ -13950,7 +13950,7 @@ dependencies = [
 
 [[package]]
 name = "version"
-version = "1.4.2"
+version = "1.4.3"
 dependencies = [
  "anyhow",
  "regex",
