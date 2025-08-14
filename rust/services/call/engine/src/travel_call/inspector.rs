@@ -1,13 +1,17 @@
+use alloy_dyn_abi::{DynSolType, DynSolValue};
 use alloy_primitives::{Address, ChainId, address};
-use call_common::{ExecutionLocation, RevmDB, WrappedRevmDBError, metadata::Metadata};
+use call_common::{
+    ExecutionLocation, RevmDB, WrappedRevmDBError,
+    metadata::{Metadata, PrecompileResult},
+};
 use call_precompiles::{is_time_dependent, precompile_by_address};
 use revm::{
     EvmContext, Inspector as IInspector,
     db::WrapDatabaseRef,
-    interpreter::{CallInputs, CallOutcome, CallScheme},
+    interpreter::{CallInputs, CallOutcome, CallScheme, InstructionResult},
     primitives::ExecutionResult,
 };
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 use crate::{
     io::Call,
@@ -18,6 +22,21 @@ use crate::{
 /// This is calculated as:
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
+
+fn parse_web_proof_url(abi_data: &[u8]) -> Option<String> {
+    let array_type = DynSolType::FixedArray(Box::new(DynSolType::String), 4);
+    let decoded = array_type.abi_decode(abi_data).ok()?;
+
+    if let DynSolValue::FixedArray(values) = decoded {
+        if let Some(DynSolValue::String(url)) = values.first() {
+            if url.starts_with("http") && !url.is_empty() {
+                return Some(url.clone());
+            }
+        }
+    }
+
+    None
+}
 
 pub type TxResultWithMetadata = (ExecutionResult, Box<[Metadata]>);
 type TransactionCallback<'a, D> =
@@ -146,6 +165,91 @@ where
             CONTRACT_ADDR => self.on_travel_call(inputs),
             _ => self.on_call(inputs),
         }
+    }
+
+    fn call_end(
+        &mut self,
+        _context: &mut EvmContext<WrapDatabaseRef<&D>>,
+        inputs: &CallInputs,
+        outcome: CallOutcome,
+    ) -> CallOutcome {
+        if let Some(precompile) =
+            precompile_by_address(&inputs.bytecode_address, self.is_vlayer_test)
+        {
+            debug!("Precompile {:?} finished execution", precompile.tag());
+            self.handle_precompile_result(&precompile, &outcome);
+        }
+
+        outcome
+    }
+}
+
+impl<D: RevmDB> Inspector<'_, D> {
+    fn handle_precompile_result(
+        &mut self,
+        precompile: &call_precompiles::precompile::Precompile,
+        outcome: &CallOutcome,
+    ) {
+        use call_precompiles::precompile::Tag;
+
+        if precompile.tag() == Tag::WebProof {
+            self.handle_web_proof_result(precompile, outcome)
+        }
+    }
+
+    fn handle_web_proof_result(
+        &mut self,
+        precompile: &call_precompiles::precompile::Precompile,
+        outcome: &CallOutcome,
+    ) {
+        match &outcome.result.result {
+            InstructionResult::Return if !outcome.result.output.is_empty() => {
+                if let Some(url) = parse_web_proof_url(&outcome.result.output) {
+                    self.update_precompile_metadata(
+                        precompile.tag(),
+                        PrecompileResult::WebProofUrl(url),
+                    );
+                }
+            }
+            InstructionResult::Revert => {
+                warn!("Web proof precompile reverted");
+            }
+            _ => {
+                warn!(
+                    "Web proof precompile finished with unexpected result: {:?}",
+                    outcome.result.result
+                );
+            }
+        }
+    }
+
+    fn update_precompile_metadata(
+        &mut self,
+        tag: call_precompiles::precompile::Tag,
+        result: PrecompileResult,
+    ) {
+        // Find and update the most recent precompile entry with this tag that doesn't have a result yet
+        if let Some(metadata_entry) = self.find_precompile_metadata_mut(tag) {
+            metadata_entry.precompile_result = Some(result);
+        }
+    }
+
+    fn find_precompile_metadata_mut(
+        &mut self,
+        tag: call_precompiles::precompile::Tag,
+    ) -> Option<&mut call_common::metadata::Precompile> {
+        self.metadata
+            .iter_mut()
+            .rev()
+            .find_map(|entry| match entry {
+                Metadata::Precompile(precompile_data)
+                    if precompile_data.tag == tag
+                        && precompile_data.precompile_result.is_none() =>
+                {
+                    Some(precompile_data)
+                }
+                _ => None,
+            })
     }
 }
 

@@ -4,7 +4,7 @@ use serde::Serialize;
 
 use super::ExecutionLocation;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Metadata {
     Precompile(Precompile),
@@ -35,10 +35,12 @@ impl Metadata {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Precompile {
     pub tag: Tag,
     pub calldata_length: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub precompile_result: Option<PrecompileResult>,
 }
 
 impl Precompile {
@@ -47,6 +49,13 @@ impl Precompile {
         Self {
             tag,
             calldata_length,
+            precompile_result: None,
         }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PrecompileResult {
+    WebProofUrl(String),
 }
