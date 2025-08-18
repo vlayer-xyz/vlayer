@@ -109,7 +109,7 @@ A few comments about different configuration options:
 
 #### Environment variables
 
-If using a `config.toml` is undesirable, the prover can also be configured using defaults with environment variables overrides. Every config option can be overriden.
+If using a `config.toml` is undesirable, the prover can also be configured using defaults with environment variables overrides. Every config option can be overridden.
 We use `VLAYER_` prefix, and nesting of config options is represented using `__`. Current up-to-date table of environment variables overrides is as follows:
 
 |Environment variable                 |Config option                |Default                       |Type   |Values                  |
