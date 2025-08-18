@@ -1,3 +1,4 @@
+import React from "react";
 import { steps } from "./utils/steps";
 import { WagmiProvider } from "wagmi";
 import { ProofProvider } from "@vlayer/react";
