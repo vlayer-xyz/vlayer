@@ -1,0 +1,71 @@
+---
+globs: *.t.sol,*.spec.ts,*.test.ts,*.test.tsx
+---
+
+# Testing Standards and Practices
+
+## Foundry Testing (Solidity)
+
+### Test Structure
+- Follow the pattern in [test/vlayer/WebProofProver.t.sol](mdc:test/vlayer/WebProofProver.t.sol)
+- Use descriptive test names that explain the scenario
+- Include both positive and negative test cases
+- Test edge cases and error conditions
+
+### Test Organization
+- Place contract tests in `test/vlayer/` directory
+- Mirror the `src/` directory structure in `test/`
+- Use proper setup and teardown patterns
+- Include integration tests for complex workflows
+
+### Test Data Usage
+- Use structured test data from [testdata/](mdc:testdata/) directory
+- Reference [testdata/web_proof_development_signature.json](mdc:testdata/web_proof_development_signature.json) for development scenarios
+- Test with invalid data using [testdata/web_proof_invalid_signature.json](mdc:testdata/web_proof_invalid_signature.json)
+
+## Frontend Testing
+
+### End-to-End Testing with Playwright
+- Use [vlayer/tests/web-proof.spec.ts](mdc:vlayer/tests/web-proof.spec.ts) for e2e tests
+- Configure Playwright through [vlayer/playwright.config.ts](mdc:vlayer/playwright.config.ts)
+- Test the complete user workflow from start to finish
+
+## Test Coverage Requirements
+
+### Contract Testing
+- Test all public functions and their edge cases
+- Verify proper error handling and revert messages
+- Test gas usage for optimization
+- Include integration tests with actual proof data
+
+### Frontend Testing
+- Test component rendering in different states
+- Test user interactions and state changes
+- Test error boundaries and error states
+- Test async operations and loading states
+
+### Integration Testing
+- Test the complete proof generation workflow
+- Test contract deployment and interaction
+- Test extension integration flows
+- Test wallet connection and transaction flows
+
+## Testing Best Practices
+
+### Data Management
+- Use realistic test data that matches production scenarios
+- Test with various signature formats and edge cases
+- Include tests for malformed or corrupted data
+- Test with different network conditions
+
+### Async Testing
+- Properly handle async operations in tests
+- Use appropriate timeouts for long-running operations
+- Test timeout scenarios and error handling
+- Mock external dependencies appropriately
+
+### Security Testing
+- Test input validation and sanitization
+- Test authorization and access controls
+- Test for common vulnerabilities (reentrancy, overflow, etc.)
+- Test with malicious inputs and edge cases
