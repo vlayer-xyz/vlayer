@@ -19,7 +19,7 @@ const createLogger = (namespace: string) => {
 
   // Enable info logs by default
   if (!debug.enabled(namespace + ":info")) {
-    debug.enable(namespace + ":info");
+    debug.enable(`${debug.disable()},${namespace}:info`);
   }
 
   return {
