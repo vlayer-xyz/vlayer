@@ -6,7 +6,7 @@ use crate::{
 };
 
 #[derive(Debug, new)]
-pub(crate) struct RequestTranscript {
+pub struct RequestTranscript {
     pub(crate) transcript: Vec<u8>,
 }
 

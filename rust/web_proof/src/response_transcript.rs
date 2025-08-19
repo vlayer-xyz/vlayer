@@ -6,12 +6,12 @@ use crate::{
 };
 
 #[derive(Debug, new)]
-pub(crate) struct ResponseTranscript {
+pub struct ResponseTranscript {
     pub(crate) transcript: Vec<u8>,
 }
 
 impl ResponseTranscript {
-    pub(crate) fn parse_body(
+    pub fn parse_body(
         self,
         redaction_mode: BodyRedactionMode,
     ) -> Result<String, ParsingError> {
