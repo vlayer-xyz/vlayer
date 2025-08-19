@@ -11,7 +11,7 @@ pub(crate) struct RequestTranscript {
 }
 
 impl RequestTranscript {
-    pub(crate) fn parse_url(self, url_test_mode: UrlTestMode) -> Result<String, ParsingError> {
+    pub fn parse_url(self, url_test_mode: UrlTestMode) -> Result<String, ParsingError> {
         parse_request_and_validate_redaction(&self.transcript, url_test_mode)
     }
 }
