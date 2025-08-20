@@ -14,30 +14,13 @@ concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
   cancel-in-progress: true
-permissions:
-  contents: read
-  pull-requests: write
 
 jobs:
-  permissions:
-    runs-on: ubuntu-latest
-    outputs:
-      has-permissions: ${{ steps.check-permissions.outputs.require-result }}
-    steps:
-      - name: Check user permissions
-        id: check-permissions
-        uses: actions-cool/check-user-permission@v2
-        with:
-          require: write
-          username: ${{ github.actor }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
-
   performance-rust-compilation:
     name: Rust incremental compilation performance
     runs-on: aws-linux-medium
-    needs: permissions
-    if: needs.permissions.outputs.has-permissions == 'true'
+    # Don't run this test on forked PRs because of required secrets - it will get tested in the merge queue.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Checkout repository

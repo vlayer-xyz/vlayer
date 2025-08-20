@@ -27,27 +27,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  permissions:
-    runs-on: ubuntu-latest
-    outputs:
-      has-permissions: ${{ steps.check-permissions.outputs.require-result }}
-    steps:
-      - name: Check user permissions
-        id: check-permissions
-        uses: actions-cool/check-user-permission@v2
-        with:
-          require: write
-          username: ${{ github.actor }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
-
   changes:
     runs-on: ubuntu-latest
-    needs: permissions
     outputs:
       code-changes: ${{ steps.filter.outputs.code-changes }}
       workflow-changes: ${{ steps.filter.outputs.workflow-changes }}
-    if: needs.permissions.outputs.has-permissions == 'true'
+    # Don't run this test on forked PRs because of required secrets - it will get tested in the merge queue.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -83,11 +69,11 @@ jobs:
   # `rust/zkvm-benchmarks/benchmarks/src/benchmarks/precompiles/gas_price_checker.rs`
   check-gas:
     name: Check gas price
-    needs: permissions
     runs-on: ubuntu-latest
     outputs:
       gas-ok: ${{ steps.set-result.outputs.gas-ok }}
-    if: needs.permissions.outputs.has-permissions == 'true'
+    # Don't run this test on forked PRs because of required secrets - it will get tested in the merge queue.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Checkout repository
