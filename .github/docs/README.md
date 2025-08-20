@@ -50,6 +50,7 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [Lint PR Title](/.github/workflows/lint_pr_title.yaml) | Validates Pull Request title against the [Conventional Commits](https://www.conventionalcommits.org/) specification. |
 | [Rust compilation performance](/.github/workflows/performance_rust_compilation.yaml) | Checks Rust incremental compilation performance. |
 | [PR team labeler](/.github/workflows/pr_team_labeler.yaml) | Adds team labels to PRs. |
+| [PR audited files reminder](/.github/workflows/pr_audited_files_reminder.yaml) | Adds a reminder that audited files are tracked in Notion. |
 | [Release](/.github/workflows/release.yaml) | Reusable workflow to publish artifacts to npm, GitHub Releases, S3. |
 | [Release nightly](/.github/workflows/release_nightly.yaml) | Uses the reusable release workflow to publish a nightly release. |
 | [Release notify failure](/.github/workflows/release_notify_failure.yaml) | Sends notifications on failed releases. |
