@@ -209,6 +209,7 @@ jobs:
             ⚠️ **Audited Files Changed**
 
             This PR modifies files that were included in the security audit.
+            cc @marekkirejczyk
 
             **Required Actions:**
             - [ ] Review changes with the Protocol team (@vlayer-xyz/protocol)
