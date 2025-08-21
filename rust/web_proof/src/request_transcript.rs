@@ -6,12 +6,12 @@ use crate::{
 };
 
 #[derive(Debug, new)]
-pub(crate) struct RequestTranscript {
+pub struct RequestTranscript {
     pub(crate) transcript: Vec<u8>,
 }
 
 impl RequestTranscript {
-    pub(crate) fn parse_url(self, url_test_mode: UrlTestMode) -> Result<String, ParsingError> {
+    pub fn parse_url(self, url_test_mode: UrlTestMode) -> Result<String, ParsingError> {
         parse_request_and_validate_redaction(&self.transcript, url_test_mode)
     }
 }

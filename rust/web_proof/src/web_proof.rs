@@ -27,7 +27,7 @@ pub struct PresentationJSON {
 }
 
 impl WebProof {
-    pub(crate) fn verify(
+    pub fn verify(
         self,
     ) -> Result<(RequestTranscript, ResponseTranscript, ServerName, VerifyingKey), VerificationError>
     {
