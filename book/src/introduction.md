@@ -8,7 +8,7 @@ Our four core features include:
 - [Web Proofs](/features/web.html): Access verified web data, including APIs and websites, in your smart contracts 
 - [Email Proofs](/features/email.html): Tap into email content from your smart contracts and use it on-chain
 - [Time Travel](/features/time-travel.html): Leverage historical on-chain data in your smart contracts
-- [Teleport](/features/teleport.html): Execute a smart contract across different EVM-comptable blockchain networks
+- [Teleport](/features/teleport.html): Execute a smart contract across different EVM-compatible blockchain networks
 
 vlayer allows smart contracts to be executed [off-chain](/advanced/prover.html). The result of the execution can then be used by [on-chain contracts](/advanced/verifier.html).
 
