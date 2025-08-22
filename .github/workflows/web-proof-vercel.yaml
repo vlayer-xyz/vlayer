@@ -55,22 +55,3 @@ jobs:
           path: rust/web_proof_vercel/target
           if-no-files-found: error
           retention-days: 3
-
-      - name: Install Vercel CLI
-        run: npm install -g vercel
-
-      - name: Deploy to Vercel (preview)
-        if: github.event_name == 'pull_request'
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: prj_5tiX2JHrZPwd2sHgIzH05aLOI2PB
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cd rust/web_proof_vercel
-          DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --scope $VERCEL_ORG_ID | tail -1)
-          COMMENT_BODY="The preview of the web-proof-vercel API is available at: $DEPLOYMENT_URL"
-          curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            -X POST \
-            -d "{\"body\":\"$COMMENT_BODY\"}" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
