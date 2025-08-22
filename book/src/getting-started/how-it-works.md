@@ -60,7 +60,7 @@ The Verifier smart contract validates the correctness of a computation generated
 
 Verification logic is immutable once deployed on the blockchain, ensuring consistent and permissionless access.
 
-See the example `Verifer` contract below. It transfers tokens to proven owner of certain NFT:
+See the example `Verifier` contract below. It transfers tokens to proven owner of certain NFT:
 
 
 ```solidity
