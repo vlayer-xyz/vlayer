@@ -1,7 +1,7 @@
 name: Release nightly
 on:
   schedule:
-    - cron: "0 6 * * 1-5" # Mon-Fri at 06:00 UTC (07:00 CET / 08:00 CEST)
+    - cron: "0 6 * * 1" # Mon at 06:00 UTC (07:00 CET / 08:00 CEST)
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}
