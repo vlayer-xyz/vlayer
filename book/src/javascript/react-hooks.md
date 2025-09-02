@@ -2,12 +2,12 @@
 
 [@vlayer/react](https://www.npmjs.com/package/@vlayer/react) is a library of React hooks for interacting with the vlayer.
 
-These hooks provide functions that help manage state and side effects in React components, aligning with React's functional programming paradigm and style of [wagmi](https://wagmi.sh/docs/getting-started) hooks.
+These hooks provide functions that help manage state and side effects in React components, aligning with React's functional programming paradigm and style of [wagmi](https://wagmi.sh/react/getting-started) hooks.
 
 ## Prerequisites
 The following libraries are required to use `@vlayer/react`:
 - [React](https://reactjs.org/docs/getting-started.html): A library for building user interfaces.
-- [Wagmi](https://wagmi.sh/docs/getting-started): A library of React hooks for Ethereum.
+- [Wagmi](https://wagmi.sh/react/getting-started): A library of React hooks for Ethereum.
 - [TanStack Query](https://tanstack.com/query/latest): A library for efficient data fetching and caching.
 
 Add them to your project if they are not already present: 
