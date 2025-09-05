@@ -2,7 +2,7 @@
 pragma solidity ^0.8.21;
 
 import {Test} from "forge-std-1.9.4/src/Test.sol";
-import {ControlID, RiscZeroGroth16Verifier} from "risc0-ethereum-2.2.2/src/groth16/RiscZeroGroth16Verifier.sol";
+import {ControlID, RiscZeroGroth16Verifier} from "risc0-ethereum-3.0.0/src/groth16/RiscZeroGroth16Verifier.sol";
 
 import {Groth16ProofVerifier} from "../../src/proof_verifier/Groth16ProofVerifier.sol";
 import {ImageID} from "../../src/ImageID.sol";

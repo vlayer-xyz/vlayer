@@ -3,11 +3,11 @@ description: Installs risc0 tools
 inputs:
   r0vm_version:
     description: "Version of r0vm to install"
-    default: 2.3.1
+    default: 3.0.3
     required: false
   cargo_risczero_version:
     description: "Version of cargo risczero to install"
-    default: 2.3.1
+    default: 3.0.3
     required: false
   rust_version:
     description: "Version of Rust toolchain for building guest images"
