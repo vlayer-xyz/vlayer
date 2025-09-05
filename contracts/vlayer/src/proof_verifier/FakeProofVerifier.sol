@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import {RiscZeroMockVerifier} from "risc0-ethereum-2.2.2/src/test/RiscZeroMockVerifier.sol";
+import {RiscZeroMockVerifier} from "risc0-ethereum-3.0.0/src/test/RiscZeroMockVerifier.sol";
 
 import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
