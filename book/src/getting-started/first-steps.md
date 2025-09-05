@@ -58,7 +58,7 @@ forge build
 ```
 This compiles the smart contracts and prepares them for deployment and testing.
 
-> Please note that `vlayer init` installs Solidity dependencies and generates `remappings.txt`. Running `forge soldeer install` is not needed to build the example and may overwrite remappings, which can cause build errors.
+> Please note that `vlayer init` installs Solidity dependencies and generates `remappings.txt`. Running `forge install` is not needed to build the example and may overwrite remappings, which can cause build errors.
 
 Then, install Typescript dependencies in vlayer folder by running:
 ```bash
