@@ -3,7 +3,7 @@ pragma solidity ^0.8.21;
 
 import {Test, console} from "forge-std-1.9.4/src/Test.sol";
 
-import {SelectorMismatch} from "risc0-ethereum-2.2.2/src/groth16/RiscZeroGroth16Verifier.sol";
+import {SelectorMismatch} from "risc0-ethereum-3.0.0/src/groth16/RiscZeroGroth16Verifier.sol";
 
 import {Proof} from "../../src/Proof.sol";
 import {ProofMode} from "../../src/Seal.sol";

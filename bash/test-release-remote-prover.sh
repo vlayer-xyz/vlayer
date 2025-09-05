@@ -34,7 +34,7 @@ echo "::group::risczero installation"
 curl -L https://risczero.com/install | bash
 export PATH="$PATH:~/.risc0/bin"
 export PATH="$PATH:~/.cargo/bin"
-rzup install r0vm 2.3.1
+rzup install r0vm 3.0.3
 rzup install rust 1.85.0
 rzup show
 echo "::endgroup::"

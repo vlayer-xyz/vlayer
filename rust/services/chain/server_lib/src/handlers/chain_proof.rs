@@ -133,9 +133,10 @@ mod tests {
 
             let wrong_guest_id = [0; 32];
 
-            assert_eq!(
-                receipt.verify(wrong_guest_id).unwrap_err(),
-                VerificationError::InvalidProof
+            let error = receipt.verify(wrong_guest_id).unwrap_err();
+            assert!(
+                matches!(error, VerificationError::VerifierParametersMismatch { .. }),
+                "Expected VerifierParametersMismatch, got: {error}"
             );
 
             Ok(())
