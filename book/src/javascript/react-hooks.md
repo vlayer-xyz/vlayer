@@ -6,7 +6,7 @@ These hooks provide functions that help manage state and side effects in React c
 
 ## Prerequisites
 The following libraries are required to use `@vlayer/react`:
-- [React](https://reactjs.org/docs/getting-started.html): A library for building user interfaces.
+- [React](https://react.dev/learn): A library for building user interfaces.
 - [Wagmi](https://wagmi.sh/react/getting-started): A library of React hooks for Ethereum.
 - [TanStack Query](https://tanstack.com/query/latest): A library for efficient data fetching and caching.
 
