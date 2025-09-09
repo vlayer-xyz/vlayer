@@ -43,7 +43,7 @@ fn build_executor_env(
             Ok::<_, anyhow::Error>(builder)
         })?
         .write(&input)?
-        // Workaround for r0vm bug reproed in: https://github.com/vlayer-xyz/risc0-r0vm-fake-repro
+        // Workaround for r0vm bug reproed in: https://github.com/vlayer-xyz/risc0-ring-repro
         .segment_limit_po2(22)
         .build()
 }
