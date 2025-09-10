@@ -77,7 +77,7 @@ forks = [
     { spec = "GRANITE", activation = { Timestamp = 1727780400 } },
 ]
 
-# https://github.com/Uniswap/unichain-node/blob/main/chainconfig/sepolia/genesis-l2.json
+# https://docs.unichain.org/docs/technical-information/network-information
 # https://docs.unichain.org/docs/technical-information/contract-addresses
 [[chains]]
 name = "unichain-sepolia"
