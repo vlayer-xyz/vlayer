@@ -34,7 +34,7 @@ contract Groth16ProofVerifierUnderTest is Groth16ProofVerifier {
     }
 }
 
-contract PinnedProofVerifer_Tests is Test {
+contract PinnedProofVerifier_Tests is Test {
     bytes32 internal fuzzingSeed;
 
     function setUp() public {
