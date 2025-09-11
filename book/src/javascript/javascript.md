@@ -47,11 +47,11 @@ const vlayer = createVlayerClient();
 ## Proving
 
 In order to start proving, we will need to provide:
-- `address` - an address of prover contract
-- `proverAbi` - abi of prover contract
-- `functionName` - name of prover contract function to call
+- `address` - the address of the prover contract
+- `proverAbi` - the ABI of the prover contract
+- `functionName` - the name of the prover contract function to call
 - `args` - an array of arguments to `functionName` prover contract function 
-- `chainId` - id of the chain in whose context the prover contract call shall be executed
+- `chainId` - the ID of the chain in which the prover contract call will be executed
 
 ```ts
 const hash = await vlayer.prove({
