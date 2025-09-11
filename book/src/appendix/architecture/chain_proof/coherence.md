@@ -20,7 +20,7 @@ Given these two elements, it is easy to prove that a set of hashes belongs to th
 1. It needs to be verified that all the hashes are part of the Chain Proof Cache structure.
 2. 𝜋 needs to be verified.
 
-### Chain Proof Cache (BPC) structure
+### Chain Proof Cache (CPC) structure
 
 The Chain Proof Cache structure is a dictionary that stores a `<block_number, block_hash>` mapping. It is implemented using a Merkle Patricia Trie. This enables us to prove that a set of hashes is part of the structure (point 1 from the previous paragraph) by supplying their corresponding Merkle proofs.
 
@@ -38,7 +38,7 @@ Every time a block is added, 𝜋 is updated. To prove that after adding a new b
 
 ### Recursive proofs
 
-In an ideal world - ZK Circuit will have access to its own ELF ID and therefore be able to verify the proofs produces by its previous invocations recursively. Unfortunately because ELF ID is a hash of a binary - it can't be included in itself.
+In an ideal world - ZK Circuit will have access to its own ELF ID and therefore be able to verify the proofs produced by its previous invocations recursively. Unfortunately because ELF ID is a hash of a binary - it can't be included in itself.
 
 Therefore, we extract ELF ID into an argument and "pipe" it through all the proofs. We also add it to an output.
 Finally - when verifying this proof within the call proof - we check ELF ID against a hard-coded constant. This can be done there as **call** and **chain** are different circuits and having an ID of one within the other does not present the cycle mentioned above.
@@ -103,7 +103,7 @@ The `prepend()` function is used to add a new oldest block to the Merkle Patrici
 - **old_leftmost_block**: the full data of the currently oldest block already stored in the MPT.
 - **mpt**: a sparse MPT containing the path from the root to the child block and the new block's intended position.
 - **proof**: a zero-knowledge proof that all contained hashes so far belong to the same chain.
-  The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the `parent_hash` from the currently oldest block and inserts it with the corresponding number into the MPT. Note that we don't need to pass the full parent block as the trie only store hashes. However, we will need to pass it next time we want to prepend.
+  The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the `parent_hash` from the currently oldest block and inserts it with the corresponding number into the MPT. Note that we don't need to pass the full parent block as the trie only stores hashes. However, we will need to pass it next time we want to prepend.
 
 ```rs
 fn prepend(elf_id: Hash, old_leftmost_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
@@ -149,7 +149,7 @@ fn append_prepend(
     } 
     for block in prepend_blocks.reverse() {
       mpt = prepend(mpt, old_leftmost_block);
-      old_leftmost_block = block
+      old_leftmost_block = block;
     }
     (new_mpt.root, elf_id)
 }
