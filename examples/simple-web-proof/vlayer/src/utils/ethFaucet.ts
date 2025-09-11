@@ -36,7 +36,7 @@ export const ensureBalance = async (address: Address, balance: bigint) => {
   const responseSchema = z.object({
     transactionHash: z
       .string()
-      .regex(/^0x[0-9a-fA-F]+$/, "Must be a hex string starting with 0x"),
+      .regex(/^0x([0-9a-fA-F]{64})$/, "Must be a hex string starting with 0x"),
   });
 
   const parsedResponse = responseSchema.parse(await response.json()) as {
