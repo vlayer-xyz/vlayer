@@ -6,12 +6,12 @@ import {Groth16ProofVerifier} from "./proof_verifier/Groth16ProofVerifier.sol";
 
 library MainnetStableDeployment {
     function repository() internal pure returns (Repository) {
-        return Repository(address(0x9DFcaBBDbe296E5C4bf36E4431C46daB43702c84));
+        return Repository(address(0xbDf27a6f3CF309F9127d8173d0D28bF9ab35ed2b));
     }
 
     function verifiers() internal pure returns (Groth16ProofVerifier) {
         Groth16ProofVerifier groth16ProofVerifier =
-            Groth16ProofVerifier(address(0xc4B7dEd1C30ec34802c85B8345eaC15c02d646A0));
+            Groth16ProofVerifier(address(0x1EE8a3B907EbcdFc33f76e3C7aAe6FFD2eFA5b73));
 
         return (groth16ProofVerifier);
     }
