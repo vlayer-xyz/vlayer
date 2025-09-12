@@ -30,14 +30,14 @@ vlayer provides base classes from which the developer derives their own smart co
 
 | Contract               | Address                                      |
 |------------------------|----------------------------------------------|
-| Repository             | `0x9DFcaBBDbe296E5C4bf36E4431C46daB43702c84` |
-| Groth16ProofVerifier   | `0xc4B7dEd1C30ec34802c85B8345eaC15c02d646A0` |
+| Repository             | `0xbDf27a6f3CF309F9127d8173d0D28bF9ab35ed2b` |
+| Groth16ProofVerifier   | `0x1EE8a3B907EbcdFc33f76e3C7aAe6FFD2eFA5b73` |
 
 ### Testnet addresses
 
 | Contract               | Address                                      |
 |------------------------|----------------------------------------------|
-| Repository             | `0xE44007361170f82a5DAB427905Dd355E2CbeE7dB` |
-| Groth16ProofVerifier   | `0xBabf9630bA994902E57f71Db032771f53B16C35b` |
-| FakeProofVerifier      | `0x3bE01bee0cA51f5a84Ba10e675dD7576E20429CA` |
-| ProofVerifierRouter    | `0xaB0B39778577A2536f12E53db7932859e1743605` |
+| Repository             | `0x0cFfdB4e737F00Ef57b4c61dBfBb334B3a416519` |
+| Groth16ProofVerifier   | `0x9AdE0B5F34402AeFdcBE1a8733d5995Ff827f586` |
+| FakeProofVerifier      | `0x711B293738290768f3eD1DBf2D00e0f9eEc19E6B` |
+| ProofVerifierRouter    | `0x7925a78734Fc7f2cb69d7E03d81467BB851f9Eb8` |
