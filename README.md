@@ -1,3 +1,6 @@
+[![Release](https://img.shields.io/github/v/release/vlayer-xyz/vlayer)](https://github.com/vlayer-xyz/vlayer/releases)
+[![Build](https://github.com/vlayer-xyz/vlayer/actions/workflows/build_examples.yaml/badge.svg)](https://github.com/vlayer-xyz/vlayer/actions/workflows/build_examples.yaml/badge.svg)
+
 # vlayer
 vlayer enables developers to extract, verify and integrate real-world data into Ethereum smart contracts. Our technology is powered by Zero Knowledge Proofs (ZKP) and Multi-Party Computation (MPC), allowing you to securely verify private data without exposing sensitive information. 
 
