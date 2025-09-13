@@ -22,27 +22,27 @@ fn get_quicknode_key() -> String {
 }
 
 lazy_static! {
-    static ref alchemy_key: String = get_alchemy_key();
+    static ref ALCHEMY_KEY: String = get_alchemy_key();
     static ref mainnet_url: String =
-        format!("https://eth-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://eth-mainnet.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref sepolia_url: String =
-        format!("https://eth-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://eth-sepolia.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref op_mainnet_url: String =
-        format!("https://opt-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://opt-mainnet.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref op_sepolia_url: String =
-        format!("https://opt-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://opt-sepolia.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref base_mainnet_url: String =
-        format!("https://base-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://base-mainnet.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref base_sepolia_url: String =
-        format!("https://base-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://base-sepolia.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref world_sepolia_url: String =
-        format!("https://worldchain-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://worldchain-sepolia.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref world_mainnet_url: String =
-        format!("https://worldchain-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://worldchain-mainnet.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref unichain_sepolia_url: String =
-        format!("https://unichain-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://unichain-sepolia.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref unichain_mainnet_url: String =
-        format!("https://unichain-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
+        format!("https://unichain-mainnet.g.alchemy.com/v2/{}", *ALCHEMY_KEY);
     static ref anvil_url: String = format!("http://localhost:8545");
     static ref op_anvil_url: String = format!("http://localhost:8546");
     static ref quicknode_key: String = get_quicknode_key();
