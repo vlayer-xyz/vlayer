@@ -46,7 +46,7 @@ pub fn build_evm<'inspector, 'envs, D: RevmDB>(
 fn preload_l1_block_info<D: RevmDB>(evm: &mut Evm<'_, Inspector<'_, D>, WrapDatabaseRef<&D>>) {
     let spec_id = evm.spec_id();
     let l1_block_info = revm::optimism::L1BlockInfo::try_fetch(evm.db_mut(), spec_id).expect(
-        "Failed to fetch L1 block info. This should not happen as we preload all necesary data in seed_cache_db_with_trusted_data",
+        "Failed to fetch L1 block info. This should not happen as we preload all necessary data in seed_cache_db_with_trusted_data",
     );
     evm.context.evm.l1_block_info = Some(l1_block_info);
 }
