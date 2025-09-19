@@ -20,6 +20,18 @@ function set_proof_mode() {
 
 function set_external_rpc_urls() {
     if [[ "${CHAIN_NAME}" != "anvil" ]]; then
+        if [[ -n "$ROUTEMESH_API_KEY" ]]; then
+            EXTERNAL_RPC_URLS=(
+                "1:https://lb.routeme.sh/rpc/1/${ROUTEMESH_API_KEY}"
+                "11155111:https://lb.routeme.sh/rpc/11155111/${ROUTEMESH_API_KEY}"
+                "10:https://lb.routeme.sh/rpc/10/${ROUTEMESH_API_KEY}"
+                "11155420:https://lb.routeme.sh/rpc/11155420/${ROUTEMESH_API_KEY}"
+                "8453:https://lb.routeme.sh/rpc/8453/${ROUTEMESH_API_KEY}"
+                "84532:https://lb.routeme.sh/rpc/84532/${ROUTEMESH_API_KEY}"
+            )
+            return
+        fi
+
         # Check that QUICKNODE_API_KEY and QUICKNODE_ENDPOINT are not empty
         if [[ -z "$QUICKNODE_API_KEY" || -z "$QUICKNODE_ENDPOINT" ]]; then
             echo "Error: QUICKNODE_API_KEY and QUICKNODE_ENDPOINT must be set in prod mode."
@@ -48,9 +60,18 @@ function set_chain_worker_args() {
     else
         CONFIRMATIONS=${CONFIRMATIONS:-1}
         if [ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]; then
-            CHAIN_WORKER_ARGS+=(
-                "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420"
-            )
+            if [[ -n "$QUICKNODE_ENDPOINT" && -n "$QUICKNODE_API_KEY" ]]; then
+                CHAIN_WORKER_ARGS+=(
+                    "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420"
+                )
+            elif [[ -n "$ROUTEMESH_API_KEY" ]]; then
+                CHAIN_WORKER_ARGS+=(
+                    "https://lb.routeme.sh/rpc/11155420/${ROUTEMESH_API_KEY} 11155420"
+                )
+            else
+                echo "Error: QUICKNODE_ENDPOINT and QUICKNODE_API_KEY or ROUTEMESH_API_KEY must be set in prod mode."
+                usage
+            fi
         fi
     fi
 }
