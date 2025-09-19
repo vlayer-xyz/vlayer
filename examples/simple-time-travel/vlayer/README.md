@@ -1,5 +1,5 @@
 # Time Travel example
-This example shows how to use Time Travel to prove holding certain amount of ERC20 tokens in specifc timeframe. Long term holders can mint the Hodler NFT.
+This example shows how to use Time Travel to prove holding certain amount of ERC20 tokens in specific timeframe. Long term holders can mint the Hodler NFT.
 
 ## How to run?
 Learn how to run this example here:  
