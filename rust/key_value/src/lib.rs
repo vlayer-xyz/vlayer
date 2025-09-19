@@ -29,7 +29,7 @@ assert_obj_safe!(ReadTx);
 #[auto_impl(Box)]
 pub trait WriteTx {
     fn create_table(&mut self, table: &str) -> DbResult<()>;
-    /// Insert `(key, value)` into `table`. Returns `DbError::DuplicateKey` if `key` alredy exists in `table`.
+    /// Insert `(key, value)` into `table`. Returns `DbError::DuplicateKey` if `key` already exists in `table`.
     fn insert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()>;
     /// Insert `(key, value)` into `table` or update to value if `key` already exists in `table`.
     fn upsert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()>;
