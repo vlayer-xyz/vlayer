@@ -40,7 +40,7 @@ const router = createBrowserRouter([
     path: "/profile-failed-auth",
     element: <ProfileFailedAuth />,
   },
-  // dashbord is where user is redirected after successful login
+  // dashboard is where user is redirected after successful login
   {
     path: "/dashboard",
     element: <Dashboard />,
