@@ -282,6 +282,7 @@ jobs:
           RUST_LOG: info
         with:
           example: "simple-teleport"
+          run: ${{ matrix.run }}
           chain_name: "sepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
           # quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}

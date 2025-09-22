@@ -5,6 +5,9 @@ inputs:
   example:
     description: "The E2E test example to run"
     required: true
+  run:
+    description: "run id"
+    required: true
 
 # Auth token related
   jwt_auth:
@@ -149,7 +152,7 @@ runs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: logs-e2e-${{ inputs.example }}
+        name: logs-e2e-${{ inputs.example }}-${{ inputs.run }}
         path: ./artifacts/logs/
         if-no-files-found: error
         retention-days: 1
