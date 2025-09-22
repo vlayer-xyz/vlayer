@@ -265,7 +265,7 @@ jobs:
           # Chain related
           chain_name: "optimismSepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          # quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
           routemesh_api_key: ${{ secrets.ROUTEMESH_API_KEY }}
 
   # We run simple-teleport using test chain service, which generates fake proofs.

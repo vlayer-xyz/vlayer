@@ -60,13 +60,13 @@ function set_chain_worker_args() {
     else
         CONFIRMATIONS=${CONFIRMATIONS:-1}
         if [ "${EXAMPLE_NAME:-}" == "simple-time-travel" ]; then
-            if [[ -n "$ROUTEMESH_API_KEY" ]]; then
-                CHAIN_WORKER_ARGS+=(
-                    "https://lb.routeme.sh/rpc/11155420/${ROUTEMESH_API_KEY} 11155420"
-                )
-            elif [[ -n "$QUICKNODE_ENDPOINT" && -n "$QUICKNODE_API_KEY" ]]; then
+            if [[ -n "$QUICKNODE_ENDPOINT" && -n "$QUICKNODE_API_KEY" ]]; then
                 CHAIN_WORKER_ARGS+=(
                     "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420"
+                )
+            elif [[ -n "$ROUTEMESH_API_KEY" ]]; then
+                CHAIN_WORKER_ARGS+=(
+                    "https://lb.routeme.sh/rpc/11155420/${ROUTEMESH_API_KEY} 11155420"
                 )
             else
                 echo "Error: QUICKNODE_ENDPOINT and QUICKNODE_API_KEY or ROUTEMESH_API_KEY must be set in prod mode."
