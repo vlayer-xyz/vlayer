@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, env};
 
 use alloy_primitives::ChainId;
 use derive_new::new;
@@ -23,14 +23,33 @@ pub struct Factory {
     rpc_urls: HashMap<ChainId, String>,
 }
 
+impl Factory {
+    fn get_rollup_endpoint_override(chain_id: ChainId) -> Option<String> {
+        let env_var = match chain_id {
+            10 => "OPTIMISM_ROLLUP_ENDPOINT",
+            11_155_420 => "OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT",
+            8453 => "BASE_ROLLUP_ENDPOINT",
+            84_532 => "BASE_SEPOLIA_ROLLUP_ENDPOINT",
+            _ => return None,
+        };
+
+        env::var(env_var).ok()
+    }
+}
+
 impl IFactory for Factory {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn IClient>, FactoryError> {
-        let url = self
-            .rpc_urls
-            .get(&chain_id)
-            .ok_or(Error::NoRpcUrl(chain_id))?;
+        let url = if let Some(override_url) = Self::get_rollup_endpoint_override(chain_id) {
+            override_url
+        } else {
+            self.rpc_urls
+                .get(&chain_id)
+                .ok_or(Error::NoRpcUrl(chain_id))?
+                .clone()
+        };
+
         let client = HttpClientBuilder::default()
-            .build(url)
+            .build(&url)
             .map_err(|err| Error::HttpClientBuilder(err.to_string()))?;
         Ok(Box::new(http::Client::new(client)))
     }

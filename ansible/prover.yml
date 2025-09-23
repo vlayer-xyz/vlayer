@@ -55,6 +55,7 @@
         prover_docker_jwt_claims: "{{ vlayer_jwt_claims }}"
         prover_docker_rpc_urls: "{{ vlayer_prover_rpc_urls }}"
         prover_docker_jwt_public_key_location: "{{ vlayer_jwt_public_key_location }}"
+        prover_docker_optimism_sepolia_rollup_endpoint: "{{ vlayer_prover_optimism_sepolia_rollup_endpoint | default(omit) }}"
       when: prover_docker_containers | length > 0
       loop: "{{ prover_docker_containers }}"
       no_log: true
