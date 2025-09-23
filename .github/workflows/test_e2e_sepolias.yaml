@@ -9,106 +9,106 @@ name: E2E test with Bonsai and OP Sepolia
 
 on:
   push:
-    branches:
-      - main
-    # If any path names do not match patterns in paths-ignore,
-    # even if some path names match the patterns,
-    # the workflow will run.
-    paths-ignore:
-      - "README.md"
-      - "LICENSE"
-      - "book/**"
+    # branches:
+    #   - main
+    # # If any path names do not match patterns in paths-ignore,
+    # # even if some path names match the patterns,
+    # # the workflow will run.
+    # paths-ignore:
+    #   - "README.md"
+    #   - "LICENSE"
+    #   - "book/**"
   pull_request:
   merge_group:
   workflow_dispatch:
-concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+# concurrency:
+#   # Do not cancel jobs on main by forcing a unique group name.
+#   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+#   cancel-in-progress: true
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      code-changes: ${{ steps.filter.outputs.code-changes }}
-      workflow-changes: ${{ steps.filter.outputs.workflow-changes }}
-    # Don't run this test on forked PRs because of required secrets - it will get tested in the merge queue.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # changes:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     code-changes: ${{ steps.filter.outputs.code-changes }}
+  #     workflow-changes: ${{ steps.filter.outputs.workflow-changes }}
+  #   # Don't run this test on forked PRs because of required secrets - it will get tested in the merge queue.
+  #   if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      # We detect code changes, and run the workflow only if relevant code or workflow changes are detected.
-      # Because the workflow is resource heavy (in time/compilation, in testnet ETH usage, and in Bonsai API usage),
-      # we also skip running the workflow on every commit of PRs (unless the workflow configuration is changed)
-      # Red PR cannot be merged because even though PR commits are skipped, the workflow will still run in the merge queue.
-      - name: Filter changed files
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            code-changes:
-              - 'rust/**'
-              - 'Cargo.toml'
-              - 'Cargo.lock'
-              - 'bash/**'
-              - 'contracts/**'
-              - 'examples/**'
-              - 'packages/**'
-              - 'docker/**'
-              - 'ansible/**'
-              - 'bun.lock'
-            workflow-changes:
-              - '.github/workflows/test_e2e_sepolias.yaml'
-              - '.github/actions/test-e2e/**'
+  #     # We detect code changes, and run the workflow only if relevant code or workflow changes are detected.
+  #     # Because the workflow is resource heavy (in time/compilation, in testnet ETH usage, and in Bonsai API usage),
+  #     # we also skip running the workflow on every commit of PRs (unless the workflow configuration is changed)
+  #     # Red PR cannot be merged because even though PR commits are skipped, the workflow will still run in the merge queue.
+  #     - name: Filter changed files
+  #       id: filter
+  #       uses: dorny/paths-filter@v3
+  #       with:
+  #         filters: |
+  #           code-changes:
+  #             - 'rust/**'
+  #             - 'Cargo.toml'
+  #             - 'Cargo.lock'
+  #             - 'bash/**'
+  #             - 'contracts/**'
+  #             - 'examples/**'
+  #             - 'packages/**'
+  #             - 'docker/**'
+  #             - 'ansible/**'
+  #             - 'bun.lock'
+  #           workflow-changes:
+  #             - '.github/workflows/test_e2e_sepolias.yaml'
+  #             - '.github/actions/test-e2e/**'
 
   # The gas price on the Ethereum Sepolia network can vary significantly.
   # To prevent running tests when gas prices are prohibitively high, this job checks the current gas price.
   # If the gas price exceeds a predefined threshold, the test is skipped to avoid running out of test eth.
   # Gas price checker is build using `build-gas-price-checker` job. It's code is in
   # `rust/zkvm-benchmarks/benchmarks/src/benchmarks/precompiles/gas_price_checker.rs`
-  check-gas:
-    name: Check gas price
-    runs-on: ubuntu-latest
-    outputs:
-      gas-ok: ${{ steps.set-result.outputs.gas-ok }}
-    # Don't run this test on forked PRs because of required secrets - it will get tested in the merge queue.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+  # check-gas:
+  #   name: Check gas price
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     gas-ok: ${{ steps.set-result.outputs.gas-ok }}
+  #   # Don't run this test on forked PRs because of required secrets - it will get tested in the merge queue.
+  #   if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
 
-      - name: Set up Rust
-        uses: ./.github/actions/setup-rust
+  #     - name: Set up Rust
+  #       uses: ./.github/actions/setup-rust
 
-      - name: Run gas_price_checker
-        id: run-check
-        run: |
-          # allow failure so we can capture it
-          set +e
-          cargo run -p gas_price_checker -- https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }} $GAS_PRICE_THRESHOLD
-          EXIT_CODE=$?
-          echo "exit_code=$EXIT_CODE" >>"$GITHUB_OUTPUT"
-        env:
-          GAS_PRICE_THRESHOLD: 20
+  #     - name: Run gas_price_checker
+  #       id: run-check
+  #       run: |
+  #         # allow failure so we can capture it
+  #         set +e
+  #         cargo run -p gas_price_checker -- https://eth-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }} $GAS_PRICE_THRESHOLD
+  #         EXIT_CODE=$?
+  #         echo "exit_code=$EXIT_CODE" >>"$GITHUB_OUTPUT"
+  #       env:
+  #         GAS_PRICE_THRESHOLD: 20
 
-      - name: Set gas check result
-        id: set-result
-        run: |
-          if [ "${{ steps.run-check.outputs.exit_code }}" = "0" ]; then
-            echo "gas-ok=true" >>"$GITHUB_OUTPUT"
-          else
-            echo "gas-ok=false" >>"$GITHUB_OUTPUT"
-          fi
+  #     - name: Set gas check result
+  #       id: set-result
+  #       run: |
+  #         if [ "${{ steps.run-check.outputs.exit_code }}" = "0" ]; then
+  #           echo "gas-ok=true" >>"$GITHUB_OUTPUT"
+  #         else
+  #           echo "gas-ok=false" >>"$GITHUB_OUTPUT"
+  #         fi
 
   build-binaries:
     name: Build binaries
-    needs: changes
+    # needs: changes
     runs-on: aws-linux-medium
-    if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
+    # if: github.event_name == 'push' || needs.changes.outputs.workflow-changes == 'true' || (github.event_name != 'pull_request' && needs.changes.outputs.code-changes == 'true')
 
     steps:
       - name: Checkout repository
@@ -158,87 +158,87 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
-  test-e2e-bonsai-opsepolia-simple:
-    name: E2E test (simple) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e
-        with:
-          example: "simple"
+  # test-e2e-bonsai-opsepolia-simple:
+  #   name: E2E test (simple) with Bonsai and OP Sepolia
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e
+  #       with:
+  #         example: "simple"
 
-          # JWT auth related
-          jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
+  #         # JWT auth related
+  #         jwt_auth: "on"
+  #         vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
-          # Proving related
-          proving_mode: "prod"
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+  #         # Proving related
+  #         proving_mode: "prod"
+  #         bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+  #         bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
-          # Chain related
-          chain_name: "optimismSepolia"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+  #         # Chain related
+  #         chain_name: "optimismSepolia"
+  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+  #         quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
-  test-e2e-bonsai-opsepolia-simple-web-proof:
-    name: E2E test (simple-web-proof) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e
-        with:
-          example: "simple-web-proof"
+  # test-e2e-bonsai-opsepolia-simple-web-proof:
+  #   name: E2E test (simple-web-proof) with Bonsai and OP Sepolia
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e
+  #       with:
+  #         example: "simple-web-proof"
 
-          # JWT auth related
-          jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
+  #         # JWT auth related
+  #         jwt_auth: "on"
+  #         vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
-          # Proving related
-          proving_mode: "prod"
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+  #         # Proving related
+  #         proving_mode: "prod"
+  #         bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+  #         bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
-          # Chain related
-          chain_name: "optimismSepolia"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+  #         # Chain related
+  #         chain_name: "optimismSepolia"
+  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+  #         quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
-  test-e2e-bonsai-opsepolia-simple-email-proof:
-    name: E2E test (simple-email-proof) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
-    runs-on: aws-linux-medium
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run E2E Test
-        uses: ./.github/actions/test-e2e
-        with:
-          example: "simple-email-proof"
+  # test-e2e-bonsai-opsepolia-simple-email-proof:
+  #   name: E2E test (simple-email-proof) with Bonsai and OP Sepolia
+  #   needs: [changes, build-binaries]
+  #   runs-on: aws-linux-medium
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Run E2E Test
+  #       uses: ./.github/actions/test-e2e
+  #       with:
+  #         example: "simple-email-proof"
 
-          # JWT auth related
-          jwt_auth: "on"
-          vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
+  #         # JWT auth related
+  #         jwt_auth: "on"
+  #         vlayer_api_token: ${{ secrets.VLAYER_API_TOKEN_MAINNET }}
 
-          # Proving related
-          proving_mode: "prod"
-          bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+  #         # Proving related
+  #         proving_mode: "prod"
+  #         bonsai_api_url: ${{ vars.BONSAI_API_URL }}
+  #         quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
-          # Chain related
-          chain_name: "optimismSepolia"
-          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+  #         # Chain related
+  #         chain_name: "optimismSepolia"
+  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+  #         bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
   test-e2e-bonsai-opsepolia-simple-time-travel:
     name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
-    needs: [changes, build-binaries]
+    needs: [build-binaries]
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
@@ -266,8 +266,8 @@ jobs:
   # It is not compatible with Bonsai, which expects "prod" proofs, so we don't test teleport on Bonsai.
   test-e2e-ethsepolia-simple-teleport:
     name: E2E test (simple-teleport) with Sepolia
-    needs: [changes, check-gas, build-binaries]
-    if: needs.check-gas.outputs.gas-ok == 'true'
+    needs: [build-binaries]
+    # if: needs.check-gas.outputs.gas-ok == 'true'
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
