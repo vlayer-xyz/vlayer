@@ -39,6 +39,9 @@ Environment=VLAYER_PROOF_MODE={{ vlayer_proof_type }}
 {% if vlayer_prover_chain_proof_latest_url is defined %}
 Environment=VLAYER_CHAIN_CLIENT__URL={{ vlayer_prover_chain_proof_latest_url }}
 {% endif %}
+{% if vlayer_prover_optimism_sepolia_rollup_endpoint is defined %}
+Environment=OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT={{ vlayer_prover_optimism_sepolia_rollup_endpoint }}
+{% endif %}
 Environment=VLAYER_AUTH__JWT__PUBLIC_KEY={{ vlayer_jwt_public_key_location }}
 Environment=VLAYER_AUTH__JWT__ALGORITHM={{ vlayer_jwt_algorithm }}
 Environment='VLAYER_AUTH__JWT__CLAIMS={{ vlayer_jwt_claims | join(' ') }}'
