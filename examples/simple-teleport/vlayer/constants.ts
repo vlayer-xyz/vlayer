@@ -21,7 +21,7 @@ export const chainToTeleportConfig: Record<string, TeleportConfig> = {
     prover: {
       erc20Addresses: "0xc6e1fb449b08b26b2063c289df9bbcb79b91c992",
       erc20ChainIds: "11155420",
-      erc20BlockNumbers: "30665000",
+      erc20BlockNumbers: "32894867",
     },
   },
   mainnet: {

@@ -20,3 +20,4 @@ Installs the vlayer Prover docker container.
 | `prover_docker_jwt_algorithm` | Algorithm type used in JWT.. |
 | `prover_docker_jwt_claims` | A list of JWT claims. |
 | `prover_docker_jwt_public_key_location` | Where is the JWT public key file installed. |
+| `prover_docker_optimism_sepolia_rollup_endpoint` | Optional override URL for Optimism Sepolia rollup node endpoint. |
