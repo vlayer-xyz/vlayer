@@ -36,6 +36,10 @@ pub struct AppendStrategy {
 }
 
 impl AppendStrategy {
+    pub fn confirmations(&self) -> u64 {
+        self.confirmations
+    }
+
     #[allow(clippy::expect_used)]
     pub fn compute_append_range(
         &self,

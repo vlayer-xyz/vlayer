@@ -124,7 +124,16 @@ where
     #[instrument(skip(self))]
     pub async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         info!("Initializing chain");
-        let start_block = self.fetcher.get_block(self.start_block).await?;
+
+        // For "latest" blocks, apply confirmations to avoid reorgs
+        let start_block = match self.start_block {
+            BlockTag::Latest => {
+                let latest = self.fetcher.get_latest_block_number().await?;
+                let confirmed = latest.saturating_sub(self.append_strategy.confirmations());
+                self.fetcher.get_block(confirmed.into()).await?
+            }
+            specific => self.fetcher.get_block(specific).await?,
+        };
         let start_block_number = start_block.number();
         let trie = BlockTrie::init(&start_block)?;
 
