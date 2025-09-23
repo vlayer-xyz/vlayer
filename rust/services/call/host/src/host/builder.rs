@@ -146,15 +146,16 @@ impl WithStartChainId {
     ///   c) latest block indexed by chain service.
     ///
     /// There are 3 possible outcomes:
-    ///   1) Prover contract is not deployed on latest RPC block --> return error,
-    ///   2) Prover contract is deployed on latest RPC block & latest indexed block
+    ///   1) Prover contract is not deployed on confirmed RPC block --> return error,
+    ///   2) Prover contract is deployed on confirmed RPC block & latest indexed block
     ///      --> use latest indexed block as starting location,
-    ///   3) Prover contract is deployed on latest RPC block, but not latest indexed block
-    ///      --> use latest RPC block as starting location (it will be necessary to wait
+    ///   3) Prover contract is deployed on confirmed RPC block, but not latest indexed block
+    ///      --> use confirmed RPC block as starting location (it will be necessary to wait
     ///      for this block to be indexed by the chain service).
     pub async fn with_prover_contract_addr(
         self,
         prover_contract_addr: Address,
+        confirmations: u64,
     ) -> Result<WithStartExecLocation, Error> {
         let WithStartChainId {
             start_chain_id,
@@ -167,8 +168,18 @@ impl WithStartChainId {
             check_prover_contract(&providers, start_chain_id, prover_contract_addr);
 
         let latest_rpc_block = providers.get_latest_block_number(start_chain_id)?;
-        if !prover_contract_deployed(latest_rpc_block)? {
-            return Err(Error::ProverContractNotDeployed(prover_contract_addr, latest_rpc_block));
+        let confirmed_rpc_block = latest_rpc_block.saturating_sub(confirmations);
+
+        println!(
+            "[INFO] Call server using confirmed block {} instead of latest {} (confirmations={})",
+            confirmed_rpc_block, latest_rpc_block, confirmations
+        );
+
+        if !prover_contract_deployed(confirmed_rpc_block)? {
+            return Err(Error::ProverContractNotDeployed(
+                prover_contract_addr,
+                confirmed_rpc_block,
+            ));
         }
 
         let sync_status = chain_client.get_sync_status(start_chain_id).await;
@@ -179,14 +190,17 @@ impl WithStartChainId {
             // If chain service is not available, we fallback to a degraded mode (no teleport or time travel)
             return Ok(WithStartExecLocation {
                 chain_client: None,
-                start_exec_location: (start_chain_id, latest_rpc_block).into(),
+                start_exec_location: (start_chain_id, confirmed_rpc_block).into(),
                 providers,
                 op_client_factory,
             });
         };
 
-        let start_block_number =
-            compute_start_block_number(latest_rpc_block, prover_contract_deployed, &sync_status)?;
+        let start_block_number = compute_start_block_number(
+            confirmed_rpc_block,
+            prover_contract_deployed,
+            &sync_status,
+        )?;
         let start_exec_location = (start_chain_id, start_block_number).into();
 
         Ok(WithStartExecLocation {
@@ -199,14 +213,14 @@ impl WithStartChainId {
 }
 
 fn compute_start_block_number(
-    latest_rpc_block: BlockNumber,
+    confirmed_rpc_block: BlockNumber,
     prover_contract_deployed: impl Fn(BlockNumber) -> Result<bool, Error>,
     sync_status: &chain_common::SyncStatus,
 ) -> Result<BlockNumber, Error> {
     if prover_contract_deployed(sync_status.last_block)? {
         Ok(sync_status.last_block)
     } else {
-        Ok(latest_rpc_block)
+        Ok(confirmed_rpc_block)
     }
 }
 
@@ -282,7 +296,9 @@ mod tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn prover_contract_not_deployed() {
             let builder = builder(&[b""]); // empty contract code at latest RPC block
-            let res = builder.with_prover_contract_addr(Address::default()).await;
+            let res = builder
+                .with_prover_contract_addr(Address::default(), 8)
+                .await;
             assert!(matches!(res, Err(Error::ProverContractNotDeployed(_, _))));
         }
 
@@ -292,7 +308,7 @@ mod tests {
             // (mock client is LIFO, hence the order of results)
             let builder = builder(&[b"", b"01"]);
             let res = builder
-                .with_prover_contract_addr(Address::default())
+                .with_prover_contract_addr(Address::default(), 8)
                 .await
                 .unwrap();
             assert_eq!(res.start_exec_location, (CHAIN_ID, LATEST_RPC_BLOCK).into());
@@ -302,7 +318,7 @@ mod tests {
         async fn prover_contract_indexed() {
             let builder = builder(&[b"01", b"01"]);
             let res = builder
-                .with_prover_contract_addr(Address::default())
+                .with_prover_contract_addr(Address::default(), 8)
                 .await
                 .unwrap();
             assert_eq!(res.start_exec_location, (CHAIN_ID, LATEST_INDEXED_BLOCK).into());

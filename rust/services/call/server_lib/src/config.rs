@@ -31,6 +31,7 @@ pub const DEFAULT_PORT: u16 = 3000;
 pub const DEFAULT_CHAIN_CLIENT_POLL_INTERVAL: u64 = 5;
 pub const DEFAULT_CHAIN_CLIENT_TIMEOUT: u64 = 240;
 pub const DEFAULT_GAS_METER_TIME_TO_LIVE: u64 = 3600;
+pub const DEFAULT_CONFIRMATIONS: u64 = 8;
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -135,6 +136,8 @@ pub struct ConfigOptions {
     pub gas_meter: Option<GasMeterOptions>,
     /// Log format
     pub log_format: Option<LogFormat>,
+    /// Number of confirmations required for latest blocks
+    pub confirmations: Option<u64>,
 }
 
 pub(crate) fn parse_config_file(path: impl AsRef<Path>) -> Result<ConfigOptions, Error> {
@@ -234,6 +237,7 @@ impl Default for ConfigOptions {
             proof_mode: ProofMode::default(),
             rpc_urls: Vec::default(),
             log_format: None,
+            confirmations: Some(DEFAULT_CONFIRMATIONS),
         }
     }
 }
@@ -315,6 +319,7 @@ impl TryFrom<ConfigOptionsWithVersion> for Config {
             .with_gas_meter_config(gas_meter_config)
             .with_jwt_config(jwt_config)
             .with_chain_client_config(chain_client_config)
+            .with_confirmations(opts.config.confirmations.unwrap_or(DEFAULT_CONFIRMATIONS))
             .build()
     }
 }
@@ -333,6 +338,7 @@ pub struct Config {
     pub semver: String,
     pub gas_meter_config: Option<GasMeterConfig>,
     pub jwt_config: Option<JwtConfig>,
+    pub confirmations: u64,
 }
 
 impl Config {
@@ -390,6 +396,7 @@ pub struct ConfigBuilder {
     semver: Option<String>,
     gas_meter_config: Option<GasMeterConfig>,
     jwt_config: Option<JwtConfig>,
+    confirmations: Option<u64>,
 }
 
 impl ConfigBuilder {
@@ -472,6 +479,12 @@ impl ConfigBuilder {
         self
     }
 
+    #[must_use]
+    pub const fn with_confirmations(mut self, confirmations: u64) -> Self {
+        self.confirmations = Some(confirmations);
+        self
+    }
+
     pub fn build(self) -> Result<Config, Error> {
         let Self {
             socket_addr,
@@ -484,6 +497,7 @@ impl ConfigBuilder {
             semver,
             gas_meter_config,
             jwt_config,
+            confirmations,
         } = self;
 
         let call_guest_elf = call_guest_elf.ok_or(Error::ConfigField("call_guest_elf".into()))?;
@@ -503,6 +517,7 @@ impl ConfigBuilder {
             semver,
             gas_meter_config,
             jwt_config,
+            confirmations: confirmations.unwrap_or(DEFAULT_CONFIRMATIONS),
         })
     }
 }

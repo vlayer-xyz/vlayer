@@ -270,27 +270,27 @@ jobs:
 
   # We run simple-teleport using test chain service, which generates fake proofs.
   # It is not compatible with Bonsai, which expects "prod" proofs, so we don't test teleport on Bonsai.
-  # test-e2e-ethsepolia-simple-teleport:
-  #   name: E2E test (simple-teleport) with Sepolia
-  #   needs: [build-binaries]
-  #   # if: needs.check-gas.outputs.gas-ok == 'true'
-  #   runs-on: aws-linux-medium
-  #   strategy:
-  #     matrix:
-  #       run: [1,2,3,4,5]
-  #     fail-fast: false
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #     - name: Run E2E Test
-  #       uses: ./.github/actions/test-e2e
-  #       env:
-  #         RUST_LOG: info
-  #       with:
-  #         example: "simple-teleport"
-  #         run: ${{ matrix.run }}
-  #         chain_name: "sepolia"
-  #         testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-  #         # quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
-  #         routemesh_api_key: ${{ secrets.ROUTEMESH_API_KEY }}
-  #         external_chain_service_url: "https://nightly-fake-chainservice.vlayer.xyz"
+  test-e2e-ethsepolia-simple-teleport:
+    name: E2E test (simple-teleport) with Sepolia
+    needs: [build-binaries]
+    # if: needs.check-gas.outputs.gas-ok == 'true'
+    runs-on: aws-linux-medium
+    strategy:
+      matrix:
+        run: [1]
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run E2E Test
+        uses: ./.github/actions/test-e2e
+        env:
+          RUST_LOG: info
+        with:
+          example: "simple-teleport"
+          run: ${{ matrix.run }}
+          chain_name: "sepolia"
+          testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
+          # quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          routemesh_api_key: ${{ secrets.ROUTEMESH_API_KEY }}
+          external_chain_service_url: "https://nightly-fake-chainservice.vlayer.xyz"

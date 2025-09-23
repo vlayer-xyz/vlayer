@@ -73,7 +73,7 @@ async fn build_host(
         .with_chain_guest_id(config.chain_guest_id())
         .with_chain_client_config(config.chain_client_config.clone())?
         .with_start_chain_id(chain_id)?
-        .with_prover_contract_addr(prover_contract_addr)
+        .with_prover_contract_addr(prover_contract_addr, config.confirmations)
         .await?
         .build(config.into())?;
     Ok(host)
