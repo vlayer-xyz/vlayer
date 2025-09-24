@@ -164,7 +164,7 @@ mod tests {
         unsafe {
             env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
         }
-        assert!(result.is_ok(), "Factory should create client with override URL");
+        assert!(result.is_ok());
     }
 
     #[test]
@@ -180,7 +180,7 @@ mod tests {
         let factory = Factory::new(rpc_urls);
         let result = factory.create(11_155_420);
 
-        assert!(result.is_ok(), "Factory should create client with fallback URL");
+        assert!(result.is_ok());
     }
 
     #[test]
@@ -194,16 +194,11 @@ mod tests {
         }
 
         // Verify no override is available
-        assert_eq!(
-            Factory::get_rollup_endpoint_override(11_155_420),
-            None,
-            "Override should be None after cleanup"
-        );
+        assert_eq!(Factory::get_rollup_endpoint_override(11_155_420), None);
 
         let factory = Factory::new(HashMap::new());
         let result = factory.create(11_155_420);
 
-        assert!(result.is_err(), "Factory should fail without URL or override");
         match result {
             Err(FactoryError::Http(Error::NoRpcUrl(chain_id))) => {
                 assert_eq!(chain_id, 11_155_420, "Chain ID should match");
@@ -228,7 +223,6 @@ mod tests {
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
         }
-        assert!(result.is_err(), "Factory should fail with invalid URL");
         match result {
             Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
                 // Expected error type
@@ -253,7 +247,6 @@ mod tests {
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
         }
-        assert!(result.is_err(), "Factory should fail with empty URL string");
         match result {
             Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
                 // Expected error type
@@ -278,7 +271,6 @@ mod tests {
         let factory = Factory::new(rpc_urls);
         let result = factory.create(10);
 
-        assert!(result.is_err(), "Factory should fail with invalid RPC URL");
         match result {
             Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
                 // Expected error type
