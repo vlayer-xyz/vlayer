@@ -199,15 +199,7 @@ mod tests {
         let factory = Factory::new(HashMap::new());
         let result = factory.create(11_155_420);
 
-        match result {
-            Err(FactoryError::Http(Error::NoRpcUrl(chain_id))) => {
-                assert_eq!(chain_id, 11_155_420, "Chain ID should match");
-            }
-            Err(e) => {
-                panic!("Expected FactoryError::Http(Error::NoRpcUrl(11_155_420)), got error: {e}")
-            }
-            Ok(_) => panic!("Expected error but got success"),
-        }
+        assert!(matches!(result, Err(FactoryError::Http(Error::NoRpcUrl(11_155_420)))));
     }
 
     #[test]
@@ -223,15 +215,7 @@ mod tests {
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
         }
-        match result {
-            Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
-                // Expected error type
-            }
-            Err(e) => {
-                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {e}")
-            }
-            Ok(_) => panic!("Expected error but got success"),
-        }
+        assert!(matches!(result, Err(FactoryError::Http(Error::HttpClientBuilder(_)))));
     }
 
     #[test]
@@ -247,15 +231,7 @@ mod tests {
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
         }
-        match result {
-            Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
-                // Expected error type
-            }
-            Err(e) => {
-                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {e}")
-            }
-            Ok(_) => panic!("Expected error but got success"),
-        }
+        assert!(matches!(result, Err(FactoryError::Http(Error::HttpClientBuilder(_)))));
     }
 
     #[test]
@@ -271,14 +247,6 @@ mod tests {
         let factory = Factory::new(rpc_urls);
         let result = factory.create(10);
 
-        match result {
-            Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
-                // Expected error type
-            }
-            Err(e) => {
-                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {e}")
-            }
-            Ok(_) => panic!("Expected error but got success"),
-        }
+        assert!(matches!(result, Err(FactoryError::Http(Error::HttpClientBuilder(_)))));
     }
 }
