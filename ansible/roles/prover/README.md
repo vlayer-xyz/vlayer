@@ -23,3 +23,5 @@ Installs the vlayer Prover server.
 | `vlayer_rust_log` | An array of log levels for constructing [`RUST_LOG`](https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html). |
 | `vlayer_prover_optimism_sepolia_rollup_endpoint` | Optional override URL for Optimism Sepolia rollup node endpoint. |
 | `vlayer_prover_base_sepolia_rollup_endpoint` | Optional override URL for Base Sepolia rollup node endpoint. |
+| `vlayer_prover_optimism_rollup_endpoint` | Optional override URL for Optimism mainnet rollup node endpoint. |
+| `vlayer_prover_base_rollup_endpoint` | Optional override URL for Base mainnet rollup node endpoint. |
