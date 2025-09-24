@@ -63,68 +63,43 @@ mod tests {
 
     use super::*;
 
+    fn test_env_override(env_var: &str, chain_id: ChainId, test_url: &str) {
+        unsafe {
+            env::set_var(env_var, test_url);
+        }
+        let result = Factory::get_rollup_endpoint_override(chain_id);
+        unsafe {
+            env::remove_var(env_var);
+        }
+        assert_eq!(result, Some(test_url.to_string()));
+    }
+
     #[test]
     #[serial]
     fn get_rollup_endpoint_override_optimism_mainnet() {
-        let test_url = "http://test-optimism-mainnet.com";
-        unsafe {
-            env::set_var("OPTIMISM_ROLLUP_ENDPOINT", test_url);
-        }
-
-        let result = Factory::get_rollup_endpoint_override(10);
-
-        unsafe {
-            env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
-        }
-        assert_eq!(result, Some(test_url.to_string()));
+        test_env_override("OPTIMISM_ROLLUP_ENDPOINT", 10, "http://test-optimism-mainnet.com");
     }
 
     #[test]
     #[serial]
     fn get_rollup_endpoint_override_optimism_sepolia() {
-        let test_url = "http://test-optimism-sepolia.com";
-        unsafe {
-            env::set_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT", test_url);
-        }
-
-        let result = Factory::get_rollup_endpoint_override(11_155_420);
-
-        unsafe {
-            env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
-        }
-        assert_eq!(result, Some(test_url.to_string()));
+        test_env_override(
+            "OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT",
+            11_155_420,
+            "http://test-optimism-sepolia.com",
+        );
     }
 
     #[test]
     #[serial]
     fn get_rollup_endpoint_override_base_mainnet() {
-        let test_url = "http://test-base-mainnet.com";
-        unsafe {
-            env::set_var("BASE_ROLLUP_ENDPOINT", test_url);
-        }
-
-        let result = Factory::get_rollup_endpoint_override(8453);
-
-        unsafe {
-            env::remove_var("BASE_ROLLUP_ENDPOINT");
-        }
-        assert_eq!(result, Some(test_url.to_string()));
+        test_env_override("BASE_ROLLUP_ENDPOINT", 8453, "http://test-base-mainnet.com");
     }
 
     #[test]
     #[serial]
     fn get_rollup_endpoint_override_base_sepolia() {
-        let test_url = "http://test-base-sepolia.com";
-        unsafe {
-            env::set_var("BASE_SEPOLIA_ROLLUP_ENDPOINT", test_url);
-        }
-
-        let result = Factory::get_rollup_endpoint_override(84_532);
-
-        unsafe {
-            env::remove_var("BASE_SEPOLIA_ROLLUP_ENDPOINT");
-        }
-        assert_eq!(result, Some(test_url.to_string()));
+        test_env_override("BASE_SEPOLIA_ROLLUP_ENDPOINT", 84_532, "http://test-base-sepolia.com");
     }
 
     #[test]
