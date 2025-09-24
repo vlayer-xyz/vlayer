@@ -54,3 +54,240 @@ impl IFactory for Factory {
         Ok(Box::new(http::Client::new(client)))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{env, sync::Mutex};
+
+    use super::*;
+
+    // Tests that modify environment variables interfere with each other in parallel.
+    static ENV_MUTEX: Mutex<()> = Mutex::new(());
+
+    #[test]
+    fn test_get_rollup_endpoint_override_optimism_mainnet() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        let test_url = "http://test-optimism-mainnet.com";
+        unsafe {
+            env::set_var("OPTIMISM_ROLLUP_ENDPOINT", test_url);
+        }
+
+        let result = Factory::get_rollup_endpoint_override(10);
+
+        unsafe {
+            env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
+        }
+        assert_eq!(result, Some(test_url.to_string()));
+    }
+
+    #[test]
+    fn test_get_rollup_endpoint_override_optimism_sepolia() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        let test_url = "http://test-optimism-sepolia.com";
+        unsafe {
+            env::set_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT", test_url);
+        }
+
+        let result = Factory::get_rollup_endpoint_override(11_155_420);
+
+        unsafe {
+            env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
+        }
+        assert_eq!(result, Some(test_url.to_string()));
+    }
+
+    #[test]
+    fn test_get_rollup_endpoint_override_base_mainnet() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        let test_url = "http://test-base-mainnet.com";
+        unsafe {
+            env::set_var("BASE_ROLLUP_ENDPOINT", test_url);
+        }
+
+        let result = Factory::get_rollup_endpoint_override(8453);
+
+        unsafe {
+            env::remove_var("BASE_ROLLUP_ENDPOINT");
+        }
+        assert_eq!(result, Some(test_url.to_string()));
+    }
+
+    #[test]
+    fn test_get_rollup_endpoint_override_base_sepolia() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        let test_url = "http://test-base-sepolia.com";
+        unsafe {
+            env::set_var("BASE_SEPOLIA_ROLLUP_ENDPOINT", test_url);
+        }
+
+        let result = Factory::get_rollup_endpoint_override(84_532);
+
+        unsafe {
+            env::remove_var("BASE_SEPOLIA_ROLLUP_ENDPOINT");
+        }
+        assert_eq!(result, Some(test_url.to_string()));
+    }
+
+    #[test]
+    fn test_get_rollup_endpoint_override_unsupported_chain() {
+        assert_eq!(Factory::get_rollup_endpoint_override(999), None);
+        assert_eq!(Factory::get_rollup_endpoint_override(1), None);
+        assert_eq!(Factory::get_rollup_endpoint_override(137), None);
+    }
+
+    #[test]
+    fn test_get_rollup_endpoint_override_no_env_var() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        unsafe {
+            env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
+            env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
+            env::remove_var("BASE_ROLLUP_ENDPOINT");
+            env::remove_var("BASE_SEPOLIA_ROLLUP_ENDPOINT");
+        }
+
+        assert_eq!(Factory::get_rollup_endpoint_override(10), None);
+        assert_eq!(Factory::get_rollup_endpoint_override(11_155_420), None);
+        assert_eq!(Factory::get_rollup_endpoint_override(8453), None);
+        assert_eq!(Factory::get_rollup_endpoint_override(84_532), None);
+    }
+
+    #[test]
+    fn test_create_with_rollup_override() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        let test_url = "http://test-override.com";
+        unsafe {
+            env::set_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT", test_url);
+        }
+
+        let factory = Factory::new(HashMap::new());
+        let result = factory.create(11_155_420);
+
+        unsafe {
+            env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
+        }
+        assert!(result.is_ok(), "Factory should create client with override URL");
+    }
+
+    #[test]
+    fn test_create_falls_back_to_rpc_urls() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        unsafe {
+            env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
+        }
+
+        let mut rpc_urls = HashMap::new();
+        rpc_urls.insert(11_155_420, "http://fallback-url.com".to_string());
+
+        let factory = Factory::new(rpc_urls);
+        let result = factory.create(11_155_420);
+
+        assert!(result.is_ok(), "Factory should create client with fallback URL");
+    }
+
+    #[test]
+    fn test_create_fails_without_url_or_override() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        unsafe {
+            env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
+            env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
+            env::remove_var("BASE_ROLLUP_ENDPOINT");
+            env::remove_var("BASE_SEPOLIA_ROLLUP_ENDPOINT");
+        }
+
+        // Verify no override is available
+        assert_eq!(
+            Factory::get_rollup_endpoint_override(11_155_420),
+            None,
+            "Override should be None after cleanup"
+        );
+
+        let factory = Factory::new(HashMap::new());
+        let result = factory.create(11_155_420);
+
+        assert!(result.is_err(), "Factory should fail without URL or override");
+        match result {
+            Err(FactoryError::Http(Error::NoRpcUrl(chain_id))) => {
+                assert_eq!(chain_id, 11_155_420, "Chain ID should match");
+            }
+            Err(e) => {
+                panic!("Expected FactoryError::Http(Error::NoRpcUrl(11_155_420)), got error: {}", e)
+            }
+            Ok(_) => panic!("Expected error but got success"),
+        }
+    }
+
+    #[test]
+    fn test_create_with_invalid_url_in_override() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        unsafe {
+            env::set_var("OPTIMISM_ROLLUP_ENDPOINT", "invalid-url");
+        }
+
+        let factory = Factory::new(HashMap::new());
+        let result = factory.create(10);
+
+        unsafe {
+            env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
+        }
+        assert!(result.is_err(), "Factory should fail with invalid URL");
+        match result {
+            Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
+                // Expected error type
+            }
+            Err(e) => {
+                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {}", e)
+            }
+            Ok(_) => panic!("Expected error but got success"),
+        }
+    }
+
+    #[test]
+    fn test_create_with_empty_string_override() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        unsafe {
+            env::set_var("OPTIMISM_ROLLUP_ENDPOINT", "");
+        }
+
+        let factory = Factory::new(HashMap::new());
+        let result = factory.create(10);
+
+        unsafe {
+            env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
+        }
+        assert!(result.is_err(), "Factory should fail with empty URL string");
+        match result {
+            Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
+                // Expected error type
+            }
+            Err(e) => {
+                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {}", e)
+            }
+            Ok(_) => panic!("Expected error but got success"),
+        }
+    }
+
+    #[test]
+    fn test_create_with_invalid_rpc_url_in_hashmap() {
+        let _guard = ENV_MUTEX.lock().unwrap();
+        unsafe {
+            env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
+        }
+
+        let mut rpc_urls = HashMap::new();
+        rpc_urls.insert(10, "invalid-url".to_string());
+
+        let factory = Factory::new(rpc_urls);
+        let result = factory.create(10);
+
+        assert!(result.is_err(), "Factory should fail with invalid RPC URL");
+        match result {
+            Err(FactoryError::Http(Error::HttpClientBuilder(_))) => {
+                // Expected error type
+            }
+            Err(e) => {
+                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {}", e)
+            }
+            Ok(_) => panic!("Expected error but got success"),
+        }
+    }
+}
