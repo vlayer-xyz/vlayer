@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_get_rollup_endpoint_override_optimism_mainnet() {
+    fn get_rollup_endpoint_override_optimism_mainnet() {
         let test_url = "http://test-optimism-mainnet.com";
         unsafe {
             env::set_var("OPTIMISM_ROLLUP_ENDPOINT", test_url);
@@ -81,7 +81,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_get_rollup_endpoint_override_optimism_sepolia() {
+    fn get_rollup_endpoint_override_optimism_sepolia() {
         let test_url = "http://test-optimism-sepolia.com";
         unsafe {
             env::set_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT", test_url);
@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_get_rollup_endpoint_override_base_mainnet() {
+    fn get_rollup_endpoint_override_base_mainnet() {
         let test_url = "http://test-base-mainnet.com";
         unsafe {
             env::set_var("BASE_ROLLUP_ENDPOINT", test_url);
@@ -113,7 +113,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_get_rollup_endpoint_override_base_sepolia() {
+    fn get_rollup_endpoint_override_base_sepolia() {
         let test_url = "http://test-base-sepolia.com";
         unsafe {
             env::set_var("BASE_SEPOLIA_ROLLUP_ENDPOINT", test_url);
@@ -128,7 +128,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_rollup_endpoint_override_unsupported_chain() {
+    fn get_rollup_endpoint_override_unsupported_chain() {
         assert_eq!(Factory::get_rollup_endpoint_override(999), None);
         assert_eq!(Factory::get_rollup_endpoint_override(1), None);
         assert_eq!(Factory::get_rollup_endpoint_override(137), None);
@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_get_rollup_endpoint_override_no_env_var() {
+    fn get_rollup_endpoint_override_no_env_var() {
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
             env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
@@ -152,7 +152,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_create_with_rollup_override() {
+    fn create_with_rollup_override() {
         let test_url = "http://test-override.com";
         unsafe {
             env::set_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT", test_url);
@@ -169,7 +169,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_create_falls_back_to_rpc_urls() {
+    fn create_falls_back_to_rpc_urls() {
         unsafe {
             env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
         }
@@ -185,7 +185,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_create_fails_without_url_or_override() {
+    fn create_fails_without_url_or_override() {
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
             env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
@@ -217,7 +217,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_create_with_invalid_url_in_override() {
+    fn create_with_invalid_url_in_override() {
         unsafe {
             env::set_var("OPTIMISM_ROLLUP_ENDPOINT", "invalid-url");
         }
@@ -242,7 +242,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_create_with_empty_string_override() {
+    fn create_with_empty_string_override() {
         unsafe {
             env::set_var("OPTIMISM_ROLLUP_ENDPOINT", "");
         }
@@ -267,7 +267,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn test_create_with_invalid_rpc_url_in_hashmap() {
+    fn create_with_invalid_rpc_url_in_hashmap() {
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
         }
