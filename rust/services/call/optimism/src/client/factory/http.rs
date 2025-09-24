@@ -210,7 +210,7 @@ mod tests {
                 assert_eq!(chain_id, 11_155_420, "Chain ID should match");
             }
             Err(e) => {
-                panic!("Expected FactoryError::Http(Error::NoRpcUrl(11_155_420)), got error: {}", e)
+                panic!("Expected FactoryError::Http(Error::NoRpcUrl(11_155_420)), got error: {e}")
             }
             Ok(_) => panic!("Expected error but got success"),
         }
@@ -235,7 +235,7 @@ mod tests {
                 // Expected error type
             }
             Err(e) => {
-                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {}", e)
+                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {e}")
             }
             Ok(_) => panic!("Expected error but got success"),
         }
@@ -260,7 +260,7 @@ mod tests {
                 // Expected error type
             }
             Err(e) => {
-                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {}", e)
+                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {e}")
             }
             Ok(_) => panic!("Expected error but got success"),
         }
@@ -285,7 +285,7 @@ mod tests {
                 // Expected error type
             }
             Err(e) => {
-                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {}", e)
+                panic!("Expected FactoryError::Http(Error::HttpClientBuilder(_)), got error: {e}")
             }
             Ok(_) => panic!("Expected error but got success"),
         }
