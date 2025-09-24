@@ -60,3 +60,4 @@ vlayer_prover_gas_meter_api_key: !vault |
 vlayer_prover_chain_proof_base_url: "https://nightly-fake-chainservice.vlayer.xyz"
 vlayer_prover_chain_proof_latest_url: "{{ vlayer_prover_chain_proof_base_url }}/latest/"
 vlayer_prover_optimism_sepolia_rollup_endpoint: "https://omniscient-flashy-frog.optimism-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key | trim }}"
+vlayer_prover_base_sepolia_rollup_endpoint: "https://omniscient-flashy-frog.base-sepolia.quiknode.pro/{{ vlayer_quicknode_api_key | trim }}"
