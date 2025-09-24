@@ -57,16 +57,15 @@ impl IFactory for Factory {
 
 #[cfg(test)]
 mod tests {
-    use std::{env, sync::Mutex};
+    use std::env;
+
+    use serial_test::serial;
 
     use super::*;
 
-    // Tests that modify environment variables interfere with each other in parallel.
-    static ENV_MUTEX: Mutex<()> = Mutex::new(());
-
     #[test]
+    #[serial]
     fn test_get_rollup_endpoint_override_optimism_mainnet() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         let test_url = "http://test-optimism-mainnet.com";
         unsafe {
             env::set_var("OPTIMISM_ROLLUP_ENDPOINT", test_url);
@@ -81,8 +80,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_get_rollup_endpoint_override_optimism_sepolia() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         let test_url = "http://test-optimism-sepolia.com";
         unsafe {
             env::set_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT", test_url);
@@ -97,8 +96,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_get_rollup_endpoint_override_base_mainnet() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         let test_url = "http://test-base-mainnet.com";
         unsafe {
             env::set_var("BASE_ROLLUP_ENDPOINT", test_url);
@@ -113,8 +112,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_get_rollup_endpoint_override_base_sepolia() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         let test_url = "http://test-base-sepolia.com";
         unsafe {
             env::set_var("BASE_SEPOLIA_ROLLUP_ENDPOINT", test_url);
@@ -136,8 +135,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_get_rollup_endpoint_override_no_env_var() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
             env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
@@ -152,8 +151,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_create_with_rollup_override() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         let test_url = "http://test-override.com";
         unsafe {
             env::set_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT", test_url);
@@ -169,8 +168,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_create_falls_back_to_rpc_urls() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         unsafe {
             env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
         }
@@ -185,8 +184,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_create_fails_without_url_or_override() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
             env::remove_var("OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT");
@@ -217,8 +216,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_create_with_invalid_url_in_override() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         unsafe {
             env::set_var("OPTIMISM_ROLLUP_ENDPOINT", "invalid-url");
         }
@@ -242,8 +241,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_create_with_empty_string_override() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         unsafe {
             env::set_var("OPTIMISM_ROLLUP_ENDPOINT", "");
         }
@@ -267,8 +266,8 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn test_create_with_invalid_rpc_url_in_hashmap() {
-        let _guard = ENV_MUTEX.lock().unwrap();
         unsafe {
             env::remove_var("OPTIMISM_ROLLUP_ENDPOINT");
         }

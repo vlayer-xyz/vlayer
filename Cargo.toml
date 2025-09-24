@@ -165,6 +165,7 @@ serde_repr = "0.1.19"
 serde_urlencoded = "0.7.1"
 serde_with = { version = "3.11.0", default-features = false }
 serde_yml = { version = "0.0.12", default-features = false }
+serial_test = "3.1"
 soldeer-commands = "0.5.2"
 soldeer-core = { version = "0.5.2", default-features = false }
 spansy = { git = "https://github.com/tlsnotary/tlsn-utils", rev = "6168663" }
