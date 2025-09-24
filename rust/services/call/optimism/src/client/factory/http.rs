@@ -168,7 +168,6 @@ mod tests {
             env::remove_var("BASE_SEPOLIA_ROLLUP_ENDPOINT");
         }
 
-        // Verify no override is available
         assert_eq!(Factory::get_rollup_endpoint_override(11_155_420), None);
 
         let factory = Factory::new(HashMap::new());
