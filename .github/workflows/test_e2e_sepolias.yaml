@@ -229,12 +229,12 @@ jobs:
           # Proving related
           proving_mode: "prod"
           bonsai_api_url: ${{ vars.BONSAI_API_URL }}
-          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
+          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
 
           # Chain related
           chain_name: "optimismSepolia"
           testnet_private_key_location: ${{ secrets.TESTNET_PRIVATE_KEY_LOCATION }}
-          bonsai_api_key: ${{ secrets.BONSAI_API_KEY }}
+          quicknode_api_key: ${{ secrets.QUICKNODE_API_KEY }}
 
   test-e2e-bonsai-opsepolia-simple-time-travel:
     name: E2E test (simple-time-travel) with Bonsai and OP Sepolia
