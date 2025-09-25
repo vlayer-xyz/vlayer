@@ -71,18 +71,6 @@ vlayer_prover_chain_proof_latest_url: "{{ vlayer_prover_chain_proof_base_url }}/
 vlayer_prover_optimism_rollup_endpoint: "https://omniscient-flashy-frog.optimism.quiknode.pro/{{ vlayer_quicknode_api_key | trim }}"
 vlayer_prover_base_rollup_endpoint: "https://omniscient-flashy-frog.base-mainnet.quiknode.pro/{{ vlayer_quicknode_api_key | trim }}"
 prover_docker_containers:
- - version: "1.4.0"
-   port: 4002
-   chain_proof_url: "{{ vlayer_prover_chain_proof_base_url }}/1.4.3/"
- - version: "1.4.1"
-   port: 4003
-   chain_proof_url: "{{ vlayer_prover_chain_proof_base_url }}/1.4.3/"
- - version: "1.4.2"
-   port: 4004
-   chain_proof_url: "{{ vlayer_prover_chain_proof_base_url }}/1.4.3/"
- - version: "1.4.3"
-   port: 4005
-   chain_proof_url: "{{ vlayer_prover_chain_proof_base_url }}/1.4.3/"
  - version: "1.5.0"
    port: 4006
    chain_proof_url: "{{ vlayer_prover_chain_proof_base_url }}"
