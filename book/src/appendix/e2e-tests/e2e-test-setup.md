@@ -183,3 +183,18 @@ For prod mode with external chains, these additional variables are required:
 | `BONSAI_API_KEY`     | None                      | API key for Bonsai     | `PROVING_MODE=prod` |
 | `QUICKNODE_API_KEY`  | None                      | API key for QuickNode  | `CHAIN_NAME!=anvil` |
 | `QUICKNODE_ENDPOINT` | None                      | Endpoint for QuickNode | `CHAIN_NAME!=anvil` |
+| `ALCHEMY_API_KEY`    | None                      | API key for Alchemy    | `CHAIN_NAME!=anvil` |
+
+Only one of QuickNode or Alchemy API key is required.
+
+**Optional Rollup (L2) Endpoint Overrides:**
+
+In the event the used chain endpoint does not support required L2 methods (`optimism_outputAtBlock`),
+an endpoint override is needed with an RPC provider that does support it.
+
+| Variable                            | Default | Description                       |
+| ----------------------------------- | ------- | --------------------------------- |
+| `OPTIMISM_ROLLUP_ENDPOINT`          | None    | Override URL for Optimism mainnet |
+| `OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT`  | None    | Override URL for Optimism sepolia |
+| `BASE_ROLLUP_ENDPOINT`              | None    | Override URL for Base mainnet     |
+| `BASE_SEPOLIA_ROLLUP_ENDPOINT`      | None    | Override URL for Base sepolia     |

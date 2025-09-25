@@ -109,6 +109,10 @@ function startup_vlayer() {
     VLAYER_CHAIN_CLIENT__URL="${chain_client_url}" \
     VLAYER_AUTH__JWT__PUBLIC_KEY="${jwt_pub_key}" \
     VLAYER_AUTH__JWT__ALGORITHM="${jwt_algorithm}" \
+    OPTIMISM_ROLLUP_ENDPOINT="${OPTIMISM_ROLLUP_ENDPOINT:-}" \
+    OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT="${OPTIMISM_SEPOLIA_ROLLUP_ENDPOINT:-}" \
+    BASE_ROLLUP_ENDPOINT="${BASE_ROLLUP_ENDPOINT:-}" \
+    BASE_SEPOLIA_ROLLUP_ENDPOINT="${BASE_SEPOLIA_ROLLUP_ENDPOINT:-}" \
     ./target/debug/call_server >>"${LOGS_DIR}/vlayer_serve.out" &
 
     VLAYER_SERVER=$!
