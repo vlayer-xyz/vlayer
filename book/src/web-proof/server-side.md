@@ -21,8 +21,7 @@ Available options:
 
 Example usage: 
 ```sh
-vlayer web-proof-fetch 
-  --notary "https://test-notary.vlayer.xyz" 
+vlayer web-proof-fetch  
   --url "https://api.kraken.com/0/public/Ticker?pair=ETHUSD"
 ```
 
