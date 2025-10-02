@@ -21,9 +21,7 @@ Available options:
 
 Example usage: 
 ```sh
-vlayer web-proof-fetch 
-  --notary "https://test-notary.vlayer.xyz" 
-  --url "https://api.kraken.com/0/public/Ticker?pair=ETHUSD"
+vlayer web-proof-fetch --url "https://api.kraken.com/0/public/Ticker?pair=ETHUSD"
 ```
 
 Such produced Web Proof (including url, headers and body) can be passed into vlayer prover and then verified on-chain. 
