@@ -43,9 +43,14 @@ pub fn add_remappings<'a>(
     foundry_root: &Path,
     iter: impl Iterator<Item = &'a Dependency>,
 ) -> Result<()> {
-    let remappings: Vec<(String, String)> = iter
-        .flat_map(Dependency::remappings)
-        .flatten()
+    // Collect all remappings, failing fast if any dependency lacks remappings
+    let remappings_slices: Vec<&[(String, String)]> = iter
+        .map(Dependency::remappings)
+        .collect::<config::Result<Vec<_>>>()?;
+
+    let remappings: Vec<(String, String)> = remappings_slices
+        .into_iter()
+        .flat_map(|slice| slice.iter())
         .map(|(x, y)| (x.clone(), y.clone()))
         .collect();
     do_add_remappings(foundry_root, &remappings)
