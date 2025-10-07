@@ -24,7 +24,7 @@ contract WebProverTest is VTest {
             account
         );
 
-        assert(screenName.equal("g_p_vlayer"));
+        assert(screenName.equal("webprooftest"));
         assertEq(addr, account);
     }
 
