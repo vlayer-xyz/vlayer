@@ -50,7 +50,7 @@ In order to execute `vlayer test` with vlayer [`examples`](https://github.com/vl
 To ensure you have the most up-to-date version of the RISC Zero toolchain (cargo-risczero):
 
 ```sh
-cargo install cargo-risczero
+cargo install cargo-risczero --force
 ```
 
 This installs or updates `cargo-risczero` to the latest version.
