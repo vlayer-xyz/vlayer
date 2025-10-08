@@ -9,15 +9,14 @@ contract WebProofProver is Prover {
     using WebProofLib for WebProof;
     using WebLib for Web;
 
-    string public constant DATA_URL =
-        "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&include_ext_dm_av_call_settings=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
+    string public constant DATA_URL = "https://api.x.com/1.1/account/settings.json";
 
     function main(WebProof calldata webProof, address account)
         public
         view
         returns (Proof memory, string memory, address)
     {
-        Web memory web = webProof.verify(DATA_URL);
+        Web memory web = webProof.verifyWithUrlPrefix(DATA_URL);
 
         string memory screenName = web.jsonGetString("screen_name");
 
