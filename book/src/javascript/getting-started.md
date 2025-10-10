@@ -6,12 +6,14 @@ This documentation walks you through building a complete vlayer Web Proof applic
 3. Verifies the proof on-chain (Optimism Sepolia testnet)
 4. Mints an NFT representing the verified Twitter account
 
+Try out the fullstack demo [here](https://webproof-getting-started.vercel.app/).
+
 ## Environment Setup
 
 ### Step 1: Clone and Navigate
 
 ```bash
-git clone https://github.com/writersblockchain/webproof-getting-started
+git clone https://github.com/vlayer-xyz/webproof-getting-started
 cd webproof-getting-started
 ```
 
@@ -106,6 +108,8 @@ VITE_EXAMPLES_TEST_PRIVATE_KEY="0xYourPrivateKeyHere"
 VITE_VLAYER_API_TOKEN="your_jwt_token_here"
 ```
 
+> **⚠️ Warning:** Environment variables prefixed with `VITE_` are embedded into your frontend and publicly visible to anyone who accesses your application. Never use a wallet with real funds or your main private key. Create a dedicated test wallet with only testnet ETH for this tutorial.
+
 ### Step 7: Install and Run Frontend
 
 ```bash
@@ -115,8 +119,6 @@ bun run dev
 ```
 
 Visit `http://localhost:5173` to see your application running.
-
----
 
 ## Smart Contract Development
 
@@ -164,6 +166,7 @@ contract WebProofProver is Prover {
 2. **`DATA_URL` constant**
    - Specifies which API endpoint you're proving
    - Must match the URL in your frontend web proof request
+   - Learn how to retrieve the API endpoint you want to prove [here](https://book.vlayer.xyz/web-proof/quickstart-guide.html#obtaining-web-proof)
 
 3. **`main` function**
    - Entry point for proof generation
@@ -264,7 +267,7 @@ contract WebProofVerifier is Verifier, ERC721 {
 
 ### Setting Up the vlayer Client
 
-The [frontend integration](https://github.com/writersblockchain/webproof-getting-started/blob/main/react-frontend/src/App.jsx) involves three main steps:
+The [frontend integration](https://github.com/vlayer-xyz/webproof-getting-started/blob/main/react-frontend/src/App.jsx) involves three main steps:
 1. Creating a Web Proof Provider
 2. Initializing the vlayer Client
 3. Creating and executing Web Proof Requests
