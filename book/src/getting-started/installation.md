@@ -42,3 +42,21 @@ You can use use the following command to install a nightly version of vlayer:
 ```sh
 vlayerup --channel nightly
 ```
+
+## Using vlayer test
+
+In order to execute `vlayer test` with vlayer [`examples`](https://github.com/vlayer-xyz/vlayer/tree/main/examples), vlayer requires `risc0-ethereum` version 3.0 or higher. Using an older version (< 3.0) will result in proof verification failures due to incompatible control roots and verifier parameters.
+
+To ensure you have the most up-to-date version of the RISC Zero toolchain (cargo-risczero):
+
+```sh
+cargo install cargo-risczero --force
+```
+
+This installs or updates `cargo-risczero` to the latest version.
+
+You can check that it has been successfully installed and inspect its version by running:
+
+```sh
+cargo risczero --version
+```
