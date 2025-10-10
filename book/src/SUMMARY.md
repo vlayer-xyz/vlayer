@@ -23,6 +23,7 @@
   - [Vanilla JS/TS](./javascript/javascript.md)
   - [React](./javascript/react-hooks.md)
   - [Web proofs](./javascript/web-proofs.md)
+    - [Getting Started](./javascript/getting-started.md)
   - [Email proofs](./javascript/email-proofs.md)
 
 - [Advanced]()
