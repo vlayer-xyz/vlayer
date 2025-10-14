@@ -6,7 +6,9 @@ This documentation walks you through building a complete vlayer Web Proof applic
 3. Verifies the proof on-chain (Optimism Sepolia testnet)
 4. Mints an NFT representing the verified Twitter account
 
-Try out the fullstack demo [here](https://webproof-getting-started.vercel.app/).
+Explore the [fullstack demo](https://webproof-getting-started.vercel.app/) 🚀
+
+> **Note:** vlayer is configured to work with multiple testnets. See the [full list of supported testnets](https://book.vlayer.xyz/getting-started/dev-and-production.html#testnet) for details on which features are available on each network.
 
 ## Environment Setup
 
