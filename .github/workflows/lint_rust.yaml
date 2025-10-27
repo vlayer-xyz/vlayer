@@ -14,7 +14,7 @@ concurrency:
 jobs:
   lint-rust:
     name: Lint Rust
-    runs-on: aws-linux-medium
+    runs-on: aws-linux-medium-przemek
 
     steps:
       - name: Checkout repository
