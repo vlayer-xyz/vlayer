@@ -17,7 +17,7 @@ vlayer 2.0 enables developers to extract, verify, and integrate real-world data 
 
 ### 🏗️ Builders Program
 
-Join the [vlayer Builders Program](https://www.vlayer.xyz/) to access:
+Join the [vlayer Builders Program](https://www.vlayer.xyz/builders-program) to access:
 
 * **Grants** for building next-generation apps
 * **Technical support** and resources
