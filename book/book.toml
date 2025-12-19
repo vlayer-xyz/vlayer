@@ -18,8 +18,8 @@ command = "mdbook-mermaid"
 [output.html]
 default-theme = "ayu"
 preferred-dark-theme = "ayu"
-additional-js = ["theme/menuv4.js", "mermaid.min.js", "mermaid-init.js", "src/static/solidity.min.js", "theme/tabs.js"]
-additional-css = ["theme/tabs.css", "theme/asidev3.css", "theme/menuv3.css"]
+additional-js = ["theme/menuv4.js", "mermaid.min.js", "mermaid-init.js", "src/static/solidity.min.js", "theme/tabs.js", "theme/outdated-banner.js"]
+additional-css = ["theme/tabs.css", "theme/asidev3.css", "theme/menuv3.css", "theme/outdated-banner.css"]
 git-repository-url = "https://github.com/vlayer-xyz/vlayer"
 
 
