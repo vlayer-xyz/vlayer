@@ -21,6 +21,74 @@ describe("resolveDkimDns Integration", () => {
   });
 });
 
+describe("DNS response validation", () => {
+  beforeEach(() => {
+    fetchMocker.enableMocks();
+    fetchMocker.resetMocks();
+  });
+
+  it("rejects negative DNS TTL values", async () => {
+    fetchMocker.mockResponseOnce(
+      JSON.stringify({
+        Status: 0,
+        TC: false,
+        RD: true,
+        RA: true,
+        AD: false,
+        CD: false,
+        Question: [],
+        Answer: [
+          {
+            name: "google._domainkey.vlayer.xyz",
+            type: 16,
+            TTL: -1,
+            data: "v=DKIM1; p=test",
+          },
+        ],
+      }),
+    );
+
+    const resolver = new DnsResolver("http://localhost:3002", "deadbeef");
+    await expect(
+      resolver.resolveDkimDns("google", "vlayer.xyz"),
+    ).rejects.toThrowError("DNS record TTL must be a nonnegative integer");
+  });
+
+  it("rejects fractional DNS verification expiry values", async () => {
+    fetchMocker.mockResponseOnce(
+      JSON.stringify({
+        Status: 0,
+        TC: false,
+        RD: true,
+        RA: true,
+        AD: false,
+        CD: false,
+        Question: [],
+        Answer: [
+          {
+            name: "google._domainkey.vlayer.xyz",
+            type: 16,
+            TTL: 60,
+            data: "v=DKIM1; p=test",
+          },
+        ],
+        VerificationData: {
+          valid_until: 1.5,
+          signature: "",
+          pub_key: "",
+        },
+      }),
+    );
+
+    const resolver = new DnsResolver("http://localhost:3002", "deadbeef");
+    await expect(
+      resolver.resolveDkimDns("google", "vlayer.xyz"),
+    ).rejects.toThrowError(
+      "DNS verification valid_until must be a nonnegative integer",
+    );
+  });
+});
+
 describe("Authentication", () => {
   beforeEach(() => {
     fetchMocker.enableMocks();
