@@ -124,7 +124,7 @@ version = "0.1.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4e0f0136c085132939da6b753452ebed4efaa73fe523bb855b10c199c2ebfaf"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "num_enum",
  "serde",
  "strum 0.26.3",
@@ -149,7 +149,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4138dc275554afa6f18c4217262ac9388790b2fc393c2dfe03c51d357abf013"
 dependencies = [
  "alloy-eips 0.9.2",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-serde 0.9.2",
  "alloy-trie",
@@ -168,7 +168,7 @@ checksum = "0fa04e1882c31288ce1028fdf31b6ea94cfa9eafa2e497f903ded631c8c6a42c"
 dependencies = [
  "alloy-consensus",
  "alloy-eips 0.9.2",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-serde 0.9.2",
  "serde",
@@ -184,7 +184,7 @@ dependencies = [
  "alloy-json-abi",
  "alloy-network",
  "alloy-network-primitives",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-rpc-types-eth",
  "alloy-sol-types",
@@ -196,18 +196,17 @@ dependencies = [
 
 [[package]]
 name = "alloy-dyn-abi"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f2d547eba3f2d331b0e08f64a24e202f66d4f291e2a3e0073914c0e1400ced3"
+checksum = "cf69d3061e2e908a4370bda5d8d6529d5080232776975489eec0b49ce971027e"
 dependencies = [
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-type-parser",
  "alloy-sol-types",
  "arbitrary",
  "const-hex",
- "derive_arbitrary",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "itoa",
  "proptest",
  "serde",
@@ -221,7 +220,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "675264c957689f0fd75f5993a73123c2cc3b5c235a38f5b9037fe6c826bfb2c0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "crc",
  "thiserror 2.0.16",
@@ -233,7 +232,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0069cf0642457f87a01a014f6dc29d5d893cd4fd8fddf0c3cdfad1bb3ebafc41"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "arbitrary",
  "rand 0.8.5",
@@ -246,7 +245,7 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cabf647eb4650c91a9d38cb6f972bb320009e7e9d61765fb688a86f1563b33e8"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "arbitrary",
  "derive_more 1.0.0",
@@ -263,7 +262,7 @@ checksum = "52dd5869ed09e399003e0e0ec6903d981b2a92e74c5d37e6b40890bad2517526"
 dependencies = [
  "alloy-eip2930",
  "alloy-eip7702",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-serde 0.9.2",
  "c-kzg",
@@ -282,7 +281,7 @@ dependencies = [
  "alloy-eip2124",
  "alloy-eip2930",
  "alloy-eip7702",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-serde 0.11.0",
  "auto_impl",
@@ -300,7 +299,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e7d2a7fe5c1a9bd6793829ea21a636f30fc2b3f5d2e7418ba86d96e41dd1f460"
 dependencies = [
  "alloy-eips 0.9.2",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-serde 0.9.2",
  "alloy-trie",
  "serde",
@@ -308,11 +307,11 @@ dependencies = [
 
 [[package]]
 name = "alloy-json-abi"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d62cf1b25f5a50ca2d329b0b4aeb0a0dedeaf225ad3c5099d83b1a4c4616186e"
+checksum = "4584e3641181ff073e9d5bec5b3b8f78f9749d9fb108a1cfbc4399a4a139c72a"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-type-parser",
  "serde",
  "serde_json",
@@ -324,7 +323,7 @@ version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2008bedb8159a255b46b7c8614516eda06679ea82f620913679afbd8031fea72"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "serde",
  "serde_json",
@@ -343,7 +342,7 @@ dependencies = [
  "alloy-eips 0.9.2",
  "alloy-json-rpc",
  "alloy-network-primitives",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rpc-types-any",
  "alloy-rpc-types-eth",
  "alloy-serde 0.9.2",
@@ -365,26 +364,25 @@ checksum = "f31c3c6b71340a1d076831823f09cb6e02de01de5c6630a9631bdb36f947ff80"
 dependencies = [
  "alloy-consensus",
  "alloy-eips 0.9.2",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-serde 0.9.2",
  "serde",
 ]
 
 [[package]]
 name = "alloy-primitives"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc1360603efdfba91151e623f13a4f4d3dc4af4adc1cbd90bf37c81e84db4c77"
+checksum = "777d58b30eb9a4db0e5f59bc30e8c2caef877fee7dc8734cf242a51a60f22e05"
 dependencies = [
  "alloy-rlp",
  "arbitrary",
  "bytes",
  "cfg-if",
  "const-hex",
- "derive_arbitrary",
- "derive_more 1.0.0",
+ "derive_more 2.0.1",
  "foldhash",
- "getrandom 0.2.15",
+ "getrandom 0.3.1",
  "hashbrown 0.15.2",
  "indexmap 2.7.0",
  "itoa",
@@ -439,7 +437,7 @@ dependencies = [
  "alloy-json-rpc",
  "alloy-network",
  "alloy-network-primitives",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-pubsub",
  "alloy-rpc-client",
  "alloy-rpc-types-eth",
@@ -474,7 +472,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2269fd635f7b505f27c63a3cb293148cd02301efce4c8bdd9ff54fbfc4a20e23"
 dependencies = [
  "alloy-json-rpc",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-transport",
  "bimap",
  "futures",
@@ -505,7 +503,7 @@ checksum = "a40e1ef334153322fd878d07e86af7a529bcb86b2439525920a88eba87bcf943"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -515,7 +513,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d06a292b37e182e514903ede6e623b9de96420e8109ce300da288a96d88b7e4b"
 dependencies = [
  "alloy-json-rpc",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-pubsub",
  "alloy-transport",
  "alloy-transport-http",
@@ -540,7 +538,7 @@ version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9383845dd924939e7ab0298bbfe231505e20928907d7905aa3bf112287305e06"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rpc-types-engine",
  "alloy-rpc-types-eth",
  "alloy-serde 0.9.2",
@@ -566,7 +564,7 @@ checksum = "4a5f821f30344862a0b6eb9a1c2eb91dfb2ff44c7489f37152a526cdcab79264"
 dependencies = [
  "alloy-consensus",
  "alloy-eips 0.9.2",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-serde 0.9.2",
  "derive_more 1.0.0",
@@ -586,7 +584,7 @@ dependencies = [
  "alloy-consensus-any",
  "alloy-eips 0.9.2",
  "alloy-network-primitives",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-serde 0.9.2",
  "alloy-sol-types",
@@ -602,7 +600,7 @@ version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cd38207e056cc7d1372367fbb4560ddf9107cbd20731743f641246bf0dede149"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rpc-types-eth",
  "alloy-serde 0.9.2",
  "serde",
@@ -616,7 +614,7 @@ version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ae0465c71d4dced7525f408d84873aeebb71faf807d22d74c4a426430ccd9b55"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "serde",
  "serde_json",
 ]
@@ -627,7 +625,7 @@ version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "86aa42c36e3c0db5bd9a7314e98aa261a61d5e3d6a0bd7e51fb8b0a3d6438481"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "serde",
  "serde_json",
 ]
@@ -639,7 +637,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9bfa395ad5cc952c82358d31e4c68b27bf4a89a5456d9b27e226e77dac50e4ff"
 dependencies = [
  "alloy-dyn-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "async-trait",
  "auto_impl",
@@ -657,7 +655,7 @@ dependencies = [
  "alloy-consensus",
  "alloy-dyn-abi",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-signer",
  "alloy-sol-types",
  "async-trait",
@@ -676,7 +674,7 @@ checksum = "fbdc63ce9eda1283fcbaca66ba4a414b841c0e3edbeef9c86a71242fc9e84ccc"
 dependencies = [
  "alloy-consensus",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-signer",
  "async-trait",
  "coins-bip32 0.12.0",
@@ -695,7 +693,7 @@ checksum = "6e7d0c000abd591c9cceac5c07f785f101c9a8c879c6ccd300feca1ae03bdef6"
 dependencies = [
  "alloy-consensus",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-signer",
  "async-trait",
  "semver 1.0.24",
@@ -706,23 +704,23 @@ dependencies = [
 
 [[package]]
 name = "alloy-sol-macro"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13f28f2131dc3a7b8e2cda882758ad4d5231ca26281b9861d4b18c700713e2da"
+checksum = "e68b32b6fa0d09bb74b4cefe35ccc8269d711c26629bc7cd98a47eeb12fe353f"
 dependencies = [
  "alloy-sol-macro-expander",
  "alloy-sol-macro-input",
  "proc-macro-error2",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
 name = "alloy-sol-macro-expander"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ee2da033256a3b27131c030933eab0460a709fbcc4d4bd57bf9a5650b2441c5"
+checksum = "2afe6879ac373e58fd53581636f2cce843998ae0b058ebe1e4f649195e2bd23c"
 dependencies = [
  "alloy-json-abi",
  "alloy-sol-macro-input",
@@ -732,33 +730,34 @@ dependencies = [
  "proc-macro-error2",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
  "syn-solidity",
  "tiny-keccak",
 ]
 
 [[package]]
 name = "alloy-sol-macro-input"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e9d9918b0abb632818bf27e2dfb86b209be8433baacf22100b190bbc0904bd4"
+checksum = "c3ba01aee235a8c699d07e5be97ba215607564e71be72f433665329bec307d28"
 dependencies = [
  "alloy-json-abi",
  "const-hex",
  "dunce",
  "heck 0.5.0",
+ "macro-string",
  "proc-macro2",
  "quote",
  "serde_json",
- "syn 2.0.93",
+ "syn 2.0.119",
  "syn-solidity",
 ]
 
 [[package]]
 name = "alloy-sol-type-parser"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a971129d242338d92009470a2f750d3b2630bc5da00a40a94d51f5d456b5712f"
+checksum = "4c13fc168b97411e04465f03e632f31ef94cad1c7c8951bf799237fd7870d535"
 dependencies = [
  "serde",
  "winnow 0.7.1",
@@ -766,12 +765,12 @@ dependencies = [
 
 [[package]]
 name = "alloy-sol-types"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75f306fc801b3aa2e3c4785b7b5252ec8b19f77b30e3b75babfd23849c81bd8c"
+checksum = "6e960c4b52508ef2ae1e37cae5058e905e9ae099b107900067a503f8c454036f"
 dependencies = [
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-macro",
  "const-hex",
  "serde",
@@ -855,7 +854,7 @@ version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6917c79e837aa7b77b7a6dae9f89cbe15313ac161c4d3cfaf8909ef21f3d22d8"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "arrayvec",
  "derive_more 1.0.0",
@@ -1048,7 +1047,7 @@ checksum = "e7e89fe77d1f0f4fe5b96dfc940923d88d17b6a773808124f21e764dfb063c6a"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1174,7 +1173,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62945a2f7e6de02a31fe400aa489f0e0f5b2502e69f95f853adb82a96c7a6b60"
 dependencies = [
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1212,7 +1211,7 @@ dependencies = [
  "num-traits",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1352,7 +1351,7 @@ checksum = "213888f660fddcca0d257e88e54ac05bca01885f258ccdf695bafd77031bb69d"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1476,7 +1475,7 @@ checksum = "3b43422f69d8ff38f95f1b2bb76517c91589a924d1559a0e935d7c8ce0274c11"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1498,7 +1497,7 @@ checksum = "c7c24de15d275a1ecfd47a380fb4d5ec9bfe0933f309ed5e705b775596a3574d"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1509,7 +1508,7 @@ checksum = "3f934833b4b7233644e5848f235df3f57ed8c80f1528a26c3dfa13d2147fa056"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1562,7 +1561,7 @@ checksum = "3c87f3f15e7794432337fc718554eaa4dc8f04c9677a950ffe366f20a162ae42"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1931,7 +1930,7 @@ checksum = "604fde5e028fea851ce1d8570bbdc034bec850d157f7569d10f347d06808c05c"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -2038,7 +2037,7 @@ dependencies = [
  "regex",
  "rustc-hash",
  "shlex",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -2143,7 +2142,7 @@ dependencies = [
 name = "block_header"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-rlp-derive",
  "anyhow",
@@ -2162,7 +2161,7 @@ dependencies = [
 name = "block_trie"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "anyhow",
  "block_header",
@@ -2209,7 +2208,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "rustversion",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -2245,7 +2244,7 @@ dependencies = [
  "proc-macro-crate",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -2310,7 +2309,7 @@ checksum = "3fa76293b4f7bb636ab88fd78228235b5248b4d05cc589aed610f954af5d7c7a"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -2389,7 +2388,7 @@ name = "call_anchor_status"
 version = "0.1.0"
 dependencies = [
  "alloy-chains 0.2.0",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "anyhow",
  "call_common",
  "call_db",
@@ -2405,7 +2404,7 @@ dependencies = [
 name = "call_common"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "anyhow",
  "call_precompiles",
@@ -2417,7 +2416,7 @@ dependencies = [
 name = "call_db"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "block_header",
  "mpt",
  "provider",
@@ -2430,7 +2429,7 @@ name = "call_engine"
 version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-sol-types",
  "alloy-trie",
@@ -2470,7 +2469,7 @@ dependencies = [
 name = "call_guest"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-rlp-derive",
  "block_header",
@@ -2491,7 +2490,7 @@ name = "call_host"
 version = "0.1.0"
 dependencies = [
  "alloy-chains 0.2.0",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "anyhow",
  "block_header",
@@ -2530,7 +2529,7 @@ dependencies = [
 name = "call_precompiles"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "derive_more 1.0.0",
  "email_proof",
@@ -2551,7 +2550,7 @@ name = "call_rpc"
 version = "0.1.0"
 dependencies = [
  "alloy-chains 0.2.0",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "dotenvy",
  "lazy_static",
 ]
@@ -2574,7 +2573,7 @@ name = "call_server_lib"
 version = "0.1.0"
 dependencies = [
  "alloy-chains 0.2.0",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-sol-types",
  "anyhow",
@@ -2758,7 +2757,7 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 name = "chain"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "anyhow",
  "derive-new",
  "lazy_static",
@@ -2773,7 +2772,7 @@ dependencies = [
 name = "chain_client"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "anyhow",
  "async-trait",
  "block_trie",
@@ -2794,7 +2793,7 @@ dependencies = [
 name = "chain_common"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "bincode",
  "block_header",
  "block_trie",
@@ -2816,7 +2815,7 @@ dependencies = [
 name = "chain_db"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "anyhow",
  "bincode",
@@ -2842,7 +2841,7 @@ dependencies = [
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "block_header",
  "block_trie",
  "chain_common",
@@ -2856,7 +2855,7 @@ dependencies = [
 name = "chain_host"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "anyhow",
  "bincode",
@@ -2905,7 +2904,7 @@ dependencies = [
 name = "chain_server_lib"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "anyhow",
  "async-trait",
  "axum 0.8.1",
@@ -3103,7 +3102,7 @@ dependencies = [
  "heck 0.5.0",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -3407,7 +3406,7 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "anyhow",
  "auto_impl",
  "bytes",
@@ -3762,7 +3761,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a2785755761f3ddc1492979ce1e48d2c00d09311c39e4466429188f3dd6501"
 dependencies = [
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -3809,7 +3808,7 @@ checksum = "f46882e17999c6cc590af592290432be3bce0428cb0d5f8b6715e4dc7b383eb3"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -3857,7 +3856,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "strsim 0.11.1",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -3879,7 +3878,7 @@ checksum = "d336a2a514f6ccccaa3e09b02d41d35330c07ddf03a62165fcec10bb561c7806"
 dependencies = [
  "darling_core 0.20.10",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -3921,7 +3920,7 @@ checksum = "bc2323e10c92e1cf4d86e11538512e6dc03ceb586842970b6332af3d4046a046"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -3964,7 +3963,7 @@ checksum = "2cdc8d50f426189eef89dac62fabfa0abb27d5cc008f25bf4156a0203325becc"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -3975,7 +3974,7 @@ checksum = "30542c1ad912e0e3d22a1935c290e12e8a29d704a420177a31faad4a601a0800"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4038,7 +4037,7 @@ dependencies = [
  "darling 0.20.10",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4068,7 +4067,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab63b0e2bf4d5928aff72e83a7dace85d7bba5fe12dcc3c5a572d78caffd3f3c"
 dependencies = [
  "derive_builder_core 0.20.2",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4098,7 +4097,7 @@ dependencies = [
  "convert_case",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
  "unicode-xid",
 ]
 
@@ -4110,7 +4109,7 @@ checksum = "bda628edc44c4bb645fbe0f758797143e4e07926f7ebf4e9bdfbd3d2ce621df3"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
  "unicode-xid",
 ]
 
@@ -4257,7 +4256,7 @@ checksum = "97369cbbc041bc366949bc74d34658d6cda5621039731c6310521892a3a20ae0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4389,7 +4388,7 @@ dependencies = [
  "enum-ordinalize",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4539,7 +4538,7 @@ dependencies = [
  "heck 0.5.0",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4559,7 +4558,7 @@ checksum = "0d28318a75d4aead5c4db25382e8ef717932d0346600cacae6357eb5941bc5ff"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4571,7 +4570,7 @@ dependencies = [
  "heck 0.4.1",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4582,7 +4581,7 @@ checksum = "2f9ed6b3789237c8a0c1c505af1c7eb2c560df6186f01b098c3a1064ea532f38"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4766,7 +4765,7 @@ dependencies = [
  "reqwest 0.11.27",
  "serde",
  "serde_json",
- "syn 2.0.93",
+ "syn 2.0.119",
  "toml 0.8.19",
  "walkdir",
 ]
@@ -4784,7 +4783,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "serde_json",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -4810,7 +4809,7 @@ dependencies = [
  "serde",
  "serde_json",
  "strum 0.26.3",
- "syn 2.0.93",
+ "syn 2.0.119",
  "tempfile",
  "thiserror 1.0.69",
  "tiny-keccak",
@@ -5134,7 +5133,7 @@ checksum = "1a5c6c585bc94aaf2c7b51dd4c2ba22680844aba4c687be581871a6f518c5742"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -5153,7 +5152,7 @@ dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-rpc-types",
  "alloy-serde 0.9.2",
@@ -5227,7 +5226,7 @@ name = "forge-doc"
 version = "0.3.1"
 source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec715a75736d61dbd9fa#082104867cc0d587196eec715a75736d61dbd9fa"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "derive_more 1.0.0",
  "eyre",
  "forge-fmt",
@@ -5251,7 +5250,7 @@ name = "forge-fmt"
 version = "0.3.1"
 source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec715a75736d61dbd9fa#082104867cc0d587196eec715a75736d61dbd9fa"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "ariadne",
  "foundry-config",
  "itertools 0.13.0",
@@ -5271,7 +5270,7 @@ dependencies = [
  "alloy-eips 0.9.2",
  "alloy-json-abi",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-rpc-types",
  "alloy-serde 0.9.2",
@@ -5311,7 +5310,7 @@ version = "0.3.1"
 source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec715a75736d61dbd9fa#082104867cc0d587196eec715a75736d61dbd9fa"
 dependencies = [
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rpc-types",
  "eyre",
  "foundry-common",
@@ -5338,7 +5337,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "serde_json",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -5348,7 +5347,7 @@ source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec71
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-rpc-types",
  "async-trait",
@@ -5390,7 +5389,7 @@ checksum = "0d7f2a3d90ff85c164c0eb05fdf19b22e68b9190b5449d1aa0eef8314c1874e9"
 dependencies = [
  "alloy-chains 0.1.51",
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "foundry-compilers",
  "reqwest 0.12.12",
  "semver 1.0.24",
@@ -5410,7 +5409,7 @@ dependencies = [
  "alloy-genesis",
  "alloy-json-abi",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-rlp",
  "alloy-rpc-types",
@@ -5467,7 +5466,7 @@ dependencies = [
  "alloy-dyn-abi",
  "alloy-eips 0.9.2",
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-rlp",
  "alloy-transport",
@@ -5508,7 +5507,7 @@ dependencies = [
  "alloy-json-abi",
  "alloy-json-rpc",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-pubsub",
  "alloy-rpc-client",
@@ -5556,7 +5555,7 @@ dependencies = [
  "alloy-consensus",
  "alloy-dyn-abi",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rpc-types",
  "alloy-serde 0.9.2",
  "chrono",
@@ -5574,7 +5573,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de23802550de5204eec1a6297296d2fef6b86ea61f33b1667eebd886577caa34"
 dependencies = [
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "auto_impl",
  "derive_more 1.0.0",
  "dirs 6.0.0",
@@ -5621,7 +5620,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "127e0e788765bc0103eb6b92067843c6ffe660090b2f6fbff1a1441a51939aa0"
 dependencies = [
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "foundry-compilers-core",
  "futures-util",
  "md-5",
@@ -5645,7 +5644,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8764f450332267305440ec399560919e01aa98f23af2c36ac952f9216449cdca"
 dependencies = [
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "foundry-compilers-artifacts-solc",
  "foundry-compilers-core",
  "path-slash",
@@ -5659,7 +5658,7 @@ version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c59caebbeaeb0e34564c1a404081478a0aadaa8999b57f0befd85965252e074a"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "cfg-if",
  "dunce",
  "fs_extra",
@@ -5682,7 +5681,7 @@ source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec71
 dependencies = [
  "Inflector",
  "alloy-chains 0.1.51",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "dirs-next",
  "dunce",
  "eyre",
@@ -5716,7 +5715,7 @@ name = "foundry-debugger"
 version = "0.3.1"
 source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec715a75736d61dbd9fa#082104867cc0d587196eec715a75736d61dbd9fa"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "crossterm",
  "eyre",
  "foundry-common",
@@ -5737,7 +5736,7 @@ source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec71
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "eyre",
  "foundry-cheatcodes",
@@ -5763,7 +5762,7 @@ name = "foundry-evm-abi"
 version = "0.3.1"
 source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec715a75736d61dbd9fa#082104867cc0d587196eec715a75736d61dbd9fa"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "derive_more 1.0.0",
  "foundry-common-fmt",
@@ -5781,7 +5780,7 @@ dependencies = [
  "alloy-genesis",
  "alloy-json-abi",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-rpc-types",
  "alloy-sol-types",
@@ -5811,7 +5810,7 @@ name = "foundry-evm-coverage"
 version = "0.3.1"
 source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec715a75736d61dbd9fa#082104867cc0d587196eec715a75736d61dbd9fa"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "eyre",
  "foundry-common",
  "foundry-compilers",
@@ -5830,7 +5829,7 @@ dependencies = [
  "ahash",
  "alloy-dyn-abi",
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "eyre",
  "foundry-common",
  "foundry-compilers",
@@ -5856,7 +5855,7 @@ source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec71
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "eyre",
  "foundry-block-explorers",
@@ -5885,7 +5884,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89a794c8a78ba20568a0c86b035768da7e81fed3c51cecea57f81523123cbcfa"
 dependencies = [
  "alloy-consensus",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "alloy-rpc-types",
  "alloy-serde 0.9.2",
@@ -5907,7 +5906,7 @@ name = "foundry-linking"
 version = "0.3.1"
 source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec715a75736d61dbd9fa#082104867cc0d587196eec715a75736d61dbd9fa"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "foundry-compilers",
  "semver 1.0.24",
  "thiserror 2.0.16",
@@ -5921,7 +5920,7 @@ dependencies = [
  "proc-macro-error",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -5929,7 +5928,7 @@ name = "foundry-test-utils"
 version = "0.3.1"
 source = "git+https://github.com/foundry-rs/foundry?rev=082104867cc0d587196eec715a75736d61dbd9fa#082104867cc0d587196eec715a75736d61dbd9fa"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-provider",
  "eyre",
  "fd-lock",
@@ -5954,7 +5953,7 @@ dependencies = [
  "alloy-consensus",
  "alloy-dyn-abi",
  "alloy-network",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-signer",
  "alloy-signer-ledger",
  "alloy-signer-local",
@@ -6090,7 +6089,7 @@ checksum = "162ee34ebcb7c64a8abebc059ce0fee27c2262618d7b60ed8faf72fef13c3650"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -6832,7 +6831,7 @@ dependencies = [
  "markup5ever",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -7173,7 +7172,7 @@ checksum = "1ec89e9337638ecdc08744df490b221a7399bf8d164eb52a665454e60e075ad6"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -7273,7 +7272,7 @@ checksum = "a0eb5a3343abf848c0984fe4604b2b105da9539376e24fc0a3b0007411ae4fd9"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -7426,7 +7425,7 @@ dependencies = [
  "pretty_assertions",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -7717,7 +7716,7 @@ dependencies = [
  "proc-macro-crate",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -7898,7 +7897,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -8075,6 +8074,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c41e0c4fef86961ac6d6f8a82609f55f31b05e4fce149ac5710e439df7619ba4"
 
 [[package]]
+name = "macro-string"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b27834086c65ec3f9387b096d66e99f221cf081c2b738042aa252bcd41204e3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
 name = "mailparse"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8168,7 +8178,7 @@ checksum = "5cf92c10c7e361d6b99666ec1c6f9805b0bea2c3bd8c78dc6fe98ac5bd78db11"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -8302,7 +8312,7 @@ checksum = "23c9b935fbe1d6cbd1dac857b54a688145e2d93f48db36010514d0f612d0ad67"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -8397,7 +8407,7 @@ dependencies = [
 name = "mpt"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-rlp-derive",
  "alloy-trie",
@@ -9099,7 +9109,7 @@ dependencies = [
  "proc-macro-crate",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -9238,7 +9248,7 @@ name = "optimism"
 version = "0.1.0"
 dependencies = [
  "alloy-eips 0.11.0",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-serde 0.11.0",
  "alloy-sol-types",
  "anyhow",
@@ -9466,7 +9476,7 @@ dependencies = [
  "proc-macro2",
  "proc-macro2-diagnostics",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -9534,7 +9544,7 @@ dependencies = [
  "pest_meta",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -9618,7 +9628,7 @@ dependencies = [
  "phf_shared 0.11.2",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -9656,7 +9666,7 @@ checksum = "3c0f5fad0874fc7abcd4d750e76917eaebbecaa2c20bde22e1dbeeba8beb758c"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -9842,7 +9852,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "64d1ec885c64d0457d564db4ec299b2dae3f9c02808b8ad9c3a089c591b18033"
 dependencies = [
  "proc-macro2",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -9921,7 +9931,7 @@ dependencies = [
  "proc-macro-error-attr2",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -9941,7 +9951,7 @@ checksum = "af066a9c399a26e020ada66a034357a868728e72cd426f3adcd35f80d88d88c8"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
  "version_check",
  "yansi 1.0.1",
 ]
@@ -10005,7 +10015,7 @@ checksum = "4ee1c9ac207483d5e7db4940700de86a9aae46ef90c48b57f99fe7edb8345e49"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -10028,7 +10038,7 @@ dependencies = [
  "itertools 0.13.0",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -10056,7 +10066,7 @@ name = "provider"
 version = "0.1.0"
 dependencies = [
  "alloy-chains 0.2.0",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "anyhow",
  "async-trait",
  "auto_impl",
@@ -10615,7 +10625,7 @@ version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc873bc873e12a1723493e1a35804fa79b673a0bfb1c19cfee659d46def8be42"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rpc-types-eth",
  "alloy-rpc-types-trace",
  "alloy-sol-types",
@@ -10665,7 +10675,7 @@ checksum = "48faea1ecf2c9f80d9b043bbde0db9da616431faed84c4cfa3dd7393005598e6"
 dependencies = [
  "alloy-eip2930",
  "alloy-eip7702",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "auto_impl",
  "bitflags 2.6.0",
  "bitvec",
@@ -11403,7 +11413,7 @@ dependencies = [
  "proc-macro-crate",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -11479,7 +11489,7 @@ checksum = "478f121bb72bbf63c52c93011ea1791dca40140dfe13f8336c4c5ac952c33aa9"
 name = "seal"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "call_engine",
  "risc0-zkvm",
@@ -11494,7 +11504,7 @@ checksum = "22f968c5ea23d555e670b449c1c5e7b2fc399fdaec1d304a17cd48e288abc107"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -11633,7 +11643,7 @@ checksum = "5a9bf7cf98d04a2b28aead066b7496853d4779c9cc183c440dbac457641e19a0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -11677,7 +11687,7 @@ checksum = "6c64451ba24fc7a6a2d60fc75dd9c83c90903b19028d4eff35e88fc1e86564e9"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -11728,7 +11738,7 @@ dependencies = [
  "darling 0.20.10",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -11778,7 +11788,7 @@ checksum = "5d69265a08751de7844521fd15003ae0a888e035773ba05695c5c759a6f89eef"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -11803,7 +11813,7 @@ dependencies = [
 name = "server_utils"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "anyhow",
  "assert-json-diff",
  "axum 0.8.1",
@@ -12079,7 +12089,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d3f6c4a476a16dcd36933a70ecdb0a807f8949cc5f3c4c1984e3748666bd714"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "bumpalo",
  "either",
  "num-bigint",
@@ -12152,7 +12162,7 @@ checksum = "970d7c774741f786d62cab78290e47d845b0b9c0c9d094a1642aced1d7946036"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -12161,7 +12171,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2e1e2d07fae218aca1b4cca81216e5c9ad7822516d48a28f11e2eaa8ffa5b249"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "bitflags 2.6.0",
  "bumpalo",
  "itertools 0.14.0",
@@ -12251,7 +12261,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d904e7009df136af5297832a3ace3370cd14ff1546a232f4f185036c2736fcac"
 dependencies = [
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -12347,7 +12357,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "rustversion",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -12360,7 +12370,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "rustversion",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -12448,9 +12458,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.93"
+version = "2.0.119"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c786062daee0d6db1132800e623df74274a0a87322d8e183338e01b3d98d058"
+checksum = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -12459,14 +12469,14 @@ dependencies = [
 
 [[package]]
 name = "syn-solidity"
-version = "0.8.20"
+version = "0.8.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7f6a4b9002584ea56d0a19713b65da44cbbf6070aca9ae0360577cba5c4db68"
+checksum = "ab4e6eed052a117409a1a744c8bda9c3ea6934597cf7419f791cb7d590871c4c"
 dependencies = [
  "paste",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -12492,7 +12502,7 @@ checksum = "c8af7666ab7b6390ab78131fb5b0fce11d6b7a6951602017c35fa82800708971"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -12666,7 +12676,7 @@ checksum = "5999e24eaa32083191ba4e425deb75cdf25efefabe5aaccb7446dd0d4122a3f5"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -12675,7 +12685,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-rlp",
  "alloy-sol-types",
  "alloy-trie",
@@ -12770,7 +12780,7 @@ checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -12781,7 +12791,7 @@ checksum = "6c5e1be1c48b9172ee610da68fd9cd2770e7a4056cb3fc98710ee6906f0c7960"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -13183,7 +13193,7 @@ checksum = "6e06d43f1345a3bcd39f6a56dbb7dcab2ba47e68e8ac134855e7e2bdbaf8cab8"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -13442,7 +13452,7 @@ checksum = "395ae124c09f9e6918a2310af6038fba074bcf474ac352496d5910dd59a2226d"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -14081,7 +14091,7 @@ dependencies = [
  "log",
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
  "wasm-bindgen-shared",
 ]
 
@@ -14116,7 +14126,7 @@ checksum = "30d7a95b763d3c45903ed6c81f156801839e5ee968bb07e534c44df0fcd330c2"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
  "wasm-bindgen-backend",
  "wasm-bindgen-shared",
 ]
@@ -14281,7 +14291,7 @@ name = "web_proof"
 version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "bincode",
  "chunked_transfer",
  "derivative",
@@ -14475,7 +14485,7 @@ checksum = "f6fc35f58ecd95a9b71c4f2329b911016e6bec66b3f2e6a4aad86bd2e99e2f9b"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -14486,7 +14496,7 @@ checksum = "9107ddc059d5b6fbfbffdfa7a7fe3e22a226def0b2608f72e9d552763d3e1ad7"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -14497,7 +14507,7 @@ checksum = "08990546bf4edef8f431fa6326e032865f27138718c587dc21bc0265bbcb57cc"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -14508,7 +14518,7 @@ checksum = "29bee4b38ea3cde66011baa44dba677c432a78593e202392d1e9070cf2a7fca7"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -14751,7 +14761,7 @@ dependencies = [
 name = "worker"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "anyhow",
  "bincode",
  "chain_host",
@@ -14882,7 +14892,7 @@ checksum = "2380878cad4ac9aac1e2435f3eb4020e8374b5f13c296cb75b4620ff8e229154"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
  "synstructure",
 ]
 
@@ -14913,7 +14923,7 @@ checksum = "fa4f8080344d4671fb4e831a13ad1e68092748387dfc4f55e356242fae12ce3e"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -14924,7 +14934,7 @@ checksum = "6352c01d0edd5db859a63e2605f4ea3183ddbd15e2c4a9e7d32184df75e4f154"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -14944,7 +14954,7 @@ checksum = "595eed982f7d355beb85837f651fa22e90b3c044842dc7f2c2842c086f295808"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
  "synstructure",
 ]
 
@@ -14965,7 +14975,7 @@ checksum = "ce36e65b0d2999d2aafac989fb249189a141aee1f53c612c1f37d72631959f69"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -14987,7 +14997,7 @@ checksum = "6eafa6dfb17584ea3e2bd6e76e0cc15ad7af12b09abdd1ca55961bed9b1063c6"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.93",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -15043,7 +15053,7 @@ dependencies = [
 name = "zkvm-benchmarks"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.8.20",
+ "alloy-primitives 0.8.26",
  "alloy-sol-types",
  "block_header",
  "block_trie",

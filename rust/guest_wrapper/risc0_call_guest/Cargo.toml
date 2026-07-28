@@ -6,7 +6,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-alloy-sol-types = { version = "=0.8.20", default-features = false }
+alloy-sol-types = { version = "=0.8.26", default-features = false }
 call_guest = { path = "../../services/call/guest" }
 risc0-zkvm = { version = "=3.0.3", default-features = false, features = ["std", "unstable"] }
 risc0-zkvm-platform = { version = "=2.2.1", features = [ "rust-runtime", "export-getrandom", "sys-getenv" ] }
