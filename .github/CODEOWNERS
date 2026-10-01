@@ -185,7 +185,7 @@
 /rust/web_proof/src/web_proof.rs @vlayer-xyz/protocol
 
 # Soon to be marked as deprecated. If updates needed, shall be reflected in the vouch repository.
-/packages/sdk/src/api/webProof/* @vlayer-xyz/protocol @wgromniak2 @akoszowski
-/packages/sdk/src/api/lib/types/webProofProvider.ts @vlayer-xyz/protocol @wgromniak2 @akoszowski
-/packages/sdk/src/api/lib/types/viem.ts @vlayer-xyz/protocol @wgromniak2 @akoszowski
-/packages/web-proof-commons/* @vlayer-xyz/protocol @wgromniak2 @akoszowski
+/packages/sdk/src/api/webProof/* @vlayer-xyz/protocol @akoszowski
+/packages/sdk/src/api/lib/types/webProofProvider.ts @vlayer-xyz/protocol @akoszowski
+/packages/sdk/src/api/lib/types/viem.ts @vlayer-xyz/protocol @akoszowski
+/packages/web-proof-commons/* @vlayer-xyz/protocol @akoszowski
