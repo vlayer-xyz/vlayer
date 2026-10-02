@@ -34,6 +34,13 @@ function parseBase64(data: string): `0x${string}` {
   return toHex(toByteArray(data));
 }
 
+function requireNonnegativeInteger(value: number, fieldName: string): bigint {
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(`${fieldName} must be a nonnegative integer`);
+  }
+  return BigInt(value);
+}
+
 function parseVerificationData(response: DnsResponse) {
   if (!response.VerificationData) {
     console.warn(`No verification data in DNS response`);
@@ -44,7 +51,10 @@ function parseVerificationData(response: DnsResponse) {
     };
   }
   return {
-    validUntil: BigInt(response.VerificationData.valid_until),
+    validUntil: requireNonnegativeInteger(
+      response.VerificationData.valid_until,
+      "DNS verification valid_until",
+    ),
     signature: parseBase64(response.VerificationData.signature),
     pubKey: parseBase64(response.VerificationData.pub_key),
   };
@@ -60,7 +70,7 @@ function takeLastAnswer(response: DnsResponse) {
   const record = answer.flat().at(-1)!;
   return {
     recordType: record.type,
-    ttl: BigInt(record.TTL),
+    ttl: requireNonnegativeInteger(record.TTL, "DNS record TTL"),
     ...record,
   };
 }
