@@ -62,11 +62,11 @@ let
     };
   };
 in
-rec {
+{
   risc0 = {
-    default = risc0."3.0.3";
     inherit (package "3.0.3") "3.0.3";
     inherit (package "2.3.1") "2.3.1";
     inherit (package "1.2.4") "1.2.4";
+    default = (package "3.0.3")."3.0.3";
   };
 }
