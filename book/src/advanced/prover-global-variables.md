@@ -37,7 +37,7 @@ The `blockhash(uint blockNumber)` function returns the hash for the given `block
 * `block.gaslimit`: Returns 30000000.
 * `msg.value`: Payable functionalities are unsupported; returns 0.
 * `msg.sig`: Not usable; does not contain a valid signature.
-* `tx.origin`: Sender of the transaction (full call chain).
+* `tx.origin`: Not usable; prover environment has no transaction origin.
 * `blobhash(uint index)`: Not usable.
 * `gasleft`: Unused.
 * `tx.gasprice`: Unused.
