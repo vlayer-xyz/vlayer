@@ -183,11 +183,11 @@ impl Display for NonEmptyRange {
 }
 
 impl IntoIterator for NonEmptyRange {
-    type IntoIter = std::ops::Range<u64>;
+    type IntoIter = RangeInclusive<u64>;
     type Item = u64;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.start..self.end
+        self.start..=self.end
     }
 }
 
@@ -241,6 +241,12 @@ mod tests {
     #[test]
     fn is_empty() {
         assert!(!NonEmptyRange::from_single_value(1).is_empty());
+    }
+
+    #[test]
+    fn into_iter_includes_end() {
+        assert_eq!(r(1..=1).into_iter().collect::<Vec<_>>(), vec![1]);
+        assert_eq!(r(1..=3).into_iter().collect::<Vec<_>>(), vec![1, 2, 3]);
     }
 
     #[test]
